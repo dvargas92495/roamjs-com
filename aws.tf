@@ -18,6 +18,7 @@ provider "aws" {
 
 provider "github" {
     organization = "dvargas92495"
+    individual = true
 }
 
 module "terraform-aws-s3-static-site" {
