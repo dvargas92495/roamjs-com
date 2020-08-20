@@ -4,7 +4,7 @@
   "description": "Various Roam Javascript extensions deployed to roam.davidvargas.me",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "repository": {
     "type": "git",
