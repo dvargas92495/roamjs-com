@@ -16,6 +16,10 @@ provider "aws" {
     region = "us-east-1"
 }
 
+provider "github" {
+    organization = "dvargas92495"
+}
+
 module "terraform-aws-s3-static-site" {
   source  = "github.com/dvargas92495/terraform-aws-s3-static-site"
 
