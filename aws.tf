@@ -16,11 +16,6 @@ provider "aws" {
     region = "us-east-1"
 }
 
-provider "github" {
-    organization = "dvargas92495"
-    individual = true
-}
-
 module "terraform-aws-s3-static-site" {
   source  = "github.com/dvargas92495/terraform-aws-s3-static-site"
 
@@ -31,6 +26,14 @@ module "terraform-aws-s3-static-site" {
   tags = {
       Application = "Roam JS Extensions"
   }
+}
+
+/*
+https://github.com/dvargas92495/roam-js-extensions/issues/1
+
+provider "github" {
+    organization = "dvargas92495"
+    individual = true
 }
 
 resource "github_actions_secret" "deploy_aws_access_key" {
@@ -44,3 +47,4 @@ resource "github_actions_secret" "deploy_aws_access_secret" {
   secret_name      = "DEPLOY_AWS_ACCESS_SECRET"
   plaintext_value  = module.terraform-aws-s3-static-site.deploy-secret
 }
+*/
