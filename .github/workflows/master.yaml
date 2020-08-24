@@ -1,0 +1,22 @@
+name: Push to Master
+on:
+  push:
+    branches: master
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.DEPLOY_AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: us-east-1
+
+jobs:
+  deploy:
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12.16.1
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.16.1
+      - name: Build
+        runs: npm run build
+      - name: Upload
+        runs: aws s3 sync build/* s3://roam.davidvargas.me/master/*
