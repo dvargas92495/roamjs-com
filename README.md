@@ -19,3 +19,7 @@ var s = document.createElement("script");
 ```
 
 The code block runs on initial load of your roam database. It adds a script tag to the head of your browser, which loads then runs the tool, providing you with the added functionality.
+
+## Contributing
+
+See the [Contributing Guide](./CONTRIBUTING.md) for more information!
