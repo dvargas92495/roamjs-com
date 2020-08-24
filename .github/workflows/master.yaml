@@ -22,4 +22,4 @@ jobs:
       - name: Build
         run: npm run build
       - name: Upload
-        run: aws s3 sync build/* s3://roam.davidvargas.me/master/*
+        run: aws s3 sync build s3://roam.davidvargas.me/master
