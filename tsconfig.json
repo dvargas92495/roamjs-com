@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "outDir": "./build/",
+    "noImplicitAny": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "module": "esnext",
+    "target": "es6",
+    "esModuleInterop": true,
+    "allowJs": true
+  },
+  "include": ["src", "local-app-env.d.ts"]
+}
