@@ -17,6 +17,6 @@ jobs:
         with:
           node-version: 12.16.1
       - name: Build
-        runs: npm run build
+        run: npm run build
       - name: Upload
-        runs: aws s3 sync build/* s3://roam.davidvargas.me/master/*
+        run: aws s3 sync build/* s3://roam.davidvargas.me/master/*
