@@ -8,12 +8,6 @@ const entry = Object.fromEntries(
 
 module.exports = {
   entry,
-  node: {
-    fs: "empty",
-    child_process: "empty",
-    net: "empty",
-    tls: "empty",
-  },
   resolve: {
     extensions: [".ts", ".js"],
   },
@@ -28,6 +22,11 @@ module.exports = {
         test: /\.ts$/,
         use: "ts-loader",
         exclude: /node_modules/,
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
       },
     ],
   },
