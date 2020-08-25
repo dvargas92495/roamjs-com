@@ -14,6 +14,6 @@ const importCalendarListener = (e: MouseEvent) => {
       auth: apiKey,
     });
     console.log("trigger import events");
-    calendar.list().then((cals: any) => console.log(cals));
+    calendar.calendarList.list().then(cals => console.log(cals));
   }
 };
