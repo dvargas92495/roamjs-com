@@ -7,7 +7,8 @@
     "module": "esnext",
     "target": "es6",
     "esModuleInterop": true,
-    "allowJs": true
+    "allowJs": true,
+    "jsx": "react"
   },
   "include": ["src", "local-app-env.d.ts"]
 }

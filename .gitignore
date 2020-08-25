@@ -2,3 +2,4 @@ node_modules
 terraform.exe
 .terraform/
 build/
+dist/
