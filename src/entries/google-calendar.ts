@@ -1,4 +1,4 @@
-const { google } = require("googleapis");
+import { google } from "googleapis";
 
 const importCalendarListener = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
