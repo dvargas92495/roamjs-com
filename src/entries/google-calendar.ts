@@ -7,11 +7,21 @@ const importCalendarListener = (e: MouseEvent) => {
   ) {
     const apiKey = document.getElementById("google-calendar-api-key").nodeValue;
 
-    fetch(`https://www.googleapis.com/calendar/v3/users/me/calendarList?key=${apiKey}`)
-      .then(r => r.json())
-      .then(cs => console.log(cs));
+    fetch(
+      `https://www.googleapis.com/calendar/v3/users/me/calendarList?key=${apiKey}`
+    )
+      .then((r) => r.json())
+      .then((cs) => {
+        console.log(cs);
+        const calendarId = cs[0].id;
+        return fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}`
+        );
+      })
+      .then((r) => r.json())
+      .then((es) => console.log(es));
     console.log("trigger import events");
   }
 };
 
-document.addEventListener('click', importCalendarListener);
+document.addEventListener("click", importCalendarListener);
