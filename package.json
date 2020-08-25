@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "googleapis": "^59.0.0",
+    "http2": "^3.3.7",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-helmet": "^6.1.0"
