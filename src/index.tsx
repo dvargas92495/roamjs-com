@@ -40,7 +40,7 @@ const Extension = ({
             placeholder="Branch"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            style={{ height: 20 }}
+            style={{ height: 20, width: 200 }}
           />
         </div>
         <div
@@ -77,6 +77,12 @@ const App = () => {
           src="google-calendar"
           inProgress
         >
+          <label htmlFor="google-calendar-api-key">API Key:</label>
+          <input
+            id="google-calendar-api-key"
+            placeholder="API Key"
+            style={{ width: 400, margin: "0 16px" }}
+          />
           <button>Import Google Calendar</button>
         </Extension>
       </article>

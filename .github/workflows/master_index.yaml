@@ -1,4 +1,4 @@
-name: Push to Master
+name: Push Site to Master
 on:
   push:
     branches: master

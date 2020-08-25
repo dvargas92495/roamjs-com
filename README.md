@@ -22,15 +22,16 @@ The code block runs on initial load of your roam database. It adds a script tag 
 
 ## Extensions
 
-This page lists all of the available extensions, as well as how to set up and use each one. Each extension gets bundled into its own script file, with the entrypoints stored [here](https://github.com/dvargas92495/roam-js-extensions/tree/master/src/entries).
+This page lists all of the available extensions, as well as how to set up and use each one. Each extension gets bundled into its own script file, with the entrypoints stored [here](https://github.com/dvargas92495/roam-js-extensions/tree/master/src/entries). You could also see the list of extensions at https://roam.davidvargas.me.
 
 ### Google Calendar
 
 The Google Calendar extension allows users to import the list of events on a given day into their daily notes page.
 
 #### Setup
-
-#### Demo
+1. Go to https://console.cloud.google.com/apis/credentials and create an API Key
+    1. Name it something intuitive, like "Google Calendar Roam Integration
+1. 
 
 ## Contributing
 
