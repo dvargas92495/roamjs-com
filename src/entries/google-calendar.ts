@@ -1,5 +1,3 @@
-import { google } from "googleapis";
-
 const importCalendarListener = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
   if (
@@ -9,11 +7,11 @@ const importCalendarListener = (e: MouseEvent) => {
   ) {
     const apiKey = document.getElementById("google-calendar-api-key").nodeValue;
 
-    const calendar = google.calendar({
-      version: "v3",
-      auth: apiKey,
-    });
+    fetch(`https://www.googleapis.com/calendar/v3/users/me/calendarList?key=${apiKey}`)
+      .then(r => r.json())
+      .then(cs => console.log(cs));
     console.log("trigger import events");
-    calendar.calendarList.list().then(cals => console.log(cals));
   }
 };
+
+document.addEventListener('click', importCalendarListener);
