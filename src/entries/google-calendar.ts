@@ -1,11 +1,11 @@
 const SLASH_COMMAND = "/Import Google Calendar";
 
 const slashEventListener = (e: KeyboardEvent) => {
-  console.log(`Entering: ${e.key}`);
   if (e.key !== "Enter") {
     return;
   }
   const target = e.target as HTMLElement;
+  console.log(`Entering: ${target.tagName} and ${target.innerText}`);
   if (
     target &&
     target.tagName === "TEXTAREA" &&
