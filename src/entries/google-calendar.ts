@@ -8,10 +8,8 @@ const importCalendarListener = (e: MouseEvent) => {
   ) {
     const textBlock = document.getElementById(
       "block-input-gxCw10dD79O6yRGXFYiqBvd1doo1-body-outline-9QvQlzvmv-ysHo8-1-N"
-    );
-    console.log(textBlock);
-    console.log(textBlock.nodeValue);
-    const apiKey = textBlock.nodeValue;
+    ).children[0] as HTMLElement;
+    const apiKey = textBlock.innerText;
     if (!apiKey) {
       console.log("Could not find API KEY!");
       return;
