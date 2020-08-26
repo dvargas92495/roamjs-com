@@ -19,9 +19,7 @@ provider "aws" {
 module "terraform-aws-s3-static-site" {
   source  = "github.com/dvargas92495/terraform-aws-s3-static-site"
 
-  domains = [
-      "roam.davidvargas.me"
-  ]
+  domains = "roam.davidvargas.me"
   secret = var.secret
   tags = {
       Application = "Roam JS Extensions"

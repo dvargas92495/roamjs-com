@@ -5,7 +5,7 @@ const importCalendarListener = (e: MouseEvent) => {
     target.tagName === "BUTTON" &&
     target.innerText.toUpperCase() === "IMPORT GOOGLE CALENDAR"
   ) {
-      console.log(target.parentElement);
+    console.log(target.parentElement);
     const blocks = Array.from(document.getElementsByClassName("roam-block"));
     const calendarBlock = blocks.find((b) => {
       const blockSpan = b.children[0];
@@ -64,7 +64,12 @@ const importCalendarListener = (e: MouseEvent) => {
         console.log(r);
         const events = r.items;
         console.log(events);
-        const bullets = events.map((e: any) => `${e.subject} @ ${e.start.datetime} - ${e.end.datetime}`);
+        const bullets = events.map(
+          (e: any) =>
+            `${e.summary} @ ${new Date(
+              e.start.dateTime
+            ).toTimeString()} - ${new Date(e.end.dateTime).toTimeString()}`
+        );
         console.log(bullets);
         return 0;
       });
