@@ -1,18 +1,17 @@
-const SLASH_COMMAND = "/Import Google Calendar";
+const SLASH_COMMAND = "/Import Google Calendar/";
 
 const slashEventListener = (e: KeyboardEvent) => {
-  if (e.key !== "Enter") {
+  if (e.key !== "/") {
     return;
   }
   const target = e.target as HTMLElement;
   if (!target || target.tagName !== "TEXTAREA") {
     return;
   }
-  
+
   const textArea = target as HTMLTextAreaElement;
   const initialValue = textArea.value;
   if (initialValue.endsWith(SLASH_COMMAND)) {
-    console.log(`we here`);
     const blocks = Array.from(document.getElementsByClassName("roam-block"));
     const calendarBlock = blocks.find((b) => {
       const blockSpan = b.children[0];
@@ -79,7 +78,12 @@ const slashEventListener = (e: KeyboardEvent) => {
               ).toLocaleTimeString()}`
           )
           .join("\n");
-        console.log(bullets);
+        console.log(
+          `${initialValue.substring(
+            0,
+            initialValue.length - SLASH_COMMAND.length
+          )}${bullets}`
+        );
         textArea.value = `${initialValue.substring(
           0,
           initialValue.length - SLASH_COMMAND.length
