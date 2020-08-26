@@ -6,9 +6,16 @@ const importCalendarListener = (e: MouseEvent) => {
     target.tagName === "BUTTON" &&
     target.innerText.toUpperCase() === "IMPORT GOOGLE CALENDAR"
   ) {
-    const apiKey = document.getElementById(
+    const textBlock = document.getElementById(
       "block-input-gxCw10dD79O6yRGXFYiqBvd1doo1-body-outline-9QvQlzvmv-ysHo8-1-N"
-    ).nodeValue;
+    );
+    console.log(textBlock);
+    console.log(textBlock.nodeValue);
+    const apiKey = textBlock.nodeValue;
+    if (!apiKey) {
+      console.log("Could not find API KEY!");
+      return;
+    }
 
     console.log("trigger import events");
     fetch(
