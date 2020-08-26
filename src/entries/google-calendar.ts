@@ -5,14 +5,14 @@ const slashEventListener = (e: KeyboardEvent) => {
     return;
   }
   const target = e.target as HTMLElement;
-  console.log(`Entering: ${target.tagName} and ${target.innerText}`);
-  if (
-    target &&
-    target.tagName === "TEXTAREA" &&
-    target.innerText.endsWith(SLASH_COMMAND)
-  ) {
+  if (!target || target.tagName !== "TEXTAREA") {
+    return;
+  }
+  
+  const textArea = target as HTMLTextAreaElement;
+  const initialValue = textArea.value;
+  if (initialValue.endsWith(SLASH_COMMAND)) {
     console.log(`we here`);
-    const textArea = target as HTMLTextAreaElement;
     const blocks = Array.from(document.getElementsByClassName("roam-block"));
     const calendarBlock = blocks.find((b) => {
       const blockSpan = b.children[0];
@@ -80,7 +80,6 @@ const slashEventListener = (e: KeyboardEvent) => {
           )
           .join("\n");
         console.log(bullets);
-        const initialValue = textArea.value;
         textArea.value = `${initialValue.substring(
           0,
           initialValue.length - SLASH_COMMAND.length
@@ -90,4 +89,4 @@ const slashEventListener = (e: KeyboardEvent) => {
   }
 };
 
-document.addEventListener("keyup", slashEventListener);
+document.addEventListener("keydown", slashEventListener);
