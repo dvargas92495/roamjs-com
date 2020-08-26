@@ -7,6 +7,7 @@ const importCalendarListener = (e: MouseEvent) => {
   ) {
     const apiKey = document.getElementById("google-calendar-api-key").nodeValue;
 
+    console.log("trigger import events");
     fetch(
       `https://www.googleapis.com/calendar/v3/users/me/calendarList?key=${apiKey}`
     )
@@ -20,7 +21,6 @@ const importCalendarListener = (e: MouseEvent) => {
       })
       .then((r) => r.json())
       .then((es) => console.log(es));
-    console.log("trigger import events");
   }
 };
 
