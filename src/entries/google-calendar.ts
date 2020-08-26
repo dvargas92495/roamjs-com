@@ -1,8 +1,9 @@
 const SLASH_COMMAND = "/Import Google Calendar";
 
 const slashEventListener = (e: KeyboardEvent) => {
-  if (e.key !== 'Enter') {
-      return;
+  console.log(`Entering: ${e.key}`);
+  if (e.key !== "Enter") {
+    return;
   }
   const target = e.target as HTMLElement;
   if (
@@ -10,7 +11,8 @@ const slashEventListener = (e: KeyboardEvent) => {
     target.tagName === "TEXTAREA" &&
     target.innerText.endsWith(SLASH_COMMAND)
   ) {
-      const textArea = target as HTMLTextAreaElement;
+    console.log(`we here`);
+    const textArea = target as HTMLTextAreaElement;
     const blocks = Array.from(document.getElementsByClassName("roam-block"));
     const calendarBlock = blocks.find((b) => {
       const blockSpan = b.children[0];
@@ -67,17 +69,22 @@ const slashEventListener = (e: KeyboardEvent) => {
       .then((r) => r.json())
       .then((r) => {
         const events = r.items;
-        const bullets = events.map(
-          (e: any) =>
-            `${e.summary} @ ${new Date(
-              e.start.dateTime
-            ).toLocaleTimeString()} - ${new Date(
-              e.end.dateTime
-            ).toLocaleTimeString()}`
-        ).join("\n");
+        const bullets = events
+          .map(
+            (e: any) =>
+              `${e.summary} @ ${new Date(
+                e.start.dateTime
+              ).toLocaleTimeString()} - ${new Date(
+                e.end.dateTime
+              ).toLocaleTimeString()}`
+          )
+          .join("\n");
         console.log(bullets);
         const initialValue = textArea.value;
-        textArea.value = `${initialValue.substring(0, initialValue.length - SLASH_COMMAND.length)}${bullets}`;
+        textArea.value = `${initialValue.substring(
+          0,
+          initialValue.length - SLASH_COMMAND.length
+        )}${bullets}`;
         return 0;
       });
   }
