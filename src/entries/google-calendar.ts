@@ -5,6 +5,7 @@ const importCalendarListener = (e: MouseEvent) => {
     target.tagName === "BUTTON" &&
     target.innerText.toUpperCase() === "IMPORT GOOGLE CALENDAR"
   ) {
+      console.log(target.parentElement);
     const blocks = Array.from(document.getElementsByClassName("roam-block"));
     const calendarBlock = blocks.find((b) => {
       const blockSpan = b.children[0];
@@ -53,15 +54,18 @@ const importCalendarListener = (e: MouseEvent) => {
       .toISOString()
       .substring(0, timeMin.toISOString().length - 1)}${offsetString}`;
 
-    console.log("trigger import events");
     fetch(
       `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
         calendarId
       )}/events?key=${apiKey}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
     )
       .then((r) => r.json())
-      .then((es) => {
-        console.log(es);
+      .then((r) => {
+        console.log(r);
+        const events = r.items;
+        console.log(events);
+        const bullets = events.map((e: any) => `${e.subject} @ ${e.start.datetime} - ${e.end.datetime}`);
+        console.log(bullets);
         return 0;
       });
   }
