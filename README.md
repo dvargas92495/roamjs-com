@@ -30,7 +30,7 @@ The Google Calendar extension allows users to import the list of events on a giv
 
 #### Setup
 1. Go to https://console.cloud.google.com/apis/credentials and create an API Key
-    1. Name it something intuitive, like "Google Calendar Roam Integration
+    1. Name it something intuitive, like "Google Calendar Roam Integration"
 1. 
 
 ## Contributing

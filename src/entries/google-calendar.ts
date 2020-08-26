@@ -6,27 +6,40 @@ const importCalendarListener = (e: MouseEvent) => {
     target.tagName === "BUTTON" &&
     target.innerText.toUpperCase() === "IMPORT GOOGLE CALENDAR"
   ) {
-    const textBlock = document.getElementById(
-      "block-input-gxCw10dD79O6yRGXFYiqBvd1doo1-body-outline-9QvQlzvmv-ysHo8-1-N"
-    ).children[0] as HTMLElement;
-    const apiKey = textBlock.innerText;
-    if (!apiKey) {
-      console.log("Could not find API KEY!");
+    const blocks = Array.from(document.getElementsByClassName('roam-block'));
+    const calendarBlock = blocks.find(b => {
+        const blockSpan = b.children[0];
+        if (!blockSpan) { return false;}
+        return blockSpan.childNodes.length === 2 && 
+          b.children[0].tagName === "STRONG" && b.children[0].innerHTML.toUpperCase() === 'GOOGLE CALENDAR:';
+    });
+    const calendarId = calendarBlock.children[0].childNodes[1].nodeValue;
+    if (!calendarId) {
+      console.warn("Could not find calendar ID!");
       return;
     }
+    const apiBlock = blocks.find(b => {
+        const blockSpan = b.children[0];
+        if (!blockSpan) { return false;}
+        return blockSpan.childNodes.length === 2 && 
+          b.children[0].tagName === "STRONG" && b.children[0].innerHTML.toUpperCase() === 'API KEY:';
+    });
+    const apiKey = apiBlock.children[0].childNodes[1].nodeValue;
+    if (!apiKey) {
+      console.warn("Could not find API KEY!");
+      return;
+    }
+    const timeMin = new Date();
+    const timeMax = new Date();
+    const offset = timeMin.getTimezoneOffset();
+    timeMin.setHours(-offset/60, 0, 0, 0);
+    timeMax.setHours(-offset/60, 0, 0, 0);
+    timeMax.setDate(timeMax.getDate() + 1)
 
     console.log("trigger import events");
     fetch(
-      `https://www.googleapis.com/calendar/v3/users/me/calendarList?key=${apiKey}`
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?key=${apiKey}&timeMin=${timeMin}&timeMax=${timeMax}`
     )
-      .then((r) => r.json())
-      .then((cs) => {
-        console.log(cs);
-        const calendarId = cs[0].id;
-        return fetch(
-          `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}`
-        );
-      })
       .then((r) => r.json())
       .then((es) => {
         console.log(es);
