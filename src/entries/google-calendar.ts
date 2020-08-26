@@ -46,8 +46,12 @@ const importCalendarListener = (e: MouseEvent) => {
     timeMax.setDate(timeMax.getDate() + 1);
     const offsetString =
       offset === 0 ? "Z" : `-${offset < 10 ? `0${offset}` : offset}:00`;
-    const timeMinParam = `${timeMin.toISOString()}${offsetString}`;
-    const timeMaxParam = `${timeMax.toISOString()}${offsetString}`;
+    const timeMinParam = `${timeMin
+      .toISOString()
+      .substring(0, timeMin.toISOString().length - 1)}${offsetString}`;
+    const timeMaxParam = `${timeMax
+      .toISOString()
+      .substring(0, timeMin.toISOString().length - 1)}${offsetString}`;
 
     console.log("trigger import events");
     fetch(
