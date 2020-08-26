@@ -1,6 +1,7 @@
 const SLASH_COMMAND = "/Import Google Calendar/";
 
 const slashEventListener = (e: KeyboardEvent) => {
+  console.log(e.key);
   if (e.key !== "/") {
     return;
   }
