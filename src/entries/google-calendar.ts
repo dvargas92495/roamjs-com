@@ -1,13 +1,10 @@
 const importCalendarListener = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
-  console.log("target: ");
-  console.log(target);
-  console.log(target.tagName);
-  console.log(target.innerText);
+  console.log("entering...");
   if (
     target &&
     target.tagName === "BUTTON" &&
-    target.innerText === "Import Google Calendar"
+    target.innerText.toUpperCase() === "IMPORT GOOGLE CALENDAR"
   ) {
     const apiKey = document.getElementById(
       "block-input-gxCw10dD79O6yRGXFYiqBvd1doo1-body-outline-9QvQlzvmv-ysHo8-1-N"
