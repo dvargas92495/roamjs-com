@@ -1,6 +1,5 @@
 const importCalendarListener = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
-  console.log("entering...");
   if (
     target &&
     target.tagName === "BUTTON" &&
@@ -11,7 +10,7 @@ const importCalendarListener = (e: MouseEvent) => {
         const blockSpan = b.children[0];
         if (!blockSpan) { return false;}
         return blockSpan.childNodes.length === 2 && 
-          b.children[0].tagName === "STRONG" && b.children[0].innerHTML.toUpperCase() === 'GOOGLE CALENDAR:';
+        blockSpan.children[0].tagName === "STRONG" && blockSpan.children[0].innerHTML.toUpperCase() === 'GOOGLE CALENDAR:';
     });
     const calendarId = calendarBlock.children[0].childNodes[1].nodeValue;
     if (!calendarId) {
@@ -22,7 +21,7 @@ const importCalendarListener = (e: MouseEvent) => {
         const blockSpan = b.children[0];
         if (!blockSpan) { return false;}
         return blockSpan.childNodes.length === 2 && 
-          b.children[0].tagName === "STRONG" && b.children[0].innerHTML.toUpperCase() === 'API KEY:';
+        blockSpan.children[0].tagName === "STRONG" && blockSpan.children[0].innerHTML.toUpperCase() === 'API KEY:';
     });
     const apiKey = apiBlock.children[0].childNodes[1].nodeValue;
     if (!apiKey) {
