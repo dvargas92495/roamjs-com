@@ -1,10 +1,16 @@
-const importCalendarListener = (e: MouseEvent) => {
+const SLASH_COMMAND = "/Import Google Calendar";
+
+const slashEventListener = (e: KeyboardEvent) => {
+  if (e.key !== 'Enter') {
+      return;
+  }
   const target = e.target as HTMLElement;
   if (
     target &&
-    target.tagName === "BUTTON" &&
-    target.innerText.toUpperCase() === "IMPORT GOOGLE CALENDAR"
+    target.tagName === "TEXTAREA" &&
+    target.innerText.endsWith(SLASH_COMMAND)
   ) {
+      const textArea = target as HTMLTextAreaElement;
     const blocks = Array.from(document.getElementsByClassName("roam-block"));
     const calendarBlock = blocks.find((b) => {
       const blockSpan = b.children[0];
@@ -60,9 +66,7 @@ const importCalendarListener = (e: MouseEvent) => {
     )
       .then((r) => r.json())
       .then((r) => {
-        console.log(r);
         const events = r.items;
-        console.log(events);
         const bullets = events.map(
           (e: any) =>
             `${e.summary} @ ${new Date(
@@ -70,16 +74,13 @@ const importCalendarListener = (e: MouseEvent) => {
             ).toLocaleTimeString()} - ${new Date(
               e.end.dateTime
             ).toLocaleTimeString()}`
-        );
+        ).join("\n");
         console.log(bullets);
-        const container = target.parentElement.parentElement.parentElement;
-        console.log(container);
-        container.click();
-        const textAreas = document.getElementsByTagName("textarea");
-        console.log(textAreas);
+        const initialValue = textArea.value;
+        textArea.value = `${initialValue.substring(0, initialValue.length - SLASH_COMMAND.length)}${bullets}`;
         return 0;
       });
   }
 };
 
-document.addEventListener("click", importCalendarListener);
+document.addEventListener("keyup", slashEventListener);
