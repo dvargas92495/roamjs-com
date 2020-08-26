@@ -23,5 +23,6 @@ jobs:
         run: aws s3 sync build s3://roam.davidvargas.me/${{github.event.number}}
       - name: Invalidate Cache
         run: |
-          CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[*].{Alias:Aliases.Items[0],Id:Id}[?Alias=='roam.davidvargas.me'].Id" --output text)
+          # CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[*].{Alias:Aliases.Items[0],Id:Id}[?Alias=='roam.davidvargas.me'].Id" --output text)
+          CLOUDFRONT_ID=E37E3VO65Q3UNU
           aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_ID --paths "/*"

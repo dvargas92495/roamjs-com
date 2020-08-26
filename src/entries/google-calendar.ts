@@ -1,11 +1,17 @@
 const importCalendarListener = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
+  console.log("target: ");
+  console.log(target);
+  console.log(target.tagName);
+  console.log(target.innerText);
   if (
     target &&
     target.tagName === "BUTTON" &&
     target.innerText === "Import Google Calendar"
   ) {
-    const apiKey = document.getElementById("google-calendar-api-key").nodeValue;
+    const apiKey = document.getElementById(
+      "block-input-gxCw10dD79O6yRGXFYiqBvd1doo1-body-outline-9QvQlzvmv-ysHo8-1-N"
+    ).nodeValue;
 
     console.log("trigger import events");
     fetch(
@@ -20,7 +26,10 @@ const importCalendarListener = (e: MouseEvent) => {
         );
       })
       .then((r) => r.json())
-      .then((es) => console.log(es));
+      .then((es) => {
+        console.log(es);
+        return 0;
+      });
   }
 };
 
