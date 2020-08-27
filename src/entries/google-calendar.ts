@@ -87,6 +87,7 @@ const slashEventListener = (e: KeyboardEvent) => {
         for (const index in bullets) {
           const bullet = bullets[index];
           await userEvent.type(document.activeElement, bullet, {
+              delay: 1,
             skipClick: true,
           });
 
