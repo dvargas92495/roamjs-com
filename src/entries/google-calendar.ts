@@ -69,9 +69,7 @@ const slashEventListener = (e: KeyboardEvent) => {
       .then((r) => r.json())
       .then(async (r) => {
         const events = r.items;
-        console.log(events);
         const bullets = events
-          .filter((e: any) => e.status !== "cancelled")
           .map(
             (e: any) =>
               `${e.summary} @ ${new Date(
@@ -89,7 +87,6 @@ const slashEventListener = (e: KeyboardEvent) => {
         for (const index in bullets) {
           const bullet = bullets[index];
           await userEvent.type(document.activeElement, bullet, {
-            delay: 1,
             skipClick: true,
           });
 
