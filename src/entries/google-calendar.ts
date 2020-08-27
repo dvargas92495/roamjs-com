@@ -85,8 +85,12 @@ const slashEventListener = (e: KeyboardEvent) => {
           initialValue.length
         );
         await userEvent.type(textArea, "{backspace}");
-        for (const bullet in bullets) {
-          await userEvent.type(document.activeElement, `${bullet}{enter}`, {delay: 50, skipClick: true});
+        for (const index in bullets) {
+          const bullet = bullets[index];
+          await userEvent.type(document.activeElement, `${bullet}{enter}`, {
+            delay: 50,
+            skipClick: true,
+          });
         }
         return 0;
       });
