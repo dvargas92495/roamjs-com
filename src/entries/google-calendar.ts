@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 const SLASH_COMMAND = "/Import Google Calendar";
 
 const slashEventListener = (e: KeyboardEvent) => {
-  if (e.key !== "/" && e.key !== "Enter") {
+  if (e.key !== "Enter") {
     return;
   }
   const target = e.target as HTMLElement;
@@ -81,13 +81,19 @@ const slashEventListener = (e: KeyboardEvent) => {
               ).toLocaleTimeString()} - ${new Date(
                 e.end.dateTime
               ).toLocaleTimeString()}`
-          );
-        textArea.setSelectionRange(initialValue.length - SLASH_COMMAND.length, initialValue.length);
-        userEvent.type(textArea, '{backspace}');
-        userEvent.type(textArea, bullets[0]);
+          ) as string[];
+        userEvent.type(document.activeElement, "{backspace}");
+        textArea.setSelectionRange(
+          initialValue.length - SLASH_COMMAND.length,
+          initialValue.length
+        );
+        userEvent.type(textArea, "{backspace}");
+        bullets.forEach((bullet) => {
+          userEvent.type(textArea, `${bullet}'{enter}`);
+        });
         return 0;
       });
   }
 };
 
-document.addEventListener("keydown", slashEventListener);
+document.addEventListener("keyup", slashEventListener);
