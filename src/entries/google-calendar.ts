@@ -26,6 +26,7 @@ const slashEventListener = (e: KeyboardEvent) => {
         '[:find (pull ?e [*]) :where [?e :node/title "roam/js/google-calendar"] ]'
       )[0][0]
       .attrs.map((a: any) => a[2].source[1]);
+      console.log(configurationAttrRefs);
     const entries = configurationAttrRefs.map((r: string) =>
       window.roamAlphaAPI
         .q(
@@ -33,7 +34,9 @@ const slashEventListener = (e: KeyboardEvent) => {
         )[0][0]
         .string.split(":")
     );
+    console.log(entries);
     const config = Object.fromEntries(entries);
+    console.log(config);
 
     const calendarId = config["Google Calendar"];
     const apiKey = config["API Key"];
