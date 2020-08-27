@@ -16,8 +16,8 @@ provider "aws" {
     region = "us-east-1"
 }
 
-module "terraform-aws-s3-static-site" {
-  source  = "github.com/dvargas92495/terraform-aws-s3-static-site"
+module "aws-static-site" {
+  source  = "github.com/dvargas92495/aws-static-site"
 
   domain = "roam.davidvargas.me"
   secret = var.secret
