@@ -96,4 +96,4 @@ const slashEventListener = (e: KeyboardEvent) => {
   }
 };
 
-document.addEventListener("keydown", slashEventListener);
+document.addEventListener("keyup", slashEventListener);
