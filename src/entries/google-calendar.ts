@@ -72,6 +72,7 @@ const slashEventListener = (e: KeyboardEvent) => {
         console.log(events);
         const bullets = events
           .filter((e: any) => e.status !== "cancelled")
+          .sort((t1: any, t2: any) => t1.start.dateTime - t2.start.dateTime)
           .map(
             (e: any) =>
               `${e.summary} @ ${new Date(
@@ -95,15 +96,19 @@ const slashEventListener = (e: KeyboardEvent) => {
 
           // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
           // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
-          await fireEvent.keyPress(document.activeElement, {
+          const enterObj = {
             key: "Enter",
             keyCode: 13,
             which: 13,
-          });
+          };
+          await fireEvent.keyDown(document.activeElement, enterObj);
+          await fireEvent.keyPress(document.activeElement, enterObj);
+          await fireEvent.keyUp(document.activeElement, enterObj);
         }
         return 0;
       });
   }
 };
-
+// @ts-ignore
+window.fireEvent = fireEvent;
 document.addEventListener("keyup", slashEventListener);
