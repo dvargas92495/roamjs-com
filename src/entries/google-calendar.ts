@@ -1,7 +1,7 @@
-const SLASH_COMMAND = "/Import Google Calendar/";
+const SLASH_COMMAND = "/Import Google Calendar";
 
 const slashEventListener = (e: KeyboardEvent) => {
-  if (e.key !== "/") {
+  if (e.key !== "/" && e.key !== 'Enter') {
     return;
   }
   const target = e.target as HTMLElement;
