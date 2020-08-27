@@ -1,3 +1,5 @@
+import userEvent from "@testing-library/user-event";
+
 const SLASH_COMMAND = "/Import Google Calendar";
 
 const slashEventListener = (e: KeyboardEvent) => {
@@ -71,25 +73,18 @@ const slashEventListener = (e: KeyboardEvent) => {
         const events = r.items;
         console.log(events);
         const bullets = events
+          .filter((e: any) => e.status !== "cancelled")
           .map(
             (e: any) =>
               `${e.summary} @ ${new Date(
-                e.start ? e.start.dateTime : "2020/01/01"
+                e.start.dateTime
               ).toLocaleTimeString()} - ${new Date(
-                e.end ? e.end.dateTime : "2020/01/01"
+                e.end.dateTime
               ).toLocaleTimeString()}`
-          )
-          .join("\n");
-        console.log(
-          `${initialValue.substring(
-            0,
-            initialValue.length - SLASH_COMMAND.length
-          )}${bullets}`
-        );
-        textArea.value = `${initialValue.substring(
-          0,
-          initialValue.length - SLASH_COMMAND.length
-        )}${bullets}`;
+          );
+        textArea.setSelectionRange(initialValue.length - SLASH_COMMAND.length, initialValue.length);
+        userEvent.type(textArea, '{backspace}');
+        userEvent.type(textArea, bullets[0]);
         return 0;
       });
   }
