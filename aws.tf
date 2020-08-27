@@ -26,6 +26,18 @@ module "aws-static-site" {
   }
 }
 
+module "aws-serverless-backend" {
+    source = "github.com/dvargas92495/aws-serverless-backend"
+
+    api_name = "roam-js-extensions"
+    paths = [
+        "google-calendar/get"
+    ]
+    tags = {
+        Application = "Roam JS Extensions"
+    }
+} 
+
 /*
 https://github.com/dvargas92495/roam-js-extensions/issues/1
 
