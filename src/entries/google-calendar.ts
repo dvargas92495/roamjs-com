@@ -25,12 +25,18 @@ const slashEventListener = (e: KeyboardEvent) => {
       .q(
         '[:find (pull ?e [*]) :where [?e :node/title "roam/js/google-calendar"] ]'
       )[0][0]
-      .map((a: any) => a[2].source[1]);
-    const entries = configurationAttrRefs.map((r: string) => window.roamAlphaAPI.q(`[:find (pull ?e [:block/string]) :where [?e :block/uid "${r}"] ]`)[0][0].string.split(":"));
+      .attrs.map((a: any) => a[2].source[1]);
+    const entries = configurationAttrRefs.map((r: string) =>
+      window.roamAlphaAPI
+        .q(
+          `[:find (pull ?e [:block/string]) :where [?e :block/uid "${r}"] ]`
+        )[0][0]
+        .string.split(":")
+    );
     const config = Object.fromEntries(entries);
 
-    const calendarId = config['Google Calendar'];
-    const apiKey = config['API Key'];
+    const calendarId = config["Google Calendar"];
+    const apiKey = config["API Key"];
     if (!calendarId) {
       console.warn("Could not find calendar ID!");
       return;
