@@ -64,7 +64,7 @@ const slashEventListener = (e: KeyboardEvent) => {
     fetch(
       `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
         calendarId
-      )}/events?key=${apiKey}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
+      )}/events?key=${apiKey}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}&orderBy=startTime&singleEvents=true`
     )
       .then((r) => r.json())
       .then(async (r) => {
@@ -72,7 +72,6 @@ const slashEventListener = (e: KeyboardEvent) => {
         console.log(events);
         const bullets = events
           .filter((e: any) => e.status !== "cancelled")
-          .sort((t1: any, t2: any) => t1.start.dateTime - t2.start.dateTime)
           .map(
             (e: any) =>
               `${e.summary} @ ${new Date(
@@ -90,7 +89,7 @@ const slashEventListener = (e: KeyboardEvent) => {
         for (const index in bullets) {
           const bullet = bullets[index];
           await userEvent.type(document.activeElement, bullet, {
-            delay: 5,
+            delay: 1,
             skipClick: true,
           });
 
