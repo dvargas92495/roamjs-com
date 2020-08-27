@@ -1,3 +1,4 @@
+import { fireEvent } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 
 const SLASH_COMMAND = "/Import Google Calendar";
@@ -87,15 +88,22 @@ const slashEventListener = (e: KeyboardEvent) => {
         await userEvent.type(textArea, "{backspace}");
         for (const index in bullets) {
           const bullet = bullets[index];
-          await userEvent.type(document.activeElement, `${bullet}{enter}`, {
-            delay: 50,
+          await userEvent.type(document.activeElement, bullet, {
+            delay: 5,
             skipClick: true,
+          });
+
+          // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
+          // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
+          await fireEvent.keyPress(document.activeElement, {
+            key: "Enter",
+            keyCode: 13,
+            which: 13,
           });
         }
         return 0;
       });
   }
 };
-// @ts-ignore
-window.userEventType = userEvent.type;
+
 document.addEventListener("keyup", slashEventListener);
