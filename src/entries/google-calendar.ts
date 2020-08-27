@@ -32,8 +32,7 @@ const slashEventListener = (e: KeyboardEvent) => {
         .q(
           `[:find (pull ?e [:block/string]) :where [?e :block/uid "${r}"] ]`
         )[0][0]
-        .string.split(":")
-    );
+        .string.split("::"));
     console.log(entries);
     const config = Object.fromEntries(entries);
     console.log(config);
