@@ -101,6 +101,10 @@ const slashEventListener = (e: KeyboardEvent) => {
           await fireEvent.keyDown(document.activeElement, enterObj);
           await fireEvent.keyPress(document.activeElement, enterObj);
           await fireEvent.keyUp(document.activeElement, enterObj);
+
+          // yolo wait, next character was bleeding
+          // https://github.com/testing-library/user-event/blob/a5b335026abe9692a85190180603597da9687496/src/type.js#L57
+          await new Promise(resolve => setTimeout(() => resolve(), 1));
         }
         return 0;
       });
