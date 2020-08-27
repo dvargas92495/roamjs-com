@@ -6,14 +6,13 @@ const slashEventListener = (e: KeyboardEvent) => {
   if (e.key !== "Enter") {
     return;
   }
-  const target = e.target as HTMLElement;
+  const target = document.activeElement as HTMLElement;
   if (!target || target.tagName !== "TEXTAREA") {
     return;
   }
 
   const textArea = target as HTMLTextAreaElement;
   const initialValue = textArea.value;
-  console.log(initialValue + " | " + initialValue.endsWith(SLASH_COMMAND));
   if (initialValue.endsWith(SLASH_COMMAND)) {
     const blocks = Array.from(document.getElementsByClassName("roam-block"));
     const calendarBlock = blocks.find((b) => {
@@ -82,7 +81,6 @@ const slashEventListener = (e: KeyboardEvent) => {
                 e.end.dateTime
               ).toLocaleTimeString()}`
           ) as string[];
-        userEvent.type(document.activeElement, "{backspace}");
         textArea.setSelectionRange(
           initialValue.length - SLASH_COMMAND.length,
           initialValue.length
@@ -96,4 +94,4 @@ const slashEventListener = (e: KeyboardEvent) => {
   }
 };
 
-document.addEventListener("keyup", slashEventListener);
+document.addEventListener("keydown", slashEventListener);
