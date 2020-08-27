@@ -16,8 +16,8 @@ const slashEventListener = (e: KeyboardEvent) => {
     return;
   }
   const target = e.target as HTMLElement;
-  const elementBeforeEnter = target.parentElement.parentElement.parentElement
-    .parentElement.previousElementSibling as HTMLElement;
+  const elementBeforeEnter = target?.parentElement?.parentElement?.parentElement
+    ?.parentElement?.previousElementSibling as HTMLElement;
   const initialValue = elementBeforeEnter.innerText;
   if (initialValue.endsWith(SLASH_COMMAND)) {
     userEvent.type(target, "{backspace}");
@@ -26,16 +26,14 @@ const slashEventListener = (e: KeyboardEvent) => {
         '[:find (pull ?e [*]) :where [?e :node/title "roam/js/google-calendar"] ]'
       )[0][0]
       .attrs.map((a: any) => a[2].source[1]);
-      console.log(configurationAttrRefs);
     const entries = configurationAttrRefs.map((r: string) =>
       window.roamAlphaAPI
         .q(
           `[:find (pull ?e [:block/string]) :where [?e :block/uid "${r}"] ]`
         )[0][0]
-        .string.split("::"));
-    console.log(entries);
+        .string.split("::")
+    );
     const config = Object.fromEntries(entries);
-    console.log(config);
 
     const calendarId = config["Google Calendar"];
     const apiKey = config["API Key"];
