@@ -3,6 +3,14 @@ import userEvent from "@testing-library/user-event";
 
 const SLASH_COMMAND = "/Import Google Calendar";
 
+declare global {
+  interface Window {
+    roamAlphaAPI: {
+      q: (query: string) => any[];
+    };
+  }
+}
+
 const slashEventListener = (e: KeyboardEvent) => {
   if (e.key !== "Enter") {
     return;
@@ -13,35 +21,28 @@ const slashEventListener = (e: KeyboardEvent) => {
   const initialValue = elementBeforeEnter.innerText;
   if (initialValue.endsWith(SLASH_COMMAND)) {
     userEvent.type(target, "{backspace}");
-    const blocks = Array.from(document.getElementsByClassName("roam-block"));
-    const calendarBlock = blocks.find((b) => {
-      const blockSpan = b.children[0];
-      if (!blockSpan) {
-        return false;
-      }
-      return (
-        blockSpan.childNodes.length === 2 &&
-        blockSpan.children[0].tagName === "STRONG" &&
-        blockSpan.children[0].innerHTML.toUpperCase() === "GOOGLE CALENDAR:"
-      );
-    });
-    const calendarId = calendarBlock.children[0].childNodes[1].nodeValue;
+    const configurationAttrRefs = window.roamAlphaAPI
+      .q(
+        '[:find (pull ?e [*]) :where [?e :node/title "roam/js/google-calendar"] ]'
+      )[0][0]
+      .attrs.map((a: any) => a[2].source[1]);
+      console.log(configurationAttrRefs);
+    const entries = configurationAttrRefs.map((r: string) =>
+      window.roamAlphaAPI
+        .q(
+          `[:find (pull ?e [:block/string]) :where [?e :block/uid "${r}"] ]`
+        )[0][0]
+        .string.split("::"));
+    console.log(entries);
+    const config = Object.fromEntries(entries);
+    console.log(config);
+
+    const calendarId = config["Google Calendar"];
+    const apiKey = config["API Key"];
     if (!calendarId) {
       console.warn("Could not find calendar ID!");
       return;
     }
-    const apiBlock = blocks.find((b) => {
-      const blockSpan = b.children[0];
-      if (!blockSpan) {
-        return false;
-      }
-      return (
-        blockSpan.childNodes.length === 2 &&
-        blockSpan.children[0].tagName === "STRONG" &&
-        blockSpan.children[0].innerHTML.toUpperCase() === "API KEY:"
-      );
-    });
-    const apiKey = apiBlock.children[0].childNodes[1].nodeValue;
     if (!apiKey) {
       console.warn("Could not find API KEY!");
       return;
@@ -69,15 +70,14 @@ const slashEventListener = (e: KeyboardEvent) => {
       .then((r) => r.json())
       .then(async (r) => {
         const events = r.items;
-        const bullets = events
-          .map(
-            (e: any) =>
-              `${e.summary} @ ${new Date(
-                e.start.dateTime
-              ).toLocaleTimeString()} - ${new Date(
-                e.end.dateTime
-              ).toLocaleTimeString()}`
-          ) as string[];
+        const bullets = events.map(
+          (e: any) =>
+            `${e.summary} @ ${new Date(
+              e.start.dateTime
+            ).toLocaleTimeString()} - ${new Date(
+              e.end.dateTime
+            ).toLocaleTimeString()}`
+        ) as string[];
         const textArea = document.activeElement as HTMLTextAreaElement;
         textArea.setSelectionRange(
           initialValue.length - SLASH_COMMAND.length,
@@ -87,7 +87,7 @@ const slashEventListener = (e: KeyboardEvent) => {
         for (const index in bullets) {
           const bullet = bullets[index];
           await userEvent.type(document.activeElement, bullet, {
-              delay: 1,
+            delay: 1,
             skipClick: true,
           });
 
@@ -104,7 +104,7 @@ const slashEventListener = (e: KeyboardEvent) => {
 
           // yolo wait, next character was bleeding
           // https://github.com/testing-library/user-event/blob/a5b335026abe9692a85190180603597da9687496/src/type.js#L57
-          await new Promise(resolve => setTimeout(() => resolve(), 1));
+          await new Promise((resolve) => setTimeout(() => resolve(), 1));
         }
         return 0;
       });
