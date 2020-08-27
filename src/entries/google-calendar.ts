@@ -1,7 +1,6 @@
 const SLASH_COMMAND = "/Import Google Calendar/";
 
 const slashEventListener = (e: KeyboardEvent) => {
-  console.log(e.key);
   if (e.key !== "/") {
     return;
   }
@@ -12,6 +11,7 @@ const slashEventListener = (e: KeyboardEvent) => {
 
   const textArea = target as HTMLTextAreaElement;
   const initialValue = textArea.value;
+  console.log(initialValue + " | " + initialValue.endsWith(SLASH_COMMAND));
   if (initialValue.endsWith(SLASH_COMMAND)) {
     const blocks = Array.from(document.getElementsByClassName("roam-block"));
     const calendarBlock = blocks.find((b) => {
