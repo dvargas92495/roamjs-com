@@ -1,7 +1,7 @@
 const SLASH_COMMAND = "/Import Google Calendar";
 
 const slashEventListener = (e: KeyboardEvent) => {
-  if (e.key !== "/" && e.key !== 'Enter') {
+  if (e.key !== "/" && e.key !== "Enter") {
     return;
   }
   const target = e.target as HTMLElement;
@@ -69,13 +69,14 @@ const slashEventListener = (e: KeyboardEvent) => {
       .then((r) => r.json())
       .then((r) => {
         const events = r.items;
+        console.log(events);
         const bullets = events
           .map(
             (e: any) =>
               `${e.summary} @ ${new Date(
-                e.start.dateTime
+                e.start ? e.start.dateTime : "2020/01/01"
               ).toLocaleTimeString()} - ${new Date(
-                e.end.dateTime
+                e.end ? e.end.dateTime : "2020/01/01"
               ).toLocaleTimeString()}`
           )
           .join("\n");
