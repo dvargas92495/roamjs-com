@@ -7,9 +7,12 @@ const slashEventListener = (e: KeyboardEvent) => {
     return;
   }
   const target = e.target as HTMLElement;
-  const elementAfterEnter = target.parentElement.parentElement.parentElement
+  console.log(target);
+  const elementBeforeEnter = target.parentElement.parentElement.parentElement
     .parentElement.previousElementSibling as HTMLElement;
-  const initialValue = elementAfterEnter.innerText;
+    console.log(elementBeforeEnter);
+  const initialValue = elementBeforeEnter.innerText;
+  console.log(initialValue);
   if (initialValue.endsWith(SLASH_COMMAND)) {
     userEvent.type(target, "{backspace}");
     const blocks = Array.from(document.getElementsByClassName("roam-block"));
@@ -86,7 +89,7 @@ const slashEventListener = (e: KeyboardEvent) => {
         );
         userEvent.type(textArea, "{backspace}");
         bullets.forEach((bullet) => {
-          userEvent.type(document.activeElement, `${bullet}'{enter}`);
+          userEvent.type(document.activeElement, `${bullet}{enter}`);
         });
         return 0;
       });
