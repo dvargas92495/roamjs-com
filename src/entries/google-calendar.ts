@@ -7,12 +7,9 @@ const slashEventListener = (e: KeyboardEvent) => {
     return;
   }
   const target = e.target as HTMLElement;
-  console.log(target);
   const elementBeforeEnter = target.parentElement.parentElement.parentElement
     .parentElement.previousElementSibling as HTMLElement;
-    console.log(elementBeforeEnter);
   const initialValue = elementBeforeEnter.innerText;
-  console.log(initialValue);
   if (initialValue.endsWith(SLASH_COMMAND)) {
     userEvent.type(target, "{backspace}");
     const blocks = Array.from(document.getElementsByClassName("roam-block"));
@@ -69,7 +66,7 @@ const slashEventListener = (e: KeyboardEvent) => {
       )}/events?key=${apiKey}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
     )
       .then((r) => r.json())
-      .then((r) => {
+      .then(async (r) => {
         const events = r.items;
         console.log(events);
         const bullets = events
@@ -87,13 +84,14 @@ const slashEventListener = (e: KeyboardEvent) => {
           initialValue.length - SLASH_COMMAND.length,
           initialValue.length
         );
-        userEvent.type(textArea, "{backspace}");
-        bullets.forEach((bullet) => {
-          userEvent.type(document.activeElement, `${bullet}{enter}`);
+        await userEvent.type(textArea, "{backspace}");
+        bullets.forEach(async (bullet) => {
+          await userEvent.type(document.activeElement, `${bullet}{enter}`, {delay: 50});
         });
         return 0;
       });
   }
 };
-
+// @ts-ignore
+window.userEventType = userEvent.type;
 document.addEventListener("keyup", slashEventListener);
