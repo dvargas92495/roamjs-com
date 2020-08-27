@@ -5,7 +5,7 @@
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
     "module": "esnext",
-    "target": "es6",
+    "target": "es2019",
     "esModuleInterop": true,
     "allowJs": true,
     "jsx": "react"
