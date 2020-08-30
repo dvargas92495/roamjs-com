@@ -61,7 +61,7 @@ const slashEventListener = (e: KeyboardEvent) => {
       .substring(0, timeMin.toISOString().length - 1)}${offsetString}`;
 
     fetch(
-      `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId${calendarId}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
+      `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${calendarId}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
     )
       .then((r) => r.json())
       .then(async (r) => {
