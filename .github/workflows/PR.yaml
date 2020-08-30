@@ -1,4 +1,4 @@
-name: Push to PR
+name: Push Extensions From PR
 on: pull_request
 
 env:

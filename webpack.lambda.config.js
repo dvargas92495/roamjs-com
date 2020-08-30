@@ -1,9 +1,10 @@
 const fs = require("fs");
 const path = require("path");
+const Dotenv = require("dotenv-webpack");
 
-const extensions = fs.readdirSync("./src/entries/");
+const extensions = fs.readdirSync("./src/lambdas/");
 const entry = Object.fromEntries(
-  extensions.map((e) => [e.substring(0, e.length - 3), `./src/entries/${e}`])
+  extensions.map((e) => [e.substring(0, e.length - 3), `./src/lambdas/${e}`])
 );
 
 module.exports = {
@@ -13,7 +14,7 @@ module.exports = {
   },
   mode: "production",
   output: {
-    path: path.join(__dirname, "build"),
+    path: path.join(__dirname, "out"),
     filename: "[name].js",
   },
   module: {
@@ -25,4 +26,9 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    new Dotenv({
+      path: ".env.local",
+    }),
+  ],
 };

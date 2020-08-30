@@ -18,7 +18,7 @@ const slashEventListener = (e: KeyboardEvent) => {
   const target = e.target as HTMLElement;
   const elementBeforeEnter = target?.parentElement?.parentElement?.parentElement
     ?.parentElement?.previousElementSibling as HTMLElement;
-  const initialValue = elementBeforeEnter.innerText;
+  const initialValue = elementBeforeEnter?.innerText;
   if (initialValue.endsWith(SLASH_COMMAND)) {
     userEvent.type(target, "{backspace}");
     const configurationAttrRefs = window.roamAlphaAPI

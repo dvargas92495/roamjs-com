@@ -1,7 +1,9 @@
-name: Push to Master
+name: Push Extensions to Master
 on:
   push:
     branches: master
+    paths:
+      - "src/entries/**"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY_ID }}

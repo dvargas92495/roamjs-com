@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
-    "build:site": "webpack --config ./webpack.index.config.js --mode production",
-    "start": "webpack-dev-server --config ./webpack.index.config.js --mode development",
+    "build:lambda": "webpack --config ./webpack.lambda.config.js",
     "test": "jest --passWithNoTests"
   },
   "repository": {
@@ -23,7 +22,9 @@
   },
   "homepage": "https://github.com/dvargas92495/roam-js-extensions#readme",
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.61",
     "babel-preset-env": "^1.7.0",
+    "dotenv-webpack": "^2.0.0",
     "eslint": "^7.7.0",
     "jest": "^26.4.0",
     "ts-loader": "^8.0.3",
@@ -33,6 +34,7 @@
   },
   "dependencies": {
     "@testing-library/dom": "^7.22.6",
-    "@testing-library/user-event": "^12.1.3"
+    "@testing-library/user-event": "^12.1.3",
+    "axios": "^0.20.0"
   }
 }

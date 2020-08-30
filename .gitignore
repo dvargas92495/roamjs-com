@@ -3,3 +3,4 @@ terraform.exe
 .terraform/
 build/
 dist/
+out/
