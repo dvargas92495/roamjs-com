@@ -11,14 +11,14 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   const { calendarId, timeMin, timeMax } = event.queryStringParameters;
   if (!calendarId) {
     return {
-      status: 400,
+      statusCode: 400,
       body: "calendarId is required",
       headers,
     };
   }
   if (!apiKey) {
     return {
-      status: 500,
+      statusCode: 500,
       body: "No API key stored",
       headers,
     };
@@ -28,12 +28,12 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${timeMin}&timeMax=${timeMax}&orderBy=startTime&singleEvents=true`
     )
     .then((r) => ({
-      status: 200,
+      statusCode: 200,
       body: JSON.stringify(r.data),
       headers,
     }))
     .catch((e) => ({
-      status: 500,
+      statusCode: 500,
       body: e.message,
       headers,
     }));
