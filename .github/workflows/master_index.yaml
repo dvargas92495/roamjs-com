@@ -2,6 +2,8 @@ name: Push Site to Master
 on:
   push:
     branches: master
+    paths:
+      - "docs"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY_ID }}
