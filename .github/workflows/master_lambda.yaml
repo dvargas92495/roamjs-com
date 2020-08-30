@@ -19,12 +19,12 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.16.1
+      - name: Set Environment
+        run: echo "GOOGLE_CALENDAR_API_KEY=${{ secrets.GOOGLE_CALENDAR_API_KEY }}" > .env.local
       - name: install
         run: npm install
       - name: Build
         run: npm run build:lambda
-      - name: Set Environment
-        run: echo "GOOGLE_CALENDAR_API_KEY=${{ secrets.GOOGLE_CALENDAR_API_KEY }}" > .env.local
       - name: Upload
         run: |
           for filename in out/*.js; do

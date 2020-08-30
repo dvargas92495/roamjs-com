@@ -16,6 +16,13 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       headers,
     };
   }
+  if (!apiKey) {
+    return {
+      status: 500,
+      body: "No API key stored",
+      headers,
+    };
+  }
   return axios
     .get(
       `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${timeMin}&timeMax=${timeMax}&orderBy=startTime&singleEvents=true`

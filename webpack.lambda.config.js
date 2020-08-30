@@ -15,6 +15,7 @@ module.exports = {
   },
   mode: "production",
   output: {
+    libraryTarget: "commonjs",
     path: path.join(__dirname, "out"),
     filename: "[name].js",
   },
