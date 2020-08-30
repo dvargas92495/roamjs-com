@@ -85,7 +85,7 @@ const slashEventListener = (e: KeyboardEvent) => {
           await userEvent.type(document.activeElement, bullet, {
             skipClick: true,
           });
-          wait();
+          await wait();
 
           // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
           // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
@@ -97,7 +97,7 @@ const slashEventListener = (e: KeyboardEvent) => {
           await fireEvent.keyDown(document.activeElement, enterObj);
           await fireEvent.keyPress(document.activeElement, enterObj);
           await fireEvent.keyUp(document.activeElement, enterObj);
-          wait();
+          await wait();
         }
         return 0;
       });
