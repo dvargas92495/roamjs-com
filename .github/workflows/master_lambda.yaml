@@ -1,4 +1,4 @@
-name: Push Extensions to Master
+name: Push Lambdas to Master
 on:
   push:
     branches: master
@@ -27,7 +27,7 @@ jobs:
         run: echo ${{ secrets.GOOGLE_CALENDAR_API_KEY }} > .env.local
       - name: Upload
         run: |
-          for filename in out/*.js
+          for filename in out/*.js; do
               LAMBDA=$(basename "$filename" .js)
               zip -jq $1.zip ./out/$LAMBDA.js
               MODIFIED=$(aws lambda update-function-code --function-name "roam-js-extensions_${LAMBDA}" --publish --zip-file "fileb://${LAMBDA}.zip" --query "LastModified" --output text)  
