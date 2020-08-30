@@ -13,3 +13,21 @@ In any page, type `/Import Google Calendar` then hit Enter. The extension will c
 > [Summary] @ [Start Time (hh:mm am)] - [End Time (hh:mm pm)]
 
 It will be displayed in the timezone of your browser.
+
+### Code Block
+
+Insert this as a child of any `[[roam/js]]` block to install the extension.
+
+```javascript
+var old = document.getElementById("google-calendar");
+if (old) {
+  old.remove();
+}
+
+var s = document.createElement("script");
+s.src = "https://roam.davidvargas.me/master/google-calendar.js";
+s.id = "google-calendar";
+s.async = false;
+s.type = "text/javascript";
+document.getElementsByTagName("head")[0].appendChild(s);
+```

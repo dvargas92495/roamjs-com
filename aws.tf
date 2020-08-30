@@ -36,7 +36,7 @@ module "aws-serverless-backend" {
     tags = {
         Application = "Roam JS Extensions"
     }
-} 
+}
 
 /*
 https://github.com/dvargas92495/roam-js-extensions/issues/1

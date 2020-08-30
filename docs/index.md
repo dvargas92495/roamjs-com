@@ -15,7 +15,7 @@ var s = document.createElement("script");
     s.id = "[name]";
     s.async = false;
     s.type  = 'text/javascript';
-    document.getElementsByTagName('head')[0].appendChild(s);
+document.getElementsByTagName('head')[0].appendChild(s);
 ```
 
 The code block runs on initial load of your roam database. It adds a script tag to the head of your browser, which loads then runs the tool, providing you with the added functionality.
