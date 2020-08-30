@@ -29,7 +29,7 @@ jobs:
         run: |
           for filename in out/*.js; do
               LAMBDA=$(basename "$filename" .js)
-              zip -jq $1.zip ./out/$LAMBDA.js
+              zip -jq $LAMBDA.zip ./out/$LAMBDA.js
               MODIFIED=$(aws lambda update-function-code --function-name "roam-js-extensions_${LAMBDA}" --publish --zip-file "fileb://${LAMBDA}.zip" --query "LastModified" --output text)  
               rm $LAMBDA.zip
               echo "Function $LAMBDA successfully updated at $MODIFIED"
