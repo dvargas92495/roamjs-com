@@ -14,7 +14,7 @@ declare global {
 // yolo wait, next character was bleeding
 // https://github.com/testing-library/user-event/blob/a5b335026abe9692a85190180603597da9687496/src/type.js#L57
 const wait = async () =>
-  await new Promise((resolve) => setTimeout(() => resolve(), 1));
+  await new Promise((resolve) => setTimeout(() => resolve(), 5));
 
 const slashEventListener = (e: KeyboardEvent) => {
   if (e.key !== "Enter") {
