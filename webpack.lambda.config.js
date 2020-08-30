@@ -8,6 +8,7 @@ const entry = Object.fromEntries(
 );
 
 module.exports = {
+  target: "node",
   entry,
   resolve: {
     extensions: [".ts", ".js"],

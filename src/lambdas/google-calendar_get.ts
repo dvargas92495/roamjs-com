@@ -9,6 +9,13 @@ const headers = {
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const { calendarId, timeMin, timeMax } = event.queryStringParameters;
+  if (!calendarId) {
+    return {
+      status: 400,
+      body: "calendarId is required",
+      headers,
+    };
+  }
   return axios
     .get(
       `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${timeMin}&timeMax=${timeMax}&orderBy=startTime&singleEvents=true`
