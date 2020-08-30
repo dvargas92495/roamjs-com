@@ -29,7 +29,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     )
     .then((r) => ({
       status: 200,
-      body: JSON.stringify(r.data.items),
+      body: JSON.stringify(r.data),
       headers,
     }))
     .catch((e) => ({
