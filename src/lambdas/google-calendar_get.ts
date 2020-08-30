@@ -11,9 +11,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   const { calendarId, timeMin, timeMax } = event.queryStringParameters;
   axios
     .get(
-      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
-        calendarId
-      )}/events?key=${apiKey}&timeMin=${timeMin}&timeMax=${timeMax}&orderBy=startTime&singleEvents=true`
+      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${timeMin}&timeMax=${timeMax}&orderBy=startTime&singleEvents=true`
     )
     .then((r) => ({
       status: 200,
