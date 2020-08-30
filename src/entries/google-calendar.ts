@@ -11,6 +11,11 @@ declare global {
   }
 }
 
+// yolo wait, next character was bleeding
+// https://github.com/testing-library/user-event/blob/a5b335026abe9692a85190180603597da9687496/src/type.js#L57
+const wait = async () =>
+  await new Promise((resolve) => setTimeout(() => resolve(), 1));
+
 const slashEventListener = (e: KeyboardEvent) => {
   if (e.key !== "Enter") {
     return;
@@ -36,13 +41,8 @@ const slashEventListener = (e: KeyboardEvent) => {
     const config = Object.fromEntries(entries);
 
     const calendarId = config["Google Calendar"];
-    const apiKey = config["API Key"];
     if (!calendarId) {
       console.warn("Could not find calendar ID!");
-      return;
-    }
-    if (!apiKey) {
-      console.warn("Could not find API KEY!");
       return;
     }
     const timeMin = new Date();
@@ -61,9 +61,7 @@ const slashEventListener = (e: KeyboardEvent) => {
       .substring(0, timeMin.toISOString().length - 1)}${offsetString}`;
 
     fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
-        calendarId
-      )}/events?key=${apiKey}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}&orderBy=startTime&singleEvents=true`
+      `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId${calendarId}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
     )
       .then((r) => r.json())
       .then(async (r) => {
@@ -85,9 +83,9 @@ const slashEventListener = (e: KeyboardEvent) => {
         for (const index in bullets) {
           const bullet = bullets[index];
           await userEvent.type(document.activeElement, bullet, {
-            delay: 1,
             skipClick: true,
           });
+          wait();
 
           // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
           // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
@@ -99,15 +97,11 @@ const slashEventListener = (e: KeyboardEvent) => {
           await fireEvent.keyDown(document.activeElement, enterObj);
           await fireEvent.keyPress(document.activeElement, enterObj);
           await fireEvent.keyUp(document.activeElement, enterObj);
-
-          // yolo wait, next character was bleeding
-          // https://github.com/testing-library/user-event/blob/a5b335026abe9692a85190180603597da9687496/src/type.js#L57
-          await new Promise((resolve) => setTimeout(() => resolve(), 1));
+          wait();
         }
         return 0;
       });
   }
 };
-// @ts-ignore
-window.fireEvent = fireEvent;
+
 document.addEventListener("keyup", slashEventListener);
