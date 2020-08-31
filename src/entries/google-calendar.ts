@@ -11,15 +11,15 @@ declare global {
   }
 }
 
-const waitUntilText = async (expected: string) => {
-  const textArea = document.activeElement as HTMLTextAreaElement;
-  let retries = 0;
-  while (textArea.value !== expected && retries < 200) {
-    // yolo wait, next character was bleeding	// yolo wait, next character was bleeding
-    // https://github.com/testing-library/user-event/blob/a5b335026abe9692a85190180603597da9687496/src/type.js#L57
-    await new Promise((resolve) => setTimeout(() => resolve(), 5));
-    retries++;
-  }
+const asyncType = async (text: string) =>
+  await userEvent.type(document.activeElement, text, {
+    skipClick: true,
+  });
+
+// yolo wait, next character was bleeding	// yolo wait, next character was bleeding
+// https://github.com/testing-library/user-event/blob/a5b335026abe9692a85190180603597da9687496/src/type.js#L57
+const wait = async () => {
+  await new Promise((resolve) => setTimeout(() => resolve(), 5));
 };
 
 const slashEventListener = (e: KeyboardEvent) => {
@@ -89,13 +89,10 @@ const slashEventListener = (e: KeyboardEvent) => {
           initialValue.length - SLASH_COMMAND.length,
           initialValue.length
         );
-        await userEvent.type(textArea, "{backspace}");
+        await asyncType("{backspace}");
         for (const index in bullets) {
           const bullet = bullets[index];
-          userEvent.type(document.activeElement, bullet, {
-            skipClick: true,
-          });
-          waitUntilText(bullet);
+          await asyncType(bullet);
 
           // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
           // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
@@ -107,7 +104,7 @@ const slashEventListener = (e: KeyboardEvent) => {
           await fireEvent.keyDown(document.activeElement, enterObj);
           await fireEvent.keyPress(document.activeElement, enterObj);
           await fireEvent.keyUp(document.activeElement, enterObj);
-          waitUntilText("");
+          await wait();
         }
         return 0;
       });
