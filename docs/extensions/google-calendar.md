@@ -10,7 +10,7 @@ The script supports the following configuration attributes:
 
 In any page, type `/Import Google Calendar` then hit Enter. The extension will clear the slash command and fill the page in with the events you have scheduled for that day in the following format:
 
-> [Summary] @ [Start Time (hh:mm am)] - [End Time (hh:mm pm)]
+> [Summary] ([Start Time (hh:mm am)] - [End Time (hh:mm pm)]) [ - link to Zoom/Meet]
 
 It will be displayed in the timezone of your browser.
 

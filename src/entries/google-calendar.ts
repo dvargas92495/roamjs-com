@@ -72,7 +72,7 @@ const slashEventListener = (e: KeyboardEvent) => {
             e.location && e.location.indexOf("zoom.us") > -1
               ? ` - [Zoom](${e.location})`
               : "";
-          return `${e.summary} @ (${new Date(
+          return `${e.summary} (${new Date(
             e.start.dateTime
           ).toLocaleTimeString()} - ${new Date(
             e.end.dateTime
