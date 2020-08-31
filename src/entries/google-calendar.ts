@@ -1,4 +1,4 @@
-import { fireEvent } from "@testing-library/dom";
+import { fireEvent, waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 
 const SLASH_COMMAND = "/Import Google Calendar";
@@ -15,6 +15,13 @@ const asyncType = async (text: string) =>
   await userEvent.type(document.activeElement, text, {
     skipClick: true,
   });
+
+const waitForCallback = (text: string) => () => {
+  const textArea = document.activeElement as HTMLTextAreaElement;
+  if (textArea.value !== text) {
+    throw new Error("Typing not complete");
+  }
+};
 
 // yolo wait, next character was bleeding	// yolo wait, next character was bleeding
 // https://github.com/testing-library/user-event/blob/a5b335026abe9692a85190180603597da9687496/src/type.js#L57
@@ -93,6 +100,7 @@ const slashEventListener = (e: KeyboardEvent) => {
         for (const index in bullets) {
           const bullet = bullets[index];
           await asyncType(bullet);
+          await waitFor(waitForCallback(bullet));
 
           // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
           // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
