@@ -24,7 +24,7 @@ const slashEventListener = (e: KeyboardEvent) => {
   const elementBeforeEnter = target?.parentElement?.parentElement?.parentElement
     ?.parentElement?.previousElementSibling as HTMLElement;
   const initialValue = elementBeforeEnter?.innerText;
-  if (initialValue.endsWith(SLASH_COMMAND)) {
+  if (initialValue && initialValue.endsWith(SLASH_COMMAND)) {
     userEvent.type(target, "{backspace}");
     const configurationAttrRefs = window.roamAlphaAPI
       .q(
@@ -66,14 +66,18 @@ const slashEventListener = (e: KeyboardEvent) => {
       .then((r) => r.json())
       .then(async (r) => {
         const events = r.items;
-        const bullets = events.map(
-          (e: any) =>
-            `${e.summary} @ ${new Date(
-              e.start.dateTime
-            ).toLocaleTimeString()} - ${new Date(
-              e.end.dateTime
-            ).toLocaleTimeString()}`
-        ) as string[];
+        const bullets = events.map((e: any) => {
+          const meetLink = e.hangoutLink ? ` - [Meet](${e.hangoutLink})` : "";
+          const zoomLink =
+            e.location && e.location.indexOf("zoom.us") > -1
+              ? ` - [Zoom](${e.location})`
+              : "";
+          return `${e.summary} @ (${new Date(
+            e.start.dateTime
+          ).toLocaleTimeString()} - ${new Date(
+            e.end.dateTime
+          ).toLocaleTimeString()})${meetLink}${zoomLink}`;
+        }) as string[];
         const textArea = document.activeElement as HTMLTextAreaElement;
         textArea.setSelectionRange(
           initialValue.length - SLASH_COMMAND.length,
