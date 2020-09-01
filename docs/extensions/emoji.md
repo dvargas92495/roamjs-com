@@ -21,3 +21,5 @@ s.async = false;
 s.type = "text/javascript";
 document.getElementsByTagName("head")[0].appendChild(s);
 ```
+
+To view all available emojis, they could be found in the following JSON file: https://raw.githubusercontent.com/omnidan/node-emoji/master/lib/emoji.json.
