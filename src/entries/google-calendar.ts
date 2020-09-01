@@ -99,27 +99,6 @@ fetch(
   });
 }
 
-const slashEventListener = async (e: KeyboardEvent) => {
-  if (e.key !== "Enter") {
-    return;
-  }
-  const target = e.target as HTMLElement;
-  const elementBeforeEnter = target?.parentElement?.parentElement?.parentElement
-    ?.parentElement?.previousElementSibling as HTMLElement;
-  const initialValue = elementBeforeEnter?.innerText;
-  if (initialValue && initialValue.endsWith(`/${GOOGLE_COMMAND}`)) {
-    userEvent.type(target, "{backspace}");
-    const textArea = document.activeElement as HTMLTextAreaElement;
-    textArea.setSelectionRange(
-      initialValue.length - GOOGLE_COMMAND.length - 1,
-      initialValue.length
-    );
-    await asyncType("{backspace}");
-    await waitFor(waitForCallback(""));
-    importGoogleCalendar();
-  }
-};
-
 const clickEventListener = async (e: MouseEvent) => {
   const target = e.target as HTMLElement;
   if (
@@ -136,7 +115,5 @@ const clickEventListener = async (e: MouseEvent) => {
     importGoogleCalendar();
   }
 }
-
-document.addEventListener("keyup", slashEventListener);
 
 document.addEventListener("click", clickEventListener);
