@@ -120,14 +120,18 @@ const slashEventListener = async (e: KeyboardEvent) => {
 
 const clickEventListener = async (e: MouseEvent) => {
   const target = e.target as HTMLElement;
+  console.log("clicky");
   if (
     target &&
     target.tagName === "BUTTON" &&
     target.innerText.toUpperCase() === GOOGLE_COMMAND.toUpperCase()
   ) {
+    console.log("I'm in this");
     const divContainer = target.parentElement.parentElement.parentElement as HTMLDivElement;
+    console.log(document.activeElement);
     await userEvent.click(divContainer);
     await waitFor(waitForCallback(`{{${GOOGLE_COMMAND}}}`));
+    console.log(document.activeElement);
     importGoogleCalendar();
   }
 }
