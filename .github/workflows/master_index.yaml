@@ -3,7 +3,7 @@ on:
   push:
     branches: master
     paths:
-      - "docs"
+      - "docs/**"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY_ID }}
