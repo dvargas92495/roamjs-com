@@ -43,6 +43,7 @@ if (!calendarId) {
   console.warn("Could not find calendar ID!");
   return;
 }
+const includeLink = config["Include Event Link"] === 'true';
 const timeMin = new Date();
 const timeMax = new Date();
 const offset = timeMin.getTimezoneOffset() / 60;
@@ -65,7 +66,7 @@ fetch(
   .then(async (r) => {
     const events = r.items;
     const bullets = events.map((e: any) => {
-      const summary = e.htmlLink ? `[${e.summary}](${e.htmlLink})` : e.summary;
+      const summary = includeLink && e.htmlLink ? `[${e.summary}](${e.htmlLink})` : e.summary;
       const meetLink = e.hangoutLink ? ` - [Meet](${e.hangoutLink})` : "";
       const zoomLink =
         e.location && e.location.indexOf("zoom.us") > -1
