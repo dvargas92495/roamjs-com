@@ -9,10 +9,10 @@ const turnOffEmoji = () => {
 
 const inputEventListener = (e: InputEvent) => {
   if (e.data === ":") {
-    if (emojiOn) {
+    if (!emojiOn) {
       turnOnEmoji();
     } else {
-      console.log("GET EMOJI FOR - " + searchText);
+      console.log("GET EMOJI FOR " + searchText);
       turnOffEmoji();
     }
   } else if (!/\s/.test(e.data) && e.data) {
