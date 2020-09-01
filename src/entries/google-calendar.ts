@@ -1,7 +1,7 @@
 import { fireEvent, waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 
-const GOOGLE_COMMAND = "/Import Google Calendar";
+const GOOGLE_COMMAND = "Import Google Calendar";
 
 declare global {
   interface Window {
@@ -121,6 +121,9 @@ const slashEventListener = async (e: KeyboardEvent) => {
 const clickEventListener = async (e: MouseEvent) => {
   const target = e.target as HTMLElement;
   console.log("clicky");
+  console.log(target);
+  console.log(target.tagName);
+  console.log(target.innerText);
   if (
     target &&
     target.tagName === "BUTTON" &&
