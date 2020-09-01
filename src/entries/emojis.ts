@@ -14,6 +14,8 @@ const inputEventListener = async (e: InputEvent) => {
   if (e.data === ":") {
     if (!emojiOn) {
       turnOnEmoji();
+    } else if (!emoji.hasEmoji(searchText)) {
+      turnOffEmoji();
     } else {
       const emojiCode = emoji.get(searchText);
       const target = e.target as HTMLTextAreaElement;
