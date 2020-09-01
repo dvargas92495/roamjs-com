@@ -25,4 +25,7 @@ module.exports = {
       },
     ],
   },
+  performance: {
+    hints: "error",
+  },
 };

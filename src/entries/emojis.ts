@@ -35,6 +35,12 @@ const inputEventListener = async (e: InputEvent) => {
       userEvent.type(target, emojiCode);
       turnOffEmoji();
     }
+  } else if (e.inputType === "deleteContentBackward") {
+    if (searchText) {
+      searchText = searchText.substring(0, searchText.length - 1);
+    } else {
+      turnOffEmoji();
+    }
   } else if (!/\s/.test(e.data) && e.data && emojiOn) {
     searchText += e.data;
   } else {
