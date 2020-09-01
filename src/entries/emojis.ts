@@ -15,7 +15,7 @@ const inputEventListener = (e: InputEvent) => {
       console.log("GET EMOJI FOR " + searchText);
       turnOffEmoji();
     }
-  } else if (!/\s/.test(e.data) && e.data) {
+  } else if (!/\s/.test(e.data) && e.data && emojiOn) {
     searchText += e.data;
   } else {
     turnOffEmoji();
