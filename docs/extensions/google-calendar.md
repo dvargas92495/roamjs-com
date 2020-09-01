@@ -7,8 +7,9 @@ The Google Calendar to Roam Integration allows users to import the list of event
 The script supports the following configuration attributes:
 
 - `Google Calendar` - (Required) This is the calendar ID that the extension will use to query for events. It's usually your gmail address, such as `dvargas92495@gmail.com`.
+- `Include Event Link` - (Optional) Set to `true` if you would like to hyperlink the event summary with a link to the google calendar event. Note, because there are more characters to be typed it's a slower operation.
 
-In any page, type `/Import Google Calendar` then hit Enter. The extension will clear the slash command and fill the page in with the events you have scheduled for that day in the following format:
+In any page, create a `Import Google Calendar` button by typing in `{{import google calendar}}` (case-insensitive) in a block. Upon then clicking the button, the extension will clear the slash command and fill the page in with the events you have scheduled for that day in the following format:
 
 > [Summary] ([Start Time (hh:mm am)] - [End Time (hh:mm pm)]) [ - link to Zoom/Meet]
 
