@@ -30,6 +30,7 @@ const turnOnEmoji = () => {
   const parentDiv = document.activeElement.parentElement as HTMLDivElement;
   parentDiv.appendChild(menu);
   emojiOn = true;
+  searchText = ":";
 };
 
 const turnOffEmoji = () => {
@@ -42,18 +43,17 @@ const turnOffEmoji = () => {
   searchText = "";
 };
 
-const insertEmoji = (target: HTMLTextAreaElement) => {
-  const emojiCode = emoji.get(searchText);
+const insertEmoji = (target: HTMLTextAreaElement, emojiCode: string) => {
   const initialValue = target.value;
   const preValue = initialValue.substring(
     0,
-    initialValue.length - 2 - searchText.length
+    initialValue.length - searchText.length
   );
   target.setSelectionRange(preValue.length, initialValue.length);
   userEvent.type(target, "{backspace}");
   userEvent.type(target, emojiCode);
   turnOffEmoji();
-}
+};
 
 const createMenuElement = ({ emoji, key }: emoji.Emoji) => {
   const title = `${key} ${emoji}`;
@@ -69,10 +69,7 @@ const createMenuElement = ({ emoji, key }: emoji.Emoji) => {
   result.innerText = title;
 
   const target = document.activeElement as HTMLTextAreaElement;
-  result.onclick = () => {
-    searchText = key;
-    insertEmoji(target);
-  }
+  result.onclick = () => insertEmoji(target, emoji);
   container.appendChild(result);
 
   menu.appendChild(container);
@@ -90,7 +87,8 @@ const inputEventListener = async (e: InputEvent) => {
     } else if (!emoji.hasEmoji(searchText)) {
       turnOffEmoji();
     } else {
-      insertEmoji(e.target as HTMLTextAreaElement);
+      searchText = `${searchText}:`;
+      insertEmoji(e.target as HTMLTextAreaElement, emoji.get(searchText));
     }
   } else if (e.inputType === "deleteContentBackward") {
     if (searchText) {
