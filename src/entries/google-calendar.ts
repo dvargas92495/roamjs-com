@@ -71,6 +71,10 @@ const importGoogleCalendar = async () => {
     .then((r) => r.json())
     .then(async (r) => {
       const events = r.items;
+      if (events.length === 0) {
+        await asyncType("No Events Scheduled for Today!");
+        return;
+      }
       const bullets = events.map((e: any) => {
         const summary =
           includeLink && e.htmlLink
