@@ -46,12 +46,12 @@ const importGoogleCalendar = async () => {
   );
   const config = Object.fromEntries(entries);
 
-  const calendarId = config["Google Calendar"];
+  const calendarId = config["Google Calendar"]?.trim();
   if (!calendarId) {
     console.warn("Could not find calendar ID!");
     return;
   }
-  const includeLink = config["Include Event Link"] === "true";
+  const includeLink = config["Include Event Link"]?.trim() === "true";
   const timeMin = new Date();
   const timeMax = new Date();
   const offset = timeMin.getTimezoneOffset() / 60;
@@ -70,7 +70,12 @@ const importGoogleCalendar = async () => {
   fetch(
     `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${calendarId}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
   )
-    .then((r) => r.json())
+    .then((r) => {
+      console.log(r.ok);
+      console.log(r.status);
+      console.log(r.statusText);
+      return r.json();
+    })
     .then(async (r) => {
       const events = r.items;
       if (events.length === 0) {
