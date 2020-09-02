@@ -1,4 +1,4 @@
-import emoji from "node-emoji";
+import emoji, { search } from "node-emoji";
 import userEvent from "@testing-library/user-event";
 
 let searchText = "";
@@ -51,6 +51,12 @@ const clearMenu = () => {
   }
 };
 
+const searchEmojis = (text: string) => {
+  const results = emoji.search(text);
+  clearMenu();
+  results.slice(0, 5).forEach(createMenuElement);
+};
+
 const turnOnEmoji = () => {
   const parentDiv = document.activeElement.parentElement as HTMLDivElement;
   parentDiv.appendChild(menu);
@@ -87,16 +93,13 @@ const inputEventListener = async (e: InputEvent) => {
   } else if (e.inputType === "deleteContentBackward") {
     if (searchText) {
       searchText = searchText.substring(0, searchText.length - 1);
-      const results = emoji.search(searchText);
-      console.log(results);
-      clearMenu();
-      results.slice(0, 5).forEach(createMenuElement);
-      console.log(menu);
+      searchEmojis(searchText);
     } else {
       turnOffEmoji();
     }
   } else if (!/\s/.test(e.data) && e.data && emojiOn) {
     searchText += e.data;
+    searchEmojis(searchText);
   } else {
     turnOffEmoji();
   }
