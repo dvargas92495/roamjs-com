@@ -20,14 +20,42 @@ menu.style.marginRight = "24px";
 menu.style.marginBottom = "24px";
 menu.style.left = "10px";
 
-const menuElementCache: { [key: string]: HTMLDivElement } = {};
+const clearMenu = () => {
+  while (menu.lastChild) {
+    menu.removeChild(menu.lastChild);
+  }
+};
+
+const turnOnEmoji = () => {
+  const parentDiv = document.activeElement.parentElement as HTMLDivElement;
+  parentDiv.appendChild(menu);
+  emojiOn = true;
+};
+
+const turnOffEmoji = () => {
+  if (emojiOn) {
+    const parentDiv = document.activeElement.parentElement as HTMLDivElement;
+    parentDiv.removeChild(menu);
+    clearMenu();
+    emojiOn = false;
+  }
+  searchText = "";
+};
+
+const insertEmoji = (target: HTMLTextAreaElement) => {
+  const emojiCode = emoji.get(searchText);
+  const initialValue = target.value;
+  const preValue = initialValue.substring(
+    0,
+    initialValue.length - 2 - searchText.length
+  );
+  target.setSelectionRange(preValue.length, initialValue.length);
+  userEvent.type(target, "{backspace}");
+  userEvent.type(target, emojiCode);
+  turnOffEmoji();
+}
 
 const createMenuElement = ({ emoji, key }: emoji.Emoji) => {
-  if (menuElementCache[key]) {
-    menu.appendChild(menuElementCache[key]);
-    return;
-  }
-
   const title = `${key} ${emoji}`;
   const container = document.createElement("div");
   container.title = title;
@@ -39,36 +67,17 @@ const createMenuElement = ({ emoji, key }: emoji.Emoji) => {
   const result = document.createElement("div");
   result.className = "rm-autocomplete-result";
   result.innerText = title;
+
+  const target = document.activeElement as HTMLTextAreaElement;
+  result.onclick = () => insertEmoji(target);
   container.appendChild(result);
 
-  menuElementCache[key] = container;
   menu.appendChild(container);
 };
-
-const clearMenu = () => {
-  while (menu.lastChild) {
-    menu.removeChild(menu.lastChild);
-  }
-};
-
 const searchEmojis = (text: string) => {
   const results = emoji.search(text);
   clearMenu();
   results.slice(0, 5).forEach(createMenuElement);
-};
-
-const turnOnEmoji = () => {
-  const parentDiv = document.activeElement.parentElement as HTMLDivElement;
-  parentDiv.appendChild(menu);
-  emojiOn = true;
-};
-
-const turnOffEmoji = () => {
-  const parentDiv = document.activeElement.parentElement as HTMLDivElement;
-  parentDiv.removeChild(menu);
-  clearMenu();
-  searchText = "";
-  emojiOn = false;
 };
 
 const inputEventListener = async (e: InputEvent) => {
@@ -78,17 +87,7 @@ const inputEventListener = async (e: InputEvent) => {
     } else if (!emoji.hasEmoji(searchText)) {
       turnOffEmoji();
     } else {
-      const emojiCode = emoji.get(searchText);
-      const target = e.target as HTMLTextAreaElement;
-      const initialValue = target.value;
-      const preValue = initialValue.substring(
-        0,
-        initialValue.length - 2 - searchText.length
-      );
-      target.setSelectionRange(preValue.length, initialValue.length);
-      userEvent.type(target, "{backspace}");
-      userEvent.type(target, emojiCode);
-      turnOffEmoji();
+      insertEmoji(e.target as HTMLTextAreaElement);
     }
   } else if (e.inputType === "deleteContentBackward") {
     if (searchText) {
