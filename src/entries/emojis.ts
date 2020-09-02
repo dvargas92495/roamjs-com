@@ -69,7 +69,10 @@ const createMenuElement = ({ emoji, key }: emoji.Emoji) => {
   result.innerText = title;
 
   const target = document.activeElement as HTMLTextAreaElement;
-  result.onclick = () => insertEmoji(target);
+  result.onclick = () => {
+    searchText = key;
+    insertEmoji(target);
+  }
   container.appendChild(result);
 
   menu.appendChild(container);
