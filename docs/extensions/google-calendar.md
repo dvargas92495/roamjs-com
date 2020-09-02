@@ -4,7 +4,7 @@ The Google Calendar to Roam Integration allows users to import the list of event
 
 ### Usage
 
-The script supports the following configuration attributes:
+The script supports the following configuration attributes, to be added in the `[[roam/js/google-calendar]]` page:
 
 - `Google Calendar` - (Required) This is the calendar ID that the extension will use to query for events. It's usually your gmail address, such as `dvargas92495@gmail.com`.
 - `Include Event Link` - (Optional) Set to `true` if you would like to hyperlink the event summary with a link to the google calendar event. Note, because there are more characters to be typed it's a slower operation.

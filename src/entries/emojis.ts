@@ -88,8 +88,10 @@ const inputEventListener = async (e: InputEvent) => {
     if (searchText) {
       searchText = searchText.substring(0, searchText.length - 1);
       const results = emoji.search(searchText);
+      console.log(results);
       clearMenu();
       results.slice(0, 5).forEach(createMenuElement);
+      console.log(menu);
     } else {
       turnOffEmoji();
     }
