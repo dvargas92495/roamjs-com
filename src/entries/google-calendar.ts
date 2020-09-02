@@ -28,7 +28,9 @@ const importGoogleCalendar = async () => {
     '[:find (pull ?e [*]) :where [?e :node/title "roam/js/google-calendar"] ]'
   );
   if (pageResults.length === 0) {
-    await asyncType("Error: Could not find the [[roam/js/google-calendar]] page. Please add this page and configure the Google Calendar attribute");
+    await asyncType(
+      "Error: Could not find the [[roam/js/google-calendar]] page. Please add this page and configure the Google Calendar attribute"
+    );
     return;
   }
 
@@ -76,10 +78,11 @@ const importGoogleCalendar = async () => {
         return;
       }
       const bullets = events.map((e: any) => {
+        const summaryText = e.summary ? e.summary : "No Summary";
         const summary =
           includeLink && e.htmlLink
-            ? `[${e.summary}](${e.htmlLink})`
-            : e.summary;
+            ? `[${summaryText}](${e.htmlLink})`
+            : summaryText;
         const meetLink = e.hangoutLink ? ` - [Meet](${e.hangoutLink})` : "";
         const zoomLink =
           e.location && e.location.indexOf("zoom.us") > -1
