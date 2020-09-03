@@ -69,14 +69,15 @@ const importGoogleCalendar = async () => {
 
   fetch(
     `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${calendarId}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
-  )
-    .then((r) => {
-      console.log(r.ok);
-      console.log(r.status);
-      console.log(r.statusText);
-      return r.json();
-    })
-    .then(async (r) => {
+  ).then((r) => {
+    if (!r.ok) {
+      return r.json().then((errorMessage) => 
+        asyncType(
+          `Error: ${errorMessage}`
+        )
+      );
+    }
+    return r.json().then(async (r) => {
       const events = r.items;
       if (events.length === 0) {
         await asyncType("No Events Scheduled for Today!");
@@ -116,8 +117,8 @@ const importGoogleCalendar = async () => {
         await fireEvent.keyUp(document.activeElement, enterObj);
         await waitFor(waitForCallback(""));
       }
-      return 0;
     });
+  });
 };
 
 const clickEventListener = async (e: MouseEvent) => {
