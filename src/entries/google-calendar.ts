@@ -71,7 +71,7 @@ const importGoogleCalendar = async () => {
     `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${calendarId}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
   ).then((r) => {
     if (!r.ok) {
-      return r.json().then((errorMessage) => 
+      return r.text().then((errorMessage) => 
         asyncType(
           `Error for calendar ${calendarId}: ${errorMessage}`
         )
