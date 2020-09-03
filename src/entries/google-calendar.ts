@@ -46,12 +46,12 @@ const importGoogleCalendar = async () => {
   );
   const config = Object.fromEntries(entries);
 
-  const calendarId = config["Google Calendar"];
+  const calendarId = config["Google Calendar"]?.trim();
   if (!calendarId) {
     console.warn("Could not find calendar ID!");
     return;
   }
-  const includeLink = config["Include Event Link"] === "true";
+  const includeLink = config["Include Event Link"]?.trim() === "true";
   const timeMin = new Date();
   const timeMax = new Date();
   const offset = timeMin.getTimezoneOffset() / 60;
@@ -69,9 +69,15 @@ const importGoogleCalendar = async () => {
 
   fetch(
     `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${calendarId}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
-  )
-    .then((r) => r.json())
-    .then(async (r) => {
+  ).then((r) => {
+    if (!r.ok) {
+      return r.text().then((errorMessage) => 
+        asyncType(
+          `Error for calendar ${calendarId}: ${errorMessage}`
+        )
+      );
+    }
+    return r.json().then(async (r) => {
       const events = r.items;
       if (events.length === 0) {
         await asyncType("No Events Scheduled for Today!");
@@ -111,8 +117,8 @@ const importGoogleCalendar = async () => {
         await fireEvent.keyUp(document.activeElement, enterObj);
         await waitFor(waitForCallback(""));
       }
-      return 0;
     });
+  });
 };
 
 const clickEventListener = async (e: MouseEvent) => {
