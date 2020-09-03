@@ -73,7 +73,7 @@ const importGoogleCalendar = async () => {
     if (!r.ok) {
       return r.json().then((errorMessage) => 
         asyncType(
-          `Error: ${errorMessage}`
+          `Error for calendar ${calendarId}: ${errorMessage}`
         )
       );
     }
