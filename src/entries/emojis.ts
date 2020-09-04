@@ -40,6 +40,7 @@ const turnOnEmoji = () => {
   emojiOn = true;
   searchText = ":";
   menuItemIndex = 0;
+  searchEmojis(searchText);
 };
 
 const turnOffEmoji = () => {
@@ -145,11 +146,11 @@ const inputEventListener = async (e: InputEvent) => {
       insertEmoji(e.target as HTMLTextAreaElement, emoji.get(searchText));
     }
   } else if (e.inputType === "deleteContentBackward") {
-    if (searchText) {
+    if (searchText === ":") {
+      turnOffEmoji();
+    } else {
       searchText = searchText.substring(0, searchText.length - 1);
       searchEmojis(searchText);
-    } else {
-      turnOffEmoji();
     }
   } else if (!/\s/.test(e.data) && e.data && emojiOn) {
     searchText += e.data;
