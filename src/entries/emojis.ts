@@ -31,7 +31,7 @@ const clearMenu = () => {
 
 const turnOnEmoji = () => {
   currentTarget = document.activeElement as HTMLTextAreaElement;
-  currentTarget.addEventListener("keypress", emojiKeyPressListener);
+  currentTarget.addEventListener("keydown", emojiKeyDownListener);
 
   const parentDiv = currentTarget.parentElement as HTMLDivElement;
   parentDiv.appendChild(menu);
@@ -50,7 +50,7 @@ const turnOffEmoji = () => {
     emojiOn = false;
   }
   searchText = "";
-  currentTarget.removeEventListener("keypress", emojiKeyPressListener);
+  currentTarget.removeEventListener("keydown", emojiKeyDownListener);
 };
 
 const insertEmoji = (target: HTMLTextAreaElement, emojiCode: string) => {
@@ -91,7 +91,7 @@ const createMenuElement = (size: number) => (
   menu.appendChild(container);
 };
 
-const emojiKeyPressListener = (e: KeyboardEvent) => {
+const emojiKeyDownListener = (e: KeyboardEvent) => {
   if (e.key === "Enter") {
     insertEmoji(e.target as HTMLTextAreaElement, results[menuItemIndex].emoji);
   } else {
