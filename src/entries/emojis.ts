@@ -109,7 +109,7 @@ const emojiKeyDownListener = (e: KeyboardEvent) => {
   } else if(e.key === "ArrowUp") {
     const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
     oldElement.style.backgroundColor = "";
-    menuItemIndex = (menuItemIndex - 1) % results.length;
+    menuItemIndex = (menuItemIndex - 1 + results.length) % results.length;
     const newElement = menu.children[menuItemIndex] as HTMLDivElement;
     newElement.style.backgroundColor = HIGHLIGHTED_COLOR;
     e.preventDefault();
