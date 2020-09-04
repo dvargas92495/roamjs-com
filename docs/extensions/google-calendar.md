@@ -40,5 +40,5 @@ document.getElementsByTagName("head")[0].appendChild(s);
 ### Demo
 
 <video width="320" height="240" controls>
-  <source src="./videos/google-calendar.mp4" type="video/mp4">
+  <source src="../../videos/google-calendar.mp4" type="video/mp4">
 </video>

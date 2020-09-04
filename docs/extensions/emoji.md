@@ -24,6 +24,8 @@ document.getElementsByTagName("head")[0].appendChild(s);
 
 To view all available emojis, they could be found in the following [JSON file](https://raw.githubusercontent.com/omnidan/node-emoji/master/lib/emoji.json).
 
+### Demo
+
 <video width="320" height="240" controls>
-  <source src="videos/emojis.mp4" type="video/mp4">
+  <source src="../../videos/emojis.mp4" type="video/mp4">
 </video>
