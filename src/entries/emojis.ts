@@ -1,8 +1,13 @@
-import emoji, { search } from "node-emoji";
+import emoji from "node-emoji";
 import userEvent from "@testing-library/user-event";
+
+const HIGHLIGHTED_COLOR = "#0000001c";
 
 let searchText = "";
 let emojiOn = false;
+let menuItemIndex = 0;
+let results: emoji.Emoji[] = [];
+let currentTarget: HTMLTextAreaElement = document.createElement("textarea");
 
 // The following styling is ripped from Roam's menu style
 let menu = document.createElement("div");
@@ -27,20 +32,28 @@ const clearMenu = () => {
 };
 
 const turnOnEmoji = () => {
-  const parentDiv = document.activeElement.parentElement as HTMLDivElement;
+  currentTarget = document.activeElement as HTMLTextAreaElement;
+  currentTarget.addEventListener("keydown", emojiKeyDownListener);
+
+  const parentDiv = currentTarget.parentElement as HTMLDivElement;
   parentDiv.appendChild(menu);
   emojiOn = true;
   searchText = ":";
+  menuItemIndex = 0;
+  searchEmojis(searchText);
 };
 
 const turnOffEmoji = () => {
   if (emojiOn) {
     const parentDiv = document.activeElement.parentElement as HTMLDivElement;
-    parentDiv.removeChild(menu);
-    clearMenu();
+    if (parentDiv.contains(menu)) {
+      parentDiv.removeChild(menu);
+      clearMenu();
+    }
     emojiOn = false;
   }
   searchText = "";
+  currentTarget.removeEventListener("keydown", emojiKeyDownListener);
 };
 
 const insertEmoji = (target: HTMLTextAreaElement, emojiCode: string) => {
@@ -55,7 +68,10 @@ const insertEmoji = (target: HTMLTextAreaElement, emojiCode: string) => {
   turnOffEmoji();
 };
 
-const createMenuElement = ({ emoji, key }: emoji.Emoji) => {
+const createMenuElement = (size: number) => (
+  { emoji, key }: emoji.Emoji,
+  i: number
+) => {
   const title = `${key} ${emoji}`;
   const container = document.createElement("div");
   container.title = title;
@@ -63,6 +79,9 @@ const createMenuElement = ({ emoji, key }: emoji.Emoji) => {
   container.style.borderRadius = "2px";
   container.style.padding = "6px";
   container.style.cursor = "pointer";
+  if (i % size === menuItemIndex) {
+    container.style.backgroundColor = HIGHLIGHTED_COLOR;
+  }
 
   const result = document.createElement("div");
   result.className = "rm-autocomplete-result";
@@ -74,10 +93,46 @@ const createMenuElement = ({ emoji, key }: emoji.Emoji) => {
 
   menu.appendChild(container);
 };
+
+const emojiKeyDownListener = (e: KeyboardEvent) => {
+  if (e.key === "Enter") {
+    if (results.length === 0) {
+      turnOffEmoji();
+    } else {
+      insertEmoji(
+        e.target as HTMLTextAreaElement,
+        results[menuItemIndex].emoji
+      );
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  } else if (e.key === "ArrowDown") {
+    if (results.length > 0) {
+      const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
+      oldElement.style.backgroundColor = "";
+      menuItemIndex = (menuItemIndex + 1) % results.length;
+      const newElement = menu.children[menuItemIndex] as HTMLDivElement;
+      newElement.style.backgroundColor = HIGHLIGHTED_COLOR;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+  } else if (e.key === "ArrowUp") {
+    if (results.length > 0) {
+      const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
+      oldElement.style.backgroundColor = "";
+      menuItemIndex = (menuItemIndex - 1 + results.length) % results.length;
+      const newElement = menu.children[menuItemIndex] as HTMLDivElement;
+      newElement.style.backgroundColor = HIGHLIGHTED_COLOR;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+  }
+};
+
 const searchEmojis = (text: string) => {
-  const results = emoji.search(text);
+  results = emoji.search(text).slice(0, 5);
   clearMenu();
-  results.slice(0, 5).forEach(createMenuElement);
+  results.forEach(createMenuElement(results.length));
 };
 
 const inputEventListener = async (e: InputEvent) => {
@@ -91,11 +146,11 @@ const inputEventListener = async (e: InputEvent) => {
       insertEmoji(e.target as HTMLTextAreaElement, emoji.get(searchText));
     }
   } else if (e.inputType === "deleteContentBackward") {
-    if (searchText) {
+    if (searchText === ":") {
+      turnOffEmoji();
+    } else {
       searchText = searchText.substring(0, searchText.length - 1);
       searchEmojis(searchText);
-    } else {
-      turnOffEmoji();
     }
   } else if (!/\s/.test(e.data) && e.data && emojiOn) {
     searchText += e.data;
