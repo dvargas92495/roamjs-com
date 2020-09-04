@@ -95,7 +95,7 @@ const createMenuElement = (size: number) => (
 
 const emojiKeyDownListener = (e: KeyboardEvent) => {
   if (e.key === "Enter") {
-    if (results.length == 0) {
+    if (results.length === 0) {
       turnOffEmoji();
     } else {
       insertEmoji(
@@ -105,20 +105,24 @@ const emojiKeyDownListener = (e: KeyboardEvent) => {
       e.preventDefault();
       e.stopPropagation();
     }
-  } else if (e.key === "ArrowDown" && results.length > 0) {
-    const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
-    oldElement.style.backgroundColor = "";
-    menuItemIndex = (menuItemIndex + 1) % results.length;
-    const newElement = menu.children[menuItemIndex] as HTMLDivElement;
-    newElement.style.backgroundColor = HIGHLIGHTED_COLOR;
+  } else if (e.key === "ArrowDown") {
+    if (results.length > 0) {
+      const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
+      oldElement.style.backgroundColor = "";
+      menuItemIndex = (menuItemIndex + 1) % results.length;
+      const newElement = menu.children[menuItemIndex] as HTMLDivElement;
+      newElement.style.backgroundColor = HIGHLIGHTED_COLOR;
+    }
     e.preventDefault();
     e.stopPropagation();
-  } else if (e.key === "ArrowUp" && results.length > 0) {
-    const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
-    oldElement.style.backgroundColor = "";
-    menuItemIndex = (menuItemIndex - 1 + results.length) % results.length;
-    const newElement = menu.children[menuItemIndex] as HTMLDivElement;
-    newElement.style.backgroundColor = HIGHLIGHTED_COLOR;
+  } else if (e.key === "ArrowUp") {
+    if (results.length > 0) {
+      const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
+      oldElement.style.backgroundColor = "";
+      menuItemIndex = (menuItemIndex - 1 + results.length) % results.length;
+      const newElement = menu.children[menuItemIndex] as HTMLDivElement;
+      newElement.style.backgroundColor = HIGHLIGHTED_COLOR;
+    }
     e.preventDefault();
     e.stopPropagation();
   }
