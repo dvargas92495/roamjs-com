@@ -1,6 +1,8 @@
 import emoji from "node-emoji";
 import userEvent from "@testing-library/user-event";
 
+const HIGHLIGHTED_COLOR = "#0000001c";
+
 let searchText = "";
 let emojiOn = false;
 let menuItemIndex = 0;
@@ -77,7 +79,7 @@ const createMenuElement = (size: number) => (
   container.style.padding = "6px";
   container.style.cursor = "pointer";
   if (i % size === menuItemIndex) {
-    container.style.backgroundColor = "#0000001c";
+    container.style.backgroundColor = HIGHLIGHTED_COLOR;
   }
 
   const result = document.createElement("div");
@@ -94,8 +96,19 @@ const createMenuElement = (size: number) => (
 const emojiKeyDownListener = (e: KeyboardEvent) => {
   if (e.key === "Enter") {
     insertEmoji(e.target as HTMLTextAreaElement, results[menuItemIndex].emoji);
-  } else {
-    console.log(e.key);
+    e.preventDefault();
+  } else if(e.key === "ArrowDown") {
+    const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
+    oldElement.style.backgroundColor = "";
+    menuItemIndex = (menuItemIndex + 1) % results.length;
+    const newElement = menu.children[menuItemIndex] as HTMLDivElement;
+    newElement.style.backgroundColor = HIGHLIGHTED_COLOR;
+  } else if(e.key === "ArrowUp") {
+    const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
+    oldElement.style.backgroundColor = "";
+    menuItemIndex = (menuItemIndex - 1) % results.length;
+    const newElement = menu.children[menuItemIndex] as HTMLDivElement;
+    newElement.style.backgroundColor = HIGHLIGHTED_COLOR;
   }
 };
 
