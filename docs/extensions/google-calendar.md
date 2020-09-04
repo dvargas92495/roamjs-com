@@ -9,6 +9,10 @@ The script supports the following configuration attributes, to be added in the `
 - `Google Calendar` - (Required) This is the calendar ID that the extension will use to query for events. It's usually your gmail address, such as `dvargas92495@gmail.com`.
 - `Include Event Link` - (Optional) Set to `true` if you would like to hyperlink the event summary with a link to the google calendar event. Note, because there are more characters to be typed it's a slower operation.
 
+Here's an example configuration page:
+
+![](../images/google-calendar-config.png)
+
 In any page, create a `Import Google Calendar` button by typing in `{{import google calendar}}` (case-insensitive) in a block. Upon clicking the button, the extension will clear the slash command and fill the page in with the events you have scheduled for that day in the following format:
 
 > [Summary] ([Start Time (hh:mm am)] - [End Time (hh:mm pm)]) [ - link to Zoom/Meet]
@@ -36,5 +40,5 @@ document.getElementsByTagName("head")[0].appendChild(s);
 ### Demo
 
 <video width="320" height="240" controls>
-  <source src="../videos/google-calendar.mp4" type="video/mp4">
+  <source src="./videos/google-calendar.mp4" type="video/mp4">
 </video>
