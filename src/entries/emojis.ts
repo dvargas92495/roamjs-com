@@ -95,10 +95,17 @@ const createMenuElement = (size: number) => (
 
 const emojiKeyDownListener = (e: KeyboardEvent) => {
   if (e.key === "Enter") {
-    insertEmoji(e.target as HTMLTextAreaElement, results[menuItemIndex].emoji);
-    e.preventDefault();
-    e.stopPropagation();
-  } else if(e.key === "ArrowDown") {
+    if (results.length == 0) {
+      turnOffEmoji();
+    } else {
+      insertEmoji(
+        e.target as HTMLTextAreaElement,
+        results[menuItemIndex].emoji
+      );
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  } else if (e.key === "ArrowDown") {
     const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
     oldElement.style.backgroundColor = "";
     menuItemIndex = (menuItemIndex + 1) % results.length;
@@ -106,7 +113,7 @@ const emojiKeyDownListener = (e: KeyboardEvent) => {
     newElement.style.backgroundColor = HIGHLIGHTED_COLOR;
     e.preventDefault();
     e.stopPropagation();
-  } else if(e.key === "ArrowUp") {
+  } else if (e.key === "ArrowUp") {
     const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
     oldElement.style.backgroundColor = "";
     menuItemIndex = (menuItemIndex - 1 + results.length) % results.length;
