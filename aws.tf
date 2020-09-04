@@ -17,7 +17,8 @@ provider "aws" {
 }
 
 module "aws-static-site" {
-  source  = "github.com/dvargas92495/aws-static-site"
+  source  = "dvargas92495/static-site/aws"
+  version = "1.0.0"
 
   domain = "roam.davidvargas.me"
   secret = var.secret
