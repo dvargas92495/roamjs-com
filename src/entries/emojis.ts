@@ -105,7 +105,7 @@ const emojiKeyDownListener = (e: KeyboardEvent) => {
       e.preventDefault();
       e.stopPropagation();
     }
-  } else if (e.key === "ArrowDown") {
+  } else if (e.key === "ArrowDown" && results.length > 0) {
     const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
     oldElement.style.backgroundColor = "";
     menuItemIndex = (menuItemIndex + 1) % results.length;
@@ -113,7 +113,7 @@ const emojiKeyDownListener = (e: KeyboardEvent) => {
     newElement.style.backgroundColor = HIGHLIGHTED_COLOR;
     e.preventDefault();
     e.stopPropagation();
-  } else if (e.key === "ArrowUp") {
+  } else if (e.key === "ArrowUp" && results.length > 0) {
     const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
     oldElement.style.backgroundColor = "";
     menuItemIndex = (menuItemIndex - 1 + results.length) % results.length;
