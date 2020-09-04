@@ -96,19 +96,21 @@ const createMenuElement = (size: number) => (
 const emojiKeyDownListener = (e: KeyboardEvent) => {
   if (e.key === "Enter") {
     insertEmoji(e.target as HTMLTextAreaElement, results[menuItemIndex].emoji);
-    e.preventDefault();
+    e.stopPropagation();
   } else if(e.key === "ArrowDown") {
     const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
     oldElement.style.backgroundColor = "";
     menuItemIndex = (menuItemIndex + 1) % results.length;
     const newElement = menu.children[menuItemIndex] as HTMLDivElement;
     newElement.style.backgroundColor = HIGHLIGHTED_COLOR;
+    e.stopPropagation();
   } else if(e.key === "ArrowUp") {
     const oldElement = menu.children[menuItemIndex] as HTMLDivElement;
     oldElement.style.backgroundColor = "";
     menuItemIndex = (menuItemIndex - 1) % results.length;
     const newElement = menu.children[menuItemIndex] as HTMLDivElement;
     newElement.style.backgroundColor = HIGHLIGHTED_COLOR;
+    e.stopPropagation();
   }
 };
 
