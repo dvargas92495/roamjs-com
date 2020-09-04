@@ -1,9 +1,11 @@
-import emoji, { search } from "node-emoji";
+import emoji from "node-emoji";
 import userEvent from "@testing-library/user-event";
 
 let searchText = "";
 let emojiOn = false;
 let menuItemIndex = 0;
+let results: emoji.Emoji[] = [];
+let currentTarget: HTMLTextAreaElement = document.createElement("textarea");
 
 // The following styling is ripped from Roam's menu style
 let menu = document.createElement("div");
@@ -28,7 +30,10 @@ const clearMenu = () => {
 };
 
 const turnOnEmoji = () => {
-  const parentDiv = document.activeElement.parentElement as HTMLDivElement;
+  currentTarget = document.activeElement as HTMLTextAreaElement;
+  currentTarget.addEventListener("keypress", emojiKeyPressListener);
+
+  const parentDiv = currentTarget.parentElement as HTMLDivElement;
   parentDiv.appendChild(menu);
   emojiOn = true;
   searchText = ":";
@@ -38,11 +43,14 @@ const turnOnEmoji = () => {
 const turnOffEmoji = () => {
   if (emojiOn) {
     const parentDiv = document.activeElement.parentElement as HTMLDivElement;
-    parentDiv.removeChild(menu);
-    clearMenu();
+    if (parentDiv.contains(menu)) {
+      parentDiv.removeChild(menu);
+      clearMenu();
+    }
     emojiOn = false;
   }
   searchText = "";
+  currentTarget.removeEventListener("keypress", emojiKeyPressListener);
 };
 
 const insertEmoji = (target: HTMLTextAreaElement, emojiCode: string) => {
@@ -83,19 +91,18 @@ const createMenuElement = (size: number) => (
   menu.appendChild(container);
 };
 
+const emojiKeyPressListener = (e: KeyboardEvent) => {
+  if (e.key === "Enter") {
+    insertEmoji(e.target as HTMLTextAreaElement, results[menuItemIndex].emoji);
+  } else {
+    console.log(e.key);
+  }
+};
+
 const searchEmojis = (text: string) => {
-  const results = emoji.search(text).slice(0, 5);
+  results = emoji.search(text).slice(0, 5);
   clearMenu();
   results.forEach(createMenuElement(results.length));
-
-  const target = document.activeElement as HTMLTextAreaElement;
-  target.onkeypress = (e) => {
-    if (e.key === "Enter") {
-      insertEmoji(target, results[menuItemIndex].emoji);
-    } else {
-      console.log(e.key);
-    }
-  };
 };
 
 const inputEventListener = async (e: InputEvent) => {
