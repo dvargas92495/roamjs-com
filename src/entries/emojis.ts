@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 let searchText = "";
 let emojiOn = false;
+let menuItemIndex = 0;
 
 // The following styling is ripped from Roam's menu style
 let menu = document.createElement("div");
@@ -31,6 +32,7 @@ const turnOnEmoji = () => {
   parentDiv.appendChild(menu);
   emojiOn = true;
   searchText = ":";
+  menuItemIndex = 0;
 };
 
 const turnOffEmoji = () => {
@@ -55,7 +57,10 @@ const insertEmoji = (target: HTMLTextAreaElement, emojiCode: string) => {
   turnOffEmoji();
 };
 
-const createMenuElement = ({ emoji, key }: emoji.Emoji) => {
+const createMenuElement = (size: number) => (
+  { emoji, key }: emoji.Emoji,
+  i: number
+) => {
   const title = `${key} ${emoji}`;
   const container = document.createElement("div");
   container.title = title;
@@ -63,6 +68,9 @@ const createMenuElement = ({ emoji, key }: emoji.Emoji) => {
   container.style.borderRadius = "2px";
   container.style.padding = "6px";
   container.style.cursor = "pointer";
+  if (i % size === menuItemIndex) {
+    container.style.backgroundColor = "#0000001c";
+  }
 
   const result = document.createElement("div");
   result.className = "rm-autocomplete-result";
@@ -74,10 +82,20 @@ const createMenuElement = ({ emoji, key }: emoji.Emoji) => {
 
   menu.appendChild(container);
 };
+
 const searchEmojis = (text: string) => {
-  const results = emoji.search(text);
+  const results = emoji.search(text).slice(0, 5);
   clearMenu();
-  results.slice(0, 5).forEach(createMenuElement);
+  results.forEach(createMenuElement(results.length));
+
+  const target = document.activeElement as HTMLTextAreaElement;
+  target.onkeypress = (e) => {
+    if (e.key === "Enter") {
+      insertEmoji(target, results[menuItemIndex].emoji);
+    } else {
+      console.log(e.key);
+    }
+  };
 };
 
 const inputEventListener = async (e: InputEvent) => {
