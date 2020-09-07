@@ -1,5 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { waitFor } from "@testing-library/dom";
+import { waitFor, fireEvent } from "@testing-library/dom";
 
 export const asyncType = async (text: string) =>
   await userEvent.type(document.activeElement, text, {
@@ -10,6 +10,26 @@ export const waitForCallback = (text: string) => () => {
   const textArea = document.activeElement as HTMLTextAreaElement;
   if (textArea.value.toUpperCase() !== text.toUpperCase()) {
     throw new Error("Typing not complete");
+  }
+};
+
+export const pushBullets = async (bullets: string[]) => {
+  for (const index in bullets) {
+    const bullet = bullets[index];
+    await asyncType(bullet);
+    await waitFor(waitForCallback(bullet));
+
+    // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
+    // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
+    const enterObj = {
+      key: "Enter",
+      keyCode: 13,
+      which: 13,
+    };
+    await fireEvent.keyDown(document.activeElement, enterObj);
+    await fireEvent.keyPress(document.activeElement, enterObj);
+    await fireEvent.keyUp(document.activeElement, enterObj);
+    await waitFor(waitForCallback(""));
   }
 };
 

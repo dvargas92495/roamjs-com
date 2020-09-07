@@ -1,5 +1,5 @@
 import { fireEvent, waitFor } from "@testing-library/dom";
-import { addButtonListener, waitForCallback, asyncType } from "../entry-helpers";
+import { addButtonListener, waitForCallback, asyncType, pushBullets } from "../entry-helpers";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
@@ -88,23 +88,7 @@ const importGoogleCalendar = async () => {
           e.end.dateTime
         ).toLocaleTimeString()})${meetLink}${zoomLink}`;
       }) as string[];
-      for (const index in bullets) {
-        const bullet = bullets[index];
-        await asyncType(bullet);
-        await waitFor(waitForCallback(bullet));
-
-        // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
-        // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
-        const enterObj = {
-          key: "Enter",
-          keyCode: 13,
-          which: 13,
-        };
-        await fireEvent.keyDown(document.activeElement, enterObj);
-        await fireEvent.keyPress(document.activeElement, enterObj);
-        await fireEvent.keyUp(document.activeElement, enterObj);
-        await waitFor(waitForCallback(""));
-      }
+      await pushBullets(bullets);
     });
   });
 };
