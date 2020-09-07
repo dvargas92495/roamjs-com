@@ -6,6 +6,15 @@ const personalAccessToken = process.env.GITHUB_TOKEN || "";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const { repository, project, column } = event.queryStringParameters;
+  if (!repository) {
+    return userError("repository is required");
+  }
+  if (!project) {
+    return userError("project is required");
+  }
+  if (!column) {
+    return userError("column is required");
+  }
   const opts = getGithubOpts(personalAccessToken);
   return axios(
     `https://api.github.com/repos/dvargas92495/${repository}/projects`,

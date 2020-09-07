@@ -10,6 +10,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.LAMBDA_AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: us-east-1
   GOOGLE_CALENDAR_API_KEY: ${{ secrets.GOOGLE_CALENDAR_API_KEY }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   deploy:

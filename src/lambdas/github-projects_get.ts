@@ -1,11 +1,14 @@
 import axios from "axios";
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { wrapAxios, getGithubOpts } from "../lambda-helpers";
+import { wrapAxios, getGithubOpts, userError } from "../lambda-helpers";
 
 const personalAccessToken = process.env.GITHUB_TOKEN || "";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const { repository } = event.queryStringParameters;
+  if (!repository) {
+    return userError("repository is required");
+  }
   const opts = getGithubOpts(personalAccessToken);
   return wrapAxios(
     axios(
