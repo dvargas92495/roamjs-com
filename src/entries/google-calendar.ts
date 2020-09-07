@@ -1,5 +1,5 @@
 import { fireEvent, waitFor } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
+import { addButtonListener, waitForCallback, asyncType, pushBullets } from "../entry-helpers";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
@@ -10,18 +10,6 @@ declare global {
     };
   }
 }
-
-const asyncType = async (text: string) =>
-  await userEvent.type(document.activeElement, text, {
-    skipClick: true,
-  });
-
-const waitForCallback = (text: string) => () => {
-  const textArea = document.activeElement as HTMLTextAreaElement;
-  if (textArea.value.toUpperCase() !== text.toUpperCase()) {
-    throw new Error("Typing not complete");
-  }
-};
 
 const importGoogleCalendar = async () => {
   const pageResults = window.roamAlphaAPI.q(
@@ -100,43 +88,9 @@ const importGoogleCalendar = async () => {
           e.end.dateTime
         ).toLocaleTimeString()})${meetLink}${zoomLink}`;
       }) as string[];
-      for (const index in bullets) {
-        const bullet = bullets[index];
-        await asyncType(bullet);
-        await waitFor(waitForCallback(bullet));
-
-        // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
-        // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
-        const enterObj = {
-          key: "Enter",
-          keyCode: 13,
-          which: 13,
-        };
-        await fireEvent.keyDown(document.activeElement, enterObj);
-        await fireEvent.keyPress(document.activeElement, enterObj);
-        await fireEvent.keyUp(document.activeElement, enterObj);
-        await waitFor(waitForCallback(""));
-      }
+      await pushBullets(bullets);
     });
   });
 };
 
-const clickEventListener = async (e: MouseEvent) => {
-  const target = e.target as HTMLElement;
-  if (
-    target &&
-    target.tagName === "BUTTON" &&
-    target.innerText.toUpperCase() === GOOGLE_COMMAND.toUpperCase()
-  ) {
-    const divContainer = target.parentElement.parentElement
-      .parentElement as HTMLDivElement;
-    await userEvent.click(divContainer);
-    await waitFor(waitForCallback(`{{${GOOGLE_COMMAND}}}`));
-    const textArea = document.activeElement as HTMLTextAreaElement;
-    await userEvent.clear(textArea);
-    await waitFor(waitForCallback(""));
-    importGoogleCalendar();
-  }
-};
-
-document.addEventListener("click", clickEventListener);
+addButtonListener(GOOGLE_COMMAND, importGoogleCalendar);
