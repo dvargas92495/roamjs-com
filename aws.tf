@@ -33,6 +33,10 @@ module "aws-serverless-backend" {
 
     api_name = "roam-js-extensions"
     paths = [
+        "github-cards/get",
+        "github-issues/get",
+        "github-projects/get",
+        "github-repositories/get",
         "google-calendar/get"
     ]
     tags = {

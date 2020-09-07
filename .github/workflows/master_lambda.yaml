@@ -9,6 +9,7 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.LAMBDA_AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.LAMBDA_AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: us-east-1
+  GOOGLE_CALENDAR_API_KEY: ${{ secrets.GOOGLE_CALENDAR_API_KEY }}
 
 jobs:
   deploy:
@@ -19,8 +20,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.16.1
-      - name: Set Environment
-        run: echo "GOOGLE_CALENDAR_API_KEY=${{ secrets.GOOGLE_CALENDAR_API_KEY }}" > .env.local
       - name: install
         run: npm install
       - name: Build
