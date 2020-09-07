@@ -30,11 +30,13 @@ export const serverError = (body: string) => ({
   headers,
 });
 
-export const getGithubOpts = (token: string) => ({
+const personalAccessToken = process.env.GITHUB_PERSONAL_ACCESS_TOKEN || "";
+
+export const getGithubOpts = () => ({
   headers: {
     Accept: "application/vnd.github.inertia-preview+json",
-    Authorization: `Basic ${Buffer.from(`dvargas92495:${token}`).toString(
-      "base64"
-    )}`,
+    Authorization: `Basic ${Buffer.from(
+      `dvargas92495:${personalAccessToken}`
+    ).toString("base64")}`,
   },
 });

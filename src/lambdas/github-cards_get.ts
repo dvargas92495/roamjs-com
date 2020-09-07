@@ -2,8 +2,6 @@ import axios from "axios";
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { getGithubOpts, userError, wrapAxios } from "../lambda-helpers";
 
-const personalAccessToken = process.env.GITHUB_TOKEN || "";
-
 export const handler = async (event: APIGatewayProxyEvent) => {
   const { repository, project, column } = event.queryStringParameters;
   if (!repository) {
@@ -15,7 +13,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   if (!column) {
     return userError("column is required");
   }
-  const opts = getGithubOpts(personalAccessToken);
+  const opts = getGithubOpts();
   return axios(
     `https://api.github.com/repos/dvargas92495/${repository}/projects`,
     opts
