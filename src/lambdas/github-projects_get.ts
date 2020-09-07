@@ -14,7 +14,3 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     )
   );
 };
-//@ts-ignore
-handler({ queryStringParameters: { repository: "roam-js-extensions" } })
-  .then((e) => console.log(e.body))
-  .catch((e) => console.log(e.message));
