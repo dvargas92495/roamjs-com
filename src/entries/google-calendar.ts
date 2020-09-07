@@ -1,5 +1,5 @@
 import { fireEvent, waitFor } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
+import { addButtonListener, waitForCallback, asyncType } from "../entry-helpers";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
@@ -10,18 +10,6 @@ declare global {
     };
   }
 }
-
-const asyncType = async (text: string) =>
-  await userEvent.type(document.activeElement, text, {
-    skipClick: true,
-  });
-
-const waitForCallback = (text: string) => () => {
-  const textArea = document.activeElement as HTMLTextAreaElement;
-  if (textArea.value.toUpperCase() !== text.toUpperCase()) {
-    throw new Error("Typing not complete");
-  }
-};
 
 const importGoogleCalendar = async () => {
   const pageResults = window.roamAlphaAPI.q(
@@ -121,22 +109,4 @@ const importGoogleCalendar = async () => {
   });
 };
 
-const clickEventListener = async (e: MouseEvent) => {
-  const target = e.target as HTMLElement;
-  if (
-    target &&
-    target.tagName === "BUTTON" &&
-    target.innerText.toUpperCase() === GOOGLE_COMMAND.toUpperCase()
-  ) {
-    const divContainer = target.parentElement.parentElement
-      .parentElement as HTMLDivElement;
-    await userEvent.click(divContainer);
-    await waitFor(waitForCallback(`{{${GOOGLE_COMMAND}}}`));
-    const textArea = document.activeElement as HTMLTextAreaElement;
-    await userEvent.clear(textArea);
-    await waitFor(waitForCallback(""));
-    importGoogleCalendar();
-  }
-};
-
-document.addEventListener("click", clickEventListener);
+addButtonListener(GOOGLE_COMMAND, importGoogleCalendar);

@@ -1,7 +1,12 @@
 import userEvent from "@testing-library/user-event";
 import { waitFor } from "@testing-library/dom";
 
-const waitForCallback = (text: string) => () => {
+export const asyncType = async (text: string) =>
+  await userEvent.type(document.activeElement, text, {
+    skipClick: true,
+  });
+
+export const waitForCallback = (text: string) => () => {
   const textArea = document.activeElement as HTMLTextAreaElement;
   if (textArea.value.toUpperCase() !== text.toUpperCase()) {
     throw new Error("Typing not complete");
