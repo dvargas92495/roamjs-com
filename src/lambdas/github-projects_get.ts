@@ -1,16 +1,20 @@
 import axios from "axios";
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { wrapAxios, githubRequestHeaders } from "../lambda-helpers";
+import { wrapAxios, getGithubOpts } from "../lambda-helpers";
 
 const personalAccessToken = process.env.GITHUB_TOKEN || "";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const { repository } = event.queryStringParameters;
-  const headers = githubRequestHeaders(personalAccessToken);
+  const opts = getGithubOpts(personalAccessToken);
   return wrapAxios(
     axios(
       `https://api.github.com/repos/dvargas92495/${repository}/projects`,
-      { headers }
+      opts
     )
   );
 };
+//@ts-ignore
+handler({ queryStringParameters: { repository: "roam-js-extensions" } })
+  .then((e) => console.log(e.body))
+  .catch((e) => console.log(e.message));

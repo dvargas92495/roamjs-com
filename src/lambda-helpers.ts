@@ -30,7 +30,7 @@ export const serverError = (body: string) => ({
   headers,
 });
 
-export const githubRequestHeaders = (token: string) => ({
+export const getGithubOpts = (token: string) => ({
   headers: {
     Accept: "application/vnd.github.inertia-preview+json",
     Authorization: `Basic ${Buffer.from(`dvargas92495:${token}`).toString(

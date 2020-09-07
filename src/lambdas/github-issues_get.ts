@@ -1,9 +1,11 @@
 import axios from "axios";
-import { wrapAxios, githubRequestHeaders } from "../lambda-helpers";
+import { wrapAxios, getGithubOpts } from "../lambda-helpers";
 
 const personalAccessToken = process.env.GITHUB_TOKEN || "";
 
 export const handler = async () => {
-  const headers = githubRequestHeaders(personalAccessToken);
-  return wrapAxios(axios(`https://api.github.com/repos/issues`, { headers }));
+  const opts = getGithubOpts(personalAccessToken);
+  return wrapAxios(axios(`https://api.github.com/issues`, opts));
 };
+
+handler().then(e => console.log(e.body)).catch(e => console.log(e.message));
