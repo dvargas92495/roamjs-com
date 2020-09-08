@@ -41,9 +41,15 @@ const importGoogleCalendar = async () => {
     .toISOString()
     .substring(0, timeMin.toISOString().length - 1)}${offsetString}`;
 
-  fetch(
-    `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${calendarId}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
-  ).then((r) => {
+  const googleFetch =
+    config["Oauth"]?.trim() === "true"
+      ? fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${timeMin}&timeMax=${timeMax}&orderBy=startTime&singleEvents=true`
+        )
+      : fetch(
+          `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${calendarId}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
+        );
+  googleFetch.then((r) => {
     if (!r.ok) {
       return r
         .text()
