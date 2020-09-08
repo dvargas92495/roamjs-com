@@ -1,4 +1,9 @@
-import { addButtonListener, asyncType, pushBullets, getConfigFromPage } from "../entry-helpers";
+import {
+  addButtonListener,
+  asyncType,
+  pushBullets,
+  getConfigFromPage,
+} from "../entry-helpers";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
@@ -11,7 +16,7 @@ declare global {
 }
 
 const importGoogleCalendar = async () => {
-  const config = getConfigFromPage('google-calendar');
+  const config = getConfigFromPage("google-calendar");
 
   const calendarId = config["Google Calendar"]?.trim();
   if (!calendarId) {
@@ -40,11 +45,15 @@ const importGoogleCalendar = async () => {
     `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${calendarId}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
   ).then((r) => {
     if (!r.ok) {
-      return r.text().then((errorMessage) => 
-        asyncType(
-          `Error for calendar ${calendarId}: ${errorMessage}`
-        )
-      );
+      return r
+        .text()
+        .then((errorMessage) =>
+          errorMessage === "Request failed with status code 404"
+            ? asyncType(
+                `Error for calendar ${calendarId}: Could not find calendar or it's not public. For more information on how to make it public, [visit this page](https://roam.davidvargas.me/extensions/google-calendar)`
+              )
+            : asyncType(`Error for calendar ${calendarId}: ${errorMessage}`)
+        );
     }
     return r.json().then(async (r) => {
       const events = r.items;
