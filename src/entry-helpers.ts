@@ -70,7 +70,7 @@ const clickEventListener = (
     const divContainer = target.parentElement.parentElement
       .parentElement as HTMLDivElement;
     await userEvent.click(divContainer);
-    await waitFor(waitForCallback(`{{${targetCommand}}}`));
+    await waitFor(waitForCallback(`{{${target.innerText}}}`));
     const textArea = document.activeElement as HTMLTextAreaElement;
     await userEvent.clear(textArea);
     await waitFor(waitForCallback(""));
