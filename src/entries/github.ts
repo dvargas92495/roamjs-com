@@ -62,7 +62,7 @@ const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
         },
       })
     : fetch(
-        `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-issues?username=${username}`
+        `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-repos?username=${username}`
       );
   githubFetch
     .then((r) => {
