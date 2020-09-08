@@ -46,9 +46,9 @@ const importGithubIssues = async () => {
     .catch((e) => asyncType(`Error: ${e.message}`));
 };
 
-const importGithubRepos = async () => {
+const importGithubRepos = async (buttonConfig: {[key: string]: string}) => {
   const config = getConfigFromPage("github");
-  const username = config["Username"];
+  const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   if (!username) {
     await asyncType("Error: Missing required parameter username!");
     return;
@@ -80,7 +80,7 @@ const importGithubRepos = async () => {
           await asyncType("No repos in your account!");
           return;
         }
-        const bullets = issues.map((i: any) => `[${i.title}](${i.html_url})`);
+        const bullets = issues.map((i: any) => `[[${i.name}]]`);
         await pushBullets(bullets);
       });
     })

@@ -56,14 +56,17 @@ export const pushBullets = async (bullets: string[]) => {
 
 const clickEventListener = (
   targetCommand: string,
-  callback: () => void
+  callback: (buttonConfig?: {[key: string]: string}) => void
 ) => async (e: MouseEvent) => {
   const target = e.target as HTMLElement;
   if (
     target &&
     target.tagName === "BUTTON" &&
-    target.innerText.toUpperCase() === targetCommand.toUpperCase()
+    target.innerText.toUpperCase().trim().startsWith(targetCommand.toUpperCase())
   ) {
+    const restOfButtonText = targetCommand.substring(targetCommand.length + 1).split(' ');
+    const buttonConfig = restOfButtonText.length > 1 ? {[restOfButtonText[0].toUpperCase()]: restOfButtonText[1]} : {};
+
     const divContainer = target.parentElement.parentElement
       .parentElement as HTMLDivElement;
     await userEvent.click(divContainer);
@@ -71,13 +74,13 @@ const clickEventListener = (
     const textArea = document.activeElement as HTMLTextAreaElement;
     await userEvent.clear(textArea);
     await waitFor(waitForCallback(""));
-    callback();
+    callback(buttonConfig);
   }
 };
 
 export const addButtonListener = (
   targetCommand: string,
-  callback: () => void
+  callback: (buttonConfig?: {[key: string]: string}) => void
 ) => {
   const listener = clickEventListener(targetCommand, callback);
   document.addEventListener("click", listener);
