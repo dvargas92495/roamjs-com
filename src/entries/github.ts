@@ -13,18 +13,17 @@ const importGithubIssues = async () => {
     return;
   }
   const token = config["Token"];
-  const githubFetch =
-    token
-      ? fetch(`https://api.github.com/repos`, {
-          headers: {
-            Authorization: `Basic ${Buffer.from(
-              `${username}:${token}`
-            ).toString("base64")}`,
-          },
-        })
-      : fetch(
-          `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-issues?username=${username}`
-        );
+  const githubFetch = token
+    ? fetch(`https://api.github.com/repos`, {
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${username}:${token}`).toString(
+            "base64"
+          )}`,
+        },
+      })
+    : fetch(
+        `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-issues?username=${username}`
+      );
   githubFetch
     .then((r) => {
       if (!r.ok) {
@@ -46,26 +45,26 @@ const importGithubIssues = async () => {
     .catch((e) => asyncType(`Error: ${e.message}`));
 };
 
-const importGithubRepos = async (buttonConfig: {[key: string]: string}) => {
+const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
   const config = getConfigFromPage("github");
+  console.log(buttonConfig);
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   if (!username) {
     await asyncType("Error: Missing required parameter username!");
     return;
   }
   const token = config["Token"];
-  const githubFetch =
-    token
-      ? fetch(`https://api.github.com/users/${username}/repos`, {
-          headers: {
-            Authorization: `Basic ${Buffer.from(
-              `${username}:${token}`
-            ).toString("base64")}`,
-          },
-        })
-      : fetch(
-          `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-issues?username=${username}`
-        );
+  const githubFetch = token
+    ? fetch(`https://api.github.com/users/${username}/repos`, {
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${username}:${token}`).toString(
+            "base64"
+          )}`,
+        },
+      })
+    : fetch(
+        `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-issues?username=${username}`
+      );
   githubFetch
     .then((r) => {
       if (!r.ok) {
@@ -85,7 +84,7 @@ const importGithubRepos = async (buttonConfig: {[key: string]: string}) => {
       });
     })
     .catch((e) => asyncType(`Error: ${e.message}`));
-}
+};
 
 addButtonListener("Import Github Cards", () => {});
 addButtonListener("Import Github Issues", importGithubIssues);
