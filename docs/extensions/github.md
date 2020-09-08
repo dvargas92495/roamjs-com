@@ -4,7 +4,10 @@ The Github to Roam Integration allows users to import various types of data from
 
 ### Usage
 
-The script is not configurable.
+The script supports the following configuration attributes, to be added in the `[[roam/js/github]]` page:
+
+- `Username` - (Optional) By default, the extension calls the api with my username and token. If you would like to make calls under your username, set this attribute with token below. This give you access to your private data and is called straight from the Roam frontend.
+- `Token` - (Optional) Set with Username above to call GitHub's api as another user. [See this page](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) for documentation on how to create a personal access token. The token must have repo scope access. 
 
 In any page, create a `Import Github Issues` button by typing in `{{import github issues}}` (case-insensitive) in a block. Upon clicking the button, the extension will clear the slash command and fill the page in with the issues you have assigned to you in the following gormat:
 

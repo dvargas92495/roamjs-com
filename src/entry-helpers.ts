@@ -13,6 +13,27 @@ export const waitForCallback = (text: string) => () => {
   }
 };
 
+export const getConfigFromPage = (page: string) => {
+  const pageResults = window.roamAlphaAPI.q(
+    `[:find (pull ?e [*]) :where [?e :node/title "roam/js/${page}"] ]`
+  );
+  if (pageResults.length === 0) {
+    return {};
+  }
+
+  const configurationAttrRefs = pageResults[0][0].attrs.map(
+    (a: any) => a[2].source[1]
+  );
+  const entries = configurationAttrRefs.map((r: string) =>
+    window.roamAlphaAPI
+      .q(
+        `[:find (pull ?e [:block/string]) :where [?e :block/uid "${r}"] ]`
+      )[0][0]
+      .string.split("::")
+  );
+  return Object.fromEntries(entries);
+}
+
 export const pushBullets = async (bullets: string[]) => {
   for (const index in bullets) {
     const bullet = bullets[index];
