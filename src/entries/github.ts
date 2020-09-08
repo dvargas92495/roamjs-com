@@ -47,7 +47,6 @@ const importGithubIssues = async () => {
 
 const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
   const config = getConfigFromPage("github");
-  console.log(buttonConfig);
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   if (!username) {
     await asyncType("Error: Missing required parameter username!");

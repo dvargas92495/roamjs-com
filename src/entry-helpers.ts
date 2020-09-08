@@ -64,7 +64,7 @@ const clickEventListener = (
     target.tagName === "BUTTON" &&
     target.innerText.toUpperCase().trim().startsWith(targetCommand.toUpperCase())
   ) {
-    const restOfButtonText = targetCommand.substring(targetCommand.length + 1).split(' ');
+    const restOfButtonText = target.innerText.substring(targetCommand.length + 1).split(' ');
     const buttonConfig = restOfButtonText.length > 1 ? {[restOfButtonText[0].toUpperCase()]: restOfButtonText[1]} : {};
 
     const divContainer = target.parentElement.parentElement
