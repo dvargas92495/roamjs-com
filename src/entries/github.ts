@@ -46,7 +46,7 @@ const importGithubIssues = async () => {
     .catch((e) => asyncType(`Error: ${e.message}`));
 };
 
-const importGithubRepos = () => {\
+const importGithubRepos = async () => {
   const config = getConfigFromPage("github");
   const username = config["Username"];
   if (!username) {
