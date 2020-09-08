@@ -9,6 +9,6 @@ export const handler = async (event: APIGatewayEvent) => {
   }
   const opts = getGithubOpts();
   return wrapAxios(
-    axios(`https://api.github.com/repos/users/${username}/repos`, opts)
+    axios(`https://api.github.com/users/${username}/repos`, opts)
   );
 };
