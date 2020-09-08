@@ -1,5 +1,4 @@
-import { fireEvent, waitFor } from "@testing-library/dom";
-import { addButtonListener, waitForCallback, asyncType, pushBullets } from "../entry-helpers";
+import { addButtonListener, asyncType, pushBullets, getConfigFromPage } from "../entry-helpers";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
@@ -12,31 +11,13 @@ declare global {
 }
 
 const importGoogleCalendar = async () => {
-  const pageResults = window.roamAlphaAPI.q(
-    '[:find (pull ?e [*]) :where [?e :node/title "roam/js/google-calendar"] ]'
-  );
-  if (pageResults.length === 0) {
-    await asyncType(
-      "Error: Could not find the [[roam/js/google-calendar]] page. Please add this page and configure the Google Calendar attribute"
-    );
-    return;
-  }
-
-  const configurationAttrRefs = pageResults[0][0].attrs.map(
-    (a: any) => a[2].source[1]
-  );
-  const entries = configurationAttrRefs.map((r: string) =>
-    window.roamAlphaAPI
-      .q(
-        `[:find (pull ?e [:block/string]) :where [?e :block/uid "${r}"] ]`
-      )[0][0]
-      .string.split("::")
-  );
-  const config = Object.fromEntries(entries);
+  const config = getConfigFromPage('google-calendar');
 
   const calendarId = config["Google Calendar"]?.trim();
   if (!calendarId) {
-    console.warn("Could not find calendar ID!");
+    await asyncType(
+      `Error: Could not find the required "Google Calendar" attribute configured in the [[roam/js/google-calendar]] page.`
+    );
     return;
   }
   const includeLink = config["Include Event Link"]?.trim() === "true";
