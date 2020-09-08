@@ -13,6 +13,10 @@ Here's an example configuration page:
 
 ![](../images/google-calendar-config.png)
 
+Be sure to make your calendar publicly accessible, since it needs to be queryable by the extension's api token:
+
+![](../images/google-calendar-permissions.png)
+
 In any page, create a `Import Google Calendar` button by typing in `{{import google calendar}}` (case-insensitive) in a block. Upon clicking the button, the extension will clear the button and fill the page in with the events you have scheduled for that day in the following format:
 
 > [Summary] ([Start Time (hh:mm am)] - [End Time (hh:mm pm)]) [ - link to Zoom/Meet]
