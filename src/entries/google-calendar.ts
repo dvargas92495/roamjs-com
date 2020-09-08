@@ -47,13 +47,15 @@ const importGoogleCalendar = async () => {
     if (!r.ok) {
       return r
         .text()
-        .then((errorMessage) =>
-          errorMessage === "Request failed with status code 404"
+        .then((errorMessage) => {
+          console.log(errorMessage);
+          console.log(errorMessage === "Request failed with status code 404");
+          return errorMessage === "Request failed with status code 404"
             ? asyncType(
                 `Error for calendar ${calendarId}: Could not find calendar or it's not public. For more information on how to make it public, [visit this page](https://roam.davidvargas.me/extensions/google-calendar)`
               )
             : asyncType(`Error for calendar ${calendarId}: ${errorMessage}`)
-        );
+            });
     }
     return r.json().then(async (r) => {
       const events = r.items;
