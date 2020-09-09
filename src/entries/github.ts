@@ -56,9 +56,9 @@ const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
   const githubFetch = token
     ? fetch(`https://api.github.com/users/${username}/repos`, {
         headers: {
-          Authorization: `Basic ${Buffer.from(`${config["Username"]}:${token}`).toString(
-            "base64"
-          )}`,
+          Authorization: `Basic ${Buffer.from(
+            `${config["Username"]}:${token}`
+          ).toString("base64")}`,
         },
       })
     : fetch(
@@ -99,9 +99,10 @@ const importGithubProjects = async (buttonConfig: {
   const githubFetch = token
     ? fetch(`https://api.github.com/repos/${repository}/projects`, {
         headers: {
-          Authorization: `Basic ${Buffer.from(`${config["Username"]}:${token}`).toString(
-            "base64"
-          )}`,
+          Authorization: `Basic ${Buffer.from(
+            `${config["Username"]}:${token}`
+          ).toString("base64")}`,
+          Accept: "application/vnd.github.inertia-preview+json",
         },
       })
     : fetch(
@@ -128,7 +129,51 @@ const importGithubProjects = async (buttonConfig: {
     .catch((e) => asyncType(`Error: ${e.message}`));
 };
 
-addButtonListener("Import Github Cards", () => {});
+const importGithubCards = (buttonConfig: {
+  [key: string]: string;
+}) => {
+  const config = getConfigFromPage("github");
+  const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
+  const pageTitle = document.getElementsByClassName(
+    "rm-title-display"
+  )[0] as HTMLHeadingElement;
+  const repoName = buttonConfig.IN ? buttonConfig.IN : pageTitle.innerText;
+  const repository = `${username}/${repoName}`;
+  const token = config["Token"];
+  const githubFetch = token
+  ? fetch(`https://api.github.com/users/${username}/projects`, {
+      headers: {
+        Authorization: `Basic ${Buffer.from(
+          `${config["Username"]}:${token}`
+        ).toString("base64")}`,
+        Accept: "application/vnd.github.inertia-preview+json",
+      },
+    })
+  : fetch(
+      `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-cards?repository=${repository}`
+    );
+    githubFetch
+    .then((r) => {
+      if (!r.ok) {
+        return r
+          .text()
+          .then((errorMessage) =>
+            asyncType(`Error fetching cards: ${errorMessage}`)
+          );
+      }
+      return r.json().then(async (cards) => {
+        if (cards.length === 0) {
+          await asyncType(`No cards in ${repository}`);
+          return;
+        }
+        const bullets = cards.map((i: any) => `[${i.title}](${i.html_link})`);
+        await pushBullets(bullets);
+      });
+    })
+    .catch((e) => asyncType(`Error: ${e.message}`));
+}
+
+addButtonListener("Import Github Cards", importGithubCards);
 addButtonListener("Import Github Issues", importGithubIssues);
 addButtonListener("Import Github Projects", importGithubProjects);
 addButtonListener("Import Github Repos", importGithubRepos);
