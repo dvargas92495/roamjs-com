@@ -133,12 +133,18 @@ const importGithubCards = (buttonConfig: {
   [key: string]: string;
 }) => {
   const config = getConfigFromPage("github");
-  const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   const pageTitle = document.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;
-  const repoName = buttonConfig.IN ? buttonConfig.IN : pageTitle.innerText;
+  const parentBlocks = window.roamAlphaAPI.q(`[:find (pull ?parentPage [:node/title]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`).filter(block => block?.title);
+  const repoAsParent = parentBlocks.length > 0 ? parentBlocks[0]?.title : "";
+
+  const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
+  const repoName = buttonConfig.IN ? buttonConfig.IN : repoAsParent;
   const repository = `${username}/${repoName}`;
+  const project = buttonConfig.UNDER ? buttonConfig.UNDER : repoAsParent;
+  const column = buttonConfig.AS ? buttonConfig.AS : "To do";
+
   const token = config["Token"];
   const githubFetch = token
   ? fetch(`https://api.github.com/users/${username}/projects`, {
@@ -150,7 +156,7 @@ const importGithubCards = (buttonConfig: {
       },
     })
   : fetch(
-      `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-cards?repository=${repository}`
+      `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-cards?repository=${repository}&project=${project}&column=${column}`
     );
     githubFetch
     .then((r) => {
