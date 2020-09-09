@@ -73,12 +73,12 @@ const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
             asyncType(`Error fetching repos: ${errorMessage}`)
           );
       }
-      return r.json().then(async (issues) => {
-        if (issues.length === 0) {
-          await asyncType("No repos in your account!");
+      return r.json().then(async (repos) => {
+        if (repos.length === 0) {
+          await asyncType(`No repos in ${username}'s account!`);
           return;
         }
-        const bullets = issues.map((i: any) => `[[${i.name}]]`);
+        const bullets = repos.map((i: any) => `[[${i.name}]]`);
         await pushBullets(bullets);
       });
     })
@@ -116,12 +116,12 @@ const importGithubProjects = async (buttonConfig: {
             asyncType(`Error fetching projects: ${errorMessage}`)
           );
       }
-      return r.json().then(async (issues) => {
-        if (issues.length === 0) {
-          await asyncType("No projects in your account!");
+      return r.json().then(async (projects) => {
+        if (projects.length === 0) {
+          await asyncType(`No projects in ${repository}`);
           return;
         }
-        const bullets = issues.map((i: any) => `[[${i.name}]]`);
+        const bullets = projects.map((i: any) => `[[${i.name}]]`);
         await pushBullets(bullets);
       });
     })
