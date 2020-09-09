@@ -15,7 +15,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   }
   const opts = getGithubOpts();
   return axios(
-    `https://api.github.com/repos/dvargas92495/${repository}/projects`,
+    `https://api.github.com/repos/${repository}/projects`,
     opts
   ).then((projects) => {
     const projectObj = projects.data.find((p: any) => p.name === project);
