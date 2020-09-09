@@ -138,9 +138,8 @@ const importGithubCards = async (buttonConfig: { [key: string]: string }) => {
     .q(
       `[:find (pull ?parentPage [:node/title]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
     )
-    .filter((block) => block?.title);
-  console.log(parentBlocks);
-  const repoAsParent = parentBlocks.length > 0 ? parentBlocks[0]?.title : "";
+    .filter((block) => block.length);
+  const repoAsParent = parentBlocks.length > 0 ? parentBlocks[0][0]?.title : "";
 
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   const repoName = buttonConfig.IN ? buttonConfig.IN : repoAsParent;
