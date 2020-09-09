@@ -89,7 +89,7 @@ const importGithubProjects = async (buttonConfig: {
   [key: string]: string;
 }) => {
   const config = getConfigFromPage("github");
-  const username = config["USername"];
+  const username = config["Username"];
   const pageTitle = document.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;
