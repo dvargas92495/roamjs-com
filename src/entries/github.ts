@@ -89,13 +89,12 @@ const importGithubProjects = async (buttonConfig: {
   [key: string]: string;
 }) => {
   const config = getConfigFromPage("github");
-  const username = config["Username"];
+  const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   const pageTitle = document.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;
-  const repoName = buttonConfig.FOR ? buttonConfig.FOR : pageTitle.innerText;
-  const repository =
-    repoName.indexOf("/") > -1 ? repoName : `${username}/${repoName}`;
+  const repoName = buttonConfig.IN ? buttonConfig.IN : pageTitle.innerText;
+  const repository = `${username}/${repoName}`;
   const token = config["Token"];
   const githubFetch = token
     ? fetch(`https://api.github.com/repos/${repository}/projects`, {
