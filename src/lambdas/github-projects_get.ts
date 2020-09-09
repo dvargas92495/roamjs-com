@@ -10,7 +10,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   const opts = getGithubOpts();
   return wrapAxios(
     axios(
-      `https://api.github.com/repos/dvargas92495/${repository}/projects`,
+      `https://api.github.com/repos/${repository}/projects`,
       opts
     )
   );
