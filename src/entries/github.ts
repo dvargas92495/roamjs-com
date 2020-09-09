@@ -142,7 +142,7 @@ const importGithubCards = (buttonConfig: {
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   const repoName = buttonConfig.IN ? buttonConfig.IN : repoAsParent;
   const repository = `${username}/${repoName}`;
-  const project = buttonConfig.UNDER ? buttonConfig.UNDER : repoAsParent;
+  const project = buttonConfig.UNDER ? buttonConfig.UNDER : pageTitle.innerText;
   const column = buttonConfig.AS ? buttonConfig.AS : "To do";
 
   const token = config["Token"];
