@@ -106,7 +106,7 @@ const importGithubProjects = async (buttonConfig: {
         },
       })
     : fetch(
-        `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-repositories?repository=${repository}`
+        `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-projects?repository=${repository}`
       );
   githubFetch
     .then((r) => {
