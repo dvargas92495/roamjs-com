@@ -56,7 +56,7 @@ const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
   const githubFetch = token
     ? fetch(`https://api.github.com/users/${username}/repos`, {
         headers: {
-          Authorization: `Basic ${Buffer.from(`${username}:${token}`).toString(
+          Authorization: `Basic ${Buffer.from(`${config["Username"]}:${token}`).toString(
             "base64"
           )}`,
         },
@@ -73,12 +73,55 @@ const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
             asyncType(`Error fetching repos: ${errorMessage}`)
           );
       }
-      return r.json().then(async (issues) => {
-        if (issues.length === 0) {
-          await asyncType("No repos in your account!");
+      return r.json().then(async (repos) => {
+        if (repos.length === 0) {
+          await asyncType(`No repos in ${username}'s account!`);
           return;
         }
-        const bullets = issues.map((i: any) => `[[${i.name}]]`);
+        const bullets = repos.map((i: any) => `[[${i.name}]]`);
+        await pushBullets(bullets);
+      });
+    })
+    .catch((e) => asyncType(`Error: ${e.message}`));
+};
+
+const importGithubProjects = async (buttonConfig: {
+  [key: string]: string;
+}) => {
+  const config = getConfigFromPage("github");
+  const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
+  const pageTitle = document.getElementsByClassName(
+    "rm-title-display"
+  )[0] as HTMLHeadingElement;
+  const repoName = buttonConfig.IN ? buttonConfig.IN : pageTitle.innerText;
+  const repository = `${username}/${repoName}`;
+  const token = config["Token"];
+  const githubFetch = token
+    ? fetch(`https://api.github.com/repos/${repository}/projects`, {
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${config["Username"]}:${token}`).toString(
+            "base64"
+          )}`,
+        },
+      })
+    : fetch(
+        `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-projects?repository=${repository}`
+      );
+  githubFetch
+    .then((r) => {
+      if (!r.ok) {
+        return r
+          .text()
+          .then((errorMessage) =>
+            asyncType(`Error fetching projects: ${errorMessage}`)
+          );
+      }
+      return r.json().then(async (projects) => {
+        if (projects.length === 0) {
+          await asyncType(`No projects in ${repository}`);
+          return;
+        }
+        const bullets = projects.map((i: any) => `[[${i.name}]]`);
         await pushBullets(bullets);
       });
     })
@@ -87,5 +130,5 @@ const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
 
 addButtonListener("Import Github Cards", () => {});
 addButtonListener("Import Github Issues", importGithubIssues);
-addButtonListener("Import Github Projects", () => {});
+addButtonListener("Import Github Projects", importGithubProjects);
 addButtonListener("Import Github Repos", importGithubRepos);

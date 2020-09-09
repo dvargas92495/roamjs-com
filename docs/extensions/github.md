@@ -20,6 +20,10 @@ In any page, create a `Import Github Issues` button by typing in `{{import githu
 
 In any page, create a `Import Github Repos` button by typing in `{{import github repos}}` (case-insensitive) in a block. Upon clicking the button, the extension will clear the button and fill the page in with the repos that you have in your account as new pages with the repo name as the title. By default it will use the `Username` attribute configured in the config page. To override this to query someone else's publicly available repos, you could add ` for {username}` to the button text. For example, `{{import github repos for dvargas92495}}`.
 
+#### GitHub Projects
+
+In any page, create a `Import Github Repos` button by typing in `{{import github repos}}` (case-insensitive) in a block. Upon clicking the button, the extension will clear the button and fill the page in with the projects that you have in your account as new pages with the project name as the title. By default it will use the `Username` attribute configured in the config page and the name of the page as the repo name. To override this to query someone else's publicly available repos, you could add ` for {username} in {name}` to the button text. For example, `{{import github projects for dvargas92495 in roam-js-extensions}}`.
+
 ### Installation
 
 Insert this as a child of any `[[roam/js]]` block to install the extension.

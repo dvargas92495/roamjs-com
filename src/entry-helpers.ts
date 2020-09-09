@@ -32,7 +32,7 @@ export const getConfigFromPage = (page: string) => {
       .string.split("::")
   );
   return Object.fromEntries(entries);
-}
+};
 
 export const pushBullets = async (bullets: string[]) => {
   for (const index in bullets) {
@@ -56,16 +56,25 @@ export const pushBullets = async (bullets: string[]) => {
 
 const clickEventListener = (
   targetCommand: string,
-  callback: (buttonConfig?: {[key: string]: string}) => void
+  callback: (buttonConfig?: { [key: string]: string }) => void
 ) => async (e: MouseEvent) => {
   const target = e.target as HTMLElement;
   if (
     target &&
     target.tagName === "BUTTON" &&
-    target.innerText.toUpperCase().trim().startsWith(targetCommand.toUpperCase())
+    target.innerText
+      .toUpperCase()
+      .trim()
+      .startsWith(targetCommand.toUpperCase())
   ) {
-    const restOfButtonText = target.innerText.substring(targetCommand.length + 1).split(' ');
-    const buttonConfig = restOfButtonText.length > 1 ? {[restOfButtonText[0].toUpperCase()]: restOfButtonText[1]} : {};
+    const restOfButtonText = target.innerText
+      .substring(targetCommand.length + 1)
+      .split(" ");
+    const numPairs = Math.floor(restOfButtonText.length/2);
+    const buttonConfig = {} as {[key: string]: string};
+    for (var i = 0; i < numPairs; i++) {
+      buttonConfig[restOfButtonText[i*2]] = restOfButtonText[(i*2) + 1];
+    }
 
     const divContainer = target.parentElement.parentElement
       .parentElement as HTMLDivElement;
@@ -80,7 +89,7 @@ const clickEventListener = (
 
 export const addButtonListener = (
   targetCommand: string,
-  callback: (buttonConfig?: {[key: string]: string}) => void
+  callback: (buttonConfig?: { [key: string]: string }) => void
 ) => {
   const listener = clickEventListener(targetCommand, callback);
   document.addEventListener("click", listener);
