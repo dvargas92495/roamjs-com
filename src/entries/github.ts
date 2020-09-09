@@ -56,7 +56,7 @@ const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
   const githubFetch = token
     ? fetch(`https://api.github.com/users/${username}/repos`, {
         headers: {
-          Authorization: `Basic ${Buffer.from(`${username}:${token}`).toString(
+          Authorization: `Basic ${Buffer.from(`${config["Username"]}:${token}`).toString(
             "base64"
           )}`,
         },
@@ -99,7 +99,7 @@ const importGithubProjects = async (buttonConfig: {
   const githubFetch = token
     ? fetch(`https://api.github.com/repos/${repository}/projects`, {
         headers: {
-          Authorization: `Basic ${Buffer.from(`${username}:${token}`).toString(
+          Authorization: `Basic ${Buffer.from(`${config["Username"]}:${token}`).toString(
             "base64"
           )}`,
         },
