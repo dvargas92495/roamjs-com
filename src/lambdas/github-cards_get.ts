@@ -18,14 +18,16 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     `https://api.github.com/repos/${repository}/projects`,
     opts
   ).then((projects) => {
-    const projectObj = projects.data.find((p: any) => p.name === project);
+    const projectName = decodeURIComponent(project);
+    const projectObj = projects.data.find((p: any) => p.name === projectName);
     if (!projectObj) {
       return userError(
         `Could not find project ${project} in repository ${repository}`
       );
     }
     return axios(projectObj.columns_url, opts).then((columns) => {
-      const columnObj = columns.data.find((c: any) => c.name === column);
+      const columnName = decodeURIComponent(column);
+      const columnObj = columns.data.find((c: any) => c.name === columnName);
       if (!columnObj) {
         return userError(
           `Could not find column ${column} in project ${project} in repository ${repository}`
