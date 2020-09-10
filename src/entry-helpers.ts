@@ -3,10 +3,13 @@ import { waitFor, fireEvent, wait } from "@testing-library/dom";
 
 // @ts-ignore
 window.userEvent = userEvent;
-export const asyncType = async (text: string) =>
-  await userEvent.type(document.activeElement, text.replace(/\./g,"\."), {
+export const asyncType = async (text: string) => {
+  console.log(text);
+  console.log(text.replace(/\./g,"\."));
+  return await userEvent.type(document.activeElement, text.replace(/\./g,"PERIOD"), {
     skipClick: true,
   });
+}
 
 export const waitForCallback = (text: string) => () => {
   const textArea = document.activeElement as HTMLTextAreaElement;
