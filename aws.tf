@@ -45,8 +45,7 @@ module "aws-serverless-backend" {
 }
 
 provider "github" {
-    organization = "dvargas92495"
-    individual = true
+    owner = "dvargas92495"
 }
 
 resource "github_actions_secret" "deploy_aws_access_key" {
