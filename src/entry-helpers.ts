@@ -1,5 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { waitFor, fireEvent } from "@testing-library/dom";
+import { waitFor, fireEvent, wait } from "@testing-library/dom";
 
 export const asyncType = async (text: string) =>
   await userEvent.type(document.activeElement, text, {
@@ -12,6 +12,8 @@ export const waitForCallback = (text: string) => () => {
     throw new Error("Typing not complete");
   }
 };
+
+export const skipFrame = () => wait(() => {}, {timeout:1});
 
 export const getConfigFromPage = (page: string) => {
   const pageResults = window.roamAlphaAPI.q(
