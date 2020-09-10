@@ -164,7 +164,7 @@ const importGithubCards = async (buttonConfig: { [key: string]: string }) => {
             await asyncType(`No cards in ${repository}`);
             return;
           }
-          const bullets = cards.map((i: any) => i.note ? i.note : i.content_url);
+          const bullets = cards.map((i: any) => i.note ? i.note : i.content_url.substring("https://api.github.com".length));
           await pushBullets(bullets);
         });
       })
