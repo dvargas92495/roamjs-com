@@ -2,7 +2,7 @@ import userEvent from "@testing-library/user-event";
 import { waitFor, fireEvent, wait } from "@testing-library/dom";
 
 export const asyncType = async (text: string) =>
-  await userEvent.type(document.activeElement, text.replace(/\./g,"\\."), {
+  await userEvent.type(document.activeElement, text.replace(/\./g,"\."), {
     skipClick: true,
   });
 
