@@ -67,13 +67,35 @@ const clickEventListener = (
       .trim()
       .startsWith(targetCommand.toUpperCase())
   ) {
-    const restOfButtonText = target.innerText
+    const rawParts = target.innerText
       .substring(targetCommand.length + 1)
       .split(" ");
-    const numPairs = Math.floor(restOfButtonText.length/2);
-    const buttonConfig = {} as {[key: string]: string};
+    let quotedWord = "";
+    const restOfButtonText: string[] = [];
+    for (var i = 0; i < rawParts.length; i++) {
+      if (quotedWord) {
+        if (rawParts[i].endsWith('"')) {
+          restOfButtonText.push(`${quotedWord} ${rawParts[i].substring(
+            0,
+            rawParts[i].length - 1
+          )}`);
+          quotedWord = '';
+        } else {
+          quotedWord = `${quotedWord} ${rawParts[i]}`;
+        }
+      } else {
+        if (rawParts[i].startsWith('"')) {
+          quotedWord = rawParts[i].substring(1);
+        } else {
+          restOfButtonText.push(rawParts[i]);
+        }
+      }
+    }
+
+    const numPairs = Math.floor(restOfButtonText.length / 2);
+    const buttonConfig = {} as { [key: string]: string };
     for (var i = 0; i < numPairs; i++) {
-      buttonConfig[restOfButtonText[i*2]] = restOfButtonText[(i*2) + 1];
+      buttonConfig[restOfButtonText[i * 2]] = restOfButtonText[i * 2 + 1];
     }
 
     const divContainer = target.parentElement.parentElement
