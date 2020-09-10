@@ -12,16 +12,19 @@ const keydownEventListener = (e: KeyboardEvent) => {
       const oldStart = textArea.selectionStart;
       const oldEnd = textArea.selectionEnd;
       if (value.startsWith("{{[[TODO]]}}") || value.startsWith("{{[[DONE]]}}")) {
+          console.log(`${oldStart} | ${oldEnd}`);
           textArea.setSelectionRange(4, 8);
           userEvent.type(textArea, "{backspace}");
           userEvent.type(textArea, "ARCHIVED");
+          console.log(`${textArea.selectionStart} | ${textArea.selectionEnd}`);
           textArea.setSelectionRange(oldStart + 4, oldEnd + 4);
-      } else if (value.startsWith("\{\{\[\[ARCHIVED\]\]\}\}")) {
+          console.log(`${textArea.selectionStart} | ${textArea.selectionEnd}`);
+      } else if (value.startsWith("{{[[ARCHIVED]]}}")) {
           textArea.setSelectionRange(0, 16);
           userEvent.type(textArea, "{backspace}");
           textArea.setSelectionRange(oldStart -16, oldEnd -16);
       } else {
-        textArea.setSelectionRange(0, 1);
+        textArea.setSelectionRange(0, 0);
         userEvent.type(textArea, "\{\{\[\[ARCHIVED\]\]\}\}")
         textArea.setSelectionRange(oldStart + 16, oldEnd + 16);
     }
