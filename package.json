@@ -6,6 +6,8 @@
   "scripts": {
     "build": "webpack",
     "build:lambda": "webpack --config ./webpack.lambda.config.js",
+    "lambda": "node out/debug-lambda.js",
+    "prelambda": "webpack --config ./webpack.debug.config.js",
     "test": "jest --passWithNoTests"
   },
   "repository": {
