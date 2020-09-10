@@ -44,9 +44,6 @@ module "aws-serverless-backend" {
     }
 }
 
-/*
-https://github.com/dvargas92495/roam-js-extensions/issues/1
-
 provider "github" {
     organization = "dvargas92495"
     individual = true
@@ -55,12 +52,11 @@ provider "github" {
 resource "github_actions_secret" "deploy_aws_access_key" {
   repository       = "roam-js-extensions"
   secret_name      = "DEPLOY_AWS_ACCESS_KEY"
-  plaintext_value  = module.terraform-aws-s3-static-site.deploy-id
+  plaintext_value  = module.aws-static-site.deploy-id
 }
 
 resource "github_actions_secret" "deploy_aws_access_secret" {
   repository       = "roam-js-extensions"
   secret_name      = "DEPLOY_AWS_ACCESS_SECRET"
-  plaintext_value  = module.terraform-aws-s3-static-site.deploy-secret
+  plaintext_value  = module.aws-static-site.deploy-secret
 }
-*/

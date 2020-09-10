@@ -1,5 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { waitForCallback, skipFrame, asyncType } from "../entry-helpers";
+import { asyncType } from "../entry-helpers";
 
 const keydownEventListener = async (e: KeyboardEvent) => {
   if (
