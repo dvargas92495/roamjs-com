@@ -1,5 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { waitForCallback, skipFrame } from "../entry-helpers";
+import { waitForCallback, skipFrame, asyncType } from "../entry-helpers";
 
 const keydownEventListener = async (e: KeyboardEvent) => {
   if (
@@ -14,10 +14,9 @@ const keydownEventListener = async (e: KeyboardEvent) => {
     const oldEnd = textArea.selectionEnd;
     if (value.startsWith("{{[[TODO]]}}") || value.startsWith("{{[[DONE]]}}")) {
       textArea.setSelectionRange(4, 8);
-      userEvent.type(textArea, "{backspace}");
-      userEvent.type(textArea, "ARCHIVED");
+      await asyncType("{backspace}");
+      await asyncType("ARCHIVED");
       textArea.setSelectionRange(oldStart + 4, oldEnd + 4);
-      await skipFrame();
     } else if (value.startsWith("{{[[ARCHIVED]]}}")) {
       textArea.setSelectionRange(0, 16);
       userEvent.type(textArea, "{backspace}");
