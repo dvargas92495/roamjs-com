@@ -26,7 +26,7 @@ In any page, create a `Import Github Projects` button by typing in `{{import git
 
 #### GitHub Cards
 
-In any page, create a `Import Github Cards` button by typing in `{{import github cards}}` (case-insensitive) in a block. Upon clicking the button, the extension will clear the button and fill the page in with the card links from the project you specify. By default it will use the `Username` attribute configured in the config page, the name of the page as the project name, and the first linked reference as the repo name. To override this, you could add any part of ` for {username} in {name} under {project} as {column}` to the button text. For example, `{{import github projects for dvargas92495 in roam-js-extensions}}` in the Github Integration page will grab the cards under the To do in that project.
+In any page, create a `Import Github Cards` button by typing in `{{import github cards}}` (case-insensitive) in a block. Upon clicking the button, the extension will clear the button and fill the page in with the card links from the project you specify. By default it will use the `Username` attribute configured in the config page, the name of the page as the project name, and the first linked reference as the repo name. To override this, you could add any part of ` for {username} in {name} under {project} as {column}` to the button text. For example, `{{import github projects for dvargas92495 in roam-js-extensions under "Github Integration" as "To do"}}` in the Github Integration page will grab the cards under the To do in that project. Note that if values themselves have spaces, they need to be surrounded by quotes.
 
 ### Installation
 
