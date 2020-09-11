@@ -1,7 +1,7 @@
 import userEvent from "@testing-library/user-event";
 import { asyncType } from "../entry-helpers";
 
-const mutationConfig = { childList: true};
+const mutationConfig = { childList: true, subtree: true};
 const mutationTarget = document.getElementsByClassName('roam-article')[0];
 const mutationCallback = (mutationList: MutationRecord[]) => {
     console.log(mutationList);
