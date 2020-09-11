@@ -1,6 +1,22 @@
 import userEvent from "@testing-library/user-event";
 import { asyncType } from "../entry-helpers";
 
+const mutationConfig = { childList: true};
+const mutationTarget = document.getElementsByClassName('roam-article')[0];
+const mutationCallback = (mutationList: MutationRecord[]) => {
+    mutationList.forEach(record => {
+        const node = record.target as HTMLElement;
+        const buttons = node.getElementsByTagName('button');
+        Array.from(buttons).forEach(button => {
+            if (button.innerText === 'ARCHIVED') {
+                button.style.backgroundColor = 'red';
+            }
+        })
+    })
+}
+const observer = new MutationObserver(mutationCallback);
+observer.observe(mutationTarget, mutationConfig);
+
 const keydownEventListener = async (e: KeyboardEvent) => {
   if (
     e.key === "Enter" &&
