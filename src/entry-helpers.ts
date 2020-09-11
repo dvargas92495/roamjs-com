@@ -6,6 +6,9 @@ export const asyncType = async (text: string) =>
     skipClick: true,
   });
 
+export const genericError = (e: Error) =>
+  asyncType(`Error: ${e.message.length > 50 ? `${e.message}...` : e.message}`);
+
 export const waitForCallback = (text: string) => () => {
   const textArea = document.activeElement as HTMLTextAreaElement;
   if (textArea.value.toUpperCase() !== text.toUpperCase()) {
@@ -13,7 +16,7 @@ export const waitForCallback = (text: string) => () => {
   }
 };
 
-export const skipFrame = () => wait(() => {}, {timeout:1});
+export const skipFrame = () => wait(() => {}, { timeout: 1 });
 
 export const getConfigFromPage = (page: string) => {
   const pageResults = window.roamAlphaAPI.q(
@@ -77,11 +80,10 @@ const clickEventListener = (
     for (var i = 0; i < rawParts.length; i++) {
       if (quotedWord) {
         if (rawParts[i].endsWith('"')) {
-          restOfButtonText.push(`${quotedWord} ${rawParts[i].substring(
-            0,
-            rawParts[i].length - 1
-          )}`);
-          quotedWord = '';
+          restOfButtonText.push(
+            `${quotedWord} ${rawParts[i].substring(0, rawParts[i].length - 1)}`
+          );
+          quotedWord = "";
         } else {
           quotedWord = `${quotedWord} ${rawParts[i]}`;
         }
