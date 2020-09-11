@@ -4,10 +4,14 @@ import { asyncType } from "../entry-helpers";
 const mutationConfig = { childList: true};
 const mutationTarget = document.getElementsByClassName('roam-article')[0];
 const mutationCallback = (mutationList: MutationRecord[]) => {
+    console.log(mutationList);
     mutationList.forEach(record => {
         const node = record.target as HTMLElement;
         const buttons = node.getElementsByTagName('button');
+        console.log(node);
+        console.log(buttons);
         Array.from(buttons).forEach(button => {
+            console.log(button.innerText);
             if (button.innerText === 'ARCHIVED') {
                 button.style.backgroundColor = 'red';
             }
