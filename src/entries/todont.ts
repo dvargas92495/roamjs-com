@@ -11,6 +11,7 @@ const styleArchivedButtons = (node: HTMLElement) => {
       button.style.padding = "0";
       button.style.minHeight = "0";
       button.style.minWidth = "0";
+      button.style.height = "16px";
     }
   });
 };
