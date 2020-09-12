@@ -18,7 +18,7 @@ const styleArchivedButtons = (node: HTMLElement) => {
 styleArchivedButtons(document.body);
 
 const mutationConfig = { childList: true, subtree: true };
-const mutationTarget = document.getElementsByClassName("roam-article")[0];
+const mutationTarget = document.getElementsByClassName("roam-article")[0]?.parentElement;
 const mutationCallback = (mutationList: MutationRecord[]) => {
   mutationList.forEach((record) => {
     styleArchivedButtons(record.target as HTMLElement);
@@ -26,6 +26,15 @@ const mutationCallback = (mutationList: MutationRecord[]) => {
 };
 const observer = new MutationObserver(mutationCallback);
 observer.observe(mutationTarget, mutationConfig);
+
+const resetCursor = (inputStart: number, inputEnd: number) => {
+  const textArea = document.activeElement as HTMLTextAreaElement;
+  const start = Math.max(0, inputStart);
+  const end = Math.max(0, inputEnd);
+
+  // hack to reset cursor in original location
+  setTimeout(() => textArea.setSelectionRange(start, end), 1);
+};
 
 const keydownEventListener = async (e: KeyboardEvent) => {
   if (
@@ -42,15 +51,20 @@ const keydownEventListener = async (e: KeyboardEvent) => {
       textArea.setSelectionRange(4, 8);
       await asyncType("{backspace}");
       await asyncType("ARCHIVED");
-      textArea.setSelectionRange(oldStart + 4, oldEnd + 4);
+      resetCursor(oldStart + 4, oldEnd + 4);
     } else if (value.startsWith("{{[[ARCHIVED]]}}")) {
-      textArea.setSelectionRange(0, 16);
-      userEvent.type(textArea, "{backspace}");
-      textArea.setSelectionRange(oldStart - 16, oldEnd - 16);
+      const afterArchive = value.substring(16).trim();
+      const end = afterArchive ? value.indexOf(afterArchive) : value.length;
+      textArea.setSelectionRange(0, end);
+      await asyncType("{backspace}");
+      resetCursor(oldStart - end, oldEnd - end);
     } else {
       textArea.setSelectionRange(0, 0);
-      userEvent.type(textArea, "{{[[ARCHIVED]]}}");
-      textArea.setSelectionRange(oldStart + 16, oldEnd + 16);
+      await userEvent.type(textArea, "{{[[ARCHIVED]]}} ", {
+        initialSelectionStart: 0,
+        initialSelectionEnd: 0,
+      });
+      resetCursor(oldStart + 17, oldEnd + 17);
     }
   }
 };
