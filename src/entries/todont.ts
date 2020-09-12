@@ -48,7 +48,7 @@ const keydownEventListener = async (e: KeyboardEvent) => {
       userEvent.type(textArea, "{backspace}");
       textArea.setSelectionRange(oldStart - 16, oldEnd - 16);
     } else {
-     // textArea.setSelectionRange(0, 0);
+      textArea.setSelectionRange(0, 0);
       userEvent.type(textArea, "{{[[ARCHIVED]]}}", {initialSelectionStart: 0, initialSelectionEnd: 0});
      // textArea.setSelectionRange(oldStart + 16, oldEnd + 16);
     }
