@@ -31,14 +31,9 @@ const resetCursor = (inputStart: number, inputEnd: number) => {
   const textArea = document.activeElement as HTMLTextAreaElement;
   const start = Math.max(0, inputStart);
   const end = Math.max(0, inputEnd);
-  textArea.setSelectionRange(start, end);
 
   // hack to reset cursor in original location
-  /*
-  await userEvent.type(textArea, "a{backspace}", {
-    initialSelectionStart: start,
-    initialSelectionEnd: end,
-  });*/
+  setTimeout(() => textArea.setSelectionRange(start, end), 500);
 };
 
 const keydownEventListener = async (e: KeyboardEvent) => {
@@ -69,9 +64,7 @@ const keydownEventListener = async (e: KeyboardEvent) => {
         initialSelectionStart: 0,
         initialSelectionEnd: 0,
       });
-      console.log(`${oldStart} | ${oldEnd}`);
       resetCursor(oldStart + 17, oldEnd + 17);
-      console.log(`${textArea.selectionStart} | ${textArea.selectionEnd}`);
     }
   }
 };
