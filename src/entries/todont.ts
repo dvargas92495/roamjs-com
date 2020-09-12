@@ -43,14 +43,23 @@ const keydownEventListener = async (e: KeyboardEvent) => {
       await asyncType("{backspace}");
       await asyncType("ARCHIVED");
       textArea.setSelectionRange(oldStart + 4, oldEnd + 4);
+
+      // hack to reset cursor in original location
+      await userEvent.type(textArea, "a{backspace}");
     } else if (value.startsWith("{{[[ARCHIVED]]}}")) {
       textArea.setSelectionRange(0, 16);
       userEvent.type(textArea, "{backspace}");
       textArea.setSelectionRange(oldStart - 16, oldEnd - 16);
+
+      // hack to reset cursor in original location
+      await userEvent.type(textArea, "a{backspace}");
     } else {
       textArea.setSelectionRange(0, 0);
       userEvent.type(textArea, "{{[[ARCHIVED]]}}", {initialSelectionStart: 0, initialSelectionEnd: 0});
-     // textArea.setSelectionRange(oldStart + 16, oldEnd + 16);
+      textArea.setSelectionRange(oldStart + 16, oldEnd + 16);
+      
+      // hack to reset cursor in original location
+      await userEvent.type(textArea, "a{backspace}");
     }
   }
 };
