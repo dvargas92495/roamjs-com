@@ -54,7 +54,7 @@ const keydownEventListener = async (e: KeyboardEvent) => {
       resetCursor(oldStart + 4, oldEnd + 4);
     } else if (value.startsWith("{{[[ARCHIVED]]}}")) {
       const afterArchive = value.substring(16).trim();
-      const end = value.indexOf(afterArchive);
+      const end = afterArchive ? value.indexOf(afterArchive) : value.length;
       textArea.setSelectionRange(0, end);
       await asyncType("{backspace}");
       resetCursor(oldStart - end, oldEnd - end);
