@@ -33,7 +33,7 @@ const resetCursor = (inputStart: number, inputEnd: number) => {
   const end = Math.max(0, inputEnd);
 
   // hack to reset cursor in original location
-  setTimeout(() => textArea.setSelectionRange(start, end), 500);
+  setTimeout(() => textArea.setSelectionRange(start, end), 50);
 };
 
 const keydownEventListener = async (e: KeyboardEvent) => {
