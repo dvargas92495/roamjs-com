@@ -27,8 +27,10 @@ const mutationCallback = (mutationList: MutationRecord[]) => {
 const observer = new MutationObserver(mutationCallback);
 observer.observe(mutationTarget, mutationConfig);
 
-const resetCursor = async (start: number, end: number) => {
+const resetCursor = async (inputStart: number, inputEnd: number) => {
   const textArea = document.activeElement as HTMLTextAreaElement;
+  const start = Math.max(0, inputStart);
+  const end = Math.max(0, inputEnd);
   textArea.setSelectionRange(start, end);
 
   // hack to reset cursor in original location
