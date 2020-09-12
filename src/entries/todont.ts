@@ -27,17 +27,18 @@ const mutationCallback = (mutationList: MutationRecord[]) => {
 const observer = new MutationObserver(mutationCallback);
 observer.observe(mutationTarget, mutationConfig);
 
-const resetCursor = async (inputStart: number, inputEnd: number) => {
+const resetCursor = (inputStart: number, inputEnd: number) => {
   const textArea = document.activeElement as HTMLTextAreaElement;
   const start = Math.max(0, inputStart);
   const end = Math.max(0, inputEnd);
   textArea.setSelectionRange(start, end);
 
   // hack to reset cursor in original location
+  /*
   await userEvent.type(textArea, "a{backspace}", {
     initialSelectionStart: start,
     initialSelectionEnd: end,
-  });
+  });*/
 };
 
 const keydownEventListener = async (e: KeyboardEvent) => {
@@ -55,20 +56,22 @@ const keydownEventListener = async (e: KeyboardEvent) => {
       textArea.setSelectionRange(4, 8);
       await asyncType("{backspace}");
       await asyncType("ARCHIVED");
-      await resetCursor(oldStart + 4, oldEnd + 4);
+      resetCursor(oldStart + 4, oldEnd + 4);
     } else if (value.startsWith("{{[[ARCHIVED]]}}")) {
       const afterArchive = value.substring(16).trim();
       const end = value.indexOf(afterArchive);
       textArea.setSelectionRange(0, end);
       await asyncType("{backspace}");
-      await resetCursor(oldStart - end, oldEnd - end);
+      resetCursor(oldStart - end, oldEnd - end);
     } else {
       textArea.setSelectionRange(0, 0);
       await userEvent.type(textArea, "{{[[ARCHIVED]]}} ", {
         initialSelectionStart: 0,
         initialSelectionEnd: 0,
       });
-      await resetCursor(oldStart + 17, oldEnd + 17);
+      console.log(`${oldStart} | ${oldEnd}`);
+      resetCursor(oldStart + 17, oldEnd + 17);
+      console.log(`${textArea.selectionStart} | ${textArea.selectionEnd}`);
     }
   }
 };
