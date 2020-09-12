@@ -18,7 +18,7 @@ const styleArchivedButtons = (node: HTMLElement) => {
 styleArchivedButtons(document.body);
 
 const mutationConfig = { childList: true, subtree: true };
-const mutationTarget = document.getElementsByClassName("roam-article")[0];
+const mutationTarget = document.getElementsByClassName("roam-article")[0]?.parentElement;
 const mutationCallback = (mutationList: MutationRecord[]) => {
   mutationList.forEach((record) => {
     styleArchivedButtons(record.target as HTMLElement);
