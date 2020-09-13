@@ -11,7 +11,17 @@ export const genericError = (e: Error) =>
 
 export const waitForCallback = (text: string) => () => {
   const textArea = document.activeElement as HTMLTextAreaElement;
-  if (textArea.value.toUpperCase() !== text.toUpperCase()) {
+  let expectedText = text.toUpperCase();
+  let expectedTextWithoutPeriod = text.replace(/\./g,'').toUpperCase();
+  let actualText = textArea.value.toUpperCase();
+
+  // relaxing constraint for equality because of the period issue.
+  if ((actualText === expectedText) || (actualText === expectedTextWithoutPeriod))
+  {
+    return;
+  }
+  else
+  {
     throw new Error("Typing not complete");
   }
 };
@@ -39,7 +49,12 @@ export const getConfigFromPage = (page: string) => {
   return Object.fromEntries(entries);
 };
 
-export const pushBullets = async (bullets: string[]) => {
+export const pushBullets = async (bullets: string[], title: string = "") => {
+  // There is an issue with periods which happens only for the first bullet. 
+  // Deliberrately adding a period, so that subsequent bullets don't face that issue.
+  bullets.unshift(title + ".");
+
+  // TODO: Nest bullets under title bullet.
   for (const index in bullets) {
     const bullet = bullets[index];
     await asyncType(bullet);
