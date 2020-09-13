@@ -35,12 +35,12 @@ For any other questions, feel free to reach out to me at dvargas92495@gmail.com.
 ## Local Setup
 
 1. Install npm
-	1. brew install node
+	1. `brew install node`
 1. Install dependencies
-	1. npm install
+	1. `npm install`
 1. Build Project
-	1. npm run build
+	1. `npm run build`
 1. Serve the JS
-	1. npm install -g http-server
+	1. `npm install -g http-server`
 	1. Run `http-server` in the project dir
-1. Change src in roam/js to http://127.0.0.1:8080/build/${name}.js
+1. Change src in roam/js to `http://127.0.0.1:8080/build/${name}.js`
