@@ -37,6 +37,10 @@ declare global {
 
 const twitterReferencesListener = async () => {
 	// https://stackoverflow.com/questions/35879943/twitter-api-authorization-fails-cors-preflight-in-browser
+	// await pushBullets(["hey", "this. is. twitter", "this. is. another. twitter"]);
+	// await pushBullets(["hey", "this is twitter", "this is also twitter"]);
+	// return;
+
 	const twitterSearch = fetch(`http://localhost:8000`, {
         headers: {
           Authorization: `Bearer AAAAAAAAAAAAAAAAAAAAAImJHgEAAAAAFgCgsnFGvAL3RAnlYcvHpw7Xt6U%3DKAOg5x2dz6xULgSRt1l3ltEz9eruOxB2OunZm6FG2UbIUjrWlJ`,
@@ -59,14 +63,16 @@ const twitterReferencesListener = async () => {
 	          return;
 	        }
 
-	        // const bullets = statuses.map((i: any) => `[${i.title}](${i.html_url})`);
-	        const bullets = statuses.map((i: any) => `@${i.user.screen_name}: ${i.text}`);
+	        const bullets = statuses.map((i: any) => `https://twitter.com/i/web/status/${i.id_str}`);
+	        // const bullets = statuses.map((i: any) => `@${i.user.screen_name}: ${i.text}`);
 	        console.log(bullets);
 	        // await asyncType("DONE!");
-	        await pushBullets(bullets);
+	        await pushBullets(bullets, "Tweets");
 	      });
 	    })
 	    .catch((e) => asyncType(`Error: ${e.message}`));
+
+
 	// await asyncType(JSON.stringify(response));
 	// pushBullets(['Hey', 'this is twitter']);
 };
