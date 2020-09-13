@@ -40,3 +40,11 @@ export const getGithubOpts = () => ({
     ).toString("base64")}`,
   },
 });
+
+const twitterBearerToken = process.env.TWITTER_BEARER_TOKEN || "";
+
+export const getTwitterOpts = () => ({
+  headers : {
+    Authorization: `Bearer ${twitterBearerToken}`
+  },
+});
