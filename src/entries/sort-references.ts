@@ -46,7 +46,7 @@ const menuUl = document.createElement("ul");
 menuUl.className = "bp3-menu";
 popoverContent.appendChild(menuUl);
 
-const menuItemCallback = () => {
+const menuItemCallback = (sortBy: string) => {
   const pageTitle = document.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;
@@ -55,11 +55,14 @@ const menuItemCallback = () => {
       `[:find (pull ?parentPage [:node/title]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
     )
     .filter((block) => block.length);
-  const linkedReferences = parentBlocks.filter((b) => b[0]).map((b) => b[0]);
+  const linkedReferences = parentBlocks
+    .filter((b) => b[0])
+    .map((b) => b[0])
+    .sort((a, b) => a[sortBy] - b[sortBy]);
   console.log(linkedReferences);
 };
 
-const createMenuItem = (text: string) => {
+const createMenuItem = (text: string, sortBy: string) => {
   const liItem = document.createElement("li");
   const aMenuItem = document.createElement("a");
   aMenuItem.className = "bp3-menu-item bp3-popover-dismiss";
@@ -69,9 +72,14 @@ const createMenuItem = (text: string) => {
   menuItemText.innerText = text;
   aMenuItem.appendChild(menuItemText);
   menuUl.appendChild(liItem);
+  liItem.onclick = (e) => {
+    menuItemCallback(sortBy);
+    e.stopImmediatePropagation();
+    e.preventDefault();
+  };
 };
-createMenuItem("Sort By Page Title");
-createMenuItem("Sort By Created Date");
+createMenuItem("Sort By Page Title", "title");
+createMenuItem("Sort By Created Date", "time");
 
 let popoverOpen = false;
 
