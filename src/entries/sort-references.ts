@@ -32,7 +32,6 @@ transitionContainer.style.position = "absolute";
 transitionContainer.style.willChange = "transform";
 transitionContainer.style.top = "0";
 transitionContainer.style.left = "0";
-transitionContainer.style.transform = "translate3d(723px, 50px, 0px);";
 
 const popover = document.createElement("div");
 popover.className = "bp3-popover";
@@ -61,4 +60,16 @@ const createMenuItem = (text: string) => {
 createMenuItem("Sort By Title");
 createMenuItem("Sort By Created Date");
 
-popoverButton.onclick = () => popoverOverlay.appendChild(transitionContainer);
+const closePopover = (e: MouseEvent) => {
+    if(!e.target || !popoverOverlay.contains(e.target as HTMLElement)) {
+        popoverOverlay.removeChild(transitionContainer);
+        document.removeEventListener('click', closePopover);
+    }
+}
+
+popoverButton.onclick = e => {
+    const {pageX, pageY} = e;
+    transitionContainer.style.transform = `translate3d(${pageX}px, ${pageY}px, 0px)`;
+    popoverOverlay.appendChild(transitionContainer);
+    document.addEventListener('click', closePopover);
+};
