@@ -46,6 +46,19 @@ const menuUl = document.createElement("ul");
 menuUl.className = "bp3-menu";
 popoverContent.appendChild(menuUl);
 
+const menuItemCallback = () => {
+  const pageTitle = document.getElementsByClassName(
+    "rm-title-display"
+  )[0] as HTMLHeadingElement;
+  const parentBlocks = window.roamAlphaAPI
+    .q(
+      `[:find (pull ?parentPage [:node/title]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
+    )
+    .filter((block) => block.length);
+  const linkedReferences = parentBlocks.filter((b) => b[0]).map((b) => b[0]);
+  console.log(linkedReferences);
+};
+
 const createMenuItem = (text: string) => {
   const liItem = document.createElement("li");
   const aMenuItem = document.createElement("a");
