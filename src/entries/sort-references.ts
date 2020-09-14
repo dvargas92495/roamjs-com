@@ -5,29 +5,24 @@ const referenceButtonContainer = document.getElementsByClassName(
 // Icon Button
 const popoverWrapper = document.createElement("span");
 popoverWrapper.className = "bp3-popover-wrapper";
-console.log(referenceButtonContainer ? "" : "referenceButtonContainer was null");
 referenceButtonContainer.appendChild(popoverWrapper);
 
 const popoverTarget = document.createElement("span");
 popoverTarget.className = "bp3-popover-target";
-console.log(popoverWrapper ? "" : "popoverWrapper was null");
 popoverWrapper.appendChild(popoverTarget);
 
 const popoverButton = document.createElement("span");
 popoverButton.className = "bp3-button bp3-minimal bp3-small";
 popoverButton.tabIndex = 0;
-console.log(popoverTarget ? "" : "popoverTarget was null");
 popoverTarget.appendChild(popoverButton);
 
 const popoverIcon = document.createElement("span");
 popoverIcon.className = "bp3-icon bp3-icon-sort";
-console.log(popoverButton ? "" : "popoverButton was null");
 popoverButton.appendChild(popoverIcon);
 
 // Overlay Content
 const popoverOverlay = document.createElement("div");
 popoverOverlay.className = "bp3-overlay bp3-overlay-inline";
-console.log(popoverWrapper ? "" : "popoverWrapper was null");
 popoverWrapper.appendChild(popoverOverlay);
 
 const transitionContainer = document.createElement("div");
@@ -41,17 +36,14 @@ transitionContainer.style.left = "0";
 const popover = document.createElement("div");
 popover.className = "bp3-popover";
 popover.style.transformOrigin = "162px top";
-console.log(transitionContainer ? "" : "transitionContainer was null");
 transitionContainer.appendChild(popover);
 
 const popoverContent = document.createElement("div");
 popoverContent.className = "bp3-popover-content";
-console.log(popover ? "" : "popover was null");
 popover.appendChild(popoverContent);
 
 const menuUl = document.createElement("ul");
 menuUl.className = "bp3-menu";
-console.log(popoverContent ? "" : "popoverContent was null");
 popoverContent.appendChild(menuUl);
 
 const menuItemCallback = (sortBy: string) => {
@@ -74,17 +66,13 @@ const createMenuItem = (text: string, sortBy: string) => {
   const liItem = document.createElement("li");
   const aMenuItem = document.createElement("a");
   aMenuItem.className = "bp3-menu-item bp3-popover-dismiss";
-  console.log(liItem ? "" : "liItem was null");
   liItem.appendChild(aMenuItem);
   const menuItemText = document.createElement("div");
   menuItemText.className = "bp3-text-overflow-ellipsis bp3-fill";
   menuItemText.innerText = text;
-  console.log(aMenuItem ? "" : "aMenuItem was null");
   aMenuItem.appendChild(menuItemText);
-  console.log(menuUl ? "" : "menuUl was null");
   menuUl.appendChild(liItem);
   aMenuItem.onclick = (e) => {
-    console.log("onclick")
     menuItemCallback(sortBy);
     e.stopImmediatePropagation();
     e.preventDefault();
@@ -105,6 +93,7 @@ const documentEventListener = (e: MouseEvent) => {
 };
 
 const closePopover = () => {
+  popoverOverlay.className = "bp3-overlay bp3-overlay-inline";
   popoverOverlay.removeChild(transitionContainer);
   document.removeEventListener("click", documentEventListener);
   popoverOpen = false;
@@ -116,7 +105,8 @@ popoverButton.onclick = (e) => {
     transitionContainer.style.transform = `translate3d(${
       pageX - 180
     }px, ${pageY}px, 0px)`;
-    console.log(popoverOverlay ? "" : "popoverOverlay was null");
+    popoverOverlay.className =
+      "bp3-overlay bp3-overlay-open bp3-overlay-inline";
     popoverOverlay.appendChild(transitionContainer);
     e.stopImmediatePropagation();
     e.preventDefault();
