@@ -52,7 +52,7 @@ const menuItemCallback = (sortBy: string) => {
   )[0] as HTMLHeadingElement;
   const parentBlocks = window.roamAlphaAPI
     .q(
-      `[:find (pull ?parentPage [:node/title]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
+      `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
     )
     .filter((block) => block.length);
   const linkedReferences = parentBlocks
