@@ -42,7 +42,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
           ...r,
           data: r.data.map((i: any) => ({
             ...i,
-            html_link: `${projectObj.html_link}#card-${i.id}`,
+            html_url: `${projectObj.html_url}#card-${i.id}`,
           })),
         }))
       );
