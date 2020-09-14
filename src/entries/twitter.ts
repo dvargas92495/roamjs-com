@@ -7,14 +7,6 @@ import {
 
 const TWITTER_REFERENCES_COMMAND = "twitter references";
 
-declare global {
-  interface Window {
-    roamAlphaAPI: {
-      q: (query: string) => any[];
-    };
-  }
-}
-
 const twitterReferencesListener = async () => {
 	const config = getConfigFromPage("twitter");
 	const username = config["Username"];
@@ -46,7 +38,6 @@ const twitterReferencesListener = async () => {
 	      return;
 	    }
 	    const bullets = statuses.map((i: any) => `https://twitter.com/i/web/status/${i.id_str}`);
-	    console.log(bullets);
 	    await pushBullets(bullets, "Tweets");
 	  });
 	})
