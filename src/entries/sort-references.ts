@@ -57,14 +57,12 @@ const createMenuItem = (text: string) => {
   aMenuItem.appendChild(menuItemText);
   menuUl.appendChild(liItem);
 };
-createMenuItem("Sort By Title");
+createMenuItem("Sort By Page Title");
 createMenuItem("Sort By Created Date");
 
 let popoverOpen = false;
 
 const documentEventListener = (e: MouseEvent) => {
-    console.log(e.target);
-    console.log(popoverOverlay.contains(e.target as HTMLElement));
   if (
     (!e.target || !popoverOverlay.contains(e.target as HTMLElement)) &&
     popoverOpen
@@ -82,9 +80,8 @@ const closePopover = () => {
 popoverButton.onclick = (e) => {
   if (!popoverOpen) {
     const { pageX, pageY } = e;
-    console.log(popover.offsetWidth);
     transitionContainer.style.transform = `translate3d(${
-      pageX - popover.offsetWidth
+      pageX - 180
     }px, ${pageY}px, 0px)`;
     popoverOverlay.appendChild(transitionContainer);
     e.stopImmediatePropagation();
