@@ -46,7 +46,12 @@ const menuUl = document.createElement("ul");
 menuUl.className = "bp3-menu";
 popoverContent.appendChild(menuUl);
 
-const menuItemCallback = (sortBy: string) => {
+type RoamBlock = {
+  title: string;
+  time: number;
+}
+
+const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   const pageTitle = document.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;
@@ -58,11 +63,11 @@ const menuItemCallback = (sortBy: string) => {
   const linkedReferences = parentBlocks
     .filter((b) => b[0])
     .map((b) => b[0])
-    .sort((a, b) => a[sortBy] - b[sortBy]);
+    .sort(sortBy);
   console.log(linkedReferences);
 };
 
-const createMenuItem = (text: string, sortBy: string) => {
+const createMenuItem = (text: string, sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   const liItem = document.createElement("li");
   const aMenuItem = document.createElement("a");
   aMenuItem.className = "bp3-menu-item bp3-popover-dismiss";
@@ -78,8 +83,8 @@ const createMenuItem = (text: string, sortBy: string) => {
     e.preventDefault();
   };
 };
-createMenuItem("Sort By Page Title", "title");
-createMenuItem("Sort By Created Date", "time");
+createMenuItem("Sort By Page Title", (a, b) => a.title.localeCompare(b.title));
+createMenuItem("Sort By Created Date", (a, b) => a.time - b.time);
 
 let popoverOpen = false;
 
