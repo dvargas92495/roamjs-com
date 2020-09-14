@@ -60,8 +60,7 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
       `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
     )
     .filter((block) => block.length);
-  const linkedReferences = parentBlocks.filter((b) => b[0]).map((b) => b[0]);
-  linkedReferences.forEach((b) => !b.title && console.log(b));
+  const linkedReferences = parentBlocks.filter((b) => b[0] && b[0].title).map((b) => b[0]);
   linkedReferences.sort(sortBy);
   console.log(linkedReferences);
 };
