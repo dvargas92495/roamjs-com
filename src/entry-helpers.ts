@@ -11,16 +11,12 @@ export const genericError = (e: Error) =>
 
 export const waitForCallback = (text: string) => () => {
   const textArea = document.activeElement as HTMLTextAreaElement;
-  let expectedText = text.toUpperCase();
   let expectedTextWithoutPeriod = text.replace(/\./g,'').toUpperCase();
-  let actualText = textArea.value.toUpperCase();
+  let actualTextWithoutPeriod = textArea.value.replace(/\./g,'').toUpperCase();
 
-  // relaxing constraint for equality because of the period issue.
-  if ((actualText === expectedText) || (actualText === expectedTextWithoutPeriod))
-  {
-    return;
-  }
-  else
+  // relaxing constraint for equality because there is an issue with periods. 
+  // in some cases, userEvent.type doesn't type the periods.
+  if (actualTextWithoutPeriod !== expectedTextWithoutPeriod)
   {
     throw new Error("Typing not complete");
   }
@@ -50,11 +46,12 @@ export const getConfigFromPage = (page: string) => {
 };
 
 export const pushBullets = async (bullets: string[], title: string = "") => {
-  // There is an issue with periods which happens only for the first bullet. 
+  // There is an issue with periods which happens only for the first bullet that contains a period.
   // Deliberrately adding a period, so that subsequent bullets don't face that issue.
+  // Doesn't always work if title is empty.
+  // This period issue is a big mystery.
   bullets.unshift(title + ".");
 
-  // TODO: Nest bullets under title bullet.
   for (const index in bullets) {
     const bullet = bullets[index];
     await asyncType(bullet);
