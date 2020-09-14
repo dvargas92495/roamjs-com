@@ -46,7 +46,29 @@ const menuUl = document.createElement("ul");
 menuUl.className = "bp3-menu";
 popoverContent.appendChild(menuUl);
 
-const createMenuItem = (text: string) => {
+type RoamBlock = {
+  title: string;
+  time: number;
+};
+
+const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
+  const pageTitle = document.getElementsByClassName(
+    "rm-title-display"
+  )[0] as HTMLHeadingElement;
+  const parentBlocks = window.roamAlphaAPI
+    .q(
+      `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
+    )
+    .filter((block) => block.length);
+  const linkedReferences = parentBlocks.filter((b) => b[0] && b[0].title).map((b) => b[0]);
+  linkedReferences.sort(sortBy);
+  console.log(linkedReferences);
+};
+
+const createMenuItem = (
+  text: string,
+  sortBy: (a: RoamBlock, b: RoamBlock) => number
+) => {
   const liItem = document.createElement("li");
   const aMenuItem = document.createElement("a");
   aMenuItem.className = "bp3-menu-item bp3-popover-dismiss";
@@ -56,9 +78,14 @@ const createMenuItem = (text: string) => {
   menuItemText.innerText = text;
   aMenuItem.appendChild(menuItemText);
   menuUl.appendChild(liItem);
+  aMenuItem.onclick = (e) => {
+    menuItemCallback(sortBy);
+    e.stopImmediatePropagation();
+    e.preventDefault();
+  };
 };
-createMenuItem("Sort By Page Title");
-createMenuItem("Sort By Created Date");
+createMenuItem("Sort By Page Title", (a, b) => a.title.localeCompare(b.title));
+createMenuItem("Sort By Created Date", (a, b) => a.time - b.time);
 
 let popoverOpen = false;
 
@@ -72,6 +99,7 @@ const documentEventListener = (e: MouseEvent) => {
 };
 
 const closePopover = () => {
+  popoverOverlay.className = "bp3-overlay bp3-overlay-inline";
   popoverOverlay.removeChild(transitionContainer);
   document.removeEventListener("click", documentEventListener);
   popoverOpen = false;
@@ -83,6 +111,8 @@ popoverButton.onclick = (e) => {
     transitionContainer.style.transform = `translate3d(${
       pageX - 180
     }px, ${pageY}px, 0px)`;
+    popoverOverlay.className =
+      "bp3-overlay bp3-overlay-open bp3-overlay-inline";
     popoverOverlay.appendChild(transitionContainer);
     e.stopImmediatePropagation();
     e.preventDefault();
