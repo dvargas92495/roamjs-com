@@ -71,5 +71,7 @@ popoverButton.onclick = e => {
     const {pageX, pageY} = e;
     transitionContainer.style.transform = `translate3d(${pageX}px, ${pageY}px, 0px)`;
     popoverOverlay.appendChild(transitionContainer);
+    e.stopImmediatePropagation();
+    e.preventDefault();
     document.addEventListener('click', closePopover);
 };
