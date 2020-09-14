@@ -61,7 +61,7 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
     )
     .filter((block) => block.length);
   const linkedReferences = parentBlocks.filter((b) => b[0]).map((b) => b[0]);
-  linkedReferences.forEach((b) => !b[0].title && console.log(b));
+  linkedReferences.forEach((b) => !b.title && console.log(b));
   linkedReferences.sort(sortBy);
   console.log(linkedReferences);
 };
