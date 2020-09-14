@@ -49,7 +49,7 @@ popoverContent.appendChild(menuUl);
 type RoamBlock = {
   title: string;
   time: number;
-}
+};
 
 const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   const pageTitle = document.getElementsByClassName(
@@ -60,14 +60,16 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
       `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
     )
     .filter((block) => block.length);
-  const linkedReferences = parentBlocks
-    .filter((b) => b[0])
-    .map((b) => b[0])
-    .sort(sortBy);
+  const linkedReferences = parentBlocks.filter((b) => b[0]).map((b) => b[0]);
+  linkedReferences.forEach((b) => !b[0].title && console.log(b));
+  linkedReferences.sort(sortBy);
   console.log(linkedReferences);
 };
 
-const createMenuItem = (text: string, sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
+const createMenuItem = (
+  text: string,
+  sortBy: (a: RoamBlock, b: RoamBlock) => number
+) => {
   const liItem = document.createElement("li");
   const aMenuItem = document.createElement("a");
   aMenuItem.className = "bp3-menu-item bp3-popover-dismiss";
