@@ -60,18 +60,36 @@ const createMenuItem = (text: string) => {
 createMenuItem("Sort By Title");
 createMenuItem("Sort By Created Date");
 
-const closePopover = (e: MouseEvent) => {
-    if(!e.target || !popoverOverlay.contains(e.target as HTMLElement)) {
-        popoverOverlay.removeChild(transitionContainer);
-        document.removeEventListener('click', closePopover);
-    }
-}
+let popoverOpen = false;
 
-popoverButton.onclick = e => {
-    const {pageX, pageY} = e;
-    transitionContainer.style.transform = `translate3d(${pageX}px, ${pageY}px, 0px)`;
+const documentEventListener = (e: MouseEvent) => {
+  if (
+    (!e.target || !popoverOverlay.contains(e.target as HTMLElement)) &&
+    popoverOpen
+  ) {
+    closePopover();
+  }
+};
+
+const closePopover = () => {
+  popoverOverlay.removeChild(transitionContainer);
+  document.removeEventListener("click", documentEventListener);
+  popoverOpen = false;
+};
+
+popoverButton.onclick = (e) => {
+  if (!popoverOpen) {
+    const { pageX, pageY } = e;
+    console.log(popover);
+    transitionContainer.style.transform = `translate3d(${
+      pageX - popover.offsetWidth
+    }px, ${pageY}px, 0px)`;
     popoverOverlay.appendChild(transitionContainer);
     e.stopImmediatePropagation();
     e.preventDefault();
-    document.addEventListener('click', closePopover);
+    document.addEventListener("click", documentEventListener);
+    popoverOpen = true;
+  } else {
+    closePopover();
+  }
 };
