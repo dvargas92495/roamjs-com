@@ -63,6 +63,8 @@ createMenuItem("Sort By Created Date");
 let popoverOpen = false;
 
 const documentEventListener = (e: MouseEvent) => {
+    console.log(e.target);
+    console.log(popoverOverlay.contains(e.target as HTMLElement));
   if (
     (!e.target || !popoverOverlay.contains(e.target as HTMLElement)) &&
     popoverOpen
@@ -80,7 +82,7 @@ const closePopover = () => {
 popoverButton.onclick = (e) => {
   if (!popoverOpen) {
     const { pageX, pageY } = e;
-    console.log(popover);
+    console.log(popover.offsetWidth);
     transitionContainer.style.transform = `translate3d(${
       pageX - popover.offsetWidth
     }px, ${pageY}px, 0px)`;
