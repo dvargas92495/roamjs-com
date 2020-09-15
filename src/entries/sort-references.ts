@@ -49,20 +49,29 @@ popoverContent.appendChild(menuUl);
 type RoamBlock = {
   title: string;
   time: number;
+  id: number;
 };
 
 const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   const pageTitle = document.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;
+  const findParentBlock: (b: RoamBlock) => RoamBlock = (b: RoamBlock) =>
+    b.title
+      ? b
+      : findParentBlock(
+          window.roamAlphaAPI.q(
+            `[:find (pull ?e [*]) :where [?e :block/children ${b.id}]]`
+          )[0][0] as RoamBlock
+        );
   const parentBlocks = window.roamAlphaAPI
     .q(
       `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
     )
     .filter((block) => block.length);
-  const linkedReferences = parentBlocks
-    .filter((b) => b[0] && b[0].title)
-    .map((b) => b[0]) as RoamBlock[];
+  const linkedReferences = parentBlocks.map((b) =>
+    findParentBlock(b[0])
+  ) as RoamBlock[];
   linkedReferences.sort(sortBy);
   const refIndexByTitle: { [key: string]: number } = {};
   linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));
@@ -76,7 +85,14 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   );
   refsInView.forEach((r) => refContainer.removeChild(r));
   console.log(refsInView);
-  refsInView.forEach(r => console.log(r.getElementsByClassName("rm-ref-page-view-title")[0].textContent, refIndexByTitle[r.getElementsByClassName("rm-ref-page-view-title")[0].textContent]));
+  refsInView.forEach((r) =>
+    console.log(
+      r.getElementsByClassName("rm-ref-page-view-title")[0].textContent,
+      refIndexByTitle[
+        r.getElementsByClassName("rm-ref-page-view-title")[0].textContent
+      ]
+    )
+  );
   refsInView.sort((a, b) => {
     const aTitle = a.getElementsByClassName(
       "rm-ref-page-view-title"
@@ -84,7 +100,9 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
     const bTitle = b.getElementsByClassName(
       "rm-ref-page-view-title"
     )[0] as HTMLDivElement;
-    return refIndexByTitle[aTitle.textContent] - refIndexByTitle[bTitle.textContent];
+    return (
+      refIndexByTitle[aTitle.textContent] - refIndexByTitle[bTitle.textContent]
+    );
   });
   console.log(refsInView);
   refsInView.forEach((r) => refContainer.appendChild(r));
