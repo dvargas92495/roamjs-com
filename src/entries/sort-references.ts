@@ -1,11 +1,9 @@
-const referenceButtonContainer = document.getElementsByClassName(
-  "rm-reference-container dont-focus-block"
-)[0] as HTMLDivElement;
+const POPOVER_WRAPPER_ID = "sort-references-popover-wrapper";
 
 // Icon Button
 const popoverWrapper = document.createElement("span");
 popoverWrapper.className = "bp3-popover-wrapper";
-referenceButtonContainer.appendChild(popoverWrapper);
+popoverWrapper.id = POPOVER_WRAPPER_ID;
 
 const popoverTarget = document.createElement("span");
 popoverTarget.className = "bp3-popover-target";
@@ -139,7 +137,6 @@ const closePopover = () => {
 
 popoverButton.onclick = (e) => {
   if (!popoverOpen) {
-    const { pageX, pageY } = e;
     const target = e.target as HTMLButtonElement;
     transitionContainer.style.transform = `translate3d(${
       target.offsetLeft - 180
@@ -155,3 +152,23 @@ popoverButton.onclick = (e) => {
     closePopover();
   }
 };
+
+const createSortIcon = () => {
+  const referenceButtonContainer = document.getElementsByClassName(
+    "rm-reference-container dont-focus-block"
+  )[0] as HTMLDivElement;
+  if (referenceButtonContainer) {
+    referenceButtonContainer.appendChild(popoverWrapper);
+  }
+};
+createSortIcon();
+
+const mutationConfig = { childList: true, subtree: true };
+const mutationTarget = document.getElementsByClassName("roam-body")[0];
+const mutationCallback = () => {
+  if (!document.getElementById(POPOVER_WRAPPER_ID)) {
+    createSortIcon();
+  }
+};
+const observer = new MutationObserver(mutationCallback);
+observer.observe(mutationTarget, mutationConfig);

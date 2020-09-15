@@ -11,8 +11,6 @@ Near the linked references, there will appear a sort icon next to the filter ico
 - Sort By Page Title - This will sort all the linked references in ascending alphabetical order of the page title.
 - Sort By Created Date - This will sort all the linked references in ascending order that the page was created.
 
-Sorting by page title
-
 ```javascript
 var old = document.getElementById("sort-references");
 if (old) {
