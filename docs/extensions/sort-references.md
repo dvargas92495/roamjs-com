@@ -8,8 +8,10 @@ The script is not configurable.
 
 Near the linked references, there will appear a sort icon next to the filter icon. Clicking on the sort icon will make a sort menu visible to the user with the following options:
 
-- Sort By Page Title
-- Sort By Created Date
+- Sort By Page Title - This will sort all the linked references in ascending alphabetical order of the page title.
+- Sort By Created Date - This will sort all the linked references in ascending order that the page was created.
+
+Sorting by page title
 
 ```javascript
 var old = document.getElementById("sort-references");

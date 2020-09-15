@@ -75,7 +75,6 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   linkedReferences.sort(sortBy);
   const refIndexByTitle: { [key: string]: number } = {};
   linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));
-  console.log(refIndexByTitle);
 
   const refContainer = document.getElementsByClassName(
     "rm-mentions refs-by-page-view"
@@ -84,15 +83,6 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
     document.getElementsByClassName("rm-ref-page-view")
   );
   refsInView.forEach((r) => refContainer.removeChild(r));
-  console.log(refsInView);
-  refsInView.forEach((r) =>
-    console.log(
-      r.getElementsByClassName("rm-ref-page-view-title")[0].textContent,
-      refIndexByTitle[
-        r.getElementsByClassName("rm-ref-page-view-title")[0].textContent
-      ]
-    )
-  );
   refsInView.sort((a, b) => {
     const aTitle = a.getElementsByClassName(
       "rm-ref-page-view-title"
@@ -104,7 +94,6 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
       refIndexByTitle[aTitle.textContent] - refIndexByTitle[bTitle.textContent]
     );
   });
-  console.log(refsInView);
   refsInView.forEach((r) => refContainer.appendChild(r));
 };
 
