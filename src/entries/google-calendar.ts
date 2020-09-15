@@ -26,6 +26,7 @@ const importGoogleCalendar = async () => {
     return;
   }
   const includeLink = config["Include Event Link"]?.trim() === "true";
+  const skipFree = config["Skip Free"]?.trim() === "true";
   const timeMin = new Date();
   const timeMax = new Date();
   const offset = timeMin.getTimezoneOffset() / 60;
@@ -61,7 +62,9 @@ const importGoogleCalendar = async () => {
         await asyncType("No Events Scheduled for Today!");
         return;
       }
-      const bullets = events.map((e: any) => {
+      const bullets = events
+      .filter((e: any) => !skipFree || e.transparency !== 'transparent')
+      .map((e: any) => {
         const summaryText = e.summary ? e.summary : "No Summary";
         const summary =
           includeLink && e.htmlLink

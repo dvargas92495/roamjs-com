@@ -8,6 +8,7 @@ The script supports the following configuration attributes, to be added in the `
 
 - `Google Calendar` - (Required) This is the calendar ID that the extension will use to query for events. It's usually your gmail address, such as `dvargas92495@gmail.com`.
 - `Include Event Link` - (Optional) Set to `true` if you would like to hyperlink the event summary with a link to the google calendar event. Note, because there are more characters to be typed it's a slower operation.
+- `Skip Free` - (Optional) Set to `true` if you would like to filter out the events from your calendar that you've set to 'Free'
 
 Here's an example configuration page:
 
