@@ -165,9 +165,7 @@ const createSortIcon = () => {
 const mutationConfig = { childList: true, subtree: true };
 const mutationTarget = document.getElementsByClassName("roam-body")[0];
 const mutationCallback = () => {
-  const icon = document.getElementById(POPOVER_WRAPPER_ID);
-  console.log(icon);
-  if (!!icon) {
+  if (!document.getElementById(POPOVER_WRAPPER_ID)) {
     createSortIcon();
   }
 };
