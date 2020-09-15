@@ -49,20 +49,52 @@ popoverContent.appendChild(menuUl);
 type RoamBlock = {
   title: string;
   time: number;
+  id: number;
 };
 
 const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   const pageTitle = document.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;
+  const findParentBlock: (b: RoamBlock) => RoamBlock = (b: RoamBlock) =>
+    b.title
+      ? b
+      : findParentBlock(
+          window.roamAlphaAPI.q(
+            `[:find (pull ?e [*]) :where [?e :block/children ${b.id}]]`
+          )[0][0] as RoamBlock
+        );
   const parentBlocks = window.roamAlphaAPI
     .q(
       `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
     )
     .filter((block) => block.length);
-  const linkedReferences = parentBlocks.filter((b) => b[0] && b[0].title).map((b) => b[0]);
+  const linkedReferences = parentBlocks.map((b) =>
+    findParentBlock(b[0])
+  ) as RoamBlock[];
   linkedReferences.sort(sortBy);
-  console.log(linkedReferences);
+  const refIndexByTitle: { [key: string]: number } = {};
+  linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));
+
+  const refContainer = document.getElementsByClassName(
+    "rm-mentions refs-by-page-view"
+  )[0];
+  const refsInView = Array.from(
+    document.getElementsByClassName("rm-ref-page-view")
+  );
+  refsInView.forEach((r) => refContainer.removeChild(r));
+  refsInView.sort((a, b) => {
+    const aTitle = a.getElementsByClassName(
+      "rm-ref-page-view-title"
+    )[0] as HTMLDivElement;
+    const bTitle = b.getElementsByClassName(
+      "rm-ref-page-view-title"
+    )[0] as HTMLDivElement;
+    return (
+      refIndexByTitle[aTitle.textContent] - refIndexByTitle[bTitle.textContent]
+    );
+  });
+  refsInView.forEach((r) => refContainer.appendChild(r));
 };
 
 const createMenuItem = (
@@ -108,9 +140,10 @@ const closePopover = () => {
 popoverButton.onclick = (e) => {
   if (!popoverOpen) {
     const { pageX, pageY } = e;
+    const target = e.target as HTMLButtonElement;
     transitionContainer.style.transform = `translate3d(${
-      pageX - 180
-    }px, ${pageY}px, 0px)`;
+      target.offsetLeft - 180
+    }px, ${target.offsetTop + 24}px, 0px)`;
     popoverOverlay.className =
       "bp3-overlay bp3-overlay-open bp3-overlay-inline";
     popoverOverlay.appendChild(transitionContainer);
