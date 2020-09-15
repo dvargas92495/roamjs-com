@@ -60,9 +60,30 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
       `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
     )
     .filter((block) => block.length);
-  const linkedReferences = parentBlocks.filter((b) => b[0] && b[0].title).map((b) => b[0]);
+  const linkedReferences = parentBlocks
+    .filter((b) => b[0] && b[0].title)
+    .map((b) => b[0]) as RoamBlock[];
   linkedReferences.sort(sortBy);
-  console.log(linkedReferences);
+  const refIndexByTitle: { [key: string]: number } = {};
+  linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));
+
+  const refContainer = document.getElementsByClassName(
+    "rm-mentions refs-by-page-view"
+  )[0];
+  const refsInView = Array.from(
+    document.getElementsByClassName("rm-ref-page-view")
+  );
+  refsInView.forEach((r) => refContainer.removeChild(r));
+  refsInView.sort((a, b) => {
+    const aTitle = a.getElementsByClassName(
+      "rm-ref-page-view-title"
+    )[0] as HTMLDivElement;
+    const bTitle = b.getElementsByClassName(
+      "rm-ref-page-view-title"
+    )[0] as HTMLDivElement;
+    return refIndexByTitle[aTitle.textContent] - refIndexByTitle[bTitle.textContent];
+  });
+  refsInView.forEach((r) => refContainer.appendChild(r));
 };
 
 const createMenuItem = (
