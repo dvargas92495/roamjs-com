@@ -128,6 +128,8 @@ const emojiKeyDownListener = (e: KeyboardEvent) => {
     e.stopPropagation();
   } else if (e.key === 'Escape' && emojiOn) {
     turnOffEmoji();
+    e.preventDefault();
+    e.stopPropagation();
   }
 };
 
