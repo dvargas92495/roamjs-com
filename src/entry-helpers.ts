@@ -12,9 +12,7 @@ export const genericError = (e: Error) =>
 export const waitForCallback = (text: string) => () => {
   const textArea = document.activeElement as HTMLTextAreaElement;
   if (textArea?.value == null) {
-    console.error(`Wrong active element waiting for ${text}`);
-    console.error(document.activeElement);
-    throw new Error("Textarea is undefined")
+    throw new Error(`Textarea is undefined. Active Element ${textArea.tagName}. Input text ${text}`);
   }
 
   let expectedTextWithoutPeriod = text.replace(/\./g,'').toUpperCase();
@@ -71,7 +69,7 @@ export const pushBullets = async (bullets: string[], title: string = "") => {
       which: 13,
     };
     await fireEvent.keyDown(document.activeElement, enterObj);
-    await fireEvent.keyPress(document.activeElement, enterObj);
+    // await fireEvent.keyPress(document.activeElement, enterObj);
     await fireEvent.keyUp(document.activeElement, enterObj);
     await waitFor(waitForCallback(""));
   }
