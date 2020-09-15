@@ -10,7 +10,15 @@ export const genericError = (e: Error) =>
   asyncType(`Error: ${e.message.length > 50 ? `${e.message}...` : e.message}`);
 
 export const waitForCallback = (text: string) => () => {
+  if (text == null) {
+    throw new Error("Input is undefined")
+  }
+
   const textArea = document.activeElement as HTMLTextAreaElement;
+  if (textArea?.value == null) {
+    throw new Error("Textarea is undefined")
+  }
+
   let expectedTextWithoutPeriod = text.replace(/\./g,'').toUpperCase();
   let actualTextWithoutPeriod = textArea.value.replace(/\./g,'').toUpperCase();
 
