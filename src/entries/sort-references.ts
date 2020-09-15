@@ -76,6 +76,7 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   );
   refsInView.forEach((r) => refContainer.removeChild(r));
   console.log(refsInView);
+  refsInView.forEach(r => console.log(r.getElementsByClassName("rm-ref-page-view-title")[0].textContent, refIndexByTitle[r.getElementsByClassName("rm-ref-page-view-title")[0].textContent]));
   refsInView.sort((a, b) => {
     const aTitle = a.getElementsByClassName(
       "rm-ref-page-view-title"
@@ -134,8 +135,8 @@ popoverButton.onclick = (e) => {
     const { pageX, pageY } = e;
     const target = e.target as HTMLButtonElement;
     transitionContainer.style.transform = `translate3d(${
-      target.offsetLeft
-    }px, ${target.offsetTop}px, 0px)`;
+      target.offsetLeft - 180
+    }px, ${target.offsetTop + 24}px, 0px)`;
     popoverOverlay.className =
       "bp3-overlay bp3-overlay-open bp3-overlay-inline";
     popoverOverlay.appendChild(transitionContainer);
