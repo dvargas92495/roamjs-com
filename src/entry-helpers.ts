@@ -69,7 +69,6 @@ export const pushBullets = async (bullets: string[], title: string = "") => {
       which: 13,
     };
     await fireEvent.keyDown(document.activeElement, enterObj);
-    // await fireEvent.keyPress(document.activeElement, enterObj);
     await fireEvent.keyUp(document.activeElement, enterObj);
     await waitFor(waitForCallback(""));
   }
