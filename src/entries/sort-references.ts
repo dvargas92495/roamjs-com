@@ -66,6 +66,7 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   linkedReferences.sort(sortBy);
   const refIndexByTitle: { [key: string]: number } = {};
   linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));
+  console.log(refIndexByTitle);
 
   const refContainer = document.getElementsByClassName(
     "rm-mentions refs-by-page-view"
