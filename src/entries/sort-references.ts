@@ -155,3 +155,10 @@ popoverButton.onclick = (e) => {
     closePopover();
   }
 };
+
+const mutationConfig = { childList: true, subtree: true };
+const mutationCallback = (mutationList: MutationRecord[]) => {
+  console.log(mutationList);
+};
+const observer = new MutationObserver(mutationCallback);
+observer.observe(popoverWrapper, mutationConfig);
