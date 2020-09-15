@@ -16,6 +16,8 @@ export const waitForCallback = (text: string) => () => {
 
   const textArea = document.activeElement as HTMLTextAreaElement;
   if (textArea?.value == null) {
+    console.error("Textarea value is null");
+    console.error(document.activeElement);
     throw new Error("Textarea is undefined")
   }
 
