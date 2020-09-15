@@ -161,6 +161,7 @@ const createSortIcon = () => {
     referenceButtonContainer.appendChild(popoverWrapper);
   }
 };
+createSortIcon();
 
 const mutationConfig = { childList: true, subtree: true };
 const mutationTarget = document.getElementsByClassName("roam-body")[0];
