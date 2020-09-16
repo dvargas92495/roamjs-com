@@ -39,7 +39,7 @@ export const getConfigFromPage = (inputPage?: string) => {
   const pageResults = window.roamAlphaAPI.q(
     `[:find (pull ?e [*]) :where [?e :node/title "${page}"] ]`
   );
-  if (pageResults.length === 0) {
+  if (pageResults.length === 0 || !pageResults[0][0].attrs) {
     return {};
   }
 
