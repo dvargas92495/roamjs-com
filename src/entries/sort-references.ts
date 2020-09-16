@@ -1,3 +1,5 @@
+import { getConfigFromPage } from "../entry-helpers";
+
 const POPOVER_WRAPPER_ID = "sort-references-popover-wrapper";
 
 // Icon Button
@@ -54,6 +56,9 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   const pageTitle = document.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;
+  if (!pageTitle) {
+    return;
+  }
   const findParentBlock: (b: RoamBlock) => RoamBlock = (b: RoamBlock) =>
     b.title
       ? b
@@ -95,10 +100,7 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   refsInView.forEach((r) => refContainer.appendChild(r));
 };
 
-const createMenuItem = (
-  text: string,
-  sortBy: (a: RoamBlock, b: RoamBlock) => number
-) => {
+const createMenuItem = (text: string, sortCallback: () => void) => {
   const liItem = document.createElement("li");
   const aMenuItem = document.createElement("a");
   aMenuItem.className = "bp3-menu-item bp3-popover-dismiss";
@@ -109,13 +111,19 @@ const createMenuItem = (
   aMenuItem.appendChild(menuItemText);
   menuUl.appendChild(liItem);
   aMenuItem.onclick = (e) => {
-    menuItemCallback(sortBy);
+    sortCallback();
     e.stopImmediatePropagation();
     e.preventDefault();
   };
 };
-createMenuItem("Sort By Page Title", (a, b) => a.title.localeCompare(b.title));
-createMenuItem("Sort By Created Date", (a, b) => a.time - b.time);
+const sortCallbacks = {
+  "Page Title": () =>
+    menuItemCallback((a, b) => a.title.localeCompare(b.title)),
+  "Created Date": () => menuItemCallback((a, b) => a.time - b.time),
+};
+Object.keys(sortCallbacks).forEach((k: keyof typeof sortCallbacks) =>
+  createMenuItem(`Sort By ${k}`, sortCallbacks[k])
+);
 
 let popoverOpen = false;
 
@@ -159,6 +167,21 @@ const createSortIcon = () => {
   )[0] as HTMLDivElement;
   if (referenceButtonContainer) {
     referenceButtonContainer.appendChild(popoverWrapper);
+
+    const thisPageConfig = getConfigFromPage();
+    const thisPageDefaultSort = thisPageConfig[
+      "Default Sort"
+    ] as keyof typeof sortCallbacks;
+    if (thisPageDefaultSort && sortCallbacks[thisPageDefaultSort]) {
+      sortCallbacks[thisPageDefaultSort]();
+      return;
+    }
+
+    const config = getConfigFromPage("sort-references");
+    const defaultSort = config["Default Sort"] as keyof typeof sortCallbacks;
+    if (defaultSort && sortCallbacks[defaultSort]) {
+      sortCallbacks[defaultSort]();
+    }
   }
 };
 createSortIcon();

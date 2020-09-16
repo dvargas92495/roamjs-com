@@ -12,27 +12,34 @@ export const genericError = (e: Error) =>
 export const waitForCallback = (text: string) => () => {
   const textArea = document.activeElement as HTMLTextAreaElement;
   if (textArea?.value == null) {
-    throw new Error(`Textarea is undefined. Active Element ${textArea.tagName}. Input text ${text}`);
+    throw new Error(
+      `Textarea is undefined. Active Element ${textArea.tagName}. Input text ${text}`
+    );
   }
 
-  let expectedTextWithoutPeriod = text.replace(/\./g,'').toUpperCase();
-  let actualTextWithoutPeriod = textArea.value.replace(/\./g,'').toUpperCase();
+  let expectedTextWithoutPeriod = text.replace(/\./g, "").toUpperCase();
+  let actualTextWithoutPeriod = textArea.value.replace(/\./g, "").toUpperCase();
 
-  // relaxing constraint for equality because there is an issue with periods. 
+  // relaxing constraint for equality because there is an issue with periods.
   // in some cases, userEvent.type doesn't type the periods.
-  if (actualTextWithoutPeriod !== expectedTextWithoutPeriod)
-  {
+  if (actualTextWithoutPeriod !== expectedTextWithoutPeriod) {
     throw new Error("Typing not complete");
   }
 };
 
 export const skipFrame = () => wait(() => {}, { timeout: 1 });
 
-export const getConfigFromPage = (page: string) => {
+export const getConfigFromPage = (inputPage?: string) => {
+  const page = inputPage
+    ? `roam/js/${inputPage}`
+    : document.getElementsByClassName("rm-title-display")[0]?.textContent;
+  if (!page) {
+    return {};
+  }  
   const pageResults = window.roamAlphaAPI.q(
-    `[:find (pull ?e [*]) :where [?e :node/title "roam/js/${page}"] ]`
+    `[:find (pull ?e [*]) :where [?e :node/title "${page}"] ]`
   );
-  if (pageResults.length === 0) {
+  if (pageResults.length === 0 || !pageResults[0][0].attrs) {
     return {};
   }
 
@@ -45,6 +52,7 @@ export const getConfigFromPage = (page: string) => {
         `[:find (pull ?e [:block/string]) :where [?e :block/uid "${r}"] ]`
       )[0][0]
       .string.split("::")
+      .map((s: string) => s.trim())
   );
   return Object.fromEntries(entries);
 };
