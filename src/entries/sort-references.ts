@@ -172,9 +172,16 @@ const mutationTarget = document.getElementsByClassName("roam-body")[0];
 const mutationCallback = () => {
   if (!document.getElementById(POPOVER_WRAPPER_ID)) {
     createSortIcon();
+    
+    const thisPageConfig = getConfigFromPage();
+    const thisPageDefaultSort = thisPageConfig["Default Sort"] as keyof typeof sortCallbacks;
+    if (thisPageDefaultSort && sortCallbacks[thisPageDefaultSort]) {
+      sortCallbacks[thisPageDefaultSort]();
+      return;
+    } 
+    
     const config = getConfigFromPage("sort-references");
     const defaultSort = config["Default Sort"] as keyof typeof sortCallbacks;
-    console.log(config);
     if (defaultSort && sortCallbacks[defaultSort]) {
       sortCallbacks[defaultSort]();
     }
