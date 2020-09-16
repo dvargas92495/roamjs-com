@@ -167,15 +167,6 @@ const createSortIcon = () => {
   )[0] as HTMLDivElement;
   if (referenceButtonContainer) {
     referenceButtonContainer.appendChild(popoverWrapper);
-  }
-};
-createSortIcon();
-
-const mutationConfig = { childList: true, subtree: true };
-const mutationTarget = document.getElementsByClassName("roam-body")[0];
-const mutationCallback = () => {
-  if (!document.getElementById(POPOVER_WRAPPER_ID)) {
-    createSortIcon();
 
     const thisPageConfig = getConfigFromPage();
     const thisPageDefaultSort = thisPageConfig[
@@ -191,6 +182,15 @@ const mutationCallback = () => {
     if (defaultSort && sortCallbacks[defaultSort]) {
       sortCallbacks[defaultSort]();
     }
+  }
+};
+createSortIcon();
+
+const mutationConfig = { childList: true, subtree: true };
+const mutationTarget = document.getElementsByClassName("roam-body")[0];
+const mutationCallback = () => {
+  if (!document.getElementById(POPOVER_WRAPPER_ID)) {
+    createSortIcon();
   }
 };
 const observer = new MutationObserver(mutationCallback);
