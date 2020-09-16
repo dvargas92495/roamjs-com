@@ -174,6 +174,7 @@ const mutationCallback = () => {
     createSortIcon();
     const config = getConfigFromPage("sort-references");
     const defaultSort = config["Default Sort"] as keyof typeof sortCallbacks;
+    console.log(config);
     if (defaultSort && sortCallbacks[defaultSort]) {
       sortCallbacks[defaultSort]();
     }
