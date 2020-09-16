@@ -178,8 +178,6 @@ const mutationCallback = () => {
     const thisPageDefaultSort = thisPageConfig[
       "Default Sort"
     ] as keyof typeof sortCallbacks;
-    console.log('thisPageConfig');
-    console.log(thisPageConfig);
     if (thisPageDefaultSort && sortCallbacks[thisPageDefaultSort]) {
       sortCallbacks[thisPageDefaultSort]();
       return;
@@ -187,8 +185,6 @@ const mutationCallback = () => {
 
     const config = getConfigFromPage("sort-references");
     const defaultSort = config["Default Sort"] as keyof typeof sortCallbacks;
-    console.log('config');
-    console.log(config);
     if (defaultSort && sortCallbacks[defaultSort]) {
       sortCallbacks[defaultSort]();
     }
