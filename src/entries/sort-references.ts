@@ -119,7 +119,10 @@ const createMenuItem = (text: string, sortCallback: () => void) => {
 const sortCallbacks = {
   "Page Title": () =>
     menuItemCallback((a, b) => a.title.localeCompare(b.title)),
+  "Page Title Descending": () =>
+    menuItemCallback((a, b) => b.title.localeCompare(a.title)),
   "Created Date": () => menuItemCallback((a, b) => a.time - b.time),
+  "Created Date Descending": () => menuItemCallback((a, b) => b.time - a.time),
 };
 Object.keys(sortCallbacks).forEach((k: keyof typeof sortCallbacks) =>
   createMenuItem(`Sort By ${k}`, sortCallbacks[k])
