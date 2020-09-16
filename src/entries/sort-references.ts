@@ -118,8 +118,9 @@ const sortCallbacks = {
     menuItemCallback((a, b) => a.title.localeCompare(b.title)),
   "Created Date": () => menuItemCallback((a, b) => a.time - b.time),
 };
-createMenuItem("Sort By Page Title", sortCallbacks["Page Title"]);
-createMenuItem("Sort By Created Date", sortCallbacks["Created Date"]);
+Object.keys(sortCallbacks).forEach((k: keyof typeof sortCallbacks) =>
+  createMenuItem(`Sort By ${k}`, sortCallbacks[k])
+);
 
 let popoverOpen = false;
 
@@ -172,16 +173,22 @@ const mutationTarget = document.getElementsByClassName("roam-body")[0];
 const mutationCallback = () => {
   if (!document.getElementById(POPOVER_WRAPPER_ID)) {
     createSortIcon();
-    
+
     const thisPageConfig = getConfigFromPage();
-    const thisPageDefaultSort = thisPageConfig["Default Sort"] as keyof typeof sortCallbacks;
+    const thisPageDefaultSort = thisPageConfig[
+      "Default Sort"
+    ] as keyof typeof sortCallbacks;
+    console.log('thisPageConfig');
+    console.log(thisPageConfig);
     if (thisPageDefaultSort && sortCallbacks[thisPageDefaultSort]) {
       sortCallbacks[thisPageDefaultSort]();
       return;
-    } 
-    
+    }
+
     const config = getConfigFromPage("sort-references");
     const defaultSort = config["Default Sort"] as keyof typeof sortCallbacks;
+    console.log('config');
+    console.log(config);
     if (defaultSort && sortCallbacks[defaultSort]) {
       sortCallbacks[defaultSort]();
     }

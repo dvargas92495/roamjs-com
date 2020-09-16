@@ -32,7 +32,10 @@ export const skipFrame = () => wait(() => {}, { timeout: 1 });
 export const getConfigFromPage = (inputPage?: string) => {
   const page = inputPage
     ? `roam/js/${inputPage}`
-    : document.getElementsByClassName("rm-title-display")[0].textContent;
+    : document.getElementsByClassName("rm-title-display")[0]?.textContent;
+  if (!page) {
+    return {};
+  }  
   const pageResults = window.roamAlphaAPI.q(
     `[:find (pull ?e [*]) :where [?e :node/title "roam/js/${page}"] ]`
   );
