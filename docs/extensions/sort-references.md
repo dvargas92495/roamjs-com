@@ -4,7 +4,9 @@ The Sort Linked References extension adds an icon button to the user's page that
 
 ### Usage
 
-The script is not configurable.
+The script supports the following configuration attributes, to be added in the `[[roam/js/sort-references]]` page:
+
+- `Default Sort` - (Optional) The default mode used to sort references on all pages. Valid values include `Page Title` and `Created Date`.
 
 Near the linked references, there will appear a sort icon next to the filter icon. Clicking on the sort icon will make a sort menu visible to the user with the following options:
 

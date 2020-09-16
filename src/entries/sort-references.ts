@@ -1,3 +1,5 @@
+import { getConfigFromPage } from "../entry-helpers";
+
 const POPOVER_WRAPPER_ID = "sort-references-popover-wrapper";
 
 // Icon Button
@@ -95,10 +97,7 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   refsInView.forEach((r) => refContainer.appendChild(r));
 };
 
-const createMenuItem = (
-  text: string,
-  sortBy: (a: RoamBlock, b: RoamBlock) => number
-) => {
+const createMenuItem = (text: string, sortCallback: () => void) => {
   const liItem = document.createElement("li");
   const aMenuItem = document.createElement("a");
   aMenuItem.className = "bp3-menu-item bp3-popover-dismiss";
@@ -109,13 +108,18 @@ const createMenuItem = (
   aMenuItem.appendChild(menuItemText);
   menuUl.appendChild(liItem);
   aMenuItem.onclick = (e) => {
-    menuItemCallback(sortBy);
+    sortCallback();
     e.stopImmediatePropagation();
     e.preventDefault();
   };
 };
-createMenuItem("Sort By Page Title", (a, b) => a.title.localeCompare(b.title));
-createMenuItem("Sort By Created Date", (a, b) => a.time - b.time);
+const sortCallbacks = {
+  "Page Title": () =>
+    menuItemCallback((a, b) => a.title.localeCompare(b.title)),
+  "Created Date": () => menuItemCallback((a, b) => a.time - b.time),
+};
+createMenuItem("Sort By Page Title", sortCallbacks["Page Title"]);
+createMenuItem("Sort By Created Date", sortCallbacks["Created Date"]);
 
 let popoverOpen = false;
 
@@ -168,6 +172,11 @@ const mutationTarget = document.getElementsByClassName("roam-body")[0];
 const mutationCallback = () => {
   if (!document.getElementById(POPOVER_WRAPPER_ID)) {
     createSortIcon();
+    const config = getConfigFromPage("sort-references");
+    const defaultSort = config["Default Sort"] as keyof typeof sortCallbacks;
+    if (defaultSort && sortCallbacks[defaultSort]) {
+      sortCallbacks[defaultSort]();
+    }
   }
 };
 const observer = new MutationObserver(mutationCallback);
