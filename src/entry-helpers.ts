@@ -144,7 +144,7 @@ export const addButtonListener = (
   document.addEventListener("click", listener);
 };
 
-export const createObserver = (mutationCallback: () => void) => {
+export const createObserver = (mutationCallback: (mutationList?: MutationRecord[]) => void) => {
   const mutationConfig = { childList: true, subtree: true };
   const mutationTarget = document.getElementsByClassName("roam-body")[0];
   const observer = new MutationObserver(mutationCallback);

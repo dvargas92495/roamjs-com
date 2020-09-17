@@ -1,5 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { asyncType } from "../entry-helpers";
+import { asyncType, createObserver } from "../entry-helpers";
 
 const styleArchivedButtons = (node: HTMLElement) => {
   const buttons = node.getElementsByTagName("button");
@@ -17,15 +17,11 @@ const styleArchivedButtons = (node: HTMLElement) => {
 };
 styleArchivedButtons(document.body);
 
-const mutationConfig = { childList: true, subtree: true };
-const mutationTarget = document.getElementsByClassName("roam-body")[0];
-const mutationCallback = (mutationList: MutationRecord[]) => {
+createObserver((mutationList: MutationRecord[]) => {
   mutationList.forEach((record) => {
     styleArchivedButtons(record.target as HTMLElement);
   });
-};
-const observer = new MutationObserver(mutationCallback);
-observer.observe(mutationTarget, mutationConfig);
+});
 
 const resetCursor = (inputStart: number, inputEnd: number) => {
   const textArea = document.activeElement as HTMLTextAreaElement;

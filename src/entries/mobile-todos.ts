@@ -2,7 +2,6 @@ import { createObserver } from "../entry-helpers";
 
 const MOBILE_MORE_ICON_BUTTON_ID = "mobile-more-icon-button";
 
-const mobileBar = document.getElementsByClassName("rm-mobile-bar")[0];
 const moreIconButton = document.createElement("button");
 moreIconButton.id = MOBILE_MORE_ICON_BUTTON_ID;
 moreIconButton.className =
@@ -20,6 +19,9 @@ moreIconButton.appendChild(moreIcon);
 
 createObserver(() => {
   if (!document.getElementById(MOBILE_MORE_ICON_BUTTON_ID)) {
-    mobileBar.appendChild(moreIconButton);
+    const mobileBar = document.getElementsByClassName("rm-mobile-bar")[0];
+    if (mobileBar) {
+      mobileBar.appendChild(moreIconButton);
+    }
   }
 });
