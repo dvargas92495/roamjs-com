@@ -50,6 +50,7 @@ type RoamBlock = {
   title: string;
   time: number;
   id: number;
+  uid: string;
 };
 
 const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
@@ -75,6 +76,7 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   const linkedReferences = parentBlocks.map((b) =>
     findParentBlock(b[0])
   ) as RoamBlock[];
+  console.log(linkedReferences);
   linkedReferences.sort(sortBy);
   const refIndexByTitle: { [key: string]: number } = {};
   linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));
@@ -123,6 +125,34 @@ const sortCallbacks = {
     menuItemCallback((a, b) => b.title.localeCompare(a.title)),
   "Created Date": () => menuItemCallback((a, b) => a.time - b.time),
   "Created Date Descending": () => menuItemCallback((a, b) => b.time - a.time),
+  "Daily Note": () =>
+    menuItemCallback((a, b) => {
+      const aDate = new Date(a.uid).valueOf();
+      const bDate = new Date(b.uid).valueOf();
+      if (isNaN(aDate) && isNaN(bDate)) {
+        return a.time - b.time;
+      } else if (isNaN(aDate)) {
+        return 1;
+      } else if (isNaN(bDate)) {
+        return -1;
+      } else {
+        return aDate - bDate;
+      }
+    }),
+    "Daily Note Descending": () =>
+      menuItemCallback((a, b) => {
+        const aDate = new Date(a.uid).valueOf();
+        const bDate = new Date(b.uid).valueOf();
+        if (isNaN(aDate) && isNaN(bDate)) {
+          return b.time - a.time;
+        } else if (isNaN(aDate)) {
+          return 1;
+        } else if (isNaN(bDate)) {
+          return -1;
+        } else {
+          return bDate - aDate;
+        }
+      }),
 };
 Object.keys(sortCallbacks).forEach((k: keyof typeof sortCallbacks) =>
   createMenuItem(`Sort By ${k}`, sortCallbacks[k])
@@ -150,7 +180,7 @@ popoverButton.onclick = (e) => {
   if (!popoverOpen) {
     const target = e.target as HTMLButtonElement;
     transitionContainer.style.transform = `translate3d(${
-      target.offsetLeft - 180
+      target.offsetLeft - 240
     }px, ${target.offsetTop + 24}px, 0px)`;
     popoverOverlay.className =
       "bp3-overlay bp3-overlay-open bp3-overlay-inline";

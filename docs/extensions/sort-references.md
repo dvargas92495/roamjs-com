@@ -14,6 +14,8 @@ Near the linked references, there will appear a sort icon next to the filter ico
 - Sort By Page Title Descending - This will sort all the linked references in descending alphabetical order of the page title.
 - Sort By Created Date - This will sort all the linked references in ascending order that the page was created.
 - Sort By Created Date Descending - This will sort all the linked references in descending order that the page was created.
+- Sort By Daily Note - This will sort all the linked references in ascending order by Daily Note, followed by created date of non-daily note pages.
+- Sort By Daily Note Descending - This will sort all the linked references in descending order by Daily Note, followed by created date of non-daily note pages.
 
 ```javascript
 var old = document.getElementById("sort-references");
