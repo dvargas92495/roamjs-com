@@ -180,7 +180,7 @@ popoverButton.onclick = (e) => {
   if (!popoverOpen) {
     const target = e.target as HTMLButtonElement;
     transitionContainer.style.transform = `translate3d(${
-      target.offsetLeft - 180
+      target.offsetLeft - 240
     }px, ${target.offsetTop + 24}px, 0px)`;
     popoverOverlay.className =
       "bp3-overlay bp3-overlay-open bp3-overlay-inline";
