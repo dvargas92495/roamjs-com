@@ -75,6 +75,7 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   const linkedReferences = parentBlocks.map((b) =>
     findParentBlock(b[0])
   ) as RoamBlock[];
+  console.log(linkedReferences);
   linkedReferences.sort(sortBy);
   const refIndexByTitle: { [key: string]: number } = {};
   linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));
