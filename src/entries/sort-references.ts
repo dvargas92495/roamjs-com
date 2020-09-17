@@ -125,17 +125,20 @@ const sortCallbacks = {
     menuItemCallback((a, b) => b.title.localeCompare(a.title)),
   "Created Date": () => menuItemCallback((a, b) => a.time - b.time),
   "Created Date Descending": () => menuItemCallback((a, b) => b.time - a.time),
-  "Daily Note": () => menuItemCallback((a,b) => {
-    const aDate = new Date(a.uid).valueOf();
-    const bDate = new Date(b.uid).valueOf();
-    if (isNaN(aDate) && isNaN(bDate)) {
-      return a.time - b.time;
-    } else if (isNaN(aDate) || isNaN(bDate)) {
-      return 1;
-    } else {
-      return aDate - bDate;
-    }
-  })
+  "Daily Note": () =>
+    menuItemCallback((a, b) => {
+      const aDate = new Date(a.uid).valueOf();
+      const bDate = new Date(b.uid).valueOf();
+      if (isNaN(aDate) && isNaN(bDate)) {
+        return a.time - b.time;
+      } else if (isNaN(aDate)) {
+        return 1;
+      } else if (isNaN(bDate)) {
+        return -1;
+      } else {
+        return aDate - bDate;
+      }
+    }),
 };
 Object.keys(sortCallbacks).forEach((k: keyof typeof sortCallbacks) =>
   createMenuItem(`Sort By ${k}`, sortCallbacks[k])
