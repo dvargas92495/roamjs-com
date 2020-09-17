@@ -1,5 +1,6 @@
+
 import parse from "date-fns/parse";
-import { getConfigFromPage } from "../entry-helpers";
+import { createObserver, getConfigFromPage } from "../entry-helpers";
 
 const POPOVER_WRAPPER_ID = "sort-references-popover-wrapper";
 
@@ -219,12 +220,8 @@ const createSortIcon = () => {
 };
 createSortIcon();
 
-const mutationConfig = { childList: true, subtree: true };
-const mutationTarget = document.getElementsByClassName("roam-body")[0];
-const mutationCallback = () => {
+createObserver(() => {
   if (!document.getElementById(POPOVER_WRAPPER_ID)) {
     createSortIcon();
   }
-};
-const observer = new MutationObserver(mutationCallback);
-observer.observe(mutationTarget, mutationConfig);
+});

@@ -35,7 +35,7 @@ export const getConfigFromPage = (inputPage?: string) => {
     : document.getElementsByClassName("rm-title-display")[0]?.textContent;
   if (!page) {
     return {};
-  }  
+  }
   const pageResults = window.roamAlphaAPI.q(
     `[:find (pull ?e [*]) :where [?e :node/title "${page}"] ]`
   );
@@ -142,4 +142,11 @@ export const addButtonListener = (
 ) => {
   const listener = clickEventListener(targetCommand, callback);
   document.addEventListener("click", listener);
+};
+
+export const createObserver = (mutationCallback: () => void) => {
+  const mutationConfig = { childList: true, subtree: true };
+  const mutationTarget = document.getElementsByClassName("roam-body")[0];
+  const observer = new MutationObserver(mutationCallback);
+  observer.observe(mutationTarget, mutationConfig);
 };
