@@ -139,6 +139,20 @@ const sortCallbacks = {
         return aDate - bDate;
       }
     }),
+    "Daily Note Descending": () =>
+      menuItemCallback((a, b) => {
+        const aDate = new Date(a.uid).valueOf();
+        const bDate = new Date(b.uid).valueOf();
+        if (isNaN(aDate) && isNaN(bDate)) {
+          return b.time - a.time;
+        } else if (isNaN(aDate)) {
+          return 1;
+        } else if (isNaN(bDate)) {
+          return -1;
+        } else {
+          return bDate - aDate;
+        }
+      }),
 };
 Object.keys(sortCallbacks).forEach((k: keyof typeof sortCallbacks) =>
   createMenuItem(`Sort By ${k}`, sortCallbacks[k])
