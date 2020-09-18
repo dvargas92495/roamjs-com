@@ -29,7 +29,7 @@ const todoIconButton = createMobileIcon(
   "mobile-todo-icon-button",
   "check-square"
 );
-let menuItems: HTMLElement[] = [];
+let menuItems: Element[] = [];
 
 moreIconButton.onclick = () => {
   const mobileBar = document.getElementById("rm-mobile-bar");
