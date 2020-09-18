@@ -18,16 +18,10 @@ moreIcon.style.margin = "8px 4px";
 moreIconButton.appendChild(moreIcon);
 
 createObserver(() => {
-  console.log("observation made");
   if (!document.getElementById(MOBILE_MORE_ICON_BUTTON_ID)) {
-    console.log("missing more!");
-    const mobileBar = document.getElementsByClassName("rm-mobile-bar")[0];
+    const mobileBar = document.getElementById("rm-mobile-bar");
     if (mobileBar) {
-      console.log("let's add");
       mobileBar.appendChild(moreIconButton);
-    } else {
-      console.log("wat");
-      console.log(document.getElementsByClassName("rm-mobile-bar"));
     }
   }
 });
