@@ -1,6 +1,7 @@
 import { createObserver } from "../entry-helpers";
 
 const MOBILE_MORE_ICON_BUTTON_ID = "mobile-more-icon-button";
+const MOBILE_BACK_ICON_BUTTON_ID = "mobile-back-icon-button";
 
 const createMobileIcon = (id: string, iconType: string) => {
   const iconButton = document.createElement("button");
@@ -22,7 +23,7 @@ const createMobileIcon = (id: string, iconType: string) => {
 
 const moreIconButton = createMobileIcon(MOBILE_MORE_ICON_BUTTON_ID, "menu");
 const backIconButton = createMobileIcon(
-  "mobile-back-icon-button",
+  MOBILE_BACK_ICON_BUTTON_ID,
   "arrow-left"
 );
 const todoIconButton = createMobileIcon(
@@ -33,6 +34,7 @@ let menuItems: Element[] = [];
 
 moreIconButton.onclick = () => {
   const mobileBar = document.getElementById("rm-mobile-bar");
+  menuItems = Array.from(mobileBar.children);
   Array.from(mobileBar.children).forEach(n => mobileBar.removeChild(n));
   mobileBar.appendChild(todoIconButton);
   mobileBar.appendChild(backIconButton);
@@ -45,11 +47,10 @@ backIconButton.onclick = () => {
 }
 
 createObserver(() => {
-  if (!document.getElementById(MOBILE_MORE_ICON_BUTTON_ID)) {
+  if (!document.getElementById(MOBILE_MORE_ICON_BUTTON_ID) && !document.getElementById(MOBILE_BACK_ICON_BUTTON_ID)) {
     const mobileBar = document.getElementById("rm-mobile-bar");
     if (mobileBar) {
       mobileBar.appendChild(moreIconButton);
-      menuItems = Array.from(mobileBar.children);
     }
   }
 });
