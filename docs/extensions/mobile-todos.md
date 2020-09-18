@@ -6,7 +6,7 @@ The Mobile TODO extension provides user with the `[[TODO]]`/`[[DONE]]` shortcut 
 
 The script is not configurable.
 
-On a mobile device, focus on a block. Once the keyboard and mobile bar comes up from the bottom, hit the menu icon on the bottom right. This will toggle a new set of buttons, the first of which is a shortcut for TODOs on mobile!
+On a mobile device, focus on a block. Once the keyboard and mobile bar comes up from the bottom, hit the menu icon on the bottom right. This will toggle a new set of buttons, the first of which is a shortcut for TODOs on mobile! Click the icon to toggle between TODO/DONE states!
 
 ```javascript
 var old = document.getElementById("mobile-todos");
@@ -21,3 +21,9 @@ s.async = false;
 s.type = "text/javascript";
 document.getElementsByTagName("head")[0].appendChild(s);
 ```
+
+### Demo
+
+<video width="320" height="240" controls>
+  <source src="../../videos/mobile-todos.mp4" type="video/mp4">
+</video>
