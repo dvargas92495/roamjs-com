@@ -1,3 +1,4 @@
+import userEvent from "@testing-library/user-event";
 import { createObserver } from "../entry-helpers";
 
 const MOBILE_MORE_ICON_BUTTON_ID = "mobile-more-icon-button";
@@ -35,19 +36,29 @@ let menuItems: Element[] = [];
 moreIconButton.onclick = () => {
   const mobileBar = document.getElementById("rm-mobile-bar");
   menuItems = Array.from(mobileBar.children);
-  Array.from(mobileBar.children).forEach(n => mobileBar.removeChild(n));
+  Array.from(mobileBar.children).forEach((n) => mobileBar.removeChild(n));
   mobileBar.appendChild(todoIconButton);
   mobileBar.appendChild(backIconButton);
 };
 
 backIconButton.onclick = () => {
   const mobileBar = document.getElementById("rm-mobile-bar");
-  Array.from(mobileBar.children).forEach(n => mobileBar.removeChild(n));
-  menuItems.forEach(n => mobileBar.appendChild(n));
-}
+  Array.from(mobileBar.children).forEach((n) => mobileBar.removeChild(n));
+  menuItems.forEach((n) => mobileBar.appendChild(n));
+};
+
+todoIconButton.onclick = () => {
+  const activeElement = document.activeElement;
+  if (activeElement.tagName === "TEXTAREA") {
+    userEvent.type(activeElement, "{ctrl}{enter}");
+  }
+};
 
 createObserver(() => {
-  if (!document.getElementById(MOBILE_MORE_ICON_BUTTON_ID) && !document.getElementById(MOBILE_BACK_ICON_BUTTON_ID)) {
+  if (
+    !document.getElementById(MOBILE_MORE_ICON_BUTTON_ID) &&
+    !document.getElementById(MOBILE_BACK_ICON_BUTTON_ID)
+  ) {
     const mobileBar = document.getElementById("rm-mobile-bar");
     if (mobileBar) {
       mobileBar.appendChild(moreIconButton);
