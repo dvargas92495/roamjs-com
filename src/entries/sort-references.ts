@@ -1,3 +1,4 @@
+import parse from "date-fns/parse";
 import { getConfigFromPage } from "../entry-helpers";
 
 const POPOVER_WRAPPER_ID = "sort-references-popover-wrapper";
@@ -76,7 +77,6 @@ const menuItemCallback = (sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
   const linkedReferences = parentBlocks.map((b) =>
     findParentBlock(b[0])
   ) as RoamBlock[];
-  console.log(linkedReferences);
   linkedReferences.sort(sortBy);
   const refIndexByTitle: { [key: string]: number } = {};
   linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));
@@ -127,8 +127,8 @@ const sortCallbacks = {
   "Created Date Descending": () => menuItemCallback((a, b) => b.time - a.time),
   "Daily Note": () =>
     menuItemCallback((a, b) => {
-      const aDate = new Date(a.uid).valueOf();
-      const bDate = new Date(b.uid).valueOf();
+      const aDate = parse(a.title, "MMMM do, yyyy", new Date()).valueOf();
+      const bDate = parse(b.title, "MMMM do, yyyy", new Date()).valueOf();
       if (isNaN(aDate) && isNaN(bDate)) {
         return a.time - b.time;
       } else if (isNaN(aDate)) {
@@ -141,8 +141,8 @@ const sortCallbacks = {
     }),
     "Daily Note Descending": () =>
       menuItemCallback((a, b) => {
-        const aDate = new Date(a.uid).valueOf();
-        const bDate = new Date(b.uid).valueOf();
+        const aDate = parse(a.title, "MMMM do, yyyy", new Date()).valueOf();
+        const bDate = parse(b.title, "MMMM do, yyyy", new Date()).valueOf();
         if (isNaN(aDate) && isNaN(bDate)) {
           return b.time - a.time;
         } else if (isNaN(aDate)) {
