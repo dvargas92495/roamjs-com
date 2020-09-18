@@ -47,10 +47,14 @@ backIconButton.onclick = () => {
   menuItems.forEach((n) => mobileBar.appendChild(n));
 };
 
+let previousActiveElement: Element;
+todoIconButton.onmousedown = () => {
+  previousActiveElement = document.activeElement;
+};
+
 todoIconButton.onclick = () => {
-  const activeElement = document.activeElement;
-  if (activeElement.tagName === "TEXTAREA") {
-    userEvent.type(activeElement, "{ctrl}{enter}");
+  if (previousActiveElement.tagName === "TEXTAREA") {
+    userEvent.type(previousActiveElement, "{ctrl}{enter}");
   }
 };
 
