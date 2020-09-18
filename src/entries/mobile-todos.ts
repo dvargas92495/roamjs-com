@@ -49,7 +49,7 @@ createObserver(() => {
     const mobileBar = document.getElementById("rm-mobile-bar");
     if (mobileBar) {
       mobileBar.appendChild(moreIconButton);
-      menuItems = Array.from(moreIconButton.children);
+      menuItems = Array.from(mobileBar.children);
     }
   }
 });
