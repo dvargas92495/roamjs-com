@@ -4,6 +4,7 @@ import { createObserver } from "../entry-helpers";
 const MOBILE_MORE_ICON_BUTTON_ID = "mobile-more-icon-button";
 const MOBILE_BACK_ICON_BUTTON_ID = "mobile-back-icon-button";
 
+let previousActiveElement: HTMLElement;
 const createMobileIcon = (id: string, iconType: string) => {
   const iconButton = document.createElement("button");
   iconButton.id = id;
@@ -19,6 +20,9 @@ const createMobileIcon = (id: string, iconType: string) => {
   icon.style.fontWeight = "1.8";
   icon.style.margin = "8px 4px";
   iconButton.appendChild(icon);
+  iconButton.onmousedown = () => {
+    previousActiveElement = document.activeElement as HTMLElement;
+  };
   return iconButton;
 };
 
@@ -39,22 +43,23 @@ moreIconButton.onclick = () => {
   Array.from(mobileBar.children).forEach((n) => mobileBar.removeChild(n));
   mobileBar.appendChild(todoIconButton);
   mobileBar.appendChild(backIconButton);
+  if (previousActiveElement.tagName === "TEXTAREA") {
+    previousActiveElement.focus();
+  }
 };
 
 backIconButton.onclick = () => {
   const mobileBar = document.getElementById("rm-mobile-bar");
   Array.from(mobileBar.children).forEach((n) => mobileBar.removeChild(n));
   menuItems.forEach((n) => mobileBar.appendChild(n));
-};
-
-let previousActiveElement: Element;
-todoIconButton.onmousedown = () => {
-  previousActiveElement = document.activeElement;
+  if (previousActiveElement.tagName === "TEXTAREA") {
+    previousActiveElement.focus();
+  }
 };
 
 todoIconButton.onclick = () => {
   if (previousActiveElement.tagName === "TEXTAREA") {
-    userEvent.type(previousActiveElement, "{ctrl}{enter}");
+    userEvent.type(previousActiveElement, "{ctrl}{enter}{/ctrl}{backspace}");
   }
 };
 
