@@ -141,8 +141,8 @@ const sortCallbacks = {
     }),
     "Daily Note Descending": () =>
       menuItemCallback((a, b) => {
-        const aDate = new Date(a.uid).valueOf();
-        const bDate = new Date(b.uid).valueOf();
+        const aDate = parse(a.title, "MMMM do, yyyy", new Date()).valueOf();
+        const bDate = parse(b.title, "MMMM do, yyyy", new Date()).valueOf();
         if (isNaN(aDate) && isNaN(bDate)) {
           return b.time - a.time;
         } else if (isNaN(aDate)) {
