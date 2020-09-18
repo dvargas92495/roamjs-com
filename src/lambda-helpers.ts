@@ -13,7 +13,7 @@ export const wrapAxios = (req: AxiosPromise<any>) =>
       headers,
     }))
     .catch((e) => ({
-      statusCode: 500,
+      statusCode: e.response?.status || 500,
       body: e.response?.data ? JSON.stringify(e.response.data) : e.message,
       headers,
     }));
