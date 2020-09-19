@@ -1,6 +1,6 @@
 ## Twitter to Roam Integration
 
-The Twitter integration allows users to import all their tweets pertaining to a particular page. So, if you've tweeted about `Trump` on twitter, you can head over to the `Trump` page on roam, and then pull all your tweets on Trump.
+The Twitter integration allows users to import all their tweets pertaining to a particular page. So, if you've tweeted about `books` a lot on twitter, you can head over to the `books` page on roam, and then pull all your tweets about `books`!
 One caveat is that this can only pull tweets made in the last 7 days.
 
 The name of the script is `twitter`
