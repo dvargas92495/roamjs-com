@@ -12,7 +12,7 @@ variable "secret" {
     type = string
 }
 
-variable "twitter_consuer_key" {
+variable "twitter_consumer_key" {
     type = string
 }
 
