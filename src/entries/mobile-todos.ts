@@ -1,5 +1,6 @@
 import userEvent from "@testing-library/user-event";
 import { createObserver } from "../entry-helpers";
+import { isIOS } from 'react-device-detect';
 
 const MOBILE_MORE_ICON_BUTTON_ID = "mobile-more-icon-button";
 const MOBILE_BACK_ICON_BUTTON_ID = "mobile-back-icon-button";
@@ -59,7 +60,8 @@ backIconButton.onclick = () => {
 
 todoIconButton.onclick = () => {
   if (previousActiveElement.tagName === "TEXTAREA") {
-    userEvent.type(previousActiveElement, "{meta}{enter}{/meta}{backspace}");
+    const modifier = isIOS ? "meta" : "ctrl";
+    userEvent.type(previousActiveElement, `{${modifier}}{enter}{/${modifier}}{backspace}`);
   }
 };
 
