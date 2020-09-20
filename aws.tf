@@ -30,7 +30,7 @@ provider "aws" {
 
 module "aws-static-site" {
   source  = "dvargas92495/static-site/aws"
-  version = "1.0.0"
+  version = "1.1.0"
 
   domain = "roam.davidvargas.me"
   secret = var.secret
@@ -41,7 +41,7 @@ module "aws-static-site" {
 
 module "aws-serverless-backend" {
     source  = "dvargas92495/serverless-backend/aws"
-    version = "1.0.0"
+    version = "1.2.1"
 
     api_name = "roam-js-extensions"
     paths = [
