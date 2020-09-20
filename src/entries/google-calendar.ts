@@ -2,7 +2,8 @@ import {
   addButtonListener,
   asyncType,
   pushBullets,
-  getConfigFromPage,, genericError
+  getConfigFromPage, 
+  genericError
 } from "../entry-helpers";
 import axios from "axios";
 
