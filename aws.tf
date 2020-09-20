@@ -49,7 +49,8 @@ module "aws-serverless-backend" {
         "github-issues/get",
         "github-projects/get",
         "github-repositories/get",
-        "google-calendar/get"
+        "google-calendar/get",
+        "twitter-search/get"
     ]
     tags = {
         Application = "Roam JS Extensions"
