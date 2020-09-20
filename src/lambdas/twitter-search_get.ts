@@ -12,7 +12,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     return userError("query is required");
   }
 
-  const opts = getTwitterOpts();
+  const opts = await getTwitterOpts();
 
   return wrapAxios(
     axios.get(

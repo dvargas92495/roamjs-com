@@ -47,8 +47,8 @@ export const getGithubOpts = () => ({
 const twitterConsumerKey = process.env.TWITTER_CONSUMER_KEY || "";
 const twitterConsumerSecret = process.env.TWITTER_CONSUMER_SECRET || "";
 
-export const getTwitterOpts = () => {
-  const twitterBearerTokenResponse = wrapAxios(
+export const getTwitterOpts = async () => {
+  const twitterBearerTokenResponse = await wrapAxios(
       axios.get(
       `https://api.twitter.com/oauth2/token`,
       {
