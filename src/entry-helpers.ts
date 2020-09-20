@@ -9,26 +9,36 @@ export const asyncType = async (text: string) =>
 
 export const genericError = (e: AxiosError) => {
   const message = e.response?.data || e.message;
-  asyncType(`Error: ${message > 50 ? `${e.message.substring(50)}...` : e.message}`);
-}
-
-export const waitForCallback = (text: string) => () => {
-  const textArea = document.activeElement as HTMLTextAreaElement;
-  if (textArea?.value == null) {
-    throw new Error(
-      `Textarea is undefined. Active Element ${textArea.tagName}. Input text ${text}`
-    );
-  }
-
-  let expectedTextWithoutPeriod = text.replace(/\./g, "").toUpperCase();
-  let actualTextWithoutPeriod = textArea.value.replace(/\./g, "").toUpperCase();
-
-  // relaxing constraint for equality because there is an issue with periods.
-  // in some cases, userEvent.type doesn't type the periods.
-  if (actualTextWithoutPeriod !== expectedTextWithoutPeriod) {
-    throw new Error("Typing not complete");
-  }
+  asyncType(
+    `Error: ${message.length > 50 ? `${message.substring(50)}...` : message}`
+  );
 };
+
+export const waitForString = (text: string) =>
+  waitFor(
+    () => {
+      const textArea = document.activeElement as HTMLTextAreaElement;
+      if (textArea?.value == null) {
+        throw new Error(
+          `Textarea is undefined. Active Element ${textArea.tagName}. Input text ${text}`
+        );
+      }
+
+      let expectedTextWithoutPeriod = text.replace(/\./g, "").toUpperCase();
+      let actualTextWithoutPeriod = textArea.value
+        .replace(/\./g, "")
+        .toUpperCase();
+
+      // relaxing constraint for equality because there is an issue with periods.
+      // in some cases, userEvent.type doesn't type the periods.
+      if (actualTextWithoutPeriod !== expectedTextWithoutPeriod) {
+        throw new Error("Typing not complete");
+      }
+    },
+    {
+      timeout: 5000,
+    }
+  );
 
 export const skipFrame = () => wait(() => {}, { timeout: 1 });
 
@@ -70,7 +80,7 @@ export const pushBullets = async (bullets: string[], title: string = "") => {
   for (const index in bullets) {
     const bullet = bullets[index];
     await asyncType(bullet);
-    await waitFor(waitForCallback(bullet));
+    await waitForString(bullet);
 
     // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
     // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
@@ -81,7 +91,7 @@ export const pushBullets = async (bullets: string[], title: string = "") => {
     };
     await fireEvent.keyDown(document.activeElement, enterObj);
     await fireEvent.keyUp(document.activeElement, enterObj);
-    await waitFor(waitForCallback(""));
+    await waitForString("");
   }
 };
 
@@ -131,10 +141,10 @@ const clickEventListener = (
     const divContainer = target.parentElement.parentElement
       .parentElement as HTMLDivElement;
     await userEvent.click(divContainer);
-    await waitFor(waitForCallback(`{{${target.innerText}}}`));
+    await waitForString(`{{${target.innerText}}}`);
     const textArea = document.activeElement as HTMLTextAreaElement;
     await userEvent.clear(textArea);
-    await waitFor(waitForCallback(""));
+    await waitForString("");
     callback(buttonConfig);
   }
 };
@@ -147,7 +157,9 @@ export const addButtonListener = (
   document.addEventListener("click", listener);
 };
 
-export const createObserver = (mutationCallback: (mutationList?: MutationRecord[]) => void) => {
+export const createObserver = (
+  mutationCallback: (mutationList?: MutationRecord[]) => void
+) => {
   const mutationConfig = { childList: true, subtree: true };
   const mutationTarget = document.getElementsByClassName("roam-body")[0];
   const observer = new MutationObserver(mutationCallback);
