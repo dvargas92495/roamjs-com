@@ -2,7 +2,7 @@ import {
   addButtonListener,
   asyncType,
   pushBullets,
-  getConfigFromPage,
+  getConfigFromPage,, genericError
 } from "../entry-helpers";
 import axios from "axios";
 
@@ -78,11 +78,7 @@ const importGoogleCalendar = async () => {
         ? asyncType(
             `Error for calendar ${calendarId}: Could not find calendar or it's not public. For more information on how to make it public, [visit this page](https://roam.davidvargas.me/extensions/google-calendar)`
           )
-        : asyncType(
-            `Error for calendar ${calendarId}: ${JSON.stringify(
-              e.response.data
-            )}`
-          )
+        : genericError(e)
     );
 };
 

@@ -1,13 +1,16 @@
 import userEvent from "@testing-library/user-event";
 import { waitFor, fireEvent, wait } from "@testing-library/dom";
+import { AxiosError } from "axios";
 
 export const asyncType = async (text: string) =>
   await userEvent.type(document.activeElement, text, {
     skipClick: true,
   });
 
-export const genericError = (e: Error) =>
-  asyncType(`Error: ${e.message.length > 50 ? `${e.message}...` : e.message}`);
+export const genericError = (e: AxiosError) => {
+  const message = e.response?.data || e.message;
+  asyncType(`Error: ${message > 50 ? `${e.message.substring(50)}...` : e.message}`);
+}
 
 export const waitForCallback = (text: string) => () => {
   const textArea = document.activeElement as HTMLTextAreaElement;
