@@ -59,7 +59,7 @@ backIconButton.onclick = () => {
 
 todoIconButton.onclick = () => {
   if (previousActiveElement.tagName === "TEXTAREA") {
-    userEvent.type(previousActiveElement, "{ctrl}{enter}{/ctrl}{backspace}");
+    userEvent.type(previousActiveElement, "{meta}{enter}{/meta}{backspace}");
   }
 };
 
