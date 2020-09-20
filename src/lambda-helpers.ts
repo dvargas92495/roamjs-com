@@ -1,4 +1,5 @@
 import { AxiosPromise } from "axios";
+import axios from "axios";
 
 export const headers = {
   "Access-Control-Allow-Origin": "*",
@@ -30,6 +31,7 @@ export const serverError = (body: string) => ({
   headers,
 });
 
+// Github Creds
 const personalAccessToken = process.env.GITHUB_PERSONAL_ACCESS_TOKEN || "";
 
 export const getGithubOpts = () => ({
@@ -40,3 +42,32 @@ export const getGithubOpts = () => ({
     ).toString("base64")}`,
   },
 });
+
+// Twitter Creds
+const twitterConsumerKey = process.env.TWITTER_CONSUMER_KEY || "";
+const twitterConsumerSecret = process.env.TWITTER_CONSUMER_SECRET || "";
+
+export const getTwitterOpts = () => {
+  const twitterBearerTokenResponse = wrapAxios(
+      axios.get(
+      `https://api.twitter.com/oauth2/token`,
+      {
+        auth: {
+          username: twitterConsumerKey,
+          password: twitterConsumerSecret
+        },
+        params : {
+          grant_type: "client_credentials"
+        }
+      }
+    )
+  );
+
+  const twitterBearerToken = twitterBearerTokenResponse.body.access_token;
+
+  return {
+    "headers" :{
+      "Authorization" : `Bearer ${twitterBearerToken}`
+    }
+  }
+};
