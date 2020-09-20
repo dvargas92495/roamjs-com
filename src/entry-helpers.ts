@@ -10,7 +10,7 @@ export const asyncType = async (text: string) =>
 export const genericError = (e: AxiosError) => {
   const message = e.response?.data || e.message;
   asyncType(
-    `Error: ${message.length > 50 ? `${message.substring(50)}...` : message}`
+    `Error: ${message.length > 50 ? `${message.substring(0, 50)}...` : message}`
   );
 };
 
