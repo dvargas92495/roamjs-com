@@ -36,7 +36,7 @@ const importGoogleCalendar = async () => {
   const timeMaxParam = encodeURIComponent(formatRFC3339(timeMax));
 
   axios(
-    `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${calendarId}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
+    `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${encodeURIComponent(calendarId)}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
   )
     .then(async (r) => {
       const events = r.data.items;
