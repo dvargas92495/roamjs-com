@@ -51,10 +51,11 @@ export const getTwitterOpts = async () => {
   const twitterBearerTokenResponse = await wrapAxios(
       axios.post(
       `https://api.twitter.com/oauth2/token`,
+      {},
       {
-        grant_type: "client_credentials"
-      },
-      {
+        params : {
+          grant_type: "client_credentials"
+        },
         auth: {
           username: twitterConsumerKey,
           password: twitterConsumerSecret
@@ -65,8 +66,9 @@ export const getTwitterOpts = async () => {
       }
     )
   );
-
-  const twitterBearerToken = twitterBearerTokenResponse.body.access_token;
+  
+  const body = JSON.parse(twitterBearerTokenResponse.body);
+  const twitterBearerToken = body.access_token;
 
   return {
     "headers" :{
