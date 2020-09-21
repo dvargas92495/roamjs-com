@@ -15,7 +15,7 @@ const menuItemCallback = (
   sortBy: (a: RoamBlock, b: RoamBlock) => number
 ) => {
   const container = refContainer.closest(".roam-log-page") || document;
-  const pageTitle = container.getElementsByClassName(".rm-title-display")[0] as HTMLHeadingElement;
+  const pageTitle = container.getElementsByClassName("rm-title-display")[0] as HTMLHeadingElement;
   if (!pageTitle) {
     return;
   }
