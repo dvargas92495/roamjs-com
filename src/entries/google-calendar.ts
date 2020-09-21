@@ -2,10 +2,11 @@ import {
   addButtonListener,
   asyncType,
   pushBullets,
-  getConfigFromPage, 
-  genericError
+  getConfigFromPage,
+  genericError,
 } from "../entry-helpers";
 import axios from "axios";
+import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
@@ -29,20 +30,10 @@ const importGoogleCalendar = async () => {
   }
   const includeLink = config["Include Event Link"]?.trim() === "true";
   const skipFree = config["Skip Free"]?.trim() === "true";
-  const timeMin = new Date();
-  const timeMax = new Date();
-  const offset = timeMin.getTimezoneOffset() / 60;
-  timeMin.setHours(-offset, 0, 0, 0);
-  timeMax.setHours(-offset, 0, 0, 0);
-  timeMax.setDate(timeMax.getDate() + 1);
-  const offsetString =
-    offset === 0 ? "Z" : `-${offset < 10 ? `0${offset}` : offset}:00`;
-  const timeMinParam = `${timeMin
-    .toISOString()
-    .substring(0, timeMin.toISOString().length - 1)}${offsetString}`;
-  const timeMaxParam = `${timeMax
-    .toISOString()
-    .substring(0, timeMin.toISOString().length - 1)}${offsetString}`;
+  const timeMin = startOfDay(new Date());
+  const timeMax = endOfDay(timeMin);
+  const timeMinParam = formatRFC3339(timeMin);
+  const timeMaxParam = formatRFC3339(timeMax);
 
   axios(
     `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${calendarId}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
