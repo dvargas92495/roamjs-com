@@ -10,10 +10,12 @@ type RoamBlock = {
   uid: string;
 };
 
-const menuItemCallback = (refContainer: Element, sortBy: (a: RoamBlock, b: RoamBlock) => number) => {
-  const pageTitle = document.getElementsByClassName(
-    "rm-title-display"
-  )[0] as HTMLHeadingElement;
+const menuItemCallback = (
+  refContainer: Element,
+  sortBy: (a: RoamBlock, b: RoamBlock) => number
+) => {
+  const pageTitle = (refContainer.closest(".roam-log-page") ||
+    refContainer.closest("rm-title-display")) as HTMLHeadingElement;
   if (!pageTitle) {
     return;
   }
@@ -56,13 +58,15 @@ const menuItemCallback = (refContainer: Element, sortBy: (a: RoamBlock, b: RoamB
 };
 
 const sortCallbacks = {
-  "Page Title":  (refContainer: Element) => () =>
+  "Page Title": (refContainer: Element) => () =>
     menuItemCallback(refContainer, (a, b) => a.title.localeCompare(b.title)),
-  "Page Title Descending":  (refContainer: Element) => () =>
+  "Page Title Descending": (refContainer: Element) => () =>
     menuItemCallback(refContainer, (a, b) => b.title.localeCompare(a.title)),
-  "Created Date": (refContainer: Element) =>  () => menuItemCallback(refContainer, (a, b) => a.time - b.time),
-  "Created Date Descending":  (refContainer: Element) => () => menuItemCallback(refContainer, (a, b) => b.time - a.time),
-  "Daily Note": (refContainer: Element) =>  () =>
+  "Created Date": (refContainer: Element) => () =>
+    menuItemCallback(refContainer, (a, b) => a.time - b.time),
+  "Created Date Descending": (refContainer: Element) => () =>
+    menuItemCallback(refContainer, (a, b) => b.time - a.time),
+  "Daily Note": (refContainer: Element) => () =>
     menuItemCallback(refContainer, (a, b) => {
       const aDate = parse(a.title, "MMMM do, yyyy", new Date()).valueOf();
       const bDate = parse(b.title, "MMMM do, yyyy", new Date()).valueOf();
@@ -76,7 +80,7 @@ const sortCallbacks = {
         return aDate - bDate;
       }
     }),
-  "Daily Note Descending":  (refContainer: Element) => () =>
+  "Daily Note Descending": (refContainer: Element) => () =>
     menuItemCallback(refContainer, (a, b) => {
       const aDate = parse(a.title, "MMMM do, yyyy", new Date()).valueOf();
       const bDate = parse(b.title, "MMMM do, yyyy", new Date()).valueOf();
