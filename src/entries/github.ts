@@ -5,6 +5,7 @@ import {
   getConfigFromPage,
   genericError,
 } from "../entry-helpers";
+import axios from "axios";
 
 const importGithubIssues = async () => {
   const config = getConfigFromPage("github");
@@ -14,36 +15,28 @@ const importGithubIssues = async () => {
     return;
   }
   const token = config["Token"];
-  const githubFetch = token
-    ? fetch(`https://api.github.com/repos`, {
+  const githubReq = token
+    ? axios.get(`https://api.github.com/repos`, {
         headers: {
           Authorization: `Basic ${Buffer.from(`${username}:${token}`).toString(
             "base64"
           )}`,
         },
       })
-    : fetch(
+    : axios.get(
         `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-issues?username=${username}`
       );
-  githubFetch
-    .then((r) => {
-      if (!r.ok) {
-        return r
-          .text()
-          .then((errorMessage) =>
-            asyncType(`Error fetching issues: ${errorMessage}`)
-          );
+  githubReq
+    .then(async (r) => {
+      const issues = r.data;
+      if (issues.length === 0) {
+        await asyncType("No issues assigned to you!");
+        return;
       }
-      return r.json().then(async (issues) => {
-        if (issues.length === 0) {
-          await asyncType("No issues assigned to you!");
-          return;
-        }
-        const bullets = issues.map((i: any) => `[${i.title}](${i.html_url})`);
-        await pushBullets(bullets);
-      });
+      const bullets = issues.map((i: any) => `[${i.title}](${i.html_url})`);
+      await pushBullets(bullets);
     })
-    .catch((e) => asyncType(`Error: ${e.message}`));
+    .catch(genericError);
 };
 
 const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
@@ -54,36 +47,28 @@ const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
     return;
   }
   const token = config["Token"];
-  const githubFetch = token
-    ? fetch(`https://api.github.com/users/${username}/repos`, {
+  const githubReq = token
+    ? axios.get(`https://api.github.com/users/${username}/repos`, {
         headers: {
           Authorization: `Basic ${Buffer.from(
             `${config["Username"]}:${token}`
           ).toString("base64")}`,
         },
       })
-    : fetch(
+    : axios.get(
         `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-repositories?username=${username}`
       );
-  githubFetch
-    .then((r) => {
-      if (!r.ok) {
-        return r
-          .text()
-          .then((errorMessage) =>
-            asyncType(`Error fetching repos: ${errorMessage}`)
-          );
+  githubReq
+    .then(async (r) => {
+      const repos = r.data;
+      if (repos.length === 0) {
+        await asyncType(`No repos in ${username}'s account!`);
+        return;
       }
-      return r.json().then(async (repos) => {
-        if (repos.length === 0) {
-          await asyncType(`No repos in ${username}'s account!`);
-          return;
-        }
-        const bullets = repos.map((i: any) => `[[${i.name}]]`);
-        await pushBullets(bullets);
-      });
+      const bullets = repos.map((i: any) => `[[${i.name}]]`);
+      await pushBullets(bullets);
     })
-    .catch((e) => asyncType(`Error: ${e.message}`));
+    .catch(genericError);
 };
 
 const importGithubProjects = async (buttonConfig: {
@@ -97,8 +82,8 @@ const importGithubProjects = async (buttonConfig: {
   const repoName = buttonConfig.IN ? buttonConfig.IN : pageTitle.innerText;
   const repository = `${username}/${repoName}`;
   const token = config["Token"];
-  const githubFetch = token
-    ? fetch(`https://api.github.com/repos/${repository}/projects`, {
+  const githubReq = token
+    ? axios.get(`https://api.github.com/repos/${repository}/projects`, {
         headers: {
           Authorization: `Basic ${Buffer.from(
             `${config["Username"]}:${token}`
@@ -106,28 +91,20 @@ const importGithubProjects = async (buttonConfig: {
           Accept: "application/vnd.github.inertia-preview+json",
         },
       })
-    : fetch(
+    : axios.get(
         `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-projects?repository=${repository}`
       );
-  githubFetch
-    .then((r) => {
-      if (!r.ok) {
-        return r
-          .text()
-          .then((errorMessage) =>
-            asyncType(`Error fetching projects: ${errorMessage}`)
-          );
+  githubReq
+    .then(async (r) => {
+      const projects = r.data;
+      if (projects.length === 0) {
+        await asyncType(`No projects in ${repository}`);
+        return;
       }
-      return r.json().then(async (projects) => {
-        if (projects.length === 0) {
-          await asyncType(`No projects in ${repository}`);
-          return;
-        }
-        const bullets = projects.map((i: any) => `[[${i.name}]]`);
-        await pushBullets(bullets);
-      });
+      const bullets = projects.map((i: any) => `[[${i.name}]]`);
+      await pushBullets(bullets);
     })
-    .catch((e) => asyncType(`Error: ${e.message}`));
+    .catch(genericError);
 };
 
 const importGithubCards = async (buttonConfig: { [key: string]: string }) => {
@@ -149,34 +126,27 @@ const importGithubCards = async (buttonConfig: { [key: string]: string }) => {
   const column = buttonConfig.AS ? buttonConfig.AS : "To do";
 
   if (!config["Token"]) {
-    fetch(
-      `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-cards?repository=${repository}&project=${project}&column=${column}`
-    )
-      .then((r) => {
-        if (!r.ok) {
-          return r
-            .text()
-            .then((errorMessage) =>
-              asyncType(`Error fetching cards: ${errorMessage}`)
-            );
+    axios
+      .get(
+        `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-cards?repository=${repository}&project=${project}&column=${column}`
+      )
+      .then(async (r) => {
+        const cards = r.data;
+        if (cards.length === 0) {
+          await asyncType(`No cards in ${repository}`);
+          return;
         }
-        return r.json().then(async (cards) => {
-          if (cards.length === 0) {
-            await asyncType(`No cards in ${repository}`);
-            return;
-          }
-          const bullets = cards.map(
-            (i: any) =>
-              `[${
-                i.note
-                  ? i.note
-                  : i.content_url.substring(
-                      "https://api.github.com/repos/".length
-                    )
-              }](${i.html_url})`
-          );
-          await pushBullets(bullets);
-        });
+        const bullets = cards.map(
+          (i: any) =>
+            `[${
+              i.note
+                ? i.note
+                : i.content_url.substring(
+                    "https://api.github.com/repos/".length
+                  )
+            }](${i.html_url})`
+        );
+        await pushBullets(bullets);
       })
       .catch(genericError);
   } else {
