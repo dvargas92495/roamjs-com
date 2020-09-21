@@ -32,8 +32,8 @@ const importGoogleCalendar = async () => {
   const skipFree = config["Skip Free"]?.trim() === "true";
   const timeMin = startOfDay(new Date());
   const timeMax = endOfDay(timeMin);
-  const timeMinParam = formatRFC3339(timeMin);
-  const timeMaxParam = formatRFC3339(timeMax);
+  const timeMinParam = encodeURIComponent(formatRFC3339(timeMin));
+  const timeMaxParam = encodeURIComponent(formatRFC3339(timeMax));
 
   axios(
     `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${calendarId}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
