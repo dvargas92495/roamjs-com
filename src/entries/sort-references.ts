@@ -35,12 +35,10 @@ const menuItemCallback = (
   const linkedReferences = parentBlocks.map((b) =>
     findParentBlock(b[0])
   ) as RoamBlock[];
-  console.log(linkedReferences);
   linkedReferences.sort(sortBy);
   const refIndexByTitle: { [key: string]: number } = {};
   linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));
-  console.log(refIndexByTitle)
-
+  console.log(refContainer);
   const refsInView = Array.from(
     refContainer.getElementsByClassName("rm-ref-page-view")
   );
