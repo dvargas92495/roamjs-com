@@ -12,12 +12,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   if (!apiKey) {
     return serverError("No API key stored");
   }
-  console.log("calendarId", calendarId);
-  console.log("timeMin", timeMin);
-  console.log("timeMax", timeMax);
   return wrapAxios(
     axios.get(
-      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${timeMin}&timeMax=${timeMax}&orderBy=startTime&singleEvents=true`
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURI(calendarId)}/events?key=${apiKey}&timeMin=${encodeURI(timeMin)}&timeMax=${encodeURI(timeMax)}&orderBy=startTime&singleEvents=true`
     )
   );
 };
