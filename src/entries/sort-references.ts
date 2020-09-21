@@ -38,7 +38,7 @@ const menuItemCallback = (refContainer: Element, sortBy: (a: RoamBlock, b: RoamB
   linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));
 
   const refsInView = Array.from(
-    document.getElementsByClassName("rm-ref-page-view")
+    refContainer.getElementsByClassName("rm-ref-page-view")
   );
   refsInView.forEach((r) => refContainer.removeChild(r));
   refsInView.sort((a, b) => {
