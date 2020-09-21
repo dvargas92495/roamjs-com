@@ -49,21 +49,26 @@ const twitterConsumerSecret = process.env.TWITTER_CONSUMER_SECRET || "";
 
 export const getTwitterOpts = async () => {
   const twitterBearerTokenResponse = await wrapAxios(
-      axios.get(
+      axios.post(
       `https://api.twitter.com/oauth2/token`,
+      {},
       {
+        params : {
+          grant_type: "client_credentials"
+        },
         auth: {
           username: twitterConsumerKey,
           password: twitterConsumerSecret
         },
-        params : {
-          grant_type: "client_credentials"
+        headers : {
+          'Content-Type' : 'application/x-www-form-urlencoded;charset=UTF-8'
         }
       }
     )
   );
-
-  const twitterBearerToken = twitterBearerTokenResponse.body.access_token;
+  
+  const body = JSON.parse(twitterBearerTokenResponse.body);
+  const twitterBearerToken = body.access_token;
 
   return {
     "headers" :{
