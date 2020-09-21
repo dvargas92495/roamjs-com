@@ -15,9 +15,7 @@ const menuItemCallback = (
   sortBy: (a: RoamBlock, b: RoamBlock) => number
 ) => {
   const container = refContainer.closest(".roam-log-page") || document;
-  console.log(container);
   const pageTitle = container.getElementsByClassName("rm-title-display")[0] as HTMLHeadingElement;
-  console.log(pageTitle);
   if (!pageTitle) {
     return;
   }
@@ -37,13 +35,16 @@ const menuItemCallback = (
   const linkedReferences = parentBlocks.map((b) =>
     findParentBlock(b[0])
   ) as RoamBlock[];
+  console.log(linkedReferences);
   linkedReferences.sort(sortBy);
   const refIndexByTitle: { [key: string]: number } = {};
   linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));
+  console.log(refIndexByTitle)
 
   const refsInView = Array.from(
     refContainer.getElementsByClassName("rm-ref-page-view")
   );
+  console.log(refsInView)
   refsInView.forEach((r) => refContainer.removeChild(r));
   refsInView.sort((a, b) => {
     const aTitle = a.getElementsByClassName(
