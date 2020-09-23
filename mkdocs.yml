@@ -1,3 +1,5 @@
 site_name: Roam JS Extensions
-theme: readthedocs
+theme: 
+    name: readthedocs
+    hljs: rainbow
 site_dir: dist

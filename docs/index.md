@@ -46,4 +46,4 @@ addScript("[name2]"); // replace with name of extension
 
 Each extension will support a `[[roam/js/[name]]]` configuration page in your Roam database. This is where you will be able to configure the extension with various options using attributes.
 
-To support the work on this site, I would really appreciate a sponsorship at https://github.com/sponsors/dvargas92495 😁
+<iframe src="https://github.com/sponsors/dvargas92495/button" title="Sponsor dvargas92495" height="35" width="116" style="border: 0;"></iframe>
