@@ -1,5 +1,5 @@
 import parse from "date-fns/parse";
-import { createObserver, createSortIcons } from "../entry-helpers";
+import { createObserver, createSortIcons, getCreatedTimeByTitle, getEditTimeByTitle } from "../entry-helpers";
 
 const menuItemCallback = (
   sortContainer: Element,
@@ -27,16 +27,20 @@ const sortCallbacks = {
     menuItemCallback(refContainer, (a, b) => a.localeCompare(b)),
   "Page Title Descending": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) => b.localeCompare(a)),
- // "Created Date": (refContainer: Element) =>
- //   menuItemCallback(refContainer, (a, b) => a.time - b.time),
- // "Created Date Descending": (refContainer: Element) =>
- //   menuItemCallback(refContainer, (a, b) => b.time - a.time),
+  "Created Date": (refContainer: Element) =>
+    menuItemCallback(refContainer, (a, b) => getCreatedTimeByTitle(a) - getCreatedTimeByTitle(b)),
+  "Created Date Descending": (refContainer: Element) =>
+    menuItemCallback(refContainer, (a, b) => getCreatedTimeByTitle(b) - getCreatedTimeByTitle(a)),
+  "Edited Date": (refContainer: Element) =>
+    menuItemCallback(refContainer, (a, b) => getEditTimeByTitle(a) - getEditTimeByTitle(b)),
+  "Edited Date Descending": (refContainer: Element) =>
+    menuItemCallback(refContainer, (a, b) => getEditTimeByTitle(b) - getEditTimeByTitle(a)),
   "Daily Note": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) => {
       const aDate = parse(a, "MMMM do, yyyy", new Date()).valueOf();
       const bDate = parse(b, "MMMM do, yyyy", new Date()).valueOf();
       if (isNaN(aDate) && isNaN(bDate)) {
-        return a.length - b.length;
+        return getCreatedTimeByTitle(a) - getCreatedTimeByTitle(b);
       } else if (isNaN(aDate)) {
         return 1;
       } else if (isNaN(bDate)) {
@@ -50,7 +54,7 @@ const sortCallbacks = {
       const aDate = parse(a, "MMMM do, yyyy", new Date()).valueOf();
       const bDate = parse(b, "MMMM do, yyyy", new Date()).valueOf();
       if (isNaN(aDate) && isNaN(bDate)) {
-        return b.length - a.length;
+        return getCreatedTimeByTitle(b) - getCreatedTimeByTitle(a);
       } else if (isNaN(aDate)) {
         return 1;
       } else if (isNaN(bDate)) {

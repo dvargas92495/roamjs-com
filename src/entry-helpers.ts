@@ -310,3 +310,11 @@ export const createSortIcons = (
     callback(sortButtonContainer);
   });
 };
+
+export const getCreatedTimeByTitle = (title: string) => window.roamAlphaAPI.q(
+  `[:find (pull ?e [:create/time]) :where [?e :node/title "${title}"]]`
+)[0][0]?.time
+
+export const getEditTimeByTitle = (title: string) => window.roamAlphaAPI.q(
+  `[:find (pull ?e [:edit/time]) :where [?e :node/title "${title}"]]`
+)[0][0]?.time
