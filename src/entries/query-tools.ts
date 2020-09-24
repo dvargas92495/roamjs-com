@@ -67,15 +67,18 @@ const sortCallbacks = {
 
 const onCreateSortIcons = (container: HTMLDivElement) => {
   const block = container.closest('.roam-block');
+  console.log(block);
   if (!block) {
     return;
   }
   const blockIdParts = block.id.split('-');
   const blockId = blockIdParts[blockIdParts.length - 1];
+  console.log(blockId);
   
   const config = getAttrConfigFromQuery(
     `[:find (pull ?e [*]) :where [?e :block/uid "${blockId}"]]`
   );
+  console.log(config);
   const defaultSort = config["Default Sort"] as keyof typeof sortCallbacks;
   if (defaultSort && sortCallbacks[defaultSort]) {
     sortCallbacks[defaultSort](container)();
@@ -84,5 +87,5 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
 
 const observerCallback = () =>
   createSortIcons("rm-query-content", onCreateSortIcons, sortCallbacks, 1);
-
+observerCallback();
 createObserver(observerCallback);
