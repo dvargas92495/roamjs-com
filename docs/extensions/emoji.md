@@ -29,3 +29,5 @@ To view all available emojis, they could be found in the following [JSON file](h
 <video width="320" height="240" controls>
   <source src="../../videos/emojis.mp4" type="video/mp4">
 </video>
+
+<iframe src="https://github.com/sponsors/dvargas92495/button" title="Sponsor dvargas92495" height="35" width="116" style="border: 0;"></iframe>

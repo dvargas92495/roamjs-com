@@ -17,6 +17,8 @@ On expanded queries, there will be a sort icon that appears next to the results 
 - Sort By Daily Note - This will sort all the query results in ascending order by Daily Note, followed by created date of non-daily note pages.
 - Sort By Daily Note Descending - This will sort all the query results in descending order by Daily Note, followed by created date of non-daily note pages.
 
+To persist a particular sort on a query, create a child block with the `Default Sort` attribute. Valid values include each of the options above, minus the sort by prefix. For example, `Default Sort:: Page Title`.
+
 ```javascript
 var old = document.getElementById("query-tools");
 if (old) {
@@ -30,3 +32,11 @@ s.async = false;
 s.type = "text/javascript";
 document.getElementsByTagName("head")[0].appendChild(s);
 ```
+
+### Demo
+
+<video width="320" height="240" controls>
+  <source src="../../videos/query-sort.mp4" type="video/mp4">
+</video>
+
+<iframe src="https://github.com/sponsors/dvargas92495/button" title="Sponsor dvargas92495" height="35" width="116" style="border: 0;"></iframe>

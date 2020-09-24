@@ -1,5 +1,5 @@
 import parse from "date-fns/parse";
-import { createObserver, createSortIcons, getCreatedTimeByTitle, getEditTimeByTitle } from "../entry-helpers";
+import { createObserver, createSortIcons, getAttrConfigFromQuery, getCreatedTimeByTitle, getEditTimeByTitle } from "../entry-helpers";
 
 const menuItemCallback = (
   sortContainer: Element,
@@ -65,7 +65,25 @@ const sortCallbacks = {
     }),
 };
 
-const observerCallback = () =>
-  createSortIcons("rm-query-content", () => {}, sortCallbacks, 1);
+const onCreateSortIcons = (container: HTMLDivElement) => {
+  const block = container.closest('.roam-block');
+  if (!block) {
+    return;
+  }
+  const blockIdParts = block.id.split('-');
+  const blockId = blockIdParts[blockIdParts.length - 1];
+  
+  const config = getAttrConfigFromQuery(
+    `[:find (pull ?e [*]) :where [?e :block/uid "${blockId}"]]`
+  );
+  
+  const defaultSort = config["Default Sort"] as keyof typeof sortCallbacks;
+  if (defaultSort && sortCallbacks[defaultSort]) {
+    sortCallbacks[defaultSort](container)();
+  }
+}
 
+const observerCallback = () =>
+  createSortIcons("rm-query-content", onCreateSortIcons, sortCallbacks, 1);
+observerCallback();
 createObserver(observerCallback);
