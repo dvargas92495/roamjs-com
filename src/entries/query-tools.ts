@@ -4,7 +4,7 @@ import { createObserver, createSortIcons } from "../entry-helpers";
 const menuItemCallback = (
   sortContainer: Element,
   sortBy: (a: string, b: string) => number
-) => {
+) => () => {
   const refContainer = sortContainer.getElementsByClassName("refs-by-page-view")[0];
   const refsInView = Array.from(
     refContainer.getElementsByClassName("rm-ref-page-view")
