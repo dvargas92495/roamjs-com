@@ -30,4 +30,6 @@ To view all available emojis, they could be found in the following [JSON file](h
   <source src="../../videos/emojis.mp4" type="video/mp4">
 </video>
 
+<br/>
+
 <iframe src="https://github.com/sponsors/dvargas92495/button" title="Sponsor dvargas92495" height="35" width="116" style="border: 0;"></iframe>
