@@ -230,6 +230,10 @@ export const createSortIcon = (
       e.stopImmediatePropagation();
       e.preventDefault();
     };
+    aMenuItem.onmousedown = (e) => {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    };
   };
   Object.keys(sortCallbacks).forEach((k: keyof typeof sortCallbacks) =>
     createMenuItem(`Sort By ${k}`, sortCallbacks[k](refContainer))
@@ -262,7 +266,7 @@ export const createSortIcon = (
     if (!popoverOpen) {
       const target = e.target as HTMLButtonElement;
       transitionContainer.style.transform = `translate3d(${
-        target.offsetLeft - 240
+        target.offsetLeft <= 240 ? target.offsetLeft : target.offsetLeft - 240
       }px, ${target.offsetTop + 24}px, 0px)`;
       popoverOverlay.className =
         "bp3-overlay bp3-overlay-open bp3-overlay-inline";
@@ -306,3 +310,15 @@ export const createSortIcons = (
     callback(sortButtonContainer);
   });
 };
+
+export const getCreatedTimeByTitle = (title: string) => {
+  const result = window.roamAlphaAPI.q(
+    `[:find (pull ?e [:create/time]) :where [?e :node/title "${title}"]]`
+  )[0][0]?.time;
+  return result || getEditTimeByTitle(title);
+};
+
+export const getEditTimeByTitle = (title: string) =>
+  window.roamAlphaAPI.q(
+    `[:find (pull ?e [:edit/time]) :where [?e :node/title "${title}"]]`
+  )[0][0]?.time;

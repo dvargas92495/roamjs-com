@@ -6,7 +6,16 @@ The Query Tools extension adds various tools on top of traditional Roam queries 
 
 The script is not configurable.
 
-On expanded queries, there will be a sort icon that appears next to the results text.
+On expanded queries, there will be a sort icon that appears next to the results text. Clicking on the sort icon will make a sort menu visible to the user with the following options:
+
+- Sort By Page Title - This will sort all the query results in ascending alphabetical order of the page title.
+- Sort By Page Title Descending - This will sort all the query results in descending alphabetical order of the page title.
+- Sort By Created Date - This will sort all the query results in ascending order that the page was created.
+- Sort By Created Date Descending - This will sort all the query results in descending order that the page was created.
+- Sort By Edited Date - This will sort all the query results in ascending order that the page was last edited.
+- Sort By Edited Date Descending - This will sort all the query results in descending order that the page was last edited.
+- Sort By Daily Note - This will sort all the query results in ascending order by Daily Note, followed by created date of non-daily note pages.
+- Sort By Daily Note Descending - This will sort all the query results in descending order by Daily Note, followed by created date of non-daily note pages.
 
 ```javascript
 var old = document.getElementById("query-tools");
