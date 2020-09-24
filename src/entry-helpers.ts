@@ -253,6 +253,11 @@ export const createSortIcon = (
     popoverOpen = false;
   };
 
+  popoverButton.onmousedown = (e) => {
+    e.stopImmediatePropagation();
+    e.preventDefault();
+  };
+
   popoverButton.onclick = (e) => {
     if (!popoverOpen) {
       const target = e.target as HTMLButtonElement;
