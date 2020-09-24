@@ -281,7 +281,8 @@ export const createSortIcon = (
 export const createSortIcons = (
   containerClass: string,
   callback: (container: HTMLDivElement) => void,
-  sortCallbacks: { [key: string]: (refContainer: Element) => () => void }
+  sortCallbacks: { [key: string]: (refContainer: Element) => () => void },
+  childIndex?: number
 ) => {
   const sortButtonContainers = Array.from(
     document.getElementsByClassName(containerClass)
@@ -295,7 +296,12 @@ export const createSortIcons = (
     }
 
     const popoverWrapper = createSortIcon(sortButtonContainer, sortCallbacks);
-    sortButtonContainer.appendChild(popoverWrapper);
+    if (childIndex) {
+      const before = sortButtonContainer.children[childIndex];
+      sortButtonContainer.insertBefore(popoverWrapper, before);
+    } else {
+      sortButtonContainer.appendChild(popoverWrapper);
+    }
 
     callback(sortButtonContainer);
   });
