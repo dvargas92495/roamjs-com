@@ -233,7 +233,7 @@ export const createSortIcon = (
     aMenuItem.onmousedown = (e) => {
       e.stopImmediatePropagation();
       e.preventDefault();
-    }
+    };
   };
   Object.keys(sortCallbacks).forEach((k: keyof typeof sortCallbacks) =>
     createMenuItem(`Sort By ${k}`, sortCallbacks[k](refContainer))
@@ -311,10 +311,14 @@ export const createSortIcons = (
   });
 };
 
-export const getCreatedTimeByTitle = (title: string) => window.roamAlphaAPI.q(
-  `[:find (pull ?e [:create/time]) :where [?e :node/title "${title}"]]`
-)[0][0]?.time
+export const getCreatedTimeByTitle = (title: string) => {
+  const result = window.roamAlphaAPI.q(
+    `[:find (pull ?e [:create/time]) :where [?e :node/title "${title}"]]`
+  )[0][0];
+  return result.time || getEditTimeByTitle(title);
+};
 
-export const getEditTimeByTitle = (title: string) => window.roamAlphaAPI.q(
-  `[:find (pull ?e [:edit/time]) :where [?e :node/title "${title}"]]`
-)[0][0]?.time
+export const getEditTimeByTitle = (title: string) =>
+  window.roamAlphaAPI.q(
+    `[:find (pull ?e [:edit/time]) :where [?e :node/title "${title}"]]`
+  )[0][0]?.time;
