@@ -314,8 +314,8 @@ export const createSortIcons = (
 export const getCreatedTimeByTitle = (title: string) => {
   const result = window.roamAlphaAPI.q(
     `[:find (pull ?e [:create/time]) :where [?e :node/title "${title}"]]`
-  )[0][0];
-  return result.time || getEditTimeByTitle(title);
+  )[0][0]?.time;
+  return result || getEditTimeByTitle(title);
 };
 
 export const getEditTimeByTitle = (title: string) =>
