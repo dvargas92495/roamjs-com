@@ -49,9 +49,11 @@ export const getConfigFromPage = (inputPage?: string) => {
   if (!page) {
     return {};
   }
-  const pageResults = window.roamAlphaAPI.q(
-    `[:find (pull ?e [*]) :where [?e :node/title "${page}"] ]`
-  );
+  return getAttrConfigFromQuery(`[:find (pull ?e [*]) :where [?e :node/title "${page}"] ]`);
+}
+
+export const getAttrConfigFromQuery = (query: string) => {
+  const pageResults = window.roamAlphaAPI.q(query);
   if (pageResults.length === 0 || !pageResults[0][0].attrs) {
     return {};
   }
