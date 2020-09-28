@@ -8,11 +8,20 @@ declare global {
       q: (query: string) => any[];
     };
     roamDatomicAlphaAPI: (params: {
-      action: "pull" | "q";
+      action: "pull" | "q" | "create-block" | "update-block";
       selector?: string;
       uid?: string;
       query?: string;
       inputs?: any;
+      location?: {
+        "parent-uid": string,
+        order: number, 
+      },
+      block?: {
+        string: string;
+        uid?: string;
+        open?: boolean;
+      },
     }) => Promise<void>;
   }
 }
@@ -155,14 +164,29 @@ const clickEventListener = (
       buttonConfig[restOfButtonText[i * 2]] = restOfButtonText[i * 2 + 1];
     }
 
-    const divContainer = target.parentElement.parentElement
-      .parentElement as HTMLDivElement;
-    await userEvent.click(divContainer);
-    await waitForString(`{{${target.innerText}}}`);
-    const textArea = document.activeElement as HTMLTextAreaElement;
-    await userEvent.clear(textArea);
-    await waitForString("");
-    callback(buttonConfig);
+    if (window.roamDatomicAlphaAPI) {
+      const block = target.closest(".roam-block");
+      const blockUid = block.id.substring(block.id.length - 9, block.id.length);
+      const restOfHTMLId = block.id.substring(0, block.id.length - 9);
+      const potentialDateUid = restOfHTMLId.substring(restOfHTMLId.length - 10, restOfHTMLId.length);
+      const parentUid = isNaN(new Date(potentialDateUid).valueOf()) ? potentialDateUid.substring(1) : potentialDateUid;
+      window.roamDatomicAlphaAPI({
+        action: 'update-block',
+        block: {
+          uid: blockUid,
+          string: "",
+        }
+      }).then(() => callback(buttonConfig));
+    } else {
+      const divContainer = target.parentElement.parentElement
+        .parentElement as HTMLDivElement;
+      await userEvent.click(divContainer);
+      await waitForString(`{{${target.innerText}}}`);
+      const textArea = document.activeElement as HTMLTextAreaElement;
+      await userEvent.clear(textArea);
+      await waitForString("");
+      callback(buttonConfig);
+    }
   }
 };
 
