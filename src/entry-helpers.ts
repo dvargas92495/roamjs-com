@@ -32,10 +32,17 @@ export const asyncType = async (text: string) =>
   });
 
 export const genericError = (e: AxiosError) => {
-  const message = e.response ? JSON.stringify(e.response.data) : e.message;
-  asyncType(
-    `Error: ${message.length > 50 ? `${message.substring(0, 50)}...` : message}`
-  );
+  const message =
+    (e.response ? JSON.stringify(e.response.data) : e.message) || "";
+  if (message) {
+    asyncType(
+      `Error: ${
+        message.length > 50 ? `${message.substring(0, 50)}...` : message
+      }`
+    );
+  } else {
+    console.log(e);
+  }
 };
 
 export const waitForString = (text: string) =>
@@ -104,7 +111,6 @@ export const pushBullets = async (
   parentUid?: string
 ) => {
   if (window.roamDatomicAlphaAPI) {
-    // use write API :D
     const parent = await window.roamDatomicAlphaAPI({
       action: "pull",
       selector: "[:block/children]",
@@ -167,15 +173,16 @@ const clickEventListener = (
     parentUid?: string
   ) => void
 ) => async (e: MouseEvent) => {
-  const target = e.target as HTMLElement;
+  const htmlTarget = e.target as HTMLElement;
   if (
-    target &&
-    target.tagName === "BUTTON" &&
-    target.innerText
+    htmlTarget &&
+    htmlTarget.tagName === "BUTTON" &&
+    htmlTarget.innerText
       .toUpperCase()
       .trim()
       .startsWith(targetCommand.toUpperCase())
   ) {
+    const target = htmlTarget as HTMLButtonElement;
     const rawParts = target.innerText
       .substring(targetCommand.length + 1)
       .split(" ");
@@ -208,6 +215,8 @@ const clickEventListener = (
 
     if (window.roamDatomicAlphaAPI) {
       target.innerText = "Loading...";
+      target.disabled = true;
+
       const block = target.closest(".roam-block");
       const blockUid = block.id.substring(block.id.length - 9, block.id.length);
       const restOfHTMLId = block.id.substring(0, block.id.length - 9);
