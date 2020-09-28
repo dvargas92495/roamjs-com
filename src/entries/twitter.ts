@@ -9,7 +9,7 @@ import axios from "axios";
 
 const TWITTER_REFERENCES_COMMAND = "twitter references";
 
-const twitterReferencesListener = async () => {
+const twitterReferencesListener = async (_: any, blockUid: string, parentUid: string) => {
   const config = getConfigFromPage("roam/js/twitter");
   const username = config["Username"];
   if (!username) {
@@ -35,7 +35,7 @@ const twitterReferencesListener = async () => {
       const bullets = statuses.map(
         (i: any) => `https://twitter.com/i/web/status/${i.id_str}`
       );
-      await pushBullets(bullets, "Tweets");
+      await pushBullets(bullets, blockUid, parentUid);
     })
     .catch(genericError);
 };

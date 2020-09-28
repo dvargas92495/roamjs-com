@@ -7,7 +7,7 @@ import {
 } from "../entry-helpers";
 import axios from "axios";
 
-const importGithubIssues = async () => {
+const importGithubIssues = async (_, blockUid: string, parentUid: string) => {
   const config = getConfigFromPage("roam/js/github");
   const username = config["Username"];
   if (!username) {
@@ -34,12 +34,16 @@ const importGithubIssues = async () => {
         return;
       }
       const bullets = issues.map((i: any) => `[${i.title}](${i.html_url})`);
-      await pushBullets(bullets);
+      await pushBullets(bullets, blockUid, parentUid);
     })
     .catch(genericError);
 };
 
-const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
+const importGithubRepos = async (
+  buttonConfig: { [key: string]: string },
+  blockUid: string,
+  parentUid: string
+) => {
   const config = getConfigFromPage("roam/js/github");
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   if (!username) {
@@ -66,14 +70,18 @@ const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
         return;
       }
       const bullets = repos.map((i: any) => `[[${i.name}]]`);
-      await pushBullets(bullets);
+      await pushBullets(bullets, blockUid, parentUid);
     })
     .catch(genericError);
 };
 
-const importGithubProjects = async (buttonConfig: {
-  [key: string]: string;
-}) => {
+const importGithubProjects = async (
+  buttonConfig: {
+    [key: string]: string;
+  },
+  blockUid: string,
+  parentUid: string
+) => {
   const config = getConfigFromPage("roam/js/github");
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   const pageTitle = document.getElementsByClassName(
@@ -102,12 +110,16 @@ const importGithubProjects = async (buttonConfig: {
         return;
       }
       const bullets = projects.map((i: any) => `[[${i.name}]]`);
-      await pushBullets(bullets);
+      await pushBullets(bullets, blockUid, parentUid);
     })
     .catch(genericError);
 };
 
-const importGithubCards = async (buttonConfig: { [key: string]: string }) => {
+const importGithubCards = async (
+  buttonConfig: { [key: string]: string },
+  blockUid: string,
+  parentUid: string
+) => {
   const config = getConfigFromPage("roam/js/github");
   const pageTitle = document.getElementsByClassName(
     "rm-title-display"
@@ -146,7 +158,7 @@ const importGithubCards = async (buttonConfig: { [key: string]: string }) => {
                   )
             }](${i.html_url})`
         );
-        await pushBullets(bullets);
+        await pushBullets(bullets, blockUid, parentUid);
       })
       .catch(genericError);
   } else {
