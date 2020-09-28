@@ -145,7 +145,7 @@ export const pushBullets = async (
           },
           location: {
             "parent-uid": parentUid,
-            order: blockIndex + parseInt(index),
+            order: blockIndex + parseInt(index) + 1,
           },
         });
       }
