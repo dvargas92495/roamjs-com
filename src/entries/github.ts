@@ -8,7 +8,7 @@ import {
 import axios from "axios";
 
 const importGithubIssues = async () => {
-  const config = getConfigFromPage("github");
+  const config = getConfigFromPage("roam/js/github");
   const username = config["Username"];
   if (!username) {
     await asyncType("Error: Missing required parameter username!");
@@ -40,7 +40,7 @@ const importGithubIssues = async () => {
 };
 
 const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
-  const config = getConfigFromPage("github");
+  const config = getConfigFromPage("roam/js/github");
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   if (!username) {
     await asyncType("Error: Missing required parameter username!");
@@ -74,7 +74,7 @@ const importGithubRepos = async (buttonConfig: { [key: string]: string }) => {
 const importGithubProjects = async (buttonConfig: {
   [key: string]: string;
 }) => {
-  const config = getConfigFromPage("github");
+  const config = getConfigFromPage("roam/js/github");
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   const pageTitle = document.getElementsByClassName(
     "rm-title-display"
@@ -108,7 +108,7 @@ const importGithubProjects = async (buttonConfig: {
 };
 
 const importGithubCards = async (buttonConfig: { [key: string]: string }) => {
-  const config = getConfigFromPage("github");
+  const config = getConfigFromPage("roam/js/github");
   const pageTitle = document.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;

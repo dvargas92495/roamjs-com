@@ -113,7 +113,7 @@ const createSortIconCallback = (container: HTMLDivElement) => {
     return;
   }
 
-  const config = getConfigFromPage("sort-references");
+  const config = getConfigFromPage("roam/js/sort-references");
   const defaultSort = config["Default Sort"] as keyof typeof sortCallbacks;
   if (defaultSort && sortCallbacks[defaultSort]) {
     sortCallbacks[defaultSort](container)();

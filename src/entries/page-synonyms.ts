@@ -25,9 +25,6 @@ aTag.onclick = () => {
       ?.Aliases?.split(",")
       ?.map((a: string) => a.trim()) || [],
   }));
-  console.log(pagesWithAliases);
-  console.log(pagesWithAliases.map(p => getConfigFromPage(p.title)));
-  console.log(uidWithAliases);
   const uidByAlias: { [key: string]: string } = {};
   uidWithAliases.forEach((p) =>
     p.aliases.forEach((a: string) => (uidByAlias[a] = p.uid))
