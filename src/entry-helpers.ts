@@ -26,14 +26,19 @@ declare global {
   }
 }
 
+type RoamError = {
+  raw: string;
+  'status-code': number;
+}
+
 export const asyncType = async (text: string) =>
   await userEvent.type(document.activeElement, text, {
     skipClick: true,
   });
 
-export const genericError = (e: AxiosError) => {
+export const genericError = (e: AxiosError & RoamError) => {
   const message =
-    (e.response ? JSON.stringify(e.response.data) : e.message) || "";
+    (e.response ? JSON.stringify(e.response.data) : e.message) || e.raw || "";
   if (message) {
     asyncType(
       `Error: ${
@@ -41,7 +46,7 @@ export const genericError = (e: AxiosError) => {
       }`
     );
   } else {
-    console.log(e);
+    console.error(e);
   }
 };
 
@@ -122,8 +127,10 @@ export const pushBullets = async (
       uid: blockUid,
     });
     const blockIndex = parent.children?.findIndex((c) => c.id === block.id);
+    console.log(parentUid, "parent", blockUid, "block", blockIndex)
     for (const index in bullets) {
       const bullet = bullets[index];
+      console.log("Printing", bullet, "to index", blockIndex + parseInt(index))
       if (index === "0") {
         await window.roamDatomicAlphaAPI({
           action: "update-block",
