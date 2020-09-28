@@ -1,4 +1,4 @@
-import { createObserver } from "../entry-helpers";
+import { createOverlayObserver } from "../entry-helpers";
 
 const option = document.createElement("li");
 const aTag = document.createElement("a");
@@ -14,7 +14,8 @@ shortcut.className = "bp3-menu-item-label";
 shortcut.innerText = "Alt-A";
 aTag.appendChild(shortcut);
 
-createObserver(() => {
+createOverlayObserver(() => {
+    console.log("observing");
     const uls = document.getElementsByClassName("bp3-menu bp3-text-small");
     Array.from(uls).forEach((ul) => {
         if (ul.tagName === "UL") {

@@ -161,9 +161,18 @@ export const addButtonListener = (
 
 export const createObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void
+) => createDivObserver(mutationCallback, "roam-body");
+
+export const createOverlayObserver = (
+  mutationCallback: (mutationList?: MutationRecord[]) => void
+) => createDivObserver(mutationCallback, "bp3-portal");
+
+const createDivObserver = (
+  mutationCallback: (mutationList?: MutationRecord[]) => void,
+  divClass: string
 ) => {
   const mutationConfig = { childList: true, subtree: true };
-  const mutationTarget = document.getElementsByClassName("roam-body")[0];
+  const mutationTarget = document.getElementsByClassName(divClass)[0];
   const observer = new MutationObserver(mutationCallback);
   observer.observe(mutationTarget, mutationConfig);
 };
