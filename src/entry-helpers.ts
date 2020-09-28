@@ -14,15 +14,15 @@ declare global {
       query?: string;
       inputs?: any;
       location?: {
-        "parent-uid": string,
-        order: number, 
-      },
+        "parent-uid": string;
+        order: number;
+      };
       block?: {
         string: string;
         uid?: string;
         open?: boolean;
-      },
-    }) => Promise<void>;
+      };
+    }) => Promise<{ children?: { id: number }[]; id?: number }>;
   }
 }
 
@@ -98,9 +98,47 @@ export const getAttrConfigFromQuery = (query: string) => {
   return Object.fromEntries(entries);
 };
 
-export const pushBullets = async (bullets: string[], title: string = "") => {
+export const pushBullets = async (
+  bullets: string[],
+  blockUid?: string,
+  parentUid?: string
+) => {
   if (window.roamDatomicAlphaAPI) {
     // use write API :D
+    const parent = await window.roamDatomicAlphaAPI({
+      action: "pull",
+      selector: "[:block/children]",
+      uid: parentUid,
+    });
+    const block = await window.roamDatomicAlphaAPI({
+      action: "pull",
+      selector: "[:db/id]",
+      uid: blockUid,
+    });
+    const blockIndex = parent.children?.findIndex((c) => c.id === block.id);
+    for (const index in bullets) {
+      const bullet = bullets[index];
+      if (index === "0") {
+        await window.roamDatomicAlphaAPI({
+          action: "update-block",
+          block: {
+            uid: blockUid,
+            string: bullet,
+          },
+        });
+      } else {
+        await window.roamDatomicAlphaAPI({
+          action: "create-block",
+          block: {
+            string: bullet,
+          },
+          location: {
+            "parent-uid": parentUid,
+            order: blockIndex + parseInt(index),
+          },
+        });
+      }
+    }
   } else {
     for (const index in bullets) {
       const bullet = bullets[index];
@@ -123,7 +161,11 @@ export const pushBullets = async (bullets: string[], title: string = "") => {
 
 const clickEventListener = (
   targetCommand: string,
-  callback: (buttonConfig?: { [key: string]: string }) => void
+  callback: (
+    buttonConfig?: { [key: string]: string },
+    blockUid?: string,
+    parentUid?: string
+  ) => void
 ) => async (e: MouseEvent) => {
   const target = e.target as HTMLElement;
   if (
@@ -165,18 +207,26 @@ const clickEventListener = (
     }
 
     if (window.roamDatomicAlphaAPI) {
+      target.innerText = "Loading...";
       const block = target.closest(".roam-block");
       const blockUid = block.id.substring(block.id.length - 9, block.id.length);
       const restOfHTMLId = block.id.substring(0, block.id.length - 9);
-      const potentialDateUid = restOfHTMLId.substring(restOfHTMLId.length - 10, restOfHTMLId.length);
-      const parentUid = isNaN(new Date(potentialDateUid).valueOf()) ? potentialDateUid.substring(1) : potentialDateUid;
-      window.roamDatomicAlphaAPI({
-        action: 'update-block',
-        block: {
-          uid: blockUid,
-          string: "",
-        }
-      }).then(() => callback(buttonConfig));
+      const potentialDateUid = restOfHTMLId.substring(
+        restOfHTMLId.length - 10,
+        restOfHTMLId.length
+      );
+      const parentUid = isNaN(new Date(potentialDateUid).valueOf())
+        ? potentialDateUid.substring(1)
+        : potentialDateUid;
+      window
+        .roamDatomicAlphaAPI({
+          action: "update-block",
+          block: {
+            uid: blockUid,
+            string: "",
+          },
+        })
+        .then(() => callback(buttonConfig, blockUid, parentUid));
     } else {
       const divContainer = target.parentElement.parentElement
         .parentElement as HTMLDivElement;
@@ -192,7 +242,11 @@ const clickEventListener = (
 
 export const addButtonListener = (
   targetCommand: string,
-  callback: (buttonConfig?: { [key: string]: string }) => void
+  callback: (
+    buttonConfig?: { [key: string]: string },
+    blockUid?: string,
+    parentUid?: string
+  ) => void
 ) => {
   const listener = clickEventListener(targetCommand, callback);
   document.addEventListener("click", listener);
