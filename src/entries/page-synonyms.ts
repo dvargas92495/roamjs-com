@@ -20,16 +20,19 @@ aTag.onclick = () => {
     )
     .map((p) => p[0]);
   const uidWithAliases = pagesWithAliases.map((p) => ({
+      title: p.title,
     uid: p.uid,
-    aliases: getConfigFromPage(p.title)
-      ?.Aliases?.split(",")
-      ?.map((a: string) => a.trim()) || [],
+    aliases:
+      getConfigFromPage(p.title)
+        ?.Aliases?.split(",")
+        ?.map((a: string) => a.trim()) || [],
   }));
   const uidByAlias: { [key: string]: string } = {};
-  uidWithAliases.forEach((p) =>
-    p.aliases.forEach((a: string) => (uidByAlias[a] = p.uid))
-  );
-  console.log(uidWithAliases);
+  uidWithAliases.forEach((p) => {
+    p.aliases.forEach((a: string) => (uidByAlias[a] = p.uid));
+    uidByAlias[p.title] = p.uid;
+  });
+  console.log(uidByAlias);
 };
 
 createOverlayObserver(() => {
