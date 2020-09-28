@@ -10,7 +10,7 @@ import axios from "axios";
 const TWITTER_REFERENCES_COMMAND = "twitter references";
 
 const twitterReferencesListener = async () => {
-  const config = getConfigFromPage("twitter");
+  const config = getConfigFromPage("roam/js/twitter");
   const username = config["Username"];
   if (!username) {
     await asyncType("Error: Missing required parameter username!");

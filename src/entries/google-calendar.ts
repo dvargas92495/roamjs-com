@@ -10,16 +10,8 @@ import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
-declare global {
-  interface Window {
-    roamAlphaAPI: {
-      q: (query: string) => any[];
-    };
-  }
-}
-
 const importGoogleCalendar = async () => {
-  const config = getConfigFromPage("google-calendar");
+  const config = getConfigFromPage("roam/js/google-calendar");
 
   const calendarId = config["Google Calendar"]?.trim();
   if (!calendarId) {

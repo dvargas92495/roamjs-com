@@ -2,6 +2,21 @@ import userEvent from "@testing-library/user-event";
 import { waitFor, fireEvent, wait } from "@testing-library/dom";
 import { AxiosError } from "axios";
 
+declare global {
+  interface Window {
+    roamAlphaAPI: {
+      q: (query: string) => any[];
+    };
+    roamDatomicAlphaAPI: (params: {
+      action: "pull" | "q";
+      selector?: string;
+      uid?: string;
+      query?: string;
+      inputs?: any;
+    }) => Promise<void>;
+  }
+}
+
 export const asyncType = async (text: string) =>
   await userEvent.type(document.activeElement, text, {
     skipClick: true,
@@ -43,14 +58,16 @@ export const waitForString = (text: string) =>
 export const skipFrame = () => wait(() => {}, { timeout: 1 });
 
 export const getConfigFromPage = (inputPage?: string) => {
-  const page = inputPage
-    ? `roam/js/${inputPage}`
-    : document.getElementsByClassName("rm-title-display")[0]?.textContent;
+  const page =
+    inputPage ||
+    document.getElementsByClassName("rm-title-display")[0]?.textContent;
   if (!page) {
     return {};
   }
-  return getAttrConfigFromQuery(`[:find (pull ?e [*]) :where [?e :node/title "${page}"] ]`);
-}
+  return getAttrConfigFromQuery(
+    `[:find (pull ?e [*]) :where [?e :node/title "${page}"] ]`
+  );
+};
 
 export const getAttrConfigFromQuery = (query: string) => {
   const pageResults = window.roamAlphaAPI.q(query);
@@ -73,27 +90,25 @@ export const getAttrConfigFromQuery = (query: string) => {
 };
 
 export const pushBullets = async (bullets: string[], title: string = "") => {
-  // There is an issue with periods which happens only for the first bullet that contains a period.
-  // Deliberrately adding a period, so that subsequent bullets don't face that issue.
-  // Doesn't always work if title is empty.
-  // This period issue is a big mystery.
-  bullets.unshift(title + ".");
+  if (window.roamDatomicAlphaAPI) {
+    // use write API :D
+  } else {
+    for (const index in bullets) {
+      const bullet = bullets[index];
+      await asyncType(bullet);
+      await waitForString(bullet);
 
-  for (const index in bullets) {
-    const bullet = bullets[index];
-    await asyncType(bullet);
-    await waitForString(bullet);
-
-    // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
-    // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
-    const enterObj = {
-      key: "Enter",
-      keyCode: 13,
-      which: 13,
-    };
-    await fireEvent.keyDown(document.activeElement, enterObj);
-    await fireEvent.keyUp(document.activeElement, enterObj);
-    await waitForString("");
+      // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
+      // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
+      const enterObj = {
+        key: "Enter",
+        keyCode: 13,
+        which: 13,
+      };
+      await fireEvent.keyDown(document.activeElement, enterObj);
+      await fireEvent.keyUp(document.activeElement, enterObj);
+      await waitForString("");
+    }
   }
 };
 
@@ -161,7 +176,11 @@ export const addButtonListener = (
 
 export const createObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void
-) => createDivObserver(mutationCallback, document.getElementsByClassName("roam-body")[0]);
+) =>
+  createDivObserver(
+    mutationCallback,
+    document.getElementsByClassName("roam-body")[0]
+  );
 
 export const createOverlayObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void
