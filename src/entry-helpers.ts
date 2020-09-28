@@ -226,11 +226,11 @@ const clickEventListener = (
       const blockUid = block.id.substring(block.id.length - 9, block.id.length);
       const restOfHTMLId = block.id.substring(0, block.id.length - 9);
       const potentialDateUid = restOfHTMLId.substring(
-        restOfHTMLId.length - 10,
-        restOfHTMLId.length
+        restOfHTMLId.length - 11,
+        restOfHTMLId.length - 1
       );
       const parentUid = isNaN(new Date(potentialDateUid).valueOf())
-        ? potentialDateUid.substring(0, potentialDateUid.length - 1)
+        ? potentialDateUid.substring(1)
         : potentialDateUid;
       window
         .roamDatomicAlphaAPI({
