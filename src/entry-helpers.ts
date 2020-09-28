@@ -28,8 +28,8 @@ declare global {
 
 type RoamError = {
   raw: string;
-  'status-code': number;
-}
+  "status-code": number;
+};
 
 export const asyncType = async (text: string) =>
   await userEvent.type(document.activeElement, text, {
@@ -116,21 +116,24 @@ export const pushBullets = async (
   parentUid?: string
 ) => {
   if (window.roamDatomicAlphaAPI) {
+    console.log(parentUid, "parent", blockUid, "blockuid");
     const parent = await window.roamDatomicAlphaAPI({
       action: "pull",
       selector: "[:block/children]",
       uid: parentUid,
     });
+    console.log("got the parent");
     const block = await window.roamDatomicAlphaAPI({
       action: "pull",
       selector: "[:db/id]",
       uid: blockUid,
     });
+    console.log("got the block");
     const blockIndex = parent.children?.findIndex((c) => c.id === block.id);
-    console.log(parentUid, "parent", blockUid, "block", blockIndex)
+    console.log(parentUid, "parent", blockUid, "block", blockIndex);
     for (const index in bullets) {
       const bullet = bullets[index];
-      console.log("Printing", bullet, "to index", blockIndex + parseInt(index))
+      console.log("Printing", bullet, "to index", blockIndex + parseInt(index));
       if (index === "0") {
         await window.roamDatomicAlphaAPI({
           action: "update-block",
@@ -234,6 +237,7 @@ const clickEventListener = (
       const parentUid = isNaN(new Date(potentialDateUid).valueOf())
         ? potentialDateUid.substring(1)
         : potentialDateUid;
+      console.log("Before clearing", blockUid, parentUid);
       window
         .roamDatomicAlphaAPI({
           action: "update-block",
