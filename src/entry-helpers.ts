@@ -8,25 +8,46 @@ declare global {
       q: (query: string) => any[];
     };
     roamDatomicAlphaAPI: (params: {
-      action: "pull" | "q";
+      action: "pull" | "q" | "create-block" | "update-block";
       selector?: string;
       uid?: string;
       query?: string;
       inputs?: any;
-    }) => Promise<void>;
+      location?: {
+        "parent-uid": string;
+        order: number;
+      };
+      block?: {
+        string: string;
+        uid?: string;
+        open?: boolean;
+      };
+    }) => Promise<{ children?: { id: number }[]; id?: number }>;
   }
 }
+
+type RoamError = {
+  raw: string;
+  "status-code": number;
+};
 
 export const asyncType = async (text: string) =>
   await userEvent.type(document.activeElement, text, {
     skipClick: true,
   });
 
-export const genericError = (e: AxiosError) => {
-  const message = e.response ? JSON.stringify(e.response.data) : e.message;
-  asyncType(
-    `Error: ${message.length > 50 ? `${message.substring(0, 50)}...` : message}`
-  );
+export const genericError = (e: AxiosError & RoamError) => {
+  const message =
+    (e.response ? JSON.stringify(e.response.data) : e.message) || e.raw || "";
+  if (message) {
+    asyncType(
+      `Error: ${
+        message.length > 50 ? `${message.substring(0, 50)}...` : message
+      }`
+    );
+  } else {
+    console.error(e);
+  }
 };
 
 export const waitForString = (text: string) =>
@@ -89,9 +110,46 @@ export const getAttrConfigFromQuery = (query: string) => {
   return Object.fromEntries(entries);
 };
 
-export const pushBullets = async (bullets: string[], title: string = "") => {
+export const pushBullets = async (
+  bullets: string[],
+  blockUid?: string,
+  parentUid?: string
+) => {
   if (window.roamDatomicAlphaAPI) {
-    // use write API :D
+    const parent = await window.roamDatomicAlphaAPI({
+      action: "pull",
+      selector: "[:block/children]",
+      uid: parentUid,
+    });
+    const block = await window.roamDatomicAlphaAPI({
+      action: "pull",
+      selector: "[:db/id]",
+      uid: blockUid,
+    });
+    const blockIndex = parent.children?.findIndex((c) => c.id === block.id);
+    for (const index in bullets) {
+      const bullet = bullets[index];
+      if (index === "0") {
+        await window.roamDatomicAlphaAPI({
+          action: "update-block",
+          block: {
+            uid: blockUid,
+            string: bullet,
+          },
+        });
+      } else {
+        await window.roamDatomicAlphaAPI({
+          action: "create-block",
+          block: {
+            string: bullet,
+          },
+          location: {
+            "parent-uid": parentUid,
+            order: blockIndex + parseInt(index) + 1,
+          },
+        });
+      }
+    }
   } else {
     for (const index in bullets) {
       const bullet = bullets[index];
@@ -114,17 +172,22 @@ export const pushBullets = async (bullets: string[], title: string = "") => {
 
 const clickEventListener = (
   targetCommand: string,
-  callback: (buttonConfig?: { [key: string]: string }) => void
+  callback: (
+    buttonConfig?: { [key: string]: string },
+    blockUid?: string,
+    parentUid?: string
+  ) => void
 ) => async (e: MouseEvent) => {
-  const target = e.target as HTMLElement;
+  const htmlTarget = e.target as HTMLElement;
   if (
-    target &&
-    target.tagName === "BUTTON" &&
-    target.innerText
+    htmlTarget &&
+    htmlTarget.tagName === "BUTTON" &&
+    htmlTarget.innerText
       .toUpperCase()
       .trim()
       .startsWith(targetCommand.toUpperCase())
   ) {
+    const target = htmlTarget as HTMLButtonElement;
     const rawParts = target.innerText
       .substring(targetCommand.length + 1)
       .split(" ");
@@ -155,20 +218,49 @@ const clickEventListener = (
       buttonConfig[restOfButtonText[i * 2]] = restOfButtonText[i * 2 + 1];
     }
 
-    const divContainer = target.parentElement.parentElement
-      .parentElement as HTMLDivElement;
-    await userEvent.click(divContainer);
-    await waitForString(`{{${target.innerText}}}`);
-    const textArea = document.activeElement as HTMLTextAreaElement;
-    await userEvent.clear(textArea);
-    await waitForString("");
-    callback(buttonConfig);
+    if (window.roamDatomicAlphaAPI) {
+      target.innerText = "Loading...";
+      target.disabled = true;
+
+      const block = target.closest(".roam-block");
+      const blockUid = block.id.substring(block.id.length - 9, block.id.length);
+      const restOfHTMLId = block.id.substring(0, block.id.length - 9);
+      const potentialDateUid = restOfHTMLId.substring(
+        restOfHTMLId.length - 11,
+        restOfHTMLId.length - 1
+      );
+      const parentUid = isNaN(new Date(potentialDateUid).valueOf())
+        ? potentialDateUid.substring(1)
+        : potentialDateUid;
+      window
+        .roamDatomicAlphaAPI({
+          action: "update-block",
+          block: {
+            uid: blockUid,
+            string: "",
+          },
+        })
+        .then(() => callback(buttonConfig, blockUid, parentUid));
+    } else {
+      const divContainer = target.parentElement.parentElement
+        .parentElement as HTMLDivElement;
+      await userEvent.click(divContainer);
+      await waitForString(`{{${target.innerText}}}`);
+      const textArea = document.activeElement as HTMLTextAreaElement;
+      await userEvent.clear(textArea);
+      await waitForString("");
+      callback(buttonConfig);
+    }
   }
 };
 
 export const addButtonListener = (
   targetCommand: string,
-  callback: (buttonConfig?: { [key: string]: string }) => void
+  callback: (
+    buttonConfig?: { [key: string]: string },
+    blockUid?: string,
+    parentUid?: string
+  ) => void
 ) => {
   const listener = clickEventListener(targetCommand, callback);
   document.addEventListener("click", listener);

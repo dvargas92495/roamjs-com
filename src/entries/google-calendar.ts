@@ -10,7 +10,7 @@ import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
-const importGoogleCalendar = async () => {
+const importGoogleCalendar = async (_: any, blockUid: string, parentUid: string) => {
   const config = getConfigFromPage("roam/js/google-calendar");
 
   const calendarId = config["Google Calendar"]?.trim();
@@ -55,7 +55,7 @@ const importGoogleCalendar = async () => {
             e.end.dateTime
           ).toLocaleTimeString()})${meetLink}${zoomLink}`;
         }) as string[];
-      await pushBullets(bullets);
+      await pushBullets(bullets, blockUid, parentUid);
     })
     .catch((e) =>
       e.message === "Request failed with status code 404"
