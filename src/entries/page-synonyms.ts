@@ -17,7 +17,7 @@ aTag.appendChild(shortcut);
 createOverlayObserver(() => {
     const uls = document.getElementsByClassName("bp3-menu bp3-text-small");
     Array.from(uls).forEach((ul) => {
-        if (ul.tagName === "UL") {
+        if (ul.tagName === "UL" && !ul.contains(option)) {
             const dividers = Array.from(ul.getElementsByClassName('bp3-menu-divider'));
             if (dividers.length > 0) {
                 const divider = dividers[0];
