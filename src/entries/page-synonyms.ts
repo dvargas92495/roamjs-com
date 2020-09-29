@@ -5,7 +5,7 @@ import {
   getUids,
 } from "../entry-helpers";
 
-let blockElementSelected : Element;
+let blockElementSelected: Element;
 
 const option = document.createElement("li");
 const aTag = document.createElement("a");
@@ -46,29 +46,35 @@ aTag.onclick = async () => {
   if (window.roamDatomicAlphaAPI) {
     const { blockUid } = getUids(blockElementSelected);
     const blockContent = await window.roamDatomicAlphaAPI({
-      action: 'pull',
+      action: "pull",
       uid: blockUid,
-      selector: ':block/string'
-    })
-    const newText = Object.keys(uidByAlias).reduce((prevText: string, alias:string) => {
-      return prevText.replace(alias, `[${alias}](${uidByAlias[alias]})`)
-    }, blockContent.string);
+      selector: ":block/string",
+    });
+    const newText = Object.keys(uidByAlias).reduce(
+      (prevText: string, alias: string) => {
+        return prevText.replace(alias, `[${alias}](((${uidByAlias[alias]})))`);
+      },
+      blockContent.string
+    );
     await window.roamDatomicAlphaAPI({
-      action: 'update-block',
+      action: "update-block",
       block: {
         uid: blockUid,
         string: newText,
       },
-    })
+    });
   } else {
     const id = blockElementSelected.id;
-    if (blockElementSelected.tagName === 'DIV') {
+    if (blockElementSelected.tagName === "DIV") {
       userEvent.click(blockElementSelected);
     }
     const textArea = document.getElementById(id) as HTMLTextAreaElement;
-    const newText = Object.keys(uidByAlias).reduce((prevText: string, alias:string) => {
-      return prevText.replace(alias, `[${alias}](${uidByAlias[alias]})`)
-    }, textArea.value);
+    const newText = Object.keys(uidByAlias).reduce(
+      (prevText: string, alias: string) => {
+        return prevText.replace(alias, `[${alias}](((${uidByAlias[alias]})))`);
+      },
+      textArea.value
+    );
     userEvent.clear(textArea);
     userEvent.type(textArea, newText);
   }
@@ -94,7 +100,10 @@ document.addEventListener("mousedown", (e) => {
     return;
   }
   const htmlTarget = e.target as HTMLElement;
-  if (htmlTarget.className === "simple-bullet-outer cursor-pointer") {
+  if (
+    htmlTarget.className === "simple-bullet-outer cursor-pointer" ||
+    htmlTarget.className === "simple-bullet-inner"
+  ) {
     const bullet = htmlTarget.closest(".controls");
     blockElementSelected =
       bullet.nextElementSibling.className.indexOf("roam-block") > -1
