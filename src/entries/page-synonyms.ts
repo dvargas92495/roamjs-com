@@ -86,7 +86,7 @@ const option = createMenuOption(async () => {
     const textArea = document.getElementById(id) as HTMLTextAreaElement;
     const newText = replace(textArea.value);
     userEvent.clear(textArea);
-    userEvent.type(textArea, newText);
+    userEvent.type(textArea, newText, );
   }
 });
 
@@ -139,7 +139,7 @@ createOverlayObserver(() => {
       if (dividers.length > 0 && !ul.contains(option)) {
         const divider = dividers[0];
         ul.insertBefore(option, divider);
-      } else if (!ul.contains(multiOption)) {
+      } else if (!ul.contains(multiOption) && dividers.length === 0) {
         ul.appendChild(multiOption);
       }
     }
