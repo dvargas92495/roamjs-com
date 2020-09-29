@@ -131,14 +131,14 @@ const multiOption = createMenuOption(() => {
 createOverlayObserver(() => {
   const uls = document.getElementsByClassName("bp3-menu bp3-text-small");
   Array.from(uls).forEach((ul) => {
-    if (ul.tagName === "UL" && !ul.contains(option)) {
+    if (ul.tagName === "UL") {
       const dividers = Array.from(
         ul.getElementsByClassName("bp3-menu-divider")
       );
-      if (dividers.length > 0) {
+      if (dividers.length > 0 && !ul.contains(option)) {
         const divider = dividers[0];
         ul.insertBefore(option, divider);
-      } else {
+      } else if (!ul.contains(multiOption)) {
         ul.appendChild(multiOption);
       }
     }
