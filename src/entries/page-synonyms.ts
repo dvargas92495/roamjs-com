@@ -1,6 +1,5 @@
 import userEvent from "@testing-library/user-event";
 import {
-  asyncType,
   createOverlayObserver,
   getConfigFromPage,
   getUids,
@@ -95,7 +94,7 @@ document.addEventListener("mousedown", (e) => {
     return;
   }
   const htmlTarget = e.target as HTMLElement;
-  if (htmlTarget.className === "simple-bullet-outer.cursor-pointer") {
+  if (htmlTarget.className === "simple-bullet-outer cursor-pointer") {
     const bullet = htmlTarget.closest(".controls");
     blockElementSelected =
       bullet.nextElementSibling.className.indexOf("roam-block") > -1
