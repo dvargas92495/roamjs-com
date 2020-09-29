@@ -90,7 +90,7 @@ const option = createMenuOption(async () => {
   }
 });
 
-const multiOption = createMenuOption(() => {
+const multiOption = createMenuOption(async () => {
   const replace = getReplacer();
   const highlightedDivIds = Array.from(
     document.getElementsByClassName("block-highlight-blue")
@@ -115,6 +115,11 @@ const multiOption = createMenuOption(() => {
   } else {
     if (highlightedDivIds.length > 0) {
       userEvent.click(document.getElementById(highlightedDivIds[0]));
+      await waitFor(() => {
+        if (document.getElementsByClassName("block-highlight-blue").length > 0) {
+          throw new Error("Divs are still highlighted");
+        }
+      });
     }
     highlightedDivIds.forEach(async (id: string) => {
       userEvent.click(document.getElementById(id));
