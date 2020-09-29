@@ -1,3 +1,4 @@
+import { wait, waitFor, waitForElement } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import {
   createOverlayObserver,
@@ -48,7 +49,7 @@ aTag.onclick = async () => {
     const blockContent = await window.roamDatomicAlphaAPI({
       action: "pull",
       uid: blockUid,
-      selector: ":block/string",
+      selector: "[:block/string]",
     });
     const newText = Object.keys(uidByAlias).reduce(
       (prevText: string, alias: string) => {
@@ -67,6 +68,11 @@ aTag.onclick = async () => {
     const id = blockElementSelected.id;
     if (blockElementSelected.tagName === "DIV") {
       userEvent.click(blockElementSelected);
+      await waitFor(() => {
+        if (document.getElementById(id).tagName !== "TEXTAREA") {
+          throw new Error("Click did not render textarea");
+        }
+      });
     }
     const textArea = document.getElementById(id) as HTMLTextAreaElement;
     const newText = Object.keys(uidByAlias).reduce(
