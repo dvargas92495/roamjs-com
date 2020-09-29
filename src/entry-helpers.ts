@@ -22,7 +22,11 @@ declare global {
         uid?: string;
         open?: boolean;
       };
-    }) => Promise<{ children?: { id: number }[]; id?: number }>;
+    }) => Promise<{
+      children?: { id: number }[];
+      id?: number;
+      string?: string;
+    }>;
   }
 }
 
@@ -170,6 +174,22 @@ export const pushBullets = async (
   }
 };
 
+export const getUids = (block: Element) => {
+  const blockUid = block.id.substring(block.id.length - 9, block.id.length);
+  const restOfHTMLId = block.id.substring(0, block.id.length - 9);
+  const potentialDateUid = restOfHTMLId.substring(
+    restOfHTMLId.length - 11,
+    restOfHTMLId.length - 1
+  );
+  const parentUid = isNaN(new Date(potentialDateUid).valueOf())
+    ? potentialDateUid.substring(1)
+    : potentialDateUid;
+  return {
+    blockUid,
+    parentUid,
+  };
+};
+
 const clickEventListener = (
   targetCommand: string,
   callback: (
@@ -223,15 +243,7 @@ const clickEventListener = (
       target.disabled = true;
 
       const block = target.closest(".roam-block");
-      const blockUid = block.id.substring(block.id.length - 9, block.id.length);
-      const restOfHTMLId = block.id.substring(0, block.id.length - 9);
-      const potentialDateUid = restOfHTMLId.substring(
-        restOfHTMLId.length - 11,
-        restOfHTMLId.length - 1
-      );
-      const parentUid = isNaN(new Date(potentialDateUid).valueOf())
-        ? potentialDateUid.substring(1)
-        : potentialDateUid;
+      const { blockUid, parentUid } = getUids(block);
       window
         .roamDatomicAlphaAPI({
           action: "update-block",
