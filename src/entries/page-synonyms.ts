@@ -111,6 +111,6 @@ document.addEventListener("mousedown", (e) => {
     blockElementSelected =
       bullet.nextElementSibling.className.indexOf("roam-block") > -1
         ? bullet.nextElementSibling
-        : bullet.nextElementSibling.getElementsByClassName("roam-block-input")[0];
+        : bullet.nextElementSibling.getElementsByClassName("rm-block-input")[0];
   }
 });
