@@ -1,4 +1,12 @@
-import { createOverlayObserver, getConfigFromPage } from "../entry-helpers";
+import { wait, waitFor, waitForElement } from "@testing-library/dom";
+import userEvent from "@testing-library/user-event";
+import {
+  createOverlayObserver,
+  getConfigFromPage,
+  getUids,
+} from "../entry-helpers";
+
+let blockElementSelected: Element;
 
 const option = document.createElement("li");
 const aTag = document.createElement("a");
@@ -13,14 +21,18 @@ const shortcut = document.createElement("span");
 shortcut.className = "bp3-menu-item-label";
 shortcut.innerText = "Alt-A";
 aTag.appendChild(shortcut);
-aTag.onclick = () => {
+aTag.onclick = async () => {
+  if (!blockElementSelected) {
+    return;
+  }
+
   const pagesWithAliases = window.roamAlphaAPI
     .q(
       `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "Aliases"]]`
     )
     .map((p) => p[0]);
   const uidWithAliases = pagesWithAliases.map((p) => ({
-      title: p.title,
+    title: p.title,
     uid: p.uid,
     aliases:
       getConfigFromPage(p.title)
@@ -32,7 +44,43 @@ aTag.onclick = () => {
     p.aliases.forEach((a: string) => (uidByAlias[a] = p.uid));
     uidByAlias[p.title] = p.uid;
   });
-  console.log(uidByAlias);
+  const replace = (input: string) => Object.keys(uidByAlias).reduce(
+    (prevText: string, alias: string) => {
+      const regex = new RegExp(` ${alias} `, 'g');
+      return prevText.replace(regex, ` [${alias}](((${uidByAlias[alias]}))) `);
+    },
+    input
+  );
+  if (window.roamDatomicAlphaAPI) {
+    const { blockUid } = getUids(blockElementSelected);
+    const blockContent = await window.roamDatomicAlphaAPI({
+      action: "pull",
+      uid: blockUid,
+      selector: "[:block/string]",
+    });
+    const newText = replace(blockContent.string);
+    await window.roamDatomicAlphaAPI({
+      action: "update-block",
+      block: {
+        uid: blockUid,
+        string: newText,
+      },
+    });
+  } else {
+    const id = blockElementSelected.id;
+    if (blockElementSelected.tagName === "DIV") {
+      userEvent.click(blockElementSelected);
+      await waitFor(() => {
+        if (document.getElementById(id).tagName !== "TEXTAREA") {
+          throw new Error("Click did not render textarea");
+        }
+      });
+    }
+    const textArea = document.getElementById(id) as HTMLTextAreaElement;
+    const newText = replace(textArea.value);
+    userEvent.clear(textArea);
+    userEvent.type(textArea, newText);
+  }
 };
 
 createOverlayObserver(() => {
@@ -48,4 +96,21 @@ createOverlayObserver(() => {
       }
     }
   });
+});
+
+document.addEventListener("mousedown", (e) => {
+  if (e.button !== 2) {
+    return;
+  }
+  const htmlTarget = e.target as HTMLElement;
+  if (
+    htmlTarget.className === "simple-bullet-outer cursor-pointer" ||
+    htmlTarget.className === "simple-bullet-inner"
+  ) {
+    const bullet = htmlTarget.closest(".controls");
+    blockElementSelected =
+      bullet.nextElementSibling.className.indexOf("roam-block") > -1
+        ? bullet.nextElementSibling
+        : bullet.nextElementSibling.getElementsByClassName("roam-block")[0];
+  }
 });

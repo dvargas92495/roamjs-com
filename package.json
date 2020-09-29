@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "automate": "node scripts/automation.js",
-    "build": "webpack",
+    "build": "webpack --config ./webpack.production.config.js",
+    "build:pr": "webpack --config ./webpack.development.config.js",
     "build:lambda": "webpack --config ./webpack.lambda.config.js",
     "lambda": "node out/debug-lambda.js",
     "prelambda": "webpack --config ./webpack.debug.config.js",
