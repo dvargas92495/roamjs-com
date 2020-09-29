@@ -11,7 +11,6 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".js"],
   },
-  mode: "production",
   output: {
     path: path.join(__dirname, "build"),
     filename: "[name].js",

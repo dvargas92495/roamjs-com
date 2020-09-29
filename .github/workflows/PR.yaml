@@ -18,7 +18,7 @@ jobs:
       - name: install
         run: npm install
       - name: Build
-        run: npm run build
+        run: npm run build:pr
       - name: Upload
         run: aws s3 sync build s3://roam.davidvargas.me/${{github.event.number}}
       - name: Invalidate Cache
