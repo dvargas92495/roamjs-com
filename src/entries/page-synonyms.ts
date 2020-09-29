@@ -86,7 +86,7 @@ const option = createMenuOption(async () => {
     const textArea = document.getElementById(id) as HTMLTextAreaElement;
     const newText = replace(textArea.value);
     userEvent.clear(textArea);
-    userEvent.type(textArea, newText);
+    userEvent.type(textArea, newText, );
   }
 });
 
