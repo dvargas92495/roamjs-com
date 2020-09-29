@@ -113,15 +113,8 @@ const multiOption = createMenuOption(async () => {
       });
     });
   } else {
-    if (highlightedDivIds.length > 0) {
-      userEvent.click(document.getElementById(highlightedDivIds[0]));
-      await waitFor(() => {
-        if (document.getElementsByClassName("block-highlight-blue").length > 0) {
-          throw new Error("Divs are still highlighted");
-        }
-      });
-    }
-    highlightedDivIds.forEach(async (id: string) => {
+    for (var index in highlightedDivIds) {
+      const id = highlightedDivIds[index];
       userEvent.click(document.getElementById(id));
       await waitFor(() => {
         if (document.getElementById(id).tagName !== "TEXTAREA") {
@@ -132,7 +125,7 @@ const multiOption = createMenuOption(async () => {
       const newText = replace(textArea.value);
       userEvent.clear(textArea);
       userEvent.type(textArea, newText);
-    });
+    };
   }
 });
 
