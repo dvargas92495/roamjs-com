@@ -18,6 +18,4 @@ jobs:
       - name: install
         run: npm install
       - name: Automate
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: npm run automate
+        run: npm run automate -- ${{ github.event.pull_request.title }}
