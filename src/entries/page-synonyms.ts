@@ -46,8 +46,8 @@ aTag.onclick = async () => {
   });
   const replace = (input: string) => Object.keys(uidByAlias).reduce(
     (prevText: string, alias: string) => {
-      const regex = new RegExp(` ${alias} `, 'g');
-      return prevText.replace(regex, ` [${alias}](((${uidByAlias[alias]}))) `);
+      const regex = new RegExp(`${alias}`, 'g');
+      return prevText.replace(regex, `[${alias}](((${uidByAlias[alias]})))`);
     },
     input
   );
@@ -111,6 +111,6 @@ document.addEventListener("mousedown", (e) => {
     blockElementSelected =
       bullet.nextElementSibling.className.indexOf("roam-block") > -1
         ? bullet.nextElementSibling
-        : bullet.nextElementSibling.getElementsByClassName("roam-block")[0];
+        : bullet.nextElementSibling.getElementsByClassName("rm-block-input")[0];
   }
 });
