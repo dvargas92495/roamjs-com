@@ -4,6 +4,7 @@
   "description": "Various Roam Javascript extensions deployed to roam.davidvargas.me",
   "main": "index.js",
   "scripts": {
+    "automate": "node scripts/automation.js",
     "build": "webpack",
     "build:lambda": "webpack --config ./webpack.lambda.config.js",
     "lambda": "node out/debug-lambda.js",
