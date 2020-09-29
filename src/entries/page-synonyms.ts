@@ -20,7 +20,7 @@ aTag.onclick = () => {
     )
     .map((p) => p[0]);
   const uidWithAliases = pagesWithAliases.map((p) => ({
-      title: p.title,
+    title: p.title,
     uid: p.uid,
     aliases:
       getConfigFromPage(p.title)
@@ -48,4 +48,8 @@ createOverlayObserver(() => {
       }
     }
   });
+});
+
+document.addEventListener("click", (e) => {
+  console.log("breakpoint");
 });

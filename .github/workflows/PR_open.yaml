@@ -18,4 +18,4 @@ jobs:
       - name: install
         run: npm install
       - name: Automate
-        run: npm run automate -- ${{ github.event.pull_request.title }}
+        run: npm run automate -- "${{ github.event.pull_request.title }}"

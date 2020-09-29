@@ -11,7 +11,6 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".js"],
   },
-  mode: "production",
   output: {
     path: path.join(__dirname, "build"),
     filename: "[name].js",
@@ -24,10 +23,5 @@ module.exports = {
         exclude: /node_modules/,
       },
     ],
-  },
-  performance: {
-    hints: "error",
-    maxEntrypointSize: 300000,
-    maxAssetSize: 300000,
   },
 };
