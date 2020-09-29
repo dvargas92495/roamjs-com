@@ -46,8 +46,7 @@ aTag.onclick = async () => {
   });
   const replace = (input: string) => Object.keys(uidByAlias).reduce(
     (prevText: string, alias: string) => {
-      // regex for not wrapped by brackets or end of string or beginning of string
-      const regex = new RegExp(`([^\\[]${alias}[^\\]]|${alias}$|^${alias})`, 'g');
+      const regex = new RegExp(`${alias}`, 'g');
       return prevText.replace(regex, `[${alias}](((${uidByAlias[alias]})))`);
     },
     input
