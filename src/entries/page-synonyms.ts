@@ -8,24 +8,25 @@ import {
 
 let blockElementSelected: Element;
 
-const option = document.createElement("li");
-const aTag = document.createElement("a");
-aTag.setAttribute("label", "Alt-A");
-aTag.className = "bp3-menu-item bp3-popover-dismiss";
-option.appendChild(aTag);
-const optionText = document.createElement("div");
-optionText.className = "bp3-text-overflow-ellipsis bp3-fill";
-optionText.innerText = "Alias Page Synonyms";
-aTag.appendChild(optionText);
-const shortcut = document.createElement("span");
-shortcut.className = "bp3-menu-item-label";
-shortcut.innerText = "Alt-A";
-aTag.appendChild(shortcut);
-aTag.onclick = async () => {
-  if (!blockElementSelected) {
-    return;
-  }
+const createMenuOption = (menuOnClick: () => void) => {
+  const option = document.createElement("li");
+  const aTag = document.createElement("a");
+  aTag.setAttribute("label", "Alt-A");
+  aTag.className = "bp3-menu-item bp3-popover-dismiss";
+  option.appendChild(aTag);
+  const optionText = document.createElement("div");
+  optionText.className = "bp3-text-overflow-ellipsis bp3-fill";
+  optionText.innerText = "Alias Page Synonyms";
+  aTag.appendChild(optionText);
+  const shortcut = document.createElement("span");
+  shortcut.className = "bp3-menu-item-label";
+  shortcut.innerText = "Alt-A";
+  aTag.appendChild(shortcut);
+  aTag.onclick = menuOnClick;
+  return option;
+};
 
+const getReplacer = () => {
   const pagesWithAliases = window.roamAlphaAPI
     .q(
       `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "Aliases"]]`
@@ -44,13 +45,19 @@ aTag.onclick = async () => {
     p.aliases.forEach((a: string) => (uidByAlias[a] = p.uid));
     uidByAlias[p.title] = p.uid;
   });
-  const replace = (input: string) => Object.keys(uidByAlias).reduce(
-    (prevText: string, alias: string) => {
-      const regex = new RegExp(`${alias}`, 'g');
+  return (input: string) =>
+    Object.keys(uidByAlias).reduce((prevText: string, alias: string) => {
+      const regex = new RegExp(`${alias}`, "g");
       return prevText.replace(regex, `[${alias}](((${uidByAlias[alias]})))`);
-    },
-    input
-  );
+    }, input);
+};
+
+const option = createMenuOption(async () => {
+  if (!blockElementSelected) {
+    return;
+  }
+
+  const replace = getReplacer();
   if (window.roamDatomicAlphaAPI) {
     const { blockUid } = getUids(blockElementSelected);
     const blockContent = await window.roamDatomicAlphaAPI({
@@ -81,7 +88,45 @@ aTag.onclick = async () => {
     userEvent.clear(textArea);
     userEvent.type(textArea, newText);
   }
-};
+});
+
+const multiOption = createMenuOption(() => {
+  const replace = getReplacer();
+  const highlightedDivIds = Array.from(
+    document.getElementsByClassName("block-highlight-blue")
+  ).map((d) => d.getElementsByClassName("roam-block")[0].id);
+  if (window.roamDatomicAlphaAPI) {
+    highlightedDivIds.forEach(async (id: string) => {
+      const { blockUid } = getUids(document.getElementById(id));
+      const blockContent = await window.roamDatomicAlphaAPI({
+        action: "pull",
+        uid: blockUid,
+        selector: "[:block/string]",
+      });
+      const newText = replace(blockContent.string);
+      await window.roamDatomicAlphaAPI({
+        action: "update-block",
+        block: {
+          uid: blockUid,
+          string: newText,
+        },
+      });
+    });
+  } else {
+    highlightedDivIds.forEach(async (id: string) => {
+      userEvent.click(document.getElementById(id));
+      await waitFor(() => {
+        if (document.getElementById(id).tagName !== "TEXTAREA") {
+          throw new Error("Click did not render textarea");
+        }
+      });
+      const textArea = document.getElementById(id) as HTMLTextAreaElement;
+      const newText = replace(textArea.value);
+      userEvent.clear(textArea);
+      userEvent.type(textArea, newText);
+    });
+  }
+});
 
 createOverlayObserver(() => {
   const uls = document.getElementsByClassName("bp3-menu bp3-text-small");
@@ -93,6 +138,8 @@ createOverlayObserver(() => {
       if (dividers.length > 0) {
         const divider = dividers[0];
         ul.insertBefore(option, divider);
+      } else {
+        ul.appendChild(multiOption);
       }
     }
   });
