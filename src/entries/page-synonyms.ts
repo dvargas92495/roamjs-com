@@ -44,6 +44,13 @@ aTag.onclick = async () => {
     p.aliases.forEach((a: string) => (uidByAlias[a] = p.uid));
     uidByAlias[p.title] = p.uid;
   });
+  const replace = (input: string) => Object.keys(uidByAlias).reduce(
+    (prevText: string, alias: string) => {
+      const regex = new RegExp(` ${alias} `, 'g');
+      return prevText.replace(regex, ` [${alias}](((${uidByAlias[alias]}))) `);
+    },
+    input
+  );
   if (window.roamDatomicAlphaAPI) {
     const { blockUid } = getUids(blockElementSelected);
     const blockContent = await window.roamDatomicAlphaAPI({
@@ -51,12 +58,7 @@ aTag.onclick = async () => {
       uid: blockUid,
       selector: "[:block/string]",
     });
-    const newText = Object.keys(uidByAlias).reduce(
-      (prevText: string, alias: string) => {
-        return prevText.replace(alias, `[${alias}](((${uidByAlias[alias]})))`);
-      },
-      blockContent.string
-    );
+    const newText = replace(blockContent.string);
     await window.roamDatomicAlphaAPI({
       action: "update-block",
       block: {
@@ -75,12 +77,7 @@ aTag.onclick = async () => {
       });
     }
     const textArea = document.getElementById(id) as HTMLTextAreaElement;
-    const newText = Object.keys(uidByAlias).reduce(
-      (prevText: string, alias: string) => {
-        return prevText.replace(alias, `[${alias}](((${uidByAlias[alias]})))`);
-      },
-      textArea.value
-    );
+    const newText = replace(textArea.value);
     userEvent.clear(textArea);
     userEvent.type(textArea, newText);
   }
