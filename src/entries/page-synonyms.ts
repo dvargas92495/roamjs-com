@@ -48,7 +48,7 @@ aTag.onclick = async () => {
     (prevText: string, alias: string) => {
       // regex for not wrapped by brackets or end of string or beginning of string
       const regex = new RegExp(`([^\[]${alias}[^\]]|${alias}$|^${alias})`, 'g');
-      return prevText.replace(regex, ` [${alias}](((${uidByAlias[alias]}))) `);
+      return prevText.replace(regex, `[${alias}](((${uidByAlias[alias]})))`);
     },
     input
   );
