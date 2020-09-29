@@ -113,6 +113,9 @@ const multiOption = createMenuOption(() => {
       });
     });
   } else {
+    if (highlightedDivIds.length > 0) {
+      userEvent.click(document.getElementById(highlightedDivIds[0]));
+    }
     highlightedDivIds.forEach(async (id: string) => {
       userEvent.click(document.getElementById(id));
       await waitFor(() => {
