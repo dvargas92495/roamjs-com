@@ -19,6 +19,10 @@ On expanded queries, there will be a sort icon that appears next to the results 
 
 To persist a particular sort on a query, create a child block with the `Default Sort` attribute. Valid values include each of the options above, minus the sort by prefix. For example, `Default Sort:: Page Title`.
 
+### Installation
+
+Insert this as a child of any `[[roam/js]]` block to install the extension.
+
 ```javascript
 var old = document.getElementById("query-tools");
 if (old) {
