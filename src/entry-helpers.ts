@@ -2,11 +2,11 @@ import userEvent from "@testing-library/user-event";
 import { waitFor, fireEvent, wait } from "@testing-library/dom";
 import { AxiosError } from "axios";
 
-window.fireEvent = fireEvent;
+window.userEvent = userEvent;
 
 declare global {
   interface Window {
-    fireEvent: typeof fireEvent;
+    userEvent: typeof userEvent;
     roamAlphaAPI: {
       q: (query: string) => any[];
     };
