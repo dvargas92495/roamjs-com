@@ -52,7 +52,7 @@ const getReplacer = () => {
     }, input);
 };
 
-const option = createMenuOption(async () => {
+const optionCallback = async () => {
   if (!blockElementSelected) {
     return;
   }
@@ -86,9 +86,11 @@ const option = createMenuOption(async () => {
     const textArea = document.getElementById(id) as HTMLTextAreaElement;
     const newText = replace(textArea.value);
     userEvent.clear(textArea);
-    userEvent.type(textArea, newText, );
+    userEvent.type(textArea, newText);
   }
-});
+};
+
+const option = createMenuOption(optionCallback);
 
 const multiOption = createMenuOption(async () => {
   const replace = getReplacer();
@@ -125,13 +127,14 @@ const multiOption = createMenuOption(async () => {
       const newText = replace(textArea.value);
       userEvent.clear(textArea);
       userEvent.type(textArea, newText);
-    };
+    }
   }
 });
 
 createOverlayObserver(() => {
   const uls = document.getElementsByClassName("bp3-menu bp3-text-small");
-  Array.from(uls).forEach((ul) => {
+  Array.from(uls).forEach((u) => {
+    const ul = u as HTMLUListElement;
     if (ul.tagName === "UL") {
       const dividers = Array.from(
         ul.getElementsByClassName("bp3-menu-divider")
@@ -139,7 +142,11 @@ createOverlayObserver(() => {
       if (dividers.length > 0 && !ul.contains(option)) {
         const divider = dividers[0];
         ul.insertBefore(option, divider);
-      } else if (!ul.contains(multiOption) && dividers.length === 0) {
+      } else if (
+        !ul.contains(multiOption) &&
+        dividers.length === 0 &&
+        ul.innerText.indexOf("Jump to block") === -1
+      ) {
         ul.appendChild(multiOption);
       }
     }
@@ -160,5 +167,12 @@ document.addEventListener("mousedown", (e) => {
       bullet.nextElementSibling.className.indexOf("roam-block") > -1
         ? bullet.nextElementSibling
         : bullet.nextElementSibling.getElementsByClassName("rm-block-input")[0];
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "a" && e.altKey) {
+    blockElementSelected = document.activeElement;
+    optionCallback();
   }
 });
