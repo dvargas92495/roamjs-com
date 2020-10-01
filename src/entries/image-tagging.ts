@@ -1,4 +1,8 @@
-import Tesseract from "tesseract.js";
+import { createWorker } from "tesseract.js";
+
+const worker = createWorker({
+  logger: (m) => console.log(m),
+});
 
 document.addEventListener("dblclick", (e) => {
   const htmlTarget = e.target as HTMLElement;
@@ -11,13 +15,18 @@ document.addEventListener("dblclick", (e) => {
 
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
-    tesseractImage.onload = () => {
+    tesseractImage.onload = async () => {
       canvas.width = tesseractImage.width;
       canvas.height = tesseractImage.height;
       ctx.drawImage(tesseractImage, 0, 0);
-      Tesseract.recognize(ctx).then(({ data: { text } }) => {
-        console.log(text);
-      });
+      await worker.load();
+      await worker.loadLanguage("eng");
+      await worker.initialize("eng");
+      const {
+        data: { text },
+      } = await worker.recognize(ctx);
+      console.log(text);
+      await worker.terminate();
     };
   }
 });
