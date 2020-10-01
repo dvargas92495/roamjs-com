@@ -1,8 +1,6 @@
 import { createWorker } from "tesseract.js";
 
-const worker = createWorker({
-  logger: (m) => console.log(m),
-});
+const worker = createWorker();
 
 document.addEventListener("dblclick", (e) => {
   const htmlTarget = e.target as HTMLElement;
@@ -24,7 +22,7 @@ document.addEventListener("dblclick", (e) => {
       await worker.initialize("eng");
       const {
         data: { text },
-      } = await worker.recognize(img.src);
+      } = await worker.recognize(ctx);
       console.log(text);
       await worker.terminate();
     };
