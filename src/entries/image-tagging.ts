@@ -24,7 +24,7 @@ document.addEventListener("dblclick", (e) => {
       await worker.initialize("eng");
       const {
         data: { text },
-      } = await worker.recognize(ctx);
+      } = await worker.recognize(img.src);
       console.log(text);
       await worker.terminate();
     };
