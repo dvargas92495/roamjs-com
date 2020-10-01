@@ -22,7 +22,7 @@ document.addEventListener("dblclick", (e) => {
       await worker.initialize("eng");
       const {
         data: { text },
-      } = await worker.recognize(ctx);
+      } = await worker.recognize(canvas);
       console.log(text);
       await worker.terminate();
     };
