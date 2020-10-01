@@ -83,8 +83,6 @@ export const waitForString = (text: string) =>
     }
   );
 
-export const skipFrame = () => wait(() => {}, { timeout: 1 });
-
 export const getConfigFromPage = (inputPage?: string) => {
   const page =
     inputPage ||
