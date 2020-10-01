@@ -1,7 +1,5 @@
 import { createWorker } from "tesseract.js";
 
-const worker = createWorker();
-
 document.addEventListener("dblclick", (e) => {
   const htmlTarget = e.target as HTMLElement;
   if (htmlTarget && htmlTarget.tagName === "IMG") {
@@ -17,6 +15,7 @@ document.addEventListener("dblclick", (e) => {
       canvas.width = tesseractImage.width;
       canvas.height = tesseractImage.height;
       ctx.drawImage(tesseractImage, 0, 0);
+      const worker = createWorker();
       await worker.load();
       await worker.loadLanguage("eng");
       await worker.initialize("eng");
