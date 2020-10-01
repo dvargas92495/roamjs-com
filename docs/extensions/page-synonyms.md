@@ -16,7 +16,7 @@ Note that the extension does a simple search and replace. That means if aliases 
 
 There's currently a known, yet non-deterministic bug related to periods being replaced when clicking the option. It's being investigated [here](https://github.com/dvargas92495/roam-js-extensions/issues/139). The issue will also be solved when the new Roam API is ready.
 
-### Installation
+## Installation
 
 Insert this as a child of any `[[roam/js]]` block to install the extension.
 
@@ -34,7 +34,7 @@ s.type = "text/javascript";
 document.getElementsByTagName("head")[0].appendChild(s);
 ```
 
-### Demo
+## Demo
 
 <video width="320" height="240" controls>
   <source src="../../videos/page-synonyms.mp4" type="video/mp4">
