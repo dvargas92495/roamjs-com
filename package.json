@@ -43,6 +43,7 @@
     "axios": "^0.20.0",
     "date-fns": "^2.16.1",
     "mobile-device-detect": "^0.4.3",
-    "node-emoji": "^1.10.0"
+    "node-emoji": "^1.10.0",
+    "tesseract.js": "^2.1.3"
   }
 }
