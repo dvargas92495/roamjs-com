@@ -16,7 +16,7 @@ document.addEventListener("dblclick", async (e) => {
       }
     })
     await newBlockEnter();
-    await userEvent.type(document.activeElement, '{tab}');
+    await userEvent.tab();
     await userEvent.type(document.activeElement, "Loading...");
 
     const tesseractImage = document.createElement("img");
