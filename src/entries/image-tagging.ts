@@ -1,3 +1,4 @@
+import { waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { createWorker } from "tesseract.js";
 import { newBlockEnter } from "../entry-helpers";
@@ -9,6 +10,11 @@ document.addEventListener("dblclick", async (e) => {
     const imgContainer = img.closest('.hoverparent')
     const editButton = imgContainer.getElementsByClassName('bp3-icon-edit')[0];
     await userEvent.click(editButton);
+    await waitFor(() => {
+      if (document.activeElement.tagName !== 'TEXTAREA') {
+        throw new Error("Textarea didn't render");
+      }
+    })
     await newBlockEnter();
     await userEvent.type(document.activeElement, '{tab}');
     await userEvent.type(document.activeElement, "Loading...");
