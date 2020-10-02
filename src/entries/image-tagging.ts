@@ -6,7 +6,7 @@ document.addEventListener("dblclick", async (e) => {
   const htmlTarget = e.target as HTMLElement;
   if (htmlTarget && htmlTarget.tagName === "IMG") {
     const img = htmlTarget as HTMLImageElement;
-    const imgContainer = img.closest('.rm-resize-img');
+    const imgContainer = img.closest('.hoverparent')
     const editButton = imgContainer.getElementsByClassName('bp3-icon-edit')[0];
     await userEvent.click(editButton);
     await newBlockEnter();
