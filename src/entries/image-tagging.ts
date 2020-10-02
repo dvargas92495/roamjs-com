@@ -1,9 +1,23 @@
+import { waitFor } from "@testing-library/dom";
+import userEvent from "@testing-library/user-event";
 import { createWorker } from "tesseract.js";
+import { newBlockEnter } from "../entry-helpers";
 
-document.addEventListener("dblclick", (e) => {
+document.addEventListener("dblclick", async (e) => {
   const htmlTarget = e.target as HTMLElement;
   if (htmlTarget && htmlTarget.tagName === "IMG") {
     const img = htmlTarget as HTMLImageElement;
+    const imgContainer = img.closest('.hoverparent')
+    const editButton = imgContainer.getElementsByClassName('bp3-icon-edit')[0];
+    await userEvent.click(editButton);
+    await waitFor(() => {
+      if (document.activeElement.tagName !== 'TEXTAREA') {
+        throw new Error("Textarea didn't render");
+      }
+    })
+    await newBlockEnter();
+    await userEvent.tab();
+    await userEvent.type(document.activeElement, "Loading...");
 
     const tesseractImage = document.createElement("img");
     tesseractImage.src = img.src;
@@ -22,8 +36,9 @@ document.addEventListener("dblclick", (e) => {
       const {
         data: { text },
       } = await worker.recognize(canvas);
-      console.log(text);
       await worker.terminate();
+      await userEvent.clear(document.activeElement);
+      await userEvent.type(document.activeElement, text);
     };
   }
 });

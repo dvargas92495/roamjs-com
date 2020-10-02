@@ -161,18 +161,22 @@ export const pushBullets = async (
       await asyncType(bullet);
       await waitForString(bullet);
 
-      // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
-      // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
-      const enterObj = {
-        key: "Enter",
-        keyCode: 13,
-        which: 13,
-      };
-      await fireEvent.keyDown(document.activeElement, enterObj);
-      await fireEvent.keyUp(document.activeElement, enterObj);
-      await waitForString("");
+      await newBlockEnter();
     }
   }
+};
+
+export const newBlockEnter = async () => {
+  // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
+  // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
+  const enterObj = {
+    key: "Enter",
+    keyCode: 13,
+    which: 13,
+  };
+  await fireEvent.keyDown(document.activeElement, enterObj);
+  await fireEvent.keyUp(document.activeElement, enterObj);
+  await waitForString("");
 };
 
 export const getUids = (block: Element) => {
