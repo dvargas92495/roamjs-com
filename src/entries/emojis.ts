@@ -140,7 +140,10 @@ const emojiKeyDownListener = (e: KeyboardEvent) => {
 const searchEmojis = (text: string) => {
   const parentDiv = currentTarget.parentElement as HTMLDivElement;
   const menuHidden = !parentDiv.contains(menu); 
-  if (menuHidden && text.length <= minimumCharacters) {
+  if (text.length <= minimumCharacters) {
+    if (!menuHidden) {
+      parentDiv.removeChild(menu);
+    }
     return;
   }
   
