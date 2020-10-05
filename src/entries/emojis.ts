@@ -2,7 +2,7 @@ import emoji from "node-emoji";
 import userEvent from "@testing-library/user-event";
 import { getConfigFromPage } from "../entry-helpers";
 
-const config = getConfigFromPage("emojis");
+const config = getConfigFromPage("roam/js/emojis");
 const minimumCharacters = config["Minimum Characters"]
   ? parseInt(config["Minimum Characters"])
   : 2;
