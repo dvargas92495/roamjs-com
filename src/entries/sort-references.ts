@@ -121,7 +121,12 @@ const observerCallback = () =>
   createSortIcons(
     "rm-reference-container dont-focus-block",
     createSortIconCallback,
-    sortCallbacks
+    sortCallbacks,
+    undefined,
+    (container: HTMLDivElement) =>
+      !!container.parentElement
+        .closest(".rm-reference-container")
+        ?.getElementsByClassName("refs-by-page-view")[0]
   );
 
 createObserver(observerCallback);
