@@ -5,7 +5,7 @@ const observerCallback = () => {
   tables.forEach((t) => {
     const ths = Array.from(t.getElementsByTagName("th"));
     ths.forEach((th) => {
-      if (th.getElementsByClassName("span").length > 0) {
+      if (th.getElementsByClassName("bp3-icon").length > 0) {
         return;
       }
       const sortButton = createIconButton();
