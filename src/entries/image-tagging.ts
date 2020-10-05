@@ -3,26 +3,30 @@ import userEvent from "@testing-library/user-event";
 import { createWorker } from "tesseract.js";
 import { getConfigFromPage, newBlockEnter } from "../entry-helpers";
 
-const config = getConfigFromPage('roam/js/image-tagging');
+const config = getConfigFromPage("roam/js/image-tagging");
 const events = {
   "DOUBLE CLICK": "dblclick",
-  "SHIFT CLICK": "click"
+  "SHIFT CLICK": "click",
 };
 const trigger = config["Trigger"]?.toUpperCase() as keyof typeof events;
 const event = trigger ? events[trigger] : "dblclick";
 
 document.addEventListener(event, async (e: MouseEvent) => {
   const htmlTarget = e.target as HTMLElement;
-  if (htmlTarget && htmlTarget.tagName === "IMG" && (trigger != "SHIFT CLICK" && e.shiftKey)) {
+  if (
+    htmlTarget &&
+    htmlTarget.tagName === "IMG" &&
+    (trigger != "SHIFT CLICK" || e.shiftKey)
+  ) {
     const img = htmlTarget as HTMLImageElement;
-    const imgContainer = img.closest('.hoverparent')
-    const editButton = imgContainer.getElementsByClassName('bp3-icon-edit')[0];
+    const imgContainer = img.closest(".hoverparent");
+    const editButton = imgContainer.getElementsByClassName("bp3-icon-edit")[0];
     await userEvent.click(editButton);
     await waitFor(() => {
-      if (document.activeElement.tagName !== 'TEXTAREA') {
+      if (document.activeElement.tagName !== "TEXTAREA") {
         throw new Error("Textarea didn't render");
       }
-    })
+    });
     await newBlockEnter();
     await userEvent.tab();
     await userEvent.type(document.activeElement, "Loading...");
