@@ -1,5 +1,11 @@
 import emoji from "node-emoji";
 import userEvent from "@testing-library/user-event";
+import { getConfigFromPage } from "../entry-helpers";
+
+const config = getConfigFromPage("roam/js/emojis");
+const minimumCharacters = config["Minimum Characters"]
+  ? parseInt(config["Minimum Characters"])
+  : 2;
 
 const HIGHLIGHTED_COLOR = "#0000001c";
 
@@ -35,8 +41,6 @@ const turnOnEmoji = () => {
   currentTarget = document.activeElement as HTMLTextAreaElement;
   currentTarget.addEventListener("keydown", emojiKeyDownListener);
 
-  const parentDiv = currentTarget.parentElement as HTMLDivElement;
-  parentDiv.appendChild(menu);
   emojiOn = true;
   searchText = ":";
   menuItemIndex = 0;
@@ -126,7 +130,7 @@ const emojiKeyDownListener = (e: KeyboardEvent) => {
     }
     e.preventDefault();
     e.stopPropagation();
-  } else if (e.key === 'Escape' && emojiOn) {
+  } else if (e.key === "Escape" && emojiOn) {
     turnOffEmoji();
     e.preventDefault();
     e.stopPropagation();
@@ -134,6 +138,19 @@ const emojiKeyDownListener = (e: KeyboardEvent) => {
 };
 
 const searchEmojis = (text: string) => {
+  const parentDiv = currentTarget.parentElement as HTMLDivElement;
+  const menuHidden = !parentDiv.contains(menu); 
+  if (text.length <= minimumCharacters) {
+    if (!menuHidden) {
+      parentDiv.removeChild(menu);
+    }
+    return;
+  }
+  
+  if (menuHidden) {
+    parentDiv.appendChild(menu);
+  }
+  
   results = emoji.search(text).slice(0, 5);
   clearMenu();
   results.forEach(createMenuElement(results.length));

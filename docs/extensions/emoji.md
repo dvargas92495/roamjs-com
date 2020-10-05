@@ -4,7 +4,10 @@ The Roam Emoji extension allows users to use familiar colon syntax to insert emo
 
 ### Usage
 
-The script is not configurable.
+
+The script supports the following configuration attributes, to be added in the `[[roam/js/emojis]]` page:
+
+- `Minimum Characters` - (Optional) The minimum number of characters needed to show the emoji menu, defaulted to 2 just like in slack.
 
 In a block, start typing with a colon, the name of the emoji, followed by an ending colon. The script will replace the colon'ed phrase with the supported emoji.
 
