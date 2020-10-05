@@ -306,6 +306,18 @@ const createDivObserver = (
 
 const POPOVER_WRAPPER_CLASS = "sort-popover-wrapper";
 
+export const createIconButton = () => {
+  const popoverButton = document.createElement("span");
+  popoverButton.className = "bp3-button bp3-minimal bp3-small";
+  popoverButton.tabIndex = 0;
+
+  const popoverIcon = document.createElement("span");
+  popoverIcon.className = "bp3-icon bp3-icon-sort";
+  popoverButton.appendChild(popoverIcon);
+
+  return popoverButton;
+};
+
 export const createSortIcon = (
   refContainer: HTMLDivElement,
   sortCallbacks: { [key: string]: (refContainer: Element) => () => void }
@@ -318,14 +330,8 @@ export const createSortIcon = (
   popoverTarget.className = "bp3-popover-target";
   popoverWrapper.appendChild(popoverTarget);
 
-  const popoverButton = document.createElement("span");
-  popoverButton.className = "bp3-button bp3-minimal bp3-small";
-  popoverButton.tabIndex = 0;
+  const popoverButton = createIconButton();
   popoverTarget.appendChild(popoverButton);
-
-  const popoverIcon = document.createElement("span");
-  popoverIcon.className = "bp3-icon bp3-icon-sort";
-  popoverButton.appendChild(popoverIcon);
 
   // Overlay Content
   const popoverOverlay = document.createElement("div");
@@ -426,7 +432,7 @@ export const createSortIcons = (
   callback: (container: HTMLDivElement) => void,
   sortCallbacks: { [key: string]: (refContainer: Element) => () => void },
   childIndex?: number,
-  shouldCreate?: (container: HTMLDivElement) => boolean,
+  shouldCreate?: (container: HTMLDivElement) => boolean
 ) => {
   const sortButtonContainers = Array.from(
     document.getElementsByClassName(containerClass)

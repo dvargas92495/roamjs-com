@@ -11,6 +11,8 @@ The script supports the following configuration attributes, to be added in the `
 
 In a block, start typing with a colon, the name of the emoji, followed by an ending colon. The script will replace the colon'ed phrase with the supported emoji.
 
+### Installation
+
 ```javascript
 var old = document.getElementById("emojis");
 if (old) {
