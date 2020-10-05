@@ -422,15 +422,18 @@ export const createSortIcon = (
 
 // This API is terrible and should be redesigned
 export const createSortIcons = (
-  containerClass: string,
+  containerClass: string | (() => HTMLDivElement[]),
   callback: (container: HTMLDivElement) => void,
   sortCallbacks: { [key: string]: (refContainer: Element) => () => void },
   childIndex?: number,
-  shouldCreate?: (container: HTMLDivElement) => boolean,
+  shouldCreate?: (container: HTMLDivElement) => boolean
 ) => {
-  const sortButtonContainers = Array.from(
-    document.getElementsByClassName(containerClass)
-  ) as HTMLDivElement[];
+  const sortButtonContainers =
+    typeof containerClass === "string"
+      ? (Array.from(
+          document.getElementsByClassName(containerClass)
+        ) as HTMLDivElement[])
+      : containerClass();
   sortButtonContainers.forEach((sortButtonContainer) => {
     const exists =
       sortButtonContainer.getElementsByClassName(POPOVER_WRAPPER_CLASS).length >
