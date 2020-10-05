@@ -8,7 +8,7 @@ The Attr Tables extensions adds various features to attribute tables.
 
 This script is not configurable.
 
-Whenever you create an Attribute Table, there will be a new sort icon at the corner of the table.
+Whenever you create an Attribute Table, there will be a new sort icon next to each of the column headers. Clicking the sort icon will toggle between three states: Neutral, Ascending, and Descending.
 
 ### Installation
 
