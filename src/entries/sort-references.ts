@@ -46,9 +46,7 @@ const menuItemCallback = (
   const refContainer = sortContainer.parentElement
     .closest(".rm-reference-container")
     ?.getElementsByClassName("refs-by-page-view")[0];
-  const refsInView = Array.from(
-    refContainer.getElementsByClassName("rm-ref-page-view")
-  );
+  const refsInView = Array.from(refContainer.children);
   refsInView.forEach((r) => refContainer.removeChild(r));
   refsInView.sort((a, b) => {
     const aTitle = a.getElementsByClassName(
@@ -123,7 +121,12 @@ const observerCallback = () =>
   createSortIcons(
     "rm-reference-container dont-focus-block",
     createSortIconCallback,
-    sortCallbacks
+    sortCallbacks,
+    undefined,
+    (container: HTMLDivElement) =>
+      !!container.parentElement
+        .closest(".rm-reference-container")
+        ?.getElementsByClassName("refs-by-page-view")[0]
   );
 
 createObserver(observerCallback);

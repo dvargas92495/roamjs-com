@@ -420,11 +420,13 @@ export const createSortIcon = (
   return popoverWrapper;
 };
 
+// This API is terrible and should be redesigned
 export const createSortIcons = (
   containerClass: string,
   callback: (container: HTMLDivElement) => void,
   sortCallbacks: { [key: string]: (refContainer: Element) => () => void },
-  childIndex?: number
+  childIndex?: number,
+  shouldCreate?: (container: HTMLDivElement) => boolean,
 ) => {
   const sortButtonContainers = Array.from(
     document.getElementsByClassName(containerClass)
@@ -434,6 +436,10 @@ export const createSortIcons = (
       sortButtonContainer.getElementsByClassName(POPOVER_WRAPPER_CLASS).length >
       0;
     if (exists) {
+      return;
+    }
+
+    if (shouldCreate && !shouldCreate(sortButtonContainer)) {
       return;
     }
 
