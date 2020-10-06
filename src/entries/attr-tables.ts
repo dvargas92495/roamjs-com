@@ -23,7 +23,8 @@ const getMaxPriority = (sortConfig: SortConfig) =>
 const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
   const headers = Array.from(t.getElementsByTagName("th"));
   headers.forEach((h) => {
-    const p = sortConfig[h.innerText].priority;
+    const key = h.childNodes[0].nodeValue;
+    const p = sortConfig[key].priority;
     const span = h.getElementsByClassName(
       PRIORITY_LABEL_CLASSNAME
     )[0] as HTMLSpanElement;
@@ -79,24 +80,25 @@ const observerCallback = () => {
       th.appendChild(sortButton);
       sortButton.onclick = () => {
         const icon = sortButton.children[0];
+        const key = th.childNodes[0].nodeValue;
         if (icon.className.indexOf("bp3-icon-sort-alphabetical-desc") > -1) {
           icon.className = "bp3-icon bp3-icon-sort";
-          sortConfig[th.innerText].asc = undefined;
-          const oldPriority = sortConfig[th.innerText].priority;
+          sortConfig[key].asc = undefined;
+          const oldPriority = sortConfig[key].priority;
           const maxPriority = getMaxPriority(sortConfig);
           const values = Object.values(sortConfig);
           for (var p = oldPriority + 1; p <= maxPriority; p++) {
             const config = values.find((v) => v.priority === p);
             config.priority--;
           }
-          sortConfig[th.innerText].priority = 0;
+          sortConfig[key].priority = 0;
         } else if (icon.className.indexOf("bp3-icon-sort-alphabetical") > -1) {
           icon.className = "bp3-icon bp3-icon-sort-alphabetical-desc";
-          sortConfig[th.innerText].asc = false;
+          sortConfig[key].asc = false;
         } else if (icon.className.indexOf("bp3-icon-sort") > -1) {
           icon.className = "bp3-icon bp3-icon-sort-alphabetical";
-          sortConfig[th.innerText].asc = true;
-          sortConfig[th.innerText].priority = getMaxPriority(sortConfig) + 1;
+          sortConfig[key].asc = true;
+          sortConfig[key].priority = getMaxPriority(sortConfig) + 1;
         }
         sortTable(t, sortConfig);
       };
