@@ -56,7 +56,6 @@ const optionCallback = async () => {
   if (!blockElementSelected) {
     return;
   }
-
   const replace = getReplacer();
   if (window.roamDatomicAlphaAPI) {
     const { blockUid } = getUids(blockElementSelected);
