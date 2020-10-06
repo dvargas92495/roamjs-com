@@ -66,8 +66,15 @@ if (trigger === "ICON CLICK") {
             .length === 0
         ) {
           const button = createIconButton("search-text");
-          button.onclick = (e: MouseEvent) =>
+          button.onclick = (e: MouseEvent) =>{
             clickCallback(e.target as HTMLElement);
+            e.stopPropagation();
+            e.preventDefault();
+          }
+          button.onmousedown = (e: MouseEvent) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }
 
           const div = document.createElement("div");
           div.style.position = "absolute";
