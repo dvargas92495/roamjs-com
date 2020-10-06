@@ -3,15 +3,42 @@ import { createIconButton, createObserver } from "../entry-helpers";
 type SortConfig = { [column: string]: {
   asc: boolean | undefined,
   index: number;
+  priority: number;
 } };
 
+const PRIORITY_LABEL_CLASSNAME = "attr-table-priority-label";
+
+const createPriorityLabel = (p: number) => {
+  const span = document.createElement('span');
+  span.className = PRIORITY_LABEL_CLASSNAME;
+  span.innerText = `(${p})`;
+  return span;
+}
+
+const getMaxPriority = (sortConfig: SortConfig) =>Math.max(...Object.values(sortConfig).map(v => v.priority));
+
 const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
+  const headers = Array.from(t.getElementsByTagName('th'));
+  headers.forEach(h => {
+    const p = sortConfig[h.innerText].priority; 
+    if (p > 0) {
+      const span = h.getElementsByClassName(PRIORITY_LABEL_CLASSNAME)[0] as HTMLSpanElement;
+      if (!span) {
+        h.appendChild(createPriorityLabel(p));
+      } else {
+        span.innerText = `(${p})`;
+      }
+    }
+  })
+  
   const body = t.getElementsByTagName('tbody')[0];
   const rows = Array.from(body.children);
+  const sorts = Object.values(sortConfig).filter(c => c.asc !== undefined);
+  sorts.sort((a, b) => a.priority - b.priority);
   rows.forEach(r => body.removeChild(r));
   rows.sort((a, b) => {
-    for (var k in sortConfig) {
-      const config = sortConfig[k];
+    for (var k in sorts) {
+      const config = sorts[k];
       if (config.asc !== undefined) {
         const aData = (a.children[config.index] as HTMLTableDataCellElement).innerText;
         const bData = (b.children[config.index] as HTMLTableDataCellElement).innerText;
@@ -34,7 +61,7 @@ const observerCallback = () => {
       if (th.getElementsByClassName("bp3-icon").length > 0) {
         return;
       }
-      sortConfig[th.innerText] = {asc: undefined, index } ;
+      sortConfig[th.innerText] = {asc: undefined, index, priority: 0 } ;
       const sortButton = createIconButton();
       th.appendChild(sortButton);
       sortButton.onclick = () => {
@@ -42,12 +69,21 @@ const observerCallback = () => {
         if (icon.className.indexOf("bp3-icon-sort-alphabetical-desc") > -1) {
           icon.className = "bp3-icon bp3-icon-sort";
           sortConfig[th.innerText].asc = undefined;
+          const oldPriority = sortConfig[th.innerText].priority;
+          const maxPriority = getMaxPriority(sortConfig);
+          const values = Object.values(sortConfig);
+          for (var p = oldPriority + 1; p <= maxPriority; p++) {
+            const config = values.find(v => v.priority === p);
+            config.priority--;
+          }
+          sortConfig[th.innerText].priority = 0;
         } else if (icon.className.indexOf("bp3-icon-sort-alphabetical") > -1) {
           icon.className = "bp3-icon bp3-icon-sort-alphabetical-desc";
           sortConfig[th.innerText].asc = false;
         } else if (icon.className.indexOf("bp3-icon-sort") > -1) {
           icon.className = "bp3-icon bp3-icon-sort-alphabetical";
           sortConfig[th.innerText].asc = true;
+          sortConfig[th.innerText].priority = getMaxPriority(sortConfig) + 1; 
         }
         sortTable(t, sortConfig);
       };
