@@ -30,7 +30,7 @@ const getMaxPriority = (sortConfig: SortConfig) =>
 const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
   const headers = Array.from(t.getElementsByTagName("th"));
   headers.forEach((h) => {
-    const p = sortConfig[getKey(h)].priority;
+    const { priority: p, asc } = sortConfig[getKey(h)];
     const span = h.getElementsByClassName(
       PRIORITY_LABEL_CLASSNAME
     )[0] as HTMLSpanElement;
@@ -42,6 +42,15 @@ const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
       }
     } else if (!!span) {
       h.removeChild(span);
+    }
+
+    const icon = h.getElementsByClassName("bp3-icon")[0];
+    if (asc === undefined) {
+      icon.className = "bp3-icon bp3-icon-sort";
+    } else if (asc) {
+      icon.className = "bp3-icon bp3-icon-sort-alphabetical";
+    } else {
+      icon.className = "bp3-icon bp3-icon-sort-alphabetical-desc";
     }
   });
 
@@ -88,7 +97,6 @@ const observerCallback = () => {
         const icon = sortButton.children[0];
         const key = getKey(th);
         if (icon.className.indexOf("bp3-icon-sort-alphabetical-desc") > -1) {
-          icon.className = "bp3-icon bp3-icon-sort";
           sortConfig[key].asc = undefined;
           const oldPriority = sortConfig[key].priority;
           const maxPriority = getMaxPriority(sortConfig);
@@ -99,10 +107,8 @@ const observerCallback = () => {
           }
           sortConfig[key].priority = 0;
         } else if (icon.className.indexOf("bp3-icon-sort-alphabetical") > -1) {
-          icon.className = "bp3-icon bp3-icon-sort-alphabetical-desc";
           sortConfig[key].asc = false;
         } else if (icon.className.indexOf("bp3-icon-sort") > -1) {
-          icon.className = "bp3-icon bp3-icon-sort-alphabetical";
           sortConfig[key].asc = true;
           sortConfig[key].priority = getMaxPriority(sortConfig) + 1;
         }
