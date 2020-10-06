@@ -75,12 +75,12 @@ const observerCallback = () => {
     document.getElementsByClassName("roam-table")
   ) as HTMLTableElement[];
   tables.forEach((t) => {
+    if (t.getElementsByClassName("bp3-icon").length > 0) {
+      return;
+    }
     const ths = Array.from(t.getElementsByTagName("th"));
     const sortConfig: SortConfig = {};
     ths.forEach((th, index) => {
-      if (th.getElementsByClassName("bp3-icon").length > 0) {
-        return;
-      }
       sortConfig[th.innerText] = { asc: undefined, index, priority: 0 };
       const sortButton = createIconButton();
       th.appendChild(sortButton);
