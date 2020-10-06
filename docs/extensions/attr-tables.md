@@ -1,5 +1,3 @@
-# UNDER DEVELOPMENT
-
 ## Attr Tables
 
 The Attr Tables extensions adds various features to attribute tables.
@@ -9,6 +7,13 @@ The Attr Tables extensions adds various features to attribute tables.
 This script is not configurable.
 
 Whenever you create an Attribute Table, there will be a new sort icon next to each of the column headers. Clicking the sort icon will toggle between three states: Neutral, Ascending, and Descending.
+
+The table will then be sorted based on the columns you clicked on. A marker next to each column will appear to show the sort priority.
+
+Because attribute tables are view only, navigating away from the page will wipe out any previous sort you had applied. To solve this, you could add a `Default Sort` attribute as a child. The value should be a comma delimited list of each column with the type of sort you want sorted. For example, if I wanted a table sorted first by "foo" column ascending, followed by "bar" column descending, I would use the following default sort value:
+```
+Default Sort:: foo=Asc, bar=Des
+```
 
 ### Installation
 
