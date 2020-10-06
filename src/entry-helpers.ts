@@ -472,3 +472,17 @@ export const getEditTimeByTitle = (title: string) =>
   window.roamAlphaAPI.q(
     `[:find (pull ?e [:edit/time]) :where [?e :node/title "${title}"]]`
   )[0][0]?.time;
+
+export const getConfigFromBlock = (container: HTMLElement) => {
+  const block = container.closest(".roam-block");
+  if (!block) {
+    return {};
+  }
+  const blockIdParts = block.id.split("-");
+  const blockId = blockIdParts[blockIdParts.length - 1];
+
+  const config = getAttrConfigFromQuery(
+    `[:find (pull ?e [*]) :where [?e :block/uid "${blockId}"]]`
+  );
+  return config;
+};

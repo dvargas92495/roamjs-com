@@ -1,4 +1,8 @@
-import { createIconButton, createObserver } from "../entry-helpers";
+import {
+  createIconButton,
+  createObserver,
+  getConfigFromBlock,
+} from "../entry-helpers";
 
 type SortConfig = {
   [column: string]: {
@@ -105,6 +109,18 @@ const observerCallback = () => {
         sortTable(t, sortConfig);
       };
     });
+    const config = getConfigFromBlock(t);
+    const defaultSort = (config["Default Sort"]
+      ?.split(",")
+      ?.map((s: string) => s.trim()) || []) as string[];
+    defaultSort.forEach((s: string, i: number) => {
+      const parts = s.split("=").map((s: string) => s.trim());
+      sortConfig[parts[0]].priority = i + 1;
+      sortConfig[parts[0]].asc = (parts[1].toUpperCase() === 'ASC');
+    });
+    if (defaultSort.length) {
+      sortTable(t, sortConfig);
+    }
   });
 };
 observerCallback();
