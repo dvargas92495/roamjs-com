@@ -2,9 +2,8 @@ import {
   addButtonListener,
   pushBullets,
   getConfigFromPage,
-  genericError,
 } from "../entry-helpers";
-import { asyncType } from "roam-client";
+import { asyncType, genericError } from "roam-client";
 import axios from "axios";
 
 const TWITTER_REFERENCES_COMMAND = "twitter references";

@@ -2,15 +2,18 @@ import {
   addButtonListener,
   pushBullets,
   getConfigFromPage,
-  genericError,
 } from "../entry-helpers";
-import { asyncType } from 'roam-client';
+import { asyncType, genericError } from "roam-client";
 import axios from "axios";
 import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
-const importGoogleCalendar = async (_: any, blockUid: string, parentUid: string) => {
+const importGoogleCalendar = async (
+  _: any,
+  blockUid: string,
+  parentUid: string
+) => {
   const config = getConfigFromPage("roam/js/google-calendar");
 
   const calendarId = config["Google Calendar"]?.trim();
@@ -28,7 +31,9 @@ const importGoogleCalendar = async (_: any, blockUid: string, parentUid: string)
   const timeMaxParam = encodeURIComponent(formatRFC3339(timeMax));
 
   axios(
-    `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${encodeURIComponent(calendarId)}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
+    `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${encodeURIComponent(
+      calendarId
+    )}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
   )
     .then(async (r) => {
       const events = r.data.items;

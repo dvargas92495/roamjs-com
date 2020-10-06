@@ -2,12 +2,15 @@ import {
   addButtonListener,
   pushBullets,
   getConfigFromPage,
-  genericError,
 } from "../entry-helpers";
-import { asyncType } from 'roam-client';
+import { asyncType, genericError } from "roam-client";
 import axios from "axios";
 
-const importGithubIssues = async (_: any, blockUid: string, parentUid: string) => {
+const importGithubIssues = async (
+  _: any,
+  blockUid: string,
+  parentUid: string
+) => {
   const config = getConfigFromPage("roam/js/github");
   const username = config["Username"];
   if (!username) {

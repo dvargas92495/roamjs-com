@@ -1,6 +1,5 @@
 import userEvent from "@testing-library/user-event";
 import { waitFor, fireEvent } from "@testing-library/dom";
-import { AxiosError } from "axios";
 import { asyncType } from 'roam-client';
 
 declare global {
@@ -30,25 +29,6 @@ declare global {
     }>;
   }
 }
-
-type RoamError = {
-  raw: string;
-  "status-code": number;
-};
-
-export const genericError = (e: AxiosError & RoamError) => {
-  const message =
-    (e.response ? JSON.stringify(e.response.data) : e.message) || e.raw || "";
-  if (message) {
-    asyncType(
-      `Error: ${
-        message.length > 50 ? `${message.substring(0, 50)}...` : message
-      }`
-    );
-  } else {
-    console.error(e);
-  }
-};
 
 export const waitForString = (text: string) =>
   waitFor(
