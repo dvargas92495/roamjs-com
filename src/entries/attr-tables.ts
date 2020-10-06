@@ -17,14 +17,16 @@ const createPriorityLabel = (p: number) => {
   return span;
 };
 
+const getKey = (h: HTMLTableHeaderCellElement) =>
+  h.childNodes[0].nodeValue || (h.children[0] as HTMLElement).innerText;
+
 const getMaxPriority = (sortConfig: SortConfig) =>
   Math.max(...Object.values(sortConfig).map((v) => v.priority));
 
 const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
   const headers = Array.from(t.getElementsByTagName("th"));
   headers.forEach((h) => {
-    const key = h.childNodes[0].nodeValue;
-    const p = sortConfig[key].priority;
+    const p = sortConfig[getKey(h)].priority;
     const span = h.getElementsByClassName(
       PRIORITY_LABEL_CLASSNAME
     )[0] as HTMLSpanElement;
@@ -34,7 +36,7 @@ const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
       } else {
         span.innerText = `(${p})`;
       }
-    } else if(!!span) {
+    } else if (!!span) {
       h.removeChild(span);
     }
   });
@@ -80,7 +82,7 @@ const observerCallback = () => {
       th.appendChild(sortButton);
       sortButton.onclick = () => {
         const icon = sortButton.children[0];
-        const key = th.childNodes[0].nodeValue;
+        const key = getKey(th);
         if (icon.className.indexOf("bp3-icon-sort-alphabetical-desc") > -1) {
           icon.className = "bp3-icon bp3-icon-sort";
           sortConfig[key].asc = undefined;
