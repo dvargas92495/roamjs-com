@@ -1,15 +1,19 @@
 import {
   addButtonListener,
-  asyncType,
   pushBullets,
   getConfigFromPage,
   genericError,
 } from "../entry-helpers";
+import { asyncType } from "roam-client";
 import axios from "axios";
 
 const TWITTER_REFERENCES_COMMAND = "twitter references";
 
-const twitterReferencesListener = async (_: any, blockUid: string, parentUid: string) => {
+const twitterReferencesListener = async (
+  _: any,
+  blockUid: string,
+  parentUid: string
+) => {
   const config = getConfigFromPage("roam/js/twitter");
   const username = config["Username"];
   if (!username) {

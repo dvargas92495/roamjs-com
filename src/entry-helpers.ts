@@ -1,12 +1,10 @@
 import userEvent from "@testing-library/user-event";
-import { waitFor, fireEvent, wait } from "@testing-library/dom";
+import { waitFor, fireEvent } from "@testing-library/dom";
 import { AxiosError } from "axios";
-
-window.fireEvent = fireEvent;
+import { asyncType } from 'roam-client';
 
 declare global {
   interface Window {
-    fireEvent: typeof fireEvent;
     roamAlphaAPI: {
       q: (query: string) => any[];
     };
@@ -37,11 +35,6 @@ type RoamError = {
   raw: string;
   "status-code": number;
 };
-
-export const asyncType = async (text: string) =>
-  await userEvent.type(document.activeElement, text, {
-    skipClick: true,
-  });
 
 export const genericError = (e: AxiosError & RoamError) => {
   const message =
