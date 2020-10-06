@@ -75,6 +75,7 @@ const optionCallback = async () => {
     });
   } else {
     const id = blockElementSelected.id;
+    console.log(id);
     if (blockElementSelected.tagName === "DIV") {
       userEvent.click(blockElementSelected);
       await waitFor(() => {
@@ -83,10 +84,14 @@ const optionCallback = async () => {
         }
       });
     }
+    console.log('ready');
     const textArea = document.getElementById(id) as HTMLTextAreaElement;
     const newText = replace(textArea.value);
+    console.log(newText);
     userEvent.clear(textArea);
+    console.log('cleared');
     userEvent.type(textArea, newText);
+    console.log('typed');
   }
 };
 
