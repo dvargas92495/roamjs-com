@@ -1,5 +1,6 @@
 import userEvent from "@testing-library/user-event";
-import { asyncType, createObserver } from "../entry-helpers";
+import { asyncType } from "roam-client";
+import { createObserver } from "../entry-helpers";
 
 const styleArchivedButtons = (node: HTMLElement) => {
   const buttons = node.getElementsByTagName("button");

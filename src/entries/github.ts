@@ -1,10 +1,10 @@
 import {
   addButtonListener,
-  asyncType,
   pushBullets,
   getConfigFromPage,
   genericError,
 } from "../entry-helpers";
+import { asyncType } from 'roam-client';
 import axios from "axios";
 
 const importGithubIssues = async (_: any, blockUid: string, parentUid: string) => {
