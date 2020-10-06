@@ -65,7 +65,7 @@ if (trigger === "ICON CLICK") {
           imgContainer.getElementsByClassName("image-extraction-icon-container")
             .length === 0
         ) {
-          const button = createIconButton("search-button");
+          const button = createIconButton("search-text");
           button.onclick = (e: MouseEvent) =>
             clickCallback(e.target as HTMLElement);
 
