@@ -91,7 +91,7 @@ const observerCallback = () => {
     const sortConfig: SortConfig = {};
     ths.forEach((th, index) => {
       sortConfig[th.innerText] = { asc: undefined, index, priority: 0 };
-      const sortButton = createIconButton();
+      const sortButton = createIconButton('sort');
       th.appendChild(sortButton);
       sortButton.onclick = () => {
         const icon = sortButton.children[0];

@@ -18,14 +18,14 @@ Default Sort:: foo=Asc, bar=Des
 ### Installation
 
 ```javascript
-var old = document.getElementById("attr-table");
+var old = document.getElementById("attr-tables");
 if (old) {
   old.remove();
 }
 
 var s = document.createElement("script");
-s.src = "https://roam.davidvargas.me/master/attr-table.js";
-s.id = "attr-table";
+s.src = "https://roam.davidvargas.me/master/attr-tables.js";
+s.id = "attr-tables";
 s.async = false;
 s.type = "text/javascript";
 document.getElementsByTagName("head")[0].appendChild(s);
