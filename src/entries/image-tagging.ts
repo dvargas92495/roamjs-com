@@ -58,11 +58,22 @@ if (trigger === "ICON CLICK") {
   createObserver(() => {
     const imgs = Array.from(document.getElementsByTagName("img"));
     imgs.forEach((img) => {
-      if (img.getElementsByClassName("bp3-icon-search-text").length === 0) {
+      const imgContainer = img.closest(".hoverparent");
+      if (
+        imgContainer.getElementsByClassName("image-extraction-icon-container").length === 0
+      ) {
         const button = createIconButton("search-button");
-        img.appendChild(button);
         button.onclick = (e: MouseEvent) =>
           clickCallback(e.target as HTMLElement);
+
+        const div = document.createElement("div");
+        div.style.position = "absolute";
+        div.style.right = "0px";
+        div.style.top = "24px";
+        div.style.zIndex = "10";
+        div.className = "image-extraction-icon-container";
+        div.appendChild(button);
+        imgContainer.appendChild(div);
       }
     });
   });
