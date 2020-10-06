@@ -163,10 +163,7 @@ document.addEventListener("mousedown", (e) => {
     htmlTarget.className === "simple-bullet-inner"
   ) {
     const bullet = htmlTarget.closest(".controls");
-    blockElementSelected =
-      bullet.nextElementSibling.className.indexOf("roam-block") > -1
-        ? bullet.nextElementSibling
-        : bullet.nextElementSibling.getElementsByClassName("rm-block-input")[0];
+    blockElementSelected = bullet.parentElement.getElementsByClassName("rm-block-text")[0];
   }
 });
 
