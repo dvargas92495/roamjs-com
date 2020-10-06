@@ -57,25 +57,28 @@ const clickCallback = async (htmlTarget: HTMLElement) => {
 if (trigger === "ICON CLICK") {
   createObserver(() => {
     const imgs = Array.from(document.getElementsByTagName("img"));
-    imgs.forEach((img) => {
-      const imgContainer = img.closest(".hoverparent");
-      if (
-        imgContainer.getElementsByClassName("image-extraction-icon-container").length === 0
-      ) {
-        const button = createIconButton("search-button");
-        button.onclick = (e: MouseEvent) =>
-          clickCallback(e.target as HTMLElement);
+    imgs
+      .filter((i) => i.className === "rm-inline-img")
+      .forEach((img) => {
+        const imgContainer = img.closest(".hoverparent");
+        if (
+          imgContainer.getElementsByClassName("image-extraction-icon-container")
+            .length === 0
+        ) {
+          const button = createIconButton("search-button");
+          button.onclick = (e: MouseEvent) =>
+            clickCallback(e.target as HTMLElement);
 
-        const div = document.createElement("div");
-        div.style.position = "absolute";
-        div.style.right = "0px";
-        div.style.top = "24px";
-        div.style.zIndex = "10";
-        div.className = "image-extraction-icon-container";
-        div.appendChild(button);
-        imgContainer.appendChild(div);
-      }
-    });
+          const div = document.createElement("div");
+          div.style.position = "absolute";
+          div.style.right = "0px";
+          div.style.top = "24px";
+          div.style.zIndex = "10";
+          div.className = "image-extraction-icon-container";
+          div.appendChild(button);
+          imgContainer.appendChild(div);
+        }
+      });
   });
 } else {
   document.addEventListener(event, (e: MouseEvent) => {
