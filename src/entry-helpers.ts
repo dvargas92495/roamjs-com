@@ -306,13 +306,13 @@ const createDivObserver = (
 
 const POPOVER_WRAPPER_CLASS = "sort-popover-wrapper";
 
-export const createIconButton = () => {
+export const createIconButton = (icon: string) => {
   const popoverButton = document.createElement("span");
   popoverButton.className = "bp3-button bp3-minimal bp3-small";
   popoverButton.tabIndex = 0;
 
   const popoverIcon = document.createElement("span");
-  popoverIcon.className = "bp3-icon bp3-icon-sort";
+  popoverIcon.className = `bp3-icon bp3-icon-${icon}`;
   popoverButton.appendChild(popoverIcon);
 
   return popoverButton;
@@ -330,7 +330,7 @@ export const createSortIcon = (
   popoverTarget.className = "bp3-popover-target";
   popoverWrapper.appendChild(popoverTarget);
 
-  const popoverButton = createIconButton();
+  const popoverButton = createIconButton('sort');
   popoverTarget.appendChild(popoverButton);
 
   // Overlay Content
