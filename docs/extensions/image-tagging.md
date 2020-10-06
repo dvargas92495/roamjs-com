@@ -6,7 +6,7 @@ The Image Tagging extension extracts the text from an image and outputs it into 
 
 The script supports the following configuration attributes, to be added in the `[[roam/js/image-tagging]]` page:
 
-- `Trigger` - (Optional) The action to do on an image to extract a text. Valid values include `DOUBLE CLICK` and `SHIFT CLICK`. By default, it uses `DOUBLE CLICK`.
+- `Trigger` - (Optional) The action to do on an image to extract a text. Valid values include `DOUBLE CLICK`, `SHIFT CLICK`, and `ICON CLICK`. By default, it uses `DOUBLE CLICK`.
 
 Double click on an image in your database. The extension will use an OCR library to extract all the text found in an image. In the meantime, it will insert a "Loading..." text as a child block. Once the extension finishes, it will replace the Loading text with all the new text it parsed from the image.
 
