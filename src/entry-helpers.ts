@@ -1,6 +1,7 @@
 import userEvent from "@testing-library/user-event";
 import { waitFor, fireEvent } from "@testing-library/dom";
-import { asyncType } from 'roam-client';
+import { asyncType } from "roam-client";
+import parse from "date-fns/parse";
 
 declare global {
   interface Window {
@@ -29,6 +30,9 @@ declare global {
     }>;
   }
 }
+
+export const parseRoamDate = (s: string) =>
+  parse(s, "MMMM do, yyyy", new Date());
 
 export const waitForString = (text: string) =>
   waitFor(
@@ -303,7 +307,7 @@ export const createSortIcon = (
   popoverTarget.className = "bp3-popover-target";
   popoverWrapper.appendChild(popoverTarget);
 
-  const popoverButton = createIconButton('sort');
+  const popoverButton = createIconButton("sort");
   popoverTarget.appendChild(popoverButton);
 
   // Overlay Content

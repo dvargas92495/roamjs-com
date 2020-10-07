@@ -2,7 +2,9 @@ import {
   createIconButton,
   createObserver,
   getConfigFromBlock,
+  parseRoamDate,
 } from "../entry-helpers";
+import parse from "date-fns/parse";
 
 type SortConfig = {
   [column: string]: {
@@ -68,9 +70,31 @@ const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
         const bData = (b.children[config.index] as HTMLTableDataCellElement)
           .innerText;
         if (aData !== bData) {
-          return config.asc
-            ? aData.localeCompare(bData)
-            : bData.localeCompare(aData);
+          if (config.asc) {
+            const aDate = parseRoamDate(aData).valueOf();
+            const bDate = parseRoamDate(bData).valueOf();
+            if (!isNaN(aDate) && !isNaN(bDate)) {
+              return aDate - bDate
+            }
+            const aNum = parseInt(aData);
+            const bNum = parseInt(bData);
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+              return aNum - bNum;
+            }
+            return aData.localeCompare(bData);
+          } else {
+            const aDate = parseRoamDate(aData).valueOf();
+            const bDate = parseRoamDate(bData).valueOf();
+            if (!isNaN(aDate) && !isNaN(bDate)) {
+              return bDate - aDate
+            }
+            const aNum = parseInt(aData);
+            const bNum = parseInt(bData);
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+              return bNum - aNum;
+            }
+            return bData.localeCompare(aData);
+          }
         }
       }
     }
