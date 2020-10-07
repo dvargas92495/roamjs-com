@@ -1,9 +1,6 @@
 import parse from "date-fns/parse";
-import {
-  createObserver,
-  createSortIcons,
-  getConfigFromPage,
-} from "../entry-helpers";
+import { createObserver, createSortIcons } from "../entry-helpers";
+import { getConfigFromPage } from "roam-client";
 
 type RoamBlock = {
   title: string;
