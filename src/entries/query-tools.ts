@@ -1,5 +1,4 @@
-import parse from "date-fns/parse";
-import { createObserver, createSortIcons, getAttrConfigFromQuery, getConfigFromBlock, getCreatedTimeByTitle, getEditTimeByTitle } from "../entry-helpers";
+import { createObserver, createSortIcons, getAttrConfigFromQuery, getConfigFromBlock, getCreatedTimeByTitle, getEditTimeByTitle, parseRoamDate } from "../entry-helpers";
 
 const menuItemCallback = (
   sortContainer: Element,
@@ -37,8 +36,8 @@ const sortCallbacks = {
     menuItemCallback(refContainer, (a, b) => getEditTimeByTitle(b) - getEditTimeByTitle(a)),
   "Daily Note": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) => {
-      const aDate = parse(a, "MMMM do, yyyy", new Date()).valueOf();
-      const bDate = parse(b, "MMMM do, yyyy", new Date()).valueOf();
+      const aDate = parseRoamDate(a).valueOf();
+      const bDate = parseRoamDate(b).valueOf();
       if (isNaN(aDate) && isNaN(bDate)) {
         return getCreatedTimeByTitle(a) - getCreatedTimeByTitle(b);
       } else if (isNaN(aDate)) {
@@ -51,8 +50,8 @@ const sortCallbacks = {
     }),
   "Daily Note Descending": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) => {
-      const aDate = parse(a, "MMMM do, yyyy", new Date()).valueOf();
-      const bDate = parse(b, "MMMM do, yyyy", new Date()).valueOf();
+      const aDate = parseRoamDate(a).valueOf();
+      const bDate = parseRoamDate(b).valueOf();
       if (isNaN(aDate) && isNaN(bDate)) {
         return getCreatedTimeByTitle(b) - getCreatedTimeByTitle(a);
       } else if (isNaN(aDate)) {
