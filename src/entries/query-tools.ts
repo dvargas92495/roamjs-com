@@ -100,6 +100,8 @@ const OR_QUERY_START = "{or:";
 const AND_QUERY_START = "{and:";
 const BETWEEN_QUERY_START = "{between:";
 const TAG_QUERY_START = "[[";
+const HASHTAG_QUERY_START = "#[[";
+const HASH_QUERY_START = "#";
 const TAG_QUERY_END = "]]";
 const SUB_QUERY_END = "}";
 type QueryNode = {
@@ -159,6 +161,24 @@ const parseSubQuery: (s: string) => QueryNode = (s: string) => {
       value: tag,
       children: [],
       rest: s.substring(end + TAG_QUERY_END.length).trim(),
+    };
+  } else if (s.startsWith(HASHTAG_QUERY_START)) {
+    const end = s.indexOf(TAG_QUERY_END);
+    const tag = s.substring(HASHTAG_QUERY_START.length, end);
+    return {
+      type: "TAG",
+      value: tag,
+      children: [],
+      rest: s.substring(end + TAG_QUERY_END.length).trim(),
+    };
+  }else if (s.startsWith(HASH_QUERY_START)) {
+    const end = Math.min(s.indexOf(" "), s.indexOf(SUB_QUERY_END));
+    const tag = s.substring(TAG_QUERY_START.length, end);
+    return {
+      type: "TAG",
+      value: tag,
+      children: [],
+      rest: s.substring(end).trim(),
     };
   } else {
     return {
