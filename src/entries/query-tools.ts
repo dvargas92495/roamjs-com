@@ -94,7 +94,26 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
   }
 };
 
-const observerCallback = () =>
+const observerCallback = () => {
   createSortIcons("rm-query-content", onCreateSortIcons, sortCallbacks, 1);
+  const queries = Array.from(
+    document.getElementsByClassName("rm-query-content")
+  )
+    .map(
+      (e) =>
+        e
+          .closest(".rm-query")
+          .getElementsByClassName("rm-query-title")[0] as HTMLDivElement
+    )
+    .filter((e) => !e.getAttribute("data-is-random-results"))
+  queries.forEach(q => {
+    const config = getConfigFromBlock(q);
+    if (config['Random'] === 'True') {
+      q.setAttribute("data-is-random-results", 'true');
+      console.log("Randomizing", q.innerText);
+    }
+  })
+};
+
 observerCallback();
 createObserver(observerCallback);
