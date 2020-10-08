@@ -94,14 +94,72 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
   }
 };
 
+const QUERY_START = "{{query:";
+const QUERY_END = "}}";
+const OR_QUERY_START = "{or:";
+const TAG_QUERY_START = "[[";
+const TAG_QUERY_END = "]]";
+const SUB_QUERY_END = "}";
+type QueryNode = {
+  type: string;
+  children: QueryNode[];
+  value: string | null;
+  rest: string;
+};
+const parseSubQuery: (s: string) => QueryNode = (s: string) => {
+  if (s.startsWith(OR_QUERY_START)) {
+    let orQuery = s.substring(OR_QUERY_START.length).trim();
+    const children = [];
+    while (!orQuery.startsWith(SUB_QUERY_END)) {
+      const child = parseSubQuery(orQuery);
+      orQuery = child.rest;
+      children.push(child);
+    }
+    return {
+      type: "OR",
+      children,
+      value: null,
+      rest: orQuery.substring(SUB_QUERY_END.length),
+    };
+  } else if (s.startsWith(TAG_QUERY_START)) {
+    const end = s.indexOf(TAG_QUERY_END);
+    const tag = s.substring(TAG_QUERY_START.length, end);
+    return {
+      type: "TAG",
+      value: tag,
+      children: [],
+      rest: s.substring(end + TAG_QUERY_END.length).trim(),
+    };
+  } else {
+    return {
+      type: "NULL",
+      value: null,
+      children: [],
+      rest: "",
+    };
+  }
+};
+
+const parseQuery = (s: string) => {
+  const query = s
+    .substring(QUERY_START.length, s.length - QUERY_END.length)
+    .trim();
+  return parseSubQuery(query);
+};
+
 const observerCallback = () => {
   createSortIcons("rm-query-content", onCreateSortIcons, sortCallbacks, 1);
   const queries = Array.from(
     document.getElementsByClassName("rm-query-content")
   )
     .filter((e) => !e.getAttribute("data-is-random-results"))
-    .map((e) => e.closest(".rm-query").getElementsByClassName('rm-query-title')[0] as HTMLDivElement)
-    .map((e) => e.innerText);
+    .map(
+      (e) =>
+        e
+          .closest(".rm-query")
+          .getElementsByClassName("rm-query-title")[0] as HTMLDivElement
+    )
+    .map((e) => parseQuery(e.innerText));
   console.log(queries);
 };
 
