@@ -94,7 +94,16 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
   }
 };
 
-const observerCallback = () =>
+const observerCallback = () => {
   createSortIcons("rm-query-content", onCreateSortIcons, sortCallbacks, 1);
+  const queries = Array.from(
+    document.getElementsByClassName("rm-query-content")
+  )
+    .filter((e) => !e.getAttribute("data-is-random-results"))
+    .map((e) => e.closest(".rm-query").getElementsByClassName('rm-query-title')[0] as HTMLDivElement)
+    .map((e) => e.innerText);
+  console.log(queries);
+};
+
 observerCallback();
 createObserver(observerCallback);
