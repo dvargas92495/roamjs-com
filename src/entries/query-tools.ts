@@ -94,128 +94,25 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
   }
 };
 
-const QUERY_START = "{{query:";
-const QUERY_END = "}}";
-const OR_QUERY_START = "{or:";
-const AND_QUERY_START = "{and:";
-const BETWEEN_QUERY_START = "{between:";
-const TAG_QUERY_START = "[[";
-const HASHTAG_QUERY_START = "#[[";
-const HASH_QUERY_START = "#";
-const TAG_QUERY_END = "]]";
-const SUB_QUERY_END = "}";
-type QueryNode = {
-  type: string;
-  children: QueryNode[];
-  value: string | null;
-  rest: string;
-};
-const parseSubQuery: (s: string) => QueryNode = (s: string) => {
-  if (s.startsWith(OR_QUERY_START)) {
-    let orQuery = s.substring(OR_QUERY_START.length).trim();
-    const children = [];
-    while (!orQuery.startsWith(SUB_QUERY_END)) {
-      const child = parseSubQuery(orQuery);
-      orQuery = child.rest;
-      children.push(child);
-    }
-    return {
-      type: "OR",
-      children,
-      value: null,
-      rest: orQuery.substring(SUB_QUERY_END.length),
-    };
-  } else if (s.startsWith(AND_QUERY_START)) {
-    let andQuery = s.substring(AND_QUERY_START.length).trim();
-    const children = [];
-    while (!andQuery.startsWith(SUB_QUERY_END)) {
-      const child = parseSubQuery(andQuery);
-      andQuery = child.rest;
-      children.push(child);
-    }
-    return {
-      type: "AND",
-      children,
-      value: null,
-      rest: andQuery.substring(SUB_QUERY_END.length),
-    };
-  } else if (s.startsWith(BETWEEN_QUERY_START)) {
-    let betweenQuery = s.substring(BETWEEN_QUERY_START.length).trim();
-    const children = [];
-    while (!betweenQuery.startsWith(SUB_QUERY_END)) {
-      const child = parseSubQuery(betweenQuery);
-      betweenQuery = child.rest;
-      children.push(child);
-    }
-    return {
-      type: "BETWEEN",
-      children,
-      value: null,
-      rest: betweenQuery.substring(SUB_QUERY_END.length),
-    };
-  } else if (s.startsWith(TAG_QUERY_START)) {
-    const end = s.indexOf(TAG_QUERY_END);
-    const tag = s.substring(TAG_QUERY_START.length, end);
-    return {
-      type: "TAG",
-      value: tag,
-      children: [],
-      rest: s.substring(end + TAG_QUERY_END.length).trim(),
-    };
-  } else if (s.startsWith(HASHTAG_QUERY_START)) {
-    const end = s.indexOf(TAG_QUERY_END);
-    const tag = s.substring(HASHTAG_QUERY_START.length, end);
-    return {
-      type: "TAG",
-      value: tag,
-      children: [],
-      rest: s.substring(end + TAG_QUERY_END.length).trim(),
-    };
-  }else if (s.startsWith(HASH_QUERY_START)) {
-    const end = Math.min(s.indexOf(" "), s.indexOf(SUB_QUERY_END));
-    const tag = s.substring(TAG_QUERY_START.length, end);
-    return {
-      type: "TAG",
-      value: tag,
-      children: [],
-      rest: s.substring(end).trim(),
-    };
-  } else {
-    return {
-      type: "NULL",
-      value: null,
-      children: [],
-      rest: s.substring(1),
-    };
-  }
-};
-
-const parseQuery = (s: string) => {
-  const query = s
-    .substring(QUERY_START.length, s.length - QUERY_END.length)
-    .trim();
-  return parseSubQuery(query);
-};
-
 const observerCallback = () => {
   createSortIcons("rm-query-content", onCreateSortIcons, sortCallbacks, 1);
   const queries = Array.from(
     document.getElementsByClassName("rm-query-content")
   )
-    .filter((e) => !e.getAttribute("data-is-random-results"))
     .map(
       (e) =>
         e
           .closest(".rm-query")
           .getElementsByClassName("rm-query-title")[0] as HTMLDivElement
     )
-    .map((e) => parseQuery(e.innerText))
-    .filter(
-      (q) =>
-        q.type === "OR" &&
-        q.children.find((c) => c.value === "Random" && c.type === "TAG")
-    );
-  console.log(queries);
+    .filter((e) => !e.getAttribute("data-is-random-results"))
+  queries.forEach(q => {
+    const config = getConfigFromBlock(q);
+    if (config['Random'] === 'True') {
+      q.setAttribute("data-is-random-results", 'true');
+      console.log("Randomizing", q.innerText);
+    }
+  })
 };
 
 observerCallback();
