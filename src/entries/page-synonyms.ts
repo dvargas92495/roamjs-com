@@ -1,10 +1,7 @@
-import { wait, waitFor, waitForElement } from "@testing-library/dom";
+import { waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
-import {
-  createOverlayObserver,
-  getConfigFromPage,
-  getUids,
-} from "../entry-helpers";
+import { createOverlayObserver, getUids } from "../entry-helpers";
+import { getConfigFromPage } from "roam-client";
 
 let blockElementSelected: Element;
 
@@ -162,7 +159,9 @@ document.addEventListener("mousedown", (e) => {
     htmlTarget.className === "simple-bullet-inner"
   ) {
     const bullet = htmlTarget.closest(".controls");
-    blockElementSelected = bullet.parentElement.getElementsByClassName("rm-block-text")[0];
+    blockElementSelected = bullet.parentElement.getElementsByClassName(
+      "rm-block-text"
+    )[0];
   }
 });
 

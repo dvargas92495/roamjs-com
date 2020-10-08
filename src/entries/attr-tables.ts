@@ -2,9 +2,8 @@ import {
   createIconButton,
   createObserver,
   getConfigFromBlock,
-  parseRoamDate,
 } from "../entry-helpers";
-import parse from "date-fns/parse";
+import { parseRoamDate } from "roam-client";
 
 type SortConfig = {
   [column: string]: {
@@ -74,7 +73,7 @@ const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
             const aDate = parseRoamDate(aData).valueOf();
             const bDate = parseRoamDate(bData).valueOf();
             if (!isNaN(aDate) && !isNaN(bDate)) {
-              return aDate - bDate
+              return aDate - bDate;
             }
             const aNum = parseInt(aData);
             const bNum = parseInt(bData);
@@ -86,7 +85,7 @@ const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
             const aDate = parseRoamDate(aData).valueOf();
             const bDate = parseRoamDate(bData).valueOf();
             if (!isNaN(aDate) && !isNaN(bDate)) {
-              return bDate - aDate
+              return bDate - aDate;
             }
             const aNum = parseInt(aData);
             const bNum = parseInt(bData);
@@ -115,7 +114,7 @@ const observerCallback = () => {
     const sortConfig: SortConfig = {};
     ths.forEach((th, index) => {
       sortConfig[th.innerText] = { asc: undefined, index, priority: 0 };
-      const sortButton = createIconButton('sort');
+      const sortButton = createIconButton("sort");
       th.appendChild(sortButton);
       sortButton.onclick = () => {
         const icon = sortButton.children[0];
@@ -146,7 +145,7 @@ const observerCallback = () => {
     defaultSort.forEach((s: string, i: number) => {
       const parts = s.split("=").map((s: string) => s.trim());
       sortConfig[parts[0]].priority = i + 1;
-      sortConfig[parts[0]].asc = (parts[1].toUpperCase() === 'ASC');
+      sortConfig[parts[0]].asc = parts[1].toUpperCase() === "ASC";
     });
     if (defaultSort.length) {
       sortTable(t, sortConfig);

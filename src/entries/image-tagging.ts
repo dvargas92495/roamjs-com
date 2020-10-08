@@ -1,12 +1,8 @@
 import { waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { createWorker } from "tesseract.js";
-import {
-  createIconButton,
-  createObserver,
-  getConfigFromPage,
-  newBlockEnter,
-} from "../entry-helpers";
+import { createIconButton, createObserver } from "../entry-helpers";
+import { getConfigFromPage, newBlockEnter } from "roam-client";
 
 const config = getConfigFromPage("roam/js/image-tagging");
 const events = {
@@ -66,15 +62,15 @@ if (trigger === "ICON CLICK") {
             .length === 0
         ) {
           const button = createIconButton("search-text");
-          button.onclick = (e: MouseEvent) =>{
+          button.onclick = (e: MouseEvent) => {
             clickCallback(e.target as HTMLElement);
             e.stopPropagation();
             e.preventDefault();
-          }
+          };
           button.onmousedown = (e: MouseEvent) => {
             e.stopPropagation();
             e.preventDefault();
-          }
+          };
 
           const div = document.createElement("div");
           div.style.position = "absolute";

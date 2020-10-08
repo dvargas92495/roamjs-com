@@ -1,6 +1,6 @@
 import emoji from "node-emoji";
 import userEvent from "@testing-library/user-event";
-import { getConfigFromPage } from "../entry-helpers";
+import { getConfigFromPage } from "roam-client";
 
 const config = getConfigFromPage("roam/js/emojis");
 const minimumCharacters = config["Minimum Characters"]

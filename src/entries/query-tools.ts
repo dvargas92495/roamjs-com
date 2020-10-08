@@ -1,10 +1,19 @@
-import { createObserver, createSortIcons, getAttrConfigFromQuery, getConfigFromBlock, getCreatedTimeByTitle, getEditTimeByTitle, parseRoamDate } from "../entry-helpers";
+import {
+  createObserver,
+  createSortIcons,
+  getConfigFromBlock,
+  getCreatedTimeByTitle,
+  getEditTimeByTitle,
+} from "../entry-helpers";
+import { parseRoamDate } from "roam-client";
 
 const menuItemCallback = (
   sortContainer: Element,
   sortBy: (a: string, b: string) => number
 ) => () => {
-  const refContainer = sortContainer.getElementsByClassName("refs-by-page-view")[0];
+  const refContainer = sortContainer.getElementsByClassName(
+    "refs-by-page-view"
+  )[0];
   const refsInView = Array.from(
     refContainer.getElementsByClassName("rm-ref-page-view")
   );
@@ -27,13 +36,25 @@ const sortCallbacks = {
   "Page Title Descending": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) => b.localeCompare(a)),
   "Created Date": (refContainer: Element) =>
-    menuItemCallback(refContainer, (a, b) => getCreatedTimeByTitle(a) - getCreatedTimeByTitle(b)),
+    menuItemCallback(
+      refContainer,
+      (a, b) => getCreatedTimeByTitle(a) - getCreatedTimeByTitle(b)
+    ),
   "Created Date Descending": (refContainer: Element) =>
-    menuItemCallback(refContainer, (a, b) => getCreatedTimeByTitle(b) - getCreatedTimeByTitle(a)),
+    menuItemCallback(
+      refContainer,
+      (a, b) => getCreatedTimeByTitle(b) - getCreatedTimeByTitle(a)
+    ),
   "Edited Date": (refContainer: Element) =>
-    menuItemCallback(refContainer, (a, b) => getEditTimeByTitle(a) - getEditTimeByTitle(b)),
+    menuItemCallback(
+      refContainer,
+      (a, b) => getEditTimeByTitle(a) - getEditTimeByTitle(b)
+    ),
   "Edited Date Descending": (refContainer: Element) =>
-    menuItemCallback(refContainer, (a, b) => getEditTimeByTitle(b) - getEditTimeByTitle(a)),
+    menuItemCallback(
+      refContainer,
+      (a, b) => getEditTimeByTitle(b) - getEditTimeByTitle(a)
+    ),
   "Daily Note": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) => {
       const aDate = parseRoamDate(a).valueOf();
@@ -66,12 +87,12 @@ const sortCallbacks = {
 
 const onCreateSortIcons = (container: HTMLDivElement) => {
   const config = getConfigFromBlock(container);
-  
+
   const defaultSort = config["Default Sort"] as keyof typeof sortCallbacks;
   if (defaultSort && sortCallbacks[defaultSort]) {
     sortCallbacks[defaultSort](container)();
   }
-}
+};
 
 const observerCallback = () =>
   createSortIcons("rm-query-content", onCreateSortIcons, sortCallbacks, 1);

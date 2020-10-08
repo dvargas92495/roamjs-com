@@ -1,9 +1,10 @@
+import { addButtonListener } from "../entry-helpers";
 import {
-  addButtonListener,
+  asyncType,
+  genericError,
   pushBullets,
   getConfigFromPage,
-} from "../entry-helpers";
-import { asyncType, genericError } from "roam-client";
+} from "roam-client";
 import axios from "axios";
 import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
 

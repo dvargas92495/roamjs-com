@@ -1,40 +1,8 @@
 import userEvent from "@testing-library/user-event";
-import { waitFor, fireEvent } from "@testing-library/dom";
-import { asyncType } from "roam-client";
-import parse from "date-fns/parse";
+import { waitFor } from "@testing-library/dom";
+import { getAttrConfigFromQuery } from 'roam-client';
 
-declare global {
-  interface Window {
-    roamAlphaAPI: {
-      q: (query: string) => any[];
-    };
-    roamDatomicAlphaAPI: (params: {
-      action: "pull" | "q" | "create-block" | "update-block";
-      selector?: string;
-      uid?: string;
-      query?: string;
-      inputs?: any;
-      location?: {
-        "parent-uid": string;
-        order: number;
-      };
-      block?: {
-        string: string;
-        uid?: string;
-        open?: boolean;
-      };
-    }) => Promise<{
-      children?: { id: number }[];
-      id?: number;
-      string?: string;
-    }>;
-  }
-}
-
-export const parseRoamDate = (s: string) =>
-  parse(s, "MMMM do, yyyy", new Date());
-
-export const waitForString = (text: string) =>
+const waitForString = (text: string) =>
   waitFor(
     () => {
       const textArea = document.activeElement as HTMLTextAreaElement;
@@ -59,102 +27,6 @@ export const waitForString = (text: string) =>
       timeout: 5000,
     }
   );
-
-export const getConfigFromPage = (inputPage?: string) => {
-  const page =
-    inputPage ||
-    document.getElementsByClassName("rm-title-display")[0]?.textContent;
-  if (!page) {
-    return {};
-  }
-  return getAttrConfigFromQuery(
-    `[:find (pull ?e [*]) :where [?e :node/title "${page}"] ]`
-  );
-};
-
-export const getAttrConfigFromQuery = (query: string) => {
-  const pageResults = window.roamAlphaAPI.q(query);
-  if (pageResults.length === 0 || !pageResults[0][0].attrs) {
-    return {};
-  }
-
-  const configurationAttrRefs = pageResults[0][0].attrs.map(
-    (a: any) => a[2].source[1]
-  );
-  const entries = configurationAttrRefs.map((r: string) =>
-    window.roamAlphaAPI
-      .q(
-        `[:find (pull ?e [:block/string]) :where [?e :block/uid "${r}"] ]`
-      )[0][0]
-      .string.split("::")
-      .map((s: string) => s.trim())
-  );
-  return Object.fromEntries(entries);
-};
-
-export const pushBullets = async (
-  bullets: string[],
-  blockUid?: string,
-  parentUid?: string
-) => {
-  if (window.roamDatomicAlphaAPI) {
-    const parent = await window.roamDatomicAlphaAPI({
-      action: "pull",
-      selector: "[:block/children]",
-      uid: parentUid,
-    });
-    const block = await window.roamDatomicAlphaAPI({
-      action: "pull",
-      selector: "[:db/id]",
-      uid: blockUid,
-    });
-    const blockIndex = parent.children?.findIndex((c) => c.id === block.id);
-    for (const index in bullets) {
-      const bullet = bullets[index];
-      if (index === "0") {
-        await window.roamDatomicAlphaAPI({
-          action: "update-block",
-          block: {
-            uid: blockUid,
-            string: bullet,
-          },
-        });
-      } else {
-        await window.roamDatomicAlphaAPI({
-          action: "create-block",
-          block: {
-            string: bullet,
-          },
-          location: {
-            "parent-uid": parentUid,
-            order: blockIndex + parseInt(index) + 1,
-          },
-        });
-      }
-    }
-  } else {
-    for (const index in bullets) {
-      const bullet = bullets[index];
-      await asyncType(bullet);
-      await waitForString(bullet);
-
-      await newBlockEnter();
-    }
-  }
-};
-
-export const newBlockEnter = async () => {
-  // Need to switch to fireEvent because user-event enters a newline when hitting enter in a text area
-  // https://github.com/testing-library/user-event/blob/master/src/type.js#L505
-  const enterObj = {
-    key: "Enter",
-    keyCode: 13,
-    which: 13,
-  };
-  await fireEvent.keyDown(document.activeElement, enterObj);
-  await fireEvent.keyUp(document.activeElement, enterObj);
-  await waitForString("");
-};
 
 export const getUids = (block: Element) => {
   const blockUid = block.id.substring(block.id.length - 9, block.id.length);
