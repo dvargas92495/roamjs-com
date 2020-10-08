@@ -3,10 +3,10 @@ import { createObserver, createSortIcons } from "../entry-helpers";
 import { getConfigFromPage } from "roam-client";
 
 type RoamBlock = {
-  title: string;
-  time: number;
-  id: number;
-  uid: string;
+  title?: string;
+  time?: number;
+  id?: number;
+  uid?: string;
 };
 
 const menuItemCallback = (
