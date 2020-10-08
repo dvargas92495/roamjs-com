@@ -97,6 +97,8 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
 const QUERY_START = "{{query:";
 const QUERY_END = "}}";
 const OR_QUERY_START = "{or:";
+const AND_QUERY_START = "{and:";
+const BETWEEN_QUERY_START = "{between:";
 const TAG_QUERY_START = "[[";
 const TAG_QUERY_END = "]]";
 const SUB_QUERY_END = "}";
@@ -121,6 +123,34 @@ const parseSubQuery: (s: string) => QueryNode = (s: string) => {
       value: null,
       rest: orQuery.substring(SUB_QUERY_END.length),
     };
+  } else if (s.startsWith(AND_QUERY_START)) {
+    let andQuery = s.substring(AND_QUERY_START.length).trim();
+    const children = [];
+    while (!andQuery.startsWith(SUB_QUERY_END)) {
+      const child = parseSubQuery(andQuery);
+      andQuery = child.rest;
+      children.push(child);
+    }
+    return {
+      type: "AND",
+      children,
+      value: null,
+      rest: andQuery.substring(SUB_QUERY_END.length),
+    };
+  } else if (s.startsWith(BETWEEN_QUERY_START)) {
+    let betweenQuery = s.substring(BETWEEN_QUERY_START.length).trim();
+    const children = [];
+    while (!betweenQuery.startsWith(SUB_QUERY_END)) {
+      const child = parseSubQuery(betweenQuery);
+      betweenQuery = child.rest;
+      children.push(child);
+    }
+    return {
+      type: "BETWEEN",
+      children,
+      value: null,
+      rest: betweenQuery.substring(SUB_QUERY_END.length),
+    };
   } else if (s.startsWith(TAG_QUERY_START)) {
     const end = s.indexOf(TAG_QUERY_END);
     const tag = s.substring(TAG_QUERY_START.length, end);
@@ -135,7 +165,7 @@ const parseSubQuery: (s: string) => QueryNode = (s: string) => {
       type: "NULL",
       value: null,
       children: [],
-      rest: "",
+      rest: s.substring(1),
     };
   }
 };
@@ -159,7 +189,12 @@ const observerCallback = () => {
           .closest(".rm-query")
           .getElementsByClassName("rm-query-title")[0] as HTMLDivElement
     )
-    .map((e) => parseQuery(e.innerText));
+    .map((e) => parseQuery(e.innerText))
+    .filter(
+      (q) =>
+        q.type === "OR" &&
+        q.children.find((c) => c.value === "Random" && c.type === "TAG")
+    );
   console.log(queries);
 };
 
