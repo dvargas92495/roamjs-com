@@ -1,5 +1,6 @@
 import userEvent from "@testing-library/user-event";
 import { waitFor } from "@testing-library/dom";
+import { getAttrConfigFromQuery } from 'roam-client';
 
 const waitForString = (text: string) =>
   waitFor(
