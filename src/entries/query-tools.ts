@@ -130,6 +130,10 @@ const observerCallback = () => {
         e.stopPropagation();
         e.preventDefault();
       }
+      randomIcon.onmousedown = (e) => {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      };
       randomize(q);
     }
   })
