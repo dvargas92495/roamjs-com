@@ -95,7 +95,7 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
   }
 };
 
-const randomize = (q: HTMLDivElement, allChildren: HTMLCollectionOf<Element>) => {
+const randomize = (q: HTMLDivElement, allChildren: Element[]) => {
   const refsByPageView = q.lastElementChild;
   const selected = allChildren[Math.floor(Math.random()*allChildren.length)]
   Array.from(refsByPageView.children).forEach(c => {
@@ -127,7 +127,7 @@ const observerCallback = () => {
       q.setAttribute("data-is-random-results", 'true');
       const randomIcon = createIconButton('reset');
       q.insertBefore(randomIcon, q.lastElementChild);
-      const allChildren = q.getElementsByClassName("rm-reference-item");
+      const allChildren = Array.from(q.getElementsByClassName("rm-reference-item"));
       randomIcon.onclick = (e) => {
         randomize(q, allChildren);
         e.stopPropagation();
