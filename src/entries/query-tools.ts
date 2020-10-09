@@ -1,4 +1,5 @@
 import {
+  createIconButton,
   createObserver,
   createSortIcons,
   getConfigFromBlock,
@@ -94,6 +95,24 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
   }
 };
 
+const randomize = (q: HTMLDivElement) => {
+  const refsByPageView = q.lastElementChild;
+  const allChildren = q.getElementsByClassName("rm-reference-item");
+  const selected = allChildren[Math.floor(Math.random()*allChildren.length)]
+  Array.from(refsByPageView.children).forEach(c => {
+    if (c.contains(selected)) {
+      const itemContainer = c.lastElementChild;
+      Array.from(itemContainer.children).forEach(cc => {
+        if (!cc.contains(selected)) {
+          itemContainer.removeChild(cc);
+        }
+      })
+    } else {
+      refsByPageView.removeChild(c);
+    }
+  })
+}
+
 const observerCallback = () => {
   createSortIcons("rm-query-content", onCreateSortIcons, sortCallbacks, 1);
   const queries = Array.from(
@@ -104,21 +123,14 @@ const observerCallback = () => {
     const config = getConfigFromBlock(q);
     if (config['Random'] === 'True') {
       q.setAttribute("data-is-random-results", 'true');
-      const refsByPageView = q.lastElementChild;
-      const allChildren = q.getElementsByClassName("rm-reference-item");
-      const selected = allChildren[Math.floor(Math.random()*allChildren.length)]
-      Array.from(refsByPageView.children).forEach(c => {
-        if (c.contains(selected)) {
-          const itemContainer = c.lastElementChild;
-          Array.from(itemContainer.children).forEach(cc => {
-            if (!cc.contains(selected)) {
-              itemContainer.removeChild(cc);
-            }
-          })
-        } else {
-          refsByPageView.removeChild(c);
-        }
-      })
+      const randomIcon = createIconButton('reset');
+      q.insertBefore(randomIcon, q.lastElementChild);
+      randomIcon.onclick = (e) => {
+        randomize(q);
+        e.stopPropagation();
+        e.preventDefault();
+      }
+      randomize(q);
     }
   })
 };
