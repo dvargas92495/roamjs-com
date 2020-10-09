@@ -95,9 +95,8 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
   }
 };
 
-const randomize = (q: HTMLDivElement) => {
+const randomize = (q: HTMLDivElement, allChildren: HTMLCollectionOf<Element>) => {
   const refsByPageView = q.lastElementChild;
-  const allChildren = q.getElementsByClassName("rm-reference-item");
   const selected = allChildren[Math.floor(Math.random()*allChildren.length)]
   Array.from(refsByPageView.children).forEach(c => {
     if (c.contains(selected)) {
@@ -111,6 +110,9 @@ const randomize = (q: HTMLDivElement) => {
       refsByPageView.removeChild(c);
     }
   })
+  if(!refsByPageView.contains(selected)) {
+    refsByPageView.appendChild(selected.closest('.rm-ref-page-view'))
+  }
 }
 
 const observerCallback = () => {
@@ -125,8 +127,9 @@ const observerCallback = () => {
       q.setAttribute("data-is-random-results", 'true');
       const randomIcon = createIconButton('reset');
       q.insertBefore(randomIcon, q.lastElementChild);
+      const allChildren = q.getElementsByClassName("rm-reference-item");
       randomIcon.onclick = (e) => {
-        randomize(q);
+        randomize(q, allChildren);
         e.stopPropagation();
         e.preventDefault();
       }
@@ -134,7 +137,7 @@ const observerCallback = () => {
         e.stopImmediatePropagation();
         e.preventDefault();
       };
-      randomize(q);
+      randomize(q, allChildren);
     }
   })
 };
