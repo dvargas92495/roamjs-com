@@ -95,51 +95,51 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
   }
 };
 
-const randomize = (q: HTMLDivElement, allChildren: Element[]) => {
+const randomize = (q: HTMLDivElement) => {
   const refsByPageView = q.lastElementChild;
-  const selected = allChildren[Math.floor(Math.random()*allChildren.length)]
-  Array.from(refsByPageView.children).forEach(c => {
+  const allChildren = Array.from(q.getElementsByClassName("rm-reference-item"));
+  const selected = allChildren[Math.floor(Math.random() * allChildren.length)];
+  Array.from(refsByPageView.children).forEach((c: HTMLElement) => {
     if (c.contains(selected)) {
       const itemContainer = c.lastElementChild;
-      Array.from(itemContainer.children).forEach(cc => {
+      Array.from(itemContainer.children).forEach((cc: HTMLElement) => {
         if (!cc.contains(selected)) {
-          itemContainer.removeChild(cc);
+          cc.style.display = "none";
+        } else {
+          cc.style.display = "flex";
         }
-      })
+      });
     } else {
-      refsByPageView.removeChild(c);
+      c.style.display = "none";
     }
-  })
-  if(!refsByPageView.contains(selected)) {
-    refsByPageView.appendChild(selected.closest('.rm-ref-page-view'))
-  }
-}
+  });
+};
 
 const observerCallback = () => {
   createSortIcons("rm-query-content", onCreateSortIcons, sortCallbacks, 1);
   const queries = Array.from(
     document.getElementsByClassName("rm-query-content")
-  )
-    .filter((e) => !e.getAttribute("data-is-random-results")) as HTMLDivElement[];
-  queries.forEach(q => {
+  ).filter(
+    (e) => !e.getAttribute("data-is-random-results")
+  ) as HTMLDivElement[];
+  queries.forEach((q) => {
     const config = getConfigFromBlock(q);
-    if (config['Random'] === 'True') {
-      q.setAttribute("data-is-random-results", 'true');
-      const randomIcon = createIconButton('reset');
+    if (config["Random"] === "True") {
+      q.setAttribute("data-is-random-results", "true");
+      const randomIcon = createIconButton("reset");
       q.insertBefore(randomIcon, q.lastElementChild);
-      const allChildren = Array.from(q.getElementsByClassName("rm-reference-item"));
       randomIcon.onclick = (e) => {
-        randomize(q, allChildren);
+        randomize(q);
         e.stopPropagation();
         e.preventDefault();
-      }
+      };
       randomIcon.onmousedown = (e) => {
         e.stopImmediatePropagation();
         e.preventDefault();
       };
-      randomize(q, allChildren);
+      randomize(q);
     }
-  })
+  });
 };
 
 observerCallback();
