@@ -1,4 +1,5 @@
 import {
+  createIconButton,
   createObserver,
   createSortIcons,
   getConfigFromBlock,
@@ -94,33 +95,52 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
   }
 };
 
+const randomize = (q: HTMLDivElement) => {
+  const refsByPageView = q.lastElementChild;
+  const allChildren = Array.from(q.getElementsByClassName("rm-reference-item"));
+  const selected = allChildren[Math.floor(Math.random() * allChildren.length)];
+  Array.from(refsByPageView.children).forEach((c: HTMLElement) => {
+    if (c.contains(selected)) {
+      const itemContainer = c.lastElementChild;
+      Array.from(itemContainer.children).forEach((cc: HTMLElement) => {
+        if (!cc.contains(selected)) {
+          cc.style.display = "none";
+        } else {
+          cc.style.display = "flex";
+          c.style.display = "block";
+        }
+      });
+    } else {
+      c.style.display = "none";
+    }
+  });
+};
+
 const observerCallback = () => {
   createSortIcons("rm-query-content", onCreateSortIcons, sortCallbacks, 1);
   const queries = Array.from(
     document.getElementsByClassName("rm-query-content")
-  )
-    .filter((e) => !e.getAttribute("data-is-random-results")) as HTMLDivElement[];
-  queries.forEach(q => {
+  ).filter(
+    (e) => !e.getAttribute("data-is-random-results")
+  ) as HTMLDivElement[];
+  queries.forEach((q) => {
     const config = getConfigFromBlock(q);
-    if (config['Random'] === 'True') {
-      q.setAttribute("data-is-random-results", 'true');
-      const refsByPageView = q.lastElementChild;
-      const allChildren = q.getElementsByClassName("rm-reference-item");
-      const selected = allChildren[Math.floor(Math.random()*allChildren.length)]
-      Array.from(refsByPageView.children).forEach(c => {
-        if (c.contains(selected)) {
-          const itemContainer = c.lastElementChild;
-          Array.from(itemContainer.children).forEach(cc => {
-            if (!cc.contains(selected)) {
-              itemContainer.removeChild(cc);
-            }
-          })
-        } else {
-          refsByPageView.removeChild(c);
-        }
-      })
+    if (config["Random"] === "True") {
+      q.setAttribute("data-is-random-results", "true");
+      const randomIcon = createIconButton("reset");
+      q.insertBefore(randomIcon, q.lastElementChild);
+      randomIcon.onclick = (e) => {
+        randomize(q);
+        e.stopPropagation();
+        e.preventDefault();
+      };
+      randomIcon.onmousedown = (e) => {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      };
+      randomize(q);
     }
-  })
+  });
 };
 
 observerCallback();
