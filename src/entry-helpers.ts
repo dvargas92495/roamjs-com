@@ -155,6 +155,9 @@ const createDivObserver = (
 
 const POPOVER_WRAPPER_CLASS = "sort-popover-wrapper";
 
+/**
+ * @param icon A blueprint icon which coul be found in https://blueprintjs.com/docs/#icons
+ */
 export const createIconButton = (icon: string) => {
   const popoverButton = document.createElement("span");
   popoverButton.className = "bp3-button bp3-minimal bp3-small";
