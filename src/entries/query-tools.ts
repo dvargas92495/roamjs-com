@@ -112,7 +112,7 @@ const observerCallback = () => {
           const itemContainer = selected.lastElementChild;
           Array.from(itemContainer.children).forEach(cc => {
             if (!cc.contains(selected)) {
-              itemContainer.removeChild(selected);
+              itemContainer.removeChild(cc);
             }
           })
         } else {

@@ -19,6 +19,10 @@ On expanded queries, there will be a sort icon that appears next to the results 
 
 To persist a particular sort on a query, create a child block with the `Default Sort` attribute. Valid values include each of the options above, minus the sort by prefix. For example, `Default Sort:: Page Title`.
 
+### Randomization
+
+Sometimes we have queries with hundreds of results and want to return a random element from that query. Returning random results from multiple queries could lead to serendipitous connections. To return a random result from a query, add the`Random` attribute as a child block of the query, with a value of `True`.
+
 ### Installation
 
 Insert this as a child of any `[[roam/js]]` block to install the extension.
