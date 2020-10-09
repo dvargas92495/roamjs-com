@@ -107,6 +107,7 @@ const randomize = (q: HTMLDivElement) => {
           cc.style.display = "none";
         } else {
           cc.style.display = "flex";
+          c.style.display = "block";
         }
       });
     } else {
