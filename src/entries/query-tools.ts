@@ -109,7 +109,7 @@ const observerCallback = () => {
       const selected = allChildren[Math.floor(Math.random()*allChildren.length)]
       Array.from(refsByPageView.children).forEach(c => {
         if (c.contains(selected)) {
-          const itemContainer = selected.lastElementChild;
+          const itemContainer = c.lastElementChild;
           Array.from(itemContainer.children).forEach(cc => {
             if (!cc.contains(selected)) {
               itemContainer.removeChild(cc);
