@@ -99,18 +99,26 @@ const observerCallback = () => {
   const queries = Array.from(
     document.getElementsByClassName("rm-query-content")
   )
-    .map(
-      (e) =>
-        e
-          .closest(".rm-query")
-          .getElementsByClassName("rm-query-title")[0] as HTMLDivElement
-    )
-    .filter((e) => !e.getAttribute("data-is-random-results"))
+    .filter((e) => !e.getAttribute("data-is-random-results")) as HTMLDivElement[];
   queries.forEach(q => {
     const config = getConfigFromBlock(q);
     if (config['Random'] === 'True') {
       q.setAttribute("data-is-random-results", 'true');
-      console.log("Randomizing", q.innerText);
+      const refsByPageView = q.lastElementChild;
+      const allChildren = q.getElementsByClassName("rm-reference-item");
+      const selected = allChildren[Math.floor(Math.random()*allChildren.length)]
+      Array.from(refsByPageView.children).forEach(c => {
+        if (c.contains(selected)) {
+          const itemContainer = selected.lastElementChild;
+          Array.from(itemContainer.children).forEach(cc => {
+            if (!cc.contains(selected)) {
+              itemContainer.removeChild(selected);
+            }
+          })
+        } else {
+          refsByPageView.removeChild(c);
+        }
+      })
     }
   })
 };
