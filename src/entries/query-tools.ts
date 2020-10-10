@@ -6,7 +6,7 @@ import {
   getCreatedTimeByTitle,
   getEditTimeByTitle,
 } from "../entry-helpers";
-import { parseRoamDate } from "roam-client";
+import { getConfigFromPage, parseRoamDate } from "roam-client";
 
 const menuItemCallback = (
   sortContainer: Element,
@@ -96,18 +96,20 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
 };
 
 const randomize = (q: HTMLDivElement) => {
+  const config = getConfigFromBlock(q);
+  const numRandomResults = Math.max(isNaN(config["Random"]) ? 1 : parseInt(config["Random"]), 1);
   const refsByPageView = q.lastElementChild;
   const allChildren = Array.from(q.getElementsByClassName("rm-reference-item"));
-  const selected = allChildren[Math.floor(Math.random() * allChildren.length)];
+  const selected = allChildren.sort(() => 0.5 - Math.random()).slice(0, numRandomResults);
   Array.from(refsByPageView.children).forEach((c: HTMLElement) => {
-    if (c.contains(selected)) {
+    if (selected.find(s => c.contains(s))) {
       const itemContainer = c.lastElementChild;
       Array.from(itemContainer.children).forEach((cc: HTMLElement) => {
-        if (!cc.contains(selected)) {
-          cc.style.display = "none";
-        } else {
+        if (selected.find(s => cc.contains(s))) {
           cc.style.display = "flex";
           c.style.display = "block";
+        } else {
+          cc.style.display = "none";
         }
       });
     } else {
@@ -125,7 +127,7 @@ const observerCallback = () => {
   ) as HTMLDivElement[];
   queries.forEach((q) => {
     const config = getConfigFromBlock(q);
-    if (config["Random"] === "True") {
+    if (config["Random"]) {
       q.setAttribute("data-is-random-results", "true");
       const randomIcon = createIconButton("reset");
       q.insertBefore(randomIcon, q.lastElementChild);
