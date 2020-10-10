@@ -21,7 +21,11 @@ To persist a particular sort on a query, create a child block with the `Default 
 
 ### Randomization
 
-Sometimes we have queries with hundreds of results and want to return a random element from that query. Returning random results from multiple queries could lead to serendipitous connections. To return a random result from a query, add the`Random` attribute as a child block of the query, with a value of `True`.
+Sometimes we have queries with hundreds of results and want to return a random element from that query. Returning random results from multiple queries could lead to serendipitous connections. To return a random result from a query, add the`Random` attribute as a child block of the query. Set the value to the number of random results you'd like returned from the query. For example, to return three random results from a query, add the following block as a child to the query:
+
+```
+Random:: 3
+```
 
 ### Installation
 
@@ -48,6 +52,8 @@ document.getElementsByTagName("head")[0].appendChild(s);
 <video width="320" height="240" controls>
   <source src="../../videos/query-sort.mp4" type="video/mp4">
 </video>
+
+<br/>
 
 #### Randomization
 
