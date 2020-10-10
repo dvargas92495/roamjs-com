@@ -41,10 +41,18 @@ s.type = "text/javascript";
 document.getElementsByTagName("head")[0].appendChild(s);
 ```
 
-### Demo
+### Demos
+
+#### Sorting
 
 <video width="320" height="240" controls>
   <source src="../../videos/query-sort.mp4" type="video/mp4">
+</video>
+
+#### Randomization
+
+<video width="320" height="240" controls>
+  <source src="../../videos/query-random.mp4" type="video/mp4">
 </video>
 
 <br/>
