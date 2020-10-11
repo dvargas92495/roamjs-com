@@ -1,6 +1,6 @@
 import userEvent from "@testing-library/user-event";
 import { waitFor } from "@testing-library/dom";
-import { getAttrConfigFromQuery } from 'roam-client';
+import { getAttrConfigFromQuery } from "roam-client";
 
 const waitForString = (text: string) =>
   waitFor(
@@ -127,10 +127,11 @@ export const addButtonListener = (
     blockUid?: string,
     parentUid?: string
   ) => void
-) => {
-  const listener = clickEventListener(targetCommand, callback);
-  document.addEventListener("click", listener);
-};
+) =>
+  document.addEventListener(
+    "click",
+    clickEventListener(targetCommand, callback)
+  );
 
 export const createObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void

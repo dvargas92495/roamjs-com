@@ -19,8 +19,13 @@ jobs:
         run: brew install mkdocs
       - name: Build
         run: mkdocs build --clean
-      - name: Upload
+      - name: Upload Old
         run: aws s3 sync dist s3://roam.davidvargas.me
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.OLD_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.OLD_AWS_SECRET_ACCESS_KEY }}
+      - name: Upload
+        run: aws s3 sync build s3://roamjs.com
       - name: Invalidate Cache
         run: |
           CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[*].{Alias:Aliases.Items[0],Id:Id}[?Alias=='roam.davidvargas.me'].Id" --output text)
