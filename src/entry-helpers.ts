@@ -149,9 +149,8 @@ const createDivObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void,
   mutationTarget: Element
 ) => {
-  const mutationConfig = { childList: true, subtree: true };
   const observer = new MutationObserver(mutationCallback);
-  observer.observe(mutationTarget, mutationConfig);
+  observer.observe(mutationTarget, { childList: true, subtree: true });
 };
 
 const POPOVER_WRAPPER_CLASS = "sort-popover-wrapper";
