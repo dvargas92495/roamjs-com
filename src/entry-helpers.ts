@@ -331,8 +331,7 @@ export const getConfigFromBlock = (container: HTMLElement) => {
   }
   const blockId = block.id.substring(block.id.length - 9, block.id.length);
 
-  const config = getAttrConfigFromQuery(
+  return getAttrConfigFromQuery(
     `[:find (pull ?e [*]) :where [?e :block/uid "${blockId}"]]`
   );
-  return config;
 };
