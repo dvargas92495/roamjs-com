@@ -39,6 +39,17 @@ module "aws-static-site" {
   }
 }
 
+module "aws_static_site" {
+  source  = "dvargas92495/static-site/aws"
+  version = "1.1.0"
+
+  domain = "roamjs.com"
+  secret = var.secret
+  tags = {
+      Application = "Roam JS Extensions"
+  }
+}
+
 module "aws-serverless-backend" {
     source  = "dvargas92495/serverless-backend/aws"
     version = "1.2.1"
