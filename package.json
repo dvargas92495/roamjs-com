@@ -9,6 +9,10 @@
     "build:pr": "webpack --config ./webpack.development.config.js",
     "build:lambda": "webpack --config ./webpack.lambda.config.js",
     "lambda": "node out/debug-lambda.js",
+    "presetup:local": "npm run build",
+    "setup:local": "node scripts/prelocal.js",
+    "prelocal": "npm run setup:local",
+    "local": "http-server",
     "prelambda": "webpack --config ./webpack.debug.config.js",
     "test": "jest --passWithNoTests"
   },
@@ -31,6 +35,7 @@
     "babel-preset-env": "^1.7.0",
     "dotenv-webpack": "^2.0.0",
     "eslint": "^7.7.0",
+    "http-server": "^0.12.3",
     "jest": "^26.4.0",
     "ts-loader": "^8.0.3",
     "typescript": "^4.0.2",
