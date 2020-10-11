@@ -72,16 +72,28 @@ provider "github" {
     owner = "dvargas92495"
 }
 
+resource "github_actions_secret" "old_aws_access_key" {
+  repository       = "roam-js-extensions"
+  secret_name      = "OLD_AWS_ACCESS_KEY"
+  plaintext_value  = module.aws-static-site.deploy-id
+}
+
+resource "github_actions_secret" "old_aws_access_secret" {
+  repository       = "roam-js-extensions"
+  secret_name      = "OLD_AWS_ACCESS_SECRET"
+  plaintext_value  = module.aws-static-site.deploy-secret
+}
+
 resource "github_actions_secret" "deploy_aws_access_key" {
   repository       = "roam-js-extensions"
   secret_name      = "DEPLOY_AWS_ACCESS_KEY"
-  plaintext_value  = module.aws-static-site.deploy-id
+  plaintext_value  = module.aws_static_site.deploy-id
 }
 
 resource "github_actions_secret" "deploy_aws_access_secret" {
   repository       = "roam-js-extensions"
   secret_name      = "DEPLOY_AWS_ACCESS_SECRET"
-  plaintext_value  = module.aws-static-site.deploy-secret
+  plaintext_value  = module.aws_static_site.deploy-secret
 }
 
 resource "github_actions_secret" "twitter_consumer_key" {
