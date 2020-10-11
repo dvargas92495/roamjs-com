@@ -26,8 +26,8 @@ jobs:
       - name: Upload Old
         run: aws s3 sync build s3://roam.davidvargas.me/master
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.OLD_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.OLD_AWS_SECRET_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.OLD_AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.OLD_AWS_ACCESS_SECRET }}
       - name: Upload
         run: aws s3 sync build s3://roamjs.com/master
       - name: Invalidate Cache

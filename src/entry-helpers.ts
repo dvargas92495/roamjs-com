@@ -237,7 +237,6 @@ export const createSortIcon = (
   );
 
   let popoverOpen = false;
-
   const documentEventListener = (e: MouseEvent) => {
     if (
       (!e.target || !popoverOverlay.contains(e.target as HTMLElement)) &&
