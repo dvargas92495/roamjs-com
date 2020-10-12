@@ -67,6 +67,7 @@ const clickCallback = async (htmlTarget: HTMLElement) => {
             ? currentText.substring(2)
             : currentText
         );
+        currentText = "";
       }
     }
     await pushBullets(bullets);
