@@ -53,7 +53,23 @@ const clickCallback = async (htmlTarget: HTMLElement) => {
     await worker.terminate();
     await userEvent.clear(document.activeElement);
     window.imageText = text;
-    const bullets = text.split(new RegExp("\\n(-|—)"));
+    const textBullets = text.split("\n");
+    const bullets = [];
+    let currentText = "";
+    for (var b = 0; b < textBullets.length; b++) {
+      const s = textBullets[b];
+      if (s) {
+        currentText += s;
+      } else {
+        bullets.push(
+          currentText.startsWith("* ") ||
+            currentText.startsWith("- ") ||
+            currentText.startsWith("— ")
+            ? s.substring(2)
+            : s
+        );
+      }
+    }
     await pushBullets(bullets);
   };
 };
