@@ -4,6 +4,12 @@ import { createWorker } from "tesseract.js";
 import { createIconButton, createObserver } from "../entry-helpers";
 import { getConfigFromPage, newBlockEnter, pushBullets } from "roam-client";
 
+declare global {
+  interface Window {
+    imageText: string;
+  }
+}
+
 const config = getConfigFromPage("roam/js/image-tagging");
 const events = {
   "DOUBLE CLICK": "dblclick",
@@ -46,7 +52,8 @@ const clickCallback = async (htmlTarget: HTMLElement) => {
     } = await worker.recognize(canvas);
     await worker.terminate();
     await userEvent.clear(document.activeElement);
-    const bullets = text.split('\n-');
+    window.imageText = text;
+    const bullets = text.split(new RegExp("\\n(-|—)"));
     await pushBullets(bullets);
   };
 };
