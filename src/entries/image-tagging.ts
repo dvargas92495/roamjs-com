@@ -65,8 +65,8 @@ const clickCallback = async (htmlTarget: HTMLElement) => {
           currentText.startsWith("* ") ||
             currentText.startsWith("- ") ||
             currentText.startsWith("— ")
-            ? s.substring(2)
-            : s
+            ? currentText.substring(2)
+            : currentText
         );
       }
     }
