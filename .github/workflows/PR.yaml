@@ -2,8 +2,8 @@ name: Push Extensions From PR
 on: pull_request
 
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.DEPLOY_AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.DEPLOY_AWS_ACCESS_SECRET }}
   AWS_DEFAULT_REGION: us-east-1
 
 jobs:
@@ -20,8 +20,8 @@ jobs:
       - name: Build
         run: npm run build:pr
       - name: Upload
-        run: aws s3 sync build s3://roam.davidvargas.me/${{github.event.number}}
+        run: aws s3 sync build s3://roamjs.com/${{github.event.number}}
       - name: Invalidate Cache
         run: |
-          CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[*].{Alias:Aliases.Items[0],Id:Id}[?Alias=='roam.davidvargas.me'].Id" --output text)
+          CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[*].{Alias:Aliases.Items[0],Id:Id}[?Alias=='roamjs.com'].Id" --output text)
           aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_ID --paths "/*"
