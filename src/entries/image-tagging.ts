@@ -2,7 +2,7 @@ import { waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { createWorker } from "tesseract.js";
 import { createIconButton, createObserver } from "../entry-helpers";
-import { getConfigFromPage, newBlockEnter } from "roam-client";
+import { getConfigFromPage, newBlockEnter, pushBullets } from "roam-client";
 
 const config = getConfigFromPage("roam/js/image-tagging");
 const events = {
@@ -46,7 +46,8 @@ const clickCallback = async (htmlTarget: HTMLElement) => {
     } = await worker.recognize(canvas);
     await worker.terminate();
     await userEvent.clear(document.activeElement);
-    await userEvent.type(document.activeElement, text);
+    const bullets = text.split('\n-');
+    await pushBullets(bullets);
   };
 };
 
