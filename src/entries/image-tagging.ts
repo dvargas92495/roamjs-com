@@ -52,7 +52,6 @@ const clickCallback = async (htmlTarget: HTMLElement) => {
     } = await worker.recognize(canvas);
     await worker.terminate();
     await userEvent.clear(document.activeElement);
-    window.imageText = text;
     const textBullets = text.split("\n");
     const bullets = [];
     let currentText = "";
