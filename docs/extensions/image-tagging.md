@@ -10,6 +10,8 @@ The script supports the following configuration attributes, to be added in the `
 
 Double click on an image in your database. The extension will use an OCR library to extract all the text found in an image. In the meantime, it will insert a "Loading..." text as a child block. Once the extension finishes, it will replace the Loading text with all the new text it parsed from the image.
 
+If the text begins with a bullet or dash on a line, the bullet will be stripped, leaving the rest of the text content.
+
 ## Installation
 
 Insert this as a child of any `[[roam/js]]` block to install the extension.
