@@ -22,7 +22,7 @@ In any page, create a `Import Google Calendar` button by typing in `{{import goo
 
 > [Summary] ([Start Time (hh:mm am)] - [End Time (hh:mm pm)]) [ - link to Zoom/Meet]
 
-It will be displayed in the timezone of your browser.
+It will be displayed in the timezone of your browser. It will use either the page's title if it's a daily note, or the current date if it's not.
 
 ### Installation
 

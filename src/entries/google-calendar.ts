@@ -3,7 +3,8 @@ import {
   asyncType,
   genericError,
   pushBullets,
-  getConfigFromPage,, parseRoamDate
+  getConfigFromPage,
+  parseRoamDate,
 } from "roam-client";
 import axios from "axios";
 import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
