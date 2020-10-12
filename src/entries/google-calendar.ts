@@ -4,6 +4,7 @@ import {
   genericError,
   pushBullets,
   getConfigFromPage,
+  parseRoamDate,
 } from "roam-client";
 import axios from "axios";
 import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
@@ -16,6 +17,10 @@ const importGoogleCalendar = async (
   parentUid: string
 ) => {
   const config = getConfigFromPage("roam/js/google-calendar");
+  const pageTitle = document.getElementsByClassName(
+    "rm-title-display"
+  )[0] as HTMLHeadingElement;
+  const dateFromPage = parseRoamDate(pageTitle.innerText);
 
   const calendarId = config["Google Calendar"]?.trim();
   if (!calendarId) {
@@ -26,7 +31,8 @@ const importGoogleCalendar = async (
   }
   const includeLink = config["Include Event Link"]?.trim() === "true";
   const skipFree = config["Skip Free"]?.trim() === "true";
-  const timeMin = startOfDay(new Date());
+  const dateToUse = isNaN(dateFromPage.valueOf()) ? new Date() : dateFromPage;
+  const timeMin = startOfDay(dateToUse);
   const timeMax = endOfDay(timeMin);
   const timeMinParam = encodeURIComponent(formatRFC3339(timeMin));
   const timeMaxParam = encodeURIComponent(formatRFC3339(timeMax));

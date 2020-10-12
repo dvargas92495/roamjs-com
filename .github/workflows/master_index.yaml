@@ -30,3 +30,5 @@ jobs:
         run: |
           CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[*].{Alias:Aliases.Items[0],Id:Id}[?Alias=='roam.davidvargas.me'].Id" --output text)
           aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_ID --paths "/*"
+          CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[*].{Alias:Aliases.Items[0],Id:Id}[?Alias=='roamjs.com'].Id" --output text)
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_ID --paths "/*"
