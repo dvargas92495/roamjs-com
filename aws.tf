@@ -68,6 +68,20 @@ module "aws-serverless-backend" {
     }
 }
 
+module "aws_cron_job" {
+  source    = "dvargas92495/cron-job/aws"
+  version   = "1.0.0"
+  
+  rule_name = "RoamJS"
+  schedule  = "cron(0 0 4 * ? *)"
+  lamdas    = [
+    "template-daily-note"
+  ]
+  tags      = {
+    Application = "Roam JS Extentions"
+  }
+}
+
 provider "github" {
     owner = "dvargas92495"
 }
@@ -94,6 +108,18 @@ resource "github_actions_secret" "deploy_aws_access_secret" {
   repository       = "roam-js-extensions"
   secret_name      = "DEPLOY_AWS_ACCESS_SECRET"
   plaintext_value  = module.aws_static_site.deploy-secret
+}
+
+resource "github_actions_secret" "deploy_aws_access_key" {
+  repository       = "roam-js-extensions"
+  secret_name      = "CRON_AWS_ACCESS_KEY_ID"
+  plaintext_value  = module.aws_cron_job.access_key
+}
+
+resource "github_actions_secret" "deploy_aws_access_secret" {
+  repository       = "roam-js-extensions"
+  secret_name      = "CRON_AWS_SECRET_ACCESS_KEY"
+  plaintext_value  = module.aws_cron_job.secret_key
 }
 
 resource "github_actions_secret" "twitter_consumer_key" {
