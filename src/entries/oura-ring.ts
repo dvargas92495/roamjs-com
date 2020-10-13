@@ -36,7 +36,7 @@ const importGoogleCalendar = async (
       `https://api.ouraring.com/v1/sleep?start=${formattedDate}&end=${formattedDate}&access_token=${token}`
     )
     .then(async (r) => {
-      const sleep = r.data[0];
+      const sleep = r.data.sleep[0];
       if (!sleep) {
         await asyncType(
           `There is no sleep data available for ${formattedDate}`

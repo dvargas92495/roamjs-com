@@ -10,6 +10,12 @@ The script supports the following configuration attributes, to be added in the `
 
 - `Token` - (Required) This is the personal access token associated with your Oura Ring account. The extension needs this in order to access your personal data. To generate your own personal access token, visit https://t.co/O1oEzNHKva?amp=1.
 
+Create a button by typing `{{import oura ring}}` into a page. If the page is a Daily note page, it will query the day before the page title, since you usually want to track last night's sleep. Otherwise, it will query yesterday's data by default. It will output the following text:
+```
+Bedtime Start:: hh:mm
+Bedtime End:: hh:mm
+```
+
 ### Installation
 
 Insert this as a child of any `[[roam/js]]` block to install the extension.
