@@ -38,7 +38,7 @@ if (old) {
 }
 
 var s = document.createElement("script");
-s.src = "https://roam.davidvargas.me/master/query-tools.js";
+s.src = "https://roamjs.com/query-tools.js";
 s.id = "query-tools";
 s.async = false;
 s.type = "text/javascript";

@@ -15,7 +15,7 @@ if (old) {
 }
 
 var s = document.createElement("script");
-s.src = "https://roam.davidvargas.me/master/mobile-todos.js";
+s.src = "https://roamjs.com/mobile-todos.js";
 s.id = "mobile-todos";
 s.async = false;
 s.type = "text/javascript";

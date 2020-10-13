@@ -1,7 +1,7 @@
 {
   "name": "roam-js-extensions",
   "version": "1.0.0",
-  "description": "Various Roam Javascript extensions deployed to roam.davidvargas.me",
+  "description": "Various Roam Javascript extensions deployed to roamjs.com",
   "main": "index.js",
   "scripts": {
     "automate": "node scripts/automation.js",

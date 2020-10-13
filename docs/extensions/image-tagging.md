@@ -23,7 +23,7 @@ if (old) {
 }
 
 var s = document.createElement("script");
-s.src = "https://roam.davidvargas.me/master/image-tagging.js";
+s.src = "https://roamjs.com/image-tagging.js";
 s.id = "image-tagging";
 s.async = false;
 s.type = "text/javascript";

@@ -17,7 +17,7 @@ Near the linked references, there will appear a sort icon next to the filter ico
 - Sort By Daily Note - This will sort all the linked references in ascending order by Daily Note, followed by created date of non-daily note pages.
 - Sort By Daily Note Descending - This will sort all the linked references in descending order by Daily Note, followed by created date of non-daily note pages.
 
-You could also add a `Default Sort` attribute with a valid value on the page itself to have a specific sorting for just that page. 
+You could also add a `Default Sort` attribute with a valid value on the page itself to have a specific sorting for just that page.
 
 ```javascript
 var old = document.getElementById("sort-references");
@@ -26,7 +26,7 @@ if (old) {
 }
 
 var s = document.createElement("script");
-s.src = "https://roam.davidvargas.me/master/sort-references.js";
+s.src = "https://roamjs.com/sort-references.js";
 s.id = "sort-references";
 s.async = false;
 s.type = "text/javascript";

@@ -4,7 +4,7 @@ A suite of JavaScript tools to extend popular workflows in [Roam](https://roamre
 
 ## Extensions
 
-You could view a static site version of our markdown docs at https://roam.davidvargas.me. 
+You could view a static site version of our markdown docs at https://roamjs.com. 
 
 ## Contributing
 

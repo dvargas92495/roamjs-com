@@ -15,7 +15,7 @@ if (old) {
 }
 
 var s = document.createElement("script");
-s.src = "https://roam.davidvargas.me/master/todont.js";
+s.src = "https://roamjs.com/todont.js";
 s.id = "todont";
 s.async = false;
 s.type = "text/javascript";

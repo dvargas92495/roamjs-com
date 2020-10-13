@@ -35,7 +35,7 @@ if (old) {
 }
 
 var s = document.createElement("script");
-s.src = "https://roam.davidvargas.me/master/google-calendar.js";
+s.src = "https://roamjs.com/google-calendar.js";
 s.id = "google-calendar";
 s.async = false;
 s.type = "text/javascript";

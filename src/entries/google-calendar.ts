@@ -72,7 +72,7 @@ const importGoogleCalendar = async (
     .catch((e) =>
       e.message === "Request failed with status code 404"
         ? asyncType(
-            `Error for calendar ${calendarId}: Could not find calendar or it's not public. For more information on how to make it public, [visit this page](https://roam.davidvargas.me/extensions/google-calendar)`
+            `Error for calendar ${calendarId}: Could not find calendar or it's not public. For more information on how to make it public, [visit this page](https://roamjs.com/extensions/google-calendar)`
           )
         : genericError(e)
     );

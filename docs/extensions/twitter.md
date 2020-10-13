@@ -28,7 +28,7 @@ if (old) {
 }
 
 var s = document.createElement("script");
-s.src = "https://roam.davidvargas.me/master/twitter.js";
+s.src = "https://roamjs.com/twitter.js";
 s.id = "twitter";
 s.async = false;
 s.type = "text/javascript";

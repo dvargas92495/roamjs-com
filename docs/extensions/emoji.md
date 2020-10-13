@@ -4,7 +4,6 @@ The Roam Emoji extension allows users to use familiar colon syntax to insert emo
 
 ### Usage
 
-
 The script supports the following configuration attributes, to be added in the `[[roam/js/emojis]]` page:
 
 - `Minimum Characters` - (Optional) The minimum number of characters needed to show the emoji menu, defaulted to 2 just like in slack.
@@ -20,7 +19,7 @@ if (old) {
 }
 
 var s = document.createElement("script");
-s.src = "https://roam.davidvargas.me/master/emojis.js";
+s.src = "https://roamjs.com/emojis.js";
 s.id = "emojis";
 s.async = false;
 s.type = "text/javascript";

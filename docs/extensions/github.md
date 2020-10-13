@@ -7,8 +7,7 @@ The Github to Roam Integration allows users to import various types of data from
 The script supports the following configuration attributes, to be added in the `[[roam/js/github]]` page:
 
 - `Username` - (Optional) By default, the extension calls the api with my username and token. If you would like to make calls under your username, set this attribute with token below. This give you access to your private data and is called straight from the Roam frontend.
-- `Token` - (Optional) Set with Username above to call GitHub's api as another user. [See this page](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) for documentation on how to create a personal access token. The token must have repo scope access. 
-
+- `Token` - (Optional) Set with Username above to call GitHub's api as another user. [See this page](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) for documentation on how to create a personal access token. The token must have repo scope access.
 
 #### GitHub Issues
 
@@ -39,7 +38,7 @@ if (old) {
 }
 
 var s = document.createElement("script");
-s.src = "https://roam.davidvargas.me/master/github.js";
+s.src = "https://roamjs.com/github.js";
 s.id = "github";
 s.async = false;
 s.type = "text/javascript";

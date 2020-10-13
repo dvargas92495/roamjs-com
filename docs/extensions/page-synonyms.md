@@ -27,7 +27,7 @@ if (old) {
 }
 
 var s = document.createElement("script");
-s.src = "https://roam.davidvargas.me/master/page-synonyms.js";
+s.src = "https://roamjs.com/page-synonyms.js";
 s.id = "page-synonyms";
 s.async = false;
 s.type = "text/javascript";
