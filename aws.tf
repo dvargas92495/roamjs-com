@@ -110,13 +110,13 @@ resource "github_actions_secret" "deploy_aws_access_secret" {
   plaintext_value  = module.aws_static_site.deploy-secret
 }
 
-resource "github_actions_secret" "deploy_aws_access_key" {
+resource "github_actions_secret" "cron_aws_access_key" {
   repository       = "roam-js-extensions"
   secret_name      = "CRON_AWS_ACCESS_KEY_ID"
   plaintext_value  = module.aws_cron_job.access_key
 }
 
-resource "github_actions_secret" "deploy_aws_access_secret" {
+resource "github_actions_secret" "cron_aws_access_secret" {
   repository       = "roam-js-extensions"
   secret_name      = "CRON_AWS_SECRET_ACCESS_KEY"
   plaintext_value  = module.aws_cron_job.secret_key
