@@ -2,10 +2,27 @@ import userEvent from "@testing-library/user-event";
 import { waitFor } from "@testing-library/dom";
 import { getAttrConfigFromQuery } from "roam-client";
 
-if (process.env.IS_LEGACY) {
+declare global{
+  interface Window {
+    depot: {
+      roamjs: {
+        alerted: boolean;
+      }
+    }
+  }
+}
+
+if (process.env.IS_LEGACY && !window.depot?.roamjs?.alerted) {
   window.alert(
     'Hey! Thanks for using extensions from roam.davidvargas.me! I am currently migrating the extensions to roamjs.com. Please edit the src in your roam/js block, replacing "roam.davidvargas.me" with "roamjs.com"'
   );
+  if (!window.depot){
+    window.depot = {roamjs:{alerted: true}};
+  } else if(!window.depot.roamjs) {
+    window.depot.roamjs = {alerted: true};
+  } else {
+    window.depot.roamjs.alerted = true;
+  }
 }
 
 const waitForString = (text: string) =>
