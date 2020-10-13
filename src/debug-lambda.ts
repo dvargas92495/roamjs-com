@@ -1,4 +1,4 @@
-import { handler } from "./lambdas/github-cards_get";
+import { handler } from "./api/github-cards_get";
 
 // @ts-ignore
 handler({

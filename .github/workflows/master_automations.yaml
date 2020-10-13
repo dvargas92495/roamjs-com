@@ -1,19 +1,15 @@
-name: Push Lambdas to Master
+name: Push Automations to Master
 on:
   push:
     branches: master
     paths:
-      - "src/lambdas/**"
+      - "src/automations/**"
       - "src/lambda-helpers.ts"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.LAMBDA_AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.LAMBDA_AWS_SECRET_ACCESS_KEY }}
-  AWS_DEFAULT_REGION: us-east-1
-  GOOGLE_CALENDAR_API_KEY: ${{ secrets.GOOGLE_CALENDAR_API_KEY }}
-  GITHUB_PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-  TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
-  TWITTER_CONSUMER_SECRET: ${{ secrets.TWITTER_CONSUMER_SECRET }} 
+  AWS_DEFAULT_REGION: us-east-1 
 
 jobs:
   deploy:
@@ -27,13 +23,13 @@ jobs:
       - name: install
         run: npm install
       - name: Build
-        run: npm run build:lambda
+        run: npm run build:automations
       - name: Upload
         run: |
           for filename in out/*.js; do
               LAMBDA=$(basename "$filename" .js)
               zip -jq $LAMBDA.zip ./out/$LAMBDA.js
-              MODIFIED=$(aws lambda update-function-code --function-name "roam-js-extensions_${LAMBDA}" --publish --zip-file "fileb://${LAMBDA}.zip" --query "LastModified" --output text)  
+              MODIFIED=$(aws lambda update-function-code --function-name "RoamJS_${LAMBDA}" --publish --zip-file "fileb://${LAMBDA}.zip" --query "LastModified" --output text)  
               rm $LAMBDA.zip
               echo "Function $LAMBDA successfully updated at $MODIFIED"
           done

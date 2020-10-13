@@ -2,14 +2,17 @@ const fs = require("fs");
 const path = require("path");
 const Dotenv = require("dotenv-webpack");
 
-const extensions = fs.readdirSync("./src/lambdas/");
-const entry = Object.fromEntries(
-  extensions.map((e) => [e.substring(0, e.length - 3), `./src/lambdas/${e}`])
-);
+const buildEntry = (dir) => {
+  const extensions = fs.readdirSync(`./src/${dir}/`);
+  const entry = Object.fromEntries(
+    extensions.map((e) => [e.substring(0, e.length - 3), `./src/${dir}/${e}`])
+  );
+  return entry;
+};
 
-module.exports = {
+module.exports = (env) => ({
   target: "node",
-  entry,
+  entry: buildEntry(env.dir || "lambdas"),
   resolve: {
     extensions: [".ts", ".js"],
   },
@@ -34,4 +37,4 @@ module.exports = {
       systemvars: true,
     }),
   ],
-};
+});
