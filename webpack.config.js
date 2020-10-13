@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const Dotenv = require("dotenv-webpack");
 
 const extensions = fs.readdirSync("./src/entries/");
 const entry = Object.fromEntries(
@@ -24,4 +25,10 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    new Dotenv({
+      path: ".env.local",
+      systemvars: true,
+    }),
+  ],
 };
