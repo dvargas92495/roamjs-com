@@ -21,6 +21,15 @@ jobs:
         run: npm run build:pr
       - name: Upload
         run: aws s3 sync build s3://roamjs.com/${{github.event.number}}
+      - name: Build
+        run: npm run build:pr
+        env:
+          IS_LEGACY: true
+      - name: Upload Old
+        run: aws s3 sync build s3://roam.davidvargas.me/${{github.event.number}}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.OLD_AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.OLD_AWS_ACCESS_SECRET }}
       - name: Invalidate Cache
         run: |
           CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[*].{Alias:Aliases.Items[0],Id:Id}[?Alias=='roamjs.com'].Id" --output text)

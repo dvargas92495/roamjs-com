@@ -2,6 +2,12 @@ import userEvent from "@testing-library/user-event";
 import { waitFor } from "@testing-library/dom";
 import { getAttrConfigFromQuery } from "roam-client";
 
+if (process.env.IS_LEGACY) {
+  window.alert(
+    'Hey! Thanks for using extensions from roam.davidvargas.me! I am currently migrating the extensions to roamjs.com. Please edit the src in your roam/js block, replacing "roam.davidvargas.me" with "roamjs.com"'
+  );
+}
+
 const waitForString = (text: string) =>
   waitFor(
     () => {
