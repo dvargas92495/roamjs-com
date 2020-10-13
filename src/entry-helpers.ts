@@ -11,7 +11,6 @@ const waitForString = (text: string) =>
           `Textarea is undefined. Active Element ${textArea.tagName}. Input text ${text}`
         );
       }
-
       let expectedTextWithoutPeriod = text.replace(/\./g, "").toUpperCase();
       let actualTextWithoutPeriod = textArea.value
         .replace(/\./g, "")
