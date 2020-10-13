@@ -1,7 +1,14 @@
 import format from "date-fns/format";
-import { asyncType, genericError, getConfigFromPage, parseRoamDate } from "roam-client";
+import {
+  asyncType,
+  genericError,
+  getConfigFromPage,
+  parseRoamDate,
+  pushBullets,
+} from "roam-client";
 import { addButtonListener } from "../entry-helpers";
 import axios from "axios";
+import subDays from "date-fns/subDays";
 
 const OURA_COMMAND = "Import Oura Ring";
 
@@ -23,12 +30,28 @@ const importGoogleCalendar = async (
     return;
   }
   const dateToUse = isNaN(dateFromPage.valueOf()) ? new Date() : dateFromPage;
-  const formattedDate = format(dateToUse, "yyyy-MM-dd");
+  const formattedDate = format(subDays(dateToUse, 1), "yyyy-MM-dd");
   axios
     .get(
       `https://api.ouraring.com/v1/sleep?start=${formattedDate}&end=${formattedDate}&access_token=${token}`
     )
-    .then((r) => console.log(r.data))
+    .then(async (r) => {
+      const sleep = r.data[0];
+      if (!sleep) {
+        await asyncType(
+          `There is no sleep data available for ${formattedDate}`
+        );
+        return;
+      }
+      const { bedtime_start, bedtime_end } = sleep;
+      const formattedStart = format(new Date(bedtime_start), "hh:mm");
+      const formattedEnd = format(new Date(bedtime_end), "hh:mm");
+      const bullets = [
+          `Bedtime Start:: ${formattedStart}`,
+          `Bedtime End:: ${formattedEnd}`,
+      ];
+      await pushBullets(bullets);
+    })
     .catch(genericError);
 };
 
