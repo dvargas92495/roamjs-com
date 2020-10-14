@@ -4,7 +4,9 @@ The Attr Tables extensions adds various features to attribute tables.
 
 ### Usage
 
-This script is not configurable.
+The script supports the following configuration attributes, to be added in the `[[roam/js/attr-tables]]` page:
+
+- `Max Sorts` - (Optional) The maximum number of sorts that any table should support. When the max gets hit, the new sort column replaces the sort column of lowest priority.
 
 Whenever you create an Attribute Table, there will be a new sort icon next to each of the column headers. Clicking the sort icon will toggle between three states: Neutral, Ascending, and Descending.
 

@@ -110,6 +110,7 @@ const observerCallback = () => {
     if (t.getElementsByClassName("bp3-icon").length > 0) {
       return;
     }
+    const config = getConfigFromBlock(t);
     const ths = Array.from(t.getElementsByTagName("th"));
     const sortConfig: SortConfig = {};
     ths.forEach((th, index) => {
@@ -118,9 +119,10 @@ const observerCallback = () => {
       th.appendChild(sortButton);
       sortButton.onclick = () => {
         const pageConfig = getConfigFromPage("roam/js/attr-tables");
-        const maxSorts = isNaN(pageConfig["Max Sorts"])
+        const maxSortsConfig = config["Max Sorts"] || pageConfig["Max Sorts"];
+        const maxSorts = isNaN(maxSortsConfig)
           ? 0
-          : parseInt(pageConfig["Max Sorts"]);
+          : parseInt(maxSortsConfig);
         const icon = sortButton.children[0];
         const key = getKey(th);
         const values = Object.values(sortConfig);
@@ -150,7 +152,6 @@ const observerCallback = () => {
         sortTable(t, sortConfig);
       };
     });
-    const config = getConfigFromBlock(t);
     const defaultSort = (config["Default Sort"]
       ?.split(",")
       ?.map((s: string) => s.trim()) || []) as string[];
