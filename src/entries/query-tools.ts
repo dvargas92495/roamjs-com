@@ -12,6 +12,11 @@ const menuItemCallback = (
   sortContainer: Element,
   sortBy: (a: string, b: string) => number
 ) => () => {
+  const blockConfig = getConfigFromBlock(sortContainer as HTMLDivElement);
+  const pageConfig = getConfigFromPage("roam/js/query-tools");
+  const sortByBlocks =
+    !!blockConfig["Sort Blocks"] || !!pageConfig["Sort Blocks"];
+
   const refContainer = sortContainer.getElementsByClassName(
     "refs-by-page-view"
   )[0];
@@ -19,16 +24,45 @@ const menuItemCallback = (
     refContainer.getElementsByClassName("rm-ref-page-view")
   );
   refsInView.forEach((r) => refContainer.removeChild(r));
-  refsInView.sort((a, b) => {
-    const aTitle = a.getElementsByClassName(
-      "rm-ref-page-view-title"
-    )[0] as HTMLDivElement;
-    const bTitle = b.getElementsByClassName(
-      "rm-ref-page-view-title"
-    )[0] as HTMLDivElement;
-    return sortBy(aTitle.textContent, bTitle.textContent);
-  });
-  refsInView.forEach((r) => refContainer.appendChild(r));
+  if (sortByBlocks) {
+    const blocksInView = refsInView.flatMap((r) =>
+      r.childElementCount === 1
+        ? [r]
+        : Array.from(r.children).map((c) => {
+            const refClone = r.cloneNode() as HTMLDivElement;
+            Array.from(refClone.lastElementChild.children).forEach((cc) => {
+              const ccDiv = cc as HTMLDivElement;
+              if (cc.getElementsByClassName("roam-block")[0]?.id === c.id) {
+                ccDiv.style.display = "flex";
+              } else {
+                ccDiv.style.display = "none";
+              }
+            });
+            return refClone;
+          })
+    );
+    blocksInView.sort((a, b) => {
+      const aTitle = a.getElementsByClassName(
+        "roam-block"
+      )[0] as HTMLDivElement;
+      const bTitle = b.getElementsByClassName(
+        "roam-block"
+      )[0] as HTMLDivElement;
+      return sortBy(aTitle.textContent, bTitle.textContent);
+    })
+    blocksInView.forEach((r) => refContainer.appendChild(r));
+  } else {
+    refsInView.sort((a, b) => {
+      const aTitle = a.getElementsByClassName(
+        "rm-ref-page-view-title"
+      )[0] as HTMLDivElement;
+      const bTitle = b.getElementsByClassName(
+        "rm-ref-page-view-title"
+      )[0] as HTMLDivElement;
+      return sortBy(aTitle.textContent, bTitle.textContent);
+    });
+    refsInView.forEach((r) => refContainer.appendChild(r));
+  }
 };
 
 const sortCallbacks = {
@@ -97,15 +131,20 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
 
 const randomize = (q: HTMLDivElement) => {
   const config = getConfigFromBlock(q);
-  const numRandomResults = Math.max(isNaN(config["Random"]) ? 1 : parseInt(config["Random"]), 1);
+  const numRandomResults = Math.max(
+    isNaN(config["Random"]) ? 1 : parseInt(config["Random"]),
+    1
+  );
   const refsByPageView = q.lastElementChild;
   const allChildren = Array.from(q.getElementsByClassName("rm-reference-item"));
-  const selected = allChildren.sort(() => 0.5 - Math.random()).slice(0, numRandomResults);
+  const selected = allChildren
+    .sort(() => 0.5 - Math.random())
+    .slice(0, numRandomResults);
   Array.from(refsByPageView.children).forEach((c: HTMLElement) => {
-    if (selected.find(s => c.contains(s))) {
+    if (selected.find((s) => c.contains(s))) {
       const itemContainer = c.lastElementChild;
       Array.from(itemContainer.children).forEach((cc: HTMLElement) => {
-        if (selected.find(s => cc.contains(s))) {
+        if (selected.find((s) => cc.contains(s))) {
           cc.style.display = "flex";
           c.style.display = "block";
         } else {
