@@ -2,17 +2,27 @@ import userEvent from "@testing-library/user-event";
 import { asyncType } from "roam-client";
 import { createObserver } from "../entry-helpers";
 
+const TODONT_CLASSNAME = "roamjs-todont";
+const css = document.createElement('style');
+css.textContent = `.bp3-button.bp3-small.${TODONT_CLASSNAME} {
+    background-color: red;
+    border-radius: 0;
+    padding: 0;
+    min-height: 0;
+    min-width: 0;
+    height: 16px;
+}`;
+document.getElementsByTagName('head')[0].appendChild(css);
+
 const styleArchivedButtons = (node: HTMLElement) => {
   const buttons = node.getElementsByTagName("button");
   Array.from(buttons).forEach((button) => {
-    if (button.innerText === "ARCHIVED") {
-      button.style.cssText = "background-color:red !important";
+    if (
+      button.innerText === "ARCHIVED" &&
+      button.className.indexOf(TODONT_CLASSNAME) < 0
+    ) {
       button.innerText = "x";
-      button.style.borderRadius = "0";
-      button.style.padding = "0";
-      button.style.minHeight = "0";
-      button.style.minWidth = "0";
-      button.style.height = "16px";
+      button.className = `${button.className} ${TODONT_CLASSNAME}`;
     }
   });
 };
