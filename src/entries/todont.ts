@@ -4,10 +4,8 @@ import { createObserver } from "../entry-helpers";
 
 const TODONT_CLASSNAME = "roamjs-todont";
 const css = document.createElement('style');
-css.textContent = `.${TODONT_CLASSNAME} {\n    background-color: red !important;\n    borderRadius: 0;\n    padding: 0;\n    minHeight: 0;\n    minWidth: 0;\n    height: 16px;\n}`;
-const head = document.getElementsByTagName('head')[0];
-const firstLink = Array.from(head.children).find(c => c.tagName === 'LINK');
-head.insertBefore(css, firstLink);
+css.textContent = `.bp3-button.bp3-small.${TODONT_CLASSNAME} {\n    background-color: red !important;\n    borderRadius: 0;\n    padding: 0;\n    minHeight: 0;\n    minWidth: 0;\n    height: 16px;\n}`;
+document.getElementsByTagName('head')[0].appendChild(css);
 
 const styleArchivedButtons = (node: HTMLElement) => {
   const buttons = node.getElementsByTagName("button");
