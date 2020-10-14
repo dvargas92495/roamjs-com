@@ -7,8 +7,8 @@ on:
       - "src/lambda-helpers.ts"
 
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.LAMBDA_AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.LAMBDA_AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.CRON_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.CRON_AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: us-east-1 
 
 jobs:
