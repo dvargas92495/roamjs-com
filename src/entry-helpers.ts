@@ -2,13 +2,13 @@ import userEvent from "@testing-library/user-event";
 import { waitFor } from "@testing-library/dom";
 import { getAttrConfigFromQuery } from "roam-client";
 
-declare global{
+declare global {
   interface Window {
     depot: {
       roamjs: {
         alerted: boolean;
-      }
-    }
+      };
+    };
   }
 }
 
@@ -16,10 +16,10 @@ if (process.env.IS_LEGACY && !window.depot?.roamjs?.alerted) {
   window.alert(
     'Hey! Thanks for using extensions from roam.davidvargas.me! I\'m currently migrating the extensions to roamjs.com. Please edit the src in your roam/js block, replacing "roam.davidvargas.me/master" with "roamjs.com"'
   );
-  if (!window.depot){
-    window.depot = {roamjs:{alerted: true}};
-  } else if(!window.depot.roamjs) {
-    window.depot.roamjs = {alerted: true};
+  if (!window.depot) {
+    window.depot = { roamjs: { alerted: true } };
+  } else if (!window.depot.roamjs) {
+    window.depot.roamjs = { alerted: true };
   } else {
     window.depot.roamjs.alerted = true;
   }
@@ -336,14 +336,14 @@ export const createSortIcons = (
 
 export const getCreatedTimeByTitle = (title: string) => {
   const result = window.roamAlphaAPI.q(
-    `[:find (pull ?e [:create/time]) :where [?e :node/title "${title}"]]`
+    `[:find (pull ?e [:create/time]) :where [?e :node/title "${title.replace(/"/g, '\\"')}"]]`
   )[0][0]?.time;
   return result || getEditTimeByTitle(title);
 };
 
 export const getEditTimeByTitle = (title: string) =>
   window.roamAlphaAPI.q(
-    `[:find (pull ?e [:edit/time]) :where [?e :node/title "${title}"]]`
+    `[:find (pull ?e [:edit/time]) :where [?e :node/title "${title.replace(/"/g, '\\"')}"]]`
   )[0][0]?.time;
 
 export const getConfigFromBlock = (container: HTMLElement) => {
@@ -357,3 +357,18 @@ export const getConfigFromBlock = (container: HTMLElement) => {
     `[:find (pull ?e [*]) :where [?e :block/uid "${blockId}"]]`
   );
 };
+
+export const getTextByBlockUid = (uid: string) =>
+  window.roamAlphaAPI.q(
+    `[:find (pull ?e [:block/string]) :where [?e :block/uid "${uid}"]]`
+  )[0][0]?.string;
+
+export const getCreateTimeByBlockUid = (uid: string) =>
+  window.roamAlphaAPI.q(
+    `[:find (pull ?e [:create/time]) :where [?e :block/uid "${uid}"]]`
+  )[0][0]?.time;
+
+export const getEditTimeByBlockUid = (uid: string) =>
+  window.roamAlphaAPI.q(
+    `[:find (pull ?e [:edit/time]) :where [?e :block/uid "${uid}"]]`
+  )[0][0]?.time;
