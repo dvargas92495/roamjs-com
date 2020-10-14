@@ -75,8 +75,8 @@ const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
             if (!isNaN(aDate) && !isNaN(bDate)) {
               return aDate - bDate;
             }
-            const aNum = parseInt(aData);
-            const bNum = parseInt(bData);
+            const aNum = parseInt(aData.replace(/,/g, ''));
+            const bNum = parseInt(bData.replace(/,/g, ''));
             if (!isNaN(aNum) && !isNaN(bNum)) {
               return aNum - bNum;
             }
