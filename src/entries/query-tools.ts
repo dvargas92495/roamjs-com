@@ -12,15 +12,13 @@ import {
 } from "../entry-helpers";
 import { getConfigFromPage, parseRoamDate } from "roam-client";
 
-
-
 let isSortByBlocks = false;
 
 const menuItemCallback = (
   sortContainer: Element,
   sortBy: (a: string, b: string) => number
 ) => () => {
-  const blockConfig = getConfigFromBlock(container as HTMLDivElement);
+  const blockConfig = getConfigFromBlock(sortContainer as HTMLDivElement);
   const pageConfig = getConfigFromPage("roam/js/query-tools");
   isSortByBlocks = !!blockConfig["Sort Blocks"] || !!pageConfig["Sort Blocks"];
   const refContainer = sortContainer.getElementsByClassName(
@@ -79,37 +77,37 @@ const menuItemCallback = (
 const sortCallbacks = {
   "Page Title": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
-    isSortByBlocks
+      isSortByBlocks
         ? getTextByBlockUid(a).localeCompare(getTextByBlockUid(b))
         : a.localeCompare(b)
     ),
   "Page Title Descending": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
-    isSortByBlocks
+      isSortByBlocks
         ? getTextByBlockUid(b).localeCompare(getTextByBlockUid(a))
         : b.localeCompare(a)
     ),
   "Created Date": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
-    isSortByBlocks
+      isSortByBlocks
         ? getCreateTimeByBlockUid(a) - getCreateTimeByBlockUid(b)
         : getCreatedTimeByTitle(a) - getCreatedTimeByTitle(b)
     ),
   "Created Date Descending": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
-    isSortByBlocks
+      isSortByBlocks
         ? getCreateTimeByBlockUid(b) - getCreateTimeByBlockUid(a)
         : getCreatedTimeByTitle(b) - getCreatedTimeByTitle(a)
     ),
   "Edited Date": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
-    isSortByBlocks
+      isSortByBlocks
         ? getEditTimeByBlockUid(a) - getEditTimeByBlockUid(b)
         : getEditTimeByTitle(a) - getEditTimeByTitle(b)
     ),
   "Edited Date Descending": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
-    isSortByBlocks
+      isSortByBlocks
         ? getEditTimeByBlockUid(b) - getEditTimeByBlockUid(a)
         : getEditTimeByTitle(b) - getEditTimeByTitle(a)
     ),
