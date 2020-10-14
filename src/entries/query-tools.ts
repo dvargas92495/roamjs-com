@@ -29,7 +29,7 @@ const menuItemCallback = (
       r.childElementCount === 1
         ? [r]
         : Array.from(r.children).map((c) => {
-            const refClone = r.cloneNode() as HTMLDivElement;
+            const refClone = r.cloneNode(true) as HTMLDivElement;
             Array.from(refClone.lastElementChild.children).forEach((cc) => {
               const ccDiv = cc as HTMLDivElement;
               if (cc.getElementsByClassName("roam-block")[0]?.id === c.id) {

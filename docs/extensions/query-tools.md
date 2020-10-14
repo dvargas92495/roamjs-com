@@ -4,7 +4,9 @@ The Query Tools extension adds various tools on top of traditional Roam queries 
 
 ### Usage
 
-The script is not configurable.
+The script supports the following configuration attributes, to be added in the `[[roam/js/query-tools]]` page:
+
+- `Sort Blocks` - (Optional) If set to 'True', sort the query results by blocks instead of pages.
 
 On expanded queries, there will be a sort icon that appears next to the results text. Clicking on the sort icon will make a sort menu visible to the user with the following options:
 
@@ -18,6 +20,8 @@ On expanded queries, there will be a sort icon that appears next to the results 
 - Sort By Daily Note Descending - This will sort all the query results in descending order by Daily Note, followed by created date of non-daily note pages.
 
 To persist a particular sort on a query, create a child block with the `Default Sort` attribute. Valid values include each of the options above, minus the sort by prefix. For example, `Default Sort:: Page Title`.
+
+To configure sorting by blocks on a single query instead of on all queries in your DB, add the `Sort Blocks` attribute as a child to the specific query.
 
 ### Randomization
 
