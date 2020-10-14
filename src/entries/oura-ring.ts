@@ -52,8 +52,8 @@ const importOuraRing = async (_: any, blockUid: string, parentUid: string) => {
     bullets.push(`There is no sleep data available for ${formattedDate}`);
   } else {
     const { bedtime_start, bedtime_end } = sleep;
-    const formattedStart = format(new Date(bedtime_start), "hh:mm");
-    const formattedEnd = format(new Date(bedtime_end), "hh:mm");
+    const formattedStart = format(new Date(bedtime_start), "hh:mm:ss");
+    const formattedEnd = format(new Date(bedtime_end), "hh:mm:ss");
     bullets.push(
       `Bedtime Start:: ${formattedStart}`,
       `Bedtime End:: ${formattedEnd}`,
@@ -71,8 +71,8 @@ const importOuraRing = async (_: any, blockUid: string, parentUid: string) => {
     bullets.push(`There is no activity data available for ${formattedDate}`);
   } else {
     const { day_start, day_end } = activity;
-    const formattedStart = format(new Date(day_start), "hh:mm");
-    const formattedEnd = format(new Date(day_end), "hh:mm");
+    const formattedStart = format(new Date(day_start), "hh:mm:ss");
+    const formattedEnd = format(new Date(day_end), "hh:mm:ss");
     bullets.push(
       `Day Start:: ${formattedStart}`,
       `Day End:: ${formattedEnd}`,

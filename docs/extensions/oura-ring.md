@@ -13,8 +13,21 @@ The script supports the following configuration attributes, to be added in the `
 Create a button by typing `{{import oura ring}}` into a page. If the page is a Daily note page, it will query the day before the page title, since you usually want to track last night's sleep. Otherwise, it will query yesterday's data by default. It will output the following text:
 
 ```
-Bedtime Start:: hh:mm
-Bedtime End:: hh:mm
+Bedtime Start:: hh:mm:ss
+Bedtime End:: hh:mm:ss
+Sleep Duration:: hh:mm:ss
+Total Sleep:: hh:mm:ss
+Total Awake:: hh:mm:ss
+Light Sleep:: hh:mm:ss
+Rem Sleep:: hh:mm:ss
+Deep Sleep:: hh:mm:ss
+Day Start:: hh:mm:ss
+Day End:: hh:mm:ss
+Low Activity:: hh:mm:ss
+Medium Activity:: hh:mm:ss
+High Activity:: hh:mm:ss
+Rest Activity:: hh:mm:ss
+Readiness Score:: hh:mm:ss
 ```
 
 ### Installation
