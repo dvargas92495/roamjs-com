@@ -336,14 +336,14 @@ export const createSortIcons = (
 
 export const getCreatedTimeByTitle = (title: string) => {
   const result = window.roamAlphaAPI.q(
-    `[:find (pull ?e [:create/time]) :where [?e :node/title "${title.replace(/"/g, '&quot;')}"]]`
+    `[:find (pull ?e [:create/time]) :where [?e :node/title "${title.replace(/"/g, '\\"')}"]]`
   )[0][0]?.time;
   return result || getEditTimeByTitle(title);
 };
 
 export const getEditTimeByTitle = (title: string) =>
   window.roamAlphaAPI.q(
-    `[:find (pull ?e [:edit/time]) :where [?e :node/title "${title.replace(/"/g, '&quot;')}"]]`
+    `[:find (pull ?e [:edit/time]) :where [?e :node/title "${title.replace(/"/g, '\\"')}"]]`
   )[0][0]?.time;
 
 export const getConfigFromBlock = (container: HTMLElement) => {
