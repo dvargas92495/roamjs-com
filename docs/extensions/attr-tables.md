@@ -18,6 +18,8 @@ Because attribute tables are view only, navigating away from the page will wipe 
 Default Sort:: foo=Asc, bar=Des
 ```
 
+The `Max Sorts` DB level configuration could also be applied at a table level, by adding the attribute as a child of the table.
+
 ### Installation
 
 ```javascript
