@@ -16,6 +16,7 @@ css.innerText = `
     height: 16px;
   }
 `;
+document.getElementsByTagName('head')[0].appendChild(css);
 
 const styleArchivedButtons = (node: HTMLElement) => {
   const buttons = node.getElementsByTagName("button");
