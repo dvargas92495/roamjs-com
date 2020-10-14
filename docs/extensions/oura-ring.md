@@ -1,5 +1,3 @@
-## UNDER DEVELOPMENT
-
 ## Oura Ring to Roam Integration
 
 The Oura Ring to Roam Integration allows users to import their daily summaries on a given day into their daily notes page. The name of the script is `oura-ring`.
