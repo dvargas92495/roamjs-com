@@ -26,13 +26,16 @@ const menuItemCallback = (
   refsInView.forEach((r) => refContainer.removeChild(r));
   if (sortByBlocks) {
     const blocksInView = refsInView.flatMap((r) =>
-      r.childElementCount === 1
+      r.lastElementChild.childElementCount === 1
         ? [r]
-        : Array.from(r.children).map((c) => {
+        : Array.from(r.lastElementChild.children).map((c) => {
             const refClone = r.cloneNode(true) as HTMLDivElement;
             Array.from(refClone.lastElementChild.children).forEach((cc) => {
               const ccDiv = cc as HTMLDivElement;
-              if (cc.getElementsByClassName("roam-block")[0]?.id === c.id) {
+              if (
+                cc.getElementsByClassName("roam-block")[0]?.id ===
+                c.getElementsByClassName("roam-block")[0]?.id
+              ) {
                 ccDiv.style.display = "flex";
               } else {
                 ccDiv.style.display = "none";
@@ -49,7 +52,7 @@ const menuItemCallback = (
         "roam-block"
       )[0] as HTMLDivElement;
       return sortBy(aTitle.textContent, bTitle.textContent);
-    })
+    });
     blocksInView.forEach((r) => refContainer.appendChild(r));
   } else {
     refsInView.sort((a, b) => {
