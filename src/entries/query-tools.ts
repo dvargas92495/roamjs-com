@@ -12,16 +12,17 @@ import {
 } from "../entry-helpers";
 import { getConfigFromPage, parseRoamDate } from "roam-client";
 
-const isSortByBlocks = (container: Element) => {
-  const blockConfig = getConfigFromBlock(container as HTMLDivElement);
-  const pageConfig = getConfigFromPage("roam/js/query-tools");
-  return !!blockConfig["Sort Blocks"] || !!pageConfig["Sort Blocks"];
-};
+
+
+let isSortByBlocks = false;
 
 const menuItemCallback = (
   sortContainer: Element,
   sortBy: (a: string, b: string) => number
 ) => () => {
+  const blockConfig = getConfigFromBlock(container as HTMLDivElement);
+  const pageConfig = getConfigFromPage("roam/js/query-tools");
+  isSortByBlocks = !!blockConfig["Sort Blocks"] || !!pageConfig["Sort Blocks"];
   const refContainer = sortContainer.getElementsByClassName(
     "refs-by-page-view"
   )[0];
@@ -29,7 +30,7 @@ const menuItemCallback = (
     refContainer.getElementsByClassName("rm-ref-page-view")
   );
   refsInView.forEach((r) => refContainer.removeChild(r));
-  if (isSortByBlocks(sortContainer)) {
+  if (isSortByBlocks) {
     const blocksInView = refsInView.flatMap((r) =>
       r.lastElementChild.childElementCount === 1
         ? [r]
@@ -78,49 +79,48 @@ const menuItemCallback = (
 const sortCallbacks = {
   "Page Title": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
-      isSortByBlocks(refContainer)
+    isSortByBlocks
         ? getTextByBlockUid(a).localeCompare(getTextByBlockUid(b))
         : a.localeCompare(b)
     ),
   "Page Title Descending": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
-      isSortByBlocks(refContainer)
+    isSortByBlocks
         ? getTextByBlockUid(b).localeCompare(getTextByBlockUid(a))
         : b.localeCompare(a)
     ),
   "Created Date": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
-      isSortByBlocks(refContainer)
+    isSortByBlocks
         ? getCreateTimeByBlockUid(a) - getCreateTimeByBlockUid(b)
         : getCreatedTimeByTitle(a) - getCreatedTimeByTitle(b)
     ),
   "Created Date Descending": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
-      isSortByBlocks(refContainer)
+    isSortByBlocks
         ? getCreateTimeByBlockUid(b) - getCreateTimeByBlockUid(a)
         : getCreatedTimeByTitle(b) - getCreatedTimeByTitle(a)
     ),
   "Edited Date": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
-      isSortByBlocks(refContainer)
+    isSortByBlocks
         ? getEditTimeByBlockUid(a) - getEditTimeByBlockUid(b)
         : getEditTimeByTitle(a) - getEditTimeByTitle(b)
     ),
   "Edited Date Descending": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
-      isSortByBlocks(refContainer)
+    isSortByBlocks
         ? getEditTimeByBlockUid(b) - getEditTimeByBlockUid(a)
         : getEditTimeByTitle(b) - getEditTimeByTitle(a)
     ),
   "Daily Note": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) => {
-      const sortByBlocks = isSortByBlocks(refContainer);
-      const aText = sortByBlocks ? getTextByBlockUid(a) : a;
-      const bText = sortByBlocks ? getTextByBlockUid(b) : b;
+      const aText = isSortByBlocks ? getTextByBlockUid(a) : a;
+      const bText = isSortByBlocks ? getTextByBlockUid(b) : b;
       const aDate = parseRoamDate(aText).valueOf();
       const bDate = parseRoamDate(bText).valueOf();
       if (isNaN(aDate) && isNaN(bDate)) {
-        return sortByBlocks
+        return isSortByBlocks
           ? getCreateTimeByBlockUid(a) - getCreateTimeByBlockUid(b)
           : getCreatedTimeByTitle(a) - getCreatedTimeByTitle(b);
       } else if (isNaN(aDate)) {
@@ -133,13 +133,12 @@ const sortCallbacks = {
     }),
   "Daily Note Descending": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) => {
-      const sortByBlocks = isSortByBlocks(refContainer);
-      const aText = sortByBlocks ? getTextByBlockUid(a) : a;
-      const bText = sortByBlocks ? getTextByBlockUid(b) : b;
+      const aText = isSortByBlocks ? getTextByBlockUid(a) : a;
+      const bText = isSortByBlocks ? getTextByBlockUid(b) : b;
       const aDate = parseRoamDate(aText).valueOf();
       const bDate = parseRoamDate(bText).valueOf();
       if (isNaN(aDate) && isNaN(bDate)) {
-        return sortByBlocks
+        return isSortByBlocks
           ? getCreateTimeByBlockUid(b) - getCreateTimeByBlockUid(a)
           : getCreatedTimeByTitle(b) - getCreatedTimeByTitle(a);
       } else if (isNaN(aDate)) {
