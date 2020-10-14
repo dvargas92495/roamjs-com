@@ -25,7 +25,9 @@ const twitterReferencesListener = async (
     .textContent;
 
   const twitterSearch = axios.get(
-    `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/twitter-search?username=${username}&query=${pageTitle}`
+    `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/twitter-search?username=${username}&query=${encodeURIComponent(
+      pageTitle
+    )}`
   );
 
   twitterSearch
