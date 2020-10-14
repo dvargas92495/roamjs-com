@@ -30,7 +30,9 @@ const menuItemCallback = (
   refsInView.forEach((r) => refContainer.removeChild(r));
   if (isSortByBlocks) {
     const blocksInView = refsInView.flatMap((r) =>
-      r.lastElementChild.childElementCount === 1
+      Array.from(r.lastElementChild.children).filter(
+        (c) => (c as HTMLDivElement).style.display !== "none"
+      ).length === 1
         ? [r]
         : Array.from(r.lastElementChild.children).map((c) => {
             const refClone = r.cloneNode(true) as HTMLDivElement;
