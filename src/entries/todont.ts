@@ -4,7 +4,14 @@ import { createObserver } from "../entry-helpers";
 
 const TODONT_CLASSNAME = "roamjs-todont";
 const css = document.createElement('style');
-css.textContent = `.bp3-button.bp3-small.${TODONT_CLASSNAME} {\n    background-color: red !important;\n    borderRadius: 0;\n    padding: 0;\n    minHeight: 0;\n    minWidth: 0;\n    height: 16px;\n}`;
+css.textContent = `.bp3-button.bp3-small.${TODONT_CLASSNAME} {
+    background-color: red;
+    border-radius: 0;
+    padding: 0;
+    min-height: 0;
+    min-width: 0;
+    height: 16px;
+}`;
 document.getElementsByTagName('head')[0].appendChild(css);
 
 const styleArchivedButtons = (node: HTMLElement) => {
