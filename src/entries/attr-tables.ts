@@ -3,7 +3,7 @@ import {
   createObserver,
   getConfigFromBlock,
 } from "../entry-helpers";
-import { parseRoamDate } from "roam-client";
+import { getConfigFromPage, parseRoamDate } from "roam-client";
 
 type SortConfig = {
   [column: string]: {
@@ -75,8 +75,8 @@ const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
             if (!isNaN(aDate) && !isNaN(bDate)) {
               return aDate - bDate;
             }
-            const aNum = parseInt(aData.replace(/,/g, ''));
-            const bNum = parseInt(bData.replace(/,/g, ''));
+            const aNum = parseInt(aData.replace(/,/g, ""));
+            const bNum = parseInt(bData.replace(/,/g, ""));
             if (!isNaN(aNum) && !isNaN(bNum)) {
               return aNum - bNum;
             }
@@ -87,8 +87,8 @@ const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
             if (!isNaN(aDate) && !isNaN(bDate)) {
               return bDate - aDate;
             }
-            const aNum = parseInt(aData.replace(/,/g, ''));
-            const bNum = parseInt(bData.replace(/,/g, ''));
+            const aNum = parseInt(aData.replace(/,/g, ""));
+            const bNum = parseInt(bData.replace(/,/g, ""));
             if (!isNaN(aNum) && !isNaN(bNum)) {
               return bNum - aNum;
             }
@@ -110,6 +110,7 @@ const observerCallback = () => {
     if (t.getElementsByClassName("bp3-icon").length > 0) {
       return;
     }
+    const config = getConfigFromBlock(t);
     const ths = Array.from(t.getElementsByTagName("th"));
     const sortConfig: SortConfig = {};
     ths.forEach((th, index) => {
@@ -117,28 +118,40 @@ const observerCallback = () => {
       const sortButton = createIconButton("sort");
       th.appendChild(sortButton);
       sortButton.onclick = () => {
+        const pageConfig = getConfigFromPage("roam/js/attr-tables");
+        const maxSortsConfig = config["Max Sorts"] || pageConfig["Max Sorts"];
+        const maxSorts = isNaN(maxSortsConfig)
+          ? 0
+          : parseInt(maxSortsConfig);
         const icon = sortButton.children[0];
         const key = getKey(th);
+        const values = Object.values(sortConfig);
         if (icon.className.indexOf("bp3-icon-sort-alphabetical-desc") > -1) {
           sortConfig[key].asc = undefined;
           const oldPriority = sortConfig[key].priority;
           const maxPriority = getMaxPriority(sortConfig);
-          const values = Object.values(sortConfig);
           for (var p = oldPriority + 1; p <= maxPriority; p++) {
-            const config = values.find((v) => v.priority === p);
-            config.priority--;
+            const value = values.find((v) => v.priority === p);
+            value.priority--;
           }
           sortConfig[key].priority = 0;
         } else if (icon.className.indexOf("bp3-icon-sort-alphabetical") > -1) {
           sortConfig[key].asc = false;
         } else if (icon.className.indexOf("bp3-icon-sort") > -1) {
           sortConfig[key].asc = true;
-          sortConfig[key].priority = getMaxPriority(sortConfig) + 1;
+          const maxPriority = getMaxPriority(sortConfig);
+          if (maxSorts > 0 && maxSorts === maxPriority) {
+            const value = values.find((v) => v.priority === maxPriority);
+            value.asc = undefined;
+            value.priority = 0
+            sortConfig[key].priority = maxPriority
+          } else {
+            sortConfig[key].priority = maxPriority + 1;
+          }
         }
         sortTable(t, sortConfig);
       };
     });
-    const config = getConfigFromBlock(t);
     const defaultSort = (config["Default Sort"]
       ?.split(",")
       ?.map((s: string) => s.trim()) || []) as string[];
