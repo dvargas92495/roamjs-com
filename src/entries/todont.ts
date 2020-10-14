@@ -6,16 +6,7 @@ const TODONT_CLASSNAME = "roamjs-todont";
 const css = document.createElement("link");
 css.type = "text/css";
 css.rel = "stylesheet";
-css.innerText = `
-  .${TODONT_CLASSNAME} {
-    background-color: red !important;
-    borderRadius: 0;
-    padding: 0;
-    minHeight: 0;
-    minWidth: 0;
-    height: 16px;
-  }
-`;
+css.innerText = `.${TODONT_CLASSNAME} {\n    background-color: red !important;\n    borderRadius: 0;\n    padding: 0;\n    minHeight: 0;\n    minWidth: 0;\n    height: 16px;\n}`;
 document.getElementsByTagName('head')[0].appendChild(css);
 
 const styleArchivedButtons = (node: HTMLElement) => {
