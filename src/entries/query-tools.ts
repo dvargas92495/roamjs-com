@@ -4,19 +4,24 @@ import {
   createSortIcons,
   getConfigFromBlock,
   getCreatedTimeByTitle,
+  getCreateTimeByBlockUid,
+  getEditTimeByBlockUid,
   getEditTimeByTitle,
+  getTextByBlockUid,
+  getUids,
 } from "../entry-helpers";
 import { getConfigFromPage, parseRoamDate } from "roam-client";
+
+const isSortByBlocks = (container: Element) => {
+  const blockConfig = getConfigFromBlock(container as HTMLDivElement);
+  const pageConfig = getConfigFromPage("roam/js/query-tools");
+  return !!blockConfig["Sort Blocks"] || !!pageConfig["Sort Blocks"];
+};
 
 const menuItemCallback = (
   sortContainer: Element,
   sortBy: (a: string, b: string) => number
 ) => () => {
-  const blockConfig = getConfigFromBlock(sortContainer as HTMLDivElement);
-  const pageConfig = getConfigFromPage("roam/js/query-tools");
-  const sortByBlocks =
-    !!blockConfig["Sort Blocks"] || !!pageConfig["Sort Blocks"];
-
   const refContainer = sortContainer.getElementsByClassName(
     "refs-by-page-view"
   )[0];
@@ -24,7 +29,7 @@ const menuItemCallback = (
     refContainer.getElementsByClassName("rm-ref-page-view")
   );
   refsInView.forEach((r) => refContainer.removeChild(r));
-  if (sortByBlocks) {
+  if (isSortByBlocks(sortContainer)) {
     const blocksInView = refsInView.flatMap((r) =>
       r.lastElementChild.childElementCount === 1
         ? [r]
@@ -48,10 +53,12 @@ const menuItemCallback = (
       const aTitle = a.getElementsByClassName(
         "roam-block"
       )[0] as HTMLDivElement;
+      const { blockUid: aUid } = getUids(aTitle);
       const bTitle = b.getElementsByClassName(
         "roam-block"
       )[0] as HTMLDivElement;
-      return sortBy(aTitle.textContent, bTitle.textContent);
+      const { blockUid: bUid } = getUids(bTitle);
+      return sortBy(aUid, bUid);
     });
     blocksInView.forEach((r) => refContainer.appendChild(r));
   } else {
@@ -70,35 +77,52 @@ const menuItemCallback = (
 
 const sortCallbacks = {
   "Page Title": (refContainer: Element) =>
-    menuItemCallback(refContainer, (a, b) => a.localeCompare(b)),
+    menuItemCallback(refContainer, (a, b) =>
+      isSortByBlocks(refContainer)
+        ? getTextByBlockUid(a).localeCompare(getTextByBlockUid(b))
+        : a.localeCompare(b)
+    ),
   "Page Title Descending": (refContainer: Element) =>
-    menuItemCallback(refContainer, (a, b) => b.localeCompare(a)),
+    menuItemCallback(refContainer, (a, b) =>
+      isSortByBlocks(refContainer)
+        ? getTextByBlockUid(b).localeCompare(getTextByBlockUid(a))
+        : b.localeCompare(a)
+    ),
   "Created Date": (refContainer: Element) =>
-    menuItemCallback(
-      refContainer,
-      (a, b) => getCreatedTimeByTitle(a) - getCreatedTimeByTitle(b)
+    menuItemCallback(refContainer, (a, b) =>
+      isSortByBlocks(refContainer)
+        ? getCreateTimeByBlockUid(a) - getCreateTimeByBlockUid(b)
+        : getCreatedTimeByTitle(a) - getCreatedTimeByTitle(b)
     ),
   "Created Date Descending": (refContainer: Element) =>
-    menuItemCallback(
-      refContainer,
-      (a, b) => getCreatedTimeByTitle(b) - getCreatedTimeByTitle(a)
+    menuItemCallback(refContainer, (a, b) =>
+      isSortByBlocks(refContainer)
+        ? getCreateTimeByBlockUid(b) - getCreateTimeByBlockUid(a)
+        : getCreatedTimeByTitle(b) - getCreatedTimeByTitle(a)
     ),
   "Edited Date": (refContainer: Element) =>
-    menuItemCallback(
-      refContainer,
-      (a, b) => getEditTimeByTitle(a) - getEditTimeByTitle(b)
+    menuItemCallback(refContainer, (a, b) =>
+      isSortByBlocks(refContainer)
+        ? getEditTimeByBlockUid(a) - getEditTimeByBlockUid(b)
+        : getEditTimeByTitle(a) - getEditTimeByTitle(b)
     ),
   "Edited Date Descending": (refContainer: Element) =>
-    menuItemCallback(
-      refContainer,
-      (a, b) => getEditTimeByTitle(b) - getEditTimeByTitle(a)
+    menuItemCallback(refContainer, (a, b) =>
+      isSortByBlocks(refContainer)
+        ? getEditTimeByBlockUid(b) - getEditTimeByBlockUid(a)
+        : getEditTimeByTitle(b) - getEditTimeByTitle(a)
     ),
   "Daily Note": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) => {
-      const aDate = parseRoamDate(a).valueOf();
-      const bDate = parseRoamDate(b).valueOf();
+      const sortByBlocks = isSortByBlocks(refContainer);
+      const aText = sortByBlocks ? getTextByBlockUid(a) : a;
+      const bText = sortByBlocks ? getTextByBlockUid(b) : b;
+      const aDate = parseRoamDate(aText).valueOf();
+      const bDate = parseRoamDate(bText).valueOf();
       if (isNaN(aDate) && isNaN(bDate)) {
-        return getCreatedTimeByTitle(a) - getCreatedTimeByTitle(b);
+        return sortByBlocks
+          ? getCreateTimeByBlockUid(a) - getCreateTimeByBlockUid(b)
+          : getCreatedTimeByTitle(a) - getCreatedTimeByTitle(b);
       } else if (isNaN(aDate)) {
         return 1;
       } else if (isNaN(bDate)) {
@@ -109,10 +133,15 @@ const sortCallbacks = {
     }),
   "Daily Note Descending": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) => {
-      const aDate = parseRoamDate(a).valueOf();
-      const bDate = parseRoamDate(b).valueOf();
+      const sortByBlocks = isSortByBlocks(refContainer);
+      const aText = sortByBlocks ? getTextByBlockUid(a) : a;
+      const bText = sortByBlocks ? getTextByBlockUid(b) : b;
+      const aDate = parseRoamDate(aText).valueOf();
+      const bDate = parseRoamDate(bText).valueOf();
       if (isNaN(aDate) && isNaN(bDate)) {
-        return getCreatedTimeByTitle(b) - getCreatedTimeByTitle(a);
+        return sortByBlocks
+          ? getCreateTimeByBlockUid(b) - getCreateTimeByBlockUid(a)
+          : getCreatedTimeByTitle(b) - getCreatedTimeByTitle(a);
       } else if (isNaN(aDate)) {
         return 1;
       } else if (isNaN(bDate)) {
