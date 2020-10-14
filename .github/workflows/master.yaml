@@ -5,6 +5,7 @@ on:
     paths:
       - "src/entries/**"
       - "src/entry-helpers.ts"
+      - "webpack.production.config.js"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY }}
