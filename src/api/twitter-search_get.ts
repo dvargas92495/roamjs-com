@@ -16,7 +16,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
   return wrapAxios(
     axios.get(
-      `https://api.twitter.com/1.1/search/tweets.json?q=from%3A${username}%20${query}%20AND%20-filter:retweets`,
+      `https://api.twitter.com/1.1/search/tweets.json?q=from%3A${username}%20${encodeURIComponent(query)}%20AND%20-filter:retweets`,
       opts
     )
   );
