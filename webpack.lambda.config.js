@@ -12,7 +12,7 @@ const buildEntry = (dir) => {
 
 module.exports = (env) => ({
   target: "node",
-  entry: buildEntry(env.dir || "lambdas"),
+  entry: buildEntry(env.dir || "api"),
   resolve: {
     extensions: [".ts", ".js"],
   },
