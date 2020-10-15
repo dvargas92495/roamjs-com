@@ -25,7 +25,7 @@ jobs:
           aws s3 sync out s3://roamjs.com$APP_BASE_PATH
           for filename in out/*.html; do
               HTML=$(basename "$filename" .html)
-              aws s3 cp $filename s3://roamjs.com$APP_BASE_PATH --content-type "text/html"
+              aws s3 cp $filename s3://roamjs.com$APP_BASE_PATH/$HTML --content-type "text/html"
           done
       - name: Invalidate Cache
         run: |
