@@ -14,7 +14,7 @@ If the text begins with a bullet or dash on a line, the bullet will be stripped,
 
 ## Installation
 
-Insert this as a child of any `[[roam/js]]` block to install the extension.
+Insert this as a child of any `{{[[roam/js]]}}` block to install the extension.
 
 ```javascript
 var old = document.getElementById("image-tagging");

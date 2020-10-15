@@ -19,7 +19,7 @@ In any page, create a `Twitter References` button by typing in `{{twitter refere
 
 ### Installation
 
-Insert this as a child of any `[[roam/js]]` block to install the extension.
+Insert this as a child of any `{{[[roam/js]]}}` block to install the extension.
 
 ```javascript
 var old = document.getElementById("twitter");
