@@ -30,7 +30,7 @@ Readiness Score:: hh:mm:ss
 
 ### Installation
 
-Insert this as a child of any `[[roam/js]]` block to install the extension.
+Insert this as a child of any `{{[[roam/js]]}}` block to install the extension.
 
 ```javascript
 var old = document.getElementById("oura-ring");

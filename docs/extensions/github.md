@@ -29,7 +29,7 @@ In any page, create a `Import Github Cards` button by typing in `{{import github
 
 ### Installation
 
-Insert this as a child of any `[[roam/js]]` block to install the extension.
+Insert this as a child of any `{{[[roam/js]]}}` block to install the extension.
 
 ```javascript
 var old = document.getElementById("github");

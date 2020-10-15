@@ -18,7 +18,7 @@ There's currently a known, yet non-deterministic bug related to periods being re
 
 ## Installation
 
-Insert this as a child of any `[[roam/js]]` block to install the extension.
+Insert this as a child of any `{{[[roam/js]]}}` block to install the extension.
 
 ```javascript
 var old = document.getElementById("page-synonyms");
