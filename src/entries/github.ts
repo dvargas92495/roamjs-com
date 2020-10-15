@@ -1,4 +1,4 @@
-import { addButtonListener } from "../entry-helpers";
+import { addButtonListener, getPageTitle } from "../entry-helpers";
 import {
   asyncType,
   genericError,
@@ -88,9 +88,7 @@ const importGithubProjects = async (
 ) => {
   const config = getConfigFromPage("roam/js/github");
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
-  const pageTitle = document.getElementsByClassName(
-    "rm-title-display"
-  )[0] as HTMLHeadingElement;
+  const pageTitle = getPageTitle(document.activeElement);
   const repoName = buttonConfig.IN ? buttonConfig.IN : pageTitle.innerText;
   const repository = `${username}/${repoName}`;
   const token = config["Token"];
@@ -125,9 +123,7 @@ const importGithubCards = async (
   parentUid: string
 ) => {
   const config = getConfigFromPage("roam/js/github");
-  const pageTitle = document.getElementsByClassName(
-    "rm-title-display"
-  )[0] as HTMLHeadingElement;
+  const pageTitle = getPageTitle(document.activeElement);
   const parentBlocks = window.roamAlphaAPI
     .q(
       `[:find (pull ?parentPage [:node/title]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
