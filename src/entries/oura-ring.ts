@@ -57,9 +57,12 @@ const importOuraRing = async (_: any, blockUid: string, parentUid: string) => {
     bullets.push(
       `Bedtime Start:: ${formattedStart}`,
       `Bedtime End:: ${formattedEnd}`,
+      `Sleep Score:: ${sleep.score}`,
+      `Sleep Efficiency:: ${sleep.efficiency}`,
       `Sleep Duration:: ${secondsToTimeString(sleep.duration)}`,
       `Total Sleep:: ${secondsToTimeString(sleep.total)}`,
       `Total Awake:: ${secondsToTimeString(sleep.awake)}`,
+      `Sleep Latency:: ${secondsToTimeString(sleep.onset_latency)}`,
       `Light Sleep:: ${secondsToTimeString(sleep.light)}`,
       `Rem Sleep:: ${secondsToTimeString(sleep.rem)}`,
       `Deep Sleep:: ${secondsToTimeString(sleep.deep)}`
@@ -76,10 +79,12 @@ const importOuraRing = async (_: any, blockUid: string, parentUid: string) => {
     bullets.push(
       `Day Start:: ${formattedStart}`,
       `Day End:: ${formattedEnd}`,
+      `Activity Score:: ${activity.score}`,
       `Low Activity:: ${secondsToTimeString(activity.low * 60)}`,
       `Medium Activity:: ${secondsToTimeString(activity.medium * 60)}`,
       `High Activity:: ${secondsToTimeString(activity.high * 60)}`,
-      `Rest Activity:: ${secondsToTimeString(activity.rest * 60)}`
+      `Rest Activity:: ${secondsToTimeString(activity.rest * 60)}`,
+      `Steps:: ${activity.steps}`
     );
   }
 

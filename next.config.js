@@ -1,3 +1,3 @@
 module.exports = {
-  basePath: process.env.APP_BASE_PATH || "/",
+  basePath: process.env.APP_BASE_PATH || "",
 };
