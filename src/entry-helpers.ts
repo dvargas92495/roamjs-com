@@ -385,3 +385,30 @@ export const getPageTitle = (e: Element) => {
     "rm-title-display"
   )[0] as HTMLHeadingElement;
 };
+
+export type RoamBlock = {
+  title?: string;
+  time?: number;
+  id?: number;
+  uid?: string;
+};
+
+export const getLinkedReferences = (t: string) => {
+  const findParentBlock: (b: RoamBlock) => RoamBlock = (b: RoamBlock) =>
+    b.title
+      ? b
+      : findParentBlock(
+          window.roamAlphaAPI.q(
+            `[:find (pull ?e [*]) :where [?e :block/children ${b.id}]]`
+          )[0][0] as RoamBlock
+        );
+  const parentBlocks = window.roamAlphaAPI
+    .q(
+      `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${t.replace(
+        /"/g,
+        '\\"'
+      )}"]]`
+    )
+    .filter((block) => block.length);
+  return parentBlocks.map((b) => findParentBlock(b[0])) as RoamBlock[];
+};
