@@ -50,15 +50,13 @@ const menuItemCallback = (
             return refClone;
           })
     );
+    const getRoamBlock = (e: Element) =>
+      Array.from(e.lastElementChild.children)
+        .filter((c) => (c as HTMLDivElement).style.display != "none")[0]
+        .getElementsByClassName("roam-block")[0] as HTMLDivElement;
     blocksInView.sort((a, b) => {
-      const aTitle = a.getElementsByClassName(
-        "roam-block"
-      )[0] as HTMLDivElement;
-      const { blockUid: aUid } = getUids(aTitle);
-      const bTitle = b.getElementsByClassName(
-        "roam-block"
-      )[0] as HTMLDivElement;
-      const { blockUid: bUid } = getUids(bTitle);
+      const { blockUid: aUid } = getUids(getRoamBlock(a));
+      const { blockUid: bUid } = getUids(getRoamBlock(b));
       return sortBy(aUid, bUid);
     });
     blocksInView.forEach((r) => refContainer.appendChild(r));
