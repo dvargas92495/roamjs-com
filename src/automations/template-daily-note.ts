@@ -7,9 +7,10 @@ const client = new RestClient({
 
 export const handler = async () => {
   const parentUid = format(new Date(), "MM-dd-yyyy");
-  await client.createBlock({
+  const output = await client.createBlock({
     parentUid,
     order: 1,
     text: "Testing Automations!",
   });
+  console.log(output);
 };
