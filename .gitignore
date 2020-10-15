@@ -4,3 +4,4 @@ terraform.exe
 build/
 dist/
 out/
+.next/

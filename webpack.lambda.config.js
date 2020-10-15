@@ -12,7 +12,7 @@ const buildEntry = (dir) => {
 
 module.exports = (env) => ({
   target: "node",
-  entry: buildEntry(env.dir || "lambdas"),
+  entry: buildEntry(env.dir || "api"),
   resolve: {
     extensions: [".ts", ".js"],
   },
@@ -26,7 +26,16 @@ module.exports = (env) => ({
     rules: [
       {
         test: /\.ts$/,
-        use: "ts-loader",
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              compilerOptions: {
+                noEmit: false,
+              },
+            },
+          },
+        ],
         exclude: /node_modules/,
       },
     ],
