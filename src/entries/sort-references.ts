@@ -2,16 +2,13 @@ import parse from "date-fns/parse";
 import {
   createObserver,
   createSortIcons,
+  getLinkedReferences,
   getPageTitle,
+  RoamBlock,
 } from "../entry-helpers";
 import { getConfigFromPage } from "roam-client";
 
-type RoamBlock = {
-  title?: string;
-  time?: number;
-  id?: number;
-  uid?: string;
-};
+
 
 const menuItemCallback = (
   sortContainer: Element,
@@ -21,22 +18,7 @@ const menuItemCallback = (
   if (!pageTitle) {
     return;
   }
-  const findParentBlock: (b: RoamBlock) => RoamBlock = (b: RoamBlock) =>
-    b.title
-      ? b
-      : findParentBlock(
-          window.roamAlphaAPI.q(
-            `[:find (pull ?e [*]) :where [?e :block/children ${b.id}]]`
-          )[0][0] as RoamBlock
-        );
-  const parentBlocks = window.roamAlphaAPI
-    .q(
-      `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
-    )
-    .filter((block) => block.length);
-  const linkedReferences = parentBlocks.map((b) =>
-    findParentBlock(b[0])
-  ) as RoamBlock[];
+  const linkedReferences = getLinkedReferences(pageTitle.innerText);
   linkedReferences.sort(sortBy);
   const refIndexByTitle: { [key: string]: number } = {};
   linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));
