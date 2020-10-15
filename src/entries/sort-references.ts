@@ -1,5 +1,9 @@
 import parse from "date-fns/parse";
-import { createObserver, createSortIcons } from "../entry-helpers";
+import {
+  createObserver,
+  createSortIcons,
+  getPageTitle,
+} from "../entry-helpers";
 import { getConfigFromPage } from "roam-client";
 
 type RoamBlock = {
@@ -13,10 +17,7 @@ const menuItemCallback = (
   sortContainer: Element,
   sortBy: (a: RoamBlock, b: RoamBlock) => number
 ) => {
-  const container = sortContainer.closest(".roam-log-page") || document;
-  const pageTitle = container.getElementsByClassName(
-    "rm-title-display"
-  )[0] as HTMLHeadingElement;
+  const pageTitle = getPageTitle(sortContainer);
   if (!pageTitle) {
     return;
   }

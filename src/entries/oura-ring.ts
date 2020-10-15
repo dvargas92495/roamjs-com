@@ -5,7 +5,7 @@ import {
   parseRoamDate,
   pushBullets,
 } from "roam-client";
-import { addButtonListener } from "../entry-helpers";
+import { addButtonListener, getPageTitle } from "../entry-helpers";
 import axios from "axios";
 import subDays from "date-fns/subDays";
 
@@ -23,9 +23,7 @@ const secondsToTimeString = (s: number) => {
 
 const importOuraRing = async (_: any, blockUid: string, parentUid: string) => {
   const config = getConfigFromPage("roam/js/oura-ring");
-  const pageTitle = document.getElementsByClassName(
-    "rm-title-display"
-  )[0] as HTMLHeadingElement;
+  const pageTitle = getPageTitle(document.activeElement);
   const dateFromPage = parseRoamDate(pageTitle.innerText);
   const token = config["Token"]?.trim();
   if (!token) {

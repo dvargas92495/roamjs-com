@@ -1,4 +1,4 @@
-import { addButtonListener } from "../entry-helpers";
+import { addButtonListener, getPageTitle } from "../entry-helpers";
 import {
   asyncType,
   genericError,
@@ -17,9 +17,7 @@ const importGoogleCalendar = async (
   parentUid: string
 ) => {
   const config = getConfigFromPage("roam/js/google-calendar");
-  const pageTitle = document.getElementsByClassName(
-    "rm-title-display"
-  )[0] as HTMLHeadingElement;
+  const pageTitle = getPageTitle(document.activeElement);
   const dateFromPage = parseRoamDate(pageTitle.innerText);
 
   const calendarId = config["Google Calendar"]?.trim();

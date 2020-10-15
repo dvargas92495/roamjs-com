@@ -1,4 +1,4 @@
-import { addButtonListener } from "../entry-helpers";
+import { addButtonListener, getPageTitle } from "../entry-helpers";
 import {
   asyncType,
   pushBullets,
@@ -21,8 +21,7 @@ const twitterReferencesListener = async (
     return;
   }
 
-  const pageTitle = document.getElementsByClassName("rm-title-display")[0]
-    .textContent;
+  const pageTitle = getPageTitle(document.activeElement).textContent;
 
   const twitterSearch = axios.get(
     `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/twitter-search?username=${username}&query=${encodeURIComponent(
