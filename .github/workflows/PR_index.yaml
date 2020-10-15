@@ -17,11 +17,11 @@ jobs:
         run: npm run build:next
       - name: Upload
         run: aws s3 sync out s3://roamjs.com/${{github.event.number}}
-            - name: Install
+      - name: Docs Install
         run: brew install mkdocs
-      - name: Build
+      - name: Docs Build
         run: mkdocs build --clean
-      - name: Upload
+      - name: Docs Upload
         run: aws s3 sync dist s3://roamjs.com/${{github.event.number}}/docs
       - name: Invalidate Cache
         run: |
