@@ -1,0 +1,29 @@
+name: Push Site to Branch
+on: pull_request
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.DEPLOY_AWS_ACCESS_SECRET }}
+  AWS_DEFAULT_REGION: us-east-1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install
+        run: npm install
+      - name: Build
+        run: npm run build:next
+      - name: Upload
+        run: aws s3 sync out s3://roamjs.com/${{github.event.number}}
+            - name: Install
+        run: brew install mkdocs
+      - name: Build
+        run: mkdocs build --clean
+      - name: Upload
+        run: aws s3 sync dist s3://roamjs.com/${{github.event.number}}/docs
+      - name: Invalidate Cache
+        run: |
+          CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[*].{Alias:Aliases.Items[0],Id:Id}[?Alias=='roamjs.com'].Id" --output text)
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_ID --paths "/*"

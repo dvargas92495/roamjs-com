@@ -8,7 +8,24 @@
     "target": "es2019",
     "esModuleInterop": true,
     "allowJs": true,
-    "jsx": "react"
+    "jsx": "preserve",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "skipLibCheck": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
   },
-  "include": ["src", "local-app-env.d.ts"]
+  "include": [
+    "src",
+    "local-app-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
