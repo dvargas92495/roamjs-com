@@ -1,5 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { getConfigFromPage, pushBullets } from "roam-client";
+import { asyncType, getConfigFromPage, pushBullets } from "roam-client";
 import {
   addButtonListener,
   getLinkedReferences,
@@ -19,6 +19,10 @@ const pullReferences = async (_: any, blockUid: string, parentUid: string) => {
   const bullets = linkedReferences.map((l) =>
     format.replace(REPLACE, `((${l.uid}))`)
   );
+  if (bullets.length === 0) {
+    await asyncType("No linked references for this page!");
+    return;
+  }
   await pushBullets(bullets, blockUid, parentUid);
 
   const removeTags = !!config["Remove Tags"];
