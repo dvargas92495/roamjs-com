@@ -24,16 +24,22 @@ const pullReferences = async (_: any, blockUid: string, parentUid: string) => {
   const removeTags = !!config["Remove Tags"];
   if (removeTags) {
     const container = pageTitle.closest(".roam-log-page") || document;
-    const blockReferences = container.getElementsByClassName("rm-reference-main")[0].getElementsByClassName("roam-block");
-    const blockReferenceIds = Array.from(blockReferences).map(b => b.id);
+    const blockReferences = Array.from(
+      container.getElementsByClassName("rm-reference-main")
+    )
+      .find((d) => d.className.indexOf("rm-query-content") < 0)
+      .getElementsByClassName("roam-block");
+    const blockReferenceIds = Array.from(blockReferences).map((b) => b.id);
     for (var b = 0; b < blockReferenceIds.length; b++) {
       const block = document.getElementById(blockReferenceIds[b]);
       await openBlock(block);
       const textArea = document.activeElement as HTMLTextAreaElement;
       const value = textArea.value;
       const index = value.indexOf(`[[${pageTitleText}]]`);
-      textArea.setSelectionRange(index, index + 4 + pageTitleText.length);
-      await userEvent.type(textArea, "{{backspace}}");
+      if (index >= 0) {
+        textArea.setSelectionRange(index, index + 4 + pageTitleText.length);
+        await userEvent.type(textArea, "{backspace}");
+      }
     }
   }
 };
