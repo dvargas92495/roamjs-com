@@ -35,11 +35,16 @@ const pullReferences = async (_: any, blockUid: string, parentUid: string) => {
       await openBlock(block);
       const textArea = document.activeElement as HTMLTextAreaElement;
       const value = textArea.value;
-      const index = value.indexOf(`[[${pageTitleText}]]`);
-      if (index >= 0) {
-        textArea.setSelectionRange(index, index + 4 + pageTitleText.length);
-        await userEvent.type(textArea, "{backspace}");
+      const removeTag = async (s: string) => {
+        const index = value.indexOf(s);
+        if (index >= 0) {
+          textArea.setSelectionRange(index, index + s.length);
+          await userEvent.type(textArea, "{backspace}");
+        }
       }
+      await removeTag(`#[[${pageTitleText}]]`);
+      await removeTag(`[[${pageTitleText}]]`);
+      await removeTag(`#${pageTitleText}`);
     }
   }
 };
