@@ -2,7 +2,7 @@ import parse from "date-fns/parse";
 import {
   createObserver,
   createSortIcons,
-  getLinkedReferences,
+  getLinkedPageReferences,
   getPageTitle,
   RoamBlock,
 } from "../entry-helpers";
@@ -18,7 +18,7 @@ const menuItemCallback = (
   if (!pageTitle) {
     return;
   }
-  const linkedReferences = getLinkedReferences(pageTitle.innerText);
+  const linkedReferences = getLinkedPageReferences(pageTitle.innerText);
   linkedReferences.sort(sortBy);
   const refIndexByTitle: { [key: string]: number } = {};
   linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));

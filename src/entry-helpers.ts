@@ -393,7 +393,7 @@ export type RoamBlock = {
   uid?: string;
 };
 
-export const getLinkedReferences = (t: string) => {
+export const getLinkedPageReferences = (t: string) => {
   const findParentBlock: (b: RoamBlock) => RoamBlock = (b: RoamBlock) =>
     b.title
       ? b
@@ -411,4 +411,16 @@ export const getLinkedReferences = (t: string) => {
     )
     .filter((block) => block.length);
   return parentBlocks.map((b) => findParentBlock(b[0])) as RoamBlock[];
+};
+
+export const getLinkedReferences = (t: string) => {
+  const parentBlocks = window.roamAlphaAPI
+    .q(
+      `[:find (pull ?referencingBlock [*]) :where [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${t.replace(
+        /"/g,
+        '\\"'
+      )}"]]`
+    )
+    .filter((block) => block.length);
+  return parentBlocks.map((b) => b[0]) as RoamBlock[];
 };
