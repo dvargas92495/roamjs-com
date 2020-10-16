@@ -1,7 +1,7 @@
 import { waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { createWorker } from "tesseract.js";
-import { createIconButton, createObserver } from "../entry-helpers";
+import { createIconButton, createObserver, openBlock } from "../entry-helpers";
 import { getConfigFromPage, newBlockEnter, pushBullets } from "roam-client";
 
 declare global {
@@ -23,12 +23,7 @@ const clickCallback = async (htmlTarget: HTMLElement) => {
   const imgContainer = htmlTarget.closest(".hoverparent");
   const img = imgContainer.getElementsByTagName("img")[0];
   const editButton = imgContainer.getElementsByClassName("bp3-icon-edit")[0];
-  await userEvent.click(editButton);
-  await waitFor(() => {
-    if (document.activeElement.tagName !== "TEXTAREA") {
-      throw new Error("Textarea didn't render");
-    }
-  });
+  await openBlock(editButton);
   await newBlockEnter();
   await userEvent.tab();
   await userEvent.type(document.activeElement, "Loading...");
