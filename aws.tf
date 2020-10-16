@@ -81,7 +81,7 @@ module "aws_cron_job" {
   version   = "1.0.0"
   
   rule_name = "RoamJS"
-  schedule  = "cron(0 0 4 ? * * *)"
+  schedule  = "cron(0 0 4 * * ?)"
   lambdas    = [
     "template-daily-note"
   ]
