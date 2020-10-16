@@ -424,3 +424,12 @@ export const getLinkedReferences = (t: string) => {
     .filter((block) => block.length);
   return parentBlocks.map((b) => b[0]) as RoamBlock[];
 };
+
+export const openBlock = async (e: Element) => {
+  await userEvent.click(e);
+  await waitFor(() => {
+    if (document.activeElement.tagName !== "TEXTAREA") {
+      throw new Error("Textarea didn't render");
+    }
+  });
+};
