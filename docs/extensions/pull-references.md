@@ -8,9 +8,9 @@ The Pull References gives user the ability to pull references to the page. The n
 
 The script supports the following configuration attributes, to be added in the `[[roam/js/pull-references]]` page:
 
-- `Format` - Coming soon...
+- `Format` - (Optional) The format that each reference will use when added to the page. Use `${ref}` to specify where you want the text to be replaced by the block reference.
 
-Create a button by typing `{{pull references}}` into a page. Clicking the button adds all the linked references as references on the current page.
+Create a button by typing `{{pull references}}` into a page. Clicking the button adds all the linked references as references on the current page. 
 
 ### Installation
 
