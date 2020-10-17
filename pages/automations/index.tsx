@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import Layout from "../../components/Layout";
 
 const AutomationsPage = () => (
@@ -12,9 +13,11 @@ const AutomationsPage = () => (
       to what's coming!
     </p>
     <ul>
-        <li>
-            Template Daily Notes
-        </li>
+      <li>
+        <Link href={"/automations/template-daily-note"}>
+          Template Daily Notes
+        </Link>
+      </li>
     </ul>
   </Layout>
 );
