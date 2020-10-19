@@ -24,7 +24,7 @@ const secondsToTimeString = (s: number) => {
 const importOuraRing = async (_: any, blockUid: string, parentUid: string) => {
   const config = getConfigFromPage("roam/js/oura-ring");
   const pageTitle = getPageTitle(document.activeElement);
-  const dateFromPage = parseRoamDate(pageTitle.innerText);
+  const dateFromPage = parseRoamDate(pageTitle.textContent);
   const token = config["Token"]?.trim();
   if (!token) {
     await asyncType(

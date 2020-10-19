@@ -18,7 +18,7 @@ const importGoogleCalendar = async (
 ) => {
   const config = getConfigFromPage("roam/js/google-calendar");
   const pageTitle = getPageTitle(document.activeElement);
-  const dateFromPage = parseRoamDate(pageTitle.innerText);
+  const dateFromPage = parseRoamDate(pageTitle.textContent);
 
   const calendarId = config["Google Calendar"]?.trim();
   if (!calendarId) {
