@@ -8,6 +8,10 @@ The Hex Color Preview extension renders a preview square of the color next to va
 
 The script is not configurable.
 
+All you have to do is have the extension installed. Anytime you create a valid hex color tag, it will render a colored preview next to the tag.
+
+To change the CSS styling of the preview, you'll want to change the CSS associated with the `roamjs-hex-color-preview` class.
+
 ### Installation
 
 ```javascript

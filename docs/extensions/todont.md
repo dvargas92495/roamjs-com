@@ -8,6 +8,8 @@ The script is not configurable.
 
 In a block, just hit CTRL+SHIFT+ENTER. Any TODOs or DONEs will be replaced with an ARCHIVED. If an ARCHIVED exists, it will be cleared. If none of the above exists, an ARCHIVED is inserted in the block.
 
+To change the CSS styling of the archive display, you'll want to change the CSS associated with the `roamjs-todont` class.
+
 ```javascript
 var old = document.getElementById("todont");
 if (old) {

@@ -11,7 +11,7 @@ css.textContent = `.${HEX_COLOR_PREVIEW_CLASSNAME} {
     width: 16px;
     height: 16px;
     display: inline-block;
-    marginLeft: 4px;
+    margin-left: 4px;
     top: 3px;
     position: relative;
 }`;
