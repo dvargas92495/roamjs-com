@@ -59,5 +59,11 @@ createObserver((ms) => {
   const blocks = ms.flatMap((m) =>
     Array.from(m.addedNodes).filter(isBlockNode)
   );
+  const childBlocks = ms.flatMap((m) =>
+    Array.from(m.addedNodes)
+      .filter((n) => n.nodeName !== "DIV")
+      .flatMap((d) => Array.from((d as HTMLDivElement).getElementsByClassName("roam-block")))
+  );
   blocks.forEach(renderColorPreviewsInBlock);
+  childBlocks.forEach(renderColorPreviewsInBlock);
 });
