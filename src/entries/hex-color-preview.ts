@@ -1,5 +1,9 @@
-import { createObserver, getRefTitlesByBlockUid, getUids } from "../entry-helpers";
-import Color from 'color';
+import {
+  createObserver,
+  getRefTitlesByBlockUid,
+  getUids,
+} from "../entry-helpers";
+import Color from "color";
 
 createObserver((ms) => {
   const record = ms.find(
@@ -14,15 +18,32 @@ createObserver((ms) => {
     const block = record.addedNodes[0] as HTMLDivElement;
     const { blockUid } = getUids(block);
     const refs = getRefTitlesByBlockUid(blockUid);
-    refs.forEach(r => {
-        try{
-            const c = Color(`#${r}`);
-            console.log("Successfully parsed color!", c);
-        } catch(e) {
-            if (!e.message || !e.message.startsWith("Unable to parse color from string")) {
-                throw e;
-            }
+    const renderedRefs = Array.from(
+      block.getElementsByClassName("rm-page-ref-tag")
+    );
+    refs.forEach((r, i) => {
+      try {
+        const c = Color(`#${r}`);
+        const previewId = `hex-code-preview-${blockUid}-${i}`;
+        if (!document.getElementById(previewId)) {
+          const renderedRef = renderedRefs.find(
+            (s) => s.getAttribute("data-tag") === r
+          );
+          const newSpan = document.createElement("span");
+          newSpan.style.backgroundColor = c.hex();
+          newSpan.style.width = "16px";
+          newSpan.style.height = "16px";
+          newSpan.id = `hex-code-preview-${blockUid}-${i}`;
+          renderedRef.appendChild(newSpan);
         }
-    })
+      } catch (e) {
+        if (
+          !e.message ||
+          !e.message.startsWith("Unable to parse color from string")
+        ) {
+          throw e;
+        }
+      }
+    });
   }
 });
