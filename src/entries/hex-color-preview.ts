@@ -19,9 +19,12 @@ createObserver((ms) => {
             const c = Color(`#${r}`);
             console.log("Successfully parsed color!", c);
         } catch(e) {
-            console.error(e);
+            if (!e.message || !e.message.startsWith("Unable to parse color from string")) {
+                console.error(e);
+            } else {
+                console.log(r, "is not a valid hex, ignore");
+            }
         }
     })
   }
-  console.log(ms);
 });
