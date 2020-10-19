@@ -18,7 +18,7 @@ const menuItemCallback = (
   if (!pageTitle) {
     return;
   }
-  const linkedReferences = getLinkedPageReferences(pageTitle.innerText);
+  const linkedReferences = getLinkedPageReferences(pageTitle.textContent);
   linkedReferences.sort(sortBy);
   const refIndexByTitle: { [key: string]: number } = {};
   linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));

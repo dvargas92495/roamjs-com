@@ -14,7 +14,7 @@ const pullReferences = async (_: any, blockUid: string, parentUid: string) => {
   const config = getConfigFromPage("roam/js/pull-references");
   const format = config["Format"] || REPLACE;
   const pageTitle = getPageTitle(document.activeElement);
-  const pageTitleText = pageTitle.innerText;
+  const pageTitleText = pageTitle.textContent;
   const linkedReferences = getLinkedReferences(pageTitleText);
   const bullets = linkedReferences.map((l) =>
     format.replace(REPLACE, `((${l.uid}))`)
@@ -27,7 +27,7 @@ const pullReferences = async (_: any, blockUid: string, parentUid: string) => {
 
   const removeTags = !!config["Remove Tags"];
   if (removeTags) {
-    const container = pageTitle.closest(".roam-log-page") || document;
+    const container = pageTitle.parentElement.closest(".roam-log-page") || document;
     const blockReferences = Array.from(
       container.getElementsByClassName("rm-reference-main")
     )

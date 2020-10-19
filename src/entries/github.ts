@@ -89,7 +89,7 @@ const importGithubProjects = async (
   const config = getConfigFromPage("roam/js/github");
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   const pageTitle = getPageTitle(document.activeElement);
-  const repoName = buttonConfig.IN ? buttonConfig.IN : pageTitle.innerText;
+  const repoName = buttonConfig.IN ? buttonConfig.IN : pageTitle.textContent;
   const repository = `${username}/${repoName}`;
   const token = config["Token"];
   const githubReq = token
@@ -126,7 +126,7 @@ const importGithubCards = async (
   const pageTitle = getPageTitle(document.activeElement);
   const parentBlocks = window.roamAlphaAPI
     .q(
-      `[:find (pull ?parentPage [:node/title]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.innerText}"]]`
+      `[:find (pull ?parentPage [:node/title]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.textContent}"]]`
     )
     .filter((block) => block.length);
   const repoAsParent = parentBlocks.length > 0 ? parentBlocks[0][0]?.title : "";
@@ -134,7 +134,7 @@ const importGithubCards = async (
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   const repoName = buttonConfig.IN ? buttonConfig.IN : repoAsParent;
   const repository = `${username}/${repoName}`;
-  const project = buttonConfig.UNDER ? buttonConfig.UNDER : pageTitle.innerText;
+  const project = buttonConfig.UNDER ? buttonConfig.UNDER : pageTitle.textContent;
   const column = buttonConfig.AS ? buttonConfig.AS : "To do";
 
   if (!config["Token"]) {
