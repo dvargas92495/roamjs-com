@@ -51,6 +51,9 @@ const renderColorPreviewsInBlock = (block: HTMLDivElement) => {
   });
 };
 
+const blocks = document.getElementsByClassName("roam-block");
+Array.from(blocks).forEach(renderColorPreviewsInBlock);
+
 const isBlockNode = (d: Node) =>
   d.nodeName === "DIV" &&
   Array.from((d as HTMLDivElement).classList).indexOf("roam-block") > -1;
@@ -62,7 +65,9 @@ createObserver((ms) => {
   const childBlocks = ms.flatMap((m) =>
     Array.from(m.addedNodes)
       .filter((n) => n.nodeName === "DIV")
-      .flatMap((d) => Array.from((d as HTMLDivElement).getElementsByClassName("roam-block")))
+      .flatMap((d) =>
+        Array.from((d as HTMLDivElement).getElementsByClassName("roam-block"))
+      )
   );
   blocks.forEach(renderColorPreviewsInBlock);
   childBlocks.forEach(renderColorPreviewsInBlock);
