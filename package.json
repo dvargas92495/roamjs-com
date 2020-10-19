@@ -60,7 +60,7 @@
     "node-emoji": "^1.10.0",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
-    "roam-client": "^1.13.0",
+    "roam-client": "^1.16.3",
     "tesseract.js": "^2.1.3"
   }
 }
