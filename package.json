@@ -35,6 +35,7 @@
   "homepage": "https://github.com/dvargas92495/roam-js-extensions#readme",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.61",
+    "@types/color": "^3.0.1",
     "@types/node-emoji": "^1.8.1",
     "@types/react": "^16.9.52",
     "babel-preset-env": "^1.7.0",

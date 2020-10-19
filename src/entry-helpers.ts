@@ -369,6 +369,13 @@ export const getTextByBlockUid = (uid: string) =>
     `[:find (pull ?e [:block/string]) :where [?e :block/uid "${uid}"]]`
   )[0][0]?.string;
 
+export const getRefTitlesByBlockUid = (uid: string) =>
+  window.roamAlphaAPI
+    .q(
+      `[:find (pull ?r [:node/title]) :where [?e :block/refs ?r] [?e :block/uid "${uid}"]]`
+    )
+    .map((b) => b[0].title);
+
 export const getCreateTimeByBlockUid = (uid: string) =>
   window.roamAlphaAPI.q(
     `[:find (pull ?e [:create/time]) :where [?e :block/uid "${uid}"]]`
