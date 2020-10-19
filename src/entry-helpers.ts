@@ -374,7 +374,7 @@ export const getRefTitlesByBlockUid = (uid: string) =>
     .q(
       `[:find (pull ?r [:node/title]) :where [?e :block/refs ?r] [?e :block/uid "${uid}"]]`
     )
-    .map((b) => b[0].title);
+    .map((b) => b[0]?.title || '');
 
 export const getCreateTimeByBlockUid = (uid: string) =>
   window.roamAlphaAPI.q(
