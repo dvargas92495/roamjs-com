@@ -11,14 +11,14 @@ const renderColorPreviewsInBlock = (block: HTMLDivElement) => {
     const renderedRefs = Array.from(
       block.getElementsByClassName("rm-page-ref-tag")
     );
-    refs.forEach((r, i) => {
+    refs.forEach((r) => {
       try {
         const c = Color(`#${r}`);
-        const previewId = `hex-code-preview-${blockUid}-${i}`;
-        const renderedRef = renderedRefs.find(
-          (s) => s.getAttribute("data-tag") === r && s.lastElementChild.id !== previewId
+        const previewIdPrefix = `hex-code-preview-${blockUid}-${r}-`;
+        const renderedRefSpans = renderedRefs.filter(
+          (s) => s.getAttribute("data-tag") === r && !s.lastElementChild.id.startsWith(previewIdPrefix)
         );
-        if (renderedRef) {
+        renderedRefSpans.forEach((renderedRef, i) => {
           const newSpan = document.createElement("span");
           newSpan.style.backgroundColor = c.hex();
           newSpan.style.width = "16px";
@@ -27,9 +27,9 @@ const renderColorPreviewsInBlock = (block: HTMLDivElement) => {
           newSpan.style.marginLeft = '4px';
           newSpan.style.top = '3px';
           newSpan.style.position = 'relative';
-          newSpan.id = `hex-code-preview-${blockUid}-${i}`;
+          newSpan.id = `${previewIdPrefix}${i}`;
           renderedRef.appendChild(newSpan);
-        }
+        });
       } catch (e) {
         if (
           !e.message ||
