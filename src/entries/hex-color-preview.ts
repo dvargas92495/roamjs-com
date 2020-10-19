@@ -33,6 +33,10 @@ createObserver((ms) => {
           newSpan.style.backgroundColor = c.hex();
           newSpan.style.width = "16px";
           newSpan.style.height = "16px";
+          newSpan.style.display = 'inline-block';
+          newSpan.style.marginLeft = '4px';
+          newSpan.style.top = '3px';
+          newSpan.style.position = 'relative';
           newSpan.id = `hex-code-preview-${blockUid}-${i}`;
           renderedRef.appendChild(newSpan);
         }
