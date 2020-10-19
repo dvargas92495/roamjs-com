@@ -61,7 +61,7 @@ createObserver((ms) => {
   );
   const childBlocks = ms.flatMap((m) =>
     Array.from(m.addedNodes)
-      .filter((n) => n.nodeName !== "DIV")
+      .filter((n) => n.nodeName === "DIV")
       .flatMap((d) => Array.from((d as HTMLDivElement).getElementsByClassName("roam-block")))
   );
   blocks.forEach(renderColorPreviewsInBlock);
