@@ -7,7 +7,7 @@ createObserver((ms) => {
       !!Array.from(m.addedNodes).find(
         (d) =>
           d.nodeName === "DIV" &&
-          (d as HTMLDivElement).className.indexOf("roam-block") > -1
+          Array.from((d as HTMLDivElement).classList).indexOf("roam-block") > -1
       )
   );
   if (record) {
@@ -20,9 +20,7 @@ createObserver((ms) => {
             console.log("Successfully parsed color!", c);
         } catch(e) {
             if (!e.message || !e.message.startsWith("Unable to parse color from string")) {
-                console.error(e);
-            } else {
-                console.log(r, "is not a valid hex, ignore");
+                throw e;
             }
         }
     })
