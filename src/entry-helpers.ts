@@ -391,7 +391,7 @@ export const getPageTitle = (e: Element) => {
   const heading = container.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;
-  return Array.from(heading.childNodes).find((n) => n.nodeName === "#text");
+  return Array.from(heading.childNodes).find((n) => n.nodeName === "#text" || n.nodeName === 'SPAN');
 };
 
 export type RoamBlock = {
