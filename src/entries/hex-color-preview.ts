@@ -1,8 +1,5 @@
-import {
-  createObserver,
-  getRefTitlesByBlockUid,
-  getUids,
-} from "../entry-helpers";
+import { createObserver, getRefTitlesByBlockUid } from "../entry-helpers";
+import { getUids } from "roam-client";
 import Color from "color";
 
 const HEX_COLOR_PREVIEW_CLASSNAME = "roamjs-hex-color-preview";

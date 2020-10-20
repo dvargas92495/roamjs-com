@@ -7,12 +7,12 @@ import {
   getEditTimeByBlockUid,
   getEditTimeByTitle,
   getTextByBlockUid,
-  getUids,
 } from "../entry-helpers";
 import {
   getConfigFromPage,
   parseRoamDate,
   createIconButton,
+  getUids,
 } from "roam-client";
 
 let isSortByBlocks = false;
