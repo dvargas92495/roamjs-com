@@ -74,7 +74,10 @@ const optionCallback = async () => {
     });
   } else {
     const id = blockElementSelected.id;
-    if (blockElementSelected.tagName === "DIV") {
+    if (
+      blockElementSelected.tagName === "DIV" ||
+      !document.contains(blockElementSelected)
+    ) {
       userEvent.click(document.getElementById(id));
       await waitFor(() => {
         if (document.getElementById(id).tagName !== "TEXTAREA") {
@@ -133,7 +136,10 @@ const multiOption = createMenuOption(async () => {
 createOverlayObserver(() => {
   const uls = document.getElementsByClassName("bp3-menu bp3-text-small");
   Array.from(uls).forEach((u) => {
-    if (u.tagName === "UL" && !u.getElementsByClassName(ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME).length) {
+    if (
+      u.tagName === "UL" &&
+      !u.getElementsByClassName(ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME).length
+    ) {
       const ul = u as HTMLUListElement;
       const dividers = Array.from(
         ul.getElementsByClassName("bp3-menu-divider")
