@@ -2,13 +2,14 @@ import { waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { createOverlayObserver, getUids } from "../entry-helpers";
 import { getConfigFromPage } from "roam-client";
+import { isIOS } from "mobile-device-detect";
 
 let blockElementSelected: Element;
 
 const createMenuOption = (menuOnClick: () => void) => {
   const option = document.createElement("li");
   const aTag = document.createElement("a");
-  aTag.setAttribute("label", "Alt-A");
+  aTag.setAttribute("label", `${isIOS ? "Opt" : "Alt"}-A`);
   aTag.className = "bp3-menu-item bp3-popover-dismiss";
   option.appendChild(aTag);
   const optionText = document.createElement("div");
@@ -150,9 +151,6 @@ createOverlayObserver(() => {
 });
 
 document.addEventListener("mousedown", (e) => {
-  if (e.button !== 2) {
-    return;
-  }
   const htmlTarget = e.target as HTMLElement;
   if (
     htmlTarget.className === "simple-bullet-outer cursor-pointer" ||
@@ -166,7 +164,7 @@ document.addEventListener("mousedown", (e) => {
 });
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === "a" && e.altKey) {
+  if (e.key === "a" && ((e.altKey && !isIOS) || (e.metaKey && isIOS))) {
     blockElementSelected = document.activeElement;
     optionCallback();
   }
