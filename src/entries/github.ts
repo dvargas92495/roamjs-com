@@ -1,5 +1,6 @@
-import { addButtonListener, getPageTitle } from "../entry-helpers";
+import { getPageTitle } from "../entry-helpers";
 import {
+  addButtonListener,
   asyncType,
   genericError,
   getConfigFromPage,
