@@ -75,7 +75,7 @@ const optionCallback = async () => {
   } else {
     const id = blockElementSelected.id;
     if (blockElementSelected.tagName === "DIV") {
-      userEvent.click(blockElementSelected);
+      userEvent.click(document.getElementById(id));
       await waitFor(() => {
         if (document.getElementById(id).tagName !== "TEXTAREA") {
           throw new Error("Click did not render textarea");
