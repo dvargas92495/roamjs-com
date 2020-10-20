@@ -35,7 +35,7 @@ const renderColorPreviewsInBlock = (block: HTMLDivElement) => {
       );
       renderedRefSpans.forEach((renderedRef, i) => {
         const newSpan = document.createElement("span");
-        newSpan.style.backgroundColor = c.hex();
+        newSpan.style.backgroundColor = c.string();
         newSpan.className = HEX_COLOR_PREVIEW_CLASSNAME;
         newSpan.id = `${previewIdPrefix}${i}`;
         renderedRef.appendChild(newSpan);
