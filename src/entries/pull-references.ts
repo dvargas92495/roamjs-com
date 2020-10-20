@@ -1,11 +1,12 @@
 import userEvent from "@testing-library/user-event";
-import { asyncType, getConfigFromPage, pushBullets } from "roam-client";
 import {
   addButtonListener,
-  getLinkedReferences,
-  getPageTitle,
+  asyncType,
+  getConfigFromPage,
   openBlock,
-} from "../entry-helpers";
+  pushBullets,
+} from "roam-client";
+import { getLinkedReferences, getPageTitle } from "../entry-helpers";
 
 const PULL_REFERENCES_COMMAND = "Pull References";
 const REPLACE = "${ref}";
@@ -27,7 +28,8 @@ const pullReferences = async (_: any, blockUid: string, parentUid: string) => {
 
   const removeTags = !!config["Remove Tags"];
   if (removeTags) {
-    const container = pageTitle.parentElement.closest(".roam-log-page") || document;
+    const container =
+      pageTitle.parentElement.closest(".roam-log-page") || document;
     const blockReferences = Array.from(
       container.getElementsByClassName("rm-reference-main")
     )
@@ -45,7 +47,7 @@ const pullReferences = async (_: any, blockUid: string, parentUid: string) => {
           textArea.setSelectionRange(index, index + s.length);
           await userEvent.type(textArea, "{backspace}");
         }
-      }
+      };
       await removeTag(`#[[${pageTitleText}]]`);
       await removeTag(`[[${pageTitleText}]]`);
       await removeTag(`#${pageTitleText}`);

@@ -25,120 +25,6 @@ if (process.env.IS_LEGACY && !window.depot?.roamjs?.alerted) {
   }
 }
 
-const waitForString = (text: string) =>
-  waitFor(
-    () => {
-      const textArea = document.activeElement as HTMLTextAreaElement;
-      if (textArea?.value == null) {
-        throw new Error(
-          `Textarea is undefined. Active Element ${textArea.tagName}. Input text ${text}`
-        );
-      }
-      let expectedTextWithoutPeriod = text.replace(/\./g, "").toUpperCase();
-      let actualTextWithoutPeriod = textArea.value
-        .replace(/\./g, "")
-        .toUpperCase();
-
-      // relaxing constraint for equality because there is an issue with periods.
-      // in some cases, userEvent.type doesn't type the periods.
-      if (actualTextWithoutPeriod !== expectedTextWithoutPeriod) {
-        throw new Error("Typing not complete");
-      }
-    },
-    {
-      timeout: 5000,
-    }
-  );
-
-const clickEventListener = (
-  targetCommand: string,
-  callback: (
-    buttonConfig?: { [key: string]: string },
-    blockUid?: string,
-    parentUid?: string
-  ) => void
-) => async (e: MouseEvent) => {
-  const htmlTarget = e.target as HTMLElement;
-  if (
-    htmlTarget &&
-    htmlTarget.tagName === "BUTTON" &&
-    htmlTarget.innerText
-      .toUpperCase()
-      .trim()
-      .startsWith(targetCommand.toUpperCase())
-  ) {
-    const target = htmlTarget as HTMLButtonElement;
-    const rawParts = target.innerText
-      .substring(targetCommand.length + 1)
-      .split(" ");
-    let quotedWord = "";
-    const restOfButtonText: string[] = [];
-    for (var i = 0; i < rawParts.length; i++) {
-      if (quotedWord) {
-        if (rawParts[i].endsWith('"')) {
-          restOfButtonText.push(
-            `${quotedWord} ${rawParts[i].substring(0, rawParts[i].length - 1)}`
-          );
-          quotedWord = "";
-        } else {
-          quotedWord = `${quotedWord} ${rawParts[i]}`;
-        }
-      } else {
-        if (rawParts[i].startsWith('"')) {
-          quotedWord = rawParts[i].substring(1);
-        } else {
-          restOfButtonText.push(rawParts[i]);
-        }
-      }
-    }
-
-    const numPairs = Math.floor(restOfButtonText.length / 2);
-    const buttonConfig = {} as { [key: string]: string };
-    for (var i = 0; i < numPairs; i++) {
-      buttonConfig[restOfButtonText[i * 2]] = restOfButtonText[i * 2 + 1];
-    }
-
-    if (window.roamDatomicAlphaAPI) {
-      target.innerText = "Loading...";
-      target.disabled = true;
-
-      const block = target.closest(".roam-block") as HTMLDivElement;
-      const { blockUid, parentUid } = getUids(block);
-      window
-        .roamDatomicAlphaAPI({
-          action: "update-block",
-          block: {
-            uid: blockUid,
-            string: "",
-          },
-        })
-        .then(() => callback(buttonConfig, blockUid, parentUid));
-    } else {
-      const divContainer = target.parentElement.parentElement
-        .parentElement as HTMLDivElement;
-      await userEvent.click(divContainer);
-      await waitForString(`{{${target.innerText}}}`);
-      const textArea = document.activeElement as HTMLTextAreaElement;
-      await userEvent.clear(textArea);
-      await waitForString("");
-      callback(buttonConfig);
-    }
-  }
-};
-
-export const addButtonListener = (
-  targetCommand: string,
-  callback: (
-    buttonConfig?: { [key: string]: string },
-    blockUid?: string,
-    parentUid?: string
-  ) => void
-) =>
-  document.addEventListener(
-    "click",
-    clickEventListener(targetCommand, callback)
-  );
-
 export const createObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void
 ) =>
@@ -400,15 +286,6 @@ export const getLinkedReferences = (t: string) => {
     )
     .filter((block) => block.length);
   return parentBlocks.map((b) => b[0]) as RoamBlock[];
-};
-
-export const openBlock = async (e: Element) => {
-  await userEvent.click(e);
-  await waitFor(() => {
-    if (document.activeElement.tagName !== "TEXTAREA") {
-      throw new Error("Textarea didn't render");
-    }
-  });
 };
 
 export const createMobileIcon = (id: string, iconType: string) => {

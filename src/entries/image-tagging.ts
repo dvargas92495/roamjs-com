@@ -1,10 +1,11 @@
 import { waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { createWorker } from "tesseract.js";
-import { createObserver, openBlock } from "../entry-helpers";
+import { createObserver } from "../entry-helpers";
 import {
   getConfigFromPage,
   newBlockEnter,
+  openBlock,
   pushBullets,
   createIconButton,
 } from "roam-client";
