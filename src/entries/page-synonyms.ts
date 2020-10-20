@@ -58,7 +58,7 @@ const optionCallback = async () => {
   }
   const replace = getReplacer();
   if (window.roamDatomicAlphaAPI) {
-    const { blockUid } = getUids(blockElementSelected);
+    const { blockUid } = getUids(blockElementSelected as HTMLDivElement);
     const blockContent = await window.roamDatomicAlphaAPI({
       action: "pull",
       uid: blockUid,
@@ -101,7 +101,7 @@ const multiOption = createMenuOption(async () => {
   ).map((d) => d.getElementsByClassName("roam-block")[0].id);
   if (window.roamDatomicAlphaAPI) {
     highlightedDivIds.forEach(async (id: string) => {
-      const { blockUid } = getUids(document.getElementById(id));
+      const { blockUid } = getUids(document.getElementById(id) as HTMLDivElement);
       const blockContent = await window.roamDatomicAlphaAPI({
         action: "pull",
         uid: blockUid,

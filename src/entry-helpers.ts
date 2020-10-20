@@ -102,7 +102,7 @@ const clickEventListener = (
       target.innerText = "Loading...";
       target.disabled = true;
 
-      const block = target.closest(".roam-block");
+      const block = target.closest(".roam-block") as HTMLDivElement;
       const { blockUid, parentUid } = getUids(block);
       window
         .roamDatomicAlphaAPI({
