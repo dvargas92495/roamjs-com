@@ -1,9 +1,9 @@
 import userEvent from "@testing-library/user-event";
 import { asyncType } from "roam-client";
-import { createObserver } from "../entry-helpers";
+import { createMobileIcon, createObserver } from "../entry-helpers";
 
 const TODONT_CLASSNAME = "roamjs-todont";
-const css = document.createElement('style');
+const css = document.createElement("style");
 css.textContent = `.bp3-button.bp3-small.${TODONT_CLASSNAME} {
     background-color: red;
     border-radius: 0;
@@ -12,7 +12,7 @@ css.textContent = `.bp3-button.bp3-small.${TODONT_CLASSNAME} {
     min-width: 0;
     height: 16px;
 }`;
-document.getElementsByTagName('head')[0].appendChild(css);
+document.getElementsByTagName("head")[0].appendChild(css);
 
 const styleArchivedButtons = (node: HTMLElement) => {
   const buttons = node.getElementsByTagName("button");
@@ -28,10 +28,33 @@ const styleArchivedButtons = (node: HTMLElement) => {
 };
 styleArchivedButtons(document.body);
 
+let previousActiveElement: HTMLElement;
+const todontIconButton = createMobileIcon("mobile-todont-icon-button", "minus-square");
+todontIconButton.onclick = () => {
+  if (previousActiveElement.tagName === "TEXTAREA") {
+    previousActiveElement.focus();
+    todontCallback();
+  }
+};
+
+todontIconButton.onmousedown = () => {
+  previousActiveElement = document.activeElement as HTMLElement;
+};
+
 createObserver((mutationList: MutationRecord[]) => {
   mutationList.forEach((record) => {
     styleArchivedButtons(record.target as HTMLElement);
   });
+  const mobileBackButton = document.getElementById("mobile-back-icon-button");
+  if (
+    !!mobileBackButton &&
+    !document.getElementById("mobile-todont-icon-button")
+  ) {
+    const mobileBar = document.getElementById("rm-mobile-bar");
+    if (mobileBar) {
+      mobileBar.insertBefore(todontIconButton, mobileBackButton);
+    }
+  }
 });
 
 const resetCursor = (inputStart: number, inputEnd: number) => {
@@ -43,13 +66,8 @@ const resetCursor = (inputStart: number, inputEnd: number) => {
   setTimeout(() => textArea.setSelectionRange(start, end), 1);
 };
 
-const keydownEventListener = async (e: KeyboardEvent) => {
-  if (
-    e.key === "Enter" &&
-    e.shiftKey &&
-    e.ctrlKey &&
-    document.activeElement.tagName === "TEXTAREA"
-  ) {
+const todontCallback = async () => {
+  if (document.activeElement.tagName === "TEXTAREA") {
     const textArea = document.activeElement as HTMLTextAreaElement;
     const value = textArea.value;
     const oldStart = textArea.selectionStart;
@@ -73,6 +91,12 @@ const keydownEventListener = async (e: KeyboardEvent) => {
       });
       resetCursor(oldStart + 17, oldEnd + 17);
     }
+  }
+};
+
+const keydownEventListener = async (e: KeyboardEvent) => {
+  if (e.key === "Enter" && e.shiftKey && e.ctrlKey) {
+    todontCallback();
   }
 };
 
