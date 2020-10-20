@@ -1,6 +1,6 @@
 import userEvent from "@testing-library/user-event";
-import { createOverlayObserver, getUids, openBlock } from "../entry-helpers";
-import { getConfigFromPage } from "roam-client";
+import { createOverlayObserver, openBlock } from "../entry-helpers";
+import { getConfigFromPage, getUids } from "roam-client";
 import { isIOS } from "mobile-device-detect";
 import { waitFor } from "@testing-library/dom";
 
