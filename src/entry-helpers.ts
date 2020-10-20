@@ -441,3 +441,21 @@ export const openBlock = async (e: Element) => {
     }
   });
 };
+
+export const createMobileIcon = (id: string, iconType: string) => {
+  const iconButton = document.createElement("button");
+  iconButton.id = id;
+  iconButton.className =
+    "bp3-button bp3-minimal rm-mobile-button dont-unfocus-block";
+  iconButton.style.padding = "6px 4px 4px;";
+  const icon = document.createElement("i");
+  icon.className = `zmdi zmdi-hc-fw-rc zmdi-${iconType}`;
+  icon.style.cursor = "pointer";
+  icon.style.color = "rgb(92, 112, 128)";
+  icon.style.fontSize = "18px";
+  icon.style.transform = "scale(1.2)";
+  icon.style.fontWeight = "1.8";
+  icon.style.margin = "8px 4px";
+  iconButton.appendChild(icon);
+  return iconButton;
+};
