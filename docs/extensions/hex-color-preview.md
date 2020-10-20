@@ -1,5 +1,3 @@
-## UNDER DEVELOPMENT
-
 ## Hex Color Preview
 
 The Hex Color Preview extension renders a preview square of the color next to valid tagged hex codes. 
