@@ -2,13 +2,15 @@ import { waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { createOverlayObserver, getUids } from "../entry-helpers";
 import { getConfigFromPage } from "roam-client";
+import { isIOS } from "mobile-device-detect";
 
 let blockElementSelected: Element;
+const ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME = "roamjs-alias-page-synonyms";
 
 const createMenuOption = (menuOnClick: () => void) => {
   const option = document.createElement("li");
   const aTag = document.createElement("a");
-  aTag.setAttribute("label", "Alt-A");
+  aTag.setAttribute("label", `${isIOS ? "Opt" : "Alt"}-A`);
   aTag.className = "bp3-menu-item bp3-popover-dismiss";
   option.appendChild(aTag);
   const optionText = document.createElement("div");
@@ -20,6 +22,7 @@ const createMenuOption = (menuOnClick: () => void) => {
   shortcut.innerText = "Alt-A";
   aTag.appendChild(shortcut);
   aTag.onclick = menuOnClick;
+  option.className = ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME;
   return option;
 };
 
@@ -71,8 +74,11 @@ const optionCallback = async () => {
     });
   } else {
     const id = blockElementSelected.id;
-    if (blockElementSelected.tagName === "DIV") {
-      userEvent.click(blockElementSelected);
+    if (
+      blockElementSelected.tagName === "DIV" ||
+      !document.contains(blockElementSelected)
+    ) {
+      userEvent.click(document.getElementById(id));
       await waitFor(() => {
         if (document.getElementById(id).tagName !== "TEXTAREA") {
           throw new Error("Click did not render textarea");
@@ -130,8 +136,11 @@ const multiOption = createMenuOption(async () => {
 createOverlayObserver(() => {
   const uls = document.getElementsByClassName("bp3-menu bp3-text-small");
   Array.from(uls).forEach((u) => {
-    const ul = u as HTMLUListElement;
-    if (ul.tagName === "UL") {
+    if (
+      u.tagName === "UL" &&
+      !u.getElementsByClassName(ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME).length
+    ) {
+      const ul = u as HTMLUListElement;
       const dividers = Array.from(
         ul.getElementsByClassName("bp3-menu-divider")
       );
@@ -150,13 +159,12 @@ createOverlayObserver(() => {
 });
 
 document.addEventListener("mousedown", (e) => {
-  if (e.button !== 2) {
-    return;
-  }
   const htmlTarget = e.target as HTMLElement;
   if (
     htmlTarget.className === "simple-bullet-outer cursor-pointer" ||
-    htmlTarget.className === "simple-bullet-inner"
+    htmlTarget.className === "simple-bullet-inner" ||
+    htmlTarget.className ===
+      "bp3-icon-standard bp3-icon-caret-down rm-caret rm-caret-open rm-caret-hidden"
   ) {
     const bullet = htmlTarget.closest(".controls");
     blockElementSelected = bullet.parentElement.getElementsByClassName(
@@ -166,7 +174,7 @@ document.addEventListener("mousedown", (e) => {
 });
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === "a" && e.altKey) {
+  if (e.key === "a" && ((e.altKey && !isIOS) || (e.metaKey && isIOS))) {
     blockElementSelected = document.activeElement;
     optionCallback();
   }
