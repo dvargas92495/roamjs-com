@@ -29,7 +29,7 @@ const styleArchivedButtons = (node: HTMLElement) => {
 styleArchivedButtons(document.body);
 
 let previousActiveElement: HTMLElement;
-const todontIconButton = createMobileIcon("mobile-todont-icon-button", "menu");
+const todontIconButton = createMobileIcon("mobile-todont-icon-button", "minus-square");
 todontIconButton.onclick = () => {
   if (previousActiveElement.tagName === "TEXTAREA") {
     previousActiveElement.focus();
