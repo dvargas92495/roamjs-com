@@ -1,8 +1,8 @@
-import { waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
-import { createOverlayObserver, getUids } from "../entry-helpers";
+import { createOverlayObserver, getUids, openBlock } from "../entry-helpers";
 import { getConfigFromPage } from "roam-client";
 import { isIOS } from "mobile-device-detect";
+import { waitFor } from "@testing-library/dom";
 
 let blockElementSelected: Element;
 const ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME = "roamjs-alias-page-synonyms";
@@ -119,12 +119,7 @@ const multiOption = createMenuOption(async () => {
   } else {
     for (var index in highlightedDivIds) {
       const id = highlightedDivIds[index];
-      userEvent.click(document.getElementById(id));
-      await waitFor(() => {
-        if (document.getElementById(id).tagName !== "TEXTAREA") {
-          throw new Error("Click did not render textarea");
-        }
-      });
+      await openBlock(document.getElementById(id));
       const textArea = document.getElementById(id) as HTMLTextAreaElement;
       const newText = replace(textArea.value);
       userEvent.clear(textArea);

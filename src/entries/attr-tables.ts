@@ -1,9 +1,8 @@
 import {
-  createIconButton,
   createObserver,
   getConfigFromBlock,
 } from "../entry-helpers";
-import { getConfigFromPage, parseRoamDate } from "roam-client";
+import { getConfigFromPage, parseRoamDate, createIconButton } from "roam-client";
 
 type SortConfig = {
   [column: string]: {

@@ -10,6 +10,9 @@ const entry = Object.fromEntries(
 module.exports = {
   entry,
   resolve: {
+    modules: [
+      'node_modules'
+    ],
     extensions: [".ts", ".js"],
   },
   output: {

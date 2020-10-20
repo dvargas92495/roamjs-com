@@ -1,8 +1,13 @@
 import { waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { createWorker } from "tesseract.js";
-import { createIconButton, createObserver, openBlock } from "../entry-helpers";
-import { getConfigFromPage, newBlockEnter, pushBullets } from "roam-client";
+import { createObserver, openBlock } from "../entry-helpers";
+import {
+  getConfigFromPage,
+  newBlockEnter,
+  pushBullets,
+  createIconButton,
+} from "roam-client";
 
 declare global {
   interface Window {

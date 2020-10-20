@@ -1,5 +1,4 @@
 import {
-  createIconButton,
   createObserver,
   createSortIcons,
   getConfigFromBlock,
@@ -10,7 +9,11 @@ import {
   getTextByBlockUid,
   getUids,
 } from "../entry-helpers";
-import { getConfigFromPage, parseRoamDate } from "roam-client";
+import {
+  getConfigFromPage,
+  parseRoamDate,
+  createIconButton,
+} from "roam-client";
 
 let isSortByBlocks = false;
 
