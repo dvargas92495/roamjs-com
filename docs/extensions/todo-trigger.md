@@ -6,7 +6,9 @@ The TODO Trigger extension allows the user to tie an action upon converting a TO
 
 ### Usage
 
-The script is not configurable.
+The script supports the following configuration attributes, to be added in the `[[roam/js/todo-trigger]]` page:
+
+- `Append Text` - (Optional) The text to add to the end of a block, when an item flips from TODO to DONE. Could use "/Current Time" to always put the current time and "/Today" to always put the current day. All other text is static.
 
 Anytime a user clicks a TODO checkbox to become DONE, an action fires.
 

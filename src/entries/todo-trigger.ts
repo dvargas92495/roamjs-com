@@ -1,17 +1,36 @@
 import format from "date-fns/format";
-import { asyncType, getConfigFromPage, openBlock, toRoamDate } from "roam-client";
+import {
+  asyncType,
+  getConfigFromPage,
+  openBlock,
+  toRoamDate,
+} from "roam-client";
 
 const onTodo = () => {
-    console.log("TODO!");
-}
+  const config = getConfigFromPage("roam/js/todo-trigger");
+  const text = config["Append Text"] || "";
+  const formattedText = text
+    .replace("/Current Time", "[0-1][0-9]:[0-5][0-9]")
+    .replace(
+      "/Today",
+      "\\[\\[(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]\\]\\]"
+    );
+  const value = (document.activeElement as HTMLTextAreaElement).value;
+  const results = new RegExp(value).exec(value);
+  console.log(results, value, formattedText);
+};
 
 const onDone = async () => {
-    const config = getConfigFromPage("roam/js/todo-trigger");
-    const text = config["Append Text"] || "";
-    const today = new Date();
-    const formattedText = text.replace("/Current Time", format(today, "hh:mm")).replace("/Today", `[[${toRoamDate(today)}]]`)
-    await asyncType(formattedText);
-}
+  const textArea = document.activeElement as HTMLTextAreaElement;
+  textArea.setSelectionRange(textArea.value.length, textArea.value.length);
+  const config = getConfigFromPage("roam/js/todo-trigger");
+  const text = config["Append Text"] || "";
+  const today = new Date();
+  const formattedText = text
+    .replace("/Current Time", format(today, "hh:mm"))
+    .replace("/Today", `[[${toRoamDate(today)}]]`);
+  await asyncType(formattedText);
+};
 
 document.addEventListener("click", async (e) => {
   const target = e.target as HTMLElement;
@@ -21,12 +40,13 @@ document.addEventListener("click", async (e) => {
   ) {
     const inputTarget = target as HTMLInputElement;
     if (inputTarget.type === "checkbox") {
-        if (inputTarget.checked) {
-            onTodo();
-        } else {
-            await openBlock(inputTarget.closest('.roam-block'));
-            await onDone();
-        }
+      await openBlock(inputTarget.closest(".roam-block"));
+      if (inputTarget.checked) {
+        onTodo();
+      } else {
+        await onDone();
+      }
+      document.body.click();
     }
   }
 });
