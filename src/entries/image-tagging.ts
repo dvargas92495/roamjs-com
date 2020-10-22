@@ -32,7 +32,8 @@ const clickCallback = async (htmlTarget: HTMLElement) => {
   await openBlock(editButton);
   await newBlockEnter();
   await userEvent.tab();
-  await userEvent.type(document.activeElement, "Loading...");
+  await userEvent.type(document.activeElement, "Loading");
+  const loadingId = document.activeElement.id;
 
   const tesseractImage = document.createElement("img");
   tesseractImage.src = img.src;
@@ -52,6 +53,7 @@ const clickCallback = async (htmlTarget: HTMLElement) => {
       data: { text },
     } = await worker.recognize(canvas);
     await worker.terminate();
+    await openBlock(document.getElementById(loadingId));
     await userEvent.clear(document.activeElement);
     const textBullets = text.split("\n");
     const bullets = [];
