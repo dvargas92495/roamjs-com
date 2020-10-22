@@ -55,3 +55,15 @@ document.addEventListener("click", async (e) => {
     }
   }
 });
+
+const keydownEventListener = async (e: KeyboardEvent) => {
+  if (e.key === "Enter" && e.ctrlKey) {
+    const target = e.target as HTMLElement;
+    if (target.tagName === "TEXTAREA") {
+      const textArea = target as HTMLTextAreaElement;
+      console.log(textArea.value.substring(0, 12));
+    }
+  }
+};
+
+document.addEventListener("keydown", keydownEventListener);
