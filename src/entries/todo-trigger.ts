@@ -1,3 +1,11 @@
+const onTodo = () => {
+    console.log("TODO!");
+}
+
+const onDone = () => {
+    console.log("DONE!");
+}
+
 document.addEventListener("click", (e) => {
   const target = e.target as HTMLElement;
   if (
@@ -6,7 +14,11 @@ document.addEventListener("click", (e) => {
   ) {
     const inputTarget = target as HTMLInputElement;
     if (inputTarget.type === "checkbox") {
-        console.log(inputTarget.checked);
+        if (inputTarget.checked) {
+            onTodo();
+        } else {
+            onDone();
+        }
     }
   }
 });
