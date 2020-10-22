@@ -1,12 +1,19 @@
+import format from "date-fns/format";
+import { asyncType, getConfigFromPage, openBlock, toRoamDate } from "roam-client";
+
 const onTodo = () => {
     console.log("TODO!");
 }
 
-const onDone = () => {
-    console.log("DONE!");
+const onDone = async () => {
+    const config = getConfigFromPage("roam/js/todo-trigger");
+    const text = config["Append Text"] || "";
+    const today = new Date();
+    const formattedText = text.replace("/Current Time", format(today, "hh:mm")).replace("/Today", `[[${toRoamDate(today)}]]`)
+    await asyncType(formattedText);
 }
 
-document.addEventListener("click", (e) => {
+document.addEventListener("click", async (e) => {
   const target = e.target as HTMLElement;
   if (
     target.tagName === "INPUT" &&
@@ -17,11 +24,9 @@ document.addEventListener("click", (e) => {
         if (inputTarget.checked) {
             onTodo();
         } else {
-            onDone();
+            await openBlock(inputTarget.closest('.roam-block'));
+            await onDone();
         }
     }
   }
 });
-
-// What a ridiculous hack
-export {}
