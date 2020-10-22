@@ -61,12 +61,12 @@ const keydownEventListener = async (e: KeyboardEvent) => {
     const target = e.target as HTMLElement;
     if (target.tagName === "TEXTAREA") {
       const textArea = target as HTMLTextAreaElement;
-      if (textArea.value.startsWith("{{DONE}}")) {
+      if (textArea.value.startsWith("{{[[DONE]]}}")) {
         const start = textArea.selectionStart;
         const end = textArea.selectionEnd;
         await onDone();
         textArea.setSelectionRange(start, end);
-      } else if (!textArea.value.startsWith("{{TODO}}")) {
+      } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
         const start = textArea.selectionStart;
         const end = textArea.selectionEnd;
         await onTodo();
