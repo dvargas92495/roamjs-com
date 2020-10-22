@@ -1,5 +1,3 @@
-import userEvent from "@testing-library/user-event";
-import { waitFor } from "@testing-library/dom";
 import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
 
 declare global {
@@ -219,6 +217,47 @@ export const getConfigFromBlock = (container: HTMLElement) => {
   );
 };
 
+const getWordCount = (str = "") => str.trim().split(/\s+/).length;
+
+const getWordCountByBlockId = (blockId: number): number => {
+  const block = window.roamAlphaAPI.pull(
+    "[:block/children, :block/string]",
+    blockId
+  );
+  const children = block[":block/children"] || [];
+  const count = getWordCount(block[":block/string"]);
+  return (
+    count +
+    children
+      .map((c) => getWordCountByBlockId(c[":db/id"]))
+      .reduce((total, cur) => cur + total, 0)
+  );
+};
+
+export const getWordCountByBlockUid = (blockUid: string) => {
+  const block = window.roamAlphaAPI.q(
+    `[:find (pull ?e [:block/children, :block/string]) :where [?e :block/uid "${blockUid}"]]`
+  )[0][0];
+  const children = block.children || [];
+  const count = getWordCount(block.string);
+  return (
+    count +
+    children
+      .map((c) => getWordCountByBlockId(c.id))
+      .reduce((total, cur) => cur + total, 0)
+  );
+};
+
+export const getWordCountByPageTitle = (title: string) => {
+  const page = window.roamAlphaAPI.q(
+    `[:find (pull ?e [:block/children]) :where [?e :node/title "${title}"]]`
+  )[0][0];
+  const children = page.children || [];
+  return children
+    .map((c) => getWordCountByBlockId(c.id))
+    .reduce((total, cur) => cur + total, 0);
+};
+
 export const getTextByBlockUid = (uid: string) =>
   window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/string]) :where [?e :block/uid "${uid}"]]`
@@ -229,7 +268,7 @@ export const getRefTitlesByBlockUid = (uid: string) =>
     .q(
       `[:find (pull ?r [:node/title]) :where [?e :block/refs ?r] [?e :block/uid "${uid}"]]`
     )
-    .map((b) => b[0]?.title || '');
+    .map((b) => b[0]?.title || "");
 
 export const getCreateTimeByBlockUid = (uid: string) =>
   window.roamAlphaAPI.q(
@@ -246,7 +285,9 @@ export const getPageTitle = (e: Element) => {
   const heading = container.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;
-  return Array.from(heading.childNodes).find((n) => n.nodeName === "#text" || n.nodeName === 'SPAN');
+  return Array.from(heading.childNodes).find(
+    (n) => n.nodeName === "#text" || n.nodeName === "SPAN"
+  );
 };
 
 export type RoamBlock = {

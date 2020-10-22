@@ -12,6 +12,8 @@ On expanded queries, there will be a sort icon that appears next to the results 
 
 - Sort By Page Title - This will sort all the query results in ascending alphabetical order of the page title.
 - Sort By Page Title Descending - This will sort all the query results in descending alphabetical order of the page title.
+- Sort By Word Count - This will sort all the query results in ascending order of the word count.
+- Sort By Word Count Descending - This will sort all the query results in descending alphabetical order of the word count.
 - Sort By Created Date - This will sort all the query results in ascending order that the page was created.
 - Sort By Created Date Descending - This will sort all the query results in descending order that the page was created.
 - Sort By Edited Date - This will sort all the query results in ascending order that the page was last edited.

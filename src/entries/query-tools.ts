@@ -7,6 +7,8 @@ import {
   getEditTimeByBlockUid,
   getEditTimeByTitle,
   getTextByBlockUid,
+  getWordCountByBlockUid,
+  getWordCountByPageTitle,
 } from "../entry-helpers";
 import {
   getConfigFromPage,
@@ -89,6 +91,18 @@ const sortCallbacks = {
       isSortByBlocks
         ? getTextByBlockUid(b).localeCompare(getTextByBlockUid(a))
         : b.localeCompare(a)
+    ),
+  "Word Count": (refContainer: Element) =>
+    menuItemCallback(refContainer, (a, b) =>
+      isSortByBlocks
+        ? getWordCountByBlockUid(a) - getWordCountByBlockUid(b)
+        : getWordCountByPageTitle(a) - getWordCountByPageTitle(b)
+    ),
+  "Word Count Descending": (refContainer: Element) =>
+    menuItemCallback(refContainer, (a, b) =>
+      isSortByBlocks
+        ? getWordCountByBlockUid(b) - getWordCountByBlockUid(a)
+        : getWordCountByPageTitle(b) - getWordCountByPageTitle(a)
     ),
   "Created Date": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
