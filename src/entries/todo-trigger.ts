@@ -6,18 +6,23 @@ import {
   toRoamDate,
 } from "roam-client";
 
-const onTodo = () => {
+const onTodo = async () => {
   const config = getConfigFromPage("roam/js/todo-trigger");
   const text = config["Append Text"] || "";
-  const formattedText = text
-    .replace("/Current Time", "[0-1][0-9]:[0-5][0-9]")
+  const formattedText = ` ${text
+    .replace("/Current Time", "[0-2][0-9]:[0-5][0-9]")
     .replace(
       "/Today",
       "\\[\\[(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]\\]\\]"
-    );
-  const value = (document.activeElement as HTMLTextAreaElement).value;
-  const results = new RegExp(value).exec(value);
-  console.log(results, value, formattedText);
+    )}`;
+  const textarea = document.activeElement as HTMLTextAreaElement;
+  const value = textarea.value;
+  const results = new RegExp(formattedText).exec(value);
+  if (results[0]) {
+    const len = results[0].length;
+    textarea.setSelectionRange(results.index, results.index + len);
+    await asyncType("{backspace}");
+  }
 };
 
 const onDone = async () => {
@@ -26,9 +31,9 @@ const onDone = async () => {
   const config = getConfigFromPage("roam/js/todo-trigger");
   const text = config["Append Text"] || "";
   const today = new Date();
-  const formattedText = text
-    .replace("/Current Time", format(today, "hh:mm"))
-    .replace("/Today", `[[${toRoamDate(today)}]]`);
+  const formattedText = ` ${text
+    .replace("/Current Time", format(today, "HH:mm"))
+    .replace("/Today", `[[${toRoamDate(today)}]]`)}`;
   await asyncType(formattedText);
 };
 

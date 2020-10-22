@@ -10,7 +10,9 @@ The script supports the following configuration attributes, to be added in the `
 
 - `Append Text` - (Optional) The text to add to the end of a block, when an item flips from TODO to DONE. Could use "/Current Time" to always put the current time and "/Today" to always put the current day. All other text is static.
 
-Anytime a user clicks a TODO checkbox to become DONE, an action fires.
+Anytime a user clicks a TODO checkbox to become DONE, the "Done" action fires. If the user clicks a DONE checkbox to become TODO, the "Todo" action fires. 
+
+When "Append Text" is configured, the "Done" action appends the configured text to the end of the block. The "Todo" action removes the configured text from the end of the string.
 
 ```javascript
 var old = document.getElementById("todo-trigger");
