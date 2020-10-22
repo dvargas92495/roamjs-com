@@ -1,5 +1,4 @@
 import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
-import wordcount from "wordcount";
 
 declare global {
   interface Window {
