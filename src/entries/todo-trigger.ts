@@ -18,7 +18,7 @@ const onTodo = async () => {
   const textarea = document.activeElement as HTMLTextAreaElement;
   const value = textarea.value;
   const results = new RegExp(formattedText).exec(value);
-  if (results[0]) {
+  if (results) {
     const len = results[0].length;
     textarea.setSelectionRange(results.index, results.index + len);
     await asyncType("{backspace}");
@@ -61,7 +61,17 @@ const keydownEventListener = async (e: KeyboardEvent) => {
     const target = e.target as HTMLElement;
     if (target.tagName === "TEXTAREA") {
       const textArea = target as HTMLTextAreaElement;
-      console.log(textArea.value.substring(0, 12));
+      if (textArea.value.startsWith("{{DONE}}")) {
+        const start = textArea.selectionStart;
+        const end = textArea.selectionEnd;
+        await onDone();
+        textArea.setSelectionRange(start, end);
+      } else if (!textArea.value.startsWith("{{TODO}}")) {
+        const start = textArea.selectionStart;
+        const end = textArea.selectionEnd;
+        await onTodo();
+        textArea.setSelectionRange(start, end);
+      }
     }
   }
 };
