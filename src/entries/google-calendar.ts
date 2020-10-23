@@ -30,6 +30,7 @@ const importGoogleCalendar = async (
   }
   const includeLink = config["Include Event Link"]?.trim() === "true";
   const skipFree = config["Skip Free"]?.trim() === "true";
+  const format = config["Format"];
   const dateToUse = isNaN(dateFromPage.valueOf()) ? new Date() : dateFromPage;
   const timeMin = startOfDay(dateToUse);
   const timeMax = endOfDay(timeMin);
@@ -50,21 +51,37 @@ const importGoogleCalendar = async (
       const bullets = events
         .filter((e: any) => !skipFree || e.transparency !== "transparent")
         .map((e: any) => {
-          const summaryText = e.summary ? e.summary : "No Summary";
-          const summary =
-            includeLink && e.htmlLink
-              ? `[${summaryText}](${e.htmlLink})`
-              : summaryText;
-          const meetLink = e.hangoutLink ? ` - [Meet](${e.hangoutLink})` : "";
-          const zoomLink =
-            e.location && e.location.indexOf("zoom.us") > -1
-              ? ` - [Zoom](${e.location})`
-              : "";
-          return `${summary} (${new Date(
-            e.start.dateTime
-          ).toLocaleTimeString()} - ${new Date(
-            e.end.dateTime
-          ).toLocaleTimeString()})${meetLink}${zoomLink}`;
+          if (format) {
+            return format
+              .replace("/Summary", e.summary || "No Summary")
+              .replace("/Link", e.htmlLink || "")
+              .replace("/Hangout", e.hangoutLink || "")
+              .replace("/Location", e.location || "")
+              .replace(
+                "/Start Time",
+                new Date(e.start.dateTime).toLocaleTimeString()
+              )
+              .replace(
+                "/End Time",
+                new Date(e.end.dateTime).toLocaleTimeString()
+              );
+          } else {
+            const summaryText = e.summary ? e.summary : "No Summary";
+            const summary =
+              includeLink && e.htmlLink
+                ? `[${summaryText}](${e.htmlLink})`
+                : summaryText;
+            const meetLink = e.hangoutLink ? ` - [Meet](${e.hangoutLink})` : "";
+            const zoomLink =
+              e.location && e.location.indexOf("zoom.us") > -1
+                ? ` - [Zoom](${e.location})`
+                : "";
+            return `${summary} (${new Date(
+              e.start.dateTime
+            ).toLocaleTimeString()} - ${new Date(
+              e.end.dateTime
+            ).toLocaleTimeString()})${meetLink}${zoomLink}`;
+          }
         }) as string[];
       await pushBullets(bullets, blockUid, parentUid);
     })
