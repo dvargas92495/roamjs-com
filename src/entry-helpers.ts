@@ -178,8 +178,9 @@ export const createSortIcon = (
 
   // Tooltip
   const tooltip = document.createElement("div");
-  tooltip.className="bp3-overlay bp3-overlay-open bp3-overlay-inline";
-  
+  tooltip.className="bp3-overlay bp3-overlay-inline";
+  popoverWrapper.appendChild(tooltip);
+
   const tooltipContainer = document.createElement("div");
   tooltipContainer.className="bp3-transition-container bp3-popover-enter-done"; 
   tooltipContainer.style.position='absolute'; 
@@ -192,7 +193,7 @@ export const createSortIcon = (
   const tooltipPopover = document.createElement("div");
   tooltipPopover.className = "bp3-popover bp3-tooltip"; 
   tooltipPopover.style.transformOrigin = "62px top";
-  tooltip.appendChild(tooltipPopover);
+  tooltipContainer.appendChild(tooltipPopover);
 
   const tooltipArrow = document.createElement("div");
   tooltipArrow.className = "bp3-popover-arrow"; 
