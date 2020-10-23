@@ -205,6 +205,8 @@ const randomize = (q: HTMLDivElement) => {
 
 const observerCallback = () => {
   createSortIcons("rm-query-content", onCreateSortIcons, sortCallbacks, 1);
+
+  // Randomization
   const queries = Array.from(
     document.getElementsByClassName("rm-query-content")
   ).filter(
@@ -226,6 +228,28 @@ const observerCallback = () => {
         e.preventDefault();
       };
       randomize(q);
+    }
+  });
+
+  // Context
+  const unContextedQueries = Array.from(
+    document.getElementsByClassName("rm-query-content")
+  ).filter(
+    (e) => !e.getAttribute("data-is-contexted-results")
+  ) as HTMLDivElement[];
+  queries.forEach((q) => {
+    const config = getConfigFromBlock(q);
+    if (config["Context"]) {
+      q.setAttribute("data-is-contexted-results", "true");
+      const context = isNaN(config["Context"])
+        ? config["Context"]
+        : parseInt(config["Context"]);
+      const contexts = Array.from(q.getElementsByClassName("zoom-mentions-view"));
+      contexts.forEach(ctx => {
+        const children = Array.from(ctx.children).reverse() as HTMLDivElement[];
+        const index = !isNaN(context) ? Math.min(context, children.length) : children.length;
+        children[index - 1].click();
+      })
     }
   });
 };
