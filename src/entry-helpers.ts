@@ -33,7 +33,10 @@ export const createObserver = (
 
 export const createBlockObserver = (
   blockCallback: (b: HTMLDivElement) => void
-) =>
+) => {
+  const blocks = document.getElementsByClassName("roam-block");
+  Array.from(blocks).forEach(blockCallback);
+
   createObserver((ms) => {
     const blocks = ms.flatMap((m) =>
       Array.from(m.addedNodes).filter(
@@ -52,6 +55,7 @@ export const createBlockObserver = (
     blocks.forEach(blockCallback);
     childBlocks.forEach(blockCallback);
   });
+};
 
 export const createOverlayObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void

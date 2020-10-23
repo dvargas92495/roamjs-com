@@ -48,7 +48,4 @@ const renderColorPreviewsInBlock = (block: HTMLDivElement) => {
   });
 };
 
-const blocks = document.getElementsByClassName("roam-block");
-Array.from(blocks).forEach(renderColorPreviewsInBlock);
-
 createBlockObserver(renderColorPreviewsInBlock);
