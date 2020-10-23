@@ -188,7 +188,6 @@ export const createSortIcon = (
   tooltipContainer.style.top= "0px"; 
   tooltipContainer.style.left = "0px"; 
   tooltipContainer.style.transform = "translate3d(664px, 2474px, 0px)";
-  tooltip.appendChild(tooltipContainer);
   
   const tooltipPopover = document.createElement("div");
   tooltipPopover.className = "bp3-popover bp3-tooltip"; 
@@ -223,10 +222,12 @@ export const createSortIcon = (
 
   popoverButton.onmouseover = () => {
     tooltip.className="bp3-overlay bp3-overlay-open bp3-overlay-inline";
+    tooltip.appendChild(tooltipContainer);
   }
 
   popoverButton.onmouseout = () => {
     tooltip.className="bp3-overlay bp3-overlay-inline";
+    tooltip.removeChild(tooltipContainer);
   }
 
   return popoverWrapper;
