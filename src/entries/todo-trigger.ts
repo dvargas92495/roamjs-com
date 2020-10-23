@@ -1,5 +1,5 @@
 import format from "date-fns/format";
-import { isIOS } from "mobile-device-detect";
+import { isIOS, isMacOs } from "mobile-device-detect";
 import {
   asyncType,
   getConfigFromPage,
@@ -108,8 +108,10 @@ document.addEventListener("click", async (e) => {
   }
 });
 
+const isApple = isIOS || isMacOs;
+
 const keydownEventListener = async (e: KeyboardEvent) => {
-  if (e.key === "Enter" && ((e.ctrlKey && !isIOS) || (e.metaKey && isIOS))) {
+  if (e.key === "Enter" && ((e.ctrlKey && !isApple) || (e.metaKey && isApple))) {
     const target = e.target as HTMLElement;
     if (target.tagName === "TEXTAREA") {
       const textArea = target as HTMLTextAreaElement;
