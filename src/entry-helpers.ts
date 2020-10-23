@@ -220,6 +220,14 @@ export const createSortIcon = (
   tooltipContent.innerText = "Sort this page";
   tooltipPopover.appendChild(tooltipContent);
 
+  popoverButton.onmouseover = () => {
+    tooltip.className="bp3-overlay bp3-overlay-open bp3-overlay-inline";
+  }
+
+  popoverButton.onmouseout = () => {
+    tooltip.className="bp3-overlay bp3-overlay-inline";
+  }
+
   return popoverWrapper;
 };
 
