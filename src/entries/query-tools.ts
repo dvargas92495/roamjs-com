@@ -244,12 +244,16 @@ const observerCallback = () => {
       const context = isNaN(config["Context"])
         ? config["Context"]
         : parseInt(config["Context"]);
-      const contexts = Array.from(q.getElementsByClassName("zoom-mentions-view"));
-      contexts.forEach(ctx => {
+      const contexts = Array.from(
+        q.getElementsByClassName("zoom-mentions-view")
+      ).filter((c) => c.childElementCount);
+      contexts.forEach((ctx) => {
         const children = Array.from(ctx.children).reverse() as HTMLDivElement[];
-        const index = !isNaN(context) ? Math.min(context, children.length) : children.length;
+        const index = !isNaN(context)
+          ? Math.min(context, children.length)
+          : children.length;
         children[index - 1].click();
-      })
+      });
     }
   });
 };
