@@ -31,6 +31,32 @@ export const createObserver = (
     document.getElementsByClassName("roam-body")[0]
   );
 
+export const createBlockObserver = (
+  blockCallback: (b: HTMLDivElement) => void
+) => {
+  const blocks = document.getElementsByClassName("roam-block");
+  Array.from(blocks).forEach(blockCallback);
+
+  createObserver((ms) => {
+    const blocks = ms.flatMap((m) =>
+      Array.from(m.addedNodes).filter(
+        (d: Node) =>
+          d.nodeName === "DIV" &&
+          Array.from((d as HTMLDivElement).classList).indexOf("roam-block") > -1
+      )
+    );
+    const childBlocks = ms.flatMap((m) =>
+      Array.from(m.addedNodes)
+        .filter((n) => n.nodeName === "DIV")
+        .flatMap((d) =>
+          Array.from((d as HTMLDivElement).getElementsByClassName("roam-block"))
+        )
+    );
+    blocks.forEach(blockCallback);
+    childBlocks.forEach(blockCallback);
+  });
+};
+
 export const createOverlayObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void
 ) => createDivObserver(mutationCallback, document.body);
