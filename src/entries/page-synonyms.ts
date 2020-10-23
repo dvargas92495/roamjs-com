@@ -171,7 +171,7 @@ document.addEventListener("mousedown", (e) => {
 });
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === "a" && ((e.altKey && !isIOS) || (e.metaKey && isIOS))) {
+  if (e.key === "a" && e.altKey) {
     blockElementSelected = document.activeElement;
     optionCallback();
   }

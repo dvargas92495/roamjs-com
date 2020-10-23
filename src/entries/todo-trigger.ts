@@ -1,4 +1,5 @@
 import format from "date-fns/format";
+import { isIOS } from "mobile-device-detect";
 import {
   asyncType,
   getConfigFromPage,
@@ -28,6 +29,11 @@ const onTodo = async () => {
   const text = config["Append Text"];
   if (text) {
     const formattedText = ` ${text
+      .replace(new RegExp("\\^", 'g'), "\\^")
+      .replace(new RegExp("\\[", 'g'), "\\[")
+      .replace(new RegExp("\\]", 'g'), "\\]")
+      .replace(new RegExp("\\(", 'g'), "\\(")
+      .replace(new RegExp("\\)", 'g'), "\\)")
       .replace("/Current Time", "[0-2][0-9]:[0-5][0-9]")
       .replace(
         "/Today",
@@ -103,7 +109,7 @@ document.addEventListener("click", async (e) => {
 });
 
 const keydownEventListener = async (e: KeyboardEvent) => {
-  if (e.key === "Enter" && e.ctrlKey) {
+  if (e.key === "Enter" && ((e.ctrlKey && !isIOS) || (e.metaKey && isIOS))) {
     const target = e.target as HTMLElement;
     if (target.tagName === "TEXTAREA") {
       const textArea = target as HTMLTextAreaElement;
