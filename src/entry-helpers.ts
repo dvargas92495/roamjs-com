@@ -175,6 +175,51 @@ export const createSortIcon = (
       closePopover();
     }
   };
+
+  // Tooltip
+  const tooltip = document.createElement("div");
+  tooltip.className="bp3-overlay bp3-overlay-open bp3-overlay-inline";
+  
+  const tooltipContainer = document.createElement("div");
+  tooltipContainer.className="bp3-transition-container bp3-popover-enter-done"; 
+  tooltipContainer.style.position='absolute'; 
+  tooltipContainer.style.willChange="transform"; 
+  tooltipContainer.style.top= "0px"; 
+  tooltipContainer.style.left = "0px"; 
+  tooltipContainer.style.transform = "translate3d(664px, 2474px, 0px)";
+  tooltip.appendChild(tooltipContainer);
+  
+  const tooltipPopover = document.createElement("div");
+  tooltipPopover.className = "bp3-popover bp3-tooltip"; 
+  tooltipPopover.style.transformOrigin = "62px top";
+  tooltip.appendChild(tooltipPopover);
+
+  const tooltipArrow = document.createElement("div");
+  tooltipArrow.className = "bp3-popover-arrow"; 
+  tooltipArrow.style.left = "51px"; 
+  tooltipArrow.style.top = "-8px";
+  tooltipPopover.appendChild(tooltipArrow);
+
+  const tooltipSvg = document.createElementNS("http://www.w3.org/2000/svg","svg") as SVGSVGElement;
+  tooltipSvg.setAttribute("viewBox","0 0 30 30");
+  tooltipSvg.style.transform = "rotate(90deg);"
+  tooltipArrow.appendChild(tooltipSvg);
+
+  const tooltipPath1 = document.createElementNS("http://www.w3.org/2000/svg","path") as SVGPathElement;
+  tooltipPath1.setAttribute('class', "bp3-popover-arrow-border"); 
+  tooltipPath1.setAttribute('d',"M8.11 6.302c1.015-.936 1.887-2.922 1.887-4.297v26c0-1.378-.868-3.357-1.888-4.297L.925 17.09c-1.237-1.14-1.233-3.034 0-4.17L8.11 6.302z");
+  tooltipSvg.appendChild(tooltipPath1);
+
+  const tooltipPath2 = document.createElementNS("http://www.w3.org/2000/svg","path") as SVGPathElement;
+  tooltipPath2.setAttribute('class', "bp3-popover-arrow-border"); 
+  tooltipPath2.setAttribute('d',"M8.787 7.036c1.22-1.125 2.21-3.376 2.21-5.03V0v30-2.005c0-1.654-.983-3.9-2.21-5.03l-7.183-6.616c-.81-.746-.802-1.96 0-2.7l7.183-6.614z");
+  tooltipSvg.appendChild(tooltipPath2);
+
+  const tooltipContent = document.createElement("div");
+  tooltipContent.className = "bp3-popover-content";
+  tooltipContent.innerText = "Sort this page";
+  tooltipPopover.appendChild(tooltipContent);
+
   return popoverWrapper;
 };
 
