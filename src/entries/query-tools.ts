@@ -232,6 +232,7 @@ const observerCallback = () => {
   });
 
   // Context
+  const pageConfig = getConfigFromPage("roam/js/query-tools");
   const unContextedQueries = Array.from(
     document.getElementsByClassName("rm-query-content")
   ).filter(
@@ -239,11 +240,12 @@ const observerCallback = () => {
   ) as HTMLDivElement[];
   unContextedQueries.forEach((q) => {
     const config = getConfigFromBlock(q);
-    if (config["Context"]) {
+    const configContext = config["Context"] || pageConfig["Context"];
+    if (configContext) {
       q.setAttribute("data-is-contexted-results", "true");
-      const context = isNaN(config["Context"])
-        ? config["Context"]
-        : parseInt(config["Context"]);
+      const context = isNaN(configContext)
+        ? configContext
+        : parseInt(configContext);
       const contexts = Array.from(
         q.getElementsByClassName("zoom-mentions-view")
       ).filter((c) => c.childElementCount);
