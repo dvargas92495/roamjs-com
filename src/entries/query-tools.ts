@@ -237,7 +237,7 @@ const observerCallback = () => {
   ).filter(
     (e) => !e.getAttribute("data-is-contexted-results")
   ) as HTMLDivElement[];
-  queries.forEach((q) => {
+  unContextedQueries.forEach((q) => {
     const config = getConfigFromBlock(q);
     if (config["Context"]) {
       q.setAttribute("data-is-contexted-results", "true");
