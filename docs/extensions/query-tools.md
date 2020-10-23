@@ -33,6 +33,14 @@ Sometimes we have queries with hundreds of results and want to return a random e
 Random:: 3
 ```
 
+### Context
+
+By default, query results only display the most nested block in the result. To display more context in a given query, add the `Context` attribute as a child block of the query. Set the value to the number of levels you'd like displayed, or `Top` to display full context. For Example, to always show two more levels of context to each query result, add the following block as a child to the query:
+
+```
+Context:: 2
+```
+
 ### Installation
 
 Insert this as a child of any `{{[[roam/js]]}}` block to install the extension.
