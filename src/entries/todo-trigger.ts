@@ -30,6 +30,10 @@ const onTodo = async () => {
   if (text) {
     const formattedText = ` ${text
       .replace(new RegExp("\\^", 'g'), "\\^")
+      .replace(new RegExp("\\[", 'g'), "\\[")
+      .replace(new RegExp("\\]", 'g'), "\\]")
+      .replace(new RegExp("\\(", 'g'), "\\(")
+      .replace(new RegExp("\\)", 'g'), "\\)")
       .replace("/Current Time", "[0-2][0-9]:[0-5][0-9]")
       .replace(
         "/Today",
