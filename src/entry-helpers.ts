@@ -31,30 +31,40 @@ export const createObserver = (
     document.getElementsByClassName("roam-body")[0]
   );
 
-export const createBlockObserver = (
-  blockCallback: (b: HTMLDivElement) => void
+const createHTMLObserver = (
+  callback: (b: HTMLElement) => void,
+  tag: string,
+  className: string
 ) => {
-  const blocks = document.getElementsByClassName("roam-block");
-  Array.from(blocks).forEach(blockCallback);
+  const blocks = document.getElementsByClassName(className);
+  Array.from(blocks).forEach(callback);
 
   createObserver((ms) => {
     const blocks = ms.flatMap((m) =>
       Array.from(m.addedNodes).filter(
         (d: Node) =>
-          d.nodeName === "DIV" &&
-          Array.from((d as HTMLDivElement).classList).indexOf("roam-block") > -1
+          d.nodeName === tag &&
+          Array.from((d as HTMLElement).classList).indexOf(className) > -1
       )
     );
     const childBlocks = ms.flatMap((m) =>
       Array.from(m.addedNodes)
         .filter((n) => n.nodeName === "DIV")
         .flatMap((d) =>
-          Array.from((d as HTMLDivElement).getElementsByClassName("roam-block"))
+          Array.from((d as HTMLDivElement).getElementsByClassName(className))
         )
     );
-    blocks.forEach(blockCallback);
-    childBlocks.forEach(blockCallback);
+    blocks.forEach(callback);
+    childBlocks.forEach(callback);
   });
+};
+
+export const createBlockObserver = (
+  blockCallback: (b: HTMLDivElement) => void,
+  blockRefCallback: (b: HTMLSpanElement) => void
+) => {
+  createHTMLObserver(blockCallback, "DIV", "roam-block");
+  createHTMLObserver(blockRefCallback, "SPAN", "rm-block-ref");
 };
 
 export const createOverlayObserver = (
@@ -284,10 +294,15 @@ export const getWordCountByPageTitle = (title: string) => {
     .reduce((total, cur) => cur + total, 0);
 };
 
-export const getTextByBlockUid = (uid: string) =>
-  window.roamAlphaAPI.q(
+export const getTextByBlockUid = (uid: string) => {
+  const results = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/string]) :where [?e :block/uid "${uid}"]]`
-  )[0][0]?.string;
+  );
+  if (results.length) {
+    return results[0][0]?.string;
+  }
+  return "";
+};
 
 export const getRefTitlesByBlockUid = (uid: string) =>
   window.roamAlphaAPI
@@ -342,6 +357,20 @@ export const getLinkedPageReferences = (t: string) => {
     .filter((block) => block.length);
   return parentBlocks.map((b) => findParentBlock(b[0])) as RoamBlock[];
 };
+
+export const getChildRefStringsByBlockUid = (b: string) =>
+  window.roamAlphaAPI
+    .q(
+      `[:find (pull ?r [:block/string]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
+    )
+    .map((r) => r[0].string);
+
+export const getChildRefUidsByBlockUid = (b: string) =>
+  window.roamAlphaAPI
+    .q(
+      `[:find (pull ?r [:block/uid]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
+    )
+    .map((r) => r[0].uid);
 
 export const getLinkedReferences = (t: string) => {
   const parentBlocks = window.roamAlphaAPI
