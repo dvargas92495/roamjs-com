@@ -7,7 +7,7 @@ import {
   openBlock,
   toRoamDate,
 } from "roam-client";
-import { createBlockObserver, getTextByBlockUid } from "../entry-helpers";
+import { createBlockObserver, getChildRefStringsByBlockUid, getTextByBlockUid } from "../entry-helpers";
 
 const replaceText = async ([before, after]: string[]) => {
   const textArea = document.activeElement as HTMLTextAreaElement;
@@ -141,6 +141,16 @@ createBlockObserver((b) => {
     const { blockUid } = getUids(b);
     if (getTextByBlockUid(blockUid).indexOf("{{[[DONE]]}}") > -1) {
       b.style.textDecoration = "line-through";
+    }
+  }
+}, (s) => {
+  if (isStrikethrough) {
+    const parent = s.closest('.roam-block') as HTMLDivElement;
+    const { blockUid } = getUids(parent);
+    const refs = getChildRefStringsByBlockUid(blockUid);
+    const index = Array.from(parent.getElementsByClassName('rm-block-ref')).indexOf(s);
+    if (refs[index].indexOf("{{[[DONE]]}}") > -1) {
+      s.style.textDecoration = "line-through";
     }
   }
 });

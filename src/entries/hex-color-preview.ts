@@ -48,4 +48,6 @@ const renderColorPreviewsInBlock = (block: HTMLDivElement) => {
   });
 };
 
-createBlockObserver(renderColorPreviewsInBlock);
+createBlockObserver(renderColorPreviewsInBlock, (s) => {
+  
+});

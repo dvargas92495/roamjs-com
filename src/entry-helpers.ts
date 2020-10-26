@@ -57,13 +57,14 @@ const createHTMLObserver = (
     blocks.forEach(callback);
     childBlocks.forEach(callback);
   });
-}
- 
+};
+
 export const createBlockObserver = (
-  blockCallback: (b: HTMLDivElement) => void
+  blockCallback: (b: HTMLDivElement) => void,
+  blockRefCallback: (b: HTMLSpanElement) => void
 ) => {
   createHTMLObserver(blockCallback, "DIV", "roam-block");
-  createHTMLObserver(blockCallback, "SPAN", "rm-block-ref");
+  createHTMLObserver(blockRefCallback, "SPAN", "rm-block-ref");
 };
 
 export const createOverlayObserver = (
@@ -351,6 +352,11 @@ export const getLinkedPageReferences = (t: string) => {
     .filter((block) => block.length);
   return parentBlocks.map((b) => findParentBlock(b[0])) as RoamBlock[];
 };
+
+export const getChildRefStringsByBlockUid = (b: string) =>
+  window.roamAlphaAPI.q(
+    `[:find (pull ?r [:block/string]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
+  ).map(r => r[0].string);
 
 export const getLinkedReferences = (t: string) => {
   const parentBlocks = window.roamAlphaAPI
