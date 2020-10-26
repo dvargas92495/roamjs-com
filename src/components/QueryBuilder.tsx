@@ -1,14 +1,14 @@
 import React, { useCallback, useState } from "react";
-import { Button, Popover } from "@blueprintjs/core";
+import { Button, MenuItem, Popover } from "@blueprintjs/core";
 import { Select } from "@blueprintjs/select";
 import { asyncType, openBlock } from "roam-client";
 
 enum NODES {
-  OR = 'OR',
-  AND = 'AND',
-  NOT = 'NOT',
-  BETWEEN = 'BETWEEN',
-  TAG = 'TAG',
+  OR = "OR",
+  AND = "AND",
+  NOT = "NOT",
+  BETWEEN = "BETWEEN",
+  TAG = "TAG",
 }
 
 const NodeSelect = Select.ofType<NODES>();
@@ -36,24 +36,36 @@ const QueryContent = ({ blockId }: { blockId: string }) => {
 
   return (
     <div style={{ padding: 16 }}>
-      <NodeSelect
-        items={[NODES.OR, NODES.AND, NODES.BETWEEN]}
-        onItemSelect={(item) =>
-          setQueryState({
-            type: item,
-            children: queryState.children,
-          })
-        }
-        itemRenderer={(item) => <div>{item}</div>}
-        filterable={false}
-      >
-        <Button
-          text={queryState.type}
-          rightIcon="double-caret-vertical"
-          autoFocus={true}
-        />
-      </NodeSelect>
-      <Button text="Save" onClick={onSave} />
+      <div style={{ paddingLeft: 4, borderLeft: "1px solid red" }}>
+        <NodeSelect
+          items={[NODES.OR, NODES.AND, NODES.BETWEEN]}
+          onItemSelect={(item) =>
+            setQueryState({
+              type: item,
+              children: queryState.children,
+            })
+          }
+          itemRenderer={(item, { modifiers, handleClick }) => (
+            <MenuItem
+              key={item}
+              text={item}
+              active={modifiers.active}
+              onClick={handleClick}
+            />
+          )}
+          filterable={false}
+          popoverProps={{ minimal: true }}
+        >
+          <Button
+            text={queryState.type}
+            rightIcon="double-caret-vertical"
+            autoFocus={true}
+          />
+        </NodeSelect>
+      </div>
+      <div style={{ paddingTop: 16 }}>
+        <Button text="Save" onClick={onSave} />
+      </div>
     </div>
   );
 };
