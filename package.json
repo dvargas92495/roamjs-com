@@ -34,10 +34,15 @@
   },
   "homepage": "https://github.com/dvargas92495/roam-js-extensions#readme",
   "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/preset-react": "^7.12.1",
     "@types/aws-lambda": "^8.10.61",
     "@types/color": "^3.0.1",
     "@types/node-emoji": "^1.8.1",
     "@types/react": "^16.9.52",
+    "@types/react-dom": "^16.9.8",
+    "babel-loader": "^8.1.0",
     "babel-preset-env": "^1.7.0",
     "dotenv-webpack": "^2.0.0",
     "eslint": "^7.7.0",
@@ -49,6 +54,7 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
+    "@blueprintjs/core": "^3.35.0",
     "@dvargas92495/ui": "^0.6.1",
     "@testing-library/dom": "^7.26.3",
     "@testing-library/user-event": "^12.1.3",

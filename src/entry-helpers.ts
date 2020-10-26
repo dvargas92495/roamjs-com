@@ -31,7 +31,7 @@ export const createObserver = (
     document.getElementsByClassName("roam-body")[0]
   );
 
-const createHTMLObserver = (
+export const createHTMLObserver = (
   callback: (b: HTMLElement) => void,
   tag: string,
   className: string
