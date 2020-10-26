@@ -294,10 +294,15 @@ export const getWordCountByPageTitle = (title: string) => {
     .reduce((total, cur) => cur + total, 0);
 };
 
-export const getTextByBlockUid = (uid: string) =>
-  window.roamAlphaAPI.q(
+export const getTextByBlockUid = (uid: string) => {
+  const results = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/string]) :where [?e :block/uid "${uid}"]]`
-  )[0][0]?.string;
+  );
+  if (results.length) {
+    return results[0][0]?.string;
+  }
+  return "";
+};
 
 export const getRefTitlesByBlockUid = (uid: string) =>
   window.roamAlphaAPI
@@ -354,14 +359,18 @@ export const getLinkedPageReferences = (t: string) => {
 };
 
 export const getChildRefStringsByBlockUid = (b: string) =>
-  window.roamAlphaAPI.q(
-    `[:find (pull ?r [:block/string]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
-  ).map(r => r[0].string);
+  window.roamAlphaAPI
+    .q(
+      `[:find (pull ?r [:block/string]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
+    )
+    .map((r) => r[0].string);
 
 export const getChildRefUidsByBlockUid = (b: string) =>
-  window.roamAlphaAPI.q(
-    `[:find (pull ?r [:block/uid]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
-  ).map(r => r[0].uid);
+  window.roamAlphaAPI
+    .q(
+      `[:find (pull ?r [:block/uid]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
+    )
+    .map((r) => r[0].uid);
 
 export const getLinkedReferences = (t: string) => {
   const parentBlocks = window.roamAlphaAPI
