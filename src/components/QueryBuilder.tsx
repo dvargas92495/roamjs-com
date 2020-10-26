@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button, MenuItem, Popover } from "@blueprintjs/core";
 import { Select } from "@blueprintjs/select";
 import { asyncType, openBlock } from "roam-client";
@@ -24,23 +24,36 @@ const toQueryString = (queryState: QueryState) => {
   return `${operator}:{}`;
 };
 
-const QueryContent = ({ blockId }: { blockId: string }) => {
-  const [queryState, setQueryState] = useState<QueryState>({
-    type: NODES.OR,
-    children: [],
-  });
-  const onSave = useCallback(async () => {
-    const outputText = `{{[[query]]: {${toQueryString(queryState)}}}}`;
-    await openBlock(document.getElementById(blockId));
-    await userEvent.clear(document.activeElement);
-    await asyncType(outputText);
-  }, [queryState]);
+const colors = ["red", "green", "blue"];
 
+const SubqueryContent = ({
+  value,
+  onChange,
+  level,
+}: {
+  value: QueryState;
+  onChange: (e: QueryState) => void;
+  level: number;
+}) => {
+  const [queryState, setQueryState] = useState<QueryState>(value);
+  useEffect(() => {
+    onChange(queryState);
+  }, [queryState, onChange]);
   return (
-    <div style={{ padding: 16 }}>
-      <div style={{ paddingLeft: 4, borderLeft: "1px solid red" }}>
+    <div
+      style={{
+        paddingLeft: 4,
+        borderLeft: `1px solid ${colors[level % colors.length]}`,
+      }}
+    >
+      <div>
         <NodeSelect
-          items={[NODES.OR, NODES.AND, NODES.BETWEEN]}
+          items={[
+            NODES.OR,
+            NODES.AND,
+            NODES.BETWEEN,
+            ...(level === 0 ? [] : [NODES.TAG, NODES.NOT]),
+          ]}
           onItemSelect={(item) =>
             setQueryState({
               type: item,
@@ -65,6 +78,54 @@ const QueryContent = ({ blockId }: { blockId: string }) => {
           />
         </NodeSelect>
       </div>
+      {queryState.children.map((q, i) => (
+        <SubqueryContent
+          value={q}
+          onChange={(newQ) => {
+            const children = queryState.children;
+            children[i] = newQ;
+            setQueryState({
+              type: queryState.type,
+              children,
+            });
+          }}
+          level={level + 1}
+        />
+      ))}
+      <div>
+        <Button
+          icon={"plus"}
+          text="Add Child"
+          onClick={() =>
+            setQueryState({
+              type: queryState.type,
+              children: [
+                ...queryState.children,
+                { type: NODES.OR, children: [] },
+              ],
+            })
+          }
+        />
+      </div>
+    </div>
+  );
+};
+
+const QueryContent = ({ blockId }: { blockId: string }) => {
+  const [queryState, setQueryState] = useState<QueryState>({
+    type: NODES.OR,
+    children: [],
+  });
+  const onSave = useCallback(async () => {
+    const outputText = `{{[[query]]: {${toQueryString(queryState)}}}}`;
+    await openBlock(document.getElementById(blockId));
+    await userEvent.clear(document.activeElement);
+    await asyncType(outputText);
+  }, [queryState]);
+
+  return (
+    <div style={{ padding: 16 }}>
+      <SubqueryContent value={queryState} onChange={setQueryState} level={0} />
       <div style={{ paddingTop: 16 }}>
         <Button text="Save" onClick={onSave} />
       </div>
