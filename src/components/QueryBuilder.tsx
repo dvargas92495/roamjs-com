@@ -40,13 +40,20 @@ const toQueryString = (queryState: QueryState): string => {
   }
 };
 
-const areEqual = (a: QueryState, b: QueryState): boolean =>
-  a.type === b.type &&
-  (a as Leaf).value === (b as Leaf).value &&
-  (a as Parent).children.length === (b as Parent).children.length &&
-  (a as Parent).children.every((aa, i) =>
-    areEqual(aa, (b as Parent).children[i])
+const areEqual = (a: QueryState, b: QueryState): boolean => {
+  if (a.type !== b.type) {
+    return false;
+  }
+  if (a.type === NODES.TAG) {
+    return (a as Leaf).value === (b as Leaf).value;
+  }
+  const aChildren = (a as Parent).children;
+  const bChildren = (b as Parent).children;
+  return (
+    aChildren.length === bChildren.length &&
+    aChildren.every((aa, i) => areEqual(aa, bChildren[i]))
   );
+};
 
 const colors = ["red", "green", "blue"];
 
@@ -127,6 +134,7 @@ const SubqueryContent = ({
                 });
               }}
               level={level + 1}
+              key={i}
             />
           ))}
           <Button
