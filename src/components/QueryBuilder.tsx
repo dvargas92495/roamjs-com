@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, MenuItem, Popover } from "@blueprintjs/core";
+import { Button, MenuItem, Popover, InputGroup } from "@blueprintjs/core";
 import { Select } from "@blueprintjs/select";
 import { asyncType, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
@@ -14,15 +14,37 @@ enum NODES {
 
 const NodeSelect = Select.ofType<NODES>();
 
-type QueryState = {
+type Node = {
   type: NODES;
+};
+
+type Leaf = Node & {
+  value: string;
+};
+
+type Parent = Node & {
   children: QueryState[];
 };
 
-const toQueryString = (queryState: QueryState) => {
-  const operator = queryState.type.toLocaleString().toLowerCase();
-  return `${operator}:{}`;
+type QueryState = Leaf | Parent;
+
+const toQueryString = (queryState: QueryState): string => {
+  if (queryState.type === NODES.TAG) {
+    return (queryState as Leaf).value;
+  } else {
+    const operator = queryState.type.toLocaleString().toLowerCase();
+    const children = (queryState as Parent).children.map(q => toQueryString(q)).join(" ");
+    return `${operator}:{${children}}`;
+  }
 };
+
+const areEqual = (a: QueryState, b: QueryState): boolean =>
+  a.type === b.type &&
+  (a as Leaf).value === (b as Leaf).value &&
+  (a as Parent).children.length === (b as Parent).children.length &&
+  (a as Parent).children.every((aa, i) =>
+    areEqual(aa, (b as Parent).children[i])
+  );
 
 const colors = ["red", "green", "blue"];
 
@@ -37,15 +59,12 @@ const SubqueryContent = ({
 }) => {
   const [queryState, setQueryState] = useState<QueryState>(value);
   useEffect(() => {
-    onChange(queryState);
-  }, [queryState, onChange]);
+    if (!areEqual(value, queryState)) {
+      onChange(queryState);
+    }
+  }, [queryState, onChange, value]);
   return (
-    <div
-      style={{
-        paddingLeft: 4,
-        borderLeft: `1px solid ${colors[level % colors.length]}`,
-      }}
-    >
+    <div>
       <div>
         <NodeSelect
           items={[
@@ -57,7 +76,7 @@ const SubqueryContent = ({
           onItemSelect={(item) =>
             setQueryState({
               type: item,
-              children: queryState.children,
+              ...queryState,
             })
           }
           itemRenderer={(item, { modifiers, handleClick }) => (
@@ -78,35 +97,51 @@ const SubqueryContent = ({
           />
         </NodeSelect>
       </div>
-      {queryState.children.map((q, i) => (
-        <SubqueryContent
-          value={q}
-          onChange={(newQ) => {
-            const children = queryState.children;
-            children[i] = newQ;
+      {queryState.type === NODES.TAG ? (
+        <InputGroup
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setQueryState({
               type: queryState.type,
-              children,
-            });
-          }}
-          level={level + 1}
-        />
-      ))}
-      <div>
-        <Button
-          icon={"plus"}
-          text="Add Child"
-          onClick={() =>
-            setQueryState({
-              type: queryState.type,
-              children: [
-                ...queryState.children,
-                { type: NODES.OR, children: [] },
-              ],
+              value: e.target.value,
             })
           }
         />
-      </div>
+      ) : (
+        <div
+          style={{
+            paddingLeft: 4,
+            borderLeft: `1px solid ${colors[level % colors.length]}`,
+          }}
+        >
+          {(queryState as Parent).children.map((q, i) => (
+            <SubqueryContent
+              value={q}
+              onChange={(newQ) => {
+                const children = (queryState as Parent).children;
+                children[i] = newQ;
+                setQueryState({
+                  type: queryState.type,
+                  children,
+                });
+              }}
+              level={level + 1}
+            />
+          ))}
+          <Button
+            icon={"plus"}
+            text="Add Child"
+            onClick={() =>
+              setQueryState({
+                type: queryState.type,
+                children: [
+                  ...(queryState as Parent).children,
+                  { type: NODES.OR, children: [] },
+                ],
+              })
+            }
+          />
+        </div>
+      )}
     </div>
   );
 };
