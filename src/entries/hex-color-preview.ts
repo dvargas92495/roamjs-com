@@ -1,4 +1,4 @@
-import { createBlockObserver, getRefTitlesByBlockUid } from "../entry-helpers";
+import { createBlockObserver, getChildRefUidsByBlockUid, getRefTitlesByBlockUid } from "../entry-helpers";
 import { getUids } from "roam-client";
 import Color from "color";
 
@@ -14,11 +14,10 @@ css.textContent = `.${HEX_COLOR_PREVIEW_CLASSNAME} {
 }`;
 document.getElementsByTagName("head")[0].appendChild(css);
 
-const renderColorPreviewsInBlock = (block: HTMLDivElement) => {
-  const { blockUid } = getUids(block);
+const renderColorPreviews = (container: HTMLElement, blockUid: string) => {
   const refs = getRefTitlesByBlockUid(blockUid);
   const renderedRefs = Array.from(
-    block.getElementsByClassName("rm-page-ref-tag")
+    container.getElementsByClassName("rm-page-ref-tag")
   );
   refs.forEach((r) => {
     try {
@@ -48,6 +47,13 @@ const renderColorPreviewsInBlock = (block: HTMLDivElement) => {
   });
 };
 
-createBlockObserver(renderColorPreviewsInBlock, (s) => {
-  
-});
+createBlockObserver(
+  (b) => renderColorPreviews(b, getUids(b).blockUid),
+  (s) => {
+    const parent = s.closest('.roam-block') as HTMLDivElement;
+    const { blockUid } = getUids(parent);
+    const refs = getChildRefUidsByBlockUid(blockUid);
+    const index = Array.from(parent.getElementsByClassName('rm-block-ref')).indexOf(s);
+    renderColorPreviews(s, refs[index]);
+  }
+);

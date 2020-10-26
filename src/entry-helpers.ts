@@ -358,6 +358,11 @@ export const getChildRefStringsByBlockUid = (b: string) =>
     `[:find (pull ?r [:block/string]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
   ).map(r => r[0].string);
 
+export const getChildRefUidsByBlockUid = (b: string) =>
+  window.roamAlphaAPI.q(
+    `[:find (pull ?r [:block/uid]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
+  ).map(r => r[0].uid);
+
 export const getLinkedReferences = (t: string) => {
   const parentBlocks = window.roamAlphaAPI
     .q(
