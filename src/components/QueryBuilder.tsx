@@ -4,11 +4,11 @@ import { Select } from "@blueprintjs/select";
 import { asyncType, openBlock } from "roam-client";
 
 enum NODES {
-  OR,
-  AND,
-  NOT,
-  BETWEEN,
-  TAG,
+  OR = 'OR',
+  AND = 'AND',
+  NOT = 'NOT',
+  BETWEEN = 'BETWEEN',
+  TAG = 'TAG',
 }
 
 const NodeSelect = Select.ofType<NODES>();
@@ -44,7 +44,8 @@ const QueryContent = ({ blockId }: { blockId: string }) => {
             children: queryState.children,
           })
         }
-        itemRenderer={(item) => <span>{item}</span>}
+        itemRenderer={(item) => <div>{item}</div>}
+        filterable={false}
       >
         <Button
           text={queryState.type}
