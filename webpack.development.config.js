@@ -5,7 +5,7 @@ module.exports = {
     mode: 'development',
     performance: {
       hints: "error",
-      maxEntrypointSize: 3000000,
-      maxAssetSize: 3000000,
+      maxEntrypointSize: 4000000,
+      maxAssetSize: 4000000,
     },
 };

@@ -13,7 +13,7 @@ module.exports = {
     modules: [
       'node_modules'
     ],
-    extensions: [".ts", ".js"],
+    extensions: [".ts", ".js", ".tsx"],
   },
   output: {
     path: path.join(__dirname, "build"),
@@ -22,8 +22,15 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.tsx?$/,
         use: [
+          {
+            loader: "babel-loader",
+            options: {
+              cacheDirectory: true,
+              cacheCompression: false,
+            }
+          },
           {
             loader: "ts-loader",
             options: {
