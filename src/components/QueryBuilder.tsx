@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import { Button, MenuItem, Popover } from "@blueprintjs/core";
 import { Select } from "@blueprintjs/select";
 import { asyncType, openBlock } from "roam-client";
+import userEvent from "@testing-library/user-event";
 
 enum NODES {
   OR = "OR",
@@ -31,6 +32,7 @@ const QueryContent = ({ blockId }: { blockId: string }) => {
   const onSave = useCallback(async () => {
     const outputText = `{{[[query]]: {${toQueryString(queryState)}}}}`;
     await openBlock(document.getElementById(blockId));
+    await userEvent.clear(document.activeElement);
     await asyncType(outputText);
   }, [queryState]);
 
