@@ -55,6 +55,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.35.0",
+    "@blueprintjs/select": "^3.14.3",
     "@dvargas92495/ui": "^0.6.1",
     "@testing-library/dom": "^7.26.3",
     "@testing-library/user-event": "^12.1.3",
