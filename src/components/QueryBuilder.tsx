@@ -33,7 +33,9 @@ const toQueryString = (queryState: QueryState): string => {
     return (queryState as Leaf).value;
   } else {
     const operator = queryState.type.toLocaleString().toLowerCase();
-    const children = (queryState as Parent).children.map(q => toQueryString(q)).join(" ");
+    const children = (queryState as Parent).children
+      .map((q) => toQueryString(q))
+      .join(" ");
     return `${operator}:{${children}}`;
   }
 };
@@ -75,8 +77,8 @@ const SubqueryContent = ({
           ]}
           onItemSelect={(item) =>
             setQueryState({
-              type: item,
               ...queryState,
+              type: item,
             })
           }
           itemRenderer={(item, { modifiers, handleClick }) => (
@@ -109,7 +111,7 @@ const SubqueryContent = ({
       ) : (
         <div
           style={{
-            paddingLeft: 4,
+            padding: 8,
             borderLeft: `1px solid ${colors[level % colors.length]}`,
           }}
         >
