@@ -97,7 +97,7 @@ const SubqueryContent = ({
             />
           )}
           filterable={false}
-          popoverProps={{ minimal: true }}
+          popoverProps={{ minimal: true, captureDismiss: true }}
         >
           <Button
             text={queryState.type}
@@ -183,7 +183,6 @@ const QueryBuilder = ({ blockId }: { blockId: string }) => {
     <Popover
       content={<QueryContent blockId={blockId} />}
       target={<Button text="QUERY" />}
-      captureDismiss={true}
     />
   );
 };

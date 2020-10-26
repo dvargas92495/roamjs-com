@@ -8,7 +8,7 @@ The Query Builder extension introduces a new user interface for building queries
 
 The script is not configurable.
 
-In a block, type `{{query builder}}`. Similar to date picker, there will be an overlay that appears next to the query builder button. 
+In a block, type `{{query builder}}`. Similar to date picker, there will be an overlay that appears next to the query builder button. After specifying different query components that you're interested in searching, hit save to insert the query syntax into the block.
 
 ```javascript
 var old = document.getElementById("query-builder");
