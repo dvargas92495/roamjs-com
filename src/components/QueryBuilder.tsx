@@ -35,7 +35,7 @@ const QueryContent = ({ blockId }: { blockId: string }) => {
   }, [queryState]);
 
   return (
-    <div>
+    <div style={{ padding: 16 }}>
       <NodeSelect
         items={[NODES.OR, NODES.AND, NODES.BETWEEN]}
         onItemSelect={(item) =>
@@ -45,7 +45,13 @@ const QueryContent = ({ blockId }: { blockId: string }) => {
           })
         }
         itemRenderer={(item) => <span>{item}</span>}
-      />
+      >
+        <Button
+          text={queryState.type}
+          rightIcon="double-caret-vertical"
+          autoFocus={true}
+        />
+      </NodeSelect>
       <Button text="Save" onClick={onSave} />
     </div>
   );
