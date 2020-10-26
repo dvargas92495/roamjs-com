@@ -77,10 +77,10 @@ const SubqueryContent = ({
       <div>
         <NodeSelect
           items={[
+            ...(level === 0 ? [] : [NODES.TAG, NODES.NOT]),
             NODES.OR,
             NODES.AND,
             NODES.BETWEEN,
-            ...(level === 0 ? [] : [NODES.TAG, NODES.NOT]),
           ]}
           onItemSelect={(item) =>
             setQueryState({
@@ -145,7 +145,7 @@ const SubqueryContent = ({
                 type: queryState.type,
                 children: [
                   ...(queryState as Parent).children,
-                  { type: NODES.OR, children: [] },
+                  { type: NODES.TAG, children: [] },
                 ],
               })
             }
@@ -183,6 +183,7 @@ const QueryBuilder = ({ blockId }: { blockId: string }) => {
     <Popover
       content={<QueryContent blockId={blockId} />}
       target={<Button text="QUERY" />}
+      captureDismiss={true}
     />
   );
 };
