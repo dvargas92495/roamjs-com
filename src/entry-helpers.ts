@@ -31,30 +31,39 @@ export const createObserver = (
     document.getElementsByClassName("roam-body")[0]
   );
 
-export const createBlockObserver = (
-  blockCallback: (b: HTMLDivElement) => void
+const createHTMLObserver = (
+  callback: (b: HTMLElement) => void,
+  tag: string,
+  className: string
 ) => {
-  const blocks = document.getElementsByClassName("roam-block");
-  Array.from(blocks).forEach(blockCallback);
+  const blocks = document.getElementsByClassName(className);
+  Array.from(blocks).forEach(callback);
 
   createObserver((ms) => {
     const blocks = ms.flatMap((m) =>
       Array.from(m.addedNodes).filter(
         (d: Node) =>
-          d.nodeName === "DIV" &&
-          Array.from((d as HTMLDivElement).classList).indexOf("roam-block") > -1
+          d.nodeName === tag &&
+          Array.from((d as HTMLElement).classList).indexOf(className) > -1
       )
     );
     const childBlocks = ms.flatMap((m) =>
       Array.from(m.addedNodes)
         .filter((n) => n.nodeName === "DIV")
         .flatMap((d) =>
-          Array.from((d as HTMLDivElement).getElementsByClassName("roam-block"))
+          Array.from((d as HTMLDivElement).getElementsByClassName(className))
         )
     );
-    blocks.forEach(blockCallback);
-    childBlocks.forEach(blockCallback);
+    blocks.forEach(callback);
+    childBlocks.forEach(callback);
   });
+}
+ 
+export const createBlockObserver = (
+  blockCallback: (b: HTMLDivElement) => void
+) => {
+  createHTMLObserver(blockCallback, "DIV", "roam-block");
+  createHTMLObserver(blockCallback, "SPAN", "rm-block-ref");
 };
 
 export const createOverlayObserver = (
