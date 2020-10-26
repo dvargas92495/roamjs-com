@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom";
-import QueryBuilder from "../components/QueryBuilder";
+import renderQueryBuilder from "../components/QueryBuilder";
 import { createHTMLObserver } from "../entry-helpers";
 
 createHTMLObserver(
@@ -8,8 +8,11 @@ createHTMLObserver(
       b.innerText.toUpperCase() === "QUERY BUILDER" &&
       !b.getAttribute("data-query-builder")
     ) {
-      b.setAttribute("data-query-builder", 'true');
-      ReactDOM.render(QueryBuilder, b.parentElement);
+      b.setAttribute("data-query-builder", "true");
+      ReactDOM.render(
+        renderQueryBuilder(b.closest(".roam-block").id),
+        b.parentElement
+      );
     }
   },
   "BUTTON",
