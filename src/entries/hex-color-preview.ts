@@ -4,7 +4,7 @@ import Color from "color";
 
 const HEX_COLOR_PREVIEW_CLASSNAME = "roamjs-hex-color-preview";
 const css = document.createElement("style");
-css.textContent = `.${HEX_COLOR_PREVIEW_CLASSNAME} span {
+css.textContent = `span.${HEX_COLOR_PREVIEW_CLASSNAME} {
     width: 16px;
     height: 16px;
     display: inline-block;
