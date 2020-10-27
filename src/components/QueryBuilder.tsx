@@ -86,6 +86,9 @@ const PageInput = ({
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const leafState = queryState as Leaf;
+  const [isOpen, setIsOpen] = useState(false);
+  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
+  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const items = useMemo(
     () => (leafState.value ? searchPagesByString(leafState.value) : []),
     [leafState.value]
@@ -93,7 +96,9 @@ const PageInput = ({
   return (
     <Popover
       captureDismiss={true}
-      defaultIsOpen={true}
+      isOpen={isOpen}
+      onClose={close}
+      onOpened={open}
       minimal={true}
       position={PopoverPosition.BOTTOM}
       content={
@@ -106,14 +111,16 @@ const PageInput = ({
       target={
         <InputGroup
           value={leafState.value}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setQueryState({
               type: leafState.type,
               value: e.target.value,
-            })
-          }
+            });
+            setIsOpen(!!e.target.value);
+          }}
           placeholder={"Search for a page"}
           style={{ paddingLeft: 8 }}
+          autoFocus={true}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") {
               setActiveIndex((activeIndex + 1) % items.length);
@@ -124,6 +131,7 @@ const PageInput = ({
                 type: leafState.type,
                 value: items[activeIndex],
               });
+              close();
             }
           }}
         />
