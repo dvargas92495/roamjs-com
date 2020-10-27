@@ -3,9 +3,11 @@ on:
   push:
     branches: master
     paths:
+      - "src/components/**"
       - "src/entries/**"
       - "src/entry-helpers.ts"
       - "webpack.production.config.js"
+      - ".github/workflows/master.yaml"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY }}
