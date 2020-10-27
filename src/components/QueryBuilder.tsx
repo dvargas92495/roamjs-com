@@ -49,7 +49,7 @@ const toQueryString = (queryState: QueryState): string => {
     const children = (queryState as Parent).children
       .map((q) => toQueryString(q))
       .join(" ");
-    return `${operator}:{${children}}`;
+    return `{${operator}:${children}}`;
   }
 };
 
@@ -244,7 +244,7 @@ const QueryContent = ({ blockId }: { blockId: string }) => {
     children: [],
   });
   const onSave = useCallback(async () => {
-    const outputText = `{{[[query]]: {${toQueryString(queryState)}}}}`;
+    const outputText = `{{[[query]]: ${toQueryString(queryState)}}}`;
     await openBlock(document.getElementById(blockId));
     await userEvent.clear(document.activeElement);
     await asyncType(outputText);
