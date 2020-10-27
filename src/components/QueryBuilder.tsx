@@ -1,5 +1,12 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Button, MenuItem, Popover, InputGroup, Menu } from "@blueprintjs/core";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Button,
+  MenuItem,
+  Popover,
+  InputGroup,
+  Menu,
+  PopoverPosition,
+} from "@blueprintjs/core";
 import { Select } from "@blueprintjs/select";
 import { asyncType, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
@@ -57,6 +64,57 @@ const areEqual = (a: QueryState, b: QueryState): boolean => {
 
 const colors = ["red", "green", "blue"];
 
+const PageInput = ({
+  queryState,
+  setQueryState,
+}: {
+  queryState: QueryState;
+  setQueryState: (q: QueryState) => void;
+}) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const leafState = queryState as Leaf;
+  return (
+    <Popover
+      captureDismiss={true}
+      defaultIsOpen={true}
+      minimal={true}
+      position={PopoverPosition.BOTTOM}
+      content={
+        <Menu>
+          <MenuItem text="David" active={activeIndex === 0} />
+          <MenuItem text="Anthony" active={activeIndex === 1} />
+          <MenuItem text="Vargas" active={activeIndex === 2} />
+        </Menu>
+      }
+      target={
+        <InputGroup
+          value={leafState.value}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setQueryState({
+              type: leafState.type,
+              value: e.target.value,
+            })
+          }
+          placeholder={"Search for a page"}
+          style={{ paddingLeft: 8 }}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown") {
+              setActiveIndex((activeIndex + 1) % 3);
+            } else if (e.key === "ArrowUp") {
+              setActiveIndex((activeIndex + 3 - 1) % 3);
+            } else if (e.key === "Enter") {
+              setQueryState({
+                type: leafState.type,
+                value: "Vargas",
+              });
+            }
+          }}
+        />
+      }
+    />
+  );
+};
+
 const SubqueryContent = ({
   value,
   onChange,
@@ -106,29 +164,7 @@ const SubqueryContent = ({
           />
         </NodeSelect>
         {queryState.type === NODES.TAG && (
-          <Popover
-            captureDismiss={true}
-            defaultIsOpen={true}
-            content={
-              <Menu>
-                <MenuItem text="David" />
-                <MenuItem text="Anthony" />
-                <MenuItem text="Vargas" />
-              </Menu>
-            }
-            target={
-              <InputGroup
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setQueryState({
-                    type: queryState.type,
-                    value: e.target.value,
-                  })
-                }
-                placeholder={"Search for a page"}
-                style={{ paddingLeft: 8 }}
-              />
-            }
-          />
+          <PageInput queryState={queryState} setQueryState={setQueryState} />
         )}
       </div>
       {queryState.type !== NODES.TAG && (
