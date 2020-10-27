@@ -165,8 +165,8 @@ const SubqueryContent = ({
         <NodeSelect
           items={[
             ...(level === 0 ? [] : [NODES.TAG, NODES.NOT]),
-            NODES.OR,
             NODES.AND,
+            NODES.OR,
             NODES.BETWEEN,
           ]}
           onItemSelect={(item) =>
@@ -240,7 +240,7 @@ const SubqueryContent = ({
 
 const QueryContent = ({ blockId }: { blockId: string }) => {
   const [queryState, setQueryState] = useState<QueryState>({
-    type: NODES.OR,
+    type: NODES.AND,
     children: [],
   });
   const onSave = useCallback(async () => {
