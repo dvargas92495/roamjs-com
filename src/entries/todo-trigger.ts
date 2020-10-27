@@ -93,7 +93,8 @@ document.addEventListener("click", async (e) => {
   const target = e.target as HTMLElement;
   if (
     target.tagName === "INPUT" &&
-    target.parentElement.className === "check-container"
+    target.parentElement.className === "check-container" &&
+    !target.closest('.rm-block-ref')
   ) {
     const inputTarget = target as HTMLInputElement;
     if (inputTarget.type === "checkbox") {
