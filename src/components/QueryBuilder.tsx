@@ -110,7 +110,7 @@ const PageInput = ({
       }
       target={
         <InputGroup
-          value={leafState.value}
+          value={leafState.value || ""}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setQueryState({
               type: leafState.type,
@@ -119,21 +119,25 @@ const PageInput = ({
             setIsOpen(!!e.target.value);
           }}
           placeholder={"Search for a page"}
-          style={{ paddingLeft: 8 }}
+          style={{ marginLeft: 8 }}
           autoFocus={true}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") {
               setActiveIndex((activeIndex + 1) % items.length);
+              e.preventDefault();
             } else if (e.key === "ArrowUp") {
               setActiveIndex((activeIndex + items.length - 1) % items.length);
+              e.preventDefault();
             } else if (e.key === "Enter" && items.length > 0) {
               setQueryState({
                 type: leafState.type,
                 value: items[activeIndex],
               });
               close();
+              e.preventDefault();
             }
           }}
+          onBlur={close}
         />
       }
     />
@@ -157,7 +161,7 @@ const SubqueryContent = ({
   }, [queryState, onChange, value]);
   return (
     <div>
-      <div>
+      <div style={{ marginBottom: 8 }}>
         <NodeSelect
           items={[
             ...(level === 0 ? [] : [NODES.TAG, NODES.NOT]),
