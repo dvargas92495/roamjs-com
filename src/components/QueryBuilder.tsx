@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, MenuItem, Popover, InputGroup } from "@blueprintjs/core";
+import { Button, MenuItem, Popover, InputGroup, Menu } from "@blueprintjs/core";
 import { Select } from "@blueprintjs/select";
 import { asyncType, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
@@ -30,7 +30,7 @@ type QueryState = Leaf | Parent;
 
 const toQueryString = (queryState: QueryState): string => {
   if (queryState.type === NODES.TAG) {
-    return (queryState as Leaf).value;
+    return `[[${(queryState as Leaf).value}]]`;
   } else {
     const operator = queryState.type.toLocaleString().toLowerCase();
     const children = (queryState as Parent).children
@@ -105,17 +105,33 @@ const SubqueryContent = ({
             autoFocus={true}
           />
         </NodeSelect>
+        {queryState.type === NODES.TAG && (
+          <Popover
+            captureDismiss={true}
+            defaultIsOpen={true}
+            content={
+              <Menu>
+                <MenuItem text="David" />
+                <MenuItem text="Anthony" />
+                <MenuItem text="Vargas" />
+              </Menu>
+            }
+            target={
+              <InputGroup
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setQueryState({
+                    type: queryState.type,
+                    value: e.target.value,
+                  })
+                }
+                placeholder={"Search for a page"}
+                style={{ paddingLeft: 8 }}
+              />
+            }
+          />
+        )}
       </div>
-      {queryState.type === NODES.TAG ? (
-        <InputGroup
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setQueryState({
-              type: queryState.type,
-              value: e.target.value,
-            })
-          }
-        />
-      ) : (
+      {queryState.type !== NODES.TAG && (
         <div
           style={{
             padding: 8,
@@ -149,6 +165,7 @@ const SubqueryContent = ({
                 ],
               })
             }
+            style={{ marginTop: 8 }}
           />
         </div>
       )}
