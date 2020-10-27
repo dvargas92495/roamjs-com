@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Button,
   MenuItem,
@@ -64,6 +70,13 @@ const areEqual = (a: QueryState, b: QueryState): boolean => {
 
 const colors = ["red", "green", "blue"];
 
+const searchPagesByString = (q: string) =>
+  window.roamAlphaAPI
+    .q("[:find (pull ?e [:node/title]) :in $ :where [?e :node/title]]")
+    .map((a) => a[0]["title"])
+    .filter((a) => a.toLowerCase().includes(q.toLowerCase()))
+    .slice(0, 9);
+
 const PageInput = ({
   queryState,
   setQueryState,
@@ -73,6 +86,10 @@ const PageInput = ({
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const leafState = queryState as Leaf;
+  const items = useMemo(
+    () => (leafState.value ? searchPagesByString(leafState.value) : []),
+    [leafState.value]
+  );
   return (
     <Popover
       captureDismiss={true}
@@ -81,9 +98,9 @@ const PageInput = ({
       position={PopoverPosition.BOTTOM}
       content={
         <Menu>
-          <MenuItem text="David" active={activeIndex === 0} />
-          <MenuItem text="Anthony" active={activeIndex === 1} />
-          <MenuItem text="Vargas" active={activeIndex === 2} />
+          {items.map((t, i) => (
+            <MenuItem text={t} active={activeIndex === i} key={i} />
+          ))}
         </Menu>
       }
       target={
@@ -99,13 +116,13 @@ const PageInput = ({
           style={{ paddingLeft: 8 }}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") {
-              setActiveIndex((activeIndex + 1) % 3);
+              setActiveIndex((activeIndex + 1) % items.length);
             } else if (e.key === "ArrowUp") {
-              setActiveIndex((activeIndex + 3 - 1) % 3);
-            } else if (e.key === "Enter") {
+              setActiveIndex((activeIndex + items.length - 1) % items.length);
+            } else if (e.key === "Enter" && items.length > 0) {
               setQueryState({
                 type: leafState.type,
-                value: "Vargas",
+                value: items[activeIndex],
               });
             }
           }}
