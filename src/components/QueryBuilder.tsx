@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Button,
   MenuItem,
@@ -16,6 +10,7 @@ import {
 import { Select } from "@blueprintjs/select";
 import { asyncType, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
+import { Icon } from "@blueprintjs/core";
 
 enum NODES {
   OR = "OR",
@@ -148,10 +143,12 @@ const SubqueryContent = ({
   value,
   onChange,
   level,
+  onDelete,
 }: {
   value: QueryState;
   onChange: (e: QueryState) => void;
   level: number;
+  onDelete?: () => void;
 }) => {
   const [queryState, setQueryState] = useState<QueryState>(value);
   useEffect(() => {
@@ -159,6 +156,30 @@ const SubqueryContent = ({
       onChange(queryState);
     }
   }, [queryState, onChange, value]);
+  const onItemSelect = useCallback(
+    (item) =>
+      setQueryState({
+        ...queryState,
+        type: item,
+      }),
+    [setQueryState, queryState]
+  );
+  const onSelectKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "a") {
+        onItemSelect(NODES.AND);
+      } else if (e.key === "o") {
+        onItemSelect(NODES.OR);
+      } else if (e.key === "b") {
+        onItemSelect(NODES.BETWEEN);
+      } else if (e.key === "t" && level > 0) {
+        onItemSelect(NODES.TAG);
+      } else if (e.key === "n" && level > 0) {
+        onItemSelect(NODES.NOT);
+      }
+    },
+    [onItemSelect, level]
+  );
   return (
     <div>
       <div style={{ marginBottom: 8 }}>
@@ -169,12 +190,10 @@ const SubqueryContent = ({
             NODES.OR,
             NODES.BETWEEN,
           ]}
-          onItemSelect={(item) =>
-            setQueryState({
-              ...queryState,
-              type: item,
-            })
-          }
+          inputProps={{
+            onKeyDown: onSelectKeyDown
+          }}
+          onItemSelect={onItemSelect}
           itemRenderer={(item, { modifiers, handleClick }) => (
             <MenuItem
               key={item}
@@ -216,6 +235,14 @@ const SubqueryContent = ({
               }}
               level={level + 1}
               key={i}
+              onDelete={() => {
+                const children = (queryState as Parent).children;
+                delete children[i];
+                setQueryState({
+                  type: queryState.type,
+                  children: children.filter((c) => !!c),
+                });
+              }}
             />
           ))}
           <Button
@@ -234,6 +261,7 @@ const SubqueryContent = ({
           />
         </div>
       )}
+      {!!onDelete && <Icon icon={"trash"} onClick={onDelete} />}
     </div>
   );
 };
@@ -265,6 +293,7 @@ const QueryBuilder = ({ blockId }: { blockId: string }) => {
     <Popover
       content={<QueryContent blockId={blockId} />}
       target={<Button text="QUERY" />}
+      defaultIsOpen={true}
     />
   );
 };
