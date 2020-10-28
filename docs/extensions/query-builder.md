@@ -1,5 +1,3 @@
-## UNDER DEVELOPMENT
-
 ## Query Builder
 
 The Query Builder extension introduces a new user interface for building queries and outputting the query syntax into the block.
@@ -9,6 +7,13 @@ The Query Builder extension introduces a new user interface for building queries
 The script is not configurable.
 
 In a block, type `{{query builder}}`. Similar to date picker, there will be an overlay that appears next to the query builder button. After specifying different query components that you're interested in searching, hit save to insert the query syntax into the block.
+
+The Overlay is fully keyboard accessible. For the query component dropdown, you could use the following key strokes to navigate:
+- Arrow Up/Arrow Down - Navigate Options
+- Enter - Open Dropdown
+- a - Select 'AND'
+- o - Select 'OR'
+- b - Select 'BETWEEN'
 
 ```javascript
 var old = document.getElementById("query-builder");

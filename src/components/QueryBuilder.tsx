@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Button,
   MenuItem,
@@ -24,28 +30,18 @@ enum NODES {
 
 const NodeSelect = Select.ofType<NODES>();
 
-type Node = {
+type QueryState = {
   type: NODES;
+  value?: string;
+  children?: QueryState[];
 };
-
-type Leaf = Node & {
-  value: string;
-};
-
-type Parent = Node & {
-  children: QueryState[];
-};
-
-type QueryState = Leaf | Parent;
 
 const toQueryString = (queryState: QueryState): string => {
   if (queryState.type === NODES.TAG) {
-    return `[[${(queryState as Leaf).value}]]`;
+    return `[[${queryState.value}]]`;
   } else {
     const operator = queryState.type.toLocaleString().toLowerCase();
-    const children = (queryState as Parent).children
-      .map((q) => toQueryString(q))
-      .join(" ");
+    const children = queryState.children.map((q) => toQueryString(q)).join(" ");
     return `{${operator}:${children}}`;
   }
 };
@@ -55,10 +51,10 @@ const areEqual = (a: QueryState, b: QueryState): boolean => {
     return false;
   }
   if (a.type === NODES.TAG) {
-    return (a as Leaf).value === (b as Leaf).value;
+    return a.value === b.value;
   }
-  const aChildren = (a as Parent).children;
-  const bChildren = (b as Parent).children;
+  const aChildren = a.children;
+  const bChildren = b.children;
   return (
     aChildren.length === bChildren.length &&
     aChildren.every((aa, i) => areEqual(aa, bChildren[i]))
@@ -82,13 +78,12 @@ const PageInput = ({
   setQueryState: (q: QueryState) => void;
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const leafState = queryState as Leaf;
   const [isOpen, setIsOpen] = useState(false);
   const open = useCallback(() => setIsOpen(true), [setIsOpen]);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const items = useMemo(
-    () => (leafState.value ? searchPagesByString(leafState.value) : []),
-    [leafState.value]
+    () => (queryState.value ? searchPagesByString(queryState.value) : []),
+    [queryState.value]
   );
   return (
     <Popover
@@ -107,10 +102,10 @@ const PageInput = ({
       }
       target={
         <InputGroup
-          value={leafState.value || ""}
+          value={queryState.value || ""}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setQueryState({
-              type: leafState.type,
+              type: queryState.type,
               value: e.target.value,
             });
             setIsOpen(!!e.target.value);
@@ -127,7 +122,7 @@ const PageInput = ({
               e.preventDefault();
             } else if (e.key === "Enter" && items.length > 0) {
               setQueryState({
-                type: leafState.type,
+                type: queryState.type,
                 value: items[activeIndex],
               });
               close();
@@ -161,7 +156,9 @@ const SubqueryContent = ({
   const onItemSelect = useCallback(
     (item) =>
       setQueryState({
-        ...queryState,
+        ...(item === NODES.TAG
+          ? { value: queryState.value || "" }
+          : { children: queryState.children || [] }),
         type: item,
       }),
     [setQueryState, queryState]
@@ -190,6 +187,7 @@ const SubqueryContent = ({
     },
     [onDelete]
   );
+  const addChildButtonRef = useRef<HTMLButtonElement>();
   return (
     <div onKeyDown={onContainerKeyDown}>
       <div style={{ marginBottom: 8 }}>
@@ -239,11 +237,11 @@ const SubqueryContent = ({
             borderLeft: `1px solid ${colors[level % colors.length]}`,
           }}
         >
-          {(queryState as Parent).children.map((q, i) => (
+          {queryState.children.map((q, i) => (
             <SubqueryContent
               value={q}
               onChange={(newQ) => {
-                const children = (queryState as Parent).children;
+                const children = queryState.children;
                 children[i] = newQ;
                 setQueryState({
                   type: queryState.type,
@@ -251,9 +249,12 @@ const SubqueryContent = ({
                 });
               }}
               level={level + 1}
-              key={i}
+              key={`${JSON.stringify(queryState)}-${i}`}
               onDelete={() => {
-                const children = (queryState as Parent).children;
+                const children = queryState.children;
+                if (i === children.length - 1) {
+                  addChildButtonRef.current.focus();
+                }
                 delete children[i];
                 setQueryState({
                   type: queryState.type,
@@ -269,12 +270,13 @@ const SubqueryContent = ({
               setQueryState({
                 type: queryState.type,
                 children: [
-                  ...(queryState as Parent).children,
+                  ...queryState.children,
                   { type: NODES.TAG, children: [] },
                 ],
               })
             }
             style={{ marginTop: 8 }}
+            elementRef={addChildButtonRef}
           />
         </div>
       )}
