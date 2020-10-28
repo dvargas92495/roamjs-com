@@ -195,6 +195,18 @@ const SubqueryContent = ({
     },
     [onDelete]
   );
+  const onAddChild = useCallback(
+    () =>
+      setQueryState({
+        type: queryState.type,
+        children: [
+          ...queryState.children,
+          { type: NODES.TAG, children: [], key: incrementKey() },
+        ],
+        key: queryState.key,
+      }),
+    [setQueryState, incrementKey, queryState]
+  );
   const addChildButtonRef = useRef<HTMLButtonElement>(null);
   return (
     <div onKeyDown={onContainerKeyDown}>
@@ -276,16 +288,7 @@ const SubqueryContent = ({
           <Button
             icon={"plus"}
             text="Add Child"
-            onClick={() =>
-              setQueryState({
-                type: queryState.type,
-                children: [
-                  ...queryState.children,
-                  { type: NODES.TAG, children: [], key: incrementKey() },
-                ],
-                key: queryState.key,
-              })
-            }
+            onClick={onAddChild}
             style={{ marginTop: 8 }}
             elementRef={addChildButtonRef}
           />
