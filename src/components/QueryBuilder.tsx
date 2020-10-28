@@ -191,6 +191,7 @@ const SubqueryContent = ({
     (e: React.KeyboardEvent) => {
       if (!!onDelete && e.key === "Backspace" && isControl(e.nativeEvent)) {
         onDelete();
+        e.stopPropagation();
       }
     },
     [onDelete]
