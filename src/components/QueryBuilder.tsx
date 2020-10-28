@@ -31,6 +31,7 @@ const NodeSelect = Select.ofType<NODES>();
 
 type QueryState = {
   type: NODES;
+  key: number;
   value?: string;
   children?: QueryState[];
 };
@@ -106,6 +107,7 @@ const PageInput = ({
             setQueryState({
               type: queryState.type,
               value: e.target.value,
+              key: queryState.key,
             });
             setIsOpen(!!e.target.value);
           }}
@@ -123,6 +125,7 @@ const PageInput = ({
               setQueryState({
                 type: queryState.type,
                 value: items[activeIndex],
+                key: queryState.key,
               });
               close();
               e.preventDefault();
@@ -146,6 +149,11 @@ const SubqueryContent = ({
   level: number;
   onDelete?: () => void;
 }) => {
+  const [key, setKey] = useState(0);
+  const incrementKey = useCallback(() => {
+    setKey(key + 1);
+    return key;
+  }, [key, setKey]);
   const [queryState, setQueryState] = useState<QueryState>(value);
   useEffect(() => {
     if (!areEqual(value, queryState)) {
@@ -159,6 +167,7 @@ const SubqueryContent = ({
           ? { value: queryState.value || "" }
           : { children: queryState.children || [] }),
         type: item,
+        key: queryState.key,
       }),
     [setQueryState, queryState]
   );
@@ -244,11 +253,12 @@ const SubqueryContent = ({
                 children[i] = newQ;
                 setQueryState({
                   type: queryState.type,
+                  key: queryState.key,
                   children,
                 });
               }}
               level={level + 1}
-              key={`${JSON.stringify(queryState)}-${i}`}
+              key={queryState.key}
               onDelete={() => {
                 const children = queryState.children;
                 if (i === children.length - 1) {
@@ -257,6 +267,7 @@ const SubqueryContent = ({
                 delete children[i];
                 setQueryState({
                   type: queryState.type,
+                  key: queryState.key,
                   children: children.filter((c) => !!c),
                 });
               }}
@@ -270,8 +281,9 @@ const SubqueryContent = ({
                 type: queryState.type,
                 children: [
                   ...queryState.children,
-                  { type: NODES.TAG, children: [] },
+                  { type: NODES.TAG, children: [], key: incrementKey() },
                 ],
+                key: queryState.key,
               })
             }
             style={{ marginTop: 8 }}
@@ -287,6 +299,7 @@ const QueryContent = ({ blockId }: { blockId: string }) => {
   const [queryState, setQueryState] = useState<QueryState>({
     type: NODES.AND,
     children: [],
+    key: 0,
   });
   const onSave = useCallback(async () => {
     const outputText = `{{[[query]]: ${toQueryString(queryState)}}}`;

@@ -19,6 +19,8 @@ The Overlay is fully keyboard accessible. Each input is focusable and you can `t
 
 On any deletable component, you could hit `ctrl+Backspace` or `cmd+Backspace` to delete the icon. Hitting `enter` on the save button will output the query into the block.
 
+### Installation
+
 ```javascript
 var old = document.getElementById("query-builder");
 if (old) {
@@ -32,5 +34,12 @@ s.async = false;
 s.type = "text/javascript";
 document.getElementsByTagName("head")[0].appendChild(s);
 ```
+### Demo
+
+<video width="320" height="240" controls>
+  <source src="../../videos/query-builder.mp4" type="video/mp4">
+</video>
+
+<br/>
 
 <iframe src="https://github.com/sponsors/dvargas92495/button" title="Sponsor dvargas92495" height="35" width="116" style="border: 0;"></iframe>

@@ -10,6 +10,8 @@ In a block, just hit CTRL+SHIFT+ENTER. Any TODOs or DONEs will be replaced with 
 
 To change the CSS styling of the archive display, you'll want to change the CSS associated with the `roamjs-todont` class.
 
+### Installation
+
 ```javascript
 var old = document.getElementById("todont");
 if (old) {
