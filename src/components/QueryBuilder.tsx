@@ -17,7 +17,6 @@ import { Select } from "@blueprintjs/select";
 import { asyncType, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import { Icon } from "@blueprintjs/core";
-import { isConsole } from "mobile-device-detect";
 import { isControl } from "../entry-helpers";
 
 enum NODES {
@@ -187,7 +186,7 @@ const SubqueryContent = ({
     },
     [onDelete]
   );
-  const addChildButtonRef = useRef<HTMLButtonElement>();
+  const addChildButtonRef = useRef<HTMLButtonElement>(null);
   return (
     <div onKeyDown={onContainerKeyDown}>
       <div style={{ marginBottom: 8 }}>
