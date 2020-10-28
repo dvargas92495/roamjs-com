@@ -271,7 +271,7 @@ const SubqueryContent = ({
                 });
               }}
               level={level + 1}
-              key={queryState.key}
+              key={q.key}
               onDelete={() => {
                 const children = queryState.children;
                 if (i === children.length - 1) {
