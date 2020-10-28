@@ -152,7 +152,7 @@ const SubqueryContent = ({
   const [key, setKey] = useState(0);
   const incrementKey = useCallback(() => {
     setKey(key + 1);
-    return key;
+    return key + 1;
   }, [key, setKey]);
   const [queryState, setQueryState] = useState<QueryState>(value);
   useEffect(() => {
@@ -246,6 +246,7 @@ const SubqueryContent = ({
             onClick={onDelete}
             style={{
               cursor: "pointer",
+              marginLeft: 16,
             }}
           />
         )}
