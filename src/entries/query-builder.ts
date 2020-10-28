@@ -8,18 +8,19 @@ css.textContent = `.bp3-button:focus {
 }`;
 document.getElementsByTagName("head")[0].appendChild(css);
 
-
 createHTMLObserver(
   (b) => {
     if (
-      b.innerText.toUpperCase() === "QUERY BUILDER" &&
-      !b.getAttribute("data-query-builder")
+      b.innerText.toUpperCase() === "QUERY BUILDER" ||
+      b.innerText.toUpperCase() === "QB"
     ) {
-      b.setAttribute("data-query-builder", "true");
-      ReactDOM.render(
-        renderQueryBuilder(b.closest(".roam-block").id),
-        b.parentElement
-      );
+      if (!b.getAttribute("data-query-builder")) {
+        b.setAttribute("data-query-builder", "true");
+        ReactDOM.render(
+          renderQueryBuilder(b.closest(".roam-block").id),
+          b.parentElement
+        );
+      }
     }
   },
   "BUTTON",

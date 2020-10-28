@@ -1,5 +1,4 @@
 import format from "date-fns/format";
-import { isIOS, isMacOs } from "mobile-device-detect";
 import {
   asyncType,
   getConfigFromPage,
@@ -7,7 +6,7 @@ import {
   openBlock,
   toRoamDate,
 } from "roam-client";
-import { createBlockObserver, getChildRefStringsByBlockUid, getTextByBlockUid } from "../entry-helpers";
+import { createBlockObserver, getChildRefStringsByBlockUid, getTextByBlockUid, isControl } from "../entry-helpers";
 
 const replaceText = async ([before, after]: string[]) => {
   const textArea = document.activeElement as HTMLTextAreaElement;
@@ -109,10 +108,8 @@ document.addEventListener("click", async (e) => {
   }
 });
 
-const isApple = isIOS || isMacOs;
-
 const keydownEventListener = async (e: KeyboardEvent) => {
-  if (e.key === "Enter" && ((e.ctrlKey && !isApple) || (e.metaKey && isApple))) {
+  if (e.key === "Enter" && isControl(e)) {
     const target = e.target as HTMLElement;
     if (target.tagName === "TEXTAREA") {
       const textArea = target as HTMLTextAreaElement;
