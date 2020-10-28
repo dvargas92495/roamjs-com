@@ -1,4 +1,5 @@
 import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
+import { isIOS, isMacOs } from "mobile-device-detect";
 
 declare global {
   interface Window {
@@ -401,3 +402,8 @@ export const createMobileIcon = (id: string, iconType: string) => {
   iconButton.appendChild(icon);
   return iconButton;
 };
+
+const isApple = isIOS || isMacOs;
+
+export const isControl = (e: KeyboardEvent) =>
+  (e.ctrlKey && !isApple) || (e.metaKey && isApple);

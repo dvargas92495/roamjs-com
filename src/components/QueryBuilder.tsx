@@ -11,6 +11,8 @@ import { Select } from "@blueprintjs/select";
 import { asyncType, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import { Icon } from "@blueprintjs/core";
+import { isConsole } from "mobile-device-detect";
+import { isControl } from "../entry-helpers";
 
 enum NODES {
   OR = "OR",
@@ -180,8 +182,16 @@ const SubqueryContent = ({
     },
     [onItemSelect, level]
   );
+  const onContainerKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!!onDelete && e.key === "Backspace" && isControl(e.nativeEvent)) {
+        onDelete();
+      }
+    },
+    [onDelete]
+  );
   return (
-    <div>
+    <div onKeyDown={onContainerKeyDown}>
       <div style={{ marginBottom: 8 }}>
         <NodeSelect
           items={[
@@ -190,9 +200,6 @@ const SubqueryContent = ({
             NODES.OR,
             NODES.BETWEEN,
           ]}
-          inputProps={{
-            onKeyDown: onSelectKeyDown
-          }}
           onItemSelect={onItemSelect}
           itemRenderer={(item, { modifiers, handleClick }) => (
             <MenuItem
@@ -209,10 +216,20 @@ const SubqueryContent = ({
             text={queryState.type}
             rightIcon="double-caret-vertical"
             autoFocus={true}
+            onKeyDown={onSelectKeyDown}
           />
         </NodeSelect>
         {queryState.type === NODES.TAG && (
           <PageInput queryState={queryState} setQueryState={setQueryState} />
+        )}
+        {!!onDelete && (
+          <Icon
+            icon={"trash"}
+            onClick={onDelete}
+            style={{
+              cursor: "pointer",
+            }}
+          />
         )}
       </div>
       {queryState.type !== NODES.TAG && (
@@ -261,7 +278,6 @@ const SubqueryContent = ({
           />
         </div>
       )}
-      {!!onDelete && <Icon icon={"trash"} onClick={onDelete} />}
     </div>
   );
 };
