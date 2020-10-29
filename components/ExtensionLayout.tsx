@@ -23,7 +23,7 @@ const ExtensionLayout = ({
     .map((f) => f.__resourcePath)
     .map((f) => ({
       label: pathToLabel(f),
-      href: `/${f.substring(0, f.length - ".mdx".length)}`,
+      href: f.substring(0, f.length - ".mdx".length),
     }));
   return (
     <Layout>

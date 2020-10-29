@@ -57,7 +57,7 @@
   "dependencies": {
     "@blueprintjs/core": "^3.35.0",
     "@blueprintjs/select": "^3.14.3",
-    "@dvargas92495/ui": "^0.13.6",
+    "@dvargas92495/ui": "^0.13.7",
     "@mapbox/rehype-prism": "^0.5.0",
     "@mdx-js/loader": "^1.6.19",
     "@testing-library/dom": "^7.26.3",
