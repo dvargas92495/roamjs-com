@@ -23,8 +23,8 @@ jobs:
       - name: Upload
         run: |
           aws s3 sync out s3://roamjs.com
-          for filename in out/*.html; do
-              HTML=$(basename "$filename" .html)
+          for filename in $(find out -type f -name "*.html"); do
+              HTML=$(echo $filename | cut -f 1 -d '.' | cut -d '/' -f 2-)
               aws s3 cp $filename s3://roamjs.com/$HTML --content-type "text/html"
           done
       - name: Invalidate Cache
