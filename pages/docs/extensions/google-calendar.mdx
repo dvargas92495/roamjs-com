@@ -1,8 +1,7 @@
-## Google Calendar to Roam Integration
-
-The Google Calendar to Roam Integration allows users to import the list of events on a given day into their daily notes page. The name of the script is `google-calendar`.
-
-### Usage
+---
+layout: 'ExtensionPageLayout'
+description: 'The Google Calendar to Roam Integration allows users to import the list of events on a given day into their daily notes page.'
+---
 
 The script supports the following configuration attributes, to be added in the `[[roam/js/google-calendar]]` page:
 
@@ -18,42 +17,14 @@ The script supports the following configuration attributes, to be added in the `
 
 Here's an example configuration page:
 
-![](../images/google-calendar-config.png)
+![](/images/google-calendar-config.png)
 
 Be sure to make your calendar publicly accessible, since it needs to be queryable by the extension's api token:
 
-![](../images/google-calendar-permissions.png)
+![](/images/google-calendar-permissions.png)
 
 In any page, create a `Import Google Calendar` button by typing in `{{import google calendar}}` (case-insensitive) in a block. Upon clicking the button, the extension will clear the button and fill the page in with the events you have scheduled for that day in the following format:
 
 > [Summary] ([Start Time (hh:mm am)] - [End Time (hh:mm pm)]) [ - link to Zoom/Meet]
 
 It will be displayed in the timezone of your browser. It will use either the page's title if it's a daily note, or the current date if it's not.
-
-### Installation
-
-Insert this as a child of any `{{[[roam/js]]}}` block to install the extension.
-
-```javascript
-var old = document.getElementById("google-calendar");
-if (old) {
-  old.remove();
-}
-
-var s = document.createElement("script");
-s.src = "https://roamjs.com/google-calendar.js";
-s.id = "google-calendar";
-s.async = false;
-s.type = "text/javascript";
-document.getElementsByTagName("head")[0].appendChild(s);
-```
-
-### Demo
-
-<video width="320" height="240" controls>
-  <source src="../../videos/google-calendar.mp4" type="video/mp4">
-</video>
-
-<br/>
-
-<iframe src="https://github.com/sponsors/dvargas92495/button" title="Sponsor dvargas92495" height="35" width="116" style="border: 0;"></iframe>

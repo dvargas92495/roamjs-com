@@ -1,8 +1,7 @@
-## Github to Roam Integration
-
-The Github to Roam Integration allows users to import various types of data from Github and bring into their Roam Database. The name of the script is `github`.
-
-### Usage
+---
+layout: 'ExtensionPageLayout'
+description: 'The Github to Roam Integration allows users to import various types of data from Github and bring into their Roam Database.'
+---
 
 The script supports the following configuration attributes, to be added in the `[[roam/js/github]]` page:
 
@@ -26,31 +25,3 @@ In any page, create a `Import Github Projects` button by typing in `{{import git
 #### GitHub Cards
 
 In any page, create a `Import Github Cards` button by typing in `{{import github cards}}` (case-insensitive) in a block. Upon clicking the button, the extension will clear the button and fill the page in with the card notes from the project you specify. By default it will use the `Username` attribute configured in the config page, the name of the page as the project name, and the first linked reference as the repo name. To override this, you could add any part of ` for {username} in {name} under {project} as {column}` to the button text. For example, `{{import github projects for dvargas92495 in roam-js-extensions under "Github Integration" as "To do"}}` in the Github Integration page will grab the cards under the To do in that project. Note that if values themselves have spaces, they need to be surrounded by quotes.
-
-### Installation
-
-Insert this as a child of any `{{[[roam/js]]}}` block to install the extension.
-
-```javascript
-var old = document.getElementById("github");
-if (old) {
-  old.remove();
-}
-
-var s = document.createElement("script");
-s.src = "https://roamjs.com/github.js";
-s.id = "github";
-s.async = false;
-s.type = "text/javascript";
-document.getElementsByTagName("head")[0].appendChild(s);
-```
-
-### Demo
-
-<video width="320" height="240" controls>
-  <source src="../../videos/github.mp4" type="video/mp4">
-</video>
-
-<br/>
-
-<iframe src="https://github.com/sponsors/dvargas92495/button" title="Sponsor dvargas92495" height="35" width="116" style="border: 0;"></iframe>
