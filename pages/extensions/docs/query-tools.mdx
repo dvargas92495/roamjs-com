@@ -1,8 +1,7 @@
-## Query Tools
-
-The Query Tools extension adds various tools on top of traditional Roam queries to make them more powerful
-
-### Usage
+---
+layout: "ExtensionPageLayout"
+description: "The Query Tools extension adds various tools on top of traditional Roam queries to make them more powerful"
+---
 
 The script supports the following configuration attributes, to be added in the `[[roam/js/query-tools]]` page:
 
@@ -42,40 +41,9 @@ By default, query results only display the most nested block in the result. To d
 Context:: 2
 ```
 
-### Installation
-
-Insert this as a child of any `{{[[roam/js]]}}` block to install the extension.
-
-```javascript
-var old = document.getElementById("query-tools");
-if (old) {
-  old.remove();
-}
-
-var s = document.createElement("script");
-s.src = "https://roamjs.com/query-tools.js";
-s.id = "query-tools";
-s.async = false;
-s.type = "text/javascript";
-document.getElementsByTagName("head")[0].appendChild(s);
-```
-
-### Demos
-
-#### Sorting
-
-<video width="320" height="240" controls>
-  <source src="../../videos/query-sort.mp4" type="video/mp4">
-</video>
-
-<br/>
-
 #### Randomization
 
 <video width="320" height="240" controls>
   <source src="../../videos/query-random.mp4" type="video/mp4">
 </video>
 
-<br/>
-
-<iframe src="https://github.com/sponsors/dvargas92495/button" title="Sponsor dvargas92495" height="35" width="116" style="border: 0;"></iframe>

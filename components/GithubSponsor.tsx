@@ -6,7 +6,7 @@ const GithubSponsor = () => (
     title="Sponsor dvargas92495"
     height="35"
     width="116"
-    style={{ border: 0 }}
+    style={{ border: 0, marginTop: 16 }}
   />
 );
 
