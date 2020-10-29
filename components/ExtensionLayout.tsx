@@ -25,7 +25,6 @@ const ExtensionLayout = ({
       label: pathToLabel(f),
       href: `/${f.substring(0, f.length - ".mdx".length)}`,
     }));
-  console.log(items);
   return (
     <Layout>
       <VerticalNavigationTabs

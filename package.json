@@ -68,7 +68,7 @@
     "date-fns": "^2.16.1",
     "mobile-device-detect": "^0.4.3",
     "next": "^9.5.5",
-    "next-mdx-enhanced": "^4.0.0",
+    "next-mdx-enhanced": "^5.0.0",
     "node-emoji": "^1.10.0",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
