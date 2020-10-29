@@ -13,8 +13,6 @@ The table will then be sorted based on the columns you clicked on. A marker next
 
 Because attribute tables are view only, navigating away from the page will wipe out any previous sort you had applied. To solve this, you could add a `Default Sort` attribute as a child. The value should be a comma delimited list of each column with the type of sort you want sorted. For example, if I wanted a table sorted first by "foo" column ascending, followed by "bar" column descending, I would use the following default sort value:
 
-```
 Default Sort:: foo=Asc, bar=Des
-```
 
 The `Max Sorts` DB level configuration could also be applied at a table level, by adding the attribute as a child of the table.

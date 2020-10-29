@@ -1,4 +1,4 @@
-import { Body, H2, H3, H6, Subtitle } from "@dvargas92495/ui";
+import { Body, H2, H3, Subtitle } from "@dvargas92495/ui";
 import React from "react";
 import { Prism } from "react-syntax-highlighter";
 import ExtensionLayout, { pathToId, pathToLabel } from "./ExtensionLayout";
@@ -16,9 +16,14 @@ const ExtensionPageLayout = ({
   return (
     <ExtensionLayout frontMatter={frontMatter}>
       <H2>{pathToLabel(frontMatter.__resourcePath).toUpperCase()}</H2>
-  <H6>{frontMatter.description} The name of the script is <code>{id}</code>.</H6>
+      <Subtitle>
+        {frontMatter.description} The name of the script is <code>{id}</code>.
+      </Subtitle>
       <H3>Installation</H3>
-      <Body>Insert this as a child of any <code>{'{{[[roam/js]]}}'}</code> block to install the extension.</Body>
+      <Body>
+        Insert this as a child of any <code>{"{{[[roam/js]]}}"}</code> block to
+        install the extension.
+      </Body>
       <Prism language="javascript">
         {`var old = document.getElementById("${id}");
 if (old) {

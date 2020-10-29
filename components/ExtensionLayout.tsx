@@ -30,6 +30,7 @@ const ExtensionLayout = ({
       <VerticalNavigationTabs
         items={[{ label: INDEX_LABEL, href: "/extensions" }, ...items]}
         label={pathToLabel(frontMatter.__resourcePath)}
+        title={"ROAMJS DOCS"}
       >
         {children}
         <GithubSponsor />
