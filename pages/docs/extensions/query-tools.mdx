@@ -3,6 +3,8 @@ layout: "ExtensionPageLayout"
 description: "The Query Tools extension adds various tools on top of traditional Roam queries to make them more powerful"
 ---
 
+import DemoVideo from "../../../components/DemoVideo";
+
 The script supports the following configuration attributes, to be added in the `[[roam/js/query-tools]]` page:
 
 - `Sort Blocks` - (Optional) If set to 'True', sort the query results by blocks instead of pages.
@@ -33,6 +35,8 @@ Sometimes we have queries with hundreds of results and want to return a random e
 Random:: 3
 ```
 
+<DemoVideo src="query-random" />
+
 ### Context
 
 By default, query results only display the most nested block in the result. To display more context in a given query, add the `Context` attribute as a child block of the query. Set the value to the number of levels you'd like displayed, or `Top` to display full context. For Example, to always show two more levels of context to each query result, add the following block as a child to the query:
@@ -40,10 +44,3 @@ By default, query results only display the most nested block in the result. To d
 ```
 Context:: 2
 ```
-
-#### Randomization
-
-<video width="320" height="240" controls>
-  <source src="../../videos/query-random.mp4" type="video/mp4">
-</video>
-

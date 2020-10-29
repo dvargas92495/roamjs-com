@@ -2,12 +2,12 @@ import { VerticalNavigationTabs } from "@dvargas92495/ui";
 import React from "react";
 import Layout from "./Layout";
 import GithubSponsor from "./GithubSponsor";
-import { frontMatter as frontMatters } from "../pages/extensions/docs/*.mdx";
+import { frontMatter as frontMatters } from "../pages/docs/extensions/*.mdx";
 
 const INDEX_LABEL = "Getting Started";
 
 export const pathToId = (f: string) =>
-  f.substring("extensions\\docs\\".length, f.length - ".mdx".length);
+  f.substring("docs\\extensions\\".length, f.length - ".mdx".length);
 
 export const pathToLabel = (f: string) =>
   f.endsWith("index.mdx") ? INDEX_LABEL : pathToId(f).replace(/-/g, " ");
@@ -28,7 +28,7 @@ const ExtensionLayout = ({
   return (
     <Layout>
       <VerticalNavigationTabs
-        items={[{ label: INDEX_LABEL, href: "/extensions" }, ...items]}
+        items={[{ label: INDEX_LABEL, href: "/docs" }, ...items]}
         label={pathToLabel(frontMatter.__resourcePath)}
         title={"ROAMJS DOCS"}
       >

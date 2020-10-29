@@ -1,9 +1,8 @@
 import { Body, H2, H3, Subtitle } from "@dvargas92495/ui";
 import React from "react";
 import { Prism } from "react-syntax-highlighter";
+import DemoVideo from "./DemoVideo";
 import ExtensionLayout, { pathToId, pathToLabel } from "./ExtensionLayout";
-
-const pathToVideo = (f: string) => `/videos/${pathToId(f)}.mp4`;
 
 const ExtensionPageLayout = ({
   children,
@@ -40,13 +39,7 @@ document.getElementsByTagName("head")[0].appendChild(s);`}
       <H3>Usage</H3>
       {children}
       <H3>Demo</H3>
-      <video
-        width="320"
-        height="240"
-        controls
-        src={pathToVideo(frontMatter.__resourcePath)}
-        style={{ display: "block" }}
-      />
+      <DemoVideo src={pathToId(frontMatter.__resourcePath)} />
     </ExtensionLayout>
   );
 };
