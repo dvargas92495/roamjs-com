@@ -1,5 +1,5 @@
-import {renderQueryBuilder} from "../components/QueryBuilder";
-import { createHTMLObserver } from "../entry-helpers";
+import { renderQueryBuilder } from "../components/QueryBuilder";
+import { createButtonObserver } from "../entry-helpers";
 
 const css = document.createElement("style");
 css.textContent = `.bp3-button:focus {
@@ -7,18 +7,9 @@ css.textContent = `.bp3-button:focus {
 }`;
 document.getElementsByTagName("head")[0].appendChild(css);
 
-createHTMLObserver(
-  (b) => {
-    if (
-      b.innerText.toUpperCase() === "QUERY BUILDER" ||
-      b.innerText.toUpperCase() === "QB"
-    ) {
-      if (!b.getAttribute("data-query-builder")) {
-        b.setAttribute("data-query-builder", "true");
-        renderQueryBuilder(b.closest(".roam-block").id, b.parentElement);
-      }
-    }
-  },
-  "BUTTON",
-  "bp3-button"
-);
+createButtonObserver({
+  shortcut: "qb",
+  attribute: "query-builder",
+  render: (b: HTMLButtonElement) =>
+    renderQueryBuilder(b.closest(".roam-block").id, b.parentElement),
+});
