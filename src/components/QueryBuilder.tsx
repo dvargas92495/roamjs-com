@@ -18,6 +18,7 @@ import { asyncType, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import { Icon } from "@blueprintjs/core";
 import { isControl } from "../entry-helpers";
+import ReactDOM from "react-dom";
 
 enum NODES {
   OR = "OR",
@@ -85,18 +86,31 @@ const PageInput = ({
     () => (queryState.value ? searchPagesByString(queryState.value) : []),
     [queryState.value]
   );
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <Popover
       captureDismiss={true}
       isOpen={isOpen}
-      onClose={close}
       onOpened={open}
       minimal={true}
       position={PopoverPosition.BOTTOM}
       content={
         <Menu>
           {items.map((t, i) => (
-            <MenuItem text={t} active={activeIndex === i} key={i} />
+            <MenuItem
+              text={t}
+              active={activeIndex === i}
+              key={i}
+              onClick={() => {
+                setQueryState({
+                  type: queryState.type,
+                  value: items[i],
+                  key: queryState.key,
+                });
+                close();
+                inputRef.current.focus();
+              }}
+            />
           ))}
         </Menu>
       }
@@ -131,7 +145,12 @@ const PageInput = ({
               e.preventDefault();
             }
           }}
-          onBlur={close}
+          onBlur={(e) => {
+            if (e.relatedTarget) {
+              close();
+            }
+          }}
+          inputRef={inputRef}
         />
       }
     />
@@ -323,14 +342,74 @@ const QueryContent = ({ blockId }: { blockId: string }) => {
   );
 };
 
-const QueryBuilder = ({ blockId }: { blockId: string }) => {
+const QueryBuilder = ({
+  blockId,
+  defaultIsOpen,
+}: {
+  blockId: string;
+  defaultIsOpen: boolean;
+}) => {
   return (
     <Popover
       content={<QueryContent blockId={blockId} />}
       target={<Button text="QUERY" />}
-      defaultIsOpen={true}
+      defaultIsOpen={defaultIsOpen}
     />
   );
 };
 
-export default (blockId: string) => <QueryBuilder blockId={blockId} />;
+export const renderQueryBuilder = (blockId: string, parent: HTMLElement) =>
+  ReactDOM.render(
+    <QueryBuilder blockId={blockId} defaultIsOpen={true} />,
+    parent
+  );
+
+export const DemoQueryBuilder = () => {
+  useEffect(() => {
+    window.roamAlphaAPI = {
+      q: () => [
+        [{ title: "David" }],
+        [{ title: "Anthony" }],
+        [{ title: "Vargas" }],
+      ],
+      pull: () => ({
+        ":block/children": [],
+        ":block/string": "",
+      }),
+    };
+    
+    // hack - page is auto scrolling to the top when the button is clicked?!
+    const queryButton = document.getElementsByClassName(
+      "bp3-button"
+    )[0] as HTMLButtonElement;
+    let scrollTop = 0;
+    document.addEventListener("mousedown", (e) => {
+      if (e.target === queryButton || queryButton.contains(e.target as Node)) {
+        scrollTop = window.scrollY;
+      }
+    });
+    document.addEventListener("click", (e) => {
+      if (e.target === queryButton || queryButton.contains(e.target as Node)) {
+        window.scrollTo({top: scrollTop});
+      }
+    });
+  }, []);
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-evenly",
+        alignItems: "center",
+      }}
+    >
+      <QueryBuilder blockId={"blockId"} defaultIsOpen={false} />
+      <textarea
+        id={"blockId"}
+        style={{ width: 400, marginLeft: 16, resize: "none" }}
+        placeholder={"Saved query text outputted here!"}
+      />
+    </div>
+  );
+};
+
+export default QueryBuilder;

@@ -4,6 +4,9 @@ import { Body, H2, ThemeProvider, H1, H3, H4, H5, H6 } from "@dvargas92495/ui";
 import React from "react";
 import { MDXProvider } from "@mdx-js/react";
 import { Prism } from "react-syntax-highlighter";
+import "normalize.css/normalize.css";
+import "@blueprintjs/icons/lib/css/blueprint-icons.css"; 
+import "@blueprintjs/core/lib/css/blueprint.css";
 
 const Li = ({ children, ...props }: { children: React.ReactNode }) => (
   <li {...props}>
