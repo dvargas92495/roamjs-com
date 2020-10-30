@@ -128,7 +128,6 @@ const PageInput = ({
           }}
           placeholder={"Search for a page"}
           style={{ marginLeft: 8 }}
-          autoFocus={true}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") {
               setActiveIndex((activeIndex + 1) % items.length);
@@ -249,7 +248,6 @@ const SubqueryContent = ({
           <Button
             text={queryState.type}
             rightIcon="double-caret-vertical"
-            autoFocus={true}
             onKeyDown={onSelectKeyDown}
           />
         </NodeSelect>
