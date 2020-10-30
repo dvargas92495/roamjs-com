@@ -377,6 +377,22 @@ export const DemoQueryBuilder = () => {
         ":block/string": "",
       }),
     };
+    
+    // hack - page is auto scrolling to the top when the button is clicked?!
+    const queryButton = document.getElementsByClassName(
+      "bp3-button"
+    )[0] as HTMLButtonElement;
+    let scrollTop = 0;
+    document.addEventListener("mousedown", (e) => {
+      if (e.target === queryButton || queryButton.contains(e.target as Node)) {
+        scrollTop = window.scrollY;
+      }
+    });
+    document.addEventListener("click", (e) => {
+      if (e.target === queryButton || queryButton.contains(e.target as Node)) {
+        window.scrollTo({top: scrollTop});
+      }
+    });
   }, []);
   return (
     <div
@@ -389,9 +405,8 @@ export const DemoQueryBuilder = () => {
       <QueryBuilder blockId={"blockId"} defaultIsOpen={false} />
       <textarea
         id={"blockId"}
-        style={{ width: 400, marginLeft: 16, resize: 'none' }}
+        style={{ width: 400, marginLeft: 16, resize: "none" }}
         placeholder={"Saved query text outputted here!"}
-        
       />
     </div>
   );
