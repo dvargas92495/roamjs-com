@@ -19,6 +19,8 @@ import userEvent from "@testing-library/user-event";
 import { Icon } from "@blueprintjs/core";
 import { isControl } from "../entry-helpers";
 import ReactDOM from "react-dom";
+import DemoPopoverWrapper from "./DemoPopoverWrapper";
+import { useArrowKeyDown } from "./hooks";
 
 enum NODES {
   OR = "OR",
@@ -87,6 +89,19 @@ const PageInput = ({
     [queryState.value]
   );
   const inputRef = useRef<HTMLInputElement>(null);
+  const onKeyDown = useArrowKeyDown({
+    activeIndex,
+    setActiveIndex,
+    onEnter: (value) => {
+      setQueryState({
+        type: queryState.type,
+        value,
+        key: queryState.key,
+      });
+      close();
+    },
+    results: items,
+  });
   return (
     <Popover
       captureDismiss={true}
@@ -128,23 +143,7 @@ const PageInput = ({
           placeholder={"Search for a page"}
           style={{ marginLeft: 8 }}
           autoFocus={true}
-          onKeyDown={(e) => {
-            if (e.key === "ArrowDown") {
-              setActiveIndex((activeIndex + 1) % items.length);
-              e.preventDefault();
-            } else if (e.key === "ArrowUp") {
-              setActiveIndex((activeIndex + items.length - 1) % items.length);
-              e.preventDefault();
-            } else if (e.key === "Enter" && items.length > 0) {
-              setQueryState({
-                type: queryState.type,
-                value: items[activeIndex],
-                key: queryState.key,
-              });
-              close();
-              e.preventDefault();
-            }
-          }}
+          onKeyDown={onKeyDown}
           onBlur={(e) => {
             if (e.relatedTarget) {
               close();
@@ -377,38 +376,12 @@ export const DemoQueryBuilder = () => {
         ":block/string": "",
       }),
     };
-    
-    // hack - page is auto scrolling to the top when the button is clicked?!
-    const queryButton = document.getElementsByClassName(
-      "bp3-button"
-    )[0] as HTMLButtonElement;
-    let scrollTop = 0;
-    document.addEventListener("mousedown", (e) => {
-      if (e.target === queryButton || queryButton.contains(e.target as Node)) {
-        scrollTop = window.scrollY;
-      }
-    });
-    document.addEventListener("click", (e) => {
-      if (e.target === queryButton || queryButton.contains(e.target as Node)) {
-        window.scrollTo({top: scrollTop});
-      }
-    });
   }, []);
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-evenly",
-        alignItems: "center",
-      }}
-    >
-      <QueryBuilder blockId={"blockId"} defaultIsOpen={false} />
-      <textarea
-        id={"blockId"}
-        style={{ width: 400, marginLeft: 16, resize: "none" }}
-        placeholder={"Saved query text outputted here!"}
-      />
-    </div>
+    <DemoPopoverWrapper
+      WrappedComponent={QueryBuilder}
+      placeholder={"Saved query text outputted here!"}
+    />
   );
 };
 
