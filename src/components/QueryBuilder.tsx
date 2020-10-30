@@ -87,7 +87,7 @@ const PageInput = ({
   );
   return (
     <Popover
-      captureDismiss={true}
+      //captureDismiss={true}
       isOpen={isOpen}
       onClose={close}
       onOpened={open}
