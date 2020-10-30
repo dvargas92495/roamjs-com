@@ -96,7 +96,19 @@ const PageInput = ({
       content={
         <Menu>
           {items.map((t, i) => (
-            <MenuItem text={t} active={activeIndex === i} key={i} />
+            <MenuItem
+              text={t}
+              active={activeIndex === i}
+              key={i}
+              onClick={() => {
+                setQueryState({
+                  type: queryState.type,
+                  value: items[i],
+                  key: queryState.key,
+                });
+                close();
+              }}
+            />
           ))}
         </Menu>
       }
