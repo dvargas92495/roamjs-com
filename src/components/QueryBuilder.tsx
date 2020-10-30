@@ -87,7 +87,7 @@ const PageInput = ({
   );
   return (
     <Popover
-      //captureDismiss={true}
+      captureDismiss={true}
       isOpen={isOpen}
       onClose={close}
       onOpened={open}
@@ -100,6 +100,9 @@ const PageInput = ({
               text={t}
               active={activeIndex === i}
               key={i}
+              popoverProps={{
+                captureDismiss: true,
+              }}
               onClick={() => {
                 setQueryState({
                   type: queryState.type,
