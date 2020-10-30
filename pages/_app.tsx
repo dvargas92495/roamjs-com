@@ -1,18 +1,12 @@
 import { AppProps } from "next/app";
 import Image from "next/image";
-import { Body, H2, ThemeProvider, H1, H3, H4, H5, H6 } from "@dvargas92495/ui";
+import { Body, H2, ThemeProvider, H1, H3, H4, H5, H6, LI } from "@dvargas92495/ui";
 import React from "react";
 import { MDXProvider } from "@mdx-js/react";
 import { Prism } from "react-syntax-highlighter";
 import "normalize.css/normalize.css";
 import "@blueprintjs/icons/lib/css/blueprint-icons.css"; 
 import "@blueprintjs/core/lib/css/blueprint.css";
-
-const Li = ({ children, ...props }: { children: React.ReactNode }) => (
-  <li {...props}>
-    <Body>{children}</Body>
-  </li>
-);
 
 const Pre: React.FunctionComponent<HTMLPreElement> = ({ children }) => (
   <>{children}</>
@@ -30,7 +24,7 @@ const Code: React.FunctionComponent<HTMLElement> = ({
 };
 
 const MdxImage = (props) => (
-  <Image unsized {...props} style={{ maxWidth: "100%" }} />
+  <Image unsized {...props} style={{ maxWidth: 600 }} />
 );
 
 const MyApp = ({ Component, pageProps }: AppProps) => (
@@ -46,7 +40,6 @@ const MyApp = ({ Component, pageProps }: AppProps) => (
         p: Body,
         code: Code,
         pre: Pre,
-        li: Li,
         img: MdxImage,
       }}
     >

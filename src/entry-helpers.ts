@@ -68,6 +68,33 @@ export const createBlockObserver = (
   createHTMLObserver(blockRefCallback, "SPAN", "rm-block-ref");
 };
 
+export const createButtonObserver = ({
+  shortcut,
+  attribute,
+  render,
+}: {
+  shortcut: string;
+  attribute: string;
+  render: (b: HTMLButtonElement) => void;
+}) =>
+  createHTMLObserver(
+    (b) => {
+      if (
+        b.innerText.toUpperCase() ===
+          attribute.toUpperCase().replace("-", " ") ||
+        b.innerText.toUpperCase() === shortcut.toUpperCase()
+      ) {
+        const dataAttribute = `data-${attribute}`;
+        if (!b.getAttribute(dataAttribute)) {
+          b.setAttribute(dataAttribute, "true");
+          render(b as HTMLButtonElement);
+        }
+      }
+    },
+    "BUTTON",
+    "bp3-button"
+  );
+
 export const createOverlayObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void
 ) => createDivObserver(mutationCallback, document.body);

@@ -14,6 +14,7 @@ const ExtensionPageLayout = ({
   const id = pathToId(frontMatter.__resourcePath);
   return (
     <ExtensionLayout frontMatter={frontMatter}>
+      {frontMatter.development && <H2>UNDER DEVELOPMENT</H2>}
       <H2>{pathToLabel(frontMatter.__resourcePath).toUpperCase()}</H2>
       <Subtitle>
         {frontMatter.description} The name of the script is <code>{id}</code>.
