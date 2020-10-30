@@ -16,6 +16,8 @@ import userEvent from "@testing-library/user-event";
 import DemoPopoverWrapper from "./DemoPopoverWrapper";
 import { useArrowKeyDown } from "./hooks";
 
+const MENUITEM_CLASSNAME = "roamjs-wiki-data-result";
+
 const WikiContent = ({
   blockId,
   closePopover,
@@ -124,6 +126,7 @@ const WikiContent = ({
                 active={i === activeIndex}
                 key={i}
                 onClick={() => onMenuItem(r)}
+                className={MENUITEM_CLASSNAME}
               />
             ))}
           </Menu>
@@ -148,6 +151,18 @@ const WikiData = ({
       content={<WikiContent blockId={blockId} closePopover={close} />}
       target={<Button text="WIKI" onClick={open} />}
       isOpen={isOpen}
+      onInteraction={(s, e) => {
+        if (
+          !e ||
+          ((e.target as HTMLElement).className.indexOf(MENUITEM_CLASSNAME) <
+            0 &&
+            !(e.target as HTMLElement).getElementsByClassName(
+              MENUITEM_CLASSNAME
+            ).length)
+        ) {
+          setIsOpen(s);
+        }
+      }}
     />
   );
 };
