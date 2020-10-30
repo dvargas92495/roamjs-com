@@ -1,3 +1,4 @@
+import { renderWikiData } from "../components/WikiData";
 import { createButtonObserver } from "../entry-helpers";
 
 createButtonObserver({
