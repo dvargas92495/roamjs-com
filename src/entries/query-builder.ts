@@ -1,5 +1,4 @@
-import ReactDOM from "react-dom";
-import renderQueryBuilder from "../components/QueryBuilder";
+import {renderQueryBuilder} from "../components/QueryBuilder";
 import { createHTMLObserver } from "../entry-helpers";
 
 const css = document.createElement("style");
@@ -16,10 +15,7 @@ createHTMLObserver(
     ) {
       if (!b.getAttribute("data-query-builder")) {
         b.setAttribute("data-query-builder", "true");
-        ReactDOM.render(
-          renderQueryBuilder(b.closest(".roam-block").id),
-          b.parentElement
-        );
+        renderQueryBuilder(b.closest(".roam-block").id, b.parentElement);
       }
     }
   },

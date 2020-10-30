@@ -18,6 +18,7 @@ import { asyncType, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import { Icon } from "@blueprintjs/core";
 import { isControl } from "../entry-helpers";
+import ReactDOM from "react-dom";
 
 enum NODES {
   OR = "OR",
@@ -85,11 +86,11 @@ const PageInput = ({
     () => (queryState.value ? searchPagesByString(queryState.value) : []),
     [queryState.value]
   );
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <Popover
       captureDismiss={true}
       isOpen={isOpen}
-      onClose={close}
       onOpened={open}
       minimal={true}
       position={PopoverPosition.BOTTOM}
@@ -100,9 +101,6 @@ const PageInput = ({
               text={t}
               active={activeIndex === i}
               key={i}
-              popoverProps={{
-                captureDismiss: true,
-              }}
               onClick={() => {
                 setQueryState({
                   type: queryState.type,
@@ -110,6 +108,7 @@ const PageInput = ({
                   key: queryState.key,
                 });
                 close();
+                inputRef.current.focus();
               }}
             />
           ))}
@@ -128,6 +127,7 @@ const PageInput = ({
           }}
           placeholder={"Search for a page"}
           style={{ marginLeft: 8 }}
+          autoFocus={true}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") {
               setActiveIndex((activeIndex + 1) % items.length);
@@ -145,7 +145,12 @@ const PageInput = ({
               e.preventDefault();
             }
           }}
-          onBlur={close}
+          onBlur={(e) => {
+            if (e.relatedTarget) {
+              close();
+            }
+          }}
+          inputRef={inputRef}
         />
       }
     />
@@ -248,6 +253,7 @@ const SubqueryContent = ({
           <Button
             text={queryState.type}
             rightIcon="double-caret-vertical"
+            autoFocus={true}
             onKeyDown={onSelectKeyDown}
           />
         </NodeSelect>
@@ -336,14 +342,59 @@ const QueryContent = ({ blockId }: { blockId: string }) => {
   );
 };
 
-const QueryBuilder = ({ blockId }: { blockId: string }) => {
+const QueryBuilder = ({
+  blockId,
+  defaultIsOpen,
+}: {
+  blockId: string;
+  defaultIsOpen: boolean;
+}) => {
   return (
     <Popover
       content={<QueryContent blockId={blockId} />}
       target={<Button text="QUERY" />}
-      defaultIsOpen={true}
+      defaultIsOpen={defaultIsOpen}
     />
   );
 };
 
-export default (blockId: string) => <QueryBuilder blockId={blockId} />;
+export const renderQueryBuilder = (blockId: string, parent: HTMLElement) =>
+  ReactDOM.render(
+    <QueryBuilder blockId={blockId} defaultIsOpen={true} />,
+    parent
+  );
+
+export const DemoQueryBuilder = () => {
+  useEffect(() => {
+    window.roamAlphaAPI = {
+      q: () => [
+        [{ title: "David" }],
+        [{ title: "Anthony" }],
+        [{ title: "Vargas" }],
+      ],
+      pull: () => ({
+        ":block/children": [],
+        ":block/string": "",
+      }),
+    };
+  }, []);
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-evenly",
+        alignItems: "center",
+      }}
+    >
+      <QueryBuilder blockId={"blockId"} defaultIsOpen={false} />
+      <textarea
+        id={"blockId"}
+        style={{ width: 400, marginLeft: 16, resize: 'none' }}
+        placeholder={"Saved query text outputted here!"}
+        
+      />
+    </div>
+  );
+};
+
+export default QueryBuilder;

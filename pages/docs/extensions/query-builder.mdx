@@ -1,13 +1,16 @@
 ---
-layout: 'ExtensionPageLayout'
-description: 'The Query Builder extension introduces a new user interface for building queries and outputting the query syntax into the block.'
+layout: "ExtensionPageLayout"
+description: "The Query Builder extension introduces a new user interface for building queries and outputting the query syntax into the block."
 ---
+
+import { DemoQueryBuilder } from "../../../src/components/QueryBuilder";
 
 The script is not configurable.
 
 In a block, type `{{query builder}}`. Similar to date picker, there will be an overlay that appears next to the query builder button. After specifying different query components that you're interested in searching, hit save to insert the query syntax into the block.
 
 The Overlay is fully keyboard accessible. Each input is focusable and you can `tab` and `shift+tab` through them. For the query component dropdown, you could use the following key strokes to navigate:
+
 - Arrow Up/Arrow Down - Navigate Options
 - Enter - Open Dropdown
 - a - Select 'AND'
@@ -17,3 +20,12 @@ The Overlay is fully keyboard accessible. Each input is focusable and you can `t
 - n - Select 'NOT'
 
 On any deletable component, you could hit `ctrl+Backspace` or `cmd+Backspace` to delete the icon. Hitting `enter` on the save button will output the query into the block.
+
+### Playground
+
+Play with the button below to get a sense of how the Query Builder works! Saved queries will get outputted to the neighboring textbox. The demo assumes a Roam Database with only the following three pages:
+- David
+- Anthony
+- Vargas
+
+<DemoQueryBuilder />
