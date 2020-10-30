@@ -4,5 +4,6 @@ import { createButtonObserver } from "../entry-helpers";
 createButtonObserver({
   shortcut: "wiki",
   attribute: "wiki-data",
-  render: (b: HTMLButtonElement) => renderWikiData(b.parentElement),
+  render: (b: HTMLButtonElement) =>
+    renderWikiData(b.closest(".roam-block").id, b.parentElement),
 });
