@@ -164,7 +164,8 @@ const WikiData = ({
             0 &&
             !(e.target as HTMLElement).getElementsByClassName(
               MENUITEM_CLASSNAME
-            ).length)
+            ).length &&
+            (e.target as HTMLElement).id !== blockId)
         ) {
           setIsOpen(s);
         }
