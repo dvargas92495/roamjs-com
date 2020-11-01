@@ -90,6 +90,14 @@ module "aws_cron_job" {
   }
 }
 
+module "aws_email" {
+  source  = "dvargas92495/email/aws"
+  version = "1.0.0"
+
+  domain = "roamjs.com"
+  zone_id = module.aws_static_site.zone_id 
+}
+
 provider "github" {
     owner = "dvargas92495"
 }
