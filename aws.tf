@@ -95,7 +95,7 @@ module "aws_email" {
   version = "1.0.0"
 
   domain = "roamjs.com"
-  zone_id = module.aws_static_site.zone_id 
+  zone_id = module.aws_static_site.route53_zone_id 
 }
 
 provider "github" {
