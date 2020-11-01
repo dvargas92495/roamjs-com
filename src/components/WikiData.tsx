@@ -108,7 +108,13 @@ const WikiContent = ({
           value={value}
           autoFocus={true}
           type={"search"}
-          onKeyDown={onKeyDown}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && results.length === 0) {
+              onSearch();
+            } else {
+              onKeyDown(e);
+            }
+          }}
           inputRef={inputRef}
         />
       </div>
