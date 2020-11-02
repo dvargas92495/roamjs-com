@@ -86,7 +86,7 @@ module "aws_cron_job" {
     "template-daily-note"
   ]
   tags      = {
-    Application = "Roam JS Extentions"
+    Application = "Roam JS Extensions"
   }
 }
 
@@ -95,7 +95,11 @@ module "aws_email" {
   version = "1.1.2"
 
   domain = "roamjs.com"
-  zone_id = module.aws_static_site.route53_zone_id 
+  zone_id = module.aws_static_site.route53_zone_id
+  forward_to = "dvargas92495@gmail.com"
+  tags = {
+    Application = "Roam JS Extensions"
+  } 
 }
 
 provider "github" {
