@@ -1,6 +1,5 @@
 import { AppProps } from "next/app";
-import Image from "next/image";
-import { Body, H2, ThemeProvider, H1, H3, H4, H5, H6, LI } from "@dvargas92495/ui";
+import { Body, H2, ThemeProvider, H1, H3, H4, H5, H6 } from "@dvargas92495/ui";
 import React from "react";
 import { MDXProvider } from "@mdx-js/react";
 import { Prism } from "react-syntax-highlighter";
@@ -24,7 +23,7 @@ const Code: React.FunctionComponent<HTMLElement> = ({
 };
 
 const MdxImage = (props) => (
-  <Image unsized {...props} style={{ maxWidth: 600 }} />
+  <img {...props} style={{ maxWidth: 600 }} />
 );
 
 const MyApp = ({ Component, pageProps }: AppProps) => (
