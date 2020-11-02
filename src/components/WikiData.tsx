@@ -32,9 +32,10 @@ const WikiContent = ({
   const [results, setResults] = useState<string[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const onChange = useCallback((e) => {
+    setHasSearched(false);
     setResults([]);
     setValue(e.target.value);
-  }, [setValue, setResults]);
+  }, [setValue, setResults, setHasSearched]);
   const inputRef = useRef<HTMLInputElement>(null);
   const onSearch = useCallback(() => {
     setError("");
