@@ -430,7 +430,7 @@ export const createMobileIcon = (id: string, iconType: string) => {
   return iconButton;
 };
 
-const isApple = isIOS || isMacOs;
+export const isApple = isIOS || isMacOs;
 
 export const isControl = (e: KeyboardEvent) =>
   (e.ctrlKey && !isApple) || (e.metaKey && isApple);
