@@ -13,17 +13,24 @@ createHTMLObserver(
     }
   },
   "SPAN",
-  "bp3-icon"
+  "bp3-button"
 );
 
 document.addEventListener("keydown", (e) => {
   if (isControl(e)) {
     if (e.shiftKey) {
       if (e.key === "S") {
-        const shortcuts = document.getElementsByClassName(
+        const emptyShortcuts = document.getElementsByClassName(
           "bp3-icon-star-empty"
         ) as HTMLCollectionOf<HTMLSpanElement>;
-        shortcuts[0]?.click();
+        const shortcuts = document.getElementsByClassName(
+          "bp3-icon-star"
+        ) as HTMLCollectionOf<HTMLSpanElement>;
+        if (emptyShortcuts.length) {
+          emptyShortcuts[0].click();
+        } else if (shortcuts.length) {
+          shortcuts[0]?.click();
+        }
       }
     }
   } else {
