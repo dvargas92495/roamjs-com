@@ -4,14 +4,21 @@ description: "The Mouseless Roam extension aims to create a fully keyboard acces
 development: true
 ---
 
-import MouselessModal from "../../../src/components/MouselessModal";
+import MouselessDialog from "../../../src/components/MouselessDialog";
 
 The script is not configurable.
 
 The biggest hurdle to transitioning to a mouseless experience in any application is remembering what keyboard shortcut maps to what. This extension adds a "master" keyboard short cut in **CTRL+?** on Windows, **CMD+?** on Mac. Once triggered, a help modal will appear where you could start typing your desired action to discover or remind yourself of what the key mapping is. Hit **ESC** to exit the modal back to the previously focused location.
 
+The extension also adds the following shortcuts that were previously unsupported:
+- `Ctrl-Shift-S` - Add Shortcut To Page
+
+More shortcuts will be added over time as I find moments where I use my mouse.
+
+There will undoubtedly commands that the dialog will be missing, especially as time goes on. Feel free to ping me if so!
+
 ### Playground
 
-<MouselessModal />
+<MouselessDialog />
 
-Hit **CTRL+?** on Windows or **CMD+?** on Mac to render the Mouseless Modal!
+Hit **CTRL+?** on Windows or **CMD+?** on Mac to render the Mouseless Help Dialog!
