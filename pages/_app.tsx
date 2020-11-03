@@ -17,7 +17,7 @@ const Code: React.FunctionComponent<HTMLElement> = ({
 }) => {
   return (
     <Prism language={(className || "").substring("language-".length)}>
-      {children}
+      {typeof children === 'string' ? children.trim() : children}
     </Prism>
   );
 };

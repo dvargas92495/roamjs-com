@@ -1,8 +1,9 @@
-import { Body, H2, H3, Subtitle } from "@dvargas92495/ui";
-import React from "react";
+import { Body, H1, H2, H3, H4, Subtitle } from "@dvargas92495/ui";
+import React, { useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import DemoVideo from "./DemoVideo";
 import ExtensionLayout, { pathToId, pathToLabel } from "./ExtensionLayout";
+import { useCopyCode } from "./hooks";
 
 const ExtensionPageLayout = ({
   children,
@@ -12,26 +13,36 @@ const ExtensionPageLayout = ({
   frontMatter: FrontMatter;
 }) => {
   const id = pathToId(frontMatter.__resourcePath);
+  const [copied, setCopied] = useState(false);
+  const onSave = useCopyCode(setCopied);
   return (
     <ExtensionLayout frontMatter={frontMatter}>
       {frontMatter.development && <H2>UNDER DEVELOPMENT</H2>}
-      <H2>{pathToLabel(frontMatter.__resourcePath).toUpperCase()}</H2>
+      <H1>{pathToLabel(frontMatter.__resourcePath).toUpperCase()}</H1>
       <Subtitle>
         {frontMatter.description} The name of the script is <code>{id}</code>.
       </Subtitle>
       <H3>Installation</H3>
       <Body>
-        First, create a <b>block</b> with the text{" "}
-        <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam DB. Then, copy
-        and paste this code block as a child of the block.
+        You could use the Copy Block button below to individually install this
+        extension.
+      </Body>
+      <button style={{ marginBottom: 24 }} onClick={() => onSave([id])}>
+        {copied ? "COPIED!" : "COPY EXTENSION"}
+      </button>
+      <H4>Manual Installation</H4>
+      <Body>
+        If instead you prefer to manually install, first create a <b>block</b>{" "}
+        with the text <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam
+        DB. Then, copy and paste this code block as a child of the block.
       </Body>
       <Prism language="javascript">
-        {`var old = document.getElementById("${id}");
+        {`const old = document.getElementById("${id}");
 if (old) {
-  old.remove();
+  return;
 }
 
-var s = document.createElement("script");
+const s = document.createElement("script");
 s.src = "https://roamjs.com/${id}.js";
 s.id = "${id}";
 s.async = false;
