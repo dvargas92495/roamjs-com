@@ -5,26 +5,26 @@ import { pathToId } from "./ExtensionLayout";
 const copyCode = (e) => {
   const scripts = frontMatters
     .map((f) => `addScript("${pathToId(f.__resourcePath)}");`)
-    .join("\n");
+    .join("");
+  const codeContent = `\`\`\`const addScript = name => {
+      var old = document.getElementById(name);
+      if (old) {
+        return;
+      }  
+      var s = document.createElement('script');      
+      s.type = \"text/javascript\";
+      s.src = \`https://roamjs.com/\$\{name\}.js\`;
+      s.async = true;
+      s.id = name;
+      document.getElementsByTagName('head')[0].appendChild(s);
+    }
+    
+    ${scripts}
+    \`\`\``;
   e.clipboardData.setData(
     "text/plain",
     `- {{[[roam/js]]}}
-  - \`\`\`javascript
-      const addScript = name => {
-        var old = document.getElementById(name);
-        if (old) {
-          return;
-        }  
-        var s = document.createElement('script');      
-        s.type = \"text/javascript\";
-        s.src = \`https://roamjs.com/\$\{name\}.js\`;
-        s.async = true;
-        s.id = name;
-        document.getElementsByTagName('head')[0].appendChild(s);
-      }
-      
-      ${scripts}
-\`\`\`
+  - ${codeContent.replace(/\n/g, '').replace(/  /g, '')}
 `
   );
   e.preventDefault();
