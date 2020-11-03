@@ -21,8 +21,9 @@ const ExtensionPageLayout = ({
       </Subtitle>
       <H3>Installation</H3>
       <Body>
-        Insert this as a child of any <code>{"{{[[roam/js]]}}"}</code> block to
-        install the extension.
+        First, create a <b>block</b> with the text{" "}
+        <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam DB. Then, copy
+        and paste this code block as a child of the block.
       </Body>
       <Prism language="javascript">
         {`var old = document.getElementById("${id}");
