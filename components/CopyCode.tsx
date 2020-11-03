@@ -4,6 +4,7 @@ import { pathToId } from "./ExtensionLayout";
 
 const copyCode = (e) => {
   const scripts = frontMatters
+    .filter((f) => !f.development)
     .map((f) => `addScript("${pathToId(f.__resourcePath)}");`)
     .join("");
   const codeContent = `\`\`\`const addScript = name => {
