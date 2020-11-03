@@ -92,7 +92,7 @@ module "aws_cron_job" {
 
 module "aws_email" {
   source  = "dvargas92495/email/aws"
-  version = "1.1.5"
+  version = "1.1.6"
 
   domain = "roamjs.com"
   zone_id = module.aws_static_site.route53_zone_id
