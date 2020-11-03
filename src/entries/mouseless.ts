@@ -20,16 +20,19 @@ document.addEventListener("keydown", (e) => {
   if (isControl(e)) {
     if (e.shiftKey) {
       if (e.key === "S") {
+        const previousElement = document.activeElement as HTMLElement;
         const emptyShortcuts = document.getElementsByClassName(
-          "bp3-icon-star-empty"
+          "bp3-button.bp3-icon-star-empty"
         ) as HTMLCollectionOf<HTMLSpanElement>;
         const shortcuts = document.getElementsByClassName(
-          "bp3-icon-star"
+          "bp3.button.bp3-icon-star"
         ) as HTMLCollectionOf<HTMLSpanElement>;
         if (emptyShortcuts.length) {
           emptyShortcuts[0].click();
+          previousElement?.focus();
         } else if (shortcuts.length) {
           shortcuts[0]?.click();
+          previousElement?.focus();
         }
       }
     }
