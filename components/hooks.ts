@@ -22,7 +22,12 @@ const copyCode = (items: string[]) => (e) => {
   e.clipboardData.setData(
     "text/plain",
     `- {{[[roam/js]]}}
-    - ${codeContent.replace(/\n/g, "").replace(/  /g, "")}
+    - ${codeContent
+      .replace(/\n/g, "")
+      .replace(/  /g, "")
+      .replace(/\'/g, '\u0027')
+      .replace(/\"/g, '\u0022')
+    }
   `
   );
   e.preventDefault();
