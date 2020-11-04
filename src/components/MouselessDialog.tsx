@@ -89,7 +89,7 @@ const convertKey = (k: string) => {
 
 const convertShortcut = (shortcut: string): KeyboardEvent => {
   const parts = shortcut.split("-");
-  return new KeyboardEvent("keypress", {
+  return new KeyboardEvent("keydown", {
     ctrlKey: parts.indexOf("Ctrl") > -1,
     shiftKey: parts.indexOf("Shift") > -1,
     altKey: parts.indexOf("Alt") > -1,
