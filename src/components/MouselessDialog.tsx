@@ -233,7 +233,11 @@ const MouselessDialog = () => {
     return () => document.removeEventListener("keydown", eventListener);
   }, [eventListener]);
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} style={{ padding: 16 }}>
+    <Dialog
+      isOpen={isOpen}
+      onClose={onClose}
+      style={{ padding: 16, position: "absolute", top: 64 }}
+    >
       <InputGroup
         placeholder={"Search Command..."}
         autoFocus={true}
