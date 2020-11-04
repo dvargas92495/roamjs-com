@@ -100,8 +100,31 @@ const convertCode = (k: string) => {
       return "ArrowLeft";
     case "Right":
       return "ArrowRight";
+    case "Enter":
+      return "Enter";
     default:
       return `Key${k.toUpperCase()}`;
+  }
+};
+
+const convertKeyCode = (k: string) => {
+  switch (k) {
+    case "Esc":
+      return 27;
+    case "Space":
+      return 32;
+    case "Up":
+      return 38;
+    case "Down":
+      return 40;
+    case "Left":
+      return 37;
+    case "Right":
+      return 39;
+    case "Enter":
+      return 13;
+    default:
+      return k.toUpperCase().charCodeAt(0);
   }
 };
 
@@ -118,7 +141,7 @@ const convertShortcut = (shortcut: string): KeyboardEvent => {
     cancelable: true,
     composed: true,
     // @ts-ignore
-    keyCode: 85,
+    keyCode: convertKeyCode(parts[parts.length - 1]),
   });
 };
 
