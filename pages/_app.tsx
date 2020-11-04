@@ -23,7 +23,7 @@ const Code: React.FunctionComponent<HTMLElement> = ({
 };
 
 const MdxImage = (props) => (
-  <img {...props} style={{ maxWidth: 600 }} />
+  <img {...props} style={{ maxWidth: 480 }} />
 );
 
 const MyApp = ({ Component, pageProps }: AppProps) => (

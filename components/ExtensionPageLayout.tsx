@@ -1,4 +1,4 @@
-import { Body, H1, H2, H3, H4, Subtitle } from "@dvargas92495/ui";
+import { Body, Button, H1, H2, H3, H4, Subtitle } from "@dvargas92495/ui";
 import React, { useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import DemoVideo from "./DemoVideo";
@@ -24,12 +24,20 @@ const ExtensionPageLayout = ({
       </Subtitle>
       <H3>Installation</H3>
       <Body>
-        You could use the Copy Block button below to individually install this
-        extension.
+        You could use the Copy Extension button below to individually install
+        this extension. To install, just paste anywhere in your Roam graph and
+        click "Yes, I Know What I'm Doing".
       </Body>
-      <button style={{ marginBottom: 24 }} onClick={() => onSave([id])}>
-        {copied ? "COPIED!" : "COPY EXTENSION"}
-      </button>
+      <div style={{ marginBottom: 24 }}>
+        <Button
+          onClick={() => onSave([id])}
+          color="primary"
+          variant="contained"
+        >
+          COPY EXTENSION
+        </Button>
+        {copied && <span style={{ marginLeft: 24 }}>COPIED!</span>}
+      </div>
       <H4>Manual Installation</H4>
       <Body>
         If instead you prefer to manually install, first create a <b>block</b>{" "}
