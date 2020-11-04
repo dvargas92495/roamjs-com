@@ -2,19 +2,19 @@ import { useCallback } from "react";
 
 const copyCode = (items: string[]) => (e) => {
   const scripts = items
-    .map((f) => `addScript("${f.replace(/ /g, "-").toLowerCase()}");`)
+    .map((f) => `addScript(\"${f.replace(/ /g, "-").toLowerCase()}\");`)
     .join("");
   const codeContent = `\`\`\`const addScript = name => {
         var old = document.getElementById(name);
         if (old) {
           return;
         }  
-        var s = document.createElement('script');      
+        var s = document.createElement(\"script\");      
         s.type = \"text/javascript\";
         s.src = \`https://roamjs.com/\$\{name\}.js\`;
         s.async = true;
         s.id = name;
-        document.getElementsByTagName('head')[0].appendChild(s);
+        document.getElementsByTagName(\"head\")[0].appendChild(s);
       }
       
       ${scripts}
@@ -25,9 +25,7 @@ const copyCode = (items: string[]) => (e) => {
     - ${codeContent
       .replace(/\n/g, "")
       .replace(/  /g, "")
-      .replace(/\'/g, '\u0027')
-      .replace(/\"/g, '\u0022')
-    }
+      .replace(/\"/g, "\u0022")}
   `
   );
   e.preventDefault();
