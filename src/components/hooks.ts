@@ -1,17 +1,14 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 export const useArrowKeyDown = <T>({
-  activeIndex,
-  setActiveIndex,
   results,
   onEnter,
 }: {
-  activeIndex: number;
-  setActiveIndex: (i: number) => void;
   results: T[];
   onEnter: (i: T) => void;
-}) =>
-  useCallback(
+}) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const onKeyDown = useCallback(
     (e) => {
       if (e.key === "ArrowDown") {
         setActiveIndex((activeIndex + 1) % results.length);
@@ -26,3 +23,8 @@ export const useArrowKeyDown = <T>({
     },
     [activeIndex, setActiveIndex, results, onEnter]
   );
+  return {
+    activeIndex,
+    onKeyDown,
+  };
+};

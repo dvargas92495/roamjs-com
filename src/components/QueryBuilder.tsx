@@ -80,7 +80,6 @@ const PageInput = ({
   queryState: QueryState;
   setQueryState: (q: QueryState) => void;
 }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const open = useCallback(() => setIsOpen(true), [setIsOpen]);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
@@ -89,9 +88,7 @@ const PageInput = ({
     [queryState.value]
   );
   const inputRef = useRef<HTMLInputElement>(null);
-  const onKeyDown = useArrowKeyDown({
-    activeIndex,
-    setActiveIndex,
+  const { activeIndex, onKeyDown } = useArrowKeyDown({
     onEnter: (value) => {
       setQueryState({
         type: queryState.type,

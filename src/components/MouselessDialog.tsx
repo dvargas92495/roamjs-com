@@ -7,7 +7,9 @@ import React, {
   useState,
 } from "react";
 import ReactDOM from "react-dom";
+import { asyncType } from "roam-client";
 import { isApple, isControl } from "../entry-helpers";
+import { useArrowKeyDown } from "./hooks";
 
 const os = (apple: string, windows: string) => (isApple ? apple : windows);
 const control = (key: string) => os(`Cmd-${key}`, `Ctrl-${key}`);
@@ -15,7 +17,7 @@ const control = (key: string) => os(`Cmd-${key}`, `Ctrl-${key}`);
 const COMMANDS = [
   { command: "Close This Dialog", shortcut: "Esc" },
   { command: "Search Database", shortcut: control("u") },
-  { command: "Search Page", shortcut: control("f") },
+  { command: "Search Page", shortcut: control("f"), disabled: true },
   {
     command: "Open Page In Sidebar From Search Results",
     shortcut: "Shift-Enter",
@@ -38,7 +40,7 @@ const COMMANDS = [
   { command: "Redo", shortcut: control("Shift-Z") },
   { command: "Zoom Into Block", shortcut: os("Cmd-Period", "Alt-Right") },
   { command: "Zoom Out to Parent", shortcut: os("Cmd-Comma", "Alt-Left") },
-  { command: "Open This Dialog", shortcut: control("Shift-?") },
+  { command: "Open This Dialog", shortcut: "Ctrl-Shift-?" },
   { command: "Collapse All Child Blocks", shortcut: control("Up") },
   { command: "Expand All Child Blocks", shortcut: control("Down") },
   { command: "Select All Blocks", shortcut: control("Shift-A") },
@@ -46,7 +48,7 @@ const COMMANDS = [
   { command: "Make Block H2", shortcut: control("Alt-2") },
   { command: "Make Block H3", shortcut: control("Alt-3") },
   { command: "Make Block Paragraph", shortcut: control("Alt-0") },
-  { command: "Toggle TODO/DONE", shortcut: control("Enter") },
+  { command: "Toggle TODO/DONE", shortcut: control("Enter"), enabled: true },
   { command: "Bold Text", shortcut: control("b") },
   { command: "Italicize", shortcut: control("i") },
   { command: "Create External Link", shortcut: control("k") },
@@ -66,6 +68,36 @@ const COMMANDS = [
   { command: "Add Shortcut To Page", shortcut: control("Shift-S") },
 ];
 
+const convertShortcut = (shortcut: string): string => {
+  if (!shortcut) {
+    return "";
+  }
+  const parts = shortcut.split("-");
+  const lead = parts[0];
+  const rest = parts.slice(1).join("-");
+  if (lead === "Ctrl") {
+    return `{ctrl}${convertShortcut(rest)}{/ctrl}`;
+  } else if (lead === "Shift") {
+    return `{shift}${convertShortcut(rest)}{/shift}`;
+  } else if (lead === "Alt") {
+    return `{alt}${convertShortcut(rest)}{/alt}`;
+  } else if (lead === "Cmd") {
+    return `{meta}${convertShortcut(rest)}{/meta}`;
+  } else if (lead === "Esc") {
+    return `{esc}`;
+  } else if (lead === "Space") {
+    return `{space}`;
+  } else if (lead === "Enter") {
+    return `{enter}`;
+  } else if (lead === "Esc") {
+    return `{esc}`;
+  } else {
+    return `${lead}${convertShortcut(rest)}`;
+  }
+};
+
+const ROAMJS_MOUSELESS_SEARCH_INPUT = "roamjs-mouseless-search-input";
+
 const MouselessDialog = () => {
   const previousFocus = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -84,18 +116,33 @@ const MouselessDialog = () => {
   );
   const eventListener = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "?" && e.shiftKey && isControl(e)) {
+      if (e.key === "?" && e.shiftKey && e.ctrlKey) {
         previousFocus.current = document.activeElement;
         setIsOpen(true);
       }
     },
-    [setIsOpen]
+    [setIsOpen, previousFocus]
   );
   const onClose = useCallback(() => {
+    console.log(previousFocus);
     previousFocus.current.focus();
     setIsOpen(false);
   }, [setIsOpen, previousFocus]);
+  const { activeIndex, onKeyDown } = useArrowKeyDown({
+    onEnter: async ({ shortcut, enabled }) => {
+      if (!enabled) {
+        return;
+      }
+      onClose();
+      const typed = convertShortcut(shortcut);
+      await asyncType(typed);
+    },
+    results,
+  });
+
   useEffect(() => {
+    // @ts-ignore
+    window.asyncType = asyncType;
     document.addEventListener("keydown", eventListener);
     return () => document.removeEventListener("keydown", eventListener);
   }, [eventListener]);
@@ -106,19 +153,25 @@ const MouselessDialog = () => {
         autoFocus={true}
         onChange={onInputChange}
         value={value}
+        onKeyDown={onKeyDown}
+        id={ROAMJS_MOUSELESS_SEARCH_INPUT}
       />
       {value && (
         <Menu>
           {results.length
-            ? results
-                .slice(0, 10)
-                .map((k) => (
-                  <MenuItem
-                    text={k.command}
-                    label={k.shortcut}
-                    key={k.command}
-                  />
-                ))
+            ? results.slice(0, 10).map((k, i) => (
+                <MenuItem
+                  text={k.command}
+                  label={k.shortcut}
+                  key={k.command}
+                  active={i === activeIndex}
+                  disabled={!k.enabled}
+                  style={{
+                    border:
+                      !k.enabled && i === activeIndex && "1px solid #137cbd",
+                  }}
+                />
+              ))
             : "No command..."}
         </Menu>
       )}
