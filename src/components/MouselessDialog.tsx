@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import ReactDOM from "react-dom";
 import { asyncType } from "roam-client";
-import { isApple, isControl } from "../entry-helpers";
+import { isApple } from "../entry-helpers";
 import { useArrowKeyDown } from "./hooks";
 
 const os = (apple: string, windows: string) => (isApple ? apple : windows);
@@ -133,7 +133,7 @@ const MouselessDialog = () => {
   }, [setIsOpen, previousFocus]);
   const { activeIndex, onKeyDown } = useArrowKeyDown({
     onEnter: async ({ shortcut, disabled }) => {
-      if (!disabled) {
+      if (disabled) {
         return;
       }
       onClose();
