@@ -69,6 +69,8 @@ module "aws-serverless-backend" {
         "github-projects/get",
         "github-repositories/get",
         "google-calendar/get",
+        "queue-issues/get",
+        "queue-projects/get",
         "twitter-search/get"
     ]
     tags = {
