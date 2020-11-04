@@ -194,8 +194,7 @@ const MouselessDialog = () => {
   );
   const eventListener = useCallback(
     (e: KeyboardEvent) => {
-      console.log(e);
-      if (e.key === "?" && e.shiftKey && e.ctrlKey) {
+      if ((e.key === "?" || e.key === "/") && e.shiftKey && e.ctrlKey) {
         previousFocus.current = document.activeElement;
         setIsOpen(true);
       }
