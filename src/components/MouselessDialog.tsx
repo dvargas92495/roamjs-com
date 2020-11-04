@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import ReactDOM from "react-dom";
-import { asyncType } from "roam-client";
+import { fireEvent } from "@testing-library/dom";
 import { isApple } from "../entry-helpers";
 import { useArrowKeyDown } from "./hooks";
 
@@ -28,8 +28,8 @@ const COMMANDS = [
   },
   { command: "Open Page From Block", shortcut: control("o") },
   { command: "Open Page In Sidebar From Block", shortcut: control("Shift-O") },
-  { command: "Toggle Brackets", shortcut: control("c-b") },
-  { command: "Toggle Namespace", shortcut: control("c-l") },
+  { command: "Toggle Brackets", shortcut: control("c-b"), disabled: true },
+  { command: "Toggle Namespace", shortcut: control("c-l"), disabled: true },
   { command: "Indent Block", shortcut: "Tab" },
   { command: "Unindent Block", shortcut: "Shift-Tab" },
   { command: "Move Block Up", shortcut: control("Shift-Up") },
@@ -68,32 +68,34 @@ const COMMANDS = [
   { command: "Add Shortcut To Page", shortcut: control("Shift-S") },
 ];
 
-const convertShortcut = (shortcut: string): string => {
-  if (!shortcut) {
-    return "";
+const convertKey = (k: string) => {
+  switch (k) {
+    case "Esc":
+      return "Escape";
+    case "Space":
+      return " ";
+    case "Up":
+      return "ArrowUp";
+    case "Down":
+      return "ArrowDown";
+    case "Left":
+      return "ArrowLeft";
+    case "Right":
+      return "ArrowRight";
+    default:
+      return k;
   }
+};
+
+const convertShortcut = (shortcut: string): KeyboardEvent => {
   const parts = shortcut.split("-");
-  const lead = parts[0];
-  const rest = parts.slice(1).join("-");
-  if (lead === "Ctrl") {
-    return `{ctrl}${convertShortcut(rest)}{/ctrl}`;
-  } else if (lead === "Shift") {
-    return `{shift}${convertShortcut(rest)}{/shift}`;
-  } else if (lead === "Alt") {
-    return `{alt}${convertShortcut(rest)}{/alt}`;
-  } else if (lead === "Cmd") {
-    return `{meta}${convertShortcut(rest)}{/meta}`;
-  } else if (lead === "Esc") {
-    return `{esc}`;
-  } else if (lead === "Space") {
-    return `{space}`;
-  } else if (lead === "Enter") {
-    return `{enter}`;
-  } else if (lead === "Esc") {
-    return `{esc}`;
-  } else {
-    return `${lead}${convertShortcut(rest)}`;
-  }
+  return new KeyboardEvent("keypress", {
+    ctrlKey: parts.indexOf("Ctrl") > -1,
+    shiftKey: parts.indexOf("Shift") > -1,
+    altKey: parts.indexOf("Alt") > -1,
+    metaKey: parts.indexOf("Cmd") > -1,
+    key: convertKey(parts[parts.length - 1]),
+  });
 };
 
 const ROAMJS_MOUSELESS_SEARCH_INPUT = "roamjs-mouseless-search-input";
@@ -132,13 +134,14 @@ const MouselessDialog = () => {
     setIsOpen(false);
   }, [setIsOpen, previousFocus]);
   const { activeIndex, onKeyDown } = useArrowKeyDown({
-    onEnter: async ({ shortcut, disabled }) => {
+    onEnter: ({ shortcut, disabled }) => {
       if (disabled) {
         return;
       }
       onClose();
-      const typed = convertShortcut(shortcut);
-      await asyncType(typed);
+      const evt = convertShortcut(shortcut);
+      console.log(evt);
+      fireEvent(document.activeElement, evt);
     },
     results,
   });
