@@ -48,7 +48,7 @@ const COMMANDS = [
   { command: "Make Block H2", shortcut: control("Alt-2") },
   { command: "Make Block H3", shortcut: control("Alt-3") },
   { command: "Make Block Paragraph", shortcut: control("Alt-0") },
-  { command: "Toggle TODO/DONE", shortcut: control("Enter"), enabled: true },
+  { command: "Toggle TODO/DONE", shortcut: control("Enter") },
   { command: "Bold Text", shortcut: control("b") },
   { command: "Italicize", shortcut: control("i") },
   { command: "Create External Link", shortcut: control("k") },
@@ -124,13 +124,16 @@ const MouselessDialog = () => {
     [setIsOpen, previousFocus]
   );
   const onClose = useCallback(() => {
-    console.log(previousFocus);
-    previousFocus.current.focus();
+    if ((previousFocus.current as HTMLElement).tabIndex >= 0) {
+      previousFocus.current.focus();
+    } else {
+      (document.activeElement as HTMLInputElement).blur();
+    }
     setIsOpen(false);
   }, [setIsOpen, previousFocus]);
   const { activeIndex, onKeyDown } = useArrowKeyDown({
-    onEnter: async ({ shortcut, enabled }) => {
-      if (!enabled) {
+    onEnter: async ({ shortcut, disabled }) => {
+      if (!disabled) {
         return;
       }
       onClose();
@@ -141,8 +144,6 @@ const MouselessDialog = () => {
   });
 
   useEffect(() => {
-    // @ts-ignore
-    window.asyncType = asyncType;
     document.addEventListener("keydown", eventListener);
     return () => document.removeEventListener("keydown", eventListener);
   }, [eventListener]);
@@ -165,10 +166,11 @@ const MouselessDialog = () => {
                   label={k.shortcut}
                   key={k.command}
                   active={i === activeIndex}
-                  disabled={!k.enabled}
+                  disabled={k.disabled}
                   style={{
                     border:
-                      !k.enabled && i === activeIndex && "1px solid #137cbd",
+                      k.disabled && i === activeIndex && "1px solid #137cbd",
+                    boxSizing: "border-box",
                   }}
                 />
               ))
