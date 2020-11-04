@@ -7,7 +7,6 @@ import React, {
   useState,
 } from "react";
 import ReactDOM from "react-dom";
-import { fireEvent } from "@testing-library/dom";
 import { isApple } from "../entry-helpers";
 import { useArrowKeyDown } from "./hooks";
 
@@ -117,6 +116,7 @@ const convertShortcut = (shortcut: string): KeyboardEvent => {
     code: convertCode(parts[parts.length - 1]),
     bubbles: true,
     cancelable: true,
+    composed: true,
   });
 };
 
@@ -163,7 +163,8 @@ const MouselessDialog = () => {
       onClose();
       const evt = convertShortcut(shortcut);
       console.log(evt);
-      fireEvent(document.activeElement, evt);
+      const cancelled = document.activeElement.dispatchEvent(evt);
+      console.log(cancelled);
     },
     results,
   });
