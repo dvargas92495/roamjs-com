@@ -30,12 +30,14 @@ const WikiContent = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [results, setResults] = useState<string[]>([]);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const onChange = useCallback((e) => {
-    setHasSearched(false);
-    setResults([]);
-    setValue(e.target.value);
-  }, [setValue, setResults, setHasSearched]);
+  const onChange = useCallback(
+    (e) => {
+      setHasSearched(false);
+      setResults([]);
+      setValue(e.target.value);
+    },
+    [setValue, setResults, setHasSearched]
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const onSearch = useCallback(() => {
     setError("");
@@ -84,9 +86,7 @@ const WikiContent = ({
     },
     [setError, setLoading, closePopover, setResults]
   );
-  const onKeyDown = useArrowKeyDown({
-    activeIndex,
-    setActiveIndex,
+  const { activeIndex, onKeyDown } = useArrowKeyDown({
     onEnter: onMenuItem,
     results,
   });

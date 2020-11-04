@@ -46,16 +46,14 @@ const ExtensionPageLayout = ({
       </Body>
       <Prism language="javascript">
         {`const old = document.getElementById("${id}");
-if (old) {
-  return;
-}
-
-const s = document.createElement("script");
-s.src = "https://roamjs.com/${id}.js";
-s.id = "${id}";
-s.async = false;
-s.type = "text/javascript";
-document.getElementsByTagName("head")[0].appendChild(s);`}
+if (!old) {
+  const s = document.createElement("script");
+  s.src = "https://roamjs.com/${id}.js";
+  s.id = "${id}";
+  s.async = false;
+  s.type = "text/javascript";
+  document.getElementsByTagName("head")[0].appendChild(s);
+}`}
       </Prism>
       <H3>Usage</H3>
       {children}
