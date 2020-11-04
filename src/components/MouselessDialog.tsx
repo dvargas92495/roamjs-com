@@ -115,8 +115,10 @@ const convertShortcut = (shortcut: string): KeyboardEvent => {
     key: convertKey(parts[parts.length - 1]),
     code: convertCode(parts[parts.length - 1]),
     bubbles: true,
-    cancelable: false,
+    cancelable: true,
     composed: true,
+    // @ts-ignore
+    keyCode: 85,
   });
 };
 
