@@ -4,7 +4,7 @@ const copyCode = (items: string[]) => (e) => {
   const scripts = items
     .map((f) => `addScript(\"${f.replace(/ /g, "-").toLowerCase()}\");`)
     .join("");
-  const codeContent = `\`\`\`const addScript = name => {
+  const codeContent = `\`\`\`var addScript = name => {
         var old = document.getElementById(name);
         if (old) {
           return;
@@ -15,7 +15,7 @@ const copyCode = (items: string[]) => (e) => {
         s.async = true;
         s.id = name;
         document.getElementsByTagName(\"head\")[0].appendChild(s);
-      }
+      };
       
       ${scripts}
       \`\`\``;
