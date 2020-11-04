@@ -14,7 +14,7 @@ const os = (apple: string, windows: string) => (isApple ? apple : windows);
 const control = (key: string) => os(`Cmd-${key}`, `Ctrl-${key}`);
 
 const COMMANDS = [
-  { command: "Search Page", shortcut: control("f") },
+  { command: "Search Page", shortcut: control("f"), disabled: true },
   { command: "Indent Block", shortcut: "Tab" },
   { command: "Unindent Block", shortcut: "Shift-Tab" },
   { command: "Move Block Up", shortcut: os("Ctrl-Shift-Up", "Alt-Shift-Up") },
@@ -22,7 +22,7 @@ const COMMANDS = [
     command: "Move Block Down",
     shortcut: os("Ctrl-Shift-Down", "Alt-Shift-Down"),
   },
-  { command: "Create a New Line", shortcut: "Shift-Enter" },
+  { command: "Create a New Line", shortcut: "Shift-Enter", disabled: true },
   { command: "Redo", shortcut: control("y") },
   { command: "Add Version", shortcut: "Ctrl-Comma" },
   { command: "Expand all Versions", shortcut: "Ctrl-Period" },
@@ -30,8 +30,8 @@ const COMMANDS = [
   { command: "Cycle Version Left", shortcut: "Ctrl-Shift-<" },
   { command: "Toggle Right Sidebar", shortcut: control("Shift-\\") },
   { command: "Toggle Left Sidebar", shortcut: control("\\") },
-  { command: "Select Block Above", shortcut: "Shift-Up" },
-  { command: "Select Block Below", shortcut: "Shift-Down" },
+  { command: "Select Block Above", shortcut: "Shift-Up", disabled: true },
+  { command: "Select Block Below", shortcut: "Shift-Down", disabled: true },
   { command: "Close This Dialog", shortcut: "Esc" },
   { command: "Search Database", shortcut: control("u") },
   {
@@ -209,8 +209,8 @@ const MouselessDialog = () => {
     }
     setIsOpen(false);
   }, [setIsOpen, previousFocus]);
-  const { activeIndex, onKeyDown } = useArrowKeyDown({
-    onEnter: ({ shortcut, disabled }) => {
+  const onEnter = useCallback(
+    ({ shortcut, disabled }: { shortcut: string; disabled?: boolean }) => {
       if (disabled) {
         return;
       }
@@ -221,6 +221,10 @@ const MouselessDialog = () => {
       const evt = convertShortcut(shortcut);
       document.activeElement.dispatchEvent(evt);
     },
+    [onClose]
+  );
+  const { activeIndex, onKeyDown } = useArrowKeyDown({
+    onEnter,
     results,
   });
 
@@ -253,6 +257,7 @@ const MouselessDialog = () => {
                       k.disabled && i === activeIndex && "1px solid #137cbd",
                     boxSizing: "border-box",
                   }}
+                  onClick={() => onEnter(k)}
                 />
               ))
             : "No command..."}
