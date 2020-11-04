@@ -95,6 +95,8 @@ const convertShortcut = (shortcut: string): KeyboardEvent => {
     altKey: parts.indexOf("Alt") > -1,
     metaKey: parts.indexOf("Cmd") > -1,
     key: convertKey(parts[parts.length - 1]),
+    bubbles: true,
+    cancelable: true,
   });
 };
 
