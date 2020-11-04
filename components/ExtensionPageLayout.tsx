@@ -45,9 +45,9 @@ const ExtensionPageLayout = ({
         DB. Then, copy and paste this code block as a child of the block.
       </Body>
       <Prism language="javascript">
-        {`const old = document.getElementById("${id}");
+        {`var old = document.getElementById("${id}");
 if (!old) {
-  const s = document.createElement("script");
+  var s = document.createElement("script");
   s.src = "https://roamjs.com/${id}.js";
   s.id = "${id}";
   s.async = false;
