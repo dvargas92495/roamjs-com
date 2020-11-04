@@ -87,6 +87,25 @@ const convertKey = (k: string) => {
   }
 };
 
+const convertCode = (k: string) => {
+  switch (k) {
+    case "Esc":
+      return "Escape";
+    case "Space":
+      return "Space";
+    case "Up":
+      return "ArrowUp";
+    case "Down":
+      return "ArrowDown";
+    case "Left":
+      return "ArrowLeft";
+    case "Right":
+      return "ArrowRight";
+    default:
+      return `Key${k.toUpperCase()}`;
+  }
+};
+
 const convertShortcut = (shortcut: string): KeyboardEvent => {
   const parts = shortcut.split("-");
   return new KeyboardEvent("keydown", {
@@ -95,6 +114,7 @@ const convertShortcut = (shortcut: string): KeyboardEvent => {
     altKey: parts.indexOf("Alt") > -1,
     metaKey: parts.indexOf("Cmd") > -1,
     key: convertKey(parts[parts.length - 1]),
+    code: convertCode(parts[parts.length - 1]),
     bubbles: true,
     cancelable: true,
   });
