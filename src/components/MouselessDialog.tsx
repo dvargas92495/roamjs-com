@@ -162,6 +162,7 @@ const MouselessDialog = () => {
       }
       onClose();
       const evt = convertShortcut(shortcut);
+      console.log(document.activeElement);
       console.log(evt);
       const cancelled = document.activeElement.dispatchEvent(evt);
       console.log(cancelled);
