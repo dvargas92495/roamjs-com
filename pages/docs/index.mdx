@@ -21,17 +21,15 @@ You could opt to manually install the scripts instead of using the widget above.
 Each tool is hosted at `https://roamjs.com/[name].js`. To use any given tool, first create a **block** with the text `{{[[roam/js]]}}`. Then add the following code block as a child, replacing `[name]` with the actual name of the script:
 
 ```js
-var old = document.getElementById("[name]");
-if (old) {
-  old.remove();
+var existing = document.getElementById("[name]");
+if (!existing) {
+  var extension = document.createElement("script");
+  extension.src = "https://roamjs.com/[name].js";
+  extension.id = "[name]";
+  extension.async = false;
+  extension.type = "text/javascript";
+  document.getElementsByTagName("head")[0].appendChild(extension);
 }
-
-var s = document.createElement("script");
-s.src = "https://roamjs.com/[name].js";
-s.id = "[name]";
-s.async = false;
-s.type = "text/javascript";
-document.getElementsByTagName("head")[0].appendChild(s);
 ```
 
 The code block runs on initial load of your roam database. It adds a script tag to the head of your browser, which loads then runs the tool, providing you with the added functionality.
@@ -39,22 +37,22 @@ The code block runs on initial load of your roam database. It adds a script tag 
 To install multiple scripts in a single code block, add the following code block instead:
 
 ```javascript
-const addScript = (name) => {
+const installScript = (name) => {
   var old = document.getElementById(name);
   if (old) {
     old.remove();
   }
 
-  var s = document.createElement("script");
-  s.src = \`https://roamjs.com/${name}.js\`;
-  s.id = name;
-  s.async = false;
-  s.type = "text/javascript";
-  document.getElementsByTagName("head")[0].appendChild(s);
+  var extension = document.createElement("script");
+  extension.src = `https://roamjs.com/${name}.js`;
+  extension.id = name;
+  extension.async = false;
+  extension.type = "text/javascript";
+  document.getElementsByTagName("head")[0].appendChild(extension);
 };
 
-addScript("[name1]"); // replace with name of extension
-addScript("[name2]"); // replace with name of extension
+installScript("[name1]"); // replace with name of extension
+installScript("[name2]"); // replace with name of extension
 // ...
 ```
 
