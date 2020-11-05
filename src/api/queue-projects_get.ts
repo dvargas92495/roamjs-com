@@ -10,9 +10,8 @@ export const handler = () => {
     )
     .then((r) => ({
       statusCode: 200,
-      body: JSON.stringify(r.data.map((project: { name: string; body: string }) => ({
+      body: JSON.stringify(r.data.map((project: { name: string }) => ({
         name: project.name,
-        description: project.body,
         total: 0,
       }))),
       headers,
