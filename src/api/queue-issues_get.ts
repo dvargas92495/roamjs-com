@@ -10,11 +10,11 @@ export const handler = () => {
     )
     .then((r) => ({
       statusCode: 200,
-      body: r.data.map((issue: { title: string; body: string }) => ({
+      body: JSON.stringify(r.data.map((issue: { title: string; body: string }) => ({
         name: issue.title,
         description: issue.body,
         total: 0,
-      })),
+      }))),
       headers,
     }))
     .catch((e) => ({
