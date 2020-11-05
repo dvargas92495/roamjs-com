@@ -150,6 +150,7 @@ export const createSortIcon = (
   menuUl.className = "bp3-menu";
   popoverContent.appendChild(menuUl);
 
+  let selectedMenuItem: HTMLAnchorElement;
   const createMenuItem = (text: string, sortCallback: () => void) => {
     const liItem = document.createElement("li");
     const aMenuItem = document.createElement("a");
@@ -162,6 +163,11 @@ export const createSortIcon = (
     menuUl.appendChild(liItem);
     aMenuItem.onclick = (e) => {
       sortCallback();
+      aMenuItem.style.fontWeight = '600';
+      if (selectedMenuItem) {
+        selectedMenuItem.style.fontWeight = null;
+      }
+      selectedMenuItem = aMenuItem;
       e.stopImmediatePropagation();
       e.preventDefault();
     };
