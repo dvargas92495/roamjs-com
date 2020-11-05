@@ -58,7 +58,7 @@ const QueuePage = () => {
           This page contains all the new extensions and enhancements coming to
           RoamJS. Directly sponsor one to prioritize it higher in the queue!
         </Body>
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", maxHeight: 600 }}>
           <QueueItems title={"Extensions"} path={"queue-projects"} />
           <QueueItems title={"Enhancements"} path={"queue-issues"} />
         </div>
