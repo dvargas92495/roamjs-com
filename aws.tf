@@ -173,3 +173,9 @@ resource "github_actions_secret" "roam_api_token" {
   secret_name      = "ROAM_CLIENT_API_TOKEN"
   plaintext_value  = var.roam_api_token
 }
+
+resource "github_actions_secret" "rest_api_id" {
+  repository       = "roam-js-extensions"
+  secret_name      = "REST_API_ID"
+  plaintext_value  = module.aws-serverless-backend.rest_api_id
+}
