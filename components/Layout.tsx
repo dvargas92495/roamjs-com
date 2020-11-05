@@ -29,7 +29,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => (
     <AppBar
       homeIcon={<RoamJSLogo size={2} />}
       userIcon={<UserIcon />}
-      pages={["about", "docs", "automations", "queue"]}
+      pages={["about", "docs", "automations", "queue", "contribute"]}
     />
     <Main>{children}</Main>
     <Footer />

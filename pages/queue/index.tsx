@@ -1,6 +1,6 @@
 import { Body, Button, H1, Queue } from "@dvargas92495/ui";
 import React, { useCallback, useState } from "react";
-import Layout from "../../components/Layout";
+import StandardLayout from "../../components/StandardLayout";
 import axios from "axios";
 
 export const API_URL = `https://${process.env.NEXT_PUBLIC_REST_API_ID}.execute-api.us-east-1.amazonaws.com/production`;
@@ -51,19 +51,17 @@ const QueueItems = ({ title, path }: { title: string; path: string }) => {
 
 const QueuePage = () => {
   return (
-    <Layout>
-      <div style={{ maxWidth: 760 }}>
-        <H1>Queue</H1>
-        <Body>
-          This page contains all the new extensions and enhancements coming to
-          RoamJS. Directly sponsor one to prioritize it higher in the queue!
-        </Body>
-        <div style={{ display: "flex", maxHeight: 600 }}>
-          <QueueItems title={"Extensions"} path={"queue-projects"} />
-          <QueueItems title={"Enhancements"} path={"queue-issues"} />
-        </div>
+    <StandardLayout>
+      <H1>Queue</H1>
+      <Body>
+        This page contains all the new extensions and enhancements coming to
+        RoamJS. Directly sponsor one to prioritize it higher in the queue!
+      </Body>
+      <div style={{ display: "flex", maxHeight: 600 }}>
+        <QueueItems title={"Extensions"} path={"queue-projects"} />
+        <QueueItems title={"Enhancements"} path={"queue-issues"} />
       </div>
-    </Layout>
+    </StandardLayout>
   );
 };
 
