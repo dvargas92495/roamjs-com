@@ -1,13 +1,33 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Editor } from "react-draft-wysiwyg";
-import { EditorState } from "draft-js";
+import { EditorState, ContentState } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import ReactDOM from "react-dom";
 
-const WYSIWYGMode = () => {
+const WYSIWYGMode = ({
+  initialValue = "",
+  onUnmount = () => {},
+}: {
+  initialValue?: string;
+  onUnmount?: () => void;
+}) => {
   const [editorState, setEditorState] = useState<EditorState>(
-    EditorState.createEmpty()
+    EditorState.createWithContent(ContentState.createFromText(initialValue))
   );
+
+  const eventListener = useCallback(
+    (e) => {
+      if (e.key === "w" && e.altKey && onUnmount) {
+        onUnmount();
+      }
+    },
+    [onUnmount]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", eventListener);
+    return () => document.removeEventListener("keydown", eventListener);
+  });
   return (
     <Editor
       toolbar={{
@@ -32,7 +52,27 @@ const WYSIWYGMode = () => {
   );
 };
 
-export const renderWYSIWYGMode = (b: HTMLElement) =>
-  ReactDOM.render(<WYSIWYGMode />, b);
+export const renderWYSIWYGMode = (
+  b: HTMLElement,
+  v: string,
+  onUnmount: () => void
+) =>
+  ReactDOM.render(
+    <WYSIWYGMode
+      initialValue={v}
+      onUnmount={() => {
+        ReactDOM.unmountComponentAtNode(b);
+        b.parentElement.removeChild(b);
+        onUnmount();
+      }}
+    />,
+    b
+  );
+
+export const DemoWYSIWYGMode = () => (
+  <div style={{ border: "1px solid black" }}>
+    <WYSIWYGMode />
+  </div>
+);
 
 export default WYSIWYGMode;
