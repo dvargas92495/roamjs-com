@@ -9,7 +9,7 @@ const WYSIWYGMode = ({
   onUnmount = () => {},
 }: {
   initialValue?: string;
-  onUnmount?: () => void;
+  onUnmount?: (output: string) => void;
 }) => {
   const [editorState, setEditorState] = useState<EditorState>(
     EditorState.createWithContent(ContentState.createFromText(initialValue))
@@ -18,7 +18,12 @@ const WYSIWYGMode = ({
   const eventListener = useCallback(
     (e) => {
       if (e.key === "w" && e.altKey && onUnmount) {
-        onUnmount();
+        const output = editorState
+          .getCurrentContent()
+          .getBlocksAsArray()
+          .map((b) => b.getText())
+          .join("\n");
+        onUnmount(output);
       }
     },
     [onUnmount]
@@ -48,6 +53,15 @@ const WYSIWYGMode = ({
       editorClassName={
         "roam-block dont-unfocus-block hoverparent rm-block-text"
       }
+      wrapperStyle={{
+        display: "flex",
+        flexDirection: "column-reverse",
+      }}
+      customStyleMap={{
+        "public-DraftStyleDefault-block": {
+          margin: 0,
+        },
+      }}
     />
   );
 };
@@ -55,15 +69,15 @@ const WYSIWYGMode = ({
 export const renderWYSIWYGMode = (
   b: HTMLElement,
   v: string,
-  onUnmount: () => void
+  onUnmount: (output: string) => void
 ) =>
   ReactDOM.render(
     <WYSIWYGMode
       initialValue={v}
-      onUnmount={() => {
+      onUnmount={(output) => {
         ReactDOM.unmountComponentAtNode(b);
         b.parentElement.removeChild(b);
-        onUnmount();
+        onUnmount(output);
       }}
     />,
     b
