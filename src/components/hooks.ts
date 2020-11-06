@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export const useArrowKeyDown = <T>({
   results,
@@ -28,3 +28,9 @@ export const useArrowKeyDown = <T>({
     onKeyDown,
   };
 };
+
+export const useDocumentKeyDown = (eventListener: (e: KeyboardEvent) => void) =>
+  useEffect(() => {
+    document.addEventListener("keydown", eventListener);
+    return () => document.removeEventListener("keydown", eventListener);
+  }, [eventListener]);

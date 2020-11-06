@@ -183,6 +183,7 @@ const MouselessDialog = () => {
   const onInputChange = useCallback((e) => setValue(e.target.value), [
     setValue,
   ]);
+  const inputRef = useRef<HTMLInputElement>(null);
   const results = useMemo(
     () =>
       value
@@ -197,9 +198,13 @@ const MouselessDialog = () => {
       if ((e.key === "?" || e.key === "/") && e.shiftKey && e.ctrlKey) {
         previousFocus.current = document.activeElement;
         setIsOpen(true);
+        const currentValue = inputRef.current?.value || "";
+        if (currentValue.length) {
+          inputRef.current.setSelectionRange(0, currentValue.length);
+        }
       }
     },
-    [setIsOpen, previousFocus]
+    [setIsOpen, previousFocus, inputRef]
   );
   const onClose = useCallback(() => {
     if ((previousFocus.current as HTMLElement).tabIndex >= 0) {
@@ -245,6 +250,7 @@ const MouselessDialog = () => {
         value={value}
         onKeyDown={onKeyDown}
         id={ROAMJS_MOUSELESS_SEARCH_INPUT}
+        inputRef={inputRef}
       />
       {value && (
         <Menu>
