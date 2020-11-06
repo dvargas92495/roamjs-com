@@ -34,7 +34,7 @@ document.addEventListener("mousedown", (e: MouseEvent) => {
       };
       const observer = new MutationObserver((records, o) => {
         const record = records.find((r) =>
-          Array.from(r.addedNodes).findIndex(findText)
+          Array.from(r.addedNodes).findIndex(findText) >= 0
         );
         if (record) {
           const div = Array.from(record.addedNodes).find(findText) as HTMLElement;
