@@ -10,7 +10,7 @@ const toggleWysiwyg = (textarea: HTMLTextAreaElement) => {
   renderWYSIWYGMode(reactRoot, textarea, async () => {
     textarea.style.display = display;
   });
-}
+};
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "w" && e.altKey) {
@@ -24,24 +24,28 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("mousedown", (e: MouseEvent) => {
-  const target = e.target as HTMLElement;
-  if (
-    e.altKey &&
-    target.tagName === "div" &&
-    target.className.indexOf("roam-block") > -1
-  ) {
-    const blockId = target.id;
-    const findText = (n: Node) => (n as HTMLElement).id === blockId && n.nodeName === 'TEXTAREA';
-    const observer = new MutationObserver((records, o) => {
-      const record = records.find(r => Array.from(r.addedNodes).findIndex(findText))
-      if (record) {
-        const textarea = Array.from(record.addedNodes).find(findText);
-        if (textarea) {
-          toggleWysiwyg(textarea as HTMLTextAreaElement);
-          o.disconnect();
+  if (e.altKey) {
+    const target = (e.target as HTMLElement).closest(".roam-block");
+    if (target?.tagName === "DIV") {
+      const blockId = target.id;
+      const findText = (n: Node) =>
+        (n as HTMLElement).id === blockId && n.nodeName === "TEXTAREA";
+      const observer = new MutationObserver((records, o) => {
+        const record = records.find((r) =>
+          Array.from(r.addedNodes).findIndex(findText)
+        );
+        if (record) {
+          const textarea = Array.from(record.addedNodes).find(findText);
+          if (textarea) {
+            toggleWysiwyg(textarea as HTMLTextAreaElement);
+            o.disconnect();
+          }
         }
-      }
-    });
-    observer.observe(target.parentElement, { childList: true, subtree: true });
+      });
+      observer.observe(target.parentElement, {
+        childList: true,
+        subtree: true,
+      });
+    }
   }
 });
