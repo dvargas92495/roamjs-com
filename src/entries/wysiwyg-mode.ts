@@ -28,15 +28,18 @@ document.addEventListener("mousedown", (e: MouseEvent) => {
     const target = (e.target as HTMLElement).closest(".roam-block");
     if (target?.tagName === "DIV") {
       const blockId = target.id;
-      const findText = (n: Node) =>
-        (n as HTMLElement).id === blockId && n.nodeName === "TEXTAREA";
+      const findText = (n: Node) => {
+        const ts = (n as HTMLElement).getElementsByTagName("textarea");
+        return ts.length && ts[0].id === blockId;
+      };
       const observer = new MutationObserver((records, o) => {
         const record = records.find((r) =>
           Array.from(r.addedNodes).findIndex(findText)
         );
         if (record) {
-          const textarea = Array.from(record.addedNodes).find(findText);
-          if (textarea) {
+          const div = Array.from(record.addedNodes).find(findText) as HTMLElement;
+          if (div) {
+            const textarea = div.getElementsByTagName('textarea')[0];
             toggleWysiwyg(textarea as HTMLTextAreaElement);
             o.disconnect();
           }
