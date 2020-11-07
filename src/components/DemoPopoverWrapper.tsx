@@ -18,12 +18,18 @@ export const DemoPopoverWrapper = ({
     )[0] as HTMLButtonElement;
     let scrollTop = 0;
     document.addEventListener("mousedown", (e) => {
-      if (e.target === overlayButton || overlayButton.contains(e.target as Node)) {
+      if (
+        e.target === overlayButton ||
+        overlayButton.contains(e.target as Node)
+      ) {
         scrollTop = window.scrollY;
       }
     });
     document.addEventListener("click", (e) => {
-      if (e.target === overlayButton || overlayButton.contains(e.target as Node)) {
+      if (
+        e.target === overlayButton ||
+        overlayButton.contains(e.target as Node)
+      ) {
         window.scrollTo({ top: scrollTop });
       }
     });
@@ -38,9 +44,9 @@ export const DemoPopoverWrapper = ({
     >
       <WrappedComponent blockId={"blockId"} defaultIsOpen={false} />
       <TextArea
-    growVertically={true}
+        growVertically={true}
         id={"blockId"}
-        style={{ width: 400, marginLeft: 16, resize: 'none' }}
+        style={{ width: 400, marginLeft: 16, resize: "none" }}
         placeholder={placeholder}
       />
     </div>
