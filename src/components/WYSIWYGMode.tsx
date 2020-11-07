@@ -100,6 +100,7 @@ const WYSIWYGMode = ({
         defaultEditorState={EditorState.createWithContent(
           ContentState.createFromText(initialValue)
         )}
+        onBlur={outputOnUnmount}
       />
     </>
   );
