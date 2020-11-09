@@ -75,7 +75,7 @@ const onDone = async () => {
     await asyncType(formattedText);
   }
   const replaceTags = config["Replace Tags"];
-  if (replaceTags) {
+  if (!!replaceTags) {
     const pairs = replaceTags.split("|") as string[];
     const formattedPairs = pairs.map((p) =>
       p
