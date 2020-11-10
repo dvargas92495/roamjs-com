@@ -10,10 +10,16 @@ export const handler = () => {
     )
     .then((r) => ({
       statusCode: 200,
-      body: JSON.stringify(r.data.map((project: { name: string }) => ({
-        name: project.name,
-        total: 0,
-      }))),
+      body: JSON.stringify(
+        r.data
+          .filter(
+            (project: { name: string }) => project.name !== "Site Improvements"
+          )
+          .map((project: { name: string }) => ({
+            name: project.name,
+            total: 0,
+          }))
+      ),
       headers,
     }))
     .catch((e) => ({
