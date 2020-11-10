@@ -37,14 +37,14 @@ const importGoogleCalendar = async (
   const timeMinParam = encodeURIComponent(formatRFC3339(timeMin));
   const timeMaxParam = encodeURIComponent(formatRFC3339(timeMax));
 
-  axios(
+  axios.get(
     `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${encodeURIComponent(
       calendarId
     )}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
   )
     .then(async (r) => {
       const events = r.data.items;
-      if (events.length === 0) {
+      if (!events || events.length === 0) {
         await asyncType("No Events Scheduled for Today!");
         return;
       }
