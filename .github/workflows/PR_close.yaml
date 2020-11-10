@@ -1,4 +1,4 @@
-name: Automations on PR open
+name: Automations on PR close
 on: 
   pull_request:
     types: [closed]
@@ -9,7 +9,7 @@ env:
   AWS_DEFAULT_REGION: us-east-1
 
 jobs:
-  deploy:
+  shell:
     runs-on: ubuntu-20.04
     steps:
       - name: Delete S3 Branch
