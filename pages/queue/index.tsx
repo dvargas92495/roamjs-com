@@ -33,7 +33,7 @@ const QueueItems = ({ title, path }: { title: string; path: string }) => {
   const loadItems = useCallback(
     () =>
       axios.get(`${API_URL}/${path}`).then((r) =>
-        r.data.map((item: QueueItemResponse) => ({
+        (r.data || []).map((item: QueueItemResponse) => ({
           avatar: <div>${item.total}</div>,
           primary: item.name,
           secondary: item.description,
