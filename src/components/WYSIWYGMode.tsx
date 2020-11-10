@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Editor } from "react-draft-wysiwyg";
+import { Editor } from "@dvargas92495/react-draft-wysiwyg";
 import { EditorState, ContentState } from "draft-js";
-import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import "@dvargas92495/react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import ReactDOM from "react-dom";
 import { TextArea } from "@blueprintjs/core";
 import { useDocumentKeyDown } from "./hooks";
@@ -14,10 +14,8 @@ type EditorType = {
 
 const WYSIWYGMode = ({
   initialValue,
-  /* TODO - fork the repo bc it's not maintained - Pass in as default selection
   initialStart,
   initialEnd,
-  */
   onUnmount,
 }: {
   initialValue: string;
@@ -100,6 +98,8 @@ const WYSIWYGMode = ({
         defaultEditorState={EditorState.createWithContent(
           ContentState.createFromText(initialValue)
         )}
+        defaultSelectionStart={initialStart}
+        defaultSelectionEnd={initialEnd}
         onBlur={outputOnUnmount}
       />
     </>
