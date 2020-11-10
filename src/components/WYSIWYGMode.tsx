@@ -1,6 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Editor } from "@dvargas92495/react-draft-wysiwyg";
-import { EditorState, ContentState } from "draft-js";
+import {
+  EditorState,
+  ContentState,
+  ContentBlock,
+  CharacterMetadata,
+} from "draft-js";
+import { List } from "immutable";
 import "@dvargas92495/react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import ReactDOM from "react-dom";
 import { TextArea } from "@blueprintjs/core";
@@ -11,6 +17,80 @@ import { asyncType } from "roam-client";
 type EditorType = {
   getEditorState: () => EditorState;
 } & Editor;
+
+const indicesOf = (matcher: string, test: string) => {
+  const regex = new RegExp(matcher, "g");
+  let match;
+  let indices = [];
+  while ((match = regex.exec(test))) {
+    indices.push(match.index);
+  }
+  return indices;
+};
+
+const groupSlice = (arr: any[]) => arr.slice(0, Math.floor(arr.length / 2) * 2);
+
+const parseValue = (s: string) => {
+  const textData = Array.from(s).map((c) => ({
+    c,
+    styles: [] as string[],
+    keep: true,
+  }));
+
+  const boldIndices = indicesOf("\\*\\*", s);
+  const groupedBoldIndices = groupSlice(boldIndices);
+  for (let pointer = 0; pointer < groupedBoldIndices.length; pointer += 2) {
+    const start = groupedBoldIndices[pointer];
+    const end = groupedBoldIndices[pointer + 1];
+    for (let td = start + 2; td < end; td++) {
+      textData[td].styles.push("BOLD");
+    }
+    textData[start].keep = false;
+    textData[start + 1].keep = false;
+    textData[end].keep = false;
+    textData[end + 1].keep = false;
+  }
+  const filteredTextData = textData.filter((td) => td.keep);
+  const text = filteredTextData.map((t) => t.c).join("");
+  const characterList = List(
+    filteredTextData.map((t) =>
+      t.styles.reduce(
+        (c, s) => CharacterMetadata.applyStyle(c, s),
+        CharacterMetadata.create()
+      )
+    )
+  );
+  return [
+    new ContentBlock({
+      characterList,
+      type: "paragraph",
+      text,
+    }),
+  ];
+};
+
+const blockToString = (contentBlock: ContentBlock) => {
+  const text = contentBlock.getText();
+  const characterList = contentBlock.getCharacterList();
+  const length = contentBlock.getLength();
+  let markdown = "";
+  let bolded = false;
+  for (let index = 0; index < length; index++) {
+    const isBold = characterList.get(index).hasStyle("BOLD");
+    if (!bolded && isBold) {
+      markdown = `${markdown}**`;
+      bolded = true;
+    } else if (bolded && !isBold) {
+      markdown = `${markdown}**`;
+      bolded = false;
+    }
+    markdown = `${markdown}${text.charAt(index)}`;
+  }
+  if (bolded) {
+    markdown = `${markdown}**`;
+  }
+  return markdown;
+};
 
 const WYSIWYGMode = ({
   initialValue,
@@ -34,10 +114,11 @@ const WYSIWYGMode = ({
   const editorRef = useRef<EditorType>(null);
   const outputOnUnmount = useCallback(() => {
     const editorState = editorRef.current.getEditorState();
+    console.log(editorState.getCurrentContent().getBlocksAsArray());
     const output = editorState
       .getCurrentContent()
       .getBlocksAsArray()
-      .map((b) => b.getText())
+      .map(blockToString)
       .join("\n");
     const selection = editorState.getSelection();
     onUnmount({
@@ -96,7 +177,7 @@ const WYSIWYGMode = ({
         }}
         ref={(ref) => (editorRef.current = ref as EditorType)}
         defaultEditorState={EditorState.createWithContent(
-          ContentState.createFromText(initialValue)
+          ContentState.createFromBlockArray(parseValue(initialValue))
         )}
         defaultSelectionStart={initialStart}
         defaultSelectionEnd={initialEnd}
