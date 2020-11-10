@@ -1,18 +1,18 @@
 const fs = require("fs");
 const path = require("path");
 const Dotenv = require("dotenv-webpack");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
+  .BundleAnalyzerPlugin;
 
 const extensions = fs.readdirSync("./src/entries/");
 const entry = Object.fromEntries(
   extensions.map((e) => [e.substring(0, e.length - 3), `./src/entries/${e}`])
 );
 
-module.exports = {
+module.exports = (env) => ({
   entry,
   resolve: {
-    modules: [
-      'node_modules'
-    ],
+    modules: ["node_modules"],
     extensions: [".ts", ".js", ".tsx"],
   },
   output: {
@@ -29,7 +29,7 @@ module.exports = {
             options: {
               cacheDirectory: true,
               cacheCompression: false,
-            }
+            },
           },
           {
             loader: "ts-loader",
@@ -44,7 +44,7 @@ module.exports = {
       },
       {
         test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
+        use: ["style-loader", "css-loader"],
       },
     ],
   },
@@ -53,5 +53,12 @@ module.exports = {
       path: ".env.local",
       systemvars: true,
     }),
+    ...(env && env.analyze
+      ? [
+          new BundleAnalyzerPlugin({
+            analyzerMode: "static",
+          }),
+        ]
+      : []),
   ],
-};
+});
