@@ -86,6 +86,9 @@ const blockToString = (contentBlock: ContentBlock) => {
     }
     markdown = `${markdown}${text.charAt(index)}`;
   }
+  if (bolded) {
+    markdown = `${markdown}**`;
+  }
   return markdown;
 };
 
