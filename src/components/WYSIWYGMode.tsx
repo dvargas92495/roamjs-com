@@ -244,9 +244,9 @@ const WYSIWYGMode = ({
   useEffect(() => {
     if (editorRef.current) {
       editorRef.current.focusEditor();
-      document.addEventListener("mousedown", clickListener);
+      document.addEventListener("click", clickListener);
     }
-    return () => document.removeEventListener("mousedown", clickListener);
+    return () => document.removeEventListener("click", clickListener);
   }, [editorRef]);
   const {
     defaultEditorState,
