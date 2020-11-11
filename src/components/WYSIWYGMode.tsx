@@ -232,10 +232,18 @@ const WYSIWYGMode = ({
 
   useDocumentKeyDown(eventListener);
 
+  const clickListener = useCallback((e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (!target.closest('.rdw-option-wrapper')) {
+      outputOnUnmount();
+    }
+  }, [outputOnUnmount, editorRef]);
   useEffect(() => {
     if (editorRef.current) {
       editorRef.current.focusEditor();
+      document.addEventListener("mousedown", clickListener);
     }
+    return () => document.removeEventListener("mousedown", clickListener);
   }, [editorRef]);
   const {
     defaultEditorState,
