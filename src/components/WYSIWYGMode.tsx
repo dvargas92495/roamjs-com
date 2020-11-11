@@ -23,6 +23,7 @@ import { asyncType } from "roam-client";
 
 type EditorType = {
   getEditorState: () => EditorState;
+  wrapper: HTMLDivElement;
 } & Editor;
 
 const parseValue = ({
@@ -232,12 +233,19 @@ const WYSIWYGMode = ({
 
   useDocumentKeyDown(eventListener);
 
-  useEffect(() => () => outputOnUnmount, [outputOnUnmount]);
-
+  const clickListener = useCallback((e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (!editorRef.current.wrapper.parentElement.contains(target)) {
+      outputOnUnmount();
+      target.click();
+    }
+  }, [outputOnUnmount, editorRef]);
   useEffect(() => {
     if (editorRef.current) {
       editorRef.current.focusEditor();
+      document.addEventListener("click", clickListener);
     }
+    return () => document.removeEventListener("click", clickListener);
   }, [editorRef]);
   const {
     defaultEditorState,
