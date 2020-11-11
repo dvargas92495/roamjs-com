@@ -238,6 +238,9 @@ const WYSIWYGMode = ({
     if (!editorRef.current.wrapper.parentElement.contains(target)) {
       outputOnUnmount();
       target.click();
+    } else {
+      e.stopImmediatePropagation();
+      e.preventDefault();
     }
   }, [outputOnUnmount, editorRef]);
   useEffect(() => {
