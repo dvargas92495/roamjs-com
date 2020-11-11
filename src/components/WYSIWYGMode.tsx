@@ -317,8 +317,8 @@ export const renderWYSIWYGMode = (
       initialStart={textarea.selectionStart}
       initialEnd={textarea.selectionEnd}
       onUnmount={async ({ output, start, end }) => {
-        ReactDOM.unmountComponentAtNode(b);
-        b.parentElement.removeChild(b);
+        // ReactDOM.unmountComponentAtNode(b);
+        // b.parentElement.removeChild(b);
         onUnmount();
         textarea.focus();
         await userEvent.clear(textarea);

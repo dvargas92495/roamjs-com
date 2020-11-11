@@ -1,5 +1,0 @@
-site_name: Roam JS Extensions
-theme: 
-    name: readthedocs
-    hljs: Rainbow
-site_dir: out/docs
