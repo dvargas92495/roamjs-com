@@ -235,7 +235,7 @@ const WYSIWYGMode = ({
 
   const clickListener = useCallback((e: MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (!target.classList.contains('rdw-option-wrapper')) {
+    if (!target.closest('.rdw-option-wrapper')) {
       outputOnUnmount();
     }
   }, [outputOnUnmount, editorRef]);
