@@ -60,7 +60,7 @@ module "aws_static_site" {
 
 module "aws-serverless-backend" {
     source  = "dvargas92495/serverless-backend/aws"
-    version = "1.2.1"
+    version = "1.3.3"
 
     api_name = "roam-js-extensions"
     paths = [
@@ -69,6 +69,7 @@ module "aws-serverless-backend" {
         "github-projects/get",
         "github-repositories/get",
         "google-calendar/get",
+        "install/put",
         "queue-issues/get",
         "queue-projects/get",
         "twitter-search/get"
