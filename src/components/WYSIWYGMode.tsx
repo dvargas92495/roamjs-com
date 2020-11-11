@@ -178,11 +178,7 @@ const WYSIWYGMode = ({
   }) => void;
 }) => {
   const editorRef = useRef<EditorType>(null);
-  const outputOnUnmount = useCallback((e?: React.FocusEvent) => {
-    if (e) {
-      console.log(e.relatedTarget);
-      console.log(e.target);
-    }
+  const outputOnUnmount = useCallback(() => {
     const editorState = editorRef.current.getEditorState();
     const editorSelection = editorState.getSelection();
     const editorBlocks = editorState.getCurrentContent().getBlocksAsArray();
@@ -295,7 +291,6 @@ const WYSIWYGMode = ({
         defaultEditorState={defaultEditorState}
         defaultSelectionStart={defaultSelectionStart}
         defaultSelectionEnd={defaultSelectionEnd}
-        onBlur={outputOnUnmount}
       />
     </>
   );
