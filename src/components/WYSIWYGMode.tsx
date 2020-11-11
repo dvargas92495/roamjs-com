@@ -1,10 +1,17 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Editor } from "@dvargas92495/react-draft-wysiwyg";
 import {
   EditorState,
   ContentState,
   ContentBlock,
   CharacterMetadata,
+  genKey,
 } from "draft-js";
 import { List } from "immutable";
 import "@dvargas92495/react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
@@ -18,38 +25,55 @@ type EditorType = {
   getEditorState: () => EditorState;
 } & Editor;
 
-const indicesOf = (matcher: string, test: string) => {
-  const regex = new RegExp(matcher, "g");
-  let match;
-  let indices = [];
-  while ((match = regex.exec(test))) {
-    indices.push(match.index);
-  }
-  return indices;
-};
-
-const groupSlice = (arr: any[]) => arr.slice(0, Math.floor(arr.length / 2) * 2);
-
-const parseValue = (s: string) => {
-  const textData = Array.from(s).map((c) => ({
+const parseValue = ({
+  initialValue,
+  initialStart,
+  initialEnd,
+}: {
+  initialValue: string;
+  initialStart: number;
+  initialEnd: number;
+}) => {
+  const textData = Array.from(initialValue).map((c) => ({
     c,
     styles: [] as string[],
     keep: true,
   }));
-
-  const boldIndices = indicesOf("\\*\\*", s);
-  const groupedBoldIndices = groupSlice(boldIndices);
-  for (let pointer = 0; pointer < groupedBoldIndices.length; pointer += 2) {
-    const start = groupedBoldIndices[pointer];
-    const end = groupedBoldIndices[pointer + 1];
-    for (let td = start + 2; td < end; td++) {
-      textData[td].styles.push("BOLD");
+  const selection = {
+    defaultSelectionStart: initialStart,
+    defaultSelectionEnd: initialEnd,
+  };
+  const deleteIndex = (n: number) => {
+    textData[n].keep = false;
+    if (initialStart > n) {
+      selection.defaultSelectionStart--;
     }
-    textData[start].keep = false;
-    textData[start + 1].keep = false;
-    textData[end].keep = false;
-    textData[end + 1].keep = false;
-  }
+    if (initialEnd > n) {
+      selection.defaultSelectionEnd--;
+    }
+  };
+
+  const applyStyle = (matcher: string, style: string) => {
+    const regex = new RegExp(matcher, "g");
+    let match;
+    let indices = [];
+    while ((match = regex.exec(initialValue))) {
+      indices.push(match.index);
+    }
+
+    const groupedIndices = indices.slice(0, Math.floor(indices.length / 2) * 2);
+    for (let pointer = 0; pointer < groupedIndices.length; pointer += 2) {
+      const start = groupedIndices[pointer];
+      const end = groupedIndices[pointer + 1];
+      for (let td = start + 2; td < end; td++) {
+        textData[td].styles.push(style);
+      }
+      [start, start + 1, end, end + 1].forEach(deleteIndex);
+    }
+  };
+  applyStyle("\\*\\*", "BOLD");
+  applyStyle("__", "ITALIC");
+
   const filteredTextData = textData.filter((td) => td.keep);
   const text = filteredTextData.map((t) => t.c).join("");
   const characterList = List(
@@ -60,35 +84,77 @@ const parseValue = (s: string) => {
       )
     )
   );
-  return [
-    new ContentBlock({
-      characterList,
-      type: "paragraph",
-      text,
-    }),
-  ];
+  return {
+    ...selection,
+    defaultEditorState: EditorState.createWithContent(
+      ContentState.createFromBlockArray([
+        new ContentBlock({
+          characterList,
+          type: "paragraph",
+          text,
+          key: genKey(),
+        }),
+      ])
+    ),
+  };
 };
 
-const blockToString = (contentBlock: ContentBlock) => {
+const blockToString = (
+  contentBlock: ContentBlock,
+  selection: {
+    start: number;
+    end: number;
+    initialStart: number;
+    initialEnd: number;
+    pointer: number;
+  }
+) => {
   const text = contentBlock.getText();
   const characterList = contentBlock.getCharacterList();
   const length = contentBlock.getLength();
   let markdown = "";
+  const addMarkdown = (text: string, i: number) => {
+    if (selection.initialStart > i + selection.pointer) {
+      selection.start += text.length;
+    }
+    if (selection.initialEnd > i + selection.pointer) {
+      selection.end += text.length;
+    }
+    return text;
+  };
+
   let bolded = false;
+  let italicized = false;
   for (let index = 0; index < length; index++) {
+    // unfortunately order matters. __**okay**__ does not apply both styles
     const isBold = characterList.get(index).hasStyle("BOLD");
+    const isItalic = characterList.get(index).hasStyle("ITALIC");
     if (!bolded && isBold) {
-      markdown = `${markdown}**`;
+      markdown = `${markdown}${addMarkdown("**", index)}`;
       bolded = true;
-    } else if (bolded && !isBold) {
-      markdown = `${markdown}**`;
+    }
+    if (!italicized && isItalic) {
+      markdown = `${markdown}${addMarkdown("__", index)}`;
+      italicized = true;
+    }
+    if (italicized && !isItalic) {
+      markdown = `${markdown}${addMarkdown("__", index)}`;
+      italicized = false;
+    }
+    if (bolded && !isBold) {
+      markdown = `${markdown}${addMarkdown("**", index)}`;
       bolded = false;
     }
     markdown = `${markdown}${text.charAt(index)}`;
   }
-  if (bolded) {
-    markdown = `${markdown}**`;
+  if (italicized) {
+    markdown = `${markdown}${addMarkdown("__", length)}`;
   }
+  if (bolded) {
+    markdown = `${markdown}${addMarkdown("**", length)}`;
+  }
+
+  selection.pointer += length;
   return markdown;
 };
 
@@ -114,17 +180,43 @@ const WYSIWYGMode = ({
   const editorRef = useRef<EditorType>(null);
   const outputOnUnmount = useCallback(() => {
     const editorState = editorRef.current.getEditorState();
-    console.log(editorState.getCurrentContent().getBlocksAsArray());
-    const output = editorState
-      .getCurrentContent()
-      .getBlocksAsArray()
-      .map(blockToString)
+    const editorSelection = editorState.getSelection();
+    const editorBlocks = editorState.getCurrentContent().getBlocksAsArray();
+
+    const getOffset = (offset: number, key: string) => {
+      let total = offset;
+      for (let b = 0; b < editorBlocks.length; b++) {
+        const thisBlock = editorBlocks[b];
+        if (thisBlock.getKey() !== key) {
+          total += thisBlock.getLength();
+        } else {
+          return total;
+        }
+      }
+      return total;
+    };
+    const initialStart = getOffset(
+      editorSelection.getStartOffset(),
+      editorSelection.getStartKey()
+    );
+    const initialEnd = getOffset(
+      editorSelection.getEndOffset(),
+      editorSelection.getEndKey()
+    );
+    const selection = {
+      start: initialStart,
+      end: initialEnd,
+      pointer: 0,
+      initialStart,
+      initialEnd,
+    };
+    const output = editorBlocks
+      .map((b) => blockToString(b, selection))
       .join("\n");
-    const selection = editorState.getSelection();
     onUnmount({
       output,
-      start: selection.getStartOffset(),
-      end: selection.getEndOffset(),
+      start: selection.start,
+      end: selection.end,
     });
   }, [onUnmount, editorRef]);
 
@@ -147,6 +239,16 @@ const WYSIWYGMode = ({
       editorRef.current.focusEditor();
     }
   }, [editorRef]);
+  const {
+    defaultEditorState,
+    defaultSelectionStart,
+    defaultSelectionEnd,
+  } = useMemo(() => parseValue({ initialValue, initialStart, initialEnd }), [
+    initialValue,
+    initialStart,
+    initialEnd,
+  ]);
+
   return (
     <>
       <style>
@@ -156,9 +258,19 @@ const WYSIWYGMode = ({
       </style>
       <Editor
         toolbar={{
-          options: ["inline", "blockType", "textAlign", "link", "image"],
+          options: [
+            "inline",
+            /* "blockType", 
+            "textAlign", 
+            "link", 
+            "image"*/
+          ],
           inline: {
-            options: ["bold", "italic", "strikethrough", "monospace"],
+            options: [
+              "bold",
+              "italic",
+              // "monospace"
+            ],
           },
           blockType: {
             inDropdown: false,
@@ -176,11 +288,9 @@ const WYSIWYGMode = ({
           flexDirection: "column-reverse",
         }}
         ref={(ref) => (editorRef.current = ref as EditorType)}
-        defaultEditorState={EditorState.createWithContent(
-          ContentState.createFromBlockArray(parseValue(initialValue))
-        )}
-        defaultSelectionStart={initialStart}
-        defaultSelectionEnd={initialEnd}
+        defaultEditorState={defaultEditorState}
+        defaultSelectionStart={defaultSelectionStart}
+        defaultSelectionEnd={defaultSelectionEnd}
         onBlur={outputOnUnmount}
       />
     </>
