@@ -232,12 +232,21 @@ const WYSIWYGMode = ({
 
   useDocumentKeyDown(eventListener);
 
-  useEffect(() => () => outputOnUnmount, [outputOnUnmount]);
-
+  const clickListener = useCallback((e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (!target.closest('.rdw-option-wrapper')) {
+      outputOnUnmount();
+    } else {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+  }, [outputOnUnmount, editorRef]);
   useEffect(() => {
     if (editorRef.current) {
       editorRef.current.focusEditor();
+      document.addEventListener("click", clickListener);
     }
+    return () => document.removeEventListener("click", clickListener);
   }, [editorRef]);
   const {
     defaultEditorState,
