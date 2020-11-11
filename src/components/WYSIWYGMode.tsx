@@ -236,6 +236,9 @@ const WYSIWYGMode = ({
     const target = e.target as HTMLElement;
     if (!target.closest('.rdw-option-wrapper')) {
       outputOnUnmount();
+    } else {
+      e.preventDefault();
+      e.stopImmediatePropagation();
     }
   }, [outputOnUnmount, editorRef]);
   useEffect(() => {
