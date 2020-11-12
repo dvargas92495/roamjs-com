@@ -18,7 +18,7 @@ const codeContent = (scriptIds: string[]) =>
   
 ${scriptIds
   .map((f) => `installScript(\"${f}\");`)
-  .join("")}
+  .join("\n")}
 \`\`\``;
 
 export const handler = (event: APIGatewayProxyEvent) => {
