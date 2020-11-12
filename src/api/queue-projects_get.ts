@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getGithubOpts, headers, wrapAxios } from "../lambda-helpers";
+import { getGithubOpts, headers } from "../lambda-helpers";
 
 export const handler = () => {
   const opts = getGithubOpts();
@@ -15,8 +15,9 @@ export const handler = () => {
           .filter(
             (project: { name: string }) => project.name !== "Site Improvements"
           )
-          .map((project: { name: string }) => ({
+          .map((project: { name: string; html_url: string }) => ({
             name: project.name,
+            htmlUrl: project.html_url,
             total: 0,
           }))
       ),

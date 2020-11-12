@@ -10,8 +10,9 @@ export const handler = () => {
     )
     .then((r) => ({
       statusCode: 200,
-      body: JSON.stringify(r.data.map((issue: { title: string }) => ({
+      body: JSON.stringify(r.data.map((issue: { title: string, html_url: string }) => ({
         name: issue.title,
+        htmlUrl: issue.html_url,
         total: 0,
       }))),
       headers,
