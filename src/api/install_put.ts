@@ -17,7 +17,7 @@ const codeContent = (scriptIds: string[]) =>
 };
   
 ${scriptIds
-  .map((f) => `installScript(\"${f.replace(/ /g, "-").toLowerCase()}\");`)
+  .map((f) => `installScript(\"${f}\");`)
   .join("")}
 \`\`\``;
 
