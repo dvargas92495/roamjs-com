@@ -5,7 +5,7 @@ const DemoVideo = ({ src }: {src: string}) => (
     width="320"
     height="240"
     controls
-    src={`/videos/${src}.mp4`}
+    src={`${process.env.APP_BASE_PATH || ''}/videos/${src}.mp4`}
     style={{ display: "block" }}
   />
 );
