@@ -32,6 +32,10 @@ variable "twitter_bearer_token" {
     type = string
 }
 
+variable "stripe_public" {
+    type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -190,4 +194,10 @@ resource "github_actions_secret" "floss_rest_api_id" {
   repository       = "roam-js-extensions"
   secret_name      = "FLOSS_API_ID"
   plaintext_value  = data.aws_api_gateway_rest_api.floss.id
+}
+
+resource "github_actions_secret" "stripe_public" {
+  repository       = "roam-js-extensions"
+  secret_name      = "STRIPE_PUBLIC_KEY"
+  plaintext_value  = var.stripe_public
 }
