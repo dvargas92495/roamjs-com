@@ -12,6 +12,8 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.DEPLOY_AWS_ACCESS_SECRET }}
   AWS_DEFAULT_REGION: us-east-1
   NEXT_PUBLIC_REST_API_ID: ${{ secrets.REST_API_ID }}
+  NEXT_PUBLIC_FLOSS_API_URL: "https://${{ secrets.FLOSS_API_ID }}.execute-api.us-east-1.amazonaws.com/production"
+  NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
 
 jobs:
   deploy:

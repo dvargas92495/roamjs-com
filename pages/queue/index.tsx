@@ -14,8 +14,13 @@ import axios from "axios";
 import { useUser } from "react-manage-users";
 import addMonths from "date-fns/addMonths";
 import isBefore from "date-fns/isBefore";
+import format from "date-fns/format";
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || "");
 
 export const API_URL = `https://${process.env.NEXT_PUBLIC_REST_API_ID}.execute-api.us-east-1.amazonaws.com/production`;
+export const FLOSS_API_URL = process.env.NEXT_PUBLIC_FLOSS_API_URL;
 
 type QueueItemResponse = {
   total: number;
@@ -37,21 +42,36 @@ const FundButton = ({
   return (
     <FormDialog
       title={name}
-      contentText={`COMING SOON: Funding will be charged upon completion of ${title
+      contentText={`Funding will be charged upon completion of ${title
         .toLowerCase()
         .substring(0, title.length - 1)}.`}
       buttonText={"FUND"}
       onSuccess={() => {}}
-      onSave={
-        () => Promise.reject({ message: `Sponsoring RoamJS ${title} Coming Soon!`})
-        /*  
+      onSave={(body) =>
         axios
-          .post(`${API_URL}/fund`, {
-            email: user?.email,
-            ...body,
-            url,
-          })
-          )*/
+          .post(
+            `${FLOSS_API_URL}/stripe-session`,
+            {
+              link: url,
+              reward: body.funding,
+              dueDate: format(body.due, "yyyy-MM-dd"),
+              mode: "setup",
+            },
+            {
+              headers: {
+                Authorization: !!user
+                  ? `token ${user.accessToken}`
+                  : `Basic ${btoa(body.email)}`,
+              },
+            }
+          )
+          .then((r) =>
+            stripe.then((s) =>
+              s.redirectToCheckout({
+                sessionId: r.data.id,
+              })
+            )
+          )
       }
       formElements={[
         {
@@ -71,15 +91,6 @@ const FundButton = ({
         ...(!!user
           ? []
           : [
-              {
-                name: "name",
-                defaultValue: "",
-                component: StringField,
-                validate: (v: string) =>
-                  v.indexOf(" ") > -1
-                    ? ""
-                    : "Please enter both first and last name",
-              },
               {
                 name: "email",
                 defaultValue: "",
@@ -103,7 +114,9 @@ const QueueItems = ({ title, path }: { title: string; path: string }) => {
           avatar: <div>${item.total}</div>,
           primary: item.name,
           secondary: (
-            <ExternalLink href={item.htmlUrl}>{title.substring(0, title.length - 1)} Link</ExternalLink>
+            <ExternalLink href={item.htmlUrl}>
+              {title.substring(0, title.length - 1)} Link
+            </ExternalLink>
           ),
           action: (
             <FundButton title={title} name={item.name} url={item.htmlUrl} />
@@ -113,7 +126,7 @@ const QueueItems = ({ title, path }: { title: string; path: string }) => {
     [title, path]
   );
   return (
-    <div style={{ padding: 8, maxWidth: 380 }}>
+    <div style={{ padding: 8, width: "50%" }}>
       <Queue title={title} loadItems={loadItems} />
     </div>
   );
