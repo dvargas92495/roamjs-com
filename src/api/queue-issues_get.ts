@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import {
   Contracts,
   getFlossActiveContracts,
@@ -17,38 +17,41 @@ export const handler = async () => {
       )
     )
     .catch(() => [] as Contracts);
-  const issuesWithContract = new Set(flossIssues.map((i) => i.link));
-  const githubIssuesByLink = await axios
+  const fundingByIssueLink = flossIssues.reduce(
+    (rewards, { link, reward }) => ({
+      ...rewards,
+      [link]: reward + (rewards[link] || 0),
+    }),
+    {} as { [link: string]: number }
+  );
+  const body = await axios
     .get(
       "https://api.github.com/repos/dvargas92495/roam-js-extensions/issues?labels=enhancement",
       opts
     )
-    .then((r) =>
-      Object.fromEntries<{
-        name: string,
-        htmlUrl: string,
-        createdAt: string,
-      }>(
-        r.data.map((issue: { title: string; html_url: string, created_at: string }) => [
-          issue.html_url,
+    .then(
+      (
+        r: AxiosResponse<
           {
+            title: string;
+            html_url: string;
+            created_at: string;
+          }[]
+        >
+      ) =>
+        r.data
+          .map((issue) => ({
             name: issue.title,
             htmlUrl: issue.html_url,
             createdAt: issue.created_at,
-          },
-        ])
-      )
+            total: fundingByIssueLink[issue.html_url] || 0,
+          }))
+          .sort((a, b) =>
+            a.total !== b.total
+              ? b.total - a.total
+              : a.createdAt.localeCompare(b.createdAt)
+          )
     );
-  const body = [
-    ...flossIssues.map((i) => ({
-      total: i.reward,
-      ...githubIssuesByLink[i.link],
-    })),
-    ...Object.keys(githubIssuesByLink)
-      .filter((l) => !issuesWithContract.has(l))
-      .sort((a, b) => githubIssuesByLink[a].createdAt.localeCompare(githubIssuesByLink[b].createdAt))
-      .map((i) => ({ total: 0, ...githubIssuesByLink[i] })),
-  ];
   return {
     statusCode: 200,
     body: JSON.stringify(body),

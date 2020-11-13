@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import {
   Contracts,
   getFlossActiveContracts,
@@ -18,38 +18,41 @@ export const handler = async () => {
       )
     )
     .catch(() => [] as Contracts);
-  const projectsWithContract = new Set(flossProjects.map((p) => p.link));
-  const githubProjectsByLink = await axios
+  const fundingByProjectLink = flossProjects.reduce(
+    (rewards, { link, reward }) => ({
+      ...rewards,
+      [link]: reward + (rewards[link] || 0),
+    }),
+    {} as { [link: string]: number }
+  );
+  const body = await axios
     .get(
       "https://api.github.com/repos/dvargas92495/roam-js-extensions/projects",
       opts
     )
-    .then((r) =>
-      Object.fromEntries<{name: string, htmlUrl:string, createdAt: string}>(
-        r.data
-          .filter(
-            (project: { name: string }) => project.name !== "Site Improvements"
-          )
-          .map((project: { name: string; html_url: string, created_at: string }) => [
-            project.html_url,
-            {
-              name: project.name,
-              htmlUrl: project.html_url,
-              createdAt: project.created_at
-            },
-          ])
-      )
+    .then((r: AxiosResponse<{
+      name: string;
+      html_url: string;
+      created_at: string;
+    }[]>) =>
+      r.data
+        .filter(
+          (project: { name: string }) => project.name !== "Site Improvements"
+        )
+        .map(
+          (project) => ({
+            name: project.name,
+            htmlUrl: project.html_url,
+            createdAt: project.created_at,
+            total: fundingByProjectLink[project.html_url] || 0,
+          })
+        )
+        .sort((a, b) =>
+          a.total !== b.total
+            ? b.total - a.total
+            : a.createdAt.localeCompare(b.createdAt)
+        )
     );
-  const body = [
-    ...flossProjects.map((i) => ({
-      total: i.reward,
-      ...githubProjectsByLink[i.link],
-    })),
-    ...Object.keys(githubProjectsByLink)
-      .filter((l) => !projectsWithContract.has(l))
-      .sort((a, b) => githubProjectsByLink[a].createdAt.localeCompare(githubProjectsByLink[b].createdAt))
-      .map((i) => ({ total: 0, ...githubProjectsByLink[i] })),
-  ];
 
   return {
     statusCode: 200,
