@@ -21,6 +21,12 @@ import { useDocumentKeyDown } from "./hooks";
 import userEvent from "@testing-library/user-event";
 import { asyncType } from "roam-client";
 
+const ToolbarWarning = () => (
+  <span style={{ margin: "0 8px" }}>
+    Warning: Clicking Buttons will close WYSIWIG. Use Hot Keys Instead
+  </span>
+);
+
 type EditorType = {
   getEditorState: () => EditorState;
 } & Editor;
@@ -232,21 +238,10 @@ const WYSIWYGMode = ({
 
   useDocumentKeyDown(eventListener);
 
-  const clickListener = useCallback((e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (!target.closest('.rdw-option-wrapper')) {
-      outputOnUnmount();
-    } else {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-    }
-  }, [outputOnUnmount, editorRef]);
   useEffect(() => {
     if (editorRef.current) {
       editorRef.current.focusEditor();
-      document.addEventListener("click", clickListener);
     }
-    return () => document.removeEventListener("click", clickListener);
   }, [editorRef]);
   const {
     defaultEditorState,
@@ -262,8 +257,21 @@ const WYSIWYGMode = ({
     <>
       <style>
         {`.public-DraftStyleDefault-block {
-        margin: 0;
-      }`}
+  margin: 0;
+}
+
+.rdw-option-wrapper {
+  cursor: not-allowed;
+}
+
+.rdw-option-wrapper.rdw-option-active:hover {
+  box-shadow: 1px 1px 0px #BFBDBD inset;
+}
+
+.rdw-option-wrapper:hover {
+  box-shadow: none;
+}
+`}
       </style>
       <Editor
         toolbar={{
@@ -289,6 +297,7 @@ const WYSIWYGMode = ({
             options: ["left", "center", "right"],
           },
         }}
+        toolbarCustomButtons={[<ToolbarWarning />]}
         editorClassName={
           "roam-block dont-unfocus-block hoverparent rm-block-text"
         }

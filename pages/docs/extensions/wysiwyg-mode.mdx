@@ -1,10 +1,13 @@
 ---
 layout: "ExtensionPageLayout"
 description: "The WYSIWYG mode extension allows users to edit blocks in it's readable, rendered state!"
-development: true
 ---
 
 import {DemoWYSIWYGMode} from "../../../src/components/WYSIWYGMode";
+
+The feature set of this extension is very limited and is still experimental. Use at your own risk. Currently, only the following stylings are supported:
+- Bolding (CTRL+b/CMD+b)
+- Italics (CTRL+i/CMD+i)
 
 To edit a block in WYSIWYG (what you see is what you get) mode, hold on the **ALT** key while clicking on it. Now you should be able to edit the content just like how it will be when rendered!
 
@@ -12,6 +15,6 @@ While in a block, you could hit **ALT+w** to toggle the block to and from WYSIWY
 
 ### Playground
 
-The text area below is meant to act as a Roam block. Hit **ALT+w** to toggle to and from WYSIWYG Mode.
+The text area below is meant to act as a Roam block. Hit **ALT+w** to toggle to and from WYSIWYG Mode. Removing focus from WYSIWYG will also toggle back to the Roam block textarea.
 
 <DemoWYSIWYGMode />
