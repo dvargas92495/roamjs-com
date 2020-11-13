@@ -1,7 +1,19 @@
-import { Body, Button, H1, Queue } from "@dvargas92495/ui";
-import React, { useCallback, useState } from "react";
+import {
+  Body,
+  H1,
+  Queue,
+  FormDialog,
+  NumberField,
+  DateField,
+  ExternalLink,
+  StringField,
+} from "@dvargas92495/ui";
+import React, { useCallback } from "react";
 import StandardLayout from "../../components/StandardLayout";
 import axios from "axios";
+import { useUser } from "react-manage-users";
+import addMonths from "date-fns/addMonths";
+import isBefore from "date-fns/isBefore";
 
 export const API_URL = `https://${process.env.NEXT_PUBLIC_REST_API_ID}.execute-api.us-east-1.amazonaws.com/production`;
 
@@ -9,23 +21,77 @@ type QueueItemResponse = {
   total: number;
   name: string;
   description: string;
+  htmlUrl: string;
 };
 
-const FundButton = () => {
-  const [clicked, setClicked] = useState(false);
+const FundButton = ({
+  title,
+  name,
+  url,
+}: {
+  title: string;
+  name: string;
+  url: string;
+}) => {
+  const user = useUser();
   return (
-    <>
-      <div>
-        <Button
-          color={"primary"}
-          variant={"contained"}
-          onClick={() => setClicked(!clicked)}
-        >
-          FUND
-        </Button>
-      </div>
-      {clicked && "Coming Soon!"}
-    </>
+    <FormDialog
+      title={name}
+      contentText={`COMING SOON: Funding will be charged upon completion of ${title
+        .toLowerCase()
+        .substring(0, title.length - 1)}.`}
+      buttonText={"FUND"}
+      onSuccess={() => {}}
+      onSave={
+        () => Promise.reject({ message: `Sponsoring RoamJS ${title} Coming Soon!`})
+        /*  
+        axios
+          .post(`${API_URL}/fund`, {
+            email: user?.email,
+            ...body,
+            url,
+          })
+          )*/
+      }
+      formElements={[
+        {
+          name: "funding",
+          defaultValue: 50,
+          component: NumberField,
+          validate: (v: number) =>
+            v > 0 ? "" : "Funding amount must be greater than 0",
+        },
+        {
+          name: "due",
+          defaultValue: addMonths(new Date(), 1),
+          component: DateField,
+          validate: (v: Date) =>
+            !isBefore(new Date(), v) ? "Due Date must be after today" : "",
+        },
+        ...(!!user
+          ? []
+          : [
+              {
+                name: "name",
+                defaultValue: "",
+                component: StringField,
+                validate: (v: string) =>
+                  v.indexOf(" ") > -1
+                    ? ""
+                    : "Please enter both first and last name",
+              },
+              {
+                name: "email",
+                defaultValue: "",
+                component: StringField,
+                validate: (v: string) =>
+                  v.indexOf("@") > -1
+                    ? ""
+                    : "Please enter a valid email address",
+              },
+            ]),
+      ]}
+    />
   );
 };
 
@@ -36,11 +102,15 @@ const QueueItems = ({ title, path }: { title: string; path: string }) => {
         (r.data || []).map((item: QueueItemResponse) => ({
           avatar: <div>${item.total}</div>,
           primary: item.name,
-          secondary: item.description,
-          action: <FundButton />,
+          secondary: (
+            <ExternalLink href={item.htmlUrl}>{title.substring(0, title.length - 1)} Link</ExternalLink>
+          ),
+          action: (
+            <FundButton title={title} name={item.name} url={item.htmlUrl} />
+          ),
         }))
       ),
-    []
+    [title, path]
   );
   return (
     <div style={{ padding: 8, maxWidth: 380 }}>

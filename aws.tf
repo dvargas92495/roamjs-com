@@ -106,6 +106,10 @@ module "aws_email" {
   } 
 }
 
+data "aws_api_gateway_rest_api" "floss" {
+  name = "floss"
+}
+
 provider "github" {
     owner = "dvargas92495"
 }
@@ -180,4 +184,10 @@ resource "github_actions_secret" "rest_api_id" {
   repository       = "roam-js-extensions"
   secret_name      = "REST_API_ID"
   plaintext_value  = module.aws-serverless-backend.rest_api_id
+}
+
+resource "github_actions_secret" "floss_rest_api_id" {
+  repository       = "roam-js-extensions"
+  secret_name      = "FLOSS_API_ID"
+  plaintext_value  = aws_api_gateway_rest_api.floss.id
 }
