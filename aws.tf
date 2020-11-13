@@ -73,7 +73,6 @@ module "aws-serverless-backend" {
         "github-projects/get",
         "github-repositories/get",
         "google-calendar/get",
-        "fund/post",
         "install/put",
         "queue-issues/get",
         "queue-projects/get",

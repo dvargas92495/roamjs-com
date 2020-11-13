@@ -1,4 +1,4 @@
-import { AxiosPromise } from "axios";
+import { AxiosPromise, AxiosResponse } from "axios";
 import axios from "axios";
 
 export const headers = {
@@ -49,30 +49,39 @@ const twitterConsumerSecret = process.env.TWITTER_CONSUMER_SECRET || "";
 
 export const getTwitterOpts = async () => {
   const twitterBearerTokenResponse = await wrapAxios(
-      axios.post(
+    axios.post(
       `https://api.twitter.com/oauth2/token`,
       {},
       {
-        params : {
-          grant_type: "client_credentials"
+        params: {
+          grant_type: "client_credentials",
         },
         auth: {
           username: twitterConsumerKey,
-          password: twitterConsumerSecret
+          password: twitterConsumerSecret,
         },
-        headers : {
-          'Content-Type' : 'application/x-www-form-urlencoded;charset=UTF-8'
-        }
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        },
       }
     )
   );
-  
+
   const body = JSON.parse(twitterBearerTokenResponse.body);
   const twitterBearerToken = body.access_token;
 
   return {
-    "headers" :{
-      "Authorization" : `Bearer ${twitterBearerToken}`
-    }
-  }
+    headers: {
+      Authorization: `Bearer ${twitterBearerToken}`,
+    },
+  };
 };
+
+export type Contracts = { link: string; reward: number }[];
+
+export const getFlossActiveContracts = () =>
+  axios
+    .get(`${process.env.FLOSS_API_URL}/contracts`)
+    .then(
+      (r: AxiosResponse<{ projects: Contracts; issues: Contracts }>) => r.data
+    );
