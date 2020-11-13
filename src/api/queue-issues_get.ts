@@ -24,12 +24,17 @@ export const handler = async () => {
       opts
     )
     .then((r) =>
-      Object.fromEntries(
-        r.data.map((issue: { title: string; html_url: string }) => [
+      Object.fromEntries<{
+        name: string,
+        htmlUrl: string,
+        createdAt: string,
+      }>(
+        r.data.map((issue: { title: string; html_url: string, created_at: string }) => [
           issue.html_url,
           {
             name: issue.title,
-            htmlUtl: issue.html_url,
+            htmlUrl: issue.html_url,
+            createdAt: issue.created_at,
           },
         ])
       )
@@ -41,6 +46,7 @@ export const handler = async () => {
     })),
     ...Object.keys(githubIssuesByLink)
       .filter((l) => !issuesWithContract.has(l))
+      .sort((a, b) => githubIssuesByLink[a].createdAt.localeCompare(githubProjectsByLink[b].createdAt))
       .map((i) => ({ total: 0, ...githubIssuesByLink[i] })),
   ];
   return {
