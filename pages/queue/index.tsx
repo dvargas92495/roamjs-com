@@ -42,7 +42,7 @@ const FundButton = ({
   return (
     <FormDialog
       title={name}
-      contentText={`Funding will be charged upon completion of ${title
+      contentText={`WARNING: Still Testing. Funding will be charged upon completion of ${title
         .toLowerCase()
         .substring(0, title.length - 1)}.`}
       buttonText={"FUND"}
