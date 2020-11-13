@@ -46,7 +46,7 @@ export const handler = async () => {
     })),
     ...Object.keys(githubIssuesByLink)
       .filter((l) => !issuesWithContract.has(l))
-      .sort((a, b) => githubIssuesByLink[a].createdAt.localeCompare(githubProjectsByLink[b].createdAt))
+      .sort((a, b) => githubIssuesByLink[a].createdAt.localeCompare(githubIssuesByLink[b].createdAt))
       .map((i) => ({ total: 0, ...githubIssuesByLink[i] })),
   ];
   return {
