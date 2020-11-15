@@ -1,3 +1,4 @@
+import { APIGatewayEvent } from "aws-lambda";
 import axios, { AxiosResponse } from "axios";
 import {
   Contracts,
@@ -6,7 +7,8 @@ import {
   headers,
 } from "../lambda-helpers";
 
-export const handler = async () => {
+export const handler = async (event: APIGatewayEvent) => {
+  const label = event.queryStringParameters.label || 'enhancement';
   const opts = getGithubOpts();
   const flossIssues = await getFlossActiveContracts()
     .then((r) =>
@@ -26,7 +28,7 @@ export const handler = async () => {
   );
   const body = await axios
     .get(
-      "https://api.github.com/repos/dvargas92495/roam-js-extensions/issues?labels=enhancement",
+      `https://api.github.com/repos/dvargas92495/roam-js-extensions/issues?labels=${label}`,
       opts
     )
     .then(
