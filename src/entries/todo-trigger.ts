@@ -18,9 +18,9 @@ const replaceText = async ([before, after]: string[]) => {
 };
 
 const replaceTagText = async ([before, after]: string[]) => {
-  await replaceText([`#[[${before}]]`, `#[[${after}]]`]);
-  await replaceText([`[[${before}]]`, `[[${after}]]`]);
-  await replaceText([`#${before}`, `#${after}`]);
+  await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : '']);
+  await replaceText([`[[${before}]]`, after ? `[[${after}]]` : '']);
+  await replaceText([`#${before}`, after ? `#${after}` : '']);
 };
 
 const onTodo = async () => {
