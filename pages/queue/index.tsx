@@ -29,6 +29,9 @@ type QueueItemResponse = {
   htmlUrl: string;
 };
 
+const toLabel = (title: string) =>
+  title.toLowerCase().substring(0, title.length - 1);
+
 const FundButton = ({
   title,
   name,
@@ -42,9 +45,9 @@ const FundButton = ({
   return (
     <FormDialog
       title={name}
-      contentText={`WARNING: Still Testing. Funding will be charged upon completion of ${title
-        .toLowerCase()
-        .substring(0, title.length - 1)}.`}
+      contentText={`WARNING: Still Testing. Funding will be charged upon completion of ${toLabel(
+        title
+      )}.`}
       buttonText={"FUND"}
       onSuccess={() => {}}
       onSave={(body) =>
@@ -106,10 +109,10 @@ const FundButton = ({
   );
 };
 
-const QueueItems = ({ title, path }: { title: string; path: string }) => {
+const QueueItems = ({ title }: { title: string }) => {
   const loadItems = useCallback(
     () =>
-      axios.get(`${API_URL}/${path}`).then((r) =>
+      axios.get(`${API_URL}/queue-issues?label=${toLabel(title)}`).then((r) =>
         (r.data || []).map((item: QueueItemResponse) => ({
           avatar: <div>${item.total}</div>,
           primary: item.name,
@@ -123,7 +126,7 @@ const QueueItems = ({ title, path }: { title: string; path: string }) => {
           ),
         }))
       ),
-    [title, path]
+    [title]
   );
   return (
     <div style={{ padding: 8, width: "50%" }}>
@@ -141,8 +144,8 @@ const QueuePage = () => {
         RoamJS. Directly sponsor one to prioritize it higher in the queue!
       </Body>
       <div style={{ display: "flex", maxHeight: 600 }}>
-        <QueueItems title={"Extensions"} path={"queue-projects"} />
-        <QueueItems title={"Enhancements"} path={"queue-issues"} />
+        <QueueItems title={"Extensions"} />
+        <QueueItems title={"Enhancements"} />
       </div>
     </StandardLayout>
   );
