@@ -11,19 +11,29 @@ createButtonObserver({
   shortcut: "qb",
   attribute: "query-builder",
   render: (b: HTMLButtonElement) =>
-    renderQueryBuilder(b.closest(".roam-block").id, b.parentElement),
+    renderQueryBuilder({
+      blockId: b.closest(".roam-block").id,
+      parent: b.parentElement,
+    }),
 });
 
-const dataAttribute = 'data-roamjs-edit-query';
+const dataAttribute = "data-roamjs-edit-query";
 
 createHTMLObserver(
   (b) => {
     if (!b.getAttribute(dataAttribute)) {
-      b.setAttribute(dataAttribute, 'true');
-      const editButtonRoot = document.createElement('div');
+      b.setAttribute(dataAttribute, "true");
+      const editButtonRoot = document.createElement("div");
       b.appendChild(editButtonRoot);
-      console.log(b.textContent);
-      renderQueryBuilder(b.closest('.roam-block').id, editButtonRoot);
+      const blockId = b.closest(".roam-block").id;
+      renderQueryBuilder({
+        blockId,
+        parent: editButtonRoot,
+        initialValue: b.textContent,
+      });
+      document
+        .getElementById(`roamjs-query-builder-button-${blockId}`)
+        .addEventListener("mousedown", (e) => e.stopPropagation());
     }
   },
   "DIV",

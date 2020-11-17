@@ -341,22 +341,41 @@ const QueryContent = ({ blockId }: { blockId: string }) => {
 const QueryBuilder = ({
   blockId,
   defaultIsOpen,
+  initialValue = "",
 }: {
   blockId: string;
   defaultIsOpen: boolean;
+  initialValue?: string;
 }) => {
   return (
     <Popover
       content={<QueryContent blockId={blockId} />}
-      target={<Button text="QUERY" />}
+      target={
+        <Button
+          text={initialValue ? <Icon icon={"edit"} /> : "QUERY"}
+          id={`roamjs-query-builder-button-${blockId}`}
+        />
+      }
       defaultIsOpen={defaultIsOpen}
     />
   );
 };
 
-export const renderQueryBuilder = (blockId: string, parent: HTMLElement) =>
+export const renderQueryBuilder = ({
+  blockId,
+  parent,
+  initialValue,
+}: {
+  blockId: string;
+  parent: HTMLElement;
+  initialValue?: string;
+}) =>
   ReactDOM.render(
-    <QueryBuilder blockId={blockId} defaultIsOpen={true} />,
+    <QueryBuilder
+      blockId={blockId}
+      defaultIsOpen={!initialValue}
+      initialValue={initialValue}
+    />,
     parent
   );
 
