@@ -34,7 +34,6 @@ createHTMLObserver(
       const editButton = document
         .getElementById(`roamjs-query-builder-button-${blockId}`);
       editButton.addEventListener("mousedown", (e) => e.stopPropagation());
-      editButton.style.float = 'right';
     }
   },
   "DIV",
