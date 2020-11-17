@@ -9,6 +9,12 @@ import { DemoCharts, styleContent } from "../../../src/components/Charts";
 
 The script is not configurable.
 
+There are two types of charts supported:
+- Create a {{line}} or {{line chart}} button to render a line graph.
+- Create a {{bar}} or {{bar chart}} button to render a bar graph. 
+
+You will need to nest labels and data as children of the rendered chart. You should have one label per line, and data should be nested under the label. The data should be two numbers separated by a comma.
+
 ### Playground
 
 <AddStyle styleContent={styleContent} />

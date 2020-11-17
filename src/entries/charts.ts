@@ -1,5 +1,4 @@
 import {
-  CHARTS_WRAPPER,
   renderBarChart,
   renderLineChart,
   styleContent,
