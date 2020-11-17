@@ -348,6 +348,7 @@ const toQueryStateChildren = (v: string): QueryState[] => {
     }
     if (inParent === 0 && inTag === 0 && !inHashTag && content) {
       children.push({ ...toQueryState(content.trim()), key: children.length });
+      content = '';
     }
   }
 
