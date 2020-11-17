@@ -339,12 +339,12 @@ const toQueryStateChildren = (v: string): QueryState[] => {
     if (inParent || inTag || inHashTag) {
       content = `${content}${c}`;
     }
-    if (c === "}") {
+    if (inParent > 0 && c === "}") {
       inParent--;
       if (inParent === 0) {
         children.push({ ...toQueryState(content.trim()), key: children.length });
       }
-    } else if (c === "]" && v.charAt(pointer + 1) === "]") {
+    } else if (inTag > 0 && c === "]" && v.charAt(pointer + 1) === "]") {
       inTag--;
       if (inTag === 0) {
         children.push({ ...toQueryState(content.trim()), key: children.length });
