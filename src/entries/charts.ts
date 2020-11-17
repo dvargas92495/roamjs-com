@@ -2,13 +2,11 @@ import {
   CHARTS_WRAPPER,
   renderBarChart,
   renderLineChart,
+  styleContent,
 } from "../components/Charts";
 import { addStyle, createButtonObserver } from "../entry-helpers";
 
-addStyle(`.${CHARTS_WRAPPER} {
-    height: 300px;
-    width: 400px;
-}`);
+addStyle(styleContent);
 
 createButtonObserver({
   shortcut: "line",
