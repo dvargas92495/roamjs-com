@@ -315,12 +315,135 @@ const SubqueryContent = ({
   );
 };
 
-const QueryContent = ({ blockId }: { blockId: string }) => {
-  const [queryState, setQueryState] = useState<QueryState>({
-    type: NODES.AND,
-    children: [],
-    key: 0,
-  });
+const toQueryStateChildren = (v: string): QueryState[] => {
+  let inParent = 0;
+  let inTag = 0;
+  let inHashTag = false;
+  const children = [];
+  let content = "";
+  for (let pointer = 0; pointer < v.length; pointer++) {
+    const c = v.charAt(pointer);
+    if (c === "{") {
+      inParent++;
+    } else if (
+      !inTag &&
+      ((c === "#" &&
+        v.charAt(pointer + 1) === "[" &&
+        v.charAt(pointer + 2) === "[") ||
+        (c === "[" && v.charAt(pointer + 1) === "["))
+    ) {
+      inTag++;
+    } else if (!inHashTag && c === "#") {
+      inHashTag = true;
+    }
+    if (inParent || inTag || inHashTag) {
+      content = `${content}${c}`;
+    }
+    if (c === "}") {
+      inParent--;
+      if (inParent === 0) {
+        children.push({ ...toQueryState(content), key: children.length });
+      }
+    } else if (c === "]" && v.charAt(pointer + 1) === "]") {
+      inTag--;
+      if (inTag === 0) {
+        children.push({ ...toQueryState(content), key: children.length });
+      }
+    } else if (inHashTag && c === " ") {
+      inHashTag = false;
+      children.push({ ...toQueryState(content), key: children.length });
+    }
+  }
+
+  return children;
+};
+
+const toQueryState = (v: string): QueryState => {
+  if (!v) {
+    return {
+      type: NODES.AND,
+      children: [] as QueryState[],
+      key: 0,
+    };
+  }
+  if (v.startsWith("{{query:")) {
+    const content = v.substring("{{query:".length, v.length - "}}".length);
+    return toQueryState(content);
+  } else if (v.startsWith("{and:")) {
+    const andContent = v.substring("{and:".length, v.length - "}".length);
+    const children = toQueryStateChildren(andContent);
+    return {
+      type: NODES.AND,
+      children,
+      key: 0,
+    };
+  } else if (v.startsWith("{or:")) {
+    const orContent = v.substring("{or:".length, v.length - "}".length);
+    const children = toQueryStateChildren(orContent);
+    return {
+      type: NODES.OR,
+      children,
+      key: 0,
+    };
+  } else if (v.startsWith("{between:")) {
+    const betweenContent = v.substring(
+      "{between:".length,
+      v.length - "}".length
+    );
+    const children = toQueryStateChildren(betweenContent);
+    return {
+      type: NODES.BETWEEN,
+      children,
+      key: 0,
+    };
+  } else if (v.startsWith("{not:")) {
+    const notContent = v.substring("{not:".length, v.length - "}".length);
+    const children = toQueryStateChildren(notContent);
+    return {
+      type: NODES.NOT,
+      children,
+      key: 0,
+    };
+  } else if (v.startsWith("#[[")) {
+    const value = v.substring("#[[".length, v.length - "]]".length);
+    return {
+      type: NODES.TAG,
+      value,
+      key: 0,
+    };
+  } else if (v.startsWith("[[")) {
+    const value = v.substring("[[".length, v.length - "]]".length);
+    return {
+      type: NODES.TAG,
+      value,
+      key: 0,
+    };
+  } else if (v.startsWith("#")) {
+    const value = v.substring("#".length);
+    return {
+      type: NODES.TAG,
+      value,
+      key: 0,
+    };
+  } else {
+    return {
+      type: NODES.AND,
+      children: [] as QueryState[],
+      key: 0,
+    };
+  }
+};
+
+const QueryContent = ({
+  blockId,
+  initialValue,
+}: {
+  blockId: string;
+  initialValue: string;
+}) => {
+  const [queryState, setQueryState] = useState<QueryState>(
+    toQueryState(initialValue)
+  );
   const onSave = useCallback(async () => {
     const outputText = `{{[[query]]: ${toQueryString(queryState)}}}`;
     await openBlock(document.getElementById(blockId));
@@ -349,7 +472,7 @@ const QueryBuilder = ({
 }) => {
   return (
     <Popover
-      content={<QueryContent blockId={blockId} />}
+      content={<QueryContent blockId={blockId} initialValue={initialValue} />}
       target={
         <Button
           text={initialValue ? <Icon icon={"edit"} /> : "QUERY"}
