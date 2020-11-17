@@ -348,7 +348,7 @@ const toQueryStateChildren = (v: string): QueryState[] => {
     }
     if (inParent === 0 && inTag === 0 && !inHashTag && content) {
       children.push({ ...toQueryState(content.trim()), key: children.length });
-      content = '';
+      content = "";
     }
   }
 
@@ -449,7 +449,7 @@ const QueryContent = ({
   }, [queryState]);
 
   return (
-    <div style={{ padding: 16 }}>
+    <div style={{ padding: 16, maxHeight: "75vh", overflowY: "scroll" }}>
       <SubqueryContent value={queryState} onChange={setQueryState} level={0} />
       <div style={{ paddingTop: 16 }}>
         <Button text="Save" onClick={onSave} />
