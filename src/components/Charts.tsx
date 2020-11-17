@@ -84,7 +84,7 @@ export const DemoCharts = () => {
     ],
     []
   );
-  return <Charts data={data} />;
+  return <Charts data={data} type={'line'}/>;
 };
 
 export default Charts;
