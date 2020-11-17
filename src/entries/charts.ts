@@ -1,5 +1,8 @@
-import { getUids } from "roam-client";
-import { CHARTS_WRAPPER, renderBarChart, renderLineChart } from "../components/Charts";
+import {
+  CHARTS_WRAPPER,
+  renderBarChart,
+  renderLineChart,
+} from "../components/Charts";
 import { addStyle, createButtonObserver } from "../entry-helpers";
 
 addStyle(`.${CHARTS_WRAPPER} {
@@ -12,7 +15,7 @@ createButtonObserver({
   attribute: "line-chart",
   render: (b: HTMLButtonElement) =>
     renderLineChart({
-      blockUid: getUids(b.closest(".roam-block") as HTMLDivElement).blockUid,
+      blockId: b.closest(".roam-block").id,
       parent: b.parentElement,
     }),
 });
@@ -22,7 +25,7 @@ createButtonObserver({
   attribute: "bar-chart",
   render: (b: HTMLButtonElement) =>
     renderBarChart({
-      blockUid: getUids(b.closest(".roam-block") as HTMLDivElement).blockUid,
+      blockId: b.closest(".roam-block").id,
       parent: b.parentElement,
     }),
 });
