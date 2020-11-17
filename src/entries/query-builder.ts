@@ -1,5 +1,5 @@
 import { renderQueryBuilder } from "../components/QueryBuilder";
-import { createButtonObserver } from "../entry-helpers";
+import { createButtonObserver, createHTMLObserver } from "../entry-helpers";
 
 const css = document.createElement("style");
 css.textContent = `.bp3-button:focus {
@@ -13,3 +13,19 @@ createButtonObserver({
   render: (b: HTMLButtonElement) =>
     renderQueryBuilder(b.closest(".roam-block").id, b.parentElement),
 });
+
+const dataAttribute = 'data-roamjs-edit-query';
+
+createHTMLObserver(
+  (b) => {
+    if (!b.getAttribute(dataAttribute)) {
+      b.setAttribute(dataAttribute, 'true');
+      const editButtonRoot = document.createElement('div');
+      b.appendChild(editButtonRoot);
+      console.log(b.textContent);
+      renderQueryBuilder(b.closest('.roam-block').id, editButtonRoot);
+    }
+  },
+  "DIV",
+  "rm-query-title"
+);
