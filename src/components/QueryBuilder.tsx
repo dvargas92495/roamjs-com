@@ -342,16 +342,16 @@ const toQueryStateChildren = (v: string): QueryState[] => {
     if (c === "}") {
       inParent--;
       if (inParent === 0) {
-        children.push({ ...toQueryState(content), key: children.length });
+        children.push({ ...toQueryState(content.trim()), key: children.length });
       }
     } else if (c === "]" && v.charAt(pointer + 1) === "]") {
       inTag--;
       if (inTag === 0) {
-        children.push({ ...toQueryState(content), key: children.length });
+        children.push({ ...toQueryState(content.trim()), key: children.length });
       }
     } else if (inHashTag && c === " ") {
       inHashTag = false;
-      children.push({ ...toQueryState(content), key: children.length });
+      children.push({ ...toQueryState(content.trim()), key: children.length });
     }
   }
 
@@ -368,10 +368,10 @@ const toQueryState = (v: string): QueryState => {
   }
   if (v.startsWith("{{query:")) {
     const content = v.substring("{{query:".length, v.length - "}}".length);
-    return toQueryState(content);
+    return toQueryState(content.trim());
   } else if (v.startsWith("{and:")) {
     const andContent = v.substring("{and:".length, v.length - "}".length);
-    const children = toQueryStateChildren(andContent);
+    const children = toQueryStateChildren(andContent.trim());
     return {
       type: NODES.AND,
       children,
@@ -379,7 +379,7 @@ const toQueryState = (v: string): QueryState => {
     };
   } else if (v.startsWith("{or:")) {
     const orContent = v.substring("{or:".length, v.length - "}".length);
-    const children = toQueryStateChildren(orContent);
+    const children = toQueryStateChildren(orContent.trim());
     return {
       type: NODES.OR,
       children,
@@ -390,7 +390,7 @@ const toQueryState = (v: string): QueryState => {
       "{between:".length,
       v.length - "}".length
     );
-    const children = toQueryStateChildren(betweenContent);
+    const children = toQueryStateChildren(betweenContent.trim());
     return {
       type: NODES.BETWEEN,
       children,
@@ -398,7 +398,7 @@ const toQueryState = (v: string): QueryState => {
     };
   } else if (v.startsWith("{not:")) {
     const notContent = v.substring("{not:".length, v.length - "}".length);
-    const children = toQueryStateChildren(notContent);
+    const children = toQueryStateChildren(notContent.trim());
     return {
       type: NODES.NOT,
       children,
