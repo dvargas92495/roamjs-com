@@ -13,3 +13,14 @@ declare module "*.mdx" {
   export default MDXComponent;
   export const frontMatter: FrontMatter[];
 }
+
+declare module "react-charts" {
+  type SeriesType = "line" | "bubble" | "area" | "bar";
+  export const Chart: React.FunctionComponent<{
+    data: { label: string; data: number[][] }[];
+    axes: { primary?: boolean; type: string; position: string }[];
+    series: {
+      type: SeriesType;
+    };
+  }>;
+}
