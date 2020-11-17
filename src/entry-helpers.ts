@@ -163,7 +163,7 @@ export const createSortIcon = (
     menuUl.appendChild(liItem);
     aMenuItem.onclick = (e) => {
       sortCallback();
-      aMenuItem.style.fontWeight = '600';
+      aMenuItem.style.fontWeight = "600";
       if (selectedMenuItem) {
         selectedMenuItem.style.fontWeight = null;
       }

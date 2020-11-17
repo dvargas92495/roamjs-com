@@ -164,7 +164,7 @@ const SubqueryContent = ({
   level: number;
   onDelete?: () => void;
 }) => {
-  const [key, setKey] = useState(0);
+  const [key, setKey] = useState(value.children?.length || 0);
   const incrementKey = useCallback(() => {
     setKey(key + 1);
     return key + 1;
@@ -315,12 +315,132 @@ const SubqueryContent = ({
   );
 };
 
-const QueryContent = ({ blockId }: { blockId: string }) => {
-  const [queryState, setQueryState] = useState<QueryState>({
-    type: NODES.AND,
-    children: [],
-    key: 0,
-  });
+const toQueryStateChildren = (v: string): QueryState[] => {
+  let inParent = 0;
+  let inTag = 0;
+  let inHashTag = false;
+  const children = [];
+  let content = "";
+  for (let pointer = 0; pointer < v.length; pointer++) {
+    const c = v.charAt(pointer);
+    if (c === "{") {
+      inParent++;
+    } else if (
+      !inTag &&
+      ((c === "#" &&
+        v.charAt(pointer + 1) === "[" &&
+        v.charAt(pointer + 2) === "[") ||
+        (c === "[" && v.charAt(pointer + 1) === "["))
+    ) {
+      inTag++;
+    } else if (!inHashTag && c === "#") {
+      inHashTag = true;
+    }
+    if (inParent || inTag || inHashTag) {
+      content = `${content}${c}`;
+    }
+    if (inParent > 0 && c === "}") {
+      inParent--;
+    } else if (inTag > 0 && c === "]" && v.charAt(pointer - 1) === "]") {
+      inTag--;
+    } else if (inHashTag && c === " ") {
+      inHashTag = false;
+    }
+    if (inParent === 0 && inTag === 0 && !inHashTag && content) {
+      children.push({ ...toQueryState(content.trim()), key: children.length });
+      content = "";
+    }
+  }
+
+  return children;
+};
+
+const toQueryState = (v: string): QueryState => {
+  if (!v) {
+    return {
+      type: NODES.AND,
+      children: [] as QueryState[],
+      key: 0,
+    };
+  }
+  if (v.startsWith("{{query:")) {
+    const content = v.substring("{{query:".length, v.length - "}}".length);
+    return toQueryState(content.trim());
+  } else if (v.startsWith("{and:")) {
+    const andContent = v.substring("{and:".length, v.length - "}".length);
+    const children = toQueryStateChildren(andContent.trim());
+    return {
+      type: NODES.AND,
+      children,
+      key: 0,
+    };
+  } else if (v.startsWith("{or:")) {
+    const orContent = v.substring("{or:".length, v.length - "}".length);
+    const children = toQueryStateChildren(orContent.trim());
+    return {
+      type: NODES.OR,
+      children,
+      key: 0,
+    };
+  } else if (v.startsWith("{between:")) {
+    const betweenContent = v.substring(
+      "{between:".length,
+      v.length - "}".length
+    );
+    const children = toQueryStateChildren(betweenContent.trim());
+    return {
+      type: NODES.BETWEEN,
+      children,
+      key: 0,
+    };
+  } else if (v.startsWith("{not:")) {
+    const notContent = v.substring("{not:".length, v.length - "}".length);
+    const children = toQueryStateChildren(notContent.trim());
+    return {
+      type: NODES.NOT,
+      children,
+      key: 0,
+    };
+  } else if (v.startsWith("#[[")) {
+    const value = v.substring("#[[".length, v.length - "]]".length);
+    return {
+      type: NODES.TAG,
+      value,
+      key: 0,
+    };
+  } else if (v.startsWith("[[")) {
+    const value = v.substring("[[".length, v.length - "]]".length);
+    return {
+      type: NODES.TAG,
+      value,
+      key: 0,
+    };
+  } else if (v.startsWith("#")) {
+    const value = v.substring("#".length);
+    return {
+      type: NODES.TAG,
+      value,
+      key: 0,
+    };
+  } else {
+    return {
+      type: NODES.AND,
+      children: [] as QueryState[],
+      key: 0,
+    };
+  }
+};
+
+const QueryContent = ({
+  blockId,
+  initialValue,
+}: {
+  blockId: string;
+  initialValue: string;
+}) => {
+  const [queryState, setQueryState] = useState<QueryState>(
+    toQueryState(initialValue)
+  );
   const onSave = useCallback(async () => {
     const outputText = `{{[[query]]: ${toQueryString(queryState)}}}`;
     await openBlock(document.getElementById(blockId));
@@ -329,7 +449,7 @@ const QueryContent = ({ blockId }: { blockId: string }) => {
   }, [queryState]);
 
   return (
-    <div style={{ padding: 16 }}>
+    <div style={{ padding: 16, maxHeight: "75vh", overflowY: "scroll" }}>
       <SubqueryContent value={queryState} onChange={setQueryState} level={0} />
       <div style={{ paddingTop: 16 }}>
         <Button text="Save" onClick={onSave} />
@@ -341,22 +461,41 @@ const QueryContent = ({ blockId }: { blockId: string }) => {
 const QueryBuilder = ({
   blockId,
   defaultIsOpen,
+  initialValue = "",
 }: {
   blockId: string;
   defaultIsOpen: boolean;
+  initialValue?: string;
 }) => {
   return (
     <Popover
-      content={<QueryContent blockId={blockId} />}
-      target={<Button text="QUERY" />}
+      content={<QueryContent blockId={blockId} initialValue={initialValue} />}
+      target={
+        <Button
+          text={initialValue ? <Icon icon={"edit"} /> : "QUERY"}
+          id={`roamjs-query-builder-button-${blockId}`}
+        />
+      }
       defaultIsOpen={defaultIsOpen}
     />
   );
 };
 
-export const renderQueryBuilder = (blockId: string, parent: HTMLElement) =>
+export const renderQueryBuilder = ({
+  blockId,
+  parent,
+  initialValue,
+}: {
+  blockId: string;
+  parent: HTMLElement;
+  initialValue?: string;
+}) =>
   ReactDOM.render(
-    <QueryBuilder blockId={blockId} defaultIsOpen={true} />,
+    <QueryBuilder
+      blockId={blockId}
+      defaultIsOpen={!initialValue}
+      initialValue={initialValue}
+    />,
     parent
   );
 
