@@ -164,7 +164,7 @@ const SubqueryContent = ({
   level: number;
   onDelete?: () => void;
 }) => {
-  const [key, setKey] = useState(0);
+  const [key, setKey] = useState(value.children?.length || 0);
   const incrementKey = useCallback(() => {
     setKey(key + 1);
     return key + 1;
