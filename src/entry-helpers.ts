@@ -1,5 +1,6 @@
 import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
+import { Tree } from "@blueprintjs/core";
 
 declare global {
   interface Window {
@@ -84,7 +85,7 @@ export const createButtonObserver = ({
           attribute.toUpperCase().replace("-", " ") ||
         b.innerText.toUpperCase() === shortcut.toUpperCase()
       ) {
-        const dataAttribute = `data-${attribute}`;
+        const dataAttribute = `data-roamjs-${attribute}`;
         if (!b.getAttribute(dataAttribute)) {
           b.setAttribute(dataAttribute, "true");
           render(b as HTMLButtonElement);
@@ -318,6 +319,36 @@ export const getWordCountByBlockUid = (blockUid: string) => {
   );
 };
 
+type TreeNode = {
+  text: string;
+  children: TreeNode[];
+}
+
+const getTextTreeByBlockId = (
+  blockId: number
+): TreeNode => {
+  const block = window.roamAlphaAPI.pull(
+    "[:block/children, :block/string]",
+    blockId
+  );
+  const children = block[":block/children"] || [];
+  return {
+    text: block[":block/string"],
+    children: children.map((c) => getTextTreeByBlockId(c[":db/id"])),
+  };
+};
+
+export const getTextTreeByBlockUid = (blockUid: string) => {
+  const block = window.roamAlphaAPI.q(
+    `[:find (pull ?e [:block/children, :block/string]) :where [?e :block/uid "${blockUid}"]]`
+  )[0][0];
+  const children = block.children || [];
+  return {
+    text: block.string,
+    children: children.map((c) => getTextTreeByBlockId(c.id)),
+  };
+};
+
 export const getWordCountByPageTitle = (title: string) => {
   const page = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/children]) :where [?e :node/title "${title}"]]`
@@ -440,3 +471,9 @@ export const isApple = isIOS || isMacOs;
 
 export const isControl = (e: KeyboardEvent) =>
   (e.ctrlKey && !isApple) || (e.metaKey && isApple);
+
+export const addStyle = (content: string) => {
+  const css = document.createElement("style");
+  css.textContent = content;
+  document.getElementsByTagName("head")[0].appendChild(css);
+};
