@@ -57,7 +57,7 @@ const Charts = ({
         <Button
           icon="edit"
           minimal
-          style={{ position: "absolute", top: 8, right: 8 }}
+          style={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}
           onClick={editCallback}
         />
       )}
