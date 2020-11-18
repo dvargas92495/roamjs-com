@@ -17,7 +17,21 @@ You will need to nest labels and data as children of the rendered chart. You sho
 
 ![](/images/charts.png)
 
+You could use the dropdowns on the right to define what type of axis the charts use. The supported types are:
+- linear - numerical values
+- ordinal - text values
+
+You could save the types that the axis use by setting the follwing attributes as children of the chart:
+- **X-Axis::** - Define the type of the x axis
+- **Y-Axis::** - Define the type of the y axis
+
+Here's an example:
+
+![](/images/charts-axis.png)
+
 ### Playground
+
+In the playground below, the chart will update dynamically based on the inputs. Each text input will be the data label, and each text area will be the data values. Deliminate each value with a new line to resemble new blocks in Roam.
 
 <AddStyle styleContent={styleContent} />
 <DemoCharts />
