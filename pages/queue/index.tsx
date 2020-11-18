@@ -8,7 +8,7 @@ import {
   ExternalLink,
   StringField,
 } from "@dvargas92495/ui";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
 import axios from "axios";
 import { useUser } from "react-manage-users";
@@ -109,7 +109,7 @@ const FundButton = ({
   );
 };
 
-const QueueItems = ({ title }: { title: string }) => {
+const QueueItems = ({ title, search }: { title: string; search: string }) => {
   const loadItems = useCallback(
     () =>
       axios.get(`${API_URL}/queue-issues?label=${toLabel(title)}`).then((r) =>
@@ -128,14 +128,20 @@ const QueueItems = ({ title }: { title: string }) => {
       ),
     [title]
   );
+  const filter = useCallback(
+    (item) =>
+      !search || item.primary.toLowerCase().indexOf(search.toLowerCase()) > -1,
+    [search]
+  );
   return (
     <div style={{ padding: 8, width: "50%" }}>
-      <Queue title={title} loadItems={loadItems} />
+      <Queue title={title} loadItems={loadItems} filter={filter} />
     </div>
   );
 };
 
 const QueuePage = () => {
+  const [search, setSearch] = useState("");
   return (
     <StandardLayout>
       <H1>Queue</H1>
@@ -143,9 +149,16 @@ const QueuePage = () => {
         This page contains all the new extensions and enhancements coming to
         RoamJS. Directly sponsor one to prioritize it higher in the queue!
       </Body>
+      <div style={{ marginBottom: 16, padding: '0 16px'}}>
+      <StringField
+        value={search}
+        setValue={setSearch}
+        label={"Search"}
+        fullWidth
+      /></div>
       <div style={{ display: "flex", maxHeight: 600 }}>
-        <QueueItems title={"Extensions"} />
-        <QueueItems title={"Enhancements"} />
+        <QueueItems title={"Extensions"} search={search} />
+        <QueueItems title={"Enhancements"} search={search} />
       </div>
     </StandardLayout>
   );
