@@ -107,12 +107,13 @@ const PageInput = ({
       minimal={true}
       position={PopoverPosition.BOTTOM}
       content={
-        <Menu>
+        <Menu style={{    maxWidth: 400        }}>
           {items.map((t, i) => (
             <MenuItem
               text={t}
               active={activeIndex === i}
               key={i}
+              multiline
               onClick={() => {
                 setQueryState({
                   type: queryState.type,

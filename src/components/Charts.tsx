@@ -57,7 +57,7 @@ const defaultColorScheme = [
 const parseAxis: {
   [key: string]: (value: string) => string | number;
 } = {
-  linear: parseFloat,
+  linear: (v: string) => v ? parseFloat(v) : 0,
   ordinal: (v: string) => v,
 };
 
@@ -113,14 +113,20 @@ const Charts = ({
   const [bottomType, setBottomType] = useState<AxisType>(initialBottomType);
   const chartData = React.useMemo(
     () =>
-      data.map((d) => ({
-        ...d,
-        data: d.data.map((s) =>
-          s
-            .split(",")
-            .map((n, i) => parseAxis[i === 0 ? bottomType : leftType](n.trim()))
-        ),
-      })),
+      data.flatMap((d) => {
+        const dataSplit = d.data.filter(s => !!s.trim()).map((s) => s.split(",").filter(s => !!s.trim()));
+        const maxDimensions = dataSplit.reduce(
+          (prev, curr) => Math.max(prev, curr.length - 1),
+          0
+        );
+        return Array.from(Array(maxDimensions).keys()).map((i) => ({
+          label: maxDimensions === 1 ? d.label : `${d.label} (${i + 1})`,
+          data: dataSplit.map((s) => [
+            parseAxis[bottomType](s[0]),
+            parseAxis[leftType](s[i + 1] || ''),
+          ]),
+        }));
+      }),
     [data, bottomType, leftType]
   );
   const axes = React.useMemo(
@@ -172,7 +178,7 @@ const Charts = ({
         </Label>
         <Card elevation={Elevation.TWO}>
           <H6>Legend</H6>
-          {data.map(({ label }, i) => (
+          {chartData.map(({ label }, i) => (
             <p key={i}>
               {label}{" "}
               <Icon icon={"layout-linear"} color={defaultColorScheme[i]} />
@@ -222,7 +228,7 @@ export const renderBarChart = ({
 export const DemoCharts = () => {
   const [data, setData] = React.useState([
     {
-      label: "Series 1",
+      label: "First",
       data: `0, 1
 1, 2
 2, 4
@@ -231,7 +237,7 @@ export const DemoCharts = () => {
       key: 0,
     },
     {
-      label: "Series 2",
+      label: "Second",
       data: `0, 3
 1, 1
 2, 5
