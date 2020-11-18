@@ -109,8 +109,8 @@ const Charts = ({
   initialBottomType: AxisType;
   initialLeftType: AxisType;
 }) => {
-  const [leftType, setLeftType] = useState<AxisType>(initialBottomType);
-  const [bottomType, setBottomType] = useState<AxisType>(initialLeftType);
+  const [leftType, setLeftType] = useState<AxisType>(initialLeftType);
+  const [bottomType, setBottomType] = useState<AxisType>(initialBottomType);
   const chartData = React.useMemo(
     () =>
       data.map((d) => ({
