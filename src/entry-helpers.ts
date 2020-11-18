@@ -321,6 +321,7 @@ export const getWordCountByBlockUid = (blockUid: string) => {
 
 type TreeNode = {
   text: string;
+  order: number;
   children: TreeNode[];
 }
 
@@ -328,13 +329,14 @@ const getTextTreeByBlockId = (
   blockId: number
 ): TreeNode => {
   const block = window.roamAlphaAPI.pull(
-    "[:block/children, :block/string]",
+    "[:block/children, :block/string, :block/order]",
     blockId
   );
   const children = block[":block/children"] || [];
   return {
     text: block[":block/string"],
-    children: children.map((c) => getTextTreeByBlockId(c[":db/id"])),
+    order: block[':block/order'],
+    children: children.map((c) => getTextTreeByBlockId(c[":db/id"])).sort((a, b) => a.order - b.order),
   };
 };
 
@@ -345,7 +347,7 @@ export const getTextTreeByBlockUid = (blockUid: string) => {
   const children = block.children || [];
   return {
     text: block.string,
-    children: children.map((c) => getTextTreeByBlockId(c.id)),
+    children: children.map((c) => getTextTreeByBlockId(c.id)).sort((a, b) => a.order - b.order),
   };
 };
 
