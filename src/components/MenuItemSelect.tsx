@@ -24,7 +24,6 @@ const MenuItemSelect = <T extends ReactText>(
         {...props.ButtonProps}
         text={props.activeItem}
         rightIcon="double-caret-vertical"
-        autoFocus={true}
       />
     </TypeSelect>
   );
