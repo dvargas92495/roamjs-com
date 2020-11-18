@@ -1,7 +1,6 @@
 ---
 layout: "ExtensionPageLayout"
 description: "The Charts extension allows users to render excel-esque charts in Roam!"
-development: true
 ---
 
 import AddStyle from '../../../components/AddStyle';
@@ -16,6 +15,8 @@ There are two types of charts supported:
 You will need to nest labels and data as children of the rendered chart. You should have one label per line, and data should be nested under the label. The data should be two numbers separated by a comma. Here's an example:
 
 ![](/images/charts.png)
+
+You could specify multiple y values for each x value. Simply delimit with a comma the additional y values on each block. 
 
 You could use the dropdowns on the right to define what type of axis the charts use. The supported types are:
 - linear - numerical values
