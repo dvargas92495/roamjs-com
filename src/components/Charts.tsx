@@ -106,7 +106,9 @@ const getProps = (blockId: string) => {
           .trim()
           .toLowerCase() as AxisType)
       : "linear",
-    dateFormat: dateFormatNode.text.substring(DATE_FORMAT_KEY.length).trim(),
+    initialDateFormat:
+      dateFormatNode &&
+      dateFormatNode.text.substring(DATE_FORMAT_KEY.length).trim(),
   };
 };
 

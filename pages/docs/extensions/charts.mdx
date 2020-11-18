@@ -21,10 +21,12 @@ You could specify multiple y values for each x value. Simply delimit with a comm
 You could use the dropdowns on the right to define what type of axis the charts use. The supported types are:
 - linear - numerical values
 - ordinal - text values
+- time - date values (defauly MM/dd/yyyy format)
 
 You could save the types that the axis use by setting the follwing attributes as children of the chart:
 - **X-Axis::** - Define the type of the x axis
 - **Y-Axis::** - Define the type of the y axis
+- **Date Format::** - Define the date format to use, based on [these specification](https://date-fns.org/v2.16.1/docs/parse).
 
 Here's an example:
 
