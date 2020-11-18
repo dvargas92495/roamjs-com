@@ -14,6 +14,7 @@ import {
 } from "@blueprintjs/core";
 import { getUids, openBlock } from "roam-client";
 import MenuItemSelect from "./MenuItemSelect";
+import parse from "date-fns/parse";
 
 const CHARTS_WRAPPER = "roamjs-charts-wrapper";
 const CHART_WRAPPER = "roamjs-charts-chart-wrapper";
@@ -55,14 +56,23 @@ const defaultColorScheme = [
 ];
 
 const parseAxis: {
-  [key: string]: (value: string) => string | number;
+  [key: string]: (value: string, format?: string) => string | number | Date;
 } = {
-  linear: (v: string) => v ? parseFloat(v) : 0,
+  linear: (v: string) => (v ? parseFloat(v) : 0),
   ordinal: (v: string) => v,
+  time: (v: string, format: string) => {
+    try {
+      const d = parse(v, format, new Date());
+      return isNaN(d.valueOf()) ? new Date() : d;
+    } catch {
+      return new Date();
+    }
+  },
 };
 
 const BOTTOM_TYPE_KEY = "X-Axis::";
 const LEFT_TYPE_KEY = "Y-Axis::";
+const DATE_FORMAT_KEY = "Date Format::";
 const getProps = (blockId: string) => {
   const { blockUid } = getUids(
     document.getElementById(blockId).closest(".roam-block") as HTMLDivElement
@@ -75,6 +85,9 @@ const getProps = (blockId: string) => {
   );
   const leftTypeNode = metaDataNodes.find((t) =>
     t.text.startsWith(LEFT_TYPE_KEY)
+  );
+  const dateFormatNode = metaDataNodes.find((t) =>
+    t.text.startsWith(DATE_FORMAT_KEY)
   );
   return {
     data: dataNodes.map((t) => ({
@@ -93,6 +106,9 @@ const getProps = (blockId: string) => {
           .trim()
           .toLowerCase() as AxisType)
       : "linear",
+    initialDateFormat:
+      dateFormatNode &&
+      dateFormatNode.text.substring(DATE_FORMAT_KEY.length).trim(),
   };
 };
 
@@ -101,6 +117,7 @@ const Charts = ({
   type,
   initialBottomType,
   initialLeftType,
+  initialDateFormat = "MM/dd/yyyy",
   editCallback = () => {},
 }: {
   type: SeriesType;
@@ -108,26 +125,31 @@ const Charts = ({
   editCallback?: () => void;
   initialBottomType: AxisType;
   initialLeftType: AxisType;
+  initialDateFormat?: string;
 }) => {
+  const [dateFormat, setDateFormat] = useState(initialDateFormat);
   const [leftType, setLeftType] = useState<AxisType>(initialLeftType);
   const [bottomType, setBottomType] = useState<AxisType>(initialBottomType);
   const chartData = React.useMemo(
     () =>
       data.flatMap((d) => {
-        const dataSplit = d.data.filter(s => !!s.trim()).map((s) => s.split(",").filter(s => !!s.trim()));
+        const labelSplit = d.label.split(",");
+        const dataSplit = d.data
+          .filter((s) => !!s.trim())
+          .map((s) => s.split(",").filter((s) => !!s.trim()));
         const maxDimensions = dataSplit.reduce(
           (prev, curr) => Math.max(prev, curr.length - 1),
           0
         );
         return Array.from(Array(maxDimensions).keys()).map((i) => ({
-          label: maxDimensions === 1 ? d.label : `${d.label} (${i + 1})`,
+          label: labelSplit[i] || d.label,
           data: dataSplit.map((s) => [
-            parseAxis[bottomType](s[0]),
-            parseAxis[leftType](s[i + 1] || ''),
+            parseAxis[bottomType](s[0], dateFormat),
+            parseAxis[leftType](s[i + 1] || ""),
           ]),
         }));
       }),
-    [data, bottomType, leftType]
+    [data, bottomType, leftType, dateFormat]
   );
   const axes = React.useMemo(
     () => [
@@ -163,11 +185,22 @@ const Charts = ({
         <Label>
           X Axis Type
           <MenuItemSelect
-            items={["linear", "ordinal"]}
+            items={["linear", "ordinal", "time"]}
             onItemSelect={(item) => setBottomType(item)}
             activeItem={bottomType}
           />
         </Label>
+        {bottomType === "time" && (
+          <Label>
+            Date Format
+            <InputGroup
+              value={dateFormat}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setDateFormat(e.target.value)
+              }
+            />
+          </Label>
+        )}
         <Label>
           Y Axis Type
           <MenuItemSelect
@@ -235,15 +268,6 @@ export const DemoCharts = () => {
 3, 2
 4, 7`,
       key: 0,
-    },
-    {
-      label: "Second",
-      data: `0, 3
-1, 1
-2, 5
-3, 6
-4, 4`,
-      key: 1,
     },
   ]);
   // const [key, setKey] = useState(2);

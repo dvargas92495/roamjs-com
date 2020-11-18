@@ -18,7 +18,7 @@ declare module "react-charts" {
   type SeriesType = "line" | "bubble" | "area" | "bar";
   type AxisType = "ordinal" | "time" | "utc" | "linear" | "log";
   export const Chart: React.FunctionComponent<{
-    data: { label: string; data: (number | string)[][] }[];
+    data: { label: string; data: (number | string | Date)[][] }[];
     axes: { primary?: boolean; type: AxisType; position: string }[];
     series: {
       type: SeriesType;
