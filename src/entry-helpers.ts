@@ -24,13 +24,19 @@ if (process.env.IS_LEGACY && !window.depot?.roamjs?.alerted) {
   }
 }
 
-export const replaceText = async ([before, after]: string[]) => {
+const replaceText = async ([before, after]: string[]) => {
   const textArea = document.activeElement as HTMLTextAreaElement;
   const index = before ? textArea.value.indexOf(before) : textArea.value.length;
   if (index >= 0) {
     textArea.setSelectionRange(index, index + before.length);
     await asyncType(`{backspace}${after}`);
   }
+};
+
+export const replaceTagText = async ([before, after]: string[]) => {
+  await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : '']);
+  await replaceText([`[[${before}]]`, after ? `[[${after}]]` : '']);
+  await replaceText([`#${before}`, after ? `#${after}` : '']);
 };
 
 export const createObserver = (

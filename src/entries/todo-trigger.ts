@@ -6,13 +6,7 @@ import {
   openBlock,
   toRoamDate,
 } from "roam-client";
-import { createBlockObserver, getChildRefStringsByBlockUid, getTextByBlockUid, isControl, replaceText } from "../entry-helpers";
-
-const replaceTagText = async ([before, after]: string[]) => {
-  await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : '']);
-  await replaceText([`[[${before}]]`, after ? `[[${after}]]` : '']);
-  await replaceText([`#${before}`, after ? `#${after}` : '']);
-};
+import { createBlockObserver, getChildRefStringsByBlockUid, getTextByBlockUid, isControl, replaceTagText } from "../entry-helpers";
 
 const onTodo = async () => {
   const config = getConfigFromPage("roam/js/todo-trigger");
