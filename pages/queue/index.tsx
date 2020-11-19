@@ -45,7 +45,7 @@ const FundButton = ({
   return (
     <FormDialog
       title={name}
-      contentText={`WARNING: Still Testing. Funding will be charged upon completion of ${toLabel(
+      contentText={`Funding will be charged upon completion of ${toLabel(
         title
       )}.`}
       buttonText={"FUND"}

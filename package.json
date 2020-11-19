@@ -18,7 +18,8 @@
     "prelocal": "npm run setup:local",
     "local": "http-server",
     "prelambda": "webpack --config ./webpack.debug.config.js",
-    "test": "jest --passWithNoTests"
+    "test": "jest --passWithNoTests",
+    "extension": "node scripts/extension.js"
   },
   "repository": {
     "type": "git",

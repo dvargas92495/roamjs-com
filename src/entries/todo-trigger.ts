@@ -6,22 +6,7 @@ import {
   openBlock,
   toRoamDate,
 } from "roam-client";
-import { createBlockObserver, getChildRefStringsByBlockUid, getTextByBlockUid, isControl } from "../entry-helpers";
-
-const replaceText = async ([before, after]: string[]) => {
-  const textArea = document.activeElement as HTMLTextAreaElement;
-  const index = textArea.value.indexOf(before);
-  if (index > 0) {
-    textArea.setSelectionRange(index, index + before.length);
-    await asyncType(`{backspace}${after}`);
-  }
-};
-
-const replaceTagText = async ([before, after]: string[]) => {
-  await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : '']);
-  await replaceText([`[[${before}]]`, after ? `[[${after}]]` : '']);
-  await replaceText([`#${before}`, after ? `#${after}` : '']);
-};
+import { createBlockObserver, getChildRefStringsByBlockUid, getTextByBlockUid, isControl, replaceTagText } from "../entry-helpers";
 
 const onTodo = async () => {
   const config = getConfigFromPage("roam/js/todo-trigger");

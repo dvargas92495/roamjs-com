@@ -1,6 +1,9 @@
-import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
+import {
+  asyncType,
+  createIconButton,
+  getAttrConfigFromQuery,
+} from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
-import { Tree } from "@blueprintjs/core";
 
 declare global {
   interface Window {
@@ -24,6 +27,25 @@ if (process.env.IS_LEGACY && !window.depot?.roamjs?.alerted) {
     window.depot.roamjs.alerted = true;
   }
 }
+
+const replaceText = async ([before, after]: string[]) => {
+  const textArea = document.activeElement as HTMLTextAreaElement;
+  const index = before ? textArea.value.indexOf(before) : textArea.value.length;
+  if (index >= 0) {
+    textArea.setSelectionRange(index, index + before.length);
+    await asyncType(`${before ? '{backspace}' : ''}${after}`);
+  }
+};
+
+export const replaceTagText = async ([before, after]: string[]) => {
+  if (before) {
+    await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : ""]);
+    await replaceText([`[[${before}]]`, after ? `[[${after}]]` : ""]);
+    await replaceText([`#${before}`, after ? `#${after}` : ""]);
+  } else {
+    await replaceText(['', `[[${after}]]`])
+  }
+};
 
 export const createObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void
@@ -323,11 +345,9 @@ type TreeNode = {
   text: string;
   order: number;
   children: TreeNode[];
-}
+};
 
-const getTextTreeByBlockId = (
-  blockId: number
-): TreeNode => {
+const getTextTreeByBlockId = (blockId: number): TreeNode => {
   const block = window.roamAlphaAPI.pull(
     "[:block/children, :block/string, :block/order]",
     blockId
@@ -335,8 +355,10 @@ const getTextTreeByBlockId = (
   const children = block[":block/children"] || [];
   return {
     text: block[":block/string"],
-    order: block[':block/order'],
-    children: children.map((c) => getTextTreeByBlockId(c[":db/id"])).sort((a, b) => a.order - b.order),
+    order: block[":block/order"],
+    children: children
+      .map((c) => getTextTreeByBlockId(c[":db/id"]))
+      .sort((a, b) => a.order - b.order),
   };
 };
 
@@ -347,8 +369,20 @@ export const getTextTreeByBlockUid = (blockUid: string) => {
   const children = block.children || [];
   return {
     text: block.string,
-    children: children.map((c) => getTextTreeByBlockId(c.id)).sort((a, b) => a.order - b.order),
+    children: children
+      .map((c) => getTextTreeByBlockId(c.id))
+      .sort((a, b) => a.order - b.order),
   };
+};
+
+export const getTextTreeByPageName = (name: string) => {
+  const block = window.roamAlphaAPI.q(
+    `[:find (pull ?e [:block/children]) :where [?e :node/title "${name}"]]`
+  )[0][0];
+  const children = block.children || [];
+  return children
+    .map((c) => getTextTreeByBlockId(c.id))
+    .sort((a, b) => a.order - b.order);
 };
 
 export const getWordCountByPageTitle = (title: string) => {
@@ -389,7 +423,8 @@ export const getEditTimeByBlockUid = (uid: string) =>
   )[0][0]?.time;
 
 export const getPageTitle = (e: Element) => {
-  const container = e.closest(".roam-log-page") || e.closest(".rm-sidebar-outline") || document;
+  const container =
+    e.closest(".roam-log-page") || e.closest(".rm-sidebar-outline") || document;
   const heading = container.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;
