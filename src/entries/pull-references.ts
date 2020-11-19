@@ -27,7 +27,7 @@ const pullReferences = async (_: any, blockUid: string, parentUid: string) => {
   await pushBullets(bullets, blockUid, parentUid);
 
   const removeTags = !!config["Remove Tags"];
-  if (removeTags) {
+  if (removeTags && !document.activeElement.closest(".rm-sidebar-outline")) {
     const container =
       pageTitle.parentElement.closest(".roam-log-page") || document;
     const blockReferences = Array.from(
