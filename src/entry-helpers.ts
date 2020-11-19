@@ -33,7 +33,7 @@ const replaceText = async ([before, after]: string[]) => {
   const index = before ? textArea.value.indexOf(before) : textArea.value.length;
   if (index >= 0) {
     textArea.setSelectionRange(index, index + before.length);
-    await asyncType(`{backspace}${after}`);
+    await asyncType(`${before ? '{backspace}' : ''}${after}`);
   }
 };
 
