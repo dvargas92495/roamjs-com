@@ -1,4 +1,8 @@
-import { asyncType, createIconButton, getAttrConfigFromQuery } from "roam-client";
+import {
+  asyncType,
+  createIconButton,
+  getAttrConfigFromQuery,
+} from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 
 declare global {
@@ -34,9 +38,13 @@ const replaceText = async ([before, after]: string[]) => {
 };
 
 export const replaceTagText = async ([before, after]: string[]) => {
-  await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : '']);
-  await replaceText([`[[${before}]]`, after ? `[[${after}]]` : '']);
-  await replaceText([`#${before}`, after ? `#${after}` : '']);
+  if (before) {
+    await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : ""]);
+    await replaceText([`[[${before}]]`, after ? `[[${after}]]` : ""]);
+    await replaceText([`#${before}`, after ? `#${after}` : ""]);
+  } else {
+    await replaceText(['', `[[${after}]]`])
+  }
 };
 
 export const createObserver = (
@@ -337,11 +345,9 @@ type TreeNode = {
   text: string;
   order: number;
   children: TreeNode[];
-}
+};
 
-const getTextTreeByBlockId = (
-  blockId: number
-): TreeNode => {
+const getTextTreeByBlockId = (blockId: number): TreeNode => {
   const block = window.roamAlphaAPI.pull(
     "[:block/children, :block/string, :block/order]",
     blockId
@@ -349,8 +355,10 @@ const getTextTreeByBlockId = (
   const children = block[":block/children"] || [];
   return {
     text: block[":block/string"],
-    order: block[':block/order'],
-    children: children.map((c) => getTextTreeByBlockId(c[":db/id"])).sort((a, b) => a.order - b.order),
+    order: block[":block/order"],
+    children: children
+      .map((c) => getTextTreeByBlockId(c[":db/id"]))
+      .sort((a, b) => a.order - b.order),
   };
 };
 
@@ -361,7 +369,9 @@ export const getTextTreeByBlockUid = (blockUid: string) => {
   const children = block.children || [];
   return {
     text: block.string,
-    children: children.map((c) => getTextTreeByBlockId(c.id)).sort((a, b) => a.order - b.order),
+    children: children
+      .map((c) => getTextTreeByBlockId(c.id))
+      .sort((a, b) => a.order - b.order),
   };
 };
 
@@ -370,7 +380,9 @@ export const getTextTreeByPageName = (name: string) => {
     `[:find (pull ?e [:block/children]) :where [?e :node/title "${name}"]]`
   )[0][0];
   const children = block.children || [];
-  return children.map((c) => getTextTreeByBlockId(c.id)).sort((a, b) => a.order - b.order);
+  return children
+    .map((c) => getTextTreeByBlockId(c.id))
+    .sort((a, b) => a.order - b.order);
 };
 
 export const getWordCountByPageTitle = (title: string) => {
@@ -411,7 +423,8 @@ export const getEditTimeByBlockUid = (uid: string) =>
   )[0][0]?.time;
 
 export const getPageTitle = (e: Element) => {
-  const container = e.closest(".roam-log-page") || e.closest(".rm-sidebar-outline") || document;
+  const container =
+    e.closest(".roam-log-page") || e.closest(".rm-sidebar-outline") || document;
   const heading = container.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;

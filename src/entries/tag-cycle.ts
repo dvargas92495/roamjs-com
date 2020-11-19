@@ -10,47 +10,41 @@ getTextTreeByPageName("roam/js/tag-cycle")
       t.text.toUpperCase().startsWith("CTRL+") ||
       t.text.toUpperCase().startsWith("CMD+")
   )
-  .forEach((shortcut) =>
+  .forEach((shortcut) => {
+    const rest = shortcut.text.split("+").slice(1);
+    const key = rest[0];
+    const cycle = shortcut.children.map((c) => c.text.trim());
+    const sortedCycle = cycle
+      .map((tag, index) => ({ tag, index }))
+      .sort((a, b) => b.tag.length - a.tag.length);
     document.addEventListener("keydown", async (e: KeyboardEvent) => {
       const element = document.activeElement as HTMLElement;
       if (element.tagName === "TEXTAREA") {
         if (isControl(e)) {
-          const rest = shortcut.text.split("+").slice(1);
-          const key = rest[0];
           if (e.key === key) {
-            const cycle = shortcut.children.map((c) => c.text.trim());
             const textarea = element as HTMLTextAreaElement;
-            const oldvalue = textarea.value;
-            const cycleTags = async (i: number) => {
-              const tag1 = cycle[i];
-              const start = textarea.selectionStart;
-              const end = textarea.selectionEnd;
-              const tag2 = cycle[(i + 1 + cycle.length) % cycle.length];
-              await replaceTagText([tag1, tag2]);
-              textarea.setSelectionRange(
-                start - tag1.length + tag2.length,
-                end - tag1.length + tag2.length
-              );
-              e.preventDefault();
-              e.stopPropagation();
-            };
-            for (let i = 0; i < cycle.length; i++) {
-              const tag1 = cycle[i];
+            for (let i = 0; i < sortedCycle.length; i++) {
+              const { tag: tag1, index } = sortedCycle[i];
               if (
                 textarea.value.includes(`#[[${tag1}]]`) ||
                 textarea.value.includes(`[[${tag1}]]`) ||
-                textarea.value.includes(`#${tag1}`)
+                textarea.value.includes(`#${tag1}`) ||
+                !tag1
               ) {
-                cycleTags(i);
-                break;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const tag2 = cycle[(index + 1 + cycle.length) % cycle.length];
+                await replaceTagText([tag1, tag2]);
+                textarea.setSelectionRange(
+                  start - tag1.length + tag2.length,
+                  end - tag1.length + tag2.length
+                );
+                e.preventDefault();
+                e.stopPropagation();
               }
-            }
-            if (oldvalue === textarea.value) {
-              const emptyIndex = cycle.indexOf("");
-              cycleTags(emptyIndex);
             }
           }
         }
       }
     })
-  );
+});
