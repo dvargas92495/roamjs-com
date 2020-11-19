@@ -41,6 +41,7 @@ getTextTreeByPageName("roam/js/tag-cycle")
                 );
                 e.preventDefault();
                 e.stopPropagation();
+                break;
               }
             }
           }
