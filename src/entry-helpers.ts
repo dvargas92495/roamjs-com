@@ -1,6 +1,5 @@
-import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
+import { asyncType, createIconButton, getAttrConfigFromQuery } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
-import { Tree } from "@blueprintjs/core";
 
 declare global {
   interface Window {
@@ -24,6 +23,15 @@ if (process.env.IS_LEGACY && !window.depot?.roamjs?.alerted) {
     window.depot.roamjs.alerted = true;
   }
 }
+
+export const replaceText = async ([before, after]: string[]) => {
+  const textArea = document.activeElement as HTMLTextAreaElement;
+  const index = textArea.value.indexOf(before);
+  if (index > 0) {
+    textArea.setSelectionRange(index, index + before.length);
+    await asyncType(`{backspace}${after}`);
+  }
+};
 
 export const createObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void
@@ -349,6 +357,14 @@ export const getTextTreeByBlockUid = (blockUid: string) => {
     text: block.string,
     children: children.map((c) => getTextTreeByBlockId(c.id)).sort((a, b) => a.order - b.order),
   };
+};
+
+export const getTextTreeByPageName = (name: string) => {
+  const block = window.roamAlphaAPI.q(
+    `[:find (pull ?e [:block/children]) :where [?e :node/title "${name}"]]`
+  )[0][0];
+  const children = block.children || [];
+  return children.map((c) => getTextTreeByBlockId(c.id)).sort((a, b) => a.order - b.order);
 };
 
 export const getWordCountByPageTitle = (title: string) => {

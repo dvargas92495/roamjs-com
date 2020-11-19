@@ -39,7 +39,7 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
         const element = document.activeElement as HTMLElement;
         if (element.tagName === 'TEXTAREA') {
           const { blockUid } = getUids(element as HTMLTextAreaElement);
-          navigator.clipboard.writeText(blockUid);
+          navigator.clipboard.writeText(`((${blockUid}))`);
           e.preventDefault();
         }
       }
