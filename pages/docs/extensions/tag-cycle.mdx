@@ -3,4 +3,15 @@ layout: 'ExtensionPageLayout'
 description: 'The Tag Cycle Extension allows users to define custom cycles tied to a keyboard shortcut!'
 ---
 
+This script is configured in the [[roam/js/tag-cycle]] page.
 
+For every cycle you want, make a block denoting the keyboard shortcut that will trigger that cycle. Then as children of that block, create one block for each text in the cycle.
+
+Now when you're in a given block, the keyboard shortcut will replace text in your block based on the cycle you defined!
+
+This is what it would look like for Roam's native TODO/DONE cycle:
+
+- CTRL+Enter
+    -
+    - [[TODO]]
+    - [[DONE]]

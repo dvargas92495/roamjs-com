@@ -26,8 +26,8 @@ if (process.env.IS_LEGACY && !window.depot?.roamjs?.alerted) {
 
 export const replaceText = async ([before, after]: string[]) => {
   const textArea = document.activeElement as HTMLTextAreaElement;
-  const index = textArea.value.indexOf(before);
-  if (index > 0) {
+  const index = before ? textArea.value.indexOf(before) : textArea.value.length;
+  if (index >= 0) {
     textArea.setSelectionRange(index, index + before.length);
     await asyncType(`{backspace}${after}`);
   }
