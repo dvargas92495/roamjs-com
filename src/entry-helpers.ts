@@ -389,7 +389,7 @@ export const getEditTimeByBlockUid = (uid: string) =>
   )[0][0]?.time;
 
 export const getPageTitle = (e: Element) => {
-  const container = e.closest(".roam-log-page") || document;
+  const container = e.closest(".roam-log-page") || e.closest(".rm-sidebar-outline") || document;
   const heading = container.getElementsByClassName(
     "rm-title-display"
   )[0] as HTMLHeadingElement;

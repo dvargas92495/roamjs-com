@@ -1,3 +1,4 @@
+import { getUids } from "roam-client";
 import { renderMouselessDialog } from "../components/MouselessDialog";
 import { createHTMLObserver, isControl } from "../entry-helpers";
 
@@ -16,7 +17,7 @@ createHTMLObserver(
   "bp3-button"
 );
 
-document.addEventListener("keydown", (e) => {
+document.addEventListener("keydown", (e: KeyboardEvent) => {
   if (isControl(e)) {
     if (e.shiftKey) {
       if (e.key === "S") {
@@ -33,6 +34,13 @@ document.addEventListener("keydown", (e) => {
         } else if (shortcuts.length) {
           shortcuts[0]?.click();
           previousElement?.focus();
+        }
+      } else if (e.key === "C") {
+        const element = document.activeElement as HTMLElement;
+        if (element.tagName === 'TEXTAREA') {
+          const { blockUid } = getUids(element as HTMLTextAreaElement);
+          navigator.clipboard.writeText(blockUid);
+          e.preventDefault();
         }
       }
     }
