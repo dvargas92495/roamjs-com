@@ -5,7 +5,8 @@ import {
   getUids,
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
-import mixpanel, { reset } from "mixpanel-browser";
+import mixpanel from "mixpanel-browser";
+import differenceInMilliseconds from "date-fns/differenceInMilliseconds";
 
 declare global {
   interface Window {
@@ -136,6 +137,7 @@ export const createPageObserver = (
     }
   };
   createObserver((ms) => {
+    const start = new Date();
     getMutatedNodes({
       ms,
       nodeList: "addedNodes",
@@ -148,6 +150,7 @@ export const createPageObserver = (
       tag: "DIV",
       className: "roam-block",
     }).forEach((b) => nodeCallback(b, false));
+    console.log(differenceInMilliseconds(new Date(), start));
   });
 };
 
