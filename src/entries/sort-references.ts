@@ -5,10 +5,9 @@ import {
   getLinkedPageReferences,
   getPageTitle,
   RoamBlock,
+  runExtension,
 } from "../entry-helpers";
 import { getConfigFromPage } from "roam-client";
-
-
 
 const menuItemCallback = (
   sortContainer: Element,
@@ -109,4 +108,6 @@ const observerCallback = () =>
         ?.getElementsByClassName("refs-by-page-view")[0]
   );
 
-createObserver(observerCallback);
+runExtension("sort-references", () => {
+  createObserver(observerCallback);
+});

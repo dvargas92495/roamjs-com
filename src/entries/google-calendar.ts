@@ -1,4 +1,4 @@
-import { getPageTitle } from "../entry-helpers";
+import { getPageTitle, runExtension } from "../entry-helpers";
 import {
   addButtonListener,
   asyncType,
@@ -37,11 +37,12 @@ const importGoogleCalendar = async (
   const timeMinParam = encodeURIComponent(formatRFC3339(timeMin));
   const timeMaxParam = encodeURIComponent(formatRFC3339(timeMax));
 
-  axios.get(
-    `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${encodeURIComponent(
-      calendarId
-    )}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
-  )
+  axios
+    .get(
+      `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${encodeURIComponent(
+        calendarId
+      )}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`
+    )
     .then(async (r) => {
       const events = r.data.items;
       if (!events || events.length === 0) {
@@ -94,4 +95,6 @@ const importGoogleCalendar = async (
     );
 };
 
-addButtonListener(GOOGLE_COMMAND, importGoogleCalendar);
+runExtension("google-calendar", () => {
+  addButtonListener(GOOGLE_COMMAND, importGoogleCalendar);
+});

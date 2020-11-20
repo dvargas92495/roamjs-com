@@ -6,7 +6,7 @@ import {
   parseRoamDate,
   pushBullets,
 } from "roam-client";
-import { getPageTitle } from "../entry-helpers";
+import { getPageTitle, runExtension } from "../entry-helpers";
 import axios from "axios";
 import subDays from "date-fns/subDays";
 
@@ -97,4 +97,6 @@ const importOuraRing = async (_: any, blockUid: string, parentUid: string) => {
   await pushBullets(bullets);
 };
 
-addButtonListener(OURA_COMMAND, importOuraRing);
+runExtension("oura-ring", () => {
+  addButtonListener(OURA_COMMAND, importOuraRing);
+});

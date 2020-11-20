@@ -1,5 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { createOverlayObserver } from "../entry-helpers";
+import { createOverlayObserver, runExtension } from "../entry-helpers";
 import { getConfigFromPage, getUids, openBlock } from "roam-client";
 import { isIOS } from "mobile-device-detect";
 import { waitFor } from "@testing-library/dom";
@@ -92,87 +92,89 @@ const optionCallback = async () => {
   }
 };
 
-const option = createMenuOption(optionCallback);
+runExtension("page-synonyms", () => {
+  const option = createMenuOption(optionCallback);
 
-const multiOption = createMenuOption(async () => {
-  const replace = getReplacer();
-  const highlightedDivIds = Array.from(
-    document.getElementsByClassName("block-highlight-blue")
-  ).map((d) => d.getElementsByClassName("roam-block")[0].id);
-  if (window.roamDatomicAlphaAPI) {
-    highlightedDivIds.forEach(async (id: string) => {
-      const { blockUid } = getUids(
-        document.getElementById(id) as HTMLDivElement
-      );
-      const blockContent = await window.roamDatomicAlphaAPI({
-        action: "pull",
-        uid: blockUid,
-        selector: "[:block/string]",
-      });
-      const newText = replace(blockContent.string);
-      await window.roamDatomicAlphaAPI({
-        action: "update-block",
-        block: {
+  const multiOption = createMenuOption(async () => {
+    const replace = getReplacer();
+    const highlightedDivIds = Array.from(
+      document.getElementsByClassName("block-highlight-blue")
+    ).map((d) => d.getElementsByClassName("roam-block")[0].id);
+    if (window.roamDatomicAlphaAPI) {
+      highlightedDivIds.forEach(async (id: string) => {
+        const { blockUid } = getUids(
+          document.getElementById(id) as HTMLDivElement
+        );
+        const blockContent = await window.roamDatomicAlphaAPI({
+          action: "pull",
           uid: blockUid,
-          string: newText,
-        },
+          selector: "[:block/string]",
+        });
+        const newText = replace(blockContent.string);
+        await window.roamDatomicAlphaAPI({
+          action: "update-block",
+          block: {
+            uid: blockUid,
+            string: newText,
+          },
+        });
       });
-    });
-  } else {
-    for (var index in highlightedDivIds) {
-      const id = highlightedDivIds[index];
-      await openBlock(document.getElementById(id));
-      const textArea = document.getElementById(id) as HTMLTextAreaElement;
-      const newText = replace(textArea.value);
-      userEvent.clear(textArea);
-      userEvent.type(textArea, newText);
-    }
-  }
-});
-
-createOverlayObserver(() => {
-  const uls = document.getElementsByClassName("bp3-menu bp3-text-small");
-  Array.from(uls).forEach((u) => {
-    if (
-      u.tagName === "UL" &&
-      !u.getElementsByClassName(ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME).length
-    ) {
-      const ul = u as HTMLUListElement;
-      const dividers = Array.from(
-        ul.getElementsByClassName("bp3-menu-divider")
-      );
-      if (dividers.length > 0 && !ul.contains(option)) {
-        const divider = dividers[0];
-        ul.insertBefore(option, divider);
-      } else if (
-        !ul.contains(multiOption) &&
-        dividers.length === 0 &&
-        ul.innerText.indexOf("Jump to block") === -1
-      ) {
-        ul.appendChild(multiOption);
+    } else {
+      for (var index in highlightedDivIds) {
+        const id = highlightedDivIds[index];
+        await openBlock(document.getElementById(id));
+        const textArea = document.getElementById(id) as HTMLTextAreaElement;
+        const newText = replace(textArea.value);
+        userEvent.clear(textArea);
+        userEvent.type(textArea, newText);
       }
     }
   });
-});
 
-document.addEventListener("mousedown", (e) => {
-  const htmlTarget = e.target as HTMLElement;
-  if (
-    htmlTarget.className === "simple-bullet-outer cursor-pointer" ||
-    htmlTarget.className === "simple-bullet-inner" ||
-    htmlTarget.className ===
-      "bp3-icon-standard bp3-icon-caret-down rm-caret rm-caret-open rm-caret-hidden"
-  ) {
-    const bullet = htmlTarget.closest(".controls");
-    blockElementSelected = bullet.parentElement.getElementsByClassName(
-      "rm-block-text"
-    )[0];
-  }
-});
+  createOverlayObserver(() => {
+    const uls = document.getElementsByClassName("bp3-menu bp3-text-small");
+    Array.from(uls).forEach((u) => {
+      if (
+        u.tagName === "UL" &&
+        !u.getElementsByClassName(ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME).length
+      ) {
+        const ul = u as HTMLUListElement;
+        const dividers = Array.from(
+          ul.getElementsByClassName("bp3-menu-divider")
+        );
+        if (dividers.length > 0 && !ul.contains(option)) {
+          const divider = dividers[0];
+          ul.insertBefore(option, divider);
+        } else if (
+          !ul.contains(multiOption) &&
+          dividers.length === 0 &&
+          ul.innerText.indexOf("Jump to block") === -1
+        ) {
+          ul.appendChild(multiOption);
+        }
+      }
+    });
+  });
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "a" && e.altKey) {
-    blockElementSelected = document.activeElement;
-    optionCallback();
-  }
+  document.addEventListener("mousedown", (e) => {
+    const htmlTarget = e.target as HTMLElement;
+    if (
+      htmlTarget.className === "simple-bullet-outer cursor-pointer" ||
+      htmlTarget.className === "simple-bullet-inner" ||
+      htmlTarget.className ===
+        "bp3-icon-standard bp3-icon-caret-down rm-caret rm-caret-open rm-caret-hidden"
+    ) {
+      const bullet = htmlTarget.closest(".controls");
+      blockElementSelected = bullet.parentElement.getElementsByClassName(
+        "rm-block-text"
+      )[0];
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "a" && e.altKey) {
+      blockElementSelected = document.activeElement;
+      optionCallback();
+    }
+  });
 });

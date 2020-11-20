@@ -1,4 +1,4 @@
-import { getPageTitle } from "../entry-helpers";
+import { getPageTitle, runExtension } from "../entry-helpers";
 import {
   addButtonListener,
   asyncType,
@@ -46,4 +46,6 @@ const twitterReferencesListener = async (
     .catch(genericError);
 };
 
-addButtonListener(TWITTER_REFERENCES_COMMAND, twitterReferencesListener);
+runExtension("twitter", () => {
+  addButtonListener(TWITTER_REFERENCES_COMMAND, twitterReferencesListener);
+});
