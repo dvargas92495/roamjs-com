@@ -13,7 +13,7 @@ getTextTreeByPageName("roam/js/tag-cycle")
       t.text.toUpperCase().startsWith("WIN+")
   )
   .forEach((shortcut) => {
-    const parts = shortcut.text.split("+").map((s) => s.toUpperCase());
+    const parts = shortcut.text.split("+").map((s) => s.toUpperCase().trim());
     const modifier = parts[0];
     const isShift = parts[1] === "SHIFT";
     const key = parts[parts.length - 1] || "";

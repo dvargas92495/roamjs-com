@@ -10,12 +10,23 @@ For every cycle you want, make a block denoting the keyboard shortcut that will 
 
 Now when you're in a given block, the keyboard shortcut will replace text in your block based on the cycle you defined!
 
+The format of a keyboard shortcut is deliminated by `+`. The following modifiers are supported:
+- CTRL
+- CMD
+- WIN
+- ALT
+Additionally, could use "SHIFT", but it should added after the modifier. The Key pressed is the last component.
+
 This is what it would look like for Roam's native TODO/DONE cycle:
 
 - CTRL+Enter
     -
     - TODO
     - DONE
+
+Here is what I use for my project tracking:
+
+![](/images/tag-cycle.md)
 
 Note that this means entering an empty block will clear the previous element, and append the next element when no other element is found.
 
