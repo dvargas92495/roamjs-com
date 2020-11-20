@@ -2,6 +2,7 @@ import {
   asyncType,
   createIconButton,
   getAttrConfigFromQuery,
+  getUids,
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 
@@ -33,7 +34,7 @@ const replaceText = async ([before, after]: string[]) => {
   const index = before ? textArea.value.indexOf(before) : textArea.value.length;
   if (index >= 0) {
     textArea.setSelectionRange(index, index + before.length);
-    await asyncType(`${before ? '{backspace}' : ''}${after}`);
+    await asyncType(`${before ? "{backspace}" : ""}${after}`);
   }
 };
 
@@ -43,7 +44,7 @@ export const replaceTagText = async ([before, after]: string[]) => {
     await replaceText([`[[${before}]]`, after ? `[[${after}]]` : ""]);
     await replaceText([`#${before}`, after ? `#${after}` : ""]);
   } else {
-    await replaceText(['', `[[${after}]]`])
+    await replaceText(["", `[[${after}]]`]);
   }
 };
 
@@ -55,6 +56,34 @@ export const createObserver = (
     document.getElementsByClassName("roam-body")[0]
   );
 
+const getMutatedNodes = ({
+  ms,
+  tag,
+  className,
+  nodeList,
+}: {
+  ms: MutationRecord[];
+  tag: string;
+  className: string;
+  nodeList: "addedNodes" | "removedNodes";
+}) => {
+  const blocks = ms.flatMap((m) =>
+    Array.from(m[nodeList]).filter(
+      (d: Node) =>
+        d.nodeName === tag &&
+        Array.from((d as HTMLElement).classList).includes(className)
+    )
+  );
+  const childBlocks = ms.flatMap((m) =>
+    Array.from(m[nodeList])
+      .filter((n) => n.hasChildNodes())
+      .flatMap((d) =>
+        Array.from((d as HTMLElement).getElementsByClassName(className))
+      )
+  );
+  return [...blocks, ...childBlocks];
+};
+
 export const createHTMLObserver = (
   callback: (b: HTMLElement) => void,
   tag: string,
@@ -64,22 +93,13 @@ export const createHTMLObserver = (
   Array.from(blocks).forEach(callback);
 
   createObserver((ms) => {
-    const blocks = ms.flatMap((m) =>
-      Array.from(m.addedNodes).filter(
-        (d: Node) =>
-          d.nodeName === tag &&
-          Array.from((d as HTMLElement).classList).indexOf(className) > -1
-      )
-    );
-    const childBlocks = ms.flatMap((m) =>
-      Array.from(m.addedNodes)
-        .filter((n) => n.nodeName === "DIV")
-        .flatMap((d) =>
-          Array.from((d as HTMLDivElement).getElementsByClassName(className))
-        )
-    );
-    blocks.forEach(callback);
-    childBlocks.forEach(callback);
+    const addedNodes = getMutatedNodes({
+      ms,
+      nodeList: 'addedNodes',
+      tag,
+      className,
+    })
+    addedNodes.forEach(callback);
   });
 };
 
@@ -89,6 +109,33 @@ export const createBlockObserver = (
 ) => {
   createHTMLObserver(blockCallback, "DIV", "roam-block");
   createHTMLObserver(blockRefCallback, "SPAN", "rm-block-ref");
+};
+
+export const createPageObserver = (
+  name: string,
+  callback: (blockUid: string, added: boolean) => void
+) => {
+  const nodeCallback = (blockNode: Node, added: boolean) => {
+    const { blockUid } = getUids(blockNode as HTMLDivElement);
+    const blockPageTitle = getPageTitleByBlockUid(blockUid);
+    if (blockPageTitle === name) {
+      callback(blockUid, added);
+    }
+  };
+  createObserver((ms) => {
+    getMutatedNodes({
+      ms,
+      nodeList: 'addedNodes',
+      tag: 'DIV',
+      className: 'roam-block',
+    }).forEach(b => nodeCallback(b, true));
+    getMutatedNodes({
+      ms,
+      nodeList: 'removedNodes',
+      tag: 'DIV',
+      className: 'roam-block',
+    }).forEach(b => nodeCallback(b, false));
+  });
 };
 
 export const createButtonObserver = ({
@@ -341,21 +388,23 @@ export const getWordCountByBlockUid = (blockUid: string) => {
   );
 };
 
-type TreeNode = {
+export type TreeNode = {
   text: string;
   order: number;
   children: TreeNode[];
+  uid: string;
 };
 
 const getTextTreeByBlockId = (blockId: number): TreeNode => {
   const block = window.roamAlphaAPI.pull(
-    "[:block/children, :block/string, :block/order]",
+    "[:block/children, :block/string, :block/order, :block/uid]",
     blockId
   );
   const children = block[":block/children"] || [];
   return {
     text: block[":block/string"],
     order: block[":block/order"],
+    uid: block[":block/uid"],
     children: children
       .map((c) => getTextTreeByBlockId(c[":db/id"]))
       .sort((a, b) => a.order - b.order),
@@ -431,6 +480,27 @@ export const getPageTitle = (e: Element) => {
   return Array.from(heading.childNodes).find(
     (n) => n.nodeName === "#text" || n.nodeName === "SPAN"
   );
+};
+
+export const getPageTitleByBlockUid = (blockUid: string): string => {
+  const result = window.roamAlphaAPI.q(
+    `[:find (pull ?c [:node/title, :block/uid]) :where [?c :block/children ?e] [?e :block/uid "${blockUid}"]]`
+  )[0][0];
+  return result.title ? result.title : getPageTitleByBlockUid(result.uid);
+};
+
+export const getBlockDepthByBlockUid = (blockUid: string): number => {
+  const result = window.roamAlphaAPI.q(
+    `[:find (pull ?c [:node/title, :block/uid]) :where [?c :block/children ?e] [?e :block/uid "${blockUid}"]]`
+  )[0][0];
+  return result.title ? 1 : getBlockDepthByBlockUid(result.uid) + 1;
+}
+
+export const getParentUidByBlockUid = (blockUid: string): string => {
+  const result = window.roamAlphaAPI.q(
+    `[:find (pull ?c [:block/uid]) :where [?c :block/children ?e] [?e :block/uid "${blockUid}"]]`
+  );
+  return result.length ? result[0][0].uid : '';
 };
 
 export type RoamBlock = {
