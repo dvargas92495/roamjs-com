@@ -35,13 +35,13 @@ const configureShortcut = (shortcut: Omit<TreeNode, "order">) => {
     if (isShift && !e.shiftKey) {
       return false;
     }
-    if (key === "SPACE" && e.key !== " ") {
-      return false;
+    if (key === "SPACE" && e.key === " ") {
+      return true;
     }
-    if (key !== e.key.toUpperCase()) {
-      return false;
+    if (key === e.key.toUpperCase()) {
+      return true;
     }
-    return true;
+    return false;
   };
   config[shortcut.uid] = async (e: KeyboardEvent) => {
     const element = document.activeElement as HTMLElement;
@@ -90,8 +90,10 @@ getTextTreeByPageName("roam/js/tag-cycle")
 
 createPageObserver("roam/js/tag-cycle", (blockUid, added) => {
   if (!added) {
-    document.removeEventListener("keydown", config[blockUid]);
-    delete config[blockUid];
+    if (config[blockUid]) {
+      document.removeEventListener("keydown", config[blockUid]);
+      delete config[blockUid];
+    }
     return;
   }
   const depth = getBlockDepthByBlockUid(blockUid);
