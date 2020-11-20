@@ -36,6 +36,10 @@ variable "stripe_public" {
     type = string
 }
 
+variable "mixpanel_token" {
+    type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -198,4 +202,10 @@ resource "github_actions_secret" "stripe_public" {
   repository       = "roam-js-extensions"
   secret_name      = "STRIPE_PUBLIC_KEY"
   plaintext_value  = var.stripe_public
+}
+
+resource "github_actions_secret" "mixpanel_token" {
+  repository       = "roam-js-extensions"
+  secret_name      = "MIXPANEL_TOKEN"
+  plaintext_value  = var.mixpanel_token
 }
