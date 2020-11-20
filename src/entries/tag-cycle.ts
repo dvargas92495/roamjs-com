@@ -43,6 +43,9 @@ const configureShortcut = (shortcut: Omit<TreeNode, "order">) => {
     }
     return false;
   };
+  if (config[shortcut.uid]) {
+    document.removeEventListener("keydown", config[shortcut.uid]);
+  }
   config[shortcut.uid] = async (e: KeyboardEvent) => {
     const element = document.activeElement as HTMLElement;
     if (element.tagName === "TEXTAREA") {
@@ -72,9 +75,6 @@ const configureShortcut = (shortcut: Omit<TreeNode, "order">) => {
       }
     }
   };
-  if (config[shortcut.uid]) {
-    document.removeEventListener("keydown", config[shortcut.uid]);
-  }
   document.addEventListener("keydown", config[shortcut.uid]);
 };
 
