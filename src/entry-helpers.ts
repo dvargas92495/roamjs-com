@@ -5,6 +5,7 @@ import {
   getUids,
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
+import mixpanel from 'mixpanel-browser';
 
 declare global {
   interface Window {
@@ -16,18 +17,29 @@ declare global {
   }
 }
 
-if (process.env.IS_LEGACY && !window.depot?.roamjs?.alerted) {
-  window.alert(
-    'Hey! Thanks for using extensions from roam.davidvargas.me! I\'m currently migrating the extensions to roamjs.com. Please edit the src in your roam/js block, replacing "roam.davidvargas.me/master" with "roamjs.com"'
-  );
-  if (!window.depot) {
-    window.depot = { roamjs: { alerted: true } };
-  } else if (!window.depot.roamjs) {
-    window.depot.roamjs = { alerted: true };
-  } else {
-    window.depot.roamjs.alerted = true;
+const roamJsVersion = process.env.ROAMJS_VERSION || '0';
+
+export const runExtension = (extensionId: string, run: () => void) => {
+  if (process.env.IS_LEGACY && !window.depot?.roamjs?.alerted) {
+    window.alert(
+      'Hey! Thanks for using extensions from roam.davidvargas.me! I\'m currently migrating the extensions to roamjs.com. Please edit the src in your roam/js block, replacing "roam.davidvargas.me/master" with "roamjs.com"'
+    );
+    if (!window.depot) {
+      window.depot = { roamjs: { alerted: true } };
+    } else if (!window.depot.roamjs) {
+      window.depot.roamjs = { alerted: true };
+    } else {
+      window.depot.roamjs.alerted = true;
+    }
   }
-}
+
+  mixpanel.init(process.env.MIXPANEL_TOKEN)
+  mixpanel.track("Load Extension", {
+    extensionId,
+    roamJsVersion
+  });
+  run();
+};
 
 const replaceText = async ([before, after]: string[]) => {
   const textArea = document.activeElement as HTMLTextAreaElement;

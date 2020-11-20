@@ -9,6 +9,7 @@ import {
   getTextByBlockUid,
   getWordCountByBlockUid,
   getWordCountByPageTitle,
+  runExtension,
 } from "../entry-helpers";
 import {
   getConfigFromPage,
@@ -260,5 +261,7 @@ const observerCallback = () => {
   });
 };
 
-observerCallback();
-createObserver(observerCallback);
+runExtension("query-tools", () => {
+  observerCallback();
+  createObserver(observerCallback);
+});

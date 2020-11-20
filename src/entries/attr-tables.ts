@@ -1,6 +1,7 @@
 import {
   createObserver,
   getConfigFromBlock,
+  runExtension,
 } from "../entry-helpers";
 import { getConfigFromPage, parseRoamDate, createIconButton } from "roam-client";
 
@@ -164,5 +165,8 @@ const observerCallback = () => {
     }
   });
 };
-observerCallback();
-createObserver(observerCallback);
+
+runExtension('attr-tables', () => {
+  observerCallback();
+  createObserver(observerCallback);
+})

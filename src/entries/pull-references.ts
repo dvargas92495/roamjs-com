@@ -6,7 +6,11 @@ import {
   openBlock,
   pushBullets,
 } from "roam-client";
-import { getLinkedReferences, getPageTitle } from "../entry-helpers";
+import {
+  getLinkedReferences,
+  getPageTitle,
+  runExtension,
+} from "../entry-helpers";
 
 const PULL_REFERENCES_COMMAND = "Pull References";
 const REPLACE = "${ref}";
@@ -55,4 +59,6 @@ const pullReferences = async (_: any, blockUid: string, parentUid: string) => {
   }
 };
 
-addButtonListener(PULL_REFERENCES_COMMAND, pullReferences);
+runExtension("pull-references", () => {
+  addButtonListener(PULL_REFERENCES_COMMAND, pullReferences);
+});

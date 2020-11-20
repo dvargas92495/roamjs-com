@@ -1,4 +1,4 @@
-import { getPageTitle } from "../entry-helpers";
+import { getPageTitle, runExtension } from "../entry-helpers";
 import {
   addButtonListener,
   asyncType,
@@ -135,7 +135,9 @@ const importGithubCards = async (
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   const repoName = buttonConfig.IN ? buttonConfig.IN : repoAsParent;
   const repository = `${username}/${repoName}`;
-  const project = buttonConfig.UNDER ? buttonConfig.UNDER : pageTitle.textContent;
+  const project = buttonConfig.UNDER
+    ? buttonConfig.UNDER
+    : pageTitle.textContent;
   const column = buttonConfig.AS ? buttonConfig.AS : "To do";
 
   if (!config["Token"]) {
@@ -167,7 +169,9 @@ const importGithubCards = async (
   }
 };
 
-addButtonListener("Import Github Cards", importGithubCards);
-addButtonListener("Import Github Issues", importGithubIssues);
-addButtonListener("Import Github Projects", importGithubProjects);
-addButtonListener("Import Github Repos", importGithubRepos);
+runExtension("github", () => {
+  addButtonListener("Import Github Cards", importGithubCards);
+  addButtonListener("Import Github Issues", importGithubIssues);
+  addButtonListener("Import Github Projects", importGithubProjects);
+  addButtonListener("Import Github Repos", importGithubRepos);
+});

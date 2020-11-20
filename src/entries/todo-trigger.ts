@@ -6,19 +6,26 @@ import {
   openBlock,
   toRoamDate,
 } from "roam-client";
-import { createBlockObserver, getChildRefStringsByBlockUid, getTextByBlockUid, isControl, replaceTagText } from "../entry-helpers";
+import {
+  createBlockObserver,
+  getChildRefStringsByBlockUid,
+  getTextByBlockUid,
+  isControl,
+  replaceTagText,
+  runExtension,
+} from "../entry-helpers";
 
 const onTodo = async () => {
   const config = getConfigFromPage("roam/js/todo-trigger");
   const text = config["Append Text"];
   if (text) {
     const formattedText = ` ${text
-      .replace(new RegExp("\\^", 'g'), "\\^")
-      .replace(new RegExp("\\[", 'g'), "\\[")
-      .replace(new RegExp("\\]", 'g'), "\\]")
-      .replace(new RegExp("\\(", 'g'), "\\(")
-      .replace(new RegExp("\\)", 'g'), "\\)")
-      .replace(new RegExp("\\|", 'g'), "\\|")
+      .replace(new RegExp("\\^", "g"), "\\^")
+      .replace(new RegExp("\\[", "g"), "\\[")
+      .replace(new RegExp("\\]", "g"), "\\]")
+      .replace(new RegExp("\\(", "g"), "\\(")
+      .replace(new RegExp("\\)", "g"), "\\)")
+      .replace(new RegExp("\\|", "g"), "\\|")
       .replace("/Current Time", "[0-2][0-9]:[0-5][0-9]")
       .replace(
         "/Today",
@@ -74,67 +81,74 @@ const onDone = async () => {
   }
 };
 
-document.addEventListener("click", async (e) => {
-  const target = e.target as HTMLElement;
-  if (
-    target.tagName === "INPUT" &&
-    target.parentElement.className === "check-container" &&
-    !target.closest('.rm-block-ref')
-  ) {
-    const inputTarget = target as HTMLInputElement;
-    if (inputTarget.type === "checkbox") {
-      await openBlock(inputTarget.closest(".roam-block"));
-      if (inputTarget.checked) {
-        onTodo();
-      } else {
-        await onDone();
-      }
-      document.body.click();
-    }
-  }
-});
-
-const keydownEventListener = async (e: KeyboardEvent) => {
-  if (e.key === "Enter" && isControl(e)) {
+runExtension("todo-trigger", () => {
+  document.addEventListener("click", async (e) => {
     const target = e.target as HTMLElement;
-    if (target.tagName === "TEXTAREA") {
-      const textArea = target as HTMLTextAreaElement;
-      if (textArea.value.startsWith("{{[[DONE]]}}")) {
-        const start = textArea.selectionStart;
-        const end = textArea.selectionEnd;
-        await onDone();
-        textArea.setSelectionRange(start, end);
-      } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
-        const start = textArea.selectionStart;
-        const end = textArea.selectionEnd;
-        await onTodo();
-        textArea.setSelectionRange(start, end);
+    if (
+      target.tagName === "INPUT" &&
+      target.parentElement.className === "check-container" &&
+      !target.closest(".rm-block-ref")
+    ) {
+      const inputTarget = target as HTMLInputElement;
+      if (inputTarget.type === "checkbox") {
+        await openBlock(inputTarget.closest(".roam-block"));
+        if (inputTarget.checked) {
+          onTodo();
+        } else {
+          await onDone();
+        }
+        document.body.click();
       }
     }
-  }
-};
+  });
 
-document.addEventListener("keydown", keydownEventListener);
-
-const isStrikethrough = !!getConfigFromPage("roam/js/todo-trigger")[
-  "Strikethrough"
-];
-
-createBlockObserver((b) => {
-  if (isStrikethrough) {
-    const { blockUid } = getUids(b);
-    if (getTextByBlockUid(blockUid).indexOf("{{[[DONE]]}}") > -1) {
-      b.style.textDecoration = "line-through";
+  const keydownEventListener = async (e: KeyboardEvent) => {
+    if (e.key === "Enter" && isControl(e)) {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "TEXTAREA") {
+        const textArea = target as HTMLTextAreaElement;
+        if (textArea.value.startsWith("{{[[DONE]]}}")) {
+          const start = textArea.selectionStart;
+          const end = textArea.selectionEnd;
+          await onDone();
+          textArea.setSelectionRange(start, end);
+        } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
+          const start = textArea.selectionStart;
+          const end = textArea.selectionEnd;
+          await onTodo();
+          textArea.setSelectionRange(start, end);
+        }
+      }
     }
-  }
-}, (s) => {
-  if (isStrikethrough) {
-    const parent = s.closest('.roam-block') as HTMLDivElement;
-    const { blockUid } = getUids(parent);
-    const refs = getChildRefStringsByBlockUid(blockUid);
-    const index = Array.from(parent.getElementsByClassName('rm-block-ref')).indexOf(s);
-    if (refs[index].indexOf("{{[[DONE]]}}") > -1) {
-      s.style.textDecoration = "line-through";
+  };
+
+  document.addEventListener("keydown", keydownEventListener);
+
+  const isStrikethrough = !!getConfigFromPage("roam/js/todo-trigger")[
+    "Strikethrough"
+  ];
+
+  createBlockObserver(
+    (b) => {
+      if (isStrikethrough) {
+        const { blockUid } = getUids(b);
+        if (getTextByBlockUid(blockUid).indexOf("{{[[DONE]]}}") > -1) {
+          b.style.textDecoration = "line-through";
+        }
+      }
+    },
+    (s) => {
+      if (isStrikethrough) {
+        const parent = s.closest(".roam-block") as HTMLDivElement;
+        const { blockUid } = getUids(parent);
+        const refs = getChildRefStringsByBlockUid(blockUid);
+        const index = Array.from(
+          parent.getElementsByClassName("rm-block-ref")
+        ).indexOf(s);
+        if (refs[index].indexOf("{{[[DONE]]}}") > -1) {
+          s.style.textDecoration = "line-through";
+        }
+      }
     }
-  }
+  );
 });
