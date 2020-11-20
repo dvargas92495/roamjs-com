@@ -5,7 +5,7 @@ import {
   getUids,
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
-import mixpanel from "mixpanel-browser";
+import mixpanel, { reset } from "mixpanel-browser";
 
 declare global {
   interface Window {
@@ -501,15 +501,23 @@ export const getPageTitle = (e: Element) => {
 export const getPageTitleByBlockUid = (blockUid: string): string => {
   const result = window.roamAlphaAPI.q(
     `[:find (pull ?c [:node/title, :block/uid]) :where [?c :block/children ?e] [?e :block/uid "${blockUid}"]]`
-  )[0][0];
-  return result.title ? result.title : getPageTitleByBlockUid(result.uid);
+  );
+  if (!result.length) {
+    return "";
+  }
+  const block = result[0][0];
+  return block.title ? block.title : getPageTitleByBlockUid(block.uid);
 };
 
 export const getBlockDepthByBlockUid = (blockUid: string): number => {
   const result = window.roamAlphaAPI.q(
     `[:find (pull ?c [:node/title, :block/uid]) :where [?c :block/children ?e] [?e :block/uid "${blockUid}"]]`
-  )[0][0];
-  return result.title ? 1 : getBlockDepthByBlockUid(result.uid) + 1;
+  );
+  if (!result.length) {
+    return -1;
+  }
+  const block = result[0][0];
+  return block.title ? 1 : getBlockDepthByBlockUid(block.uid) + 1;
 };
 
 export const getParentUidByBlockUid = (blockUid: string): string => {

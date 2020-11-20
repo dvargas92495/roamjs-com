@@ -99,7 +99,7 @@ runExtension('tag-cycle', () => {
       return;
     }
     const depth = getBlockDepthByBlockUid(blockUid);
-    if (depth > 2) {
+    if (depth > 2 || depth < 0) {
       return;
     }
     const uid = depth === 2 ? getParentUidByBlockUid(blockUid) : blockUid;
