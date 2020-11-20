@@ -5,7 +5,7 @@ import {
   getUids,
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
-import mixpanel from 'mixpanel-browser';
+import mixpanel from "mixpanel-browser";
 
 declare global {
   interface Window {
@@ -17,7 +17,7 @@ declare global {
   }
 }
 
-const roamJsVersion = process.env.ROAMJS_VERSION || '0';
+const roamJsVersion = process.env.ROAMJS_VERSION || "0";
 
 export const runExtension = (extensionId: string, run: () => void) => {
   if (process.env.IS_LEGACY && !window.depot?.roamjs?.alerted) {
@@ -33,10 +33,10 @@ export const runExtension = (extensionId: string, run: () => void) => {
     }
   }
 
-  mixpanel.init(process.env.MIXPANEL_TOKEN)
+  mixpanel.init(process.env.MIXPANEL_TOKEN);
   mixpanel.track("Load Extension", {
     extensionId,
-    roamJsVersion
+    roamJsVersion,
   });
   run();
 };
@@ -107,10 +107,10 @@ export const createHTMLObserver = (
   createObserver((ms) => {
     const addedNodes = getMutatedNodes({
       ms,
-      nodeList: 'addedNodes',
+      nodeList: "addedNodes",
       tag,
       className,
-    })
+    });
     addedNodes.forEach(callback);
   });
 };
@@ -137,16 +137,16 @@ export const createPageObserver = (
   createObserver((ms) => {
     getMutatedNodes({
       ms,
-      nodeList: 'addedNodes',
-      tag: 'DIV',
-      className: 'roam-block',
-    }).forEach(b => nodeCallback(b, true));
+      nodeList: "addedNodes",
+      tag: "DIV",
+      className: "roam-block",
+    }).forEach((b) => nodeCallback(b, true));
     getMutatedNodes({
       ms,
-      nodeList: 'removedNodes',
-      tag: 'DIV',
-      className: 'roam-block',
-    }).forEach(b => nodeCallback(b, false));
+      nodeList: "removedNodes",
+      tag: "DIV",
+      className: "roam-block",
+    }).forEach((b) => nodeCallback(b, false));
   });
 };
 
@@ -437,9 +437,13 @@ export const getTextTreeByBlockUid = (blockUid: string) => {
 };
 
 export const getTextTreeByPageName = (name: string) => {
-  const block = window.roamAlphaAPI.q(
+  const result = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/children]) :where [?e :node/title "${name}"]]`
-  )[0][0];
+  );
+  if (!result.length) {
+    return [];
+  }
+  const block = result[0][0];
   const children = block.children || [];
   return children
     .map((c) => getTextTreeByBlockId(c.id))
@@ -506,13 +510,13 @@ export const getBlockDepthByBlockUid = (blockUid: string): number => {
     `[:find (pull ?c [:node/title, :block/uid]) :where [?c :block/children ?e] [?e :block/uid "${blockUid}"]]`
   )[0][0];
   return result.title ? 1 : getBlockDepthByBlockUid(result.uid) + 1;
-}
+};
 
 export const getParentUidByBlockUid = (blockUid: string): string => {
   const result = window.roamAlphaAPI.q(
     `[:find (pull ?c [:block/uid]) :where [?c :block/children ?e] [?e :block/uid "${blockUid}"]]`
   );
-  return result.length ? result[0][0].uid : '';
+  return result.length ? result[0][0].uid : "";
 };
 
 export type RoamBlock = {
