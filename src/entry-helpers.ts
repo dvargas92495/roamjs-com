@@ -19,7 +19,7 @@ declare global {
 
 const roamJsVersion = process.env.ROAMJS_VERSION || '0';
 
-const runExtension = (extensionId: string, run: () => void) => {
+export const runExtension = (extensionId: string, run: () => void) => {
   if (process.env.IS_LEGACY && !window.depot?.roamjs?.alerted) {
     window.alert(
       'Hey! Thanks for using extensions from roam.davidvargas.me! I\'m currently migrating the extensions to roamjs.com. Please edit the src in your roam/js block, replacing "roam.davidvargas.me/master" with "roamjs.com"'
