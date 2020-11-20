@@ -1,4 +1,3 @@
-import { waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { createWorker } from "tesseract.js";
 import { createObserver, runExtension } from "../entry-helpers";
@@ -9,12 +8,6 @@ import {
   pushBullets,
   createIconButton,
 } from "roam-client";
-
-declare global {
-  interface Window {
-    imageText: string;
-  }
-}
 
 runExtension("image-tagging", () => {
   const config = getConfigFromPage("roam/js/image-tagging");

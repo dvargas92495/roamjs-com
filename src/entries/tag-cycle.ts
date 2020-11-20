@@ -9,6 +9,16 @@ import {
   TreeNode,
 } from "../entry-helpers";
 
+declare global {
+  interface Window {
+    observerCount: number;
+    pageObserverCount: number;
+  }
+}
+
+window.observerCount = 0;
+window.pageObserverCount = 0;
+
 runExtension('tag-cycle', () => {
   const config: { [blockUid: string]: (e: KeyboardEvent) => void } = {};
   
@@ -91,6 +101,7 @@ runExtension('tag-cycle', () => {
     .forEach(configureShortcut);
   
   createPageObserver("roam/js/tag-cycle", (blockUid, added) => {
+    window.pageObserverCount++;
     if (!added) {
       if (config[blockUid]) {
         document.removeEventListener("keydown", config[blockUid]);

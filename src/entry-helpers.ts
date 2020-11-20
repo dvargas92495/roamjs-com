@@ -128,6 +128,7 @@ export const createPageObserver = (
   callback: (blockUid: string, added: boolean) => void
 ) => {
   const nodeCallback = (blockNode: Node, added: boolean) => {
+    window.observerCount++;
     const { blockUid } = getUids(blockNode as HTMLDivElement);
     const blockPageTitle = getPageTitleByBlockUid(blockUid);
     if (blockPageTitle === name) {
