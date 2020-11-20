@@ -15,6 +15,9 @@ module.exports = (env) => ({
     modules: ["node_modules"],
     extensions: [".ts", ".js", ".tsx"],
   },
+  /*externals: [
+    
+  ],*/
   output: {
     path: path.join(__dirname, "build"),
     filename: "[name].js",

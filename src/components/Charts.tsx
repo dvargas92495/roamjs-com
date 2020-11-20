@@ -56,7 +56,7 @@ const defaultColorScheme = [
 ];
 
 const parseAxis: {
-  [key: string]: (value: string, format?: string) => string | number | Date;
+  [key in AxisType]: (value: string, format?: string) => string | number | Date;
 } = {
   linear: (v: string) => (v ? parseFloat(v) : 0),
   ordinal: (v: string) => v,
@@ -68,6 +68,8 @@ const parseAxis: {
       return new Date();
     }
   },
+  log: (v: string) => v,
+  utc: (v: string) => v,
 };
 
 const BOTTOM_TYPE_KEY = "X-Axis::";

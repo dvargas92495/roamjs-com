@@ -5,7 +5,7 @@ module.exports = (env) => ({
     mode: 'production',
     performance: {
       hints: "error",
-      maxEntrypointSize: 2000000,
-      maxAssetSize: 2000000,
+      maxEntrypointSize: 1520435,
+      maxAssetSize: 1520435,
     },
 });
