@@ -52,13 +52,21 @@ export const replaceText = async ([before, after]: string[]) => {
   }
 };
 
-export const replaceTagText = async ([before, after]: string[], addHash = false) => {
+export const replaceTagText = async ({
+  before,
+  after,
+  addHash = false,
+}: {
+  before: string;
+  after: string;
+  addHash?: boolean;
+}) => {
   if (before) {
     await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : ""]);
     await replaceText([`[[${before}]]`, after ? `[[${after}]]` : ""]);
     await replaceText([`#${before}`, after ? `#${after}` : ""]);
   } else {
-    await replaceText(["", `${addHash ? '#' : ''}[[${after}]]`]);
+    await replaceText(["", `${addHash ? "#" : ""}[[${after}]]`]);
   }
 };
 
