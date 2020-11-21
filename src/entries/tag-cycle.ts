@@ -5,6 +5,7 @@ import {
   getTextTreeByBlockUid,
   getTextTreeByPageName,
   replaceTagText,
+  replaceText,
   runExtension,
   TreeNode,
 } from "../entry-helpers";
@@ -17,6 +18,8 @@ declare global {
 
 window.observerCount = 0;
 
+type CycleType = "HASH" | "RAW";
+
 runExtension('tag-cycle', () => {
   const config: { [blockUid: string]: (e: KeyboardEvent) => void } = {};
   
@@ -24,7 +27,9 @@ runExtension('tag-cycle', () => {
     const parts = shortcut.text.split("+").map((s) => s.toUpperCase().trim());
     const modifier = parts[0];
     const isShift = parts[1] === "SHIFT";
-    const key = parts[parts.length - 1] || "";
+    const keyParts = parts[parts.length - 1].split(" ") || [""];
+    const key = keyParts[0];
+    const cycleType = keyParts.length > 1 ? keyParts[1] as CycleType : "BRACKET";
     const cycle = shortcut.children.map((c) => c.text.trim());
     const sortedCycle = cycle
       .map((tag, index) => ({ tag, index }))
@@ -72,7 +77,11 @@ runExtension('tag-cycle', () => {
               const start = textarea.selectionStart;
               const end = textarea.selectionEnd;
               const tag2 = cycle[(index + 1 + cycle.length) % cycle.length];
-              await replaceTagText([tag1, tag2]);
+              if (cycleType === "RAW") {
+                await replaceText([tag1, tag2])
+              } else {
+                await replaceTagText([tag1, tag2], cycleType === 'HASH');
+              }
               textarea.setSelectionRange(
                 start - tag1.length + tag2.length,
                 end - tag1.length + tag2.length

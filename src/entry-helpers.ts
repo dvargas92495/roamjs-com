@@ -43,7 +43,7 @@ export const runExtension = (extensionId: string, run: () => void) => {
   run();
 };
 
-const replaceText = async ([before, after]: string[]) => {
+export const replaceText = async ([before, after]: string[]) => {
   const textArea = document.activeElement as HTMLTextAreaElement;
   const index = before ? textArea.value.indexOf(before) : textArea.value.length;
   if (index >= 0) {
@@ -52,13 +52,13 @@ const replaceText = async ([before, after]: string[]) => {
   }
 };
 
-export const replaceTagText = async ([before, after]: string[]) => {
+export const replaceTagText = async ([before, after]: string[], addHash = false) => {
   if (before) {
     await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : ""]);
     await replaceText([`[[${before}]]`, after ? `[[${after}]]` : ""]);
     await replaceText([`#${before}`, after ? `#${after}` : ""]);
   } else {
-    await replaceText(["", `[[${after}]]`]);
+    await replaceText(["", `${addHash ? '#' : ''}[[${after}]]`]);
   }
 };
 
