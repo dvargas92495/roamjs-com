@@ -7,6 +7,7 @@ import {
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel from "mixpanel-browser";
 import differenceInMilliseconds from "date-fns/differenceInMilliseconds";
+import { add } from "date-fns";
 
 declare global {
   interface Window {
@@ -130,31 +131,35 @@ export const createPageObserver = (
 ) =>
   createObserver((ms) => {
     const start = new Date();
-    const blockUids = getBlockUidsByPageTitle(name);
-    getMutatedNodes({
+    const addedNodes = getMutatedNodes({
       ms,
       nodeList: "addedNodes",
       tag: "DIV",
       className: "roam-block",
-    })
-      .map((blockNode) => getUids(blockNode as HTMLDivElement).blockUid)
-      .filter(blockUids.has)
-      .forEach((b) => {
-        callback(b, true);
-        console.log(differenceInMilliseconds(new Date(), start));
-      });
-    getMutatedNodes({
+    }).map((blockNode) => ({
+      blockUid: getUids(blockNode as HTMLDivElement).blockUid,
+      added: true,
+    }));
+
+    const removedNodes = getMutatedNodes({
       ms,
       nodeList: "removedNodes",
       tag: "DIV",
       className: "roam-block",
-    })
-      .map((blockNode) => getUids(blockNode as HTMLDivElement).blockUid)
-      .filter(blockUids.has)
-      .forEach((b) => {
-        callback(b, false);
-        console.log(differenceInMilliseconds(new Date(), start));
-      });
+    }).map((blockNode) => ({
+      blockUid: getUids(blockNode as HTMLDivElement).blockUid,
+      added: false,
+    }));
+
+    if (addedNodes.length || removedNodes.length) {
+      const blockUids = getBlockUidsByPageTitle(name);
+      [...addedNodes, ...removedNodes]
+        .filter(({ blockUid }) => blockUids.has(blockUid))
+        .forEach(({ blockUid, added }) => {
+          callback(blockUid, added);
+          console.log(differenceInMilliseconds(new Date(), start));
+        });
+    }
     console.log(differenceInMilliseconds(new Date(), start));
   });
 
