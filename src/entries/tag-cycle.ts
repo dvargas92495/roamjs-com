@@ -9,6 +9,14 @@ import {
   TreeNode,
 } from "../entry-helpers";
 
+declare global {
+  interface Window {
+    observerCount: number;
+  }
+}
+
+window.observerCount = 0;
+
 runExtension('tag-cycle', () => {
   const config: { [blockUid: string]: (e: KeyboardEvent) => void } = {};
   

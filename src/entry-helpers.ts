@@ -5,7 +5,9 @@ import {
   getUids,
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
-import mixpanel, { reset } from "mixpanel-browser";
+import mixpanel from "mixpanel-browser";
+import differenceInMilliseconds from "date-fns/differenceInMilliseconds";
+import { add } from "date-fns";
 
 declare global {
   interface Window {
@@ -126,29 +128,35 @@ export const createBlockObserver = (
 export const createPageObserver = (
   name: string,
   callback: (blockUid: string, added: boolean) => void
-) => {
-  const nodeCallback = (blockNode: Node, added: boolean) => {
-    const { blockUid } = getUids(blockNode as HTMLDivElement);
-    const blockPageTitle = getPageTitleByBlockUid(blockUid);
-    if (blockPageTitle === name) {
-      callback(blockUid, added);
-    }
-  };
+) =>
   createObserver((ms) => {
-    getMutatedNodes({
+    const addedNodes = getMutatedNodes({
       ms,
       nodeList: "addedNodes",
       tag: "DIV",
       className: "roam-block",
-    }).forEach((b) => nodeCallback(b, true));
-    getMutatedNodes({
+    }).map((blockNode) => ({
+      blockUid: getUids(blockNode as HTMLDivElement).blockUid,
+      added: true,
+    }));
+
+    const removedNodes = getMutatedNodes({
       ms,
       nodeList: "removedNodes",
       tag: "DIV",
       className: "roam-block",
-    }).forEach((b) => nodeCallback(b, false));
+    }).map((blockNode) => ({
+      blockUid: getUids(blockNode as HTMLDivElement).blockUid,
+      added: false,
+    }));
+
+    if (addedNodes.length || removedNodes.length) {
+      const blockUids = getBlockUidsByPageTitle(name);
+      [...addedNodes, ...removedNodes]
+        .filter(({ blockUid }) => blockUids.has(blockUid))
+        .forEach(({ blockUid, added }) => callback(blockUid, added));
+    }
   });
-};
 
 export const createButtonObserver = ({
   shortcut,
@@ -525,6 +533,30 @@ export const getParentUidByBlockUid = (blockUid: string): string => {
     `[:find (pull ?c [:block/uid]) :where [?c :block/children ?e] [?e :block/uid "${blockUid}"]]`
   );
   return result.length ? result[0][0].uid : "";
+};
+
+const getBlockUidsByBlockId = (blockId: number): string[] => {
+  const block = window.roamAlphaAPI.pull(
+    "[:block/children, :block/string]",
+    blockId
+  );
+  const children = block[":block/children"] || [];
+  return [
+    block[":block/uid"],
+    ...children.flatMap((c) => getBlockUidsByBlockId(c[":db/id"])),
+  ];
+};
+
+const getBlockUidsByPageTitle = (title: string) => {
+  const result = window.roamAlphaAPI.q(
+    `[:find (pull ?e [:block/children]) :where [?e :node/title "${title}"]]`
+  );
+  if (!result.length) {
+    return new Set();
+  }
+  const page = result[0][0];
+  const children = page.children || [];
+  return new Set(children.flatMap((c) => getBlockUidsByBlockId(c.id)));
 };
 
 export type RoamBlock = {
