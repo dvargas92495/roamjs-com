@@ -160,7 +160,7 @@ export const createPageObserver = (
 
     if (addedNodes.length || removedNodes.length) {
       const blockUids = getBlockUidsByPageTitle(name);
-      [...addedNodes, ...removedNodes]
+      [...removedNodes, ...addedNodes]
         .filter(({ blockUid }) => blockUids.has(blockUid))
         .forEach(({ blockUid, added }) => callback(blockUid, added));
     }
