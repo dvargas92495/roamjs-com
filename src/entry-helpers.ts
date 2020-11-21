@@ -130,7 +130,6 @@ export const createPageObserver = (
   callback: (blockUid: string, added: boolean) => void
 ) =>
   createObserver((ms) => {
-    const start = new Date();
     const addedNodes = getMutatedNodes({
       ms,
       nodeList: "addedNodes",
@@ -155,12 +154,8 @@ export const createPageObserver = (
       const blockUids = getBlockUidsByPageTitle(name);
       [...addedNodes, ...removedNodes]
         .filter(({ blockUid }) => blockUids.has(blockUid))
-        .forEach(({ blockUid, added }) => {
-          callback(blockUid, added);
-          console.log(differenceInMilliseconds(new Date(), start));
-        });
+        .forEach(({ blockUid, added }) => callback(blockUid, added));
     }
-    console.log(differenceInMilliseconds(new Date(), start));
   });
 
 export const createButtonObserver = ({
