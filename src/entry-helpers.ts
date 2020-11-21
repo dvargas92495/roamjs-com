@@ -143,13 +143,19 @@ export const createPageObserver = (
       nodeList: "addedNodes",
       tag: "DIV",
       className: "roam-block",
-    }).forEach((b) => nodeCallback(b, true));
+    }).forEach((b) => {
+      nodeCallback(b, true);
+      console.log(differenceInMilliseconds(new Date(), start));
+    });
     getMutatedNodes({
       ms,
       nodeList: "removedNodes",
       tag: "DIV",
       className: "roam-block",
-    }).forEach((b) => nodeCallback(b, false));
+    }).forEach((b) => {
+      nodeCallback(b, false);
+      console.log(differenceInMilliseconds(new Date(), start));
+    });
     console.log(differenceInMilliseconds(new Date(), start));
   });
 };
