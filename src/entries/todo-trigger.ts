@@ -51,7 +51,9 @@ const onTodo = async () => {
         )
         .reverse()
     );
-    formattedPairs.forEach(replaceTagText);
+    formattedPairs.forEach(([before, after]) =>
+      replaceTagText({ before, after })
+    );
   }
 };
 
@@ -77,7 +79,9 @@ const onDone = async () => {
           pp.trim().replace("#", "").replace("[[", "").replace("]]", "")
         )
     );
-    formattedPairs.forEach(replaceTagText);
+    formattedPairs.forEach(([before, after]) =>
+      replaceTagText({ before, after })
+    );
   }
 };
 
