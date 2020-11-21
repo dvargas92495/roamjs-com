@@ -70,6 +70,7 @@ runExtension("tag-cycle", () => {
           for (let i = 0; i < sortedCycle.length; i++) {
             const { tag: tag1, index } = sortedCycle[i];
             if (
+              (textarea.value.includes(tag1) && cycleType === "RAW") ||
               textarea.value.includes(`#[[${tag1}]]`) ||
               textarea.value.includes(`[[${tag1}]]`) ||
               textarea.value.includes(`#${tag1}`) ||
