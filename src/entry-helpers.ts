@@ -545,7 +545,7 @@ export const getParentUidByBlockUid = (blockUid: string): string => {
 
 const getBlockUidsByBlockId = (blockId: number): string[] => {
   const block = window.roamAlphaAPI.pull(
-    "[:block/children, :block/string]",
+    "[:block/children, :block/uid]",
     blockId
   );
   const children = block[":block/children"] || [];
