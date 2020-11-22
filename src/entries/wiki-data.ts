@@ -5,7 +5,9 @@ runExtension("wiki-data", () => {
   createButtonObserver({
     shortcut: "wiki",
     attribute: "wiki-data",
-    render: (b: HTMLButtonElement) =>
-      renderWikiData(b.closest(".roam-block").id, b.parentElement),
+    render: (b: HTMLButtonElement) => {
+      debugger;
+      renderWikiData(b.closest(".roam-block").id, b.parentElement);
+    },
   });
 });

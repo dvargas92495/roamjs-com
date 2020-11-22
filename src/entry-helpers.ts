@@ -6,8 +6,6 @@ import {
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel from "mixpanel-browser";
-import differenceInMilliseconds from "date-fns/differenceInMilliseconds";
-import { add } from "date-fns";
 
 declare global {
   interface Window {
