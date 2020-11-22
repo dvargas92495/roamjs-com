@@ -159,7 +159,7 @@ const WikiData = ({
   return (
     <Popover
       content={<WikiContent blockId={blockId} closePopover={close} />}
-      target={<Button text="WIKI" onClick={open} />}
+      target={<Button text="WIKI" onClick={open} data-roamjs-wiki-data />}
       isOpen={isOpen}
       onInteraction={(s, e) => {
         if (
