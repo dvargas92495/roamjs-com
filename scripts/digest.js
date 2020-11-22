@@ -1,9 +1,11 @@
 const axios = require("axios");
 const startOfWeek = require("date-fns/startOfWeek");
 const isBefore = require("date-fns/isBefore");
+const subWeeks = require("date-fns/subWeeks");
 const addDays = require("date-fns/addDays");
 
-const since = addDays(startOfWeek(new Date()), 1);
+const monday = addDays(startOfWeek(new Date()), 1);
+const since = isBefore(monday, new Date()) ? monday : subWeeks(monday, 1);
 const run = async () => {
   const enhancements = await axios.get(
     `https://api.github.com/repos/dvargas92495/roam-js-extensions/issues?labels=enhancement`
