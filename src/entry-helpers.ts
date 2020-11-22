@@ -20,12 +20,10 @@ declare global {
 }
 
 const roamJsVersion = process.env.ROAMJS_VERSION || "0";
+mixpanel.init(process.env.MIXPANEL_TOKEN);
 
 export const runExtension = (extensionId: string, run: () => void) => {
   if (process.env.IS_LEGACY && !window.depot?.roamjs?.alerted) {
-    window.alert(
-      'Hey! Thanks for using extensions from roam.davidvargas.me! I\'m currently migrating the extensions to roamjs.com. Please edit the src in your roam/js block, replacing "roam.davidvargas.me/master" with "roamjs.com"'
-    );
     if (!window.depot) {
       window.depot = { roamjs: { alerted: true } };
     } else if (!window.depot.roamjs) {
@@ -33,9 +31,12 @@ export const runExtension = (extensionId: string, run: () => void) => {
     } else {
       window.depot.roamjs.alerted = true;
     }
+    window.alert(
+      'Hey! Thanks for using extensions from roam.davidvargas.me! I\'m currently migrating the extensions to roamjs.com. Please edit the src in your roam/js block, replacing "roam.davidvargas.me/master" with "roamjs.com"'
+    );
+    mixpanel.track('Legacy Alerted');
   }
 
-  mixpanel.init(process.env.MIXPANEL_TOKEN);
   mixpanel.track("Load Extension", {
     extensionId,
     roamJsVersion,

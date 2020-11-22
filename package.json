@@ -19,7 +19,8 @@
     "local": "http-server",
     "prelambda": "webpack --config ./webpack.debug.config.js",
     "test": "jest --passWithNoTests",
-    "extension": "node scripts/extension.js"
+    "extension": "node scripts/extension.js",
+    "digest": "node scripts/digest.js"
   },
   "repository": {
     "type": "git",
