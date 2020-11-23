@@ -19,8 +19,8 @@ declare global {
         customCommands: {
           key: string; // `<% ${string} %> (SmartBlock function)`, sad - https://github.com/microsoft/TypeScript/issues/13969
           icon: "gear";
-          value: () => Promise<void>;
-          processor: "function";
+          value:  string; // `<%${string}%>;
+          processor: () => Promise<string[]>;
         }[];
       };
     };
@@ -661,18 +661,18 @@ export const addStyle = (content: string) => {
 
 export const createCustomSmartBlockCommand = ({
   command,
-  value,
+  processor,
 }: {
   command: string;
-  value: () => Promise<void>;
+  processor: () => Promise<string[]>;
 }) => {
   const inputListener = () => {
     if (window.roam42) {
       window.roam42.smartBlocks.customCommands.push({
         key: `<% ${command.toUpperCase()} %> (SmartBlock function)`,
         icon: "gear",
-        processor: "function",
-        value,
+        processor,
+        value: `<% ${command.toUpperCase()} %>`,
       });
       document.removeEventListener("input", inputListener);
     }

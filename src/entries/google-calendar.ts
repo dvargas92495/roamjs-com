@@ -1,4 +1,8 @@
-import { createCustomSmartBlockCommand, getPageTitle, runExtension } from "../entry-helpers";
+import {
+  createCustomSmartBlockCommand,
+  getPageTitle,
+  runExtension,
+} from "../entry-helpers";
 import {
   addButtonListener,
   asyncType,
@@ -12,11 +16,7 @@ import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
-const importGoogleCalendar = async (
-  _?: any,
-  blockUid?: string,
-  parentUid?: string
-) => {
+const fetchGoogleCalendar = async () => {
   const config = getConfigFromPage("roam/js/google-calendar");
   const pageTitle = getPageTitle(document.activeElement);
   const dateFromPage = parseRoamDate(pageTitle.textContent);
@@ -37,7 +37,7 @@ const importGoogleCalendar = async (
   const timeMinParam = encodeURIComponent(formatRFC3339(timeMin));
   const timeMaxParam = encodeURIComponent(formatRFC3339(timeMax));
 
-  axios
+  return axios
     .get(
       `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/google-calendar?calendarId=${encodeURIComponent(
         calendarId
@@ -49,7 +49,7 @@ const importGoogleCalendar = async (
         await asyncType("No Events Scheduled for Today!");
         return;
       }
-      const bullets = events
+      return events
         .filter((e: any) => !skipFree || e.transparency !== "transparent")
         .map((e: any) => {
           if (format) {
@@ -83,8 +83,7 @@ const importGoogleCalendar = async (
               e.end.dateTime
             ).toLocaleTimeString()})${meetLink}${zoomLink}`;
           }
-        }) as string[];
-      await pushBullets(bullets, blockUid, parentUid);
+        });
     })
     .catch((e) =>
       e.message === "Request failed with status code 404"
@@ -95,11 +94,20 @@ const importGoogleCalendar = async (
     );
 };
 
+const importGoogleCalendar = async (
+  _?: any,
+  blockUid?: string,
+  parentUid?: string
+) => {
+  const bullets = await fetchGoogleCalendar();
+  await pushBullets(bullets, blockUid, parentUid);
+};
+
 runExtension("google-calendar", () => {
   addButtonListener(GOOGLE_COMMAND, importGoogleCalendar);
 });
 
 createCustomSmartBlockCommand({
-  command: 'GOOGLECALENDAR',
-  value: importGoogleCalendar
-})
+  command: "GOOGLECALENDAR",
+  processor: fetchGoogleCalendar,
+});
