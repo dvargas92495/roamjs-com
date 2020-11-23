@@ -168,10 +168,6 @@ const convertShortcut = (shortcut: string): KeyboardEvent => {
     composed: true,
     // @ts-ignore
     keyCode: convertKeyCode(parts[parts.length - 1]),
-    returnValue:
-      parts.length == 2 &&
-      parts[0] === "Shift" &&
-      ["Up", "Down", "Enter"].indexOf(parts[1]) > -1,
   });
 };
 

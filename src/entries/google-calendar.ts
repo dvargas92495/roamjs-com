@@ -13,9 +13,9 @@ import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
 const GOOGLE_COMMAND = "Import Google Calendar";
 
 const importGoogleCalendar = async (
-  _: any,
-  blockUid: string,
-  parentUid: string
+  _?: any,
+  blockUid?: string,
+  parentUid?: string
 ) => {
   const config = getConfigFromPage("roam/js/google-calendar");
   const pageTitle = getPageTitle(document.activeElement);
