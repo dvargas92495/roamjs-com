@@ -1,4 +1,4 @@
-import { getPageTitle, runExtension } from "../entry-helpers";
+import { createCustomSmartBlockCommand, getPageTitle, runExtension } from "../entry-helpers";
 import {
   addButtonListener,
   asyncType,
@@ -98,3 +98,8 @@ const importGoogleCalendar = async (
 runExtension("google-calendar", () => {
   addButtonListener(GOOGLE_COMMAND, importGoogleCalendar);
 });
+
+createCustomSmartBlockCommand({
+  command: 'GOOGLECALENDAR',
+  value: importGoogleCalendar
+})
