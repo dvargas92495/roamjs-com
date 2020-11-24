@@ -22,6 +22,17 @@ type CycleType = "HASH" | "RAW" | "BRACKET";
 
 runExtension("tag-cycle", () => {
   const config: { [blockUid: string]: (e: KeyboardEvent) => void } = {};
+  const blockUidsByKeystroke: { [keystroke: string]: Set<string> } = {};
+
+  const cleanConfig = (blockUid: string) => {
+    if (config[blockUid]) {
+      document.removeEventListener("keydown", config[blockUid]);
+      delete config[blockUid];
+      Object.values(blockUidsByKeystroke)
+        .find((v) => v.has(blockUid))
+        .delete(blockUid);
+    }
+  };
 
   const configureShortcut = (shortcut: Omit<TreeNode, "order">) => {
     const parts = shortcut.text.split("+").map((s) => s.toUpperCase().trim());
@@ -29,6 +40,12 @@ runExtension("tag-cycle", () => {
     const isShift = parts[1] === "SHIFT";
     const keyParts = parts[parts.length - 1].split(" ") || [""];
     const key = keyParts[0];
+    const keyStroke = [...parts[parts.length - 1], key].join('+');
+    if (blockUidsByKeystroke[keyStroke]) {
+      blockUidsByKeystroke[keyStroke].add(shortcut.uid);
+    } else {
+      blockUidsByKeystroke[keyStroke] = new Set(shortcut.uid);
+    }
     const cycleType =
       keyParts.length > 1 ? (keyParts[1] as CycleType) : "BRACKET";
     const cycle = shortcut.children.map((c) => c.text.trim());
@@ -59,9 +76,7 @@ runExtension("tag-cycle", () => {
       }
       return false;
     };
-    if (config[shortcut.uid]) {
-      document.removeEventListener("keydown", config[shortcut.uid]);
-    }
+    cleanConfig(shortcut.uid);
     config[shortcut.uid] = async (e: KeyboardEvent) => {
       const element = document.activeElement as HTMLElement;
       if (element.tagName === "TEXTAREA") {
@@ -74,7 +89,7 @@ runExtension("tag-cycle", () => {
               textarea.value.includes(`#[[${tag1}]]`) ||
               textarea.value.includes(`[[${tag1}]]`) ||
               textarea.value.includes(`#${tag1}`) ||
-              !tag1
+              (!tag1 && blockUidsByKeystroke[keyStroke].size === 1)
             ) {
               const start = textarea.selectionStart;
               const end = textarea.selectionEnd;
@@ -115,10 +130,7 @@ runExtension("tag-cycle", () => {
 
   createPageObserver("roam/js/tag-cycle", (blockUid, added) => {
     if (!added) {
-      if (config[blockUid]) {
-        document.removeEventListener("keydown", config[blockUid]);
-        delete config[blockUid];
-      }
+      cleanConfig(blockUid);
       return;
     }
     const depth = getBlockDepthByBlockUid(blockUid);
