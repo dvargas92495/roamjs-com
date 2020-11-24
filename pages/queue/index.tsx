@@ -109,7 +109,15 @@ const FundButton = ({
   );
 };
 
-const QueueItems = ({ title, search }: { title: string; search: string }) => {
+const QueueItems = ({
+  title,
+  search,
+  description,
+}: {
+  title: string;
+  search: string;
+  description: string;
+}) => {
   const loadItems = useCallback(
     () =>
       axios.get(`${API_URL}/queue-issues?label=${toLabel(title)}`).then((r) =>
@@ -135,7 +143,12 @@ const QueueItems = ({ title, search }: { title: string; search: string }) => {
   );
   return (
     <div style={{ padding: 8, width: "50%" }}>
-      <Queue title={title} loadItems={loadItems} filter={filter} />
+      <Queue
+        title={title}
+        loadItems={loadItems}
+        filter={filter}
+        subheader={description}
+      />
     </div>
   );
 };
@@ -149,16 +162,25 @@ const QueuePage = () => {
         This page contains all the new extensions and enhancements coming to
         RoamJS. Directly sponsor one to prioritize it higher in the queue!
       </Body>
-      <div style={{ marginBottom: 16, padding: '0 16px'}}>
-      <StringField
-        value={search}
-        setValue={setSearch}
-        label={"Search"}
-        fullWidth
-      /></div>
+      <div style={{ marginBottom: 16, padding: "0 16px" }}>
+        <StringField
+          value={search}
+          setValue={setSearch}
+          label={"Search"}
+          fullWidth
+        />
+      </div>
       <div style={{ display: "flex", maxHeight: 600 }}>
-        <QueueItems title={"Extensions"} search={search} />
-        <QueueItems title={"Enhancements"} search={search} />
+        <QueueItems
+          title={"Extensions"}
+          search={search}
+          description={"New releases"}
+        />
+        <QueueItems
+          title={"Enhancements"}
+          search={search}
+          description={"Improvements to existing extensions"}
+        />
       </div>
     </StandardLayout>
   );

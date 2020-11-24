@@ -9,17 +9,16 @@ import mixpanel from "mixpanel-browser";
 
 declare global {
   interface Window {
-    depot: {
-      roamjs: {
-        alerted: boolean;
-      };
+    roamjs?: {
+      alerted: boolean;
+      loaded: Set<string>;
     };
     roam42?: {
       smartBlocks: {
         customCommands: {
           key: string; // `<% ${string} %> (SmartBlock function)`, sad - https://github.com/microsoft/TypeScript/issues/13969
           icon: "gear";
-          value:  string; // `<%${string}%>;
+          value: string; // `<%${string}%>;
           processor: () => Promise<string>;
         }[];
       };
@@ -31,14 +30,15 @@ const roamJsVersion = process.env.ROAMJS_VERSION || "0";
 mixpanel.init(process.env.MIXPANEL_TOKEN);
 
 export const runExtension = (extensionId: string, run: () => void) => {
-  if (process.env.IS_LEGACY && !window.depot?.roamjs?.alerted) {
-    if (!window.depot) {
-      window.depot = { roamjs: { alerted: true } };
-    } else if (!window.depot.roamjs) {
-      window.depot.roamjs = { alerted: true };
-    } else {
-      window.depot.roamjs.alerted = true;
-    }
+  if (!window.roamjs) {
+    window.roamjs = { alerted: false, loaded: new Set() };
+  }
+  if (window.roamjs.loaded.has(extensionId)) {
+    return;
+  }
+  window.roamjs.loaded.add(extensionId);
+  if (process.env.IS_LEGACY && !window.roamjs?.alerted) {
+    window.roamjs.alerted = true;
     window.alert(
       'Hey! Thanks for using extensions from roam.davidvargas.me! I\'m currently migrating the extensions to roamjs.com. Please edit the src in your roam/js block, replacing "roam.davidvargas.me/master" with "roamjs.com"'
     );
@@ -671,7 +671,7 @@ export const createCustomSmartBlockCommand = ({
       window.roam42.smartBlocks.customCommands.push({
         key: `<% ${command.toUpperCase()} %> (SmartBlock function)`,
         icon: "gear",
-        processor: () => processor().then(bullets => bullets.join('\n')),
+        processor: () => processor().then((bullets) => bullets.join("\n")),
         value: `<%${command.toUpperCase()}%>`,
       });
       document.removeEventListener("input", inputListener);
