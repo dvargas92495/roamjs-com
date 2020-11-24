@@ -40,7 +40,7 @@ runExtension("tag-cycle", () => {
     const isShift = parts[1] === "SHIFT";
     const keyParts = parts[parts.length - 1].split(" ") || [""];
     const key = keyParts[0];
-    const keyStroke = [...parts.slice(0, parts.length - 1), key].join('+');
+    const keyStroke = [...parts.slice(0, parts.length - 1), key].join("+");
     if (blockUidsByKeystroke[keyStroke]) {
       blockUidsByKeystroke[keyStroke].add(shortcut.uid);
     } else {
@@ -85,10 +85,10 @@ runExtension("tag-cycle", () => {
           for (let i = 0; i < sortedCycle.length; i++) {
             const { tag: tag1, index } = sortedCycle[i];
             if (
-              (textarea.value.includes(tag1) && cycleType === "RAW") ||
-              textarea.value.includes(`#[[${tag1}]]`) ||
-              textarea.value.includes(`[[${tag1}]]`) ||
-              textarea.value.includes(`#${tag1}`) ||
+              (textarea.value.includes(tag1) && cycleType === "RAW" && tag1) ||
+              (textarea.value.includes(`#[[${tag1}]]`) && tag1) ||
+              (textarea.value.includes(`[[${tag1}]]`) && tag1) ||
+              (textarea.value.includes(`#${tag1}`) && tag1) ||
               (!tag1 && blockUidsByKeystroke[keyStroke].size === 1)
             ) {
               const start = textarea.selectionStart;
