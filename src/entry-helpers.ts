@@ -14,6 +14,16 @@ declare global {
         alerted: boolean;
       };
     };
+    roam42?: {
+      smartBlocks: {
+        customCommands: {
+          key: string; // `<% ${string} %> (SmartBlock function)`, sad - https://github.com/microsoft/TypeScript/issues/13969
+          icon: "gear";
+          value:  string; // `<%${string}%>;
+          processor: () => Promise<string>;
+        }[];
+      };
+    };
   }
 }
 
@@ -32,7 +42,7 @@ export const runExtension = (extensionId: string, run: () => void) => {
     window.alert(
       'Hey! Thanks for using extensions from roam.davidvargas.me! I\'m currently migrating the extensions to roamjs.com. Please edit the src in your roam/js block, replacing "roam.davidvargas.me/master" with "roamjs.com"'
     );
-    mixpanel.track('Legacy Alerted');
+    mixpanel.track("Legacy Alerted");
   }
 
   mixpanel.track("Load Extension", {
@@ -63,7 +73,7 @@ export const replaceTagText = async ({
   if (before) {
     await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : ""]);
     await replaceText([`[[${before}]]`, after ? `[[${after}]]` : ""]);
-    const hashAfter = after.includes(' ') ? `#[[${after}]]` : `#${after}`;
+    const hashAfter = after.includes(" ") ? `#[[${after}]]` : `#${after}`;
     await replaceText([`#${before}`, after ? `#${hashAfter}` : ""]);
   } else {
     await replaceText(["", `${addHash ? "#" : ""}[[${after}]]`]);
@@ -647,4 +657,25 @@ export const addStyle = (content: string) => {
   const css = document.createElement("style");
   css.textContent = content;
   document.getElementsByTagName("head")[0].appendChild(css);
+};
+
+export const createCustomSmartBlockCommand = ({
+  command,
+  processor,
+}: {
+  command: string;
+  processor: () => Promise<string[]>;
+}) => {
+  const inputListener = () => {
+    if (window.roam42) {
+      window.roam42.smartBlocks.customCommands.push({
+        key: `<% ${command.toUpperCase()} %> (SmartBlock function)`,
+        icon: "gear",
+        processor: () => processor().then(bullets => bullets.join('\n')),
+        value: `<%${command.toUpperCase()}%>`,
+      });
+      document.removeEventListener("input", inputListener);
+    }
+  };
+  document.addEventListener("input", inputListener);
 };
