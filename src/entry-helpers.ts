@@ -74,7 +74,7 @@ export const replaceTagText = async ({
     await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : ""]);
     await replaceText([`[[${before}]]`, after ? `[[${after}]]` : ""]);
     const hashAfter = after.includes(" ") ? `#[[${after}]]` : `#${after}`;
-    await replaceText([`#${before}`, after ? `#${hashAfter}` : ""]);
+    await replaceText([`#${before}`, after ? hashAfter : ""]);
   } else {
     await replaceText(["", `${addHash ? "#" : ""}[[${after}]]`]);
   }
