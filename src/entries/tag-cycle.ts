@@ -56,6 +56,9 @@ runExtension("tag-cycle", () => {
       if (modifier === "ALT" && !e.altKey) {
         return false;
       }
+      if (modifier === "OPT" && !e.altKey) {
+        return false;
+      }
       if (modifier === "CMD" && !e.metaKey) {
         return false;
       }
@@ -122,6 +125,7 @@ runExtension("tag-cycle", () => {
     t.text.toUpperCase().startsWith("CTRL+") ||
     t.text.toUpperCase().startsWith("CMD+") ||
     t.text.toUpperCase().startsWith("ALT+") ||
+    t.text.toUpperCase().startsWith("OPT+") ||
     t.text.toUpperCase().startsWith("WIN+");
 
   getTextTreeByPageName("roam/js/tag-cycle")
