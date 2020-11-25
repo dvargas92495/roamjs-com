@@ -5,7 +5,7 @@ import { frontMatter as frontMatters } from "../pages/docs/extensions/*.mdx";
 import { pathToId } from "./ExtensionLayout";
 import { useCopyCode } from "./hooks";
 import axios from "axios";
-import { API_URL } from "../pages/queue";
+import { API_URL } from "./constants";
 
 const scriptIds = frontMatters
   .filter((f) => !f.development)

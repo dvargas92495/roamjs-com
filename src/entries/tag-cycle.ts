@@ -28,9 +28,11 @@ runExtension("tag-cycle", () => {
     if (config[blockUid]) {
       document.removeEventListener("keydown", config[blockUid]);
       delete config[blockUid];
-      Object.values(blockUidsByKeystroke)
+      const uids = Object.values(blockUidsByKeystroke)
         .find((v) => v.has(blockUid))
-        .delete(blockUid);
+      if (uids) {
+        uids.delete(blockUid);
+      }
     }
   };
 

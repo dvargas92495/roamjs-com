@@ -75,8 +75,11 @@ export const replaceTagText = async ({
     await replaceText([`[[${before}]]`, after ? `[[${after}]]` : ""]);
     const hashAfter = after.match(/(\s|\[\[.*\]\])/) ? `#[[${after}]]` : `#${after}`;
     await replaceText([`#${before}`, after ? hashAfter : ""]);
+  } else if (addHash) {
+    const hashAfter = after.match(/(\s|\[\[.*\]\])/) ? `#[[${after}]]` : `#${after}`;
+    await replaceText(["", hashAfter]);
   } else {
-    await replaceText(["", `${addHash ? "#" : ""}[[${after}]]`]);
+    await replaceText(["", `[[${after}]]`]);
   }
 };
 
