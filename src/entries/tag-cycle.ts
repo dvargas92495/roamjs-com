@@ -28,9 +28,11 @@ runExtension("tag-cycle", () => {
     if (config[blockUid]) {
       document.removeEventListener("keydown", config[blockUid]);
       delete config[blockUid];
-      Object.values(blockUidsByKeystroke)
+      const uids = Object.values(blockUidsByKeystroke)
         .find((v) => v.has(blockUid))
-        .delete(blockUid);
+      if (uids) {
+        uids.delete(blockUid);
+      }
     }
   };
 
@@ -54,6 +56,9 @@ runExtension("tag-cycle", () => {
       .sort((a, b) => b.tag.length - a.tag.length);
     const isTriggered = (e: KeyboardEvent) => {
       if (modifier === "ALT" && !e.altKey) {
+        return false;
+      }
+      if (modifier === "OPT" && !e.altKey) {
         return false;
       }
       if (modifier === "CMD" && !e.metaKey) {
@@ -122,6 +127,7 @@ runExtension("tag-cycle", () => {
     t.text.toUpperCase().startsWith("CTRL+") ||
     t.text.toUpperCase().startsWith("CMD+") ||
     t.text.toUpperCase().startsWith("ALT+") ||
+    t.text.toUpperCase().startsWith("OPT+") ||
     t.text.toUpperCase().startsWith("WIN+");
 
   getTextTreeByPageName("roam/js/tag-cycle")
