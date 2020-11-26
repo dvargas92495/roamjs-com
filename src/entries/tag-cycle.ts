@@ -42,12 +42,6 @@ runExtension("tag-cycle", () => {
     const isShift = parts[1] === "SHIFT";
     const keyParts = parts[parts.length - 1].split(" ") || [""];
     const key = keyParts[0];
-    const keyStroke = [...parts.slice(0, parts.length - 1), key].join("+");
-    if (blockUidsByKeystroke[keyStroke]) {
-      blockUidsByKeystroke[keyStroke].add(shortcut.uid);
-    } else {
-      blockUidsByKeystroke[keyStroke] = new Set([shortcut.uid]);
-    }
     const cycleType =
       keyParts.length > 1 ? (keyParts[1] as CycleType) : "BRACKET";
     const cycle = shortcut.children.map((c) => c.text.trim());
@@ -82,6 +76,12 @@ runExtension("tag-cycle", () => {
       return false;
     };
     cleanConfig(shortcut.uid);
+    const keyStroke = [...parts.slice(0, parts.length - 1), key].join("+");
+    if (blockUidsByKeystroke[keyStroke]) {
+      blockUidsByKeystroke[keyStroke].add(shortcut.uid);
+    } else {
+      blockUidsByKeystroke[keyStroke] = new Set([shortcut.uid]);
+    }
     config[shortcut.uid] = async (e: KeyboardEvent) => {
       const element = document.activeElement as HTMLElement;
       if (element.tagName === "TEXTAREA") {
