@@ -14,7 +14,7 @@ declare global {
       loaded: Set<string>;
     };
     roam42?: {
-      smartBlocks: {
+      smartBlocks?: {
         customCommands: {
           key: string; // `<% ${string} %> (SmartBlock function)`, sad - https://github.com/microsoft/TypeScript/issues/13969
           icon: "gear";
@@ -670,7 +670,7 @@ export const createCustomSmartBlockCommand = ({
   processor: () => Promise<string[]>;
 }) => {
   const inputListener = () => {
-    if (window.roam42) {
+    if (window.roam42 && window.roam42.smartBlocks) {
       window.roam42.smartBlocks.customCommands.push({
         key: `<% ${command.toUpperCase()} %> (SmartBlock function)`,
         icon: "gear",
