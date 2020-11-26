@@ -1,4 +1,5 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { isMobile } from "react-device-detect";
 
 const copyCode = (items: string[]) => (e) => {
   const scripts = items
@@ -41,3 +42,13 @@ export const useCopyCode = (setCopied: (flag: boolean) => void) =>
     },
     [setCopied]
   );
+
+export const useIsMobile = () => {
+  const [mobile, setMobile] = useState(false);
+
+  useEffect(() => {
+    setMobile(isMobile);
+  }, [setMobile]);
+
+  return mobile;
+};

@@ -1,15 +1,15 @@
 import React from "react";
-import Layout from "../components/Layout";
 import RoamJSLogo from "../components/RoamJSLogo";
 import { Landing } from "@dvargas92495/ui";
+import StandardLayout from "../components/StandardLayout";
 
 const HomePage = () => (
-  <Layout>
+  <StandardLayout>
     <Landing
       Logo={RoamJSLogo}
       subtitle={"Extensions That Turn You Into A Roam Power User"}
     />
-  </Layout>
+  </StandardLayout>
 );
 
 export default HomePage;

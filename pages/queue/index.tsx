@@ -1,26 +1,9 @@
-import {
-  Body,
-  H1,
-  Queue,
-  FormDialog,
-  NumberField,
-  DateField,
-  StringField,
-} from "@dvargas92495/ui";
+import { Body, H1, Queue, StringField } from "@dvargas92495/ui";
 import Link from "next/link";
 import React, { useCallback, useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
 import axios from "axios";
-import { useUser } from "react-manage-users";
-import addMonths from "date-fns/addMonths";
-import isBefore from "date-fns/isBefore";
-import format from "date-fns/format";
-import { loadStripe } from "@stripe/stripe-js";
-import {
-  API_URL,
-  FLOSS_API_URL,
-  QueueItemResponse,
-} from "../../components/constants";
+import { API_URL, QueueItemResponse } from "../../components/constants";
 import FundButton from "../../components/FundButton";
 
 const toLabel = (title: string) =>
@@ -52,7 +35,11 @@ const QueueItems = ({
             </Link>
           ),
           action: (
-            <FundButton title={toLabel(title)} name={item.name} url={item.htmlUrl} />
+            <FundButton
+              title={toLabel(title)}
+              name={item.name}
+              url={item.htmlUrl}
+            />
           ),
         }))
       ),
@@ -92,7 +79,7 @@ const QueuePage = () => {
           fullWidth
         />
       </div>
-      <div style={{ display: "flex", maxHeight: 600 }}>
+      <div style={{ display: "flex", maxHeight: 600, height: 600 }}>
         <QueueItems
           title={"Extensions"}
           search={search}

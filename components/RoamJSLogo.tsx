@@ -1,8 +1,8 @@
 import { Logo } from "@dvargas92495/ui";
 import React from "react";
 
-const RoamJSLogo = ({ size }: { size: number }) => (
-  <Logo size={size} viewBoxWidth={1350}>
+const RoamJSLogo = () => (
+  <Logo viewBoxWidth={1350}>
     <path
       fillRule="evenodd"
       clipRule="evenodd"
