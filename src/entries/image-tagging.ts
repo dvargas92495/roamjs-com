@@ -23,7 +23,8 @@ runExtension("image-tagging", () => {
     const imgContainer = htmlTarget.closest(".hoverparent");
     const img = imgContainer.getElementsByTagName("img")[0];
     const editButton = imgContainer.getElementsByClassName("bp3-icon-edit")[0];
-    await openBlock(editButton);
+    const textarea = await openBlock(editButton);
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
     await newBlockEnter();
     await userEvent.tab();
     await userEvent.type(document.activeElement, "Loading");
