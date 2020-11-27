@@ -1,7 +1,6 @@
 import userEvent from "@testing-library/user-event";
-import { createOverlayObserver, runExtension } from "../entry-helpers";
+import { createOverlayObserver, isApple, runExtension } from "../entry-helpers";
 import { getConfigFromPage, getUids, openBlock } from "roam-client";
-import { isIOS } from "mobile-device-detect";
 import { waitFor } from "@testing-library/dom";
 
 let blockElementSelected: Element;
@@ -10,7 +9,7 @@ const ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME = "roamjs-alias-page-synonyms";
 const createMenuOption = (menuOnClick: () => void) => {
   const option = document.createElement("li");
   const aTag = document.createElement("a");
-  aTag.setAttribute("label", `${isIOS ? "Opt" : "Alt"}-A`);
+  aTag.setAttribute("label", `${isApple ? "Opt" : "Alt"}-A`);
   aTag.className = "bp3-menu-item bp3-popover-dismiss";
   option.appendChild(aTag);
   const optionText = document.createElement("div");
