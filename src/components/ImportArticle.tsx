@@ -3,6 +3,11 @@ import React, { ChangeEvent, useCallback, useState } from "react";
 import { Button, Icon, InputGroup, Popover } from "@blueprintjs/core";
 import { asyncType, newBlockEnter, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
+import axios from "axios";
+import parse from "node-html-parser";
+import TurndownService from 'turndown';
+
+const turndownService = new TurndownService();
 
 const ImportContent = ({ blockId }: { blockId: string }) => {
   const [value, setValue] = useState("");
@@ -10,14 +15,25 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
     (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
     [setValue]
   );
-  const importArticle = useCallback(async () => {
-    await openBlock(document.getElementById(blockId));
-    await userEvent.clear(document.activeElement);
-    await asyncType("Content:");
-    await newBlockEnter();
-    await userEvent.tab();
-    await asyncType(value);
-  }, [blockId, value]);
+  const importArticle = useCallback(
+    async () =>
+      axios.get(value).then(async (r) => {
+        const root = parse(r.data);
+        const article = root.querySelector("article");
+        const header = article.querySelector('header');
+        const content = header.nextElementSibling;
+        await openBlock(document.getElementById(blockId));
+        await userEvent.clear(document.activeElement);
+        await asyncType("Content:");
+        await newBlockEnter();
+        await userEvent.tab();
+        for (const child of content.childNodes) {
+            await asyncType(child.innerText);
+            await newBlockEnter();
+        }
+      }),
+    [blockId, value]
+  );
   return (
     <div style={{ padding: 16 }}>
       <div>
@@ -27,15 +43,17 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
           placeholder="Enter url..."
           value={value}
           autoFocus={true}
-          type={"search"}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               importArticle();
             }
           }}
+          width={600}
         />
       </div>
-      <Button text={"IMPORT"} onClick={importArticle} />
+      <div style={{ marginTop: 16 }}>
+        <Button text={"IMPORT"} onClick={importArticle} />
+      </div>
     </div>
   );
 };
