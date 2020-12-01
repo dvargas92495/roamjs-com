@@ -11,5 +11,10 @@ development: true
 fs.writeFileSync(`pages/docs/extensions/${id}.mdx`, format);
 fs.writeFileSync(
   `src/entries/${id}.ts`,
-  'import { getConfigFromPage } from "roam-client";'
+  `import { runExtension } from "../entry-helpers";
+
+runExtension("${id}", () => {
+
+});
+`
 );
