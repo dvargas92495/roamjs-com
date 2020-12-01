@@ -4,7 +4,28 @@ import { Button, Icon, InputGroup, Popover, Text } from "@blueprintjs/core";
 import { asyncType, newBlockEnter, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
-import parse from "node-html-parser";
+import {
+  parse,
+  HTMLElement as ParsedHTMLElement,
+  Node as ParsedNode,
+} from "node-html-parser";
+
+const getTextFromNode = (e: ParsedNode): string => {
+  if (e.childNodes.length === 0) {
+    return e.innerText.replace(/&nbsp;/g, "");
+  }
+
+  const element = e as ParsedHTMLElement;
+  const children = element.childNodes.map((c) => getTextFromNode(c)).join("");
+  if (element.rawTagName === "p") {
+    return children;
+  } else if (element.rawTagName === "em") {
+    return `__${children}__`;
+  } else {
+    console.warn("unsupported raw tag", element.rawTagName);
+    return children;
+  }
+};
 
 const ImportContent = ({ blockId }: { blockId: string }) => {
   const [value, setValue] = useState("");
@@ -21,7 +42,6 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
     axios
       .post(`${process.env.REST_API_URL}/article`, { url: value })
       .then(async (r) => {
-        console.log(r.data);
         const root = parse(r.data);
         const article = root.querySelector("article");
         const header = article.querySelector("header");
@@ -31,8 +51,9 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         await asyncType("Content:");
         await newBlockEnter();
         await userEvent.tab();
-        for (const child of content.childNodes) {
-          await asyncType(child.innerText);
+        const nodes = content.childNodes.filter((c) => c.innerText !== "\n");
+        for (const child of nodes) {
+          await asyncType(getTextFromNode(child));
           await newBlockEnter();
         }
       })
