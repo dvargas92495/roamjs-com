@@ -1,3 +1,4 @@
+import { renderImportArticle } from "../components/ImportArticle";
 import { createButtonObserver, runExtension } from "../entry-helpers";
 
 runExtension("article", () => {
@@ -5,6 +6,6 @@ runExtension("article", () => {
     shortcut: "article",
     attribute: "import-article",
     render: (b: HTMLButtonElement) =>
-      renderWikiData(b.closest(".roam-block").id, b.parentElement),
+      renderImportArticle(b.closest(".roam-block").id, b.parentElement),
   });
 });
