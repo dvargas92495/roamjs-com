@@ -1,23 +1,29 @@
 import ReactDOM from "react-dom";
 import React, { ChangeEvent, useCallback, useState } from "react";
-import { Button, Icon, InputGroup, Popover } from "@blueprintjs/core";
+import { Button, Icon, InputGroup, Popover, Text } from "@blueprintjs/core";
 import { asyncType, newBlockEnter, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import parse from "node-html-parser";
-import TurndownService from "turndown";
+// import TurndownService from "turndown";
 
-const turndownService = new TurndownService();
+// const turndownService = new TurndownService();
 
 const ImportContent = ({ blockId }: { blockId: string }) => {
   const [value, setValue] = useState("");
+  const [error, setError] = useState("");
   const onChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setValue(e.target.value);
+      setError("");
+    },
     [setValue]
   );
-  const importArticle = useCallback(
-    () =>
-      axios.get(value).then(async (r) => {
+  const importArticle = useCallback(() => {
+    setError("");
+    axios
+      .get(value)
+      .then(async (r) => {
         const root = parse(r.data);
         const article = root.querySelector("article");
         const header = article.querySelector("header");
@@ -31,9 +37,9 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
           await asyncType(child.innerText);
           await newBlockEnter();
         }
-      }),
-    [blockId, value]
-  );
+      })
+      .catch(() => setError("Error Importing Article"));
+  }, [blockId, value]);
   return (
     <div style={{ padding: 16 }}>
       <div>
@@ -53,6 +59,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
       </div>
       <div style={{ marginTop: 16 }}>
         <Button text={"IMPORT"} onClick={importArticle} />
+        <Text>{error}</Text>
       </div>
     </div>
   );
