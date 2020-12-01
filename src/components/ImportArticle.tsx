@@ -21,6 +21,16 @@ const getTextFromNode = (e: ParsedNode): string => {
     return children;
   } else if (element.rawTagName === "em") {
     return `__${children}__`;
+  } else if (element.rawTagName === 'a') {
+    return `[${children}](${element.getAttribute('href')})`
+  } else if (element.rawTagName === 'br') {
+    return '';
+  } else if (element.rawTagName === 'h1') {
+    return `# ${children}`;
+  } else if (element.rawTagName === 'h2') {
+    return `## ${children}`;
+  } else if (element.rawTagName === 'h3') {
+    return `### ${children}`;
   } else {
     console.warn("unsupported raw tag", element.rawTagName);
     return children;
@@ -51,7 +61,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         await asyncType("Content:");
         await newBlockEnter();
         await userEvent.tab();
-        const nodes = content.childNodes.filter((c) => c.innerText !== "\n");
+        const nodes = content.childNodes.filter((c) => !!c.innerText.replace(/\n/g, ''));
         for (const child of nodes) {
           await asyncType(getTextFromNode(child));
           await newBlockEnter();
