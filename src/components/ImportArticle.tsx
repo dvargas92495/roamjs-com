@@ -62,9 +62,6 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         const content = header.nextElementSibling;
         await openBlock(document.getElementById(blockId));
         await userEvent.clear(document.activeElement);
-        await asyncType("Content:");
-        await newBlockEnter();
-        await userEvent.tab();
         const nodes = content.childNodes.filter((c) => !!c.innerText.replace(/\n/g, ''));
         for (const child of nodes) {
           await asyncType(getTextFromNode(child));
