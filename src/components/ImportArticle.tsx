@@ -21,6 +21,8 @@ const getTextFromNode = (e: ParsedNode): string => {
     return children;
   } else if (element.rawTagName === "em") {
     return `__${children}__`;
+  } else if (element.rawTagName === "strong") {
+    return `**${children}**`;
   } else if (element.rawTagName === 'a') {
     return `[${children}](${element.getAttribute('href')})`
   } else if (element.rawTagName === 'br') {
@@ -30,6 +32,8 @@ const getTextFromNode = (e: ParsedNode): string => {
   } else if (element.rawTagName === 'h2') {
     return `## ${children}`;
   } else if (element.rawTagName === 'h3') {
+    return `### ${children}`;
+  } else if (element.rawTagName === 'h4') {
     return `### ${children}`;
   } else {
     console.warn("unsupported raw tag", element.rawTagName);
