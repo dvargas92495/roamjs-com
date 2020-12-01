@@ -5,7 +5,7 @@ import { asyncType, newBlockEnter, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import parse from "node-html-parser";
-import TurndownService from 'turndown';
+import TurndownService from "turndown";
 
 const turndownService = new TurndownService();
 
@@ -16,11 +16,11 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
     [setValue]
   );
   const importArticle = useCallback(
-    async () =>
+    () =>
       axios.get(value).then(async (r) => {
         const root = parse(r.data);
         const article = root.querySelector("article");
-        const header = article.querySelector('header');
+        const header = article.querySelector("header");
         const content = header.nextElementSibling;
         await openBlock(document.getElementById(blockId));
         await userEvent.clear(document.activeElement);
@@ -28,8 +28,8 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         await newBlockEnter();
         await userEvent.tab();
         for (const child of content.childNodes) {
-            await asyncType(child.innerText);
-            await newBlockEnter();
+          await asyncType(child.innerText);
+          await newBlockEnter();
         }
       }),
     [blockId, value]
