@@ -4,10 +4,42 @@ import { Button, Icon, InputGroup, Popover, Text } from "@blueprintjs/core";
 import { asyncType, newBlockEnter, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
-import parse from "node-html-parser";
-// import TurndownService from "turndown";
+import {
+  parse,
+  HTMLElement as ParsedHTMLElement,
+  Node as ParsedNode,
+} from "node-html-parser";
 
-// const turndownService = new TurndownService();
+const getTextFromNode = (e: ParsedNode): string => {
+  if (e.childNodes.length === 0) {
+    return e.innerText.replace(/&nbsp;/g, "");
+  }
+
+  const element = e as ParsedHTMLElement;
+  const children = element.childNodes.map((c) => getTextFromNode(c)).join("");
+  if (element.rawTagName === "p") {
+    return children;
+  } else if (element.rawTagName === "em") {
+    return `__${children}__`;
+  } else if (element.rawTagName === "strong") {
+    return `**${children}**`;
+  } else if (element.rawTagName === 'a') {
+    return `[${children}](${element.getAttribute('href')})`
+  } else if (element.rawTagName === 'br') {
+    return '';
+  } else if (element.rawTagName === 'h1') {
+    return `# ${children}`;
+  } else if (element.rawTagName === 'h2') {
+    return `## ${children}`;
+  } else if (element.rawTagName === 'h3') {
+    return `### ${children}`;
+  } else if (element.rawTagName === 'h4') {
+    return `### ${children}`;
+  } else {
+    console.warn("unsupported raw tag", element.rawTagName);
+    return children;
+  }
+};
 
 const ImportContent = ({ blockId }: { blockId: string }) => {
   const [value, setValue] = useState("");
@@ -22,7 +54,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
   const importArticle = useCallback(() => {
     setError("");
     axios
-      .get(value)
+      .post(`${process.env.REST_API_URL}/article`, { url: value })
       .then(async (r) => {
         const root = parse(r.data);
         const article = root.querySelector("article");
@@ -30,11 +62,9 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         const content = header.nextElementSibling;
         await openBlock(document.getElementById(blockId));
         await userEvent.clear(document.activeElement);
-        await asyncType("Content:");
-        await newBlockEnter();
-        await userEvent.tab();
-        for (const child of content.childNodes) {
-          await asyncType(child.innerText);
+        const nodes = content.childNodes.filter((c) => !!c.innerText.replace(/\n/g, ''));
+        for (const child of nodes) {
+          await asyncType(getTextFromNode(child));
           await newBlockEnter();
         }
       })

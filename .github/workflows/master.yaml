@@ -15,6 +15,7 @@ env:
   AWS_DEFAULT_REGION: us-east-1
   ROAMJS_VERSION: production
   MIXPANEL_TOKEN: ${{ secrets.MIXPANEL_TOKEN }}
+  REST_API_URL: https://${{ secrets.REST_API_ID }}.execute-api.us-east-1.amazonaws.com/production
 
 jobs:
   deploy:
