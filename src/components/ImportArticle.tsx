@@ -19,7 +19,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
   const importArticle = useCallback(() => {
     setError("");
     axios
-      .post(process.env.REST_API_URL, { url: value })
+      .post(`${process.env.REST_API_URL}/article`, { url: value })
       .then(async (r) => {
         console.log(r.data);
         const root = parse(r.data);
