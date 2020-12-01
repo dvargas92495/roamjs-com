@@ -5,9 +5,6 @@ import { asyncType, newBlockEnter, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import parse from "node-html-parser";
-// import TurndownService from "turndown";
-
-// const turndownService = new TurndownService();
 
 const ImportContent = ({ blockId }: { blockId: string }) => {
   const [value, setValue] = useState("");
@@ -22,8 +19,9 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
   const importArticle = useCallback(() => {
     setError("");
     axios
-      .get(value)
+      .post(process.env.REST_API_URL, { url: value })
       .then(async (r) => {
+        console.log(r.data);
         const root = parse(r.data);
         const article = root.querySelector("article");
         const header = article.querySelector("header");
