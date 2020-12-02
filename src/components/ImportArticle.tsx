@@ -117,10 +117,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         const nodes = content.childNodes.filter(
           (c) => !!c.innerText.replace(/\n/g, "")
         );
-        await userEvent.paste(textarea, nodes.map(getTextFromNode).join("\n"), {
-          // @ts-ignore - https://github.com/testing-library/user-event/issues/512
-          clipboardData: { files: [] },
-        });
+        await userEvent.paste(textarea, nodes.map(getTextFromNode).join("\n"));
       })
       .catch(() => {
         setError("Error Importing Article");
