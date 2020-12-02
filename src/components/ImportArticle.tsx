@@ -1,6 +1,13 @@
 import ReactDOM from "react-dom";
 import React, { ChangeEvent, useCallback, useState } from "react";
-import { Button, Icon, InputGroup, Popover, Text } from "@blueprintjs/core";
+import {
+  Button,
+  Icon,
+  InputGroup,
+  Popover,
+  Spinner,
+  Text,
+} from "@blueprintjs/core";
 import { asyncType, newBlockEnter, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
@@ -23,17 +30,17 @@ const getTextFromNode = (e: ParsedNode): string => {
     return `__${children}__`;
   } else if (element.rawTagName === "strong") {
     return `**${children}**`;
-  } else if (element.rawTagName === 'a') {
-    return `[${children}](${element.getAttribute('href')})`
-  } else if (element.rawTagName === 'br') {
-    return '';
-  } else if (element.rawTagName === 'h1') {
+  } else if (element.rawTagName === "a") {
+    return `[${children}](${element.getAttribute("href")})`;
+  } else if (element.rawTagName === "br") {
+    return "";
+  } else if (element.rawTagName === "h1") {
     return `# ${children}`;
-  } else if (element.rawTagName === 'h2') {
+  } else if (element.rawTagName === "h2") {
     return `## ${children}`;
-  } else if (element.rawTagName === 'h3') {
+  } else if (element.rawTagName === "h3") {
     return `### ${children}`;
-  } else if (element.rawTagName === 'h4') {
+  } else if (element.rawTagName === "h4") {
     return `### ${children}`;
   } else {
     console.warn("unsupported raw tag", element.rawTagName);
@@ -44,6 +51,7 @@ const getTextFromNode = (e: ParsedNode): string => {
 const ImportContent = ({ blockId }: { blockId: string }) => {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const onChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       setValue(e.target.value);
@@ -53,6 +61,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
   );
   const importArticle = useCallback(() => {
     setError("");
+    setLoading(true);
     axios
       .post(`${process.env.REST_API_URL}/article`, { url: value })
       .then(async (r) => {
@@ -62,14 +71,17 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         const content = header.nextElementSibling;
         await openBlock(document.getElementById(blockId));
         await userEvent.clear(document.activeElement);
-        const nodes = content.childNodes.filter((c) => !!c.innerText.replace(/\n/g, ''));
+        const nodes = content.childNodes.filter(
+          (c) => !!c.innerText.replace(/\n/g, "")
+        );
         for (const child of nodes) {
           await asyncType(getTextFromNode(child));
           await newBlockEnter();
         }
       })
-      .catch(() => setError("Error Importing Article"));
-  }, [blockId, value]);
+      .catch(() => setError("Error Importing Article"))
+      .finally(() => setLoading(false));
+  }, [blockId, value, setError, setLoading]);
   return (
     <div style={{ padding: 16 }}>
       <div>
@@ -88,7 +100,11 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         />
       </div>
       <div style={{ marginTop: 16 }}>
-        <Button text={"IMPORT"} onClick={importArticle} />
+        <Button
+          text={loading ? <Spinner /> : "IMPORT"}
+          onClick={importArticle}
+          disabled={loading}
+        />
         <Text>{error}</Text>
       </div>
     </div>
