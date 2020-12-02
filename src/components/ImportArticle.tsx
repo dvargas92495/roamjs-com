@@ -76,7 +76,7 @@ const getContent = (article: ParsedHTMLElement) => {
   const nestedContent = content.childNodes.find(
     (c) =>
       c.nodeType === NodeType.ELEMENT_NODE &&
-      (c as ParsedHTMLElement).classNames.some((s) => s.includes("content"))
+      (c as ParsedHTMLElement).classNames.some((s) => s.includes("entry"))
   );
   if (nestedContent) {
     return nestedContent;

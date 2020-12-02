@@ -81,6 +81,7 @@
     "imagemin-mozjpeg": "^9.0.0",
     "imagemin-optipng": "^8.0.0",
     "markdown-to-jsx": "^7.1.0",
+    "mixpanel": "^0.13.0",
     "mixpanel-browser": "^2.39.0",
     "mobile-device-detect": "^0.4.3",
     "next": "^10.0.0",
