@@ -28,6 +28,8 @@ const getTextFromNode = (e: ParsedNode): string => {
     return children;
   } else if (element.rawTagName === "li") {
     return children;
+  } else if (element.rawTagName === "span") {
+    return children;
   } else if (element.rawTagName === "blockquote") {
     return element.childNodes.map((c) => `    ${getTextFromNode(c)}`).join("");
   } else if (element.rawTagName === "ul") {
@@ -52,10 +54,31 @@ const getTextFromNode = (e: ParsedNode): string => {
     return `### ${children}`;
   } else if (element.rawTagName === "h4") {
     return `### ${children}`;
+  } else if (element.rawTagName === "script") {
+    return "";
   } else {
     console.warn("unsupported raw tag", element.rawTagName);
     return children;
   }
+};
+
+const getContent = (article: ParsedHTMLElement) => {
+  const header = article.querySelector("header");
+  const content = header.nextElementSibling;
+  const anyDivs = content.childNodes.some(
+    (c) => (c as ParsedHTMLElement).rawTagName === "div"
+  );
+  if (!anyDivs) {
+    return content;
+  }
+  const nestedContent = content.childNodes.find((c) =>
+    (c as ParsedHTMLElement).classNames.some((s) => s.includes("content"))
+  );
+  if (nestedContent) {
+    return nestedContent;
+  }
+  console.warn('Could not find article content');
+  return article;
 };
 
 const ImportContent = ({ blockId }: { blockId: string }) => {
@@ -77,8 +100,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
       .then(async (r) => {
         const root = parse(r.data);
         const article = root.querySelector("article");
-        const header = article.querySelector("header");
-        const content = header.nextElementSibling;
+        const content = getContent(article);
         await openBlock(document.getElementById(blockId));
         await userEvent.clear(document.activeElement);
         const nodes = content.childNodes.filter(
