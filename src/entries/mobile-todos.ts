@@ -1,6 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { createMobileIcon, createObserver, runExtension } from "../entry-helpers";
-import { isIOS } from "mobile-device-detect";
+import { createMobileIcon, createObserver, isApple, runExtension } from "../entry-helpers";
 
 const MOBILE_MORE_ICON_BUTTON_ID = "mobile-more-icon-button";
 const MOBILE_BACK_ICON_BUTTON_ID = "mobile-back-icon-button";
@@ -41,7 +40,7 @@ runExtension("mobile-todos", () => {
 
   todoIconButton.onclick = () => {
     if (previousActiveElement.tagName === "TEXTAREA") {
-      const modifier = isIOS ? "meta" : "ctrl";
+      const modifier = isApple ? "meta" : "ctrl";
       userEvent.type(
         previousActiveElement,
         `{${modifier}}{enter}{/${modifier}}{backspace}`

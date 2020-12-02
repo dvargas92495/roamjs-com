@@ -14,6 +14,7 @@ env:
   FLOSS_API_URL: "https://${{ secrets.FLOSS_API_ID }}.execute-api.us-east-1.amazonaws.com/production"
   GOOGLE_CALENDAR_API_KEY: ${{ secrets.GOOGLE_CALENDAR_API_KEY }}
   GITHUB_PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+  MIXPANEL_TOKEN: ${{ secrets.MIXPANEL_TOKEN }}
   ROAM_CLIENT_API_KEY: ${{ secrets.ROAM_CLIENT_API_KEY }}
   ROAM_CLIENT_API_TOKEN: ${{ secrets.ROAM_CLIENT_API_TOKEN }}
   TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
