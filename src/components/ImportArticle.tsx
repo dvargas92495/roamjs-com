@@ -26,9 +26,19 @@ const getTextFromNode = (e: ParsedNode): string => {
   const children = element.childNodes.map((c) => getTextFromNode(c)).join("");
   if (element.rawTagName === "p") {
     return children;
+  } else if (element.rawTagName === "li") {
+    return children;
+  } else if (element.rawTagName === "blockquote") {
+    return element.childNodes.map((c) => `    ${getTextFromNode(c)}`).join("");
+  } else if (element.rawTagName === "ul") {
+    return element.childNodes.map((c) => `    ${getTextFromNode(c)}`).join("");
+  } else if (element.rawTagName === "ol") {
+    return element.childNodes.map((c) => `    ${getTextFromNode(c)}`).join("");
   } else if (element.rawTagName === "em") {
     return `__${children}__`;
   } else if (element.rawTagName === "strong") {
+    return `**${children}**`;
+  } else if (element.rawTagName === "b") {
     return `**${children}**`;
   } else if (element.rawTagName === "a") {
     return `[${children}](${element.getAttribute("href")})`;
