@@ -37,6 +37,8 @@ const getTextFromNode = (e: ParsedNode): string => {
     return children;
   } else if (element.rawTagName === "li") {
     return children;
+  } else if (element.rawTagName === "div") {
+    return children;
   } else if (element.rawTagName === "span") {
     return children;
   } else if (element.rawTagName === "blockquote") {
@@ -120,6 +122,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
           .join("\n");
         const data = new DataTransfer();
         data.setData("text/plain", text);
+        data.effectAllowed = 'uninitialized';
         await userEvent.paste(textarea, text, {
           // @ts-ignore - https://github.com/testing-library/user-event/issues/512
           clipboardData: data,
