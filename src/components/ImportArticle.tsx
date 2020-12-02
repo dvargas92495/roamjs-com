@@ -2,7 +2,6 @@ import ReactDOM from "react-dom";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import {
   Button,
-  Checkbox,
   Icon,
   InputGroup,
   Popover,
@@ -26,6 +25,7 @@ const getTextFromNode = (e: ParsedNode): string => {
       .replace(/&nbsp;/g, "")
       .replace(/&#8211;/g, "-")
       .replace(/&#8212;/g, "-")
+      .replace(/&#8216;/g, "'")
       .replace(/&#8217;/g, "'")
       .replace(/&#8220;/g, '"')
       .replace(/&#8221;/g, '"');
@@ -96,11 +96,6 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [checked, setChecked] = useState(false);
-  const onCheckChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => setChecked(e.target.checked),
-    [setChecked]
-  );
   const onChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       setValue(e.target.value);
@@ -122,20 +117,16 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         const nodes = content.childNodes.filter(
           (c) => !!c.innerText.replace(/\n/g, "")
         );
-        if (checked) {
-          navigator.clipboard.writeText(nodes.map(getTextFromNode).join("\n"));
-          const modifier = isApple ? "meta" : "ctrl";
-          await userEvent.type(textarea, `{${modifier}}v{/${modifier}}`);
-        } else {
-          for (const child of nodes) {
-            await asyncType(getTextFromNode(child));
-            await newBlockEnter();
-          }
-        }
+        await userEvent.paste(textarea, nodes.map(getTextFromNode).join("\n"), {
+          // @ts-ignore - https://github.com/testing-library/user-event/issues/512
+          clipboardData: { files: [] },
+        });
       })
-      .catch(() => setError("Error Importing Article"))
-      .finally(() => setLoading(false));
-  }, [blockId, value, setError, setLoading, checked]);
+      .catch(() => {
+        setError("Error Importing Article");
+        setLoading(false);
+      });
+  }, [blockId, value, setError, setLoading]);
   return (
     <div style={{ padding: 16 }}>
       <div>
@@ -158,11 +149,6 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
           text={loading ? <Spinner size={20} /> : "IMPORT"}
           onClick={importArticle}
           disabled={loading}
-        />
-        <Checkbox
-          checked={checked}
-          label={"Use Copy Paste"}
-          onChange={onCheckChange}
         />
         <Text>{error}</Text>
       </div>
