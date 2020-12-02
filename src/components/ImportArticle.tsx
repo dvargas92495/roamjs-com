@@ -2,6 +2,7 @@ import ReactDOM from "react-dom";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import {
   Button,
+  Checkbox,
   Icon,
   InputGroup,
   Popover,
@@ -15,6 +16,7 @@ import {
   parse,
   HTMLElement as ParsedHTMLElement,
   Node as ParsedNode,
+  NodeType,
 } from "node-html-parser";
 
 const getTextFromNode = (e: ParsedNode): string => {
@@ -71,13 +73,15 @@ const getContent = (article: ParsedHTMLElement) => {
   if (!anyDivs) {
     return content;
   }
-  const nestedContent = content.childNodes.find((c) =>
-    (c as ParsedHTMLElement).classNames.some((s) => s.includes("content"))
+  const nestedContent = content.childNodes.find(
+    (c) =>
+      c.nodeType === NodeType.ELEMENT_NODE &&
+      (c as ParsedHTMLElement).classNames.some((s) => s.includes("content"))
   );
   if (nestedContent) {
     return nestedContent;
   }
-  console.warn('Could not find article content');
+  console.warn("Could not find article content");
   return article;
 };
 
@@ -85,6 +89,11 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checked, setChecked] = useState(false);
+  const onCheckChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => setChecked(e.target.checked),
+    [setChecked]
+  );
   const onChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       setValue(e.target.value);
@@ -101,19 +110,24 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         const root = parse(r.data);
         const article = root.querySelector("article");
         const content = getContent(article);
-        await openBlock(document.getElementById(blockId));
+        const textarea = await openBlock(document.getElementById(blockId));
         await userEvent.clear(document.activeElement);
         const nodes = content.childNodes.filter(
           (c) => !!c.innerText.replace(/\n/g, "")
         );
-        for (const child of nodes) {
-          await asyncType(getTextFromNode(child));
-          await newBlockEnter();
+        if (checked) {
+          navigator.clipboard.writeText(nodes.map(getTextFromNode).join("\n"));
+          await userEvent.paste(textarea);
+        } else {
+          for (const child of nodes) {
+            await asyncType(getTextFromNode(child));
+            await newBlockEnter();
+          }
         }
       })
       .catch(() => setError("Error Importing Article"))
       .finally(() => setLoading(false));
-  }, [blockId, value, setError, setLoading]);
+  }, [blockId, value, setError, setLoading, checked]);
   return (
     <div style={{ padding: 16 }}>
       <div>
@@ -133,9 +147,14 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
       </div>
       <div style={{ marginTop: 16 }}>
         <Button
-          text={loading ? <Spinner /> : "IMPORT"}
+          text={loading ? <Spinner size={20} /> : "IMPORT"}
           onClick={importArticle}
           disabled={loading}
+        />
+        <Checkbox
+          checked={checked}
+          label={"Use Copy Paste"}
+          onChange={onCheckChange}
         />
         <Text>{error}</Text>
       </div>
