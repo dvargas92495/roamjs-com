@@ -114,10 +114,16 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         const content = getContent(article);
         const textarea = await openBlock(document.getElementById(blockId));
         await userEvent.clear(document.activeElement);
-        const nodes = content.childNodes.filter(
-          (c) => !!c.innerText.replace(/\n/g, "")
-        );
-        await userEvent.paste(textarea, nodes.map(getTextFromNode).join("\n"));
+        const text = content.childNodes
+          .filter((c) => !!c.innerText.trim())
+          .map(getTextFromNode)
+          .join("\n");
+        const data = new DataTransfer();
+        data.setData("text/plain", text);
+        await userEvent.paste(textarea, text, {
+          // @ts-ignore - https://github.com/testing-library/user-event/issues/512
+          clipboardData: data,
+        });
       })
       .catch(() => {
         setError("Error Importing Article");
