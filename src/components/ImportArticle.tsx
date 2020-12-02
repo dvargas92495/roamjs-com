@@ -76,10 +76,10 @@ const getTextFromNode = (e: ParsedNode): string => {
 const getContent = (article: ParsedHTMLElement) => {
   const header = article.querySelector("header");
   const content = header.nextElementSibling;
-  const anyDivs = content.childNodes.some(
-    (c) => (c as ParsedHTMLElement).rawTagName === "div"
+  const anyPs = content.childNodes.some(
+    (c) => (c as ParsedHTMLElement).rawTagName === "p"
   );
-  if (!anyDivs) {
+  if (anyPs) {
     return content;
   }
   const nestedContent = content.childNodes.find(
@@ -116,10 +116,13 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         const content = getContent(article);
         await openBlock(document.getElementById(blockId));
         await userEvent.clear(document.activeElement);
-        const nodes = content.childNodes.filter((c) => !!c.innerText.trim());
+        const nodes = content.childNodes.filter(
+          (c) => !!c.innerText.trim() && (c as ParsedHTMLElement).rawTagName !== 'div'
+        );
         for (const node of nodes) {
           const textarea = document.activeElement as HTMLTextAreaElement;
-          await userEvent.paste(textarea, getTextFromNode(node), {
+          const text = getTextFromNode(node);
+          await userEvent.paste(textarea, text, {
             // @ts-ignore - https://github.com/testing-library/user-event/issues/512
             clipboardData: new DataTransfer(),
           });
