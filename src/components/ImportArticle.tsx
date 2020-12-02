@@ -18,10 +18,17 @@ import {
   Node as ParsedNode,
   NodeType,
 } from "node-html-parser";
+import { isApple } from "../entry-helpers";
 
 const getTextFromNode = (e: ParsedNode): string => {
   if (e.childNodes.length === 0) {
-    return e.innerText.replace(/&nbsp;/g, "");
+    return e.innerText
+      .replace(/&nbsp;/g, "")
+      .replace(/&#8211;/g, "-")
+      .replace(/&#8212;/g, "-")
+      .replace(/&#8217;/g, "'")
+      .replace(/&#8220;/g, '"')
+      .replace(/&#8221;/g, '"');
   }
 
   const element = e as ParsedHTMLElement;
@@ -117,7 +124,8 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         );
         if (checked) {
           navigator.clipboard.writeText(nodes.map(getTextFromNode).join("\n"));
-          await userEvent.paste(textarea);
+          const modifier = isApple ? "meta" : "ctrl";
+          await userEvent.type(textarea, `{${modifier}}v{/${modifier}}`);
         } else {
           for (const child of nodes) {
             await asyncType(getTextFromNode(child));
