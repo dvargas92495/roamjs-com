@@ -172,22 +172,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         const content = getContent(article);
         await openBlock(document.getElementById(blockId));
         await userEvent.clear(document.activeElement);
-        const nodes = content.childNodes.filter(
-          (c) =>
-            !!c.innerText.trim() &&
-            (c as ParsedHTMLElement).rawTagName !== "div"
-        );
-        for (const node of nodes) {
-          const textarea = document.activeElement as HTMLTextAreaElement;
-          const text = await getText(node);
-          await userEvent.paste(textarea, text, {
-            // @ts-ignore - https://github.com/testing-library/user-event/issues/512
-            clipboardData: new DataTransfer(),
-          });
-          const end = textarea.value.length;
-          textarea.setSelectionRange(end, end);
-          await newBlockEnter();
-        }
+        printContent(content);
       })
       .catch(() => {
         setError("Error Importing Article");
