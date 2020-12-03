@@ -30,5 +30,5 @@ declare module "react-charts" {
 }
 
 declare module "@mozilla/readability" {
-  export const Readability: Readability
+  export const Readability: Readability;
 }
