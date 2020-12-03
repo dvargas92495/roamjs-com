@@ -67,7 +67,9 @@ const getTextFromNode = (e: ParsedNode): string => {
   } else if (element.rawTagName === "h4") {
     return `### ${children}`;
   } else if (element.rawTagName === "img") {
-    return `![${element.getAttribute("alt")}](${element.getAttribute("src")})`;
+    const src = element.getAttribute("src");
+    const dataSrc = element.getAttribute("data-src");
+    return `![${element.getAttribute("alt")}](${dataSrc || src})`;
   } else if (element.rawTagName === "script") {
     return "";
   } else if (element.rawTagName === "noscript") {
