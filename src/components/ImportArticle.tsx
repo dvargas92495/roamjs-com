@@ -27,7 +27,8 @@ const getTextFromNode = (e: ParsedNode): string => {
       .replace(/&#8216;/g, "'")
       .replace(/&#8217;/g, "'")
       .replace(/&#8220;/g, '"')
-      .replace(/&#8221;/g, '"');
+      .replace(/&#8221;/g, '"')
+      .replace(/&#8230;/g, '...');
   }
 
   const element = e as ParsedHTMLElement;
@@ -105,11 +106,7 @@ const getContent = (article: ParsedHTMLElement) => {
   if (anyPs) {
     return content;
   }
-  const nestedContent = content.childNodes.find(
-    (c) =>
-      c.nodeType === NodeType.ELEMENT_NODE &&
-      (c as ParsedHTMLElement).classNames.some((s) => s.includes("entry"))
-  );
+  const nestedContent = content.querySelector('.post-entry');
   if (nestedContent) {
     return nestedContent;
   }
