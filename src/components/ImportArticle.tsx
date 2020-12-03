@@ -28,7 +28,12 @@ const getTextFromNode = (e: ParsedNode): string => {
       .replace(/&#8217;/g, "'")
       .replace(/&#8220;/g, '"')
       .replace(/&#8221;/g, '"')
-      .replace(/&#8230;/g, '...');
+      .replace(/&#8230;/g, '...')
+      .replace(/&ldquo;/g, '"')
+      .replace(/&rdquo;/g, '"')
+      .replace(/&rsquo;/g, "'")
+      .replace(/&mdash;/g, '-')
+      .replace(/&hellip;/g, '...');
   }
 
   const element = e as ParsedHTMLElement;
