@@ -106,7 +106,7 @@ const getText = async (e: ParsedNode) => {
   return text;
 };
 
-const contentClassnames = [".post-entry", ".post-content"];
+const contentClassnames = [".post-entry", ".post-content", ".article-body", ".entry-content"];
 const getContent = (root: ParsedHTMLElement) => {
   const article = root.querySelector("article") || root.querySelector("body");
   const header = article.querySelector("header");
