@@ -19,7 +19,7 @@ import {
 } from "node-html-parser";
 
 const getTextFromNode = (e: ParsedNode): string => {
-  if (e.childNodes.length === 0) {
+  if (e.childNodes.length === 0 && e.nodeType !== NodeType.ELEMENT_NODE) {
     return e.innerText
       .replace(/&nbsp;/g, "")
       .replace(/&#8211;/g, "-")
