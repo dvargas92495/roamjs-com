@@ -106,7 +106,8 @@ const getText = async (e: ParsedNode) => {
   return text;
 };
 
-const getContent = (article: ParsedHTMLElement) => {
+const getContent = (root: ParsedHTMLElement) => {
+  const article = root.querySelector("article") || root.querySelector('body');
   const header = article.querySelector("header");
   const content = header ? header.nextElementSibling : article;
   const anyPs = content.childNodes.some(
@@ -168,8 +169,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
       .post(`${process.env.REST_API_URL}/article`, { url: value })
       .then(async (r) => {
         const root = parse(r.data);
-        const article = root.querySelector("article");
-        const content = getContent(article);
+        const content = getContent(root);
         await openBlock(document.getElementById(blockId));
         await userEvent.clear(document.activeElement);
         printContent(content);
