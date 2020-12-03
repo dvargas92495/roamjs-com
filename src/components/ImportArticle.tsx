@@ -106,8 +106,9 @@ const getText = async (e: ParsedNode) => {
   return text;
 };
 
+const contentClassnames = [".post-entry", ".post-content"];
 const getContent = (root: ParsedHTMLElement) => {
-  const article = root.querySelector("article") || root.querySelector('body');
+  const article = root.querySelector("article") || root.querySelector("body");
   const header = article.querySelector("header");
   const content = header ? header.nextElementSibling : article;
   const anyPs = content.childNodes.some(
@@ -116,7 +117,6 @@ const getContent = (root: ParsedHTMLElement) => {
   if (anyPs) {
     return content;
   }
-  const contentClassnames = [".post-entry", ".post-content"];
   for (const className of contentClassnames) {
     const nestedContent = content.querySelector(className);
     if (nestedContent) {
@@ -127,7 +127,7 @@ const getContent = (root: ParsedHTMLElement) => {
   return article;
 };
 
-const contentContainers = ["div", "section"];
+const contentContainers = ["div", "section", "main"];
 
 const printContent = async (content: ParsedHTMLElement) => {
   const nodes = content.childNodes.filter((c) => !!c.innerText.trim());
