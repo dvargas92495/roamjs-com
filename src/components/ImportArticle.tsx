@@ -17,6 +17,8 @@ import {
   Node as ParsedNode,
   NodeType,
 } from "node-html-parser";
+import { Readability } from "@mozilla/readability";
+import { JSDOM } from "jsdom";
 
 const getTextFromNode = (e: ParsedNode): string => {
   if (e.childNodes.length === 0 && e.nodeType !== NodeType.ELEMENT_NODE) {
@@ -106,7 +108,12 @@ const getText = async (e: ParsedNode) => {
   return text;
 };
 
-const contentClassnames = [".post-entry", ".post-content", ".article-body", ".entry-content"];
+const contentClassnames = [
+  ".post-entry",
+  ".post-content",
+  ".article-body",
+  ".entry-content",
+];
 const getContent = (root: ParsedHTMLElement) => {
   const article = root.querySelector("article") || root.querySelector("body");
   const header = article.querySelector("header");
@@ -168,10 +175,14 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
     axios
       .post(`${process.env.REST_API_URL}/article`, { url: value })
       .then(async (r) => {
-        const root = parse(r.data);
-        const content = getContent(root);
-        await openBlock(document.getElementById(blockId));
-        await userEvent.clear(document.activeElement);
+        //const root = parse(r.data);
+        //const content = getContent(root);
+        const doc = new JSDOM(r.data, {
+          url: value,
+        });
+        const content = new Readability(doc.window.document).parse();
+        const textarea = await openBlock(document.getElementById(blockId));
+        await userEvent.clear(textarea);
         await printContent(content);
       })
       .catch(() => {
