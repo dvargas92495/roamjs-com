@@ -172,7 +172,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         const content = getContent(root);
         await openBlock(document.getElementById(blockId));
         await userEvent.clear(document.activeElement);
-        printContent(content);
+        await printContent(content);
       })
       .catch(() => {
         setError("Error Importing Article");
