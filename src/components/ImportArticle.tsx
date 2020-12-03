@@ -17,10 +17,9 @@ import {
   Node as ParsedNode,
   NodeType,
 } from "node-html-parser";
-import { isApple } from "../entry-helpers";
 
 const getTextFromNode = (e: ParsedNode): string => {
-  if (e.childNodes.length === 0) {
+  if (e.childNodes.length === 0 && e.nodeType !== NodeType.ELEMENT_NODE) {
     return e.innerText
       .replace(/&nbsp;/g, "")
       .replace(/&#8211;/g, "-")
@@ -49,6 +48,8 @@ const getTextFromNode = (e: ParsedNode): string => {
     return element.childNodes.map((c) => `    ${getTextFromNode(c)}`).join("");
   } else if (element.rawTagName === "em") {
     return `__${children}__`;
+  } else if (element.rawTagName === "i") {
+    return `__${children}__`;
   } else if (element.rawTagName === "strong") {
     return `**${children}**`;
   } else if (element.rawTagName === "b") {
@@ -65,7 +66,13 @@ const getTextFromNode = (e: ParsedNode): string => {
     return `### ${children}`;
   } else if (element.rawTagName === "h4") {
     return `### ${children}`;
+  } else if (element.rawTagName === "img") {
+    const src = element.getAttribute("src");
+    const dataSrc = element.getAttribute("data-src");
+    return `![${element.getAttribute("alt")}](${dataSrc || src})`;
   } else if (element.rawTagName === "script") {
+    return "";
+  } else if (element.rawTagName === "noscript") {
     return "";
   } else {
     console.warn("unsupported raw tag", element.rawTagName);
@@ -73,13 +80,29 @@ const getTextFromNode = (e: ParsedNode): string => {
   }
 };
 
+const getText = async (e: ParsedNode) => {
+  const text = getTextFromNode(e);
+  if (
+    text.startsWith("# ") ||
+    text.startsWith("## ") ||
+    text.startsWith("### ")
+  ) {
+    const headingIndex = text.indexOf("# ");
+    const typeText = text.substring(0, headingIndex + 2);
+    const pasteText = text.substring(headingIndex + 2);
+    await asyncType(typeText);
+    return pasteText;
+  }
+  return text;
+}
+
 const getContent = (article: ParsedHTMLElement) => {
   const header = article.querySelector("header");
   const content = header.nextElementSibling;
-  const anyDivs = content.childNodes.some(
-    (c) => (c as ParsedHTMLElement).rawTagName === "div"
+  const anyPs = content.childNodes.some(
+    (c) => (c as ParsedHTMLElement).rawTagName === "p"
   );
-  if (!anyDivs) {
+  if (anyPs) {
     return content;
   }
   const nestedContent = content.childNodes.find(
@@ -116,10 +139,15 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         const content = getContent(article);
         await openBlock(document.getElementById(blockId));
         await userEvent.clear(document.activeElement);
-        const nodes = content.childNodes.filter((c) => !!c.innerText.trim());
+        const nodes = content.childNodes.filter(
+          (c) =>
+            !!c.innerText.trim() &&
+            (c as ParsedHTMLElement).rawTagName !== "div"
+        );
         for (const node of nodes) {
           const textarea = document.activeElement as HTMLTextAreaElement;
-          await userEvent.paste(textarea, getTextFromNode(node), {
+          const text = await getText(node);
+          await userEvent.paste(textarea, text, {
             // @ts-ignore - https://github.com/testing-library/user-event/issues/512
             clipboardData: new DataTransfer(),
           });
