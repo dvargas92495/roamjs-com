@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
-import { useUser, useLogout } from "react-manage-users";
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   Button,
   H1,
@@ -10,6 +10,7 @@ import {
   StringField,
   Subtitle,
 } from "@dvargas92495/ui";
+import { useUser } from "react-manage-users";
 
 const Settings = ({ name }: { name: string }) => {
   const [isEditable, setIsEditable] = useState({
@@ -49,13 +50,19 @@ const Settings = ({ name }: { name: string }) => {
 };
 
 const UserPage = () => {
-  const user = useUser();
-  const logout = useLogout();
+  const { isAuthenticated, error, user, logout } = useAuth0();
+  const legacyUser = useUser();
   return (
     <StandardLayout>
       <H1>User Settings</H1>
       <Outlined>
-        {user ? <Settings {...user} /> : <div>Not logged in</div>}
+        {isAuthenticated ? (
+          <Settings {...legacyUser} {...user} />
+        ) : error ? (
+          <div>{`${error.name}: ${error.message}`}</div>
+        ) : (
+          <div>Not Logged In</div>
+        )}
       </Outlined>
       <div style={{ marginTop: 24 }}>
         {user && (
@@ -63,7 +70,7 @@ const UserPage = () => {
             size="large"
             variant="contained"
             color="primary"
-            onClick={logout}
+            onClick={() => logout()}
           >
             Log Out
           </Button>

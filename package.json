@@ -63,6 +63,7 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^1.2.0",
     "@blueprintjs/core": "^3.35.0",
     "@blueprintjs/select": "^3.14.3",
     "@dvargas92495/react-draft-wysiwyg": "^1.15.1",
@@ -74,7 +75,6 @@
     "@testing-library/dom": "^7.26.3",
     "@testing-library/user-event": "^12.3.0",
     "@types/mozilla-readability": "^0.2.0",
-    "auth0": "^2.30.0",
     "axios": "^0.20.0",
     "babel-plugin-import-glob-array": "^0.2.0",
     "color": "^3.1.3",
