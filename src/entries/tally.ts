@@ -4,8 +4,8 @@ import { createButtonObserver, getTextTreeByBlockUid, runExtension } from "../en
 
 runExtension("tally", () => {
   createButtonObserver({
-    shortcut: "wiki",
-    attribute: "wiki-data",
+    shortcut: "tally",
+    attribute: "tally-button",
     render: (b: HTMLButtonElement) => {
       const { blockUid } = getUidsFromButton(b);
       const tree = getTextTreeByBlockUid(blockUid);
