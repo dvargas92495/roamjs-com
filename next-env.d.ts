@@ -14,6 +14,10 @@ declare module "*.mdx" {
   export const frontMatter: FrontMatter[];
 }
 
+declare module "@mozilla/readability" {
+  export { default as Readability } from "mozilla-readability";
+}
+
 declare module "react-charts" {
   type SeriesType = "line" | "bubble" | "area" | "bar";
   type AxisType = "ordinal" | "time" | "utc" | "linear" | "log";

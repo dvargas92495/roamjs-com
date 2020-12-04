@@ -11,87 +11,10 @@ import {
 import { asyncType, newBlockEnter, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
-import {
-  parse,
-  HTMLElement as ParsedHTMLElement,
-  Node as ParsedNode,
-  NodeType,
-} from "node-html-parser";
+import { Readability } from "@mozilla/readability";
+import TurndownService from "turndown";
 
-const getTextFromNode = (e: ParsedNode): string => {
-  if (e.childNodes.length === 0 && e.nodeType !== NodeType.ELEMENT_NODE) {
-    return e.innerText
-      .replace(/&nbsp;/g, "")
-      .replace(/&#8211;/g, "-")
-      .replace(/&#8212;/g, "-")
-      .replace(/&#8216;/g, "'")
-      .replace(/&#8217;/g, "'")
-      .replace(/&#8220;/g, '"')
-      .replace(/&#8221;/g, '"')
-      .replace(/&#8230;/g, "...")
-      .replace(/&ldquo;/g, '"')
-      .replace(/&rdquo;/g, '"')
-      .replace(/&rsquo;/g, "'")
-      .replace(/&mdash;/g, "-")
-      .replace(/&hellip;/g, "...");
-  }
-
-  const element = e as ParsedHTMLElement;
-  const children = element.childNodes.map((c) => getTextFromNode(c)).join("");
-  if (element.rawTagName === "p") {
-    return children;
-  } else if (element.rawTagName === "li") {
-    return children;
-  } else if (element.rawTagName === "div") {
-    return children;
-  } else if (element.rawTagName === "span") {
-    return children;
-  } else if (element.rawTagName === "blockquote") {
-    return element.childNodes.map((c) => `    ${getTextFromNode(c)}`).join("");
-  } else if (element.rawTagName === "ul") {
-    return element.childNodes.map((c) => `    ${getTextFromNode(c)}`).join("");
-  } else if (element.rawTagName === "ol") {
-    return element.childNodes.map((c) => `    ${getTextFromNode(c)}`).join("");
-  } else if (element.rawTagName === "em") {
-    return `__${children}__`;
-  } else if (element.rawTagName === "i") {
-    return `__${children}__`;
-  } else if (element.rawTagName === "strong") {
-    return `**${children}**`;
-  } else if (element.rawTagName === "b") {
-    return `**${children}**`;
-  } else if (element.rawTagName === "a") {
-    return `[${children}](${element.getAttribute("href")})`;
-  } else if (element.rawTagName === "br") {
-    return "";
-  } else if (element.rawTagName === "h1") {
-    return `# ${children}`;
-  } else if (element.rawTagName === "h2") {
-    return `## ${children}`;
-  } else if (element.rawTagName === "h3") {
-    return `### ${children}`;
-  } else if (element.rawTagName === "h4") {
-    return `### ${children}`;
-  } else if (element.rawTagName === "img") {
-    const src = element.getAttribute("src");
-    const dataSrc = element.getAttribute("data-src");
-    return `![${element.getAttribute("alt")}](${dataSrc || src})`;
-  } else if (element.rawTagName === "figure") {
-    return children;
-  } else if (element.rawTagName === "figurecaption") {
-    return children;
-  } else if (element.rawTagName === "script") {
-    return "";
-  } else if (element.rawTagName === "noscript") {
-    return "";
-  } else {
-    console.warn("unsupported raw tag", element.rawTagName);
-    return children;
-  }
-};
-
-const getText = async (e: ParsedNode) => {
-  const text = getTextFromNode(e);
+const getText = async (text: string) => {
   if (
     text.startsWith("# ") ||
     text.startsWith("## ") ||
@@ -106,50 +29,28 @@ const getText = async (e: ParsedNode) => {
   return text;
 };
 
-const getContent = (root: ParsedHTMLElement) => {
-  const article = root.querySelector("article") || root.querySelector('body');
-  const header = article.querySelector("header");
-  const content = header ? header.nextElementSibling : article;
-  const anyPs = content.childNodes.some(
-    (c) => (c as ParsedHTMLElement).rawTagName === "p"
-  );
-  if (anyPs) {
-    return content;
+const td = new TurndownService();
+td.addRule('img', {
+  filter: 'img',
+  replacement: function (content, node) {
+    const img = node as HTMLImageElement;
+    const src = img.getAttribute('data-src') || img.getAttribute('src');
+    const alt = img.getAttribute('alt') || '';
+    return `![${alt}](${src})`;
   }
-  const contentClassnames = [".post-entry", ".post-content"];
-  for (const className of contentClassnames) {
-    const nestedContent = content.querySelector(className);
-    if (nestedContent) {
-      return nestedContent;
-    }
+})
+td.addRule('i', {
+  filter: ['i', 'em'],
+  replacement: function (content) {
+    return `__${content}__`;
   }
-  console.warn("Could not find article content");
-  return article;
-};
-
-const contentContainers = ["div", "section"];
-
-const printContent = async (content: ParsedHTMLElement) => {
-  const nodes = content.childNodes.filter((c) => !!c.innerText.trim());
-  for (const node of nodes) {
-    if (
-      node.nodeType === NodeType.ELEMENT_NODE &&
-      contentContainers.includes((node as ParsedHTMLElement).rawTagName)
-    ) {
-      await printContent(node as ParsedHTMLElement);
-    } else {
-      const textarea = document.activeElement as HTMLTextAreaElement;
-      const text = await getText(node);
-      await userEvent.paste(textarea, text, {
-        // @ts-ignore - https://github.com/testing-library/user-event/issues/512
-        clipboardData: new DataTransfer(),
-      });
-      const end = textarea.value.length;
-      textarea.setSelectionRange(end, end);
-      await newBlockEnter();
-    }
+})
+td.addRule('h4', {
+  filter: ['h4'],
+  replacement: function (content) {
+    return `### ${content}`;
   }
-};
+})
 
 const ImportContent = ({ blockId }: { blockId: string }) => {
   const [value, setValue] = useState("");
@@ -168,11 +69,26 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
     axios
       .post(`${process.env.REST_API_URL}/article`, { url: value })
       .then(async (r) => {
-        const root = parse(r.data);
-        const content = getContent(root);
-        await openBlock(document.getElementById(blockId));
-        await userEvent.clear(document.activeElement);
-        await printContent(content);
+        const doc = new DOMParser().parseFromString(
+          r.data as string,
+          "text/html"
+        );
+        const { content } = new Readability(doc).parse();
+        const textarea = await openBlock(document.getElementById(blockId));
+        await userEvent.clear(textarea);
+        const markdown = td.turndown(content);
+        const nodes = markdown.split("\n").filter((c) => !!c.trim());
+        for (const node of nodes) {
+          const textarea = document.activeElement as HTMLTextAreaElement;
+          const text = await getText(node);
+          await userEvent.paste(textarea, text, {
+            // @ts-ignore - https://github.com/testing-library/user-event/issues/512
+            clipboardData: new DataTransfer(),
+          });
+          const end = textarea.value.length;
+          textarea.setSelectionRange(end, end);
+          await newBlockEnter();
+        }
       })
       .catch(() => {
         setError("Error Importing Article");
