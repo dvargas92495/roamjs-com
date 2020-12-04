@@ -1,8 +1,6 @@
 /// <reference types="next" />
 /// <reference types="next/types/global" />
 
-import Readability from "mozilla-readability";
-
 // https://github.com/jescalan/babel-plugin-import-glob-array/issues/7
 interface FrontMatter {
   __resourcePath: string;
@@ -16,6 +14,10 @@ declare module "*.mdx" {
   export const frontMatter: FrontMatter[];
 }
 
+declare module "@mozilla/readability" {
+  export { default as Readability } from "mozilla-readability";
+}
+
 declare module "react-charts" {
   type SeriesType = "line" | "bubble" | "area" | "bar";
   type AxisType = "ordinal" | "time" | "utc" | "linear" | "log";
@@ -27,8 +29,4 @@ declare module "react-charts" {
     };
     defaultColors?: string[];
   }>;
-}
-
-declare module "@mozilla/readability" {
-  export const Readability: Readability;
 }

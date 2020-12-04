@@ -181,12 +181,12 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         const doc = new JSDOM(r.data, {
           url: value,
         });
-        const content = new Readability(doc.window.document).parse();
+        const { content } = new Readability(doc.window.document).parse();
         const textarea = await openBlock(document.getElementById(blockId));
         await userEvent.clear(textarea);
         const markdown = td.turndown(content);
         console.log(markdown);
-        await printContent(content);
+      //  await printContent(content);
       })
       .catch(() => {
         setError("Error Importing Article");
