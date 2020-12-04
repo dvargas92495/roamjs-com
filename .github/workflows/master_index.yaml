@@ -6,6 +6,7 @@ on:
       - "components/**"
       - "public/**"
       - "pages/**"
+      - "package.json"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY }}
