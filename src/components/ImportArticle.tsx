@@ -29,7 +29,9 @@ const getText = async (text: string) => {
   return text;
 };
 
-const td = new TurndownService();
+const td = new TurndownService({
+  hr: '---',
+});
 td.addRule('img', {
   filter: 'img',
   replacement: function (content, node) {
@@ -91,7 +93,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
         }
       })
       .catch(() => {
-        setError("Error Importing Article");
+        setError("Error Importing Article. Email link to support@roamjs.com.");
         setLoading(false);
       });
   }, [blockId, value, setError, setLoading]);
@@ -109,7 +111,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
               importArticle();
             }
           }}
-          width={600}
+          width={1000}
         />
       </div>
       <div style={{ marginTop: 16 }}>
