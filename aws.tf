@@ -40,6 +40,10 @@ variable "mixpanel_token" {
     type = string
 }
 
+variable "auth0_client_id" {
+    type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -209,4 +213,10 @@ resource "github_actions_secret" "mixpanel_token" {
   repository       = "roam-js-extensions"
   secret_name      = "MIXPANEL_TOKEN"
   plaintext_value  = var.mixpanel_token
+}
+
+resource "github_actions_secret" "auth0_client_id" {
+  repository       = "roam-js-extensions"
+  secret_name      = "AUTH0_CLIENT_ID"
+  plaintext_value  = var.auth0_client_id
 }
