@@ -2,6 +2,7 @@ import {
   createBlockObserver,
   getChildRefUidsByBlockUid,
   getRefTitlesByBlockUid,
+  getTextTreeByPageName,
   runExtension,
 } from "../entry-helpers";
 import { getUids } from "roam-client";
@@ -19,38 +20,51 @@ runExtension("hex-color-preview", () => {
     position: relative;
 }`;
   document.getElementsByTagName("head")[0].appendChild(css);
+  const config = getTextTreeByPageName("roam/js/hex-color-preview");
+  const includeLengthsNode = config.find(
+    (t) => t.text.toUpperCase() === "INCLUDE LENGTHS"
+  );
+  const includeLengths = includeLengthsNode
+    ? includeLengthsNode.children
+        .filter((c) => !Number.isNaN(c.text))
+        .map((c) => parseInt(c.text))
+    : [];
 
   const renderColorPreviews = (container: HTMLElement, blockUid: string) => {
     const refs = getRefTitlesByBlockUid(blockUid);
     const renderedRefs = Array.from(
       container.getElementsByClassName("rm-page-ref-tag")
     );
-    refs.forEach((r) => {
-      try {
-        const c = Color(`#${r}`);
-        const previewIdPrefix = `hex-color-preview-${blockUid}-${r}-`;
-        const renderedRefSpans = renderedRefs.filter(
-          (s) =>
-            s.getAttribute("data-tag") === r &&
-            (!s.lastElementChild ||
-              !s.lastElementChild.id.startsWith(previewIdPrefix))
-        );
-        renderedRefSpans.forEach((renderedRef, i) => {
-          const newSpan = document.createElement("span");
-          newSpan.style.backgroundColor = c.string();
-          newSpan.className = HEX_COLOR_PREVIEW_CLASSNAME;
-          newSpan.id = `${previewIdPrefix}${i}`;
-          renderedRef.appendChild(newSpan);
-        });
-      } catch (e) {
-        if (
-          !e.message ||
-          !e.message.startsWith("Unable to parse color from string")
-        ) {
-          throw e;
+    refs
+      .filter(
+        (r) => !includeLengths.length || includeLengths.includes(r.length)
+      )
+      .forEach((r) => {
+        try {
+          const c = Color(`#${r}`);
+          const previewIdPrefix = `hex-color-preview-${blockUid}-${r}-`;
+          const renderedRefSpans = renderedRefs.filter(
+            (s) =>
+              s.getAttribute("data-tag") === r &&
+              (!s.lastElementChild ||
+                !s.lastElementChild.id.startsWith(previewIdPrefix))
+          );
+          renderedRefSpans.forEach((renderedRef, i) => {
+            const newSpan = document.createElement("span");
+            newSpan.style.backgroundColor = c.string();
+            newSpan.className = HEX_COLOR_PREVIEW_CLASSNAME;
+            newSpan.id = `${previewIdPrefix}${i}`;
+            renderedRef.appendChild(newSpan);
+          });
+        } catch (e) {
+          if (
+            !e.message ||
+            !e.message.startsWith("Unable to parse color from string")
+          ) {
+            throw e;
+          }
         }
-      }
-    });
+      });
   };
 
   createBlockObserver(
