@@ -46,6 +46,25 @@ const getText = async (text: string) => {
 };
 
 const td = new TurndownService();
+td.addRule('img', {
+  filter: 'img',
+  replacement: function (content, node) {
+    return content;
+  }
+})
+td.addRule('i', {
+  filter: ['i', 'em'],
+  replacement: function (content) {
+    return `__${content}__`;
+  }
+})
+td.addRule('h4', {
+  filter: ['h4'],
+  replacement: function (content) {
+    return `### ${content}`;
+  }
+})
+
 const ImportContent = ({ blockId }: { blockId: string }) => {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
