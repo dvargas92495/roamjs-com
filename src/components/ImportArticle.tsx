@@ -14,22 +14,6 @@ import axios from "axios";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 
-const getTextFromNode = (text: string): string =>
-  text
-    .replace(/&nbsp;/g, "")
-    .replace(/&#8211;/g, "-")
-    .replace(/&#8212;/g, "-")
-    .replace(/&#8216;/g, "'")
-    .replace(/&#8217;/g, "'")
-    .replace(/&#8220;/g, '"')
-    .replace(/&#8221;/g, '"')
-    .replace(/&#8230;/g, "...")
-    .replace(/&ldquo;/g, '"')
-    .replace(/&rdquo;/g, '"')
-    .replace(/&rsquo;/g, "'")
-    .replace(/&mdash;/g, "-")
-    .replace(/&hellip;/g, "...");
-
 const getText = async (text: string) => {
   if (
     text.startsWith("# ") ||
@@ -49,7 +33,10 @@ const td = new TurndownService();
 td.addRule('img', {
   filter: 'img',
   replacement: function (content, node) {
-    return content;
+    const img = node as HTMLImageElement;
+    const src = img.getAttribute('data-src') || img.getAttribute('src');
+    const alt = img.getAttribute('alt') || '';
+    return `![${alt}](${src})`;
   }
 })
 td.addRule('i', {
