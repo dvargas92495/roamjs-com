@@ -83,7 +83,6 @@
     "iframe-resizer-react": "^1.0.4",
     "imagemin-mozjpeg": "^9.0.0",
     "imagemin-optipng": "^8.0.0",
-    "jsdom": "^16.4.0",
     "markdown-to-jsx": "^7.1.0",
     "mixpanel": "^0.13.0",
     "mixpanel-browser": "^2.39.0",

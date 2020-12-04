@@ -18,7 +18,6 @@ import {
   NodeType,
 } from "node-html-parser";
 import { Readability } from "@mozilla/readability";
-import { JSDOM } from "jsdom";
 import TurndownService from 'turndown';
 
 const getTextFromNode = (e: ParsedNode): string => {
@@ -178,10 +177,8 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
       .then(async (r) => {
         //const root = parse(r.data);
         //const content = getContent(root);
-        const doc = new JSDOM(r.data, {
-          url: value,
-        });
-        const { content } = new Readability(doc.window.document).parse();
+        const doc = new DOMParser().parseFromString(r.data as string, 'text/html');
+        const { content } = new Readability(doc).parse();
         const textarea = await openBlock(document.getElementById(blockId));
         await userEvent.clear(textarea);
         const markdown = td.turndown(content);
