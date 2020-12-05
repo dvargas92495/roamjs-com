@@ -6,6 +6,7 @@ import {
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel from "mixpanel-browser";
+import { renderConfig } from "./components/Config";
 
 declare global {
   interface Window {
@@ -29,13 +30,20 @@ declare global {
 const roamJsVersion = process.env.ROAMJS_VERSION || "0";
 mixpanel.init(process.env.MIXPANEL_TOKEN);
 
-export const runExtension = (extensionId: string, run: () => void) => {
+export const runExtension = ({
+  extensionId,
+  run,
+}: {
+  extensionId: string;
+  run: () => void;
+}) => {
   if (!window.roamjs) {
     window.roamjs = { alerted: false, loaded: new Set() };
   }
   if (window.roamjs.loaded.has(extensionId)) {
     return;
   }
+  const createConfigObserver = window.roamjs.loaded.size === 0;
   window.roamjs.loaded.add(extensionId);
   if (process.env.IS_LEGACY && !window.roamjs?.alerted) {
     window.roamjs.alerted = true;
@@ -49,7 +57,39 @@ export const runExtension = (extensionId: string, run: () => void) => {
     extensionId,
     roamJsVersion,
   });
+
   run();
+
+  if (createConfigObserver) {
+    console.log("observing for configs");
+    createObserver((ms) => {
+      const roamJsPages = new Set(
+        ms
+          .flatMap((m) => Array.from(m.addedNodes))
+          .flatMap((a) => getPageTitle(a as Element))
+          .filter(
+            (s) =>
+              s.textContent.startsWith("roam/js/") &&
+              window.roamjs.loaded.has(
+                s.textContent.substring("roam/js/".length)
+              )
+          )
+      );
+      roamJsPages.forEach((p) => {
+        const header =
+          p.parentElement.className === "rm-title-display"
+            ? p.parentElement
+            : p.parentElement.closest(".rm-title-display");
+        const headerParent = header.parentElement;
+        if (!headerParent.getAttribute("data-roamjs-config")) {
+          headerParent.setAttribute("data-roamjs-config", "true");
+          const parent = document.createElement("div");
+          headerParent.appendChild(parent);
+          renderConfig(parent);
+        }
+      });
+    });
+  }
 };
 
 export const replaceText = async ([before, after]: string[]) => {
@@ -73,10 +113,14 @@ export const replaceTagText = async ({
   if (before) {
     await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : ""]);
     await replaceText([`[[${before}]]`, after ? `[[${after}]]` : ""]);
-    const hashAfter = after.match(/(\s|\[\[.*\]\])/) ? `#[[${after}]]` : `#${after}`;
+    const hashAfter = after.match(/(\s|\[\[.*\]\])/)
+      ? `#[[${after}]]`
+      : `#${after}`;
     await replaceText([`#${before}`, after ? hashAfter : ""]);
   } else if (addHash) {
-    const hashAfter = after.match(/(\s|\[\[.*\]\])/) ? `#[[${after}]]` : `#${after}`;
+    const hashAfter = after.match(/(\s|\[\[.*\]\])/)
+      ? `#[[${after}]]`
+      : `#${after}`;
     await replaceText(["", hashAfter]);
   } else {
     await replaceText(["", `[[${after}]]`]);
