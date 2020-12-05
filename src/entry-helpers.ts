@@ -6,13 +6,14 @@ import {
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel from "mixpanel-browser";
-import { renderConfig } from "./components/RoamJSConfig";
+import { ExtensionConfig, renderConfig } from "./components/RoamJSConfig";
 
 declare global {
   interface Window {
     roamjs?: {
       alerted: boolean;
       loaded: Set<string>;
+      config: { [extensionId: string]: ExtensionConfig };
     };
     roam42?: {
       smartBlocks?: {
@@ -32,19 +33,22 @@ mixpanel.init(process.env.MIXPANEL_TOKEN);
 
 export const runExtension = ({
   extensionId,
+  config,
   run,
 }: {
   extensionId: string;
+  config?: ExtensionConfig;
   run: () => void;
 }) => {
   if (!window.roamjs) {
-    window.roamjs = { alerted: false, loaded: new Set() };
+    window.roamjs = { alerted: false, loaded: new Set(), config: {} };
   }
   if (window.roamjs.loaded.has(extensionId)) {
     return;
   }
   const oneTimeSetup = window.roamjs.loaded.size === 0;
   window.roamjs.loaded.add(extensionId);
+  window.roamjs.config[extensionId] = config;
   if (process.env.IS_LEGACY && !window.roamjs?.alerted) {
     window.roamjs.alerted = true;
     window.alert(
@@ -69,7 +73,7 @@ export const runExtension = ({
 export const createUiConfigObserver = () =>
   createObserver(() => {
     const roamJsPages = new Set(
-      Array.from(document.getElementsByClassName('rm-title-display'))
+      Array.from(document.getElementsByClassName("rm-title-display"))
         .map((a) => getPageTitle(a as Element))
         .filter(
           (s) =>
@@ -83,11 +87,12 @@ export const createUiConfigObserver = () =>
           ? p.parentElement
           : p.parentElement.closest(".rm-title-display");
       const headerParent = header.parentElement;
-      if (!headerParent.getAttribute("data-roamjs-config")) {
+      const extensionConfig = window.roamjs.config[p.textContent];
+      if (!headerParent.getAttribute("data-roamjs-config") && extensionConfig) {
         headerParent.setAttribute("data-roamjs-config", "true");
         const parent = document.createElement("div");
         headerParent.appendChild(parent);
-        renderConfig(parent);
+        renderConfig({extensionConfig, parent});
       }
     });
   });

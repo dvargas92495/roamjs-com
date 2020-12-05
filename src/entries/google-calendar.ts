@@ -15,9 +15,15 @@ import axios from "axios";
 import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
+const config = {
+  "Google Calendar": "",
+  "Include Event Link": "false",
+  "Skip Free": "false",
+  "Format": "",
+  ...getConfigFromPage("roam/js/google-calendar"),
+}
 
 const fetchGoogleCalendar = async () => {
-  const config = getConfigFromPage("roam/js/google-calendar");
   const pageTitle = getPageTitle(document.activeElement);
   const dateFromPage = parseRoamDate(pageTitle.textContent);
 
@@ -108,6 +114,7 @@ runExtension({
   run: () => {
     addButtonListener(GOOGLE_COMMAND, importGoogleCalendar);
   },
+  config,
 });
 
 createCustomSmartBlockCommand({
