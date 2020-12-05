@@ -97,6 +97,9 @@ const importOuraRing = async (_: any, blockUid: string, parentUid: string) => {
   await pushBullets(bullets);
 };
 
-runExtension("oura-ring", () => {
-  addButtonListener(OURA_COMMAND, importOuraRing);
+runExtension({
+  extensionId: "oura-ring",
+  run: () => {
+    addButtonListener(OURA_COMMAND, importOuraRing);
+  },
 });

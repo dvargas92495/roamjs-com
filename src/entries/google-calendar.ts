@@ -103,8 +103,11 @@ const importGoogleCalendar = async (
   await pushBullets(bullets, blockUid, parentUid);
 };
 
-runExtension("google-calendar", () => {
-  addButtonListener(GOOGLE_COMMAND, importGoogleCalendar);
+runExtension({
+  extensionId: "google-calendar",
+  run: () => {
+    addButtonListener(GOOGLE_COMMAND, importGoogleCalendar);
+  },
 });
 
 createCustomSmartBlockCommand({

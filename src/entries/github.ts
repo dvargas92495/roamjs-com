@@ -169,9 +169,12 @@ const importGithubCards = async (
   }
 };
 
-runExtension("github", () => {
-  addButtonListener("Import Github Cards", importGithubCards);
-  addButtonListener("Import Github Issues", importGithubIssues);
-  addButtonListener("Import Github Projects", importGithubProjects);
-  addButtonListener("Import Github Repos", importGithubRepos);
+runExtension({
+  extensionId: "github",
+  run: () => {
+    addButtonListener("Import Github Cards", importGithubCards);
+    addButtonListener("Import Github Issues", importGithubIssues);
+    addButtonListener("Import Github Projects", importGithubProjects);
+    addButtonListener("Import Github Repos", importGithubRepos);
+  },
 });

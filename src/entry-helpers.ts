@@ -61,7 +61,7 @@ export const runExtension = ({
   run();
 
   if (createConfigObserver) {
-    console.log("observing for configs");
+    console.log("observing for configs (Closes #279)");
     createObserver((ms) => {
       const roamJsPages = new Set(
         ms

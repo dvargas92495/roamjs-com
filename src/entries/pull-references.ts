@@ -59,6 +59,9 @@ const pullReferences = async (_: any, blockUid: string, parentUid: string) => {
   }
 };
 
-runExtension("pull-references", () => {
-  addButtonListener(PULL_REFERENCES_COMMAND, pullReferences);
+runExtension({
+  extensionId: "pull-references",
+  run: () => {
+    addButtonListener(PULL_REFERENCES_COMMAND, pullReferences);
+  },
 });

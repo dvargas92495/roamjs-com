@@ -108,6 +108,9 @@ const observerCallback = () =>
         ?.getElementsByClassName("refs-by-page-view")[0]
   );
 
-runExtension("sort-references", () => {
-  createObserver(observerCallback);
+runExtension({
+  extensionId: "sort-references",
+  run: () => {
+    createObserver(observerCallback);
+  },
 });

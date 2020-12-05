@@ -3,7 +3,11 @@ import {
   getConfigFromBlock,
   runExtension,
 } from "../entry-helpers";
-import { getConfigFromPage, parseRoamDate, createIconButton } from "roam-client";
+import {
+  getConfigFromPage,
+  parseRoamDate,
+  createIconButton,
+} from "roam-client";
 
 type SortConfig = {
   [column: string]: {
@@ -120,9 +124,7 @@ const observerCallback = () => {
       sortButton.onclick = () => {
         const pageConfig = getConfigFromPage("roam/js/attr-tables");
         const maxSortsConfig = config["Max Sorts"] || pageConfig["Max Sorts"];
-        const maxSorts = isNaN(maxSortsConfig)
-          ? 0
-          : parseInt(maxSortsConfig);
+        const maxSorts = isNaN(maxSortsConfig) ? 0 : parseInt(maxSortsConfig);
         const icon = sortButton.children[0];
         const key = getKey(th);
         const values = Object.values(sortConfig);
@@ -143,8 +145,8 @@ const observerCallback = () => {
           if (maxSorts > 0 && maxSorts === maxPriority) {
             const value = values.find((v) => v.priority === maxPriority);
             value.asc = undefined;
-            value.priority = 0
-            sortConfig[key].priority = maxPriority
+            value.priority = 0;
+            sortConfig[key].priority = maxPriority;
           } else {
             sortConfig[key].priority = maxPriority + 1;
           }
@@ -166,7 +168,10 @@ const observerCallback = () => {
   });
 };
 
-runExtension('attr-tables', () => {
-  observerCallback();
-  createObserver(observerCallback);
-})
+runExtension({
+  extensionId: "attr-tables",
+  run: () => {
+    observerCallback();
+    createObserver(observerCallback);
+  },
+});

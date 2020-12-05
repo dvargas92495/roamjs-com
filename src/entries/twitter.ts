@@ -46,6 +46,9 @@ const twitterReferencesListener = async (
     .catch(genericError);
 };
 
-runExtension("twitter", () => {
-  addButtonListener(TWITTER_REFERENCES_COMMAND, twitterReferencesListener);
+runExtension({
+  extensionId: "twitter",
+  run: () => {
+    addButtonListener(TWITTER_REFERENCES_COMMAND, twitterReferencesListener);
+  },
 });

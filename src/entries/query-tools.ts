@@ -261,7 +261,10 @@ const observerCallback = () => {
   });
 };
 
-runExtension("query-tools", () => {
-  observerCallback();
-  createObserver(observerCallback);
+runExtension({
+  extensionId: "query-tools",
+  run: () => {
+    observerCallback();
+    createObserver(observerCallback);
+  },
 });
