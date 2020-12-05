@@ -3,7 +3,7 @@ import { Config } from "mixpanel-browser";
 import React from "react";
 import ReactDOM from "react-dom";
 
-const Config = () => {
+const RoamJSConfig = () => {
   return (
     <Card>
       <InputGroup placeholder={"Google Calendar"} />
@@ -12,6 +12,7 @@ const Config = () => {
   );
 };
 
-export const renderConfig = (p: HTMLElement) => ReactDOM.render(<Config />, p);
+export const renderConfig = (p: HTMLElement) =>
+  ReactDOM.render(<RoamJSConfig />, p);
 
-export default Config;
+export default RoamJSConfig;

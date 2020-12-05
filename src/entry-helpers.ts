@@ -6,7 +6,7 @@ import {
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel from "mixpanel-browser";
-import { renderConfig } from "./components/Config";
+import { renderConfig } from "./components/RoamJSConfig";
 
 declare global {
   interface Window {
@@ -43,7 +43,7 @@ export const runExtension = ({
   if (window.roamjs.loaded.has(extensionId)) {
     return;
   }
-  const createConfigObserver = window.roamjs.loaded.size === 0;
+  const oneTimeSetup = window.roamjs.loaded.size === 0;
   window.roamjs.loaded.add(extensionId);
   if (process.env.IS_LEGACY && !window.roamjs?.alerted) {
     window.roamjs.alerted = true;
@@ -60,37 +60,39 @@ export const runExtension = ({
 
   run();
 
-  if (createConfigObserver) {
+  if (oneTimeSetup) {
     console.log("observing for configs (Closes #279)");
-    createObserver((ms) => {
-      const roamJsPages = new Set(
-        ms
-          .flatMap((m) => Array.from(m.addedNodes))
-          .flatMap((a) => getPageTitle(a as Element))
-          .filter(
-            (s) =>
-              s.textContent.startsWith("roam/js/") &&
-              window.roamjs.loaded.has(
-                s.textContent.substring("roam/js/".length)
-              )
-          )
-      );
-      roamJsPages.forEach((p) => {
-        const header =
-          p.parentElement.className === "rm-title-display"
-            ? p.parentElement
-            : p.parentElement.closest(".rm-title-display");
-        const headerParent = header.parentElement;
-        if (!headerParent.getAttribute("data-roamjs-config")) {
-          headerParent.setAttribute("data-roamjs-config", "true");
-          const parent = document.createElement("div");
-          headerParent.appendChild(parent);
-          renderConfig(parent);
-        }
-      });
-    });
+    createUiConfigObserver();
   }
 };
+
+export const createUiConfigObserver = () =>
+  createObserver((ms) => {
+    const roamJsPages = new Set(
+      ms
+        .flatMap((m) => Array.from(m.addedNodes))
+        .filter(a => a.nodeType === 1)
+        .map((a) => getPageTitle(a as Element))
+        .filter(
+          (s) =>
+            s.textContent.startsWith("roam/js/") &&
+            window.roamjs.loaded.has(s.textContent.substring("roam/js/".length))
+        )
+    );
+    roamJsPages.forEach((p) => {
+      const header =
+        p.parentElement.className === "rm-title-display"
+          ? p.parentElement
+          : p.parentElement.closest(".rm-title-display");
+      const headerParent = header.parentElement;
+      if (!headerParent.getAttribute("data-roamjs-config")) {
+        headerParent.setAttribute("data-roamjs-config", "true");
+        const parent = document.createElement("div");
+        headerParent.appendChild(parent);
+        renderConfig(parent);
+      }
+    });
+  });
 
 export const replaceText = async ([before, after]: string[]) => {
   const textArea = document.activeElement as HTMLTextAreaElement;
