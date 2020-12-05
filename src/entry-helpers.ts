@@ -61,17 +61,15 @@ export const runExtension = ({
   run();
 
   if (oneTimeSetup) {
-    console.log("observing for configs (Closes #279)");
+    console.log("observing for configs (Closes #279)", extensionId, new Date());
     createUiConfigObserver();
   }
 };
 
 export const createUiConfigObserver = () =>
-  createObserver((ms) => {
+  createObserver(() => {
     const roamJsPages = new Set(
-      ms
-        .flatMap((m) => Array.from(m.addedNodes))
-        .filter(a => a.nodeType === 1)
+      Array.from(document.getElementsByClassName('rm-title-display'))
         .map((a) => getPageTitle(a as Element))
         .filter(
           (s) =>
