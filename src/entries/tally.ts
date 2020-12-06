@@ -9,7 +9,7 @@ runExtension("tally", () => {
     render: (b: HTMLButtonElement) => {
       const { blockUid } = getUidsFromButton(b);
       const tree = getTextTreeByBlockUid(blockUid);
-      const initialValueNode = tree.children.find(c => !Number.isNaN(c.text));
+      const initialValueNode = tree.children.find(c => !isNaN(parseInt(c.text)));
       const initialValue = initialValueNode ? parseInt(initialValueNode.text) : 0;  
       renderTallyCounter(initialValue, b.parentElement);
     },
