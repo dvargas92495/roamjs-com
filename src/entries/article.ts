@@ -1,3 +1,4 @@
+import userEvent from "@testing-library/user-event";
 import { asyncPaste, newBlockEnter } from "roam-client";
 import urlRegex from "url-regex";
 import { importArticle, renderImportArticle } from "../components/ImportArticle";
@@ -23,8 +24,9 @@ runExtension("article", () => {
         if (match) {
           const url = match[0];
           await newBlockEnter();
+          await userEvent.tab();
           await asyncPaste('Loading...');
-          await importArticle({ url, blockId: textarea.id }) 
+          await importArticle({ url, blockId: document.activeElement.id }) 
         }
       }
     }
