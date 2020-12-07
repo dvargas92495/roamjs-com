@@ -175,9 +175,10 @@ const ROAMJS_MOUSELESS_SEARCH_INPUT = "roamjs-mouseless-search-input";
 
 const MouselessDialog = () => {
   const previousFocus = useRef(null);
-  const allCommands = useMemo(() => {
+  const [allCommands, setAllCommands] = useState(COMMANDS);
+  useEffect(() => {
     const articleLoaded = window.roamjs.loaded.has("article");
-    return [
+    setAllCommands([
       ...COMMANDS,
       ...(articleLoaded
         ? [
@@ -187,8 +188,8 @@ const MouselessDialog = () => {
             },
           ]
         : []),
-    ];
-  }, []);
+    ]);
+  }, [setAllCommands]);
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState("");
   const onInputChange = useCallback((e) => setValue(e.target.value), [

@@ -1,9 +1,8 @@
-import { asyncPaste } from "roam-client";
+import { asyncPaste, newBlockEnter } from "roam-client";
 import urlRegex from "url-regex";
 import { importArticle, renderImportArticle } from "../components/ImportArticle";
 import {
   createButtonObserver,
-  createHTMLObserver,
   runExtension,
 } from "../entry-helpers";
 
@@ -23,6 +22,7 @@ runExtension("article", () => {
         const match = textarea.value.match(urlRegex({ strict: true }));
         if (match) {
           const url = match[0];
+          await newBlockEnter();
           await asyncPaste('Loading...');
           await importArticle({ url, blockId: textarea.id }) 
         }
