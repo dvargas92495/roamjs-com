@@ -76,7 +76,10 @@ const WikiContent = ({
           const { extract } = r.data;
           await openBlock(document.getElementById(blockId));
           await userEvent.clear(document.activeElement);
-          await asyncType(extract);
+          await userEvent.paste(document.activeElement, extract, {
+            // @ts-ignore - https://github.com/testing-library/user-event/issues/512
+            clipboardData: new DataTransfer(),
+          });
           closePopover();
         })
         .catch((e) => {
