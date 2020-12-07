@@ -73,10 +73,14 @@ export const replaceTagText = async ({
   if (before) {
     await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : ""]);
     await replaceText([`[[${before}]]`, after ? `[[${after}]]` : ""]);
-    const hashAfter = after.match(/(\s|\[\[.*\]\])/) ? `#[[${after}]]` : `#${after}`;
+    const hashAfter = after.match(/(\s|\[\[.*\]\])/)
+      ? `#[[${after}]]`
+      : `#${after}`;
     await replaceText([`#${before}`, after ? hashAfter : ""]);
   } else if (addHash) {
-    const hashAfter = after.match(/(\s|\[\[.*\]\])/) ? `#[[${after}]]` : `#${after}`;
+    const hashAfter = after.match(/(\s|\[\[.*\]\])/)
+      ? `#[[${after}]]`
+      : `#${after}`;
     await replaceText(["", hashAfter]);
   } else {
     await replaceText(["", `[[${after}]]`]);
@@ -119,11 +123,15 @@ const getMutatedNodes = ({
   return [...blocks, ...childBlocks];
 };
 
-export const createHTMLObserver = (
-  callback: (b: HTMLElement) => void,
-  tag: string,
-  className: string
-) => {
+export const createHTMLObserver = ({
+  callback,
+  tag,
+  className,
+}: {
+  callback: (b: HTMLElement) => void;
+  tag: string;
+  className: string;
+}) => {
   const blocks = document.getElementsByClassName(className);
   Array.from(blocks).forEach(callback);
 
@@ -142,8 +150,16 @@ export const createBlockObserver = (
   blockCallback: (b: HTMLDivElement) => void,
   blockRefCallback: (b: HTMLSpanElement) => void
 ) => {
-  createHTMLObserver(blockCallback, "DIV", "roam-block");
-  createHTMLObserver(blockRefCallback, "SPAN", "rm-block-ref");
+  createHTMLObserver({
+    callback: blockCallback,
+    tag: "DIV",
+    className: "roam-block",
+  });
+  createHTMLObserver({
+    callback: blockRefCallback,
+    tag: "SPAN",
+    className: "rm-block-ref",
+  });
 };
 
 export const createPageObserver = (
@@ -188,8 +204,8 @@ export const createButtonObserver = ({
   attribute: string;
   render: (b: HTMLButtonElement) => void;
 }) =>
-  createHTMLObserver(
-    (b) => {
+  createHTMLObserver({
+    callback: (b) => {
       if (
         b.innerText.toUpperCase() ===
           attribute.toUpperCase().replace("-", " ") ||
@@ -202,9 +218,9 @@ export const createButtonObserver = ({
         }
       }
     },
-    "BUTTON",
-    "bp3-button"
-  );
+    tag: "BUTTON",
+    className: "bp3-button",
+  });
 
 export const createOverlayObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void
