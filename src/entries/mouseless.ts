@@ -8,15 +8,15 @@ runExtension("mouseless", () => {
   document.body.appendChild(container);
   renderMouselessDialog(container as HTMLDivElement);
 
-  createHTMLObserver(
-    (b) => {
+  createHTMLObserver({
+    callback: (b) => {
       if (b.tabIndex < 0) {
         b.tabIndex = 0;
       }
     },
-    "SPAN",
-    "bp3-button"
-  );
+    tag: "SPAN",
+    className: "bp3-button"
+  });
 
   document.addEventListener("keydown", (e: KeyboardEvent) => {
     if (isControl(e)) {
