@@ -1,4 +1,6 @@
-import { renderImportArticle } from "../components/ImportArticle";
+import { asyncPaste } from "roam-client";
+import urlRegex from "url-regex";
+import { importArticle, renderImportArticle } from "../components/ImportArticle";
 import {
   createButtonObserver,
   createHTMLObserver,
@@ -13,13 +15,18 @@ runExtension("article", () => {
       renderImportArticle(b.closest(".roam-block").id, b.parentElement),
   });
 
-  createHTMLObserver({
-    callback: (e) => {
-      if (e.previousElementSibling === document.activeElement) {
-        console.log("observing!");
+  document.addEventListener("keydown", async (e) => {
+    if (e.altKey && e.shiftKey && e.key === "I") {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "TEXTAREA") {
+        const textarea = target as HTMLTextAreaElement;
+        const match = textarea.value.match(urlRegex({ strict: true }));
+        if (match) {
+          const url = match[0];
+          await asyncPaste('Loading...');
+          await importArticle({ url, blockId: textarea.id }) 
+        }
       }
-    },
-    tag: "DIV",
-    className: "bp3-elevation-3",
+    }
   });
 });

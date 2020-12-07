@@ -30,29 +30,56 @@ const getText = async (text: string) => {
 };
 
 const td = new TurndownService({
-  hr: '---',
+  hr: "---",
 });
-td.addRule('img', {
-  filter: 'img',
+td.addRule("img", {
+  filter: "img",
   replacement: function (content, node) {
     const img = node as HTMLImageElement;
-    const src = img.getAttribute('data-src') || img.getAttribute('src');
-    const alt = img.getAttribute('alt') || '';
+    const src = img.getAttribute("data-src") || img.getAttribute("src");
+    const alt = img.getAttribute("alt") || "";
     return `![${alt}](${src})`;
-  }
-})
-td.addRule('i', {
-  filter: ['i', 'em'],
+  },
+});
+td.addRule("i", {
+  filter: ["i", "em"],
   replacement: function (content) {
     return `__${content}__`;
-  }
-})
-td.addRule('h4', {
-  filter: ['h4'],
+  },
+});
+td.addRule("h4", {
+  filter: ["h4"],
   replacement: function (content) {
     return `### ${content}`;
-  }
-})
+  },
+});
+
+export const importArticle = ({
+  url,
+  blockId,
+}: {
+  url: string;
+  blockId: string;
+}) =>
+  axios.post(`${process.env.REST_API_URL}/article`, { url }).then(async (r) => {
+    const doc = new DOMParser().parseFromString(r.data as string, "text/html");
+    const { content } = new Readability(doc).parse();
+    const textarea = await openBlock(document.getElementById(blockId));
+    await userEvent.clear(textarea);
+    const markdown = td.turndown(content);
+    const nodes = markdown.split("\n").filter((c) => !!c.trim());
+    for (const node of nodes) {
+      const textarea = document.activeElement as HTMLTextAreaElement;
+      const text = await getText(node);
+      await userEvent.paste(textarea, text, {
+        // @ts-ignore - https://github.com/testing-library/user-event/issues/512
+        clipboardData: new DataTransfer(),
+      });
+      const end = textarea.value.length;
+      textarea.setSelectionRange(end, end);
+      await newBlockEnter();
+    }
+  });
 
 const ImportContent = ({ blockId }: { blockId: string }) => {
   const [value, setValue] = useState("");
@@ -65,33 +92,10 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
     },
     [setValue]
   );
-  const importArticle = useCallback(() => {
+  const importArticleCallback = useCallback(() => {
     setError("");
     setLoading(true);
-    axios
-      .post(`${process.env.REST_API_URL}/article`, { url: value })
-      .then(async (r) => {
-        const doc = new DOMParser().parseFromString(
-          r.data as string,
-          "text/html"
-        );
-        const { content } = new Readability(doc).parse();
-        const textarea = await openBlock(document.getElementById(blockId));
-        await userEvent.clear(textarea);
-        const markdown = td.turndown(content);
-        const nodes = markdown.split("\n").filter((c) => !!c.trim());
-        for (const node of nodes) {
-          const textarea = document.activeElement as HTMLTextAreaElement;
-          const text = await getText(node);
-          await userEvent.paste(textarea, text, {
-            // @ts-ignore - https://github.com/testing-library/user-event/issues/512
-            clipboardData: new DataTransfer(),
-          });
-          const end = textarea.value.length;
-          textarea.setSelectionRange(end, end);
-          await newBlockEnter();
-        }
-      })
+    importArticle({ url: value, blockId })
       .catch(() => {
         setError("Error Importing Article. Email link to support@roamjs.com.");
         setLoading(false);
@@ -108,7 +112,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
           autoFocus={true}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              importArticle();
+              importArticleCallback();
             }
           }}
           width={1000}
@@ -117,7 +121,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
       <div style={{ marginTop: 16 }}>
         <Button
           text={loading ? <Spinner size={20} /> : "IMPORT"}
-          onClick={importArticle}
+          onClick={importArticleCallback}
           disabled={loading}
         />
         <Text>{error}</Text>
