@@ -75,8 +75,6 @@ export const importArticle = ({
         // @ts-ignore - https://github.com/testing-library/user-event/issues/512
         clipboardData: new DataTransfer(),
       });
-      const end = textarea.value.length;
-      textarea.setSelectionRange(end, end);
       await newBlockEnter();
     }
   });
@@ -95,11 +93,10 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
   const importArticleCallback = useCallback(() => {
     setError("");
     setLoading(true);
-    importArticle({ url: value, blockId })
-      .catch(() => {
-        setError("Error Importing Article. Email link to support@roamjs.com.");
-        setLoading(false);
-      });
+    importArticle({ url: value, blockId }).catch(() => {
+      setError("Error Importing Article. Email link to support@roamjs.com.");
+      setLoading(false);
+    });
   }, [blockId, value, setError, setLoading]);
   return (
     <div style={{ padding: 16 }}>
