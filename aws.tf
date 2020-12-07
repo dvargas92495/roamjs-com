@@ -44,6 +44,10 @@ variable "auth0_client_id" {
     type = string
 }
 
+variable "mapbox_token" {
+    type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -219,4 +223,10 @@ resource "github_actions_secret" "auth0_client_id" {
   repository       = "roam-js-extensions"
   secret_name      = "AUTH0_CLIENT_ID"
   plaintext_value  = var.auth0_client_id
+}
+
+resource "github_actions_secret" "mapbox_token" {
+  repository       = "roam-js-extensions"
+  secret_name      = "MAPBOX_TOKEN"
+  plaintext_value  = var.mapbox_token
 }
