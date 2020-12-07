@@ -1,16 +1,22 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import { getUids } from "roam-client";
 import { getTextTreeByBlockUid } from "../entry-helpers";
 import { MapContainer, TileLayer } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 const Maps = ({ blockId }: { blockId: string }) => {
   const id = useMemo(() => `roamjs-maps-container-id-${blockId}`, [blockId]);
   return (
-    <MapContainer center={[51.505, -0.09]} zoom={13} id={id}>
+    <MapContainer
+      center={[51.505, -0.09]}
+      zoom={13}
+      id={id}
+      style={{ height: 400 }}
+    >
       <TileLayer
-        attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
-        url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.MAPBOX_TOKEN}`}
+        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
     </MapContainer>
   );
