@@ -16,6 +16,7 @@ env:
   NEXT_PUBLIC_FLOSS_API_URL: "https://${{ secrets.FLOSS_API_ID }}.execute-api.us-east-1.amazonaws.com/production"
   NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
   NEXT_PUBLIC_AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+  NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
 
 jobs:
   deploy:
