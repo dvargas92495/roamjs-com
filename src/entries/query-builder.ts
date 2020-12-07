@@ -1,5 +1,9 @@
 import { renderQueryBuilder } from "../components/QueryBuilder";
-import { createButtonObserver, createHTMLObserver, runExtension } from "../entry-helpers";
+import {
+  createButtonObserver,
+  createHTMLObserver,
+  runExtension,
+} from "../entry-helpers";
 
 runExtension("query-builder", () => {
   const css = document.createElement("style");
@@ -20,8 +24,8 @@ runExtension("query-builder", () => {
 
   const dataAttribute = "data-roamjs-edit-query";
 
-  createHTMLObserver(
-    (b) => {
+  createHTMLObserver({
+    callback: (b) => {
       if (!b.getAttribute(dataAttribute)) {
         b.setAttribute(dataAttribute, "true");
         const editButtonRoot = document.createElement("div");
@@ -38,7 +42,7 @@ runExtension("query-builder", () => {
         editButton.addEventListener("mousedown", (e) => e.stopPropagation());
       }
     },
-    "DIV",
-    "rm-query-title"
-  );
+    tag: "DIV",
+    className: "rm-query-title",
+  });
 });
