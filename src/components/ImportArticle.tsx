@@ -91,6 +91,10 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
     [setValue]
   );
   const importArticleCallback = useCallback(() => {
+    if (!value.startsWith('https://') && !value.startsWith('http://')) {
+      setError("Link must start with https:// protocol!");
+      return;
+    }
     setError("");
     setLoading(true);
     importArticle({ url: value, blockId }).catch(() => {
