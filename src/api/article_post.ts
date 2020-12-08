@@ -12,7 +12,6 @@ export const handler = async (event: APIGatewayEvent) => {
     action: "Import",
   });
   const { url } = JSON.parse(event.body);
-  const enc = charset(event.headers);
   return axios
     .get(url, { headers: { "Content-type": "text/html" } })
     .then((r) => ({
@@ -20,7 +19,7 @@ export const handler = async (event: APIGatewayEvent) => {
       body: JSON.stringify(r.data),
       headers: {
         ...headers,
-        "Content-Type": `application/json;charset=${enc}`,
+        "Content-Type": `application/json;charset=${charset(r.headers)}`,
       },
     }))
     .catch((e) => ({
