@@ -14,7 +14,7 @@ export const handler = async (event: APIGatewayEvent) => {
   const { url } = JSON.parse(event.body);
   const enc = charset(event.headers);
   return axios
-    .get(url)
+    .get(url, { headers: { "Content-type": "text/html" } })
     .then((r) => ({
       statusCode: 200,
       body: JSON.stringify(r.data),
