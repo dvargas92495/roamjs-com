@@ -59,7 +59,7 @@ export const render = (b: HTMLButtonElement) => {
       blockId={blockId}
       zoom={isNaN(zoom) ? undefined : zoom}
       center={
-        center.length !== 2 || center.some((c) => isNaN(c))
+        !center || center.length !== 2 || center.some((c) => isNaN(c))
           ? undefined
           : (center as LatLngExpression)
       }

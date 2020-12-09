@@ -14,6 +14,8 @@ import axios from "axios";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 
+export const ERROR_MESSAGE = "Error Importing Article. Email link to support@roamjs.com for help!";
+
 const getText = async (text: string) => {
   if (
     text.startsWith("# ") ||
@@ -107,7 +109,7 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
     setError("");
     setLoading(true);
     importArticle({ url: value, blockId }).catch(() => {
-      setError("Error Importing Article. Email link to support@roamjs.com.");
+      setError(ERROR_MESSAGE);
       setLoading(false);
     });
   }, [blockId, value, setError, setLoading]);
