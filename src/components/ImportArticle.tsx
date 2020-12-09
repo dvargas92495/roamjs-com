@@ -13,8 +13,14 @@ import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
+import { addStyle } from "../entry-helpers";
 
-export const ERROR_MESSAGE = "Error Importing Article. Email link to support@roamjs.com for help!";
+addStyle(`.leaflet-pane {
+  z-index: 10;
+}`);
+
+export const ERROR_MESSAGE =
+  "Error Importing Article. Email link to support@roamjs.com for help!";
 
 const getText = async (text: string) => {
   if (
@@ -33,6 +39,7 @@ const getText = async (text: string) => {
 
 const td = new TurndownService({
   hr: "---",
+  headingStyle: "atx",
 });
 td.addRule("img", {
   filter: "img",

@@ -9,7 +9,7 @@ export const useArrowKeyDown = <T>({
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const onKeyDown = useCallback(
-    (e) => {
+    (e: KeyboardEvent) => {
       if (e.key === "ArrowDown") {
         setActiveIndex((activeIndex + 1) % results.length);
         e.preventDefault();
@@ -19,6 +19,7 @@ export const useArrowKeyDown = <T>({
       } else if (e.key === "Enter" && results.length > 0) {
         onEnter(results[activeIndex]);
         e.preventDefault();
+        e.stopImmediatePropagation();
       }
     },
     [activeIndex, setActiveIndex, results, onEnter]
