@@ -3,6 +3,11 @@ import { Body, H4, Landing } from "@dvargas92495/ui";
 import Layout from "../components/Layout";
 import LandingUndraw from "../components/svg/LandingUndraw.svg";
 import Head from "next/head";
+import dynamic from "next/dynamic";
+
+const ConvertKitComponent = dynamic(() => import("../components/ConvertKit"), {
+  ssr: false,
+});
 
 const HomePage = () => (
   <Layout>
@@ -54,18 +59,12 @@ const HomePage = () => (
         },
       ]}
     >
-      <Head>
-        <script
-          async
-          src="https://prodigious-trader-7332.ck.page/a85e477729/index.js"
-        />
-      </Head>
       <H4>ROAMJS DIGEST</H4>
       <Body>
         Add your email below to stay up to date on all RoamJS features, fixes,
         and news!
       </Body>
-      <script data-uid="a85e477729" />
+      <ConvertKitComponent />
     </Landing>
   </Layout>
 );

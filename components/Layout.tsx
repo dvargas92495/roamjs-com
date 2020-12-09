@@ -13,6 +13,11 @@ import {
 import RoamJSLogo from "./RoamJSLogo";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useUser } from "react-manage-users";
+import dynamic from "next/dynamic";
+
+const ConvertKitComponent = dynamic(() => import("../components/ConvertKit"), {
+  ssr: false,
+});
 
 const UserIcon = () => {
   const user = useUser();
@@ -20,17 +25,11 @@ const UserIcon = () => {
     <UserAvatar {...user} />
   ) : (
     <AddUser buttonText={"Subscribe"} title="ROAMJS DIGEST">
-      <Head>
-        <script
-          async
-          src="https://prodigious-trader-7332.ck.page/a85e477729/index.js"
-        />
-      </Head>
       <Body>
         Add your email below to stay up to date on all RoamJS features, fixes,
         and news!
       </Body>
-      <script data-uid="a85e477729" />
+      <ConvertKitComponent />
     </AddUser>
   );
 };
