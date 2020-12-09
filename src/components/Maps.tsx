@@ -15,7 +15,7 @@ const Maps = ({
   blockId: string;
   zoom?: number;
   center?: LatLngExpression;
-  markers?: { position: LatLngExpression; tag: string }[];
+  markers?: { x: number; y: number; tag: string }[];
 }) => {
   const id = useMemo(() => `roamjs-maps-container-id-${blockId}`, [blockId]);
   return (
@@ -25,7 +25,7 @@ const Maps = ({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       {markers.map((m, i) => (
-        <Marker position={m.position} key={i}>
+        <Marker position={[m.x, m.y]} key={i}>
           <Popup>{m.tag}</Popup>
         </Marker>
       ))}
@@ -45,15 +45,25 @@ export const render = (b: HTMLButtonElement) => {
   const zoom = parseInt(zoomNode?.text);
   const center =
     centerNode && centerNode.text.split(",").map((s) => parseFloat(s));
-  const markers = markerNode;
+  const markers = markerNode.children
+    .map((m) => m.text.split(","))
+    .filter((m) => m.length === 3)
+    .map((m) => ({
+      tag: m[0],
+      x: parseFloat(m[1]),
+      y: parseFloat(m[2]),
+    }))
+    .filter(({ x, y }) => !isNaN(x) && !isNaN(y));
   ReactDOM.render(
     <Maps
       blockId={blockId}
       zoom={isNaN(zoom) ? undefined : zoom}
       center={
-        center.length !== 2 || center.some((c) => isNaN(c)) ? undefined : center as LatLngExpression
+        center.length !== 2 || center.some((c) => isNaN(c))
+          ? undefined
+          : (center as LatLngExpression)
       }
-
+      markers={markers}
     />,
     b.parentElement
   );
