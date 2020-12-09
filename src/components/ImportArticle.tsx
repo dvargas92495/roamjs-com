@@ -13,11 +13,10 @@ import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
-import { addStyle } from "../entry-helpers";
+import iconv from "iconv-lite";
 
-addStyle(`.leaflet-pane {
-  z-index: 10;
-}`);
+//@ts-ignore
+window.iconv = iconv;
 
 export const ERROR_MESSAGE =
   "Error Importing Article. Email link to support@roamjs.com for help!";
@@ -73,6 +72,12 @@ td.addRule("a", {
       return "";
     }
     const anchor = node as HTMLAnchorElement;
+    if (
+      anchor.childElementCount === 1 &&
+      anchor.children[0].nodeName === "img"
+    ) {
+      return content;
+    }
     var href = anchor.getAttribute("href");
     return "[" + content + "](" + href + ")";
   },

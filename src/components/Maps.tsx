@@ -1,11 +1,15 @@
 import React, { useMemo } from "react";
 import ReactDOM from "react-dom";
 import { getUids } from "roam-client";
-import { getTextTreeByBlockUid } from "../entry-helpers";
+import { addStyle, getTextTreeByBlockUid } from "../entry-helpers";
 import { MapContainer, Marker, TileLayer, Popup } from "react-leaflet";
 import { LatLngExpression, Icon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import EditContainer from "./EditContainer";
+
+addStyle(`.leaflet-pane {
+  z-index: 10 !important;
+}`);
 
 // https://github.com/Leaflet/Leaflet/blob/c0bf09ba32e71fdf29f91808c8b31bbb5946cc74/src/layer/marker/Icon.Default.js
 const MarkerIcon = new Icon({
