@@ -67,16 +67,16 @@ export const render = (b: HTMLButtonElement) => {
   const center =
     centerNode &&
     centerNode.children[0] &&
-    centerNode.children[0].text.split(",").map((s) => parseFloat(s));
+    centerNode.children[0].text.split(",").map((s) => parseFloat(s.trim()));
   const markers =
     markerNode &&
     markerNode.children
       .map((m) => m.text.split(","))
       .filter((m) => m.length === 3)
       .map((m) => ({
-        tag: m[0],
-        x: parseFloat(m[1]),
-        y: parseFloat(m[2]),
+        tag: m[0].trim(),
+        x: parseFloat(m[1].trim()),
+        y: parseFloat(m[2].trim()),
       }))
       .filter(({ x, y }) => !isNaN(x) && !isNaN(y));
   ReactDOM.render(
