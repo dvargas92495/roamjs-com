@@ -61,23 +61,32 @@ export const importArticle = ({
   url: string;
   blockId: string;
 }) =>
-  axios.get(url, { responseType: "document" }).then(async (r) => {
-    const doc = new DOMParser().parseFromString(r.data as string, "text/html");
-    const { content } = new Readability(doc).parse();
-    const textarea = await openBlock(document.getElementById(blockId));
-    await userEvent.clear(textarea);
-    const markdown = td.turndown(content);
-    const nodes = markdown.split("\n").filter((c) => !!c.trim());
-    for (const node of nodes) {
-      const textarea = document.activeElement as HTMLTextAreaElement;
-      const text = await getText(node);
-      await userEvent.paste(textarea, text, {
-        // @ts-ignore - https://github.com/testing-library/user-event/issues/512
-        clipboardData: new DataTransfer(),
-      });
-      await newBlockEnter();
-    }
-  });
+  axios
+    .post(
+      `${process.env.REST_API_URL}/article`,
+      { url },
+      { headers: { "Content-Type": "application/json" } }
+    )
+    .then(async (r) => {
+      const doc = new DOMParser().parseFromString(
+        r.data as string,
+        "text/html"
+      );
+      const { content } = new Readability(doc).parse();
+      const textarea = await openBlock(document.getElementById(blockId));
+      await userEvent.clear(textarea);
+      const markdown = td.turndown(content);
+      const nodes = markdown.split("\n").filter((c) => !!c.trim());
+      for (const node of nodes) {
+        const textarea = document.activeElement as HTMLTextAreaElement;
+        const text = await getText(node);
+        await userEvent.paste(textarea, text, {
+          // @ts-ignore - https://github.com/testing-library/user-event/issues/512
+          clipboardData: new DataTransfer(),
+        });
+        await newBlockEnter();
+      }
+    });
 
 const ImportContent = ({ blockId }: { blockId: string }) => {
   const [value, setValue] = useState("");
