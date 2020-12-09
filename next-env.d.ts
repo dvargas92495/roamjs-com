@@ -1,5 +1,6 @@
 /// <reference types="next" />
 /// <reference types="next/types/global" />
+/// <reference types="next-react-svg" />
 
 // https://github.com/jescalan/babel-plugin-import-glob-array/issues/7
 interface FrontMatter {
