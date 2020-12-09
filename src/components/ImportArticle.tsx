@@ -62,6 +62,21 @@ td.addRule("h4", {
     return `### ${content}`;
   },
 });
+td.addRule("a", {
+  filter: (node, options) =>
+    options.linkStyle === "inlined" &&
+    node.nodeName === "A" &&
+    !!node.getAttribute("href"),
+
+  replacement: (content, node) => {
+    if (!content) {
+      return "";
+    }
+    const anchor = node as HTMLAnchorElement;
+    var href = anchor.getAttribute("href");
+    return "[" + content + "](" + href + ")";
+  },
+});
 
 export const importArticle = ({
   url,
