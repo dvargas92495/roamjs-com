@@ -1,9 +1,8 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import { AxisType, Chart, SeriesType } from "react-charts";
 import { getTextTreeByBlockUid } from "../entry-helpers";
 import {
-  Button,
   Card,
   Elevation,
   H6,
@@ -12,9 +11,10 @@ import {
   Label,
   TextArea,
 } from "@blueprintjs/core";
-import { getUids, openBlock } from "roam-client";
+import { getUids } from "roam-client";
 import MenuItemSelect from "./MenuItemSelect";
 import parse from "date-fns/parse";
+import EditContainer from "./EditContainer";
 
 const CHARTS_WRAPPER = "roamjs-charts-wrapper";
 const CHART_WRAPPER = "roamjs-charts-chart-wrapper";
@@ -120,11 +120,11 @@ const Charts = ({
   initialBottomType,
   initialLeftType,
   initialDateFormat = "MM/dd/yyyy",
-  editCallback = () => {},
+  blockId = "",
 }: {
   type: SeriesType;
   data: { label: string; data: string[] }[];
-  editCallback?: () => void;
+  blockId?: string;
   initialBottomType: AxisType;
   initialLeftType: AxisType;
   initialDateFormat?: string;
@@ -161,28 +161,12 @@ const Charts = ({
     [leftType, bottomType]
   );
   const series = React.useMemo(() => ({ type }), []);
-  const [showEditIcon, setShowEditIcon] = useState(false);
-  const appear = useCallback(() => setShowEditIcon(true), [setShowEditIcon]);
-  const disappear = useCallback(() => setShowEditIcon(false), [
-    setShowEditIcon,
-  ]);
+
   return (
     <div className={CHARTS_WRAPPER}>
-      <div
-        className={CHART_WRAPPER}
-        onMouseOver={appear}
-        onMouseLeave={disappear}
-      >
-        {showEditIcon && (
-          <Button
-            icon="edit"
-            minimal
-            style={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}
-            onClick={editCallback}
-          />
-        )}
+      <EditContainer blockId={blockId} className={CHART_WRAPPER}>
         <Chart data={chartData} axes={axes} series={series} />
-      </div>
+      </EditContainer>
       <div className={LEGEND_WRAPPER}>
         <Label>
           X Axis Type
@@ -225,9 +209,6 @@ const Charts = ({
   );
 };
 
-const editCallback = (blockId: string) => () =>
-  openBlock(document.getElementById(blockId));
-
 export const renderLineChart = ({
   blockId,
   parent,
@@ -236,11 +217,7 @@ export const renderLineChart = ({
   parent: HTMLElement;
 }) =>
   ReactDOM.render(
-    <Charts
-      type={"line"}
-      {...getProps(blockId)}
-      editCallback={editCallback(blockId)}
-    />,
+    <Charts type={"line"} {...getProps(blockId)} blockId={blockId} />,
     parent
   );
 
@@ -250,15 +227,7 @@ export const renderBarChart = ({
 }: {
   blockId: string;
   parent: HTMLElement;
-}) =>
-  ReactDOM.render(
-    <Charts
-      type={"bar"}
-      {...getProps(blockId)}
-      editCallback={editCallback(blockId)}
-    />,
-    parent
-  );
+}) => ReactDOM.render(<Charts type={"bar"} {...getProps(blockId)} />, parent);
 
 export const DemoCharts = () => {
   const [data, setData] = React.useState([

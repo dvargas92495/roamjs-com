@@ -12,6 +12,15 @@ Type `{{maps}}` in a block. When the block renders, an interactive map will rend
 
 To position the map at a particular center, create a child block with text "Center". Under that block, put in the latitude and longitude coordinates of the center delimited by a comma.
 
+To start the map at a particular zoom level, create a child block with text "Zoom". Under that block, put in the zoom level value which should be a number.
+
+To add Markers to the map, create a child block with text "Markers". Under that block, add one child for every marker you want to include. The format of each child block should be:
+```
+text, latitude, longitude
+```
+
+Where text is the label that will appear on the marker, latitude is a decimal value for the latitude, and longitude is a decimal value for the longitude.
+
 ### Playground
 
 <DemoMaps />

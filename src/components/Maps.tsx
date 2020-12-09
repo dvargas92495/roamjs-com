@@ -5,6 +5,7 @@ import { getTextTreeByBlockUid } from "../entry-helpers";
 import { MapContainer, Marker, TileLayer, Popup } from "react-leaflet";
 import { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import EditContainer from "./EditContainer";
 
 const Maps = ({
   blockId,
@@ -19,17 +20,19 @@ const Maps = ({
 }) => {
   const id = useMemo(() => `roamjs-maps-container-id-${blockId}`, [blockId]);
   return (
-    <MapContainer center={center} zoom={zoom} id={id} style={{ height: 400 }}>
-      <TileLayer
-        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {markers.map((m, i) => (
-        <Marker position={[m.x, m.y]} key={i}>
-          <Popup>{m.tag}</Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+    <EditContainer blockId={blockId}>
+      <MapContainer center={center} zoom={zoom} id={id} style={{ height: 400 }}>
+        <TileLayer
+          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {markers.map((m, i) => (
+          <Marker position={[m.x, m.y]} key={i}>
+            <Popup>{m.tag}</Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </EditContainer>
   );
 };
 
@@ -39,21 +42,30 @@ export const render = (b: HTMLButtonElement) => {
     document.getElementById(blockId) as HTMLDivElement
   );
   const tree = getTextTreeByBlockUid(blockUid);
-  const markerNode = tree.children.find((c) => c.text.startsWith("Markers"));
-  const centerNode = tree.children.find((c) => c.text.startsWith("Center"));
-  const zoomNode = tree.children.find((c) => c.text.startsWith("Zoom"));
-  const zoom = parseInt(zoomNode?.text);
+  const markerNode = tree.children.find(
+    (c) => c.text.toUpperCase() === "MARKERS"
+  );
+  const centerNode = tree.children.find(
+    (c) => c.text.toUpperCase() === "CENTER"
+  );
+  const zoomNode = tree.children.find((c) => c.text.toUpperCase() === "ZOOM");
+  const zoom =
+    zoomNode && zoomNode.children[0] && parseInt(zoomNode.children[0].text);
   const center =
-    centerNode && centerNode.text.split(",").map((s) => parseFloat(s));
-  const markers = markerNode && markerNode.children
-    .map((m) => m.text.split(","))
-    .filter((m) => m.length === 3)
-    .map((m) => ({
-      tag: m[0],
-      x: parseFloat(m[1]),
-      y: parseFloat(m[2]),
-    }))
-    .filter(({ x, y }) => !isNaN(x) && !isNaN(y));
+    centerNode &&
+    centerNode.children[0] &&
+    centerNode.children[0].text.split(",").map((s) => parseFloat(s));
+  const markers =
+    markerNode &&
+    markerNode.children
+      .map((m) => m.text.split(","))
+      .filter((m) => m.length === 3)
+      .map((m) => ({
+        tag: m[0],
+        x: parseFloat(m[1]),
+        y: parseFloat(m[2]),
+      }))
+      .filter(({ x, y }) => !isNaN(x) && !isNaN(y));
   ReactDOM.render(
     <Maps
       blockId={blockId}
