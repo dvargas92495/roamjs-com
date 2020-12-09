@@ -246,6 +246,8 @@ const SubqueryContent = ({
           )}
           filterable={false}
           popoverProps={{ minimal: true, captureDismiss: true }}
+          // @ts-ignore
+          onKeyDown={e => e.nativeEvent.stopPropagation()}
         >
           <Button
             text={queryState.type}

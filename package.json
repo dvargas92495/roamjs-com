@@ -40,6 +40,7 @@
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-react": "^7.12.1",
     "@types/aws-lambda": "^8.10.61",
+    "@types/axios": "^0.14.0",
     "@types/charset": "^1.0.2",
     "@types/color": "^3.0.1",
     "@types/draft-js": "^0.10.44",

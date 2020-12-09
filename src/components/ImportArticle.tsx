@@ -14,9 +14,7 @@ import axios from "axios";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 import iconv from "iconv-lite";
-
-//@ts-ignore
-window.iconv = iconv;
+import charset from "charset";
 
 export const ERROR_MESSAGE =
   "Error Importing Article. Email link to support@roamjs.com for help!";
@@ -74,7 +72,7 @@ td.addRule("a", {
     const anchor = node as HTMLAnchorElement;
     if (
       anchor.childElementCount === 1 &&
-      anchor.children[0].nodeName === "img"
+      anchor.children[0].nodeName === "IMG"
     ) {
       return content;
     }
@@ -97,8 +95,10 @@ export const importArticle = ({
       { headers: { "Content-Type": "application/json" } }
     )
     .then(async (r) => {
+      const enc = charset(r.headers) || "utf-8";
+      const buffer = iconv.encode(r.data, "base64");
       const doc = new DOMParser().parseFromString(
-        r.data as string,
+        iconv.decode(buffer, enc),
         "text/html"
       );
       const { content } = new Readability(doc).parse();
