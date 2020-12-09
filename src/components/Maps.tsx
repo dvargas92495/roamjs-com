@@ -45,7 +45,7 @@ export const render = (b: HTMLButtonElement) => {
   const zoom = parseInt(zoomNode?.text);
   const center =
     centerNode && centerNode.text.split(",").map((s) => parseFloat(s));
-  const markers = markerNode.children
+  const markers = markerNode && markerNode.children
     .map((m) => m.text.split(","))
     .filter((m) => m.length === 3)
     .map((m) => ({

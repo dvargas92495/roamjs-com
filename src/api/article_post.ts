@@ -16,32 +16,20 @@ export const handler = async (event: APIGatewayEvent) => {
   return axios
     .get(url, {
       headers: { "Content-type": "text/html" },
-      responseType: "stream",
+      responseType: "arraybuffer",
     })
-    .then(
-      (r) =>
-        new Promise((resolve) => {
-          const enc = charset(r.headers) || "utf8";
-          const stream = r.data;
-          const responseBuffer = [] as Uint8Array[];
-          stream.on('data', (chunk: Uint8Array) => {
-              responseBuffer.push(chunk);
-          });
-      
-          stream.on('end', () => {
-            var responseData = Buffer.concat(responseBuffer);
-            const data = iconv.decode(responseData, enc.toUpperCase());
-            resolve({
-              statusCode: 200,
-              body: JSON.stringify(data),
-              headers: {
-                ...headers,
-                "Content-Type": `application/json;charset=${enc}`,
-              },
-            });
-          });
-        })
-    )
+    .then((r) => {
+      const enc = charset(r.headers) || "utf8";
+      const data = iconv.decode(r.data, enc);
+      return {
+        statusCode: 200,
+        body: JSON.stringify(data),
+        headers: {
+          ...headers,
+          "Content-Type": `application/json;charset=${enc}`,
+        },
+      };
+    })
     .catch((e) => ({
       statusCode: e.response?.status || 500,
       body: e.response?.data ? JSON.stringify(e.response.data) : e.message,
