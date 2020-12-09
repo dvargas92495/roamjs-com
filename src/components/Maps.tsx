@@ -3,9 +3,22 @@ import ReactDOM from "react-dom";
 import { getUids } from "roam-client";
 import { getTextTreeByBlockUid } from "../entry-helpers";
 import { MapContainer, Marker, TileLayer, Popup } from "react-leaflet";
-import { LatLngExpression } from "leaflet";
+import { LatLngExpression, Icon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import EditContainer from "./EditContainer";
+
+// https://github.com/Leaflet/Leaflet/blob/c0bf09ba32e71fdf29f91808c8b31bbb5946cc74/src/layer/marker/Icon.Default.js
+const MarkerIcon = new Icon({
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  tooltipAnchor: [16, -28],
+  shadowSize: [41, 41],
+});
 
 const Maps = ({
   blockId,
@@ -27,7 +40,7 @@ const Maps = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {markers.map((m, i) => (
-          <Marker position={[m.x, m.y]} key={i}>
+          <Marker position={[m.x, m.y]} key={i} icon={MarkerIcon}>
             <Popup>{m.tag}</Popup>
           </Marker>
         ))}

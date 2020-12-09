@@ -22,7 +22,6 @@ const LEGEND_WRAPPER = "roamjs-charts-legend-wrapper";
 export const styleContent = `.${CHART_WRAPPER} {
     height: 300px;
     width: 400px;
-    position: relative;
 }
 
 .${CHARTS_WRAPPER} {
