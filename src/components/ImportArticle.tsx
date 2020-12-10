@@ -104,7 +104,7 @@ export const importArticle = ({
         if (isHeader) {
           if (indent) {
             if (firstHeaderFound) {
-              userEvent.tab({ shift: true });
+              await userEvent.tab({ shift: true });
             } else {
               firstHeaderFound = true;
             }
