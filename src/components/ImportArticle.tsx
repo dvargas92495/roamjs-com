@@ -15,6 +15,7 @@ import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 import iconv from "iconv-lite";
 import charset from "charset";
+import { getTextTreeByPageName } from "../entry-helpers";
 
 export const ERROR_MESSAGE =
   "Error Importing Article. Email link to support@roamjs.com for help!";
@@ -106,14 +107,30 @@ export const importArticle = ({
       await userEvent.clear(textarea);
       const markdown = td.turndown(content);
       const nodes = markdown.split("\n").filter((c) => !!c.trim());
+      const config = getTextTreeByPageName("roam/js/article");
+      const indent = config.some(
+        (s) => s.text.trim().toUpperCase() === "INDENT UNDER HEADER"
+      );
+      let firstHeaderFound = false;
       for (const node of nodes) {
         const textarea = document.activeElement as HTMLTextAreaElement;
         const text = await getText(node);
+        const isHeader = indent && (text.startsWith("# ") || text.startsWith("## ") || text.startsWith("### "));
+        if (isHeader) {
+          if (firstHeaderFound) {
+            userEvent.tab({ shift: true });
+          } else {
+            firstHeaderFound = true;
+          }
+        }
         await userEvent.paste(textarea, text, {
           // @ts-ignore - https://github.com/testing-library/user-event/issues/512
           clipboardData: new DataTransfer(),
         });
         await newBlockEnter();
+        if (isHeader) {
+          await userEvent.tab();
+        }
       }
     });
 
