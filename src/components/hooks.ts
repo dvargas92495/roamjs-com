@@ -9,7 +9,7 @@ export const useArrowKeyDown = <T>({
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const onKeyDown = useCallback(
-    (e) => {
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "ArrowDown") {
         setActiveIndex((activeIndex + 1) % results.length);
         e.preventDefault();

@@ -13,8 +13,11 @@ import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
+import iconv from "iconv-lite";
+import charset from "charset";
 
-export const ERROR_MESSAGE = "Error Importing Article. Email link to support@roamjs.com for help!";
+export const ERROR_MESSAGE =
+  "Error Importing Article. Email link to support@roamjs.com for help!";
 
 const getText = async (text: string) => {
   if (
@@ -33,6 +36,7 @@ const getText = async (text: string) => {
 
 const td = new TurndownService({
   hr: "---",
+  headingStyle: "atx",
 });
 td.addRule("img", {
   filter: "img",
@@ -55,6 +59,27 @@ td.addRule("h4", {
     return `### ${content}`;
   },
 });
+td.addRule("a", {
+  filter: (node, options) =>
+    options.linkStyle === "inlined" &&
+    node.nodeName === "A" &&
+    !!node.getAttribute("href"),
+
+  replacement: (content, node) => {
+    if (!content) {
+      return "";
+    }
+    const anchor = node as HTMLAnchorElement;
+    if (
+      anchor.childElementCount === 1 &&
+      anchor.children[0].nodeName === "IMG"
+    ) {
+      return content;
+    }
+    var href = anchor.getAttribute("href");
+    return "[" + content + "](" + href + ")";
+  },
+});
 
 export const importArticle = ({
   url,
@@ -70,8 +95,10 @@ export const importArticle = ({
       { headers: { "Content-Type": "application/json" } }
     )
     .then(async (r) => {
+      const enc = charset(r.headers) || "utf-8";
+      const buffer = iconv.encode(r.data, "base64");
       const doc = new DOMParser().parseFromString(
-        r.data as string,
+        iconv.decode(buffer, enc),
         "text/html"
       );
       const { content } = new Readability(doc).parse();

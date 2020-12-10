@@ -1,11 +1,15 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import { getUids } from "roam-client";
-import { getTextTreeByBlockUid } from "../entry-helpers";
+import { addStyle, getPageUidByPageTitle, getTextTreeByBlockUid } from "../entry-helpers";
 import { MapContainer, Marker, TileLayer, Popup } from "react-leaflet";
 import { LatLngExpression, Icon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import EditContainer from "./EditContainer";
+
+addStyle(`.leaflet-pane {
+  z-index: 10 !important;
+}`);
 
 // https://github.com/Leaflet/Leaflet/blob/c0bf09ba32e71fdf29f91808c8b31bbb5946cc74/src/layer/marker/Icon.Default.js
 const MarkerIcon = new Icon({
@@ -32,6 +36,34 @@ const Maps = ({
   markers?: { x: number; y: number; tag: string }[];
 }) => {
   const id = useMemo(() => `roamjs-maps-container-id-${blockId}`, [blockId]);
+  const [href, setHref] = useState("https://roamresearch.com");
+  useEffect(() => {
+    const windowHref = window.location.href;
+    setHref(
+      windowHref.includes("/page/")
+        ? windowHref.substring(0, windowHref.indexOf("/page/"))
+        : windowHref
+    );
+  }, [setHref]);
+  const popupCallback = useCallback(
+    (tag: string) => () => {
+      const extractedTag =
+        tag.startsWith("#[[") && tag.endsWith("]]")
+          ? tag.substring(3, tag.length - 2)
+          : tag.startsWith("[[") && tag.endsWith("]]")
+          ? tag.substring(2, tag.length - 2)
+          : tag.startsWith("#")
+          ? tag.substring(1)
+          : tag;
+      if (extractedTag !== tag) {
+        const pageUid = getPageUidByPageTitle(extractedTag);
+        if (pageUid) {
+          window.location.assign(`${href}/page/${pageUid}`);
+        }
+      }
+    },
+    [href]
+  );
   return (
     <EditContainer blockId={blockId}>
       <MapContainer center={center} zoom={zoom} id={id} style={{ height: 400 }}>
@@ -41,7 +73,7 @@ const Maps = ({
         />
         {markers.map((m, i) => (
           <Marker position={[m.x, m.y]} key={i} icon={MarkerIcon}>
-            <Popup>{m.tag}</Popup>
+            <Popup onOpen={popupCallback(m.tag)}>{m.tag}</Popup>
           </Marker>
         ))}
       </MapContainer>

@@ -16,14 +16,15 @@ export const handler = async (event: APIGatewayEvent) => {
   return axios
     .get(url, {
       headers: { "Content-type": "text/html" },
-      responseType: "arraybuffer",
+      responseType: "document",
+      // @ts-ignore https://github.com/axios/axios/pull/2619
+      responseEncoding: "base64",
     })
     .then((r) => {
       const enc = charset(r.headers) || "utf8";
-      const data = iconv.decode(r.data, enc);
       return {
         statusCode: 200,
-        body: JSON.stringify(data),
+        body: JSON.stringify(r.data),
         headers: {
           ...headers,
           "Content-Type": `application/json;charset=${enc}`,
