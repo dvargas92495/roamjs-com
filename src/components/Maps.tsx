@@ -72,7 +72,7 @@ const Maps = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {markers.map((m, i) => (
-          <Marker position={[m.x, m.y]} key={i} icon={MarkerIcon}>
+          <Marker position={[m.x, m.y]} key={i} icon={MarkerIcon} title={m.tag}>
             <Popup onOpen={popupCallback(m.tag)}>{m.tag}</Popup>
           </Marker>
         ))}
