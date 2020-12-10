@@ -20,21 +20,6 @@ import { getTextTreeByPageName } from "../entry-helpers";
 export const ERROR_MESSAGE =
   "Error Importing Article. Email link to support@roamjs.com for help!";
 
-const getText = async (text: string) => {
-  if (
-    text.startsWith("# ") ||
-    text.startsWith("## ") ||
-    text.startsWith("### ")
-  ) {
-    const headingIndex = text.indexOf("# ");
-    const typeText = text.substring(0, headingIndex + 2);
-    const pasteText = text.substring(headingIndex + 2);
-    await asyncType(typeText);
-    return pasteText;
-  }
-  return text;
-};
-
 const td = new TurndownService({
   hr: "---",
   headingStyle: "atx",
@@ -114,14 +99,17 @@ export const importArticle = ({
       let firstHeaderFound = false;
       for (const node of nodes) {
         const textarea = document.activeElement as HTMLTextAreaElement;
-        const text = await getText(node);
-        const isHeader = indent && (text.startsWith("# ") || text.startsWith("## ") || text.startsWith("### "));
+        const isHeader = (node.startsWith("# ") || node.startsWith("## ") || node.startsWith("### "));
+        const text = isHeader ? node.substring(0, node.indexOf("# ")) : node;
         if (isHeader) {
-          if (firstHeaderFound) {
-            userEvent.tab({ shift: true });
-          } else {
-            firstHeaderFound = true;
+          if (indent) {
+            if (firstHeaderFound) {
+              userEvent.tab({ shift: true });
+            } else {
+              firstHeaderFound = true;
+            }
           }
+          await asyncType(node.substring(0, node.indexOf("# ") + 2));
         }
         await userEvent.paste(textarea, text, {
           // @ts-ignore - https://github.com/testing-library/user-event/issues/512
