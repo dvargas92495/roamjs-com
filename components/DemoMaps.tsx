@@ -9,7 +9,10 @@ const DemoMaps = () => {
       blockId="demo"
       center={[32.715736, -117.161087]}
       zoom={12}
-      markers={[{ tag: "David Vargas", x: 32.7, y: -117.2 }]}
+      markers={[
+        { tag: "David Vargas", x: 32.7, y: -117.2 },
+        { tag: "RoamJS", x: 32.72, y: -117.1 },
+      ]}
     />
   );
 };

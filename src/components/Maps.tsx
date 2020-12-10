@@ -107,13 +107,14 @@ export const render = (b: HTMLButtonElement) => {
   const markers =
     markerNode &&
     markerNode.children
-      .map((m) => m.text.split(","))
-      .filter((m) => m.length === 3)
-      .map((m) => ({
-        tag: m[0].trim(),
-        x: parseFloat(m[1].trim()),
-        y: parseFloat(m[2].trim()),
-      }))
+      .map((m) => {
+        const [x, y] = m.children[0].text.split(',').map(s => parseFloat(s.trim()));
+        return {
+          tag: m.text.trim(),
+          x,
+          y,
+        }
+      })
       .filter(({ x, y }) => !isNaN(x) && !isNaN(y));
   ReactDOM.render(
     <Maps
