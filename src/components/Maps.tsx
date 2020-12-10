@@ -82,7 +82,11 @@ const Maps = ({
 };
 
 export const render = (b: HTMLButtonElement) => {
-  const blockId = b.closest(".roam-block").id;
+  const block = b.closest(".roam-block");
+  if (!block) {
+    return;
+  }
+  const blockId = block.id;
   const { blockUid } = getUids(
     document.getElementById(blockId) as HTMLDivElement
   );
