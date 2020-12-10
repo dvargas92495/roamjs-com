@@ -100,7 +100,7 @@ export const importArticle = ({
       for (const node of nodes) {
         const textarea = document.activeElement as HTMLTextAreaElement;
         const isHeader = (node.startsWith("# ") || node.startsWith("## ") || node.startsWith("### "));
-        const text = isHeader ? node.substring(0, node.indexOf("# ")) : node;
+        const text = isHeader ? node.substring(node.indexOf("# ") + 2) : node;
         if (isHeader) {
           if (indent) {
             if (firstHeaderFound) {
