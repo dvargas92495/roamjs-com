@@ -116,7 +116,7 @@ export const importArticle = ({
           clipboardData: new DataTransfer(),
         });
         await newBlockEnter();
-        if (isHeader) {
+        if (indent && isHeader) {
           await userEvent.tab();
         }
       }
