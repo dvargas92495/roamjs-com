@@ -556,7 +556,7 @@ export const getPageTitleByBlockUid = (blockUid: string): string => {
 
 export const getPageUidByPageTitle = (title: string): string => {
   const result = window.roamAlphaAPI.q(
-    `[:find (pull ?c [:block/uid]) :where [?e :node/title "${title}"]]`
+    `[:find (pull ?e [:block/uid]) :where [?e :node/title "${title}"]]`
   );
   if (!result.length) {
     return "";

@@ -72,7 +72,7 @@ const Maps = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {markers.map((m, i) => (
-          <Marker position={[m.x, m.y]} key={i} icon={MarkerIcon}>
+          <Marker position={[m.x, m.y]} key={i} icon={MarkerIcon} title={m.tag}>
             <Popup onOpen={popupCallback(m.tag)}>{m.tag}</Popup>
           </Marker>
         ))}
@@ -82,7 +82,11 @@ const Maps = ({
 };
 
 export const render = (b: HTMLButtonElement) => {
-  const blockId = b.closest(".roam-block").id;
+  const block = b.closest(".roam-block");
+  if (!block) {
+    return;
+  }
+  const blockId = block.id;
   const { blockUid } = getUids(
     document.getElementById(blockId) as HTMLDivElement
   );
@@ -103,13 +107,14 @@ export const render = (b: HTMLButtonElement) => {
   const markers =
     markerNode &&
     markerNode.children
-      .map((m) => m.text.split(","))
-      .filter((m) => m.length === 3)
-      .map((m) => ({
-        tag: m[0].trim(),
-        x: parseFloat(m[1].trim()),
-        y: parseFloat(m[2].trim()),
-      }))
+      .map((m) => {
+        const [x, y] = m.children[0].text.split(',').map(s => parseFloat(s.trim()));
+        return {
+          tag: m.text.trim(),
+          x,
+          y,
+        }
+      })
       .filter(({ x, y }) => !isNaN(x) && !isNaN(y));
   ReactDOM.render(
     <Maps
