@@ -107,7 +107,7 @@ const PageInput = ({
       minimal={true}
       position={PopoverPosition.BOTTOM}
       content={
-        <Menu style={{    maxWidth: 400        }}>
+        <Menu style={{ maxWidth: 400 }}>
           {items.map((t, i) => (
             <MenuItem
               text={t}
@@ -247,7 +247,7 @@ const SubqueryContent = ({
           filterable={false}
           popoverProps={{ minimal: true, captureDismiss: true }}
           // @ts-ignore
-          onKeyDown={e => e.nativeEvent.stopPropagation()}
+          onKeyDown={(e) => e.nativeEvent.stopPropagation()}
         >
           <Button
             text={queryState.type}
