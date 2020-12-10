@@ -19,7 +19,6 @@ export const useArrowKeyDown = <T>({
       } else if (e.key === "Enter" && results.length > 0) {
         onEnter(results[activeIndex]);
         e.preventDefault();
-        e.nativeEvent.stopImmediatePropagation();
       }
     },
     [activeIndex, setActiveIndex, results, onEnter]
