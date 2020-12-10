@@ -15,9 +15,12 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useUser } from "react-manage-users";
 import dynamic from "next/dynamic";
 
-const ConvertKitComponent = dynamic(() => import("../components/ConvertKit"), {
-  ssr: false,
-});
+const ConvertKitComponent = () => {
+  const Component = dynamic(() => import("../components/ConvertKit"), {
+    ssr: false,
+  });
+  return <Component />;
+};
 
 const UserIcon = () => {
   const user = useUser();
