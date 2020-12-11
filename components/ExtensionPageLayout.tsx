@@ -1,9 +1,22 @@
-import { Body, Button, H1, H2, H3, H4, Subtitle } from "@dvargas92495/ui";
+import {
+  Body,
+  Button,
+  ExternalLink,
+  H1,
+  H2,
+  H3,
+  H4,
+  Subtitle,
+} from "@dvargas92495/ui";
 import React, { useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import DemoVideo from "./DemoVideo";
 import ExtensionLayout, { pathToId, pathToLabel } from "./ExtensionLayout";
 import { useCopyCode } from "./hooks";
+
+const contributors = {
+  "Rodrigo Franco": "https://www.rodrigofranco.com/",
+};
 
 const ExtensionPageLayout = ({
   children,
@@ -62,10 +75,19 @@ if (!existing) {
       {frontMatter.contributors && (
         <>
           <H3>Contributors</H3>
-          <Body>A special thanks to those who's contributions helped make this extension possible:</Body>
+          <Body>
+            A special thanks to those who's contributions helped make this
+            extension possible:
+          </Body>
           <ul>
             {frontMatter.contributors.split(",").map((s) => (
-              <li key={s}>{s}</li>
+              <li key={s}>
+                {contributors[s] ? (
+                  <ExternalLink href={contributors[s]}>{s}</ExternalLink>
+                ) : (
+                  s
+                )}
+              </li>
             ))}
           </ul>
         </>
