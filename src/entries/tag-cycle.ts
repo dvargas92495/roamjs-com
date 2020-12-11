@@ -18,7 +18,7 @@ declare global {
 
 window.observerCount = 0;
 
-type CycleType = "HASH" | "RAW" | "BRACKET";
+type CycleType = "HASH" | "RAW" | "BRACKET" | "FRONT";
 
 runExtension("tag-cycle", () => {
   const config: { [blockUid: string]: (e: KeyboardEvent) => void } = {};
