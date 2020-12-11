@@ -3,10 +3,10 @@ layout: "ExtensionPageLayout"
 description: "The Article extension allows users to import articles into their Roam DB!"
 ---
 
-The script is not configurable
-
 In a block, type `{{article}}`. Similar to date picker, there will be an overlay that appears next to the article button. There will be a text input where you paste in the article's URL. Then, you could hit the `IMPORT` button and the contents of the article will be imported into your Roam DB!
 
 The extension is making it's best guess on what content from the link is considered the article and what isn't. To help improve the extension over time, send article links that did not quite format correctly to support@roamjs.com.
 
 If there is already an article link in a block, you could use the ALT+SHIFT+I or the OPT+SHIFT+I keyboard shortcut to automatically import the article from the link.
+
+The overlay supports an "Indent Under Header" option. When checked, this will paste contents as children of each header in the article. To set this value globally, add a block with the text "Indent Under Header" in the `roam/js/article` page in your Roam DB.

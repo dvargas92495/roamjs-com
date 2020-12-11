@@ -2,8 +2,10 @@ import ReactDOM from "react-dom";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import {
   Button,
+  Checkbox,
   Icon,
   InputGroup,
+  Label,
   Popover,
   Spinner,
   Text,
@@ -16,7 +18,6 @@ import TurndownService from "turndown";
 import iconv from "iconv-lite";
 import charset from "charset";
 import { getTextTreeByPageName } from "../entry-helpers";
-import { fireEvent } from "@testing-library/dom";
 
 export const ERROR_MESSAGE =
   "Error Importing Article. Email link to support@roamjs.com for help!";
@@ -31,7 +32,7 @@ td.addRule("img", {
     const img = node as HTMLImageElement;
     const src = img.getAttribute("data-src") || img.getAttribute("src");
     const alt = img.getAttribute("alt") || "";
-    return `![${alt}](${src})`;
+    return `![${alt.replace(/\n/g, "")}](${src})`;
   },
 });
 td.addRule("i", {
@@ -68,20 +69,14 @@ td.addRule("a", {
   },
 });
 
-const tabObj = {
-  key: "Tab",
-  keyCode: 9,
-  code: 9,
-  which: 9,
-};
-const shiftTabObj = { ...tabObj, shiftKey: true };
-              
 export const importArticle = ({
   url,
   blockId,
+  indent,
 }: {
   url: string;
   blockId: string;
+  indent: boolean;
 }) =>
   axios
     .post(
@@ -106,10 +101,6 @@ export const importArticle = ({
       await userEvent.clear(textarea);
       const markdown = td.turndown(content);
       const nodes = markdown.split("\n").filter((c) => !!c.trim());
-      const config = getTextTreeByPageName("roam/js/article");
-      const indent = config.some(
-        (s) => s.text.trim().toUpperCase() === "INDENT UNDER HEADER"
-      );
       let firstHeaderFound = false;
       for (const node of nodes) {
         const textarea = document.activeElement as HTMLTextAreaElement;
@@ -121,8 +112,7 @@ export const importArticle = ({
         if (isHeader) {
           if (indent) {
             if (firstHeaderFound) {
-              await fireEvent.keyDown(textarea, shiftTabObj);
-              await fireEvent.keyUp(textarea, shiftTabObj);
+              await userEvent.tab({ shift: true });
             } else {
               firstHeaderFound = true;
             }
@@ -135,15 +125,21 @@ export const importArticle = ({
         });
         await newBlockEnter();
         if (indent && isHeader) {
-          await fireEvent.keyDown(document.activeElement, tabObj);
-          await fireEvent.keyUp(document.activeElement, tabObj);
+          await userEvent.tab();
         }
       }
     });
 
-const ImportContent = ({ blockId }: { blockId: string }) => {
+const ImportContent = ({
+  blockId,
+  initialIndent,
+}: {
+  blockId: string;
+  initialIndent: boolean;
+}) => {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
+  const [indent, setIndent] = useState(initialIndent);
   const [loading, setLoading] = useState(false);
   const onChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -159,11 +155,15 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
     }
     setError("");
     setLoading(true);
-    importArticle({ url: value, blockId }).catch(() => {
+    importArticle({ url: value, blockId, indent }).catch(() => {
       setError(ERROR_MESSAGE);
       setLoading(false);
     });
   }, [blockId, value, setError, setLoading]);
+  const indentOnChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => setIndent(e.target.checked),
+    [setIndent]
+  );
   return (
     <div style={{ padding: 16 }}>
       <div>
@@ -181,6 +181,12 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
           width={1000}
         />
       </div>
+      <div>
+        <Label>
+          Indent Under Header
+          <Checkbox checked={indent} onChange={indentOnChange} />
+        </Label>
+      </div>
       <div style={{ marginTop: 16 }}>
         <Button
           text={loading ? <Spinner size={20} /> : "IMPORT"}
@@ -193,15 +199,22 @@ const ImportContent = ({ blockId }: { blockId: string }) => {
   );
 };
 
-const ImportArticle = ({ blockId }: { blockId: string }) => (
+const ImportArticle = ({ blockId, initialIndent }: { blockId: string, initialIndent: boolean; }) => (
   <Popover
-    content={<ImportContent blockId={blockId} />}
+    content={<ImportContent blockId={blockId} initialIndent={initialIndent} />}
     target={<Button text="IMPORT ARTICLE" data-roamjs-import-article />}
     defaultIsOpen={true}
   />
 );
 
+export const getIndentConfig = () => {
+  const config = getTextTreeByPageName("roam/js/article");
+  return config.some(
+    (s) => s.text.trim().toUpperCase() === "INDENT UNDER HEADER"
+  );
+};
+
 export const renderImportArticle = (blockId: string, p: HTMLElement) =>
-  ReactDOM.render(<ImportArticle blockId={blockId} />, p);
+  ReactDOM.render(<ImportArticle blockId={blockId} initialIndent={getIndentConfig()}/>, p);
 
 export default ImportArticle;

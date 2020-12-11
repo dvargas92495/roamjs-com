@@ -3,6 +3,7 @@ import { asyncPaste, newBlockEnter } from "roam-client";
 import urlRegex from "url-regex";
 import {
   ERROR_MESSAGE,
+  getIndentConfig,
   importArticle,
   renderImportArticle,
 } from "../components/ImportArticle";
@@ -23,6 +24,7 @@ runExtension("article", () => {
         const textarea = target as HTMLTextAreaElement;
         const match = textarea.value.match(urlRegex({ strict: true }));
         if (match) {
+          const indent = getIndentConfig();
           const url = match[0];
           await newBlockEnter();
           await userEvent.tab();
@@ -30,6 +32,7 @@ runExtension("article", () => {
           await importArticle({
             url,
             blockId: document.activeElement.id,
+            indent,
           }).catch(async () => {
             await userEvent.clear(document.activeElement);
             await asyncPaste(ERROR_MESSAGE);
