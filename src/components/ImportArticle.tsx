@@ -113,6 +113,7 @@ export const importArticle = ({
           if (indent) {
             if (firstHeaderFound) {
               await userEvent.tab({ shift: true });
+              window.requestAnimationFrame(() => {});
             } else {
               firstHeaderFound = true;
             }
@@ -126,6 +127,7 @@ export const importArticle = ({
         await newBlockEnter();
         if (indent && isHeader) {
           await userEvent.tab();
+          window.requestAnimationFrame(() => {});
         }
       }
     });
@@ -199,7 +201,13 @@ const ImportContent = ({
   );
 };
 
-const ImportArticle = ({ blockId, initialIndent }: { blockId: string, initialIndent: boolean; }) => (
+const ImportArticle = ({
+  blockId,
+  initialIndent,
+}: {
+  blockId: string;
+  initialIndent: boolean;
+}) => (
   <Popover
     content={<ImportContent blockId={blockId} initialIndent={initialIndent} />}
     target={<Button text="IMPORT ARTICLE" data-roamjs-import-article />}
@@ -215,6 +223,9 @@ export const getIndentConfig = () => {
 };
 
 export const renderImportArticle = (blockId: string, p: HTMLElement) =>
-  ReactDOM.render(<ImportArticle blockId={blockId} initialIndent={getIndentConfig()}/>, p);
+  ReactDOM.render(
+    <ImportArticle blockId={blockId} initialIndent={getIndentConfig()} />,
+    p
+  );
 
 export default ImportArticle;
