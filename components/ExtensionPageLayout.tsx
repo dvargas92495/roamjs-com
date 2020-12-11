@@ -59,6 +59,17 @@ if (!existing) {
       {children}
       <H3>Demo</H3>
       <DemoVideo src={pathToId(frontMatter.__resourcePath)} />
+      {frontMatter.contributors && (
+        <>
+          <H3>Contributors</H3>
+          <Body>A special thanks to those who's contributions helped make this extension possible:</Body>
+          <ul>
+            {frontMatter.contributors.split(",").map((s) => (
+              <li key={s}>{s}</li>
+            ))}
+          </ul>
+        </>
+      )}
     </ExtensionLayout>
   );
 };
