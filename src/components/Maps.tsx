@@ -94,7 +94,7 @@ const getCoords = (tag: string) => axios
 )
 .then((r) =>
   r.data.features?.length
-    ? (r.data.features[0].center as number[])
+    ? (r.data.features[0].center as number[]).reverse()
     : [NaN, NaN]
 );
 
