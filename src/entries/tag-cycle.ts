@@ -28,8 +28,9 @@ runExtension("tag-cycle", () => {
     if (config[blockUid]) {
       document.removeEventListener("keydown", config[blockUid]);
       delete config[blockUid];
-      const uids = Object.values(blockUidsByKeystroke)
-        .find((v) => v.has(blockUid))
+      const uids = Object.values(blockUidsByKeystroke).find((v) =>
+        v.has(blockUid)
+      );
       if (uids) {
         uids.delete(blockUid);
       }
@@ -100,12 +101,13 @@ runExtension("tag-cycle", () => {
               const end = textarea.selectionEnd;
               const tag2 = cycle[(index + 1 + cycle.length) % cycle.length];
               if (cycleType === "RAW") {
-                await replaceText([tag1, tag2]);
+                await replaceText({ before: tag1, after: tag2 });
               } else {
                 await replaceTagText({
                   before: tag1,
                   after: tag2,
                   addHash: cycleType === "HASH",
+                  prepend: cycleType === "FRONT",
                 });
               }
               textarea.setSelectionRange(

@@ -52,9 +52,21 @@ export const runExtension = (extensionId: string, run: () => void) => {
   run();
 };
 
-export const replaceText = async ([before, after]: string[]) => {
+export const replaceText = async ({
+  before,
+  after,
+  prepend,
+}: {
+  before: string;
+  after: string;
+  prepend?: boolean;
+}) => {
   const textArea = document.activeElement as HTMLTextAreaElement;
-  const index = before ? textArea.value.indexOf(before) : textArea.value.length;
+  const index = before
+    ? textArea.value.indexOf(before)
+    : prepend
+    ? 0
+    : textArea.value.length;
   if (index >= 0) {
     textArea.setSelectionRange(index, index + before.length);
     await asyncType(`${before ? "{backspace}" : ""}${after}`);
@@ -65,25 +77,39 @@ export const replaceTagText = async ({
   before,
   after,
   addHash = false,
+  prepend = false,
 }: {
   before: string;
   after: string;
   addHash?: boolean;
+  prepend?: boolean;
 }) => {
   if (before) {
-    await replaceText([`#[[${before}]]`, after ? `#[[${after}]]` : ""]);
-    await replaceText([`[[${before}]]`, after ? `[[${after}]]` : ""]);
+    await replaceText({
+      before: `#[[${before}]]`,
+      after: after ? `#[[${after}]]` : "",
+      prepend,
+    });
+    await replaceText({
+      before: `[[${before}]]`,
+      after: after ? `[[${after}]]` : "",
+      prepend,
+    });
     const hashAfter = after.match(/(\s|\[\[.*\]\])/)
       ? `#[[${after}]]`
       : `#${after}`;
-    await replaceText([`#${before}`, after ? hashAfter : ""]);
+    await replaceText({
+      before: `#${before}`,
+      after: after ? hashAfter : "",
+      prepend,
+    });
   } else if (addHash) {
     const hashAfter = after.match(/(\s|\[\[.*\]\])/)
       ? `#[[${after}]]`
       : `#${after}`;
-    await replaceText(["", hashAfter]);
+    await replaceText({ before: "", after: hashAfter, prepend });
   } else {
-    await replaceText(["", `[[${after}]]`]);
+    await replaceText({ before: "", after: `[[${after}]]`, prepend });
   }
 };
 
