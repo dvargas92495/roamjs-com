@@ -122,7 +122,7 @@ runExtension("tag-cycle", () => {
         }
       }
     };
-    document.addEventListener("keydown", config[shortcut.uid]);
+    document.getElementsByClassName("roam-app")[0].addEventListener("keydown", config[shortcut.uid]);
   };
 
   const isValidShortcut = (t: Pick<TreeNode, "text">) =>
