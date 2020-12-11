@@ -6,6 +6,7 @@ import {
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel from "mixpanel-browser";
+import userEvent from "@testing-library/user-event";
 
 declare global {
   interface Window {
@@ -69,7 +70,12 @@ export const replaceText = async ({
     : textArea.value.length;
   if (index >= 0) {
     textArea.setSelectionRange(index, index + before.length);
-    await asyncType(`${before ? "{backspace}" : ""}${after}`);
+    const text = `${before ? "{backspace}" : ""}${after}`;
+    await userEvent.type(textArea, text, {
+      initialSelectionEnd: index + before.length,
+      initialSelectionStart: index,
+      skipClick: true,
+    });
   }
 };
 

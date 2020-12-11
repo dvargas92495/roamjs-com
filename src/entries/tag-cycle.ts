@@ -18,8 +18,6 @@ declare global {
 
 window.observerCount = 0;
 
-type CycleType = "HASH" | "RAW" | "BRACKET" | "FRONT";
-
 runExtension("tag-cycle", () => {
   const config: { [blockUid: string]: (e: KeyboardEvent) => void } = {};
   const blockUidsByKeystroke: { [keystroke: string]: Set<string> } = {};
@@ -43,8 +41,7 @@ runExtension("tag-cycle", () => {
     const isShift = parts[1] === "SHIFT";
     const keyParts = parts[parts.length - 1].split(" ") || [""];
     const key = keyParts[0];
-    const cycleType =
-      keyParts.length > 1 ? (keyParts[1] as CycleType) : "BRACKET";
+    const modifiers = keyParts.slice(1).map((s) => s.toUpperCase());
     const cycle = shortcut.children.map((c) => c.text.trim());
     const sortedCycle = cycle
       .map((tag, index) => ({ tag, index }))
@@ -91,7 +88,9 @@ runExtension("tag-cycle", () => {
           for (let i = 0; i < sortedCycle.length; i++) {
             const { tag: tag1, index } = sortedCycle[i];
             if (
-              (textarea.value.includes(tag1) && cycleType === "RAW" && tag1) ||
+              (textarea.value.includes(tag1) &&
+                modifiers.includes("RAW") &&
+                tag1) ||
               (textarea.value.includes(`#[[${tag1}]]`) && tag1) ||
               (textarea.value.includes(`[[${tag1}]]`) && tag1) ||
               (textarea.value.includes(`#${tag1}`) && tag1) ||
@@ -100,14 +99,15 @@ runExtension("tag-cycle", () => {
               const start = textarea.selectionStart;
               const end = textarea.selectionEnd;
               const tag2 = cycle[(index + 1 + cycle.length) % cycle.length];
-              if (cycleType === "RAW") {
-                await replaceText({ before: tag1, after: tag2 });
+              const prepend = modifiers.includes("FRONT");
+              if (modifiers.includes("RAW")) {
+                await replaceText({ before: tag1, after: tag2, prepend });
               } else {
                 await replaceTagText({
                   before: tag1,
                   after: tag2,
-                  addHash: cycleType === "HASH",
-                  prepend: cycleType === "FRONT",
+                  addHash: modifiers.includes("HASH"),
+                  prepend,
                 });
               }
               textarea.setSelectionRange(
