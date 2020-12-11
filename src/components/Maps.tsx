@@ -125,7 +125,7 @@ export const render = (b: HTMLButtonElement) => {
     ? Promise.all(
         markerNode.children.map((m) => {
           const tag = m.text.trim();
-          const coords = m.children
+          const coords = m.children.length
             ? Promise.resolve(
                 m.children[0].text.split(",").map((s) => parseFloat(s.trim()))
               )
