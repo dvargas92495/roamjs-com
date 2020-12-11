@@ -16,6 +16,7 @@ import TurndownService from "turndown";
 import iconv from "iconv-lite";
 import charset from "charset";
 import { getTextTreeByPageName } from "../entry-helpers";
+import { fireEvent } from "@testing-library/dom";
 
 export const ERROR_MESSAGE =
   "Error Importing Article. Email link to support@roamjs.com for help!";
@@ -67,6 +68,14 @@ td.addRule("a", {
   },
 });
 
+const tabObj = {
+  key: "Tab",
+  keyCode: 9,
+  code: 9,
+  which: 9,
+};
+const shiftTabObj = { ...tabObj, shiftKey: true };
+              
 export const importArticle = ({
   url,
   blockId,
@@ -83,10 +92,15 @@ export const importArticle = ({
     .then(async (r) => {
       const enc = charset(r.headers) || "utf-8";
       const buffer = iconv.encode(r.data, "base64");
-      const doc = new DOMParser().parseFromString(
-        iconv.decode(buffer, enc),
-        "text/html"
-      );
+      const html = iconv.decode(buffer, enc);
+      const headIndex = html.indexOf("<head>") + "<head>".length;
+      const base = document.createElement("base");
+      base.href = new URL(url).origin;
+      base.target = "_blank";
+      const htmlWithBase = `${html.substring(0, headIndex)}${
+        base.outerHTML
+      }${html.substring(headIndex)}`;
+      const doc = new DOMParser().parseFromString(htmlWithBase, "text/html");
       const { content } = new Readability(doc).parse();
       const textarea = await openBlock(document.getElementById(blockId));
       await userEvent.clear(textarea);
@@ -99,12 +113,16 @@ export const importArticle = ({
       let firstHeaderFound = false;
       for (const node of nodes) {
         const textarea = document.activeElement as HTMLTextAreaElement;
-        const isHeader = (node.startsWith("# ") || node.startsWith("## ") || node.startsWith("### "));
+        const isHeader =
+          node.startsWith("# ") ||
+          node.startsWith("## ") ||
+          node.startsWith("### ");
         const text = isHeader ? node.substring(node.indexOf("# ") + 2) : node;
         if (isHeader) {
           if (indent) {
             if (firstHeaderFound) {
-              await userEvent.tab({ shift: true });
+              await fireEvent.keyDown(textarea, shiftTabObj);
+              await fireEvent.keyUp(textarea, shiftTabObj);
             } else {
               firstHeaderFound = true;
             }
@@ -117,7 +135,8 @@ export const importArticle = ({
         });
         await newBlockEnter();
         if (indent && isHeader) {
-          await userEvent.tab();
+          await fireEvent.keyDown(document.activeElement, tabObj);
+          await fireEvent.keyUp(document.activeElement, tabObj);
         }
       }
     });
