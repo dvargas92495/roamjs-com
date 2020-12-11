@@ -1,15 +1,29 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import { getUids } from "roam-client";
-import { addStyle, getPageUidByPageTitle, getTextTreeByBlockUid } from "../entry-helpers";
+import {
+  addStyle,
+  getPageUidByPageTitle,
+  getTextTreeByBlockUid,
+} from "../entry-helpers";
 import { MapContainer, Marker, TileLayer, Popup } from "react-leaflet";
 import { LatLngExpression, Icon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import EditContainer from "./EditContainer";
+import axios from "axios";
 
 addStyle(`.leaflet-pane {
   z-index: 10 !important;
 }`);
+
+const extractTag = (tag: string) =>
+  tag.startsWith("#[[") && tag.endsWith("]]")
+    ? tag.substring(3, tag.length - 2)
+    : tag.startsWith("[[") && tag.endsWith("]]")
+    ? tag.substring(2, tag.length - 2)
+    : tag.startsWith("#")
+    ? tag.substring(1)
+    : tag;
 
 // https://github.com/Leaflet/Leaflet/blob/c0bf09ba32e71fdf29f91808c8b31bbb5946cc74/src/layer/marker/Icon.Default.js
 const MarkerIcon = new Icon({
@@ -47,14 +61,7 @@ const Maps = ({
   }, [setHref]);
   const popupCallback = useCallback(
     (tag: string) => () => {
-      const extractedTag =
-        tag.startsWith("#[[") && tag.endsWith("]]")
-          ? tag.substring(3, tag.length - 2)
-          : tag.startsWith("[[") && tag.endsWith("]]")
-          ? tag.substring(2, tag.length - 2)
-          : tag.startsWith("#")
-          ? tag.substring(1)
-          : tag;
+      const extractedTag = extractTag(tag);
       if (extractedTag !== tag) {
         const pageUid = getPageUidByPageTitle(extractedTag);
         if (pageUid) {
@@ -81,6 +88,16 @@ const Maps = ({
   );
 };
 
+const getCoords = (tag: string) => axios
+.get(
+  `https://api.mapbox.com/geocoding/v5/mapbox.places/${extractTag(tag)}.json?access_token=${process.env.MAPBOX_TOKEN}`
+)
+.then((r) =>
+  r.data.features?.length
+    ? (r.data.features[0].center as number[])
+    : [NaN, NaN]
+);
+
 export const render = (b: HTMLButtonElement) => {
   const block = b.closest(".roam-block");
   if (!block) {
@@ -104,30 +121,37 @@ export const render = (b: HTMLButtonElement) => {
     centerNode &&
     centerNode.children[0] &&
     centerNode.children[0].text.split(",").map((s) => parseFloat(s.trim()));
-  const markers =
-    markerNode &&
-    markerNode.children
-      .map((m) => {
-        const [x, y] = m.children[0].text.split(',').map(s => parseFloat(s.trim()));
-        return {
-          tag: m.text.trim(),
-          x,
-          y,
+  const getMarkers = markerNode
+    ? Promise.all(
+        markerNode.children.map((m) => {
+          const tag = m.text.trim();
+          const coords = m.children
+            ? Promise.resolve(
+                m.children[0].text.split(",").map((s) => parseFloat(s.trim()))
+              )
+            : getCoords(tag)
+          return coords.then(([x, y]) => ({
+            tag,
+            x,
+            y,
+          }));
+        })
+      ).then((markers) => markers.filter(({ x, y }) => !isNaN(x) && !isNaN(y)))
+    : Promise.resolve([]);
+  getMarkers.then((markers) =>
+    ReactDOM.render(
+      <Maps
+        blockId={blockId}
+        zoom={isNaN(zoom) ? undefined : zoom}
+        center={
+          !center || center.length !== 2 || center.some((c) => isNaN(c))
+            ? undefined
+            : (center as LatLngExpression)
         }
-      })
-      .filter(({ x, y }) => !isNaN(x) && !isNaN(y));
-  ReactDOM.render(
-    <Maps
-      blockId={blockId}
-      zoom={isNaN(zoom) ? undefined : zoom}
-      center={
-        !center || center.length !== 2 || center.some((c) => isNaN(c))
-          ? undefined
-          : (center as LatLngExpression)
-      }
-      markers={markers}
-    />,
-    b.parentElement
+        markers={markers}
+      />,
+      b.parentElement
+    )
   );
 };
 

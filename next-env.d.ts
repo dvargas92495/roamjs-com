@@ -7,6 +7,7 @@ interface FrontMatter {
   __resourcePath: string;
   description: string;
   development: boolean;
+  acknowledgements: string;
 }
 
 declare module "*.mdx" {
