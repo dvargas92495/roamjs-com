@@ -112,8 +112,7 @@ export const importArticle = ({
         if (isHeader) {
           if (indent) {
             if (firstHeaderFound) {
-              await userEvent.tab({ shift: true });
-              window.requestAnimationFrame(() => {});
+              userEvent.tab({ shift: true });
             } else {
               firstHeaderFound = true;
             }
@@ -126,8 +125,7 @@ export const importArticle = ({
         });
         await newBlockEnter();
         if (indent && isHeader) {
-          await userEvent.tab();
-          window.requestAnimationFrame(() => {});
+          userEvent.tab();
         }
       }
     });
