@@ -21,10 +21,11 @@ window.observerCount = 0;
 runExtension("tag-cycle", () => {
   const config: { [blockUid: string]: (e: KeyboardEvent) => void } = {};
   const blockUidsByKeystroke: { [keystroke: string]: Set<string> } = {};
+  const root = document.getElementsByClassName("roam-app")[0] || document;
 
   const cleanConfig = (blockUid: string) => {
     if (config[blockUid]) {
-      document.removeEventListener("keydown", config[blockUid]);
+      root.removeEventListener("keydown", config[blockUid]);
       delete config[blockUid];
       const uids = Object.values(blockUidsByKeystroke).find((v) =>
         v.has(blockUid)
@@ -122,7 +123,7 @@ runExtension("tag-cycle", () => {
         }
       }
     };
-    document.getElementsByClassName("roam-app")[0].addEventListener("keydown", config[shortcut.uid]);
+    root.addEventListener("keydown", config[shortcut.uid]);
   };
 
   const isValidShortcut = (t: Pick<TreeNode, "text">) =>
