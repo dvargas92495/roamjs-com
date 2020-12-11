@@ -36,11 +36,25 @@ By default, empty blocks will cycle to a `[[]]` tag. To use a `#[[]]` tag instea
     - TODO
     - DONE
 
-If instead of tags, you would like to cycle through raw text, add RAW at the end of the shortcut. Like this:
+If instead of tags, you would like to cycle through raw text, add RAW to the end of the shortcut. Like this:
 
 - CTRL+Enter RAW
     -
     - TODO
     - DONE
+
+By default, empty blocks will cycle the next entry to the end of the block. To prepend to the block instead, add FRONT to the end of the shortcut. Like this:
+
+- CTRL+Enter FRONT
+    -
+    - TODO
+    - DONE
+
+Front could combine with some of the other modifiers above. So to fully reproduce Roam's native tag cycle, it would look like this:
+
+- CTRL+Enter FRONT RAW
+    -
+    - {{[[TODO]]}}
+    - {{[[DONE]]}}
 
 If you change the blocks on the configuration page, the changes will take effect as soon as you navigate away from the blocks.

@@ -18,18 +18,18 @@ declare global {
 
 window.observerCount = 0;
 
-type CycleType = "HASH" | "RAW" | "BRACKET";
-
 runExtension("tag-cycle", () => {
   const config: { [blockUid: string]: (e: KeyboardEvent) => void } = {};
   const blockUidsByKeystroke: { [keystroke: string]: Set<string> } = {};
+  const root = document.getElementsByClassName("roam-app")[0] || document;
 
   const cleanConfig = (blockUid: string) => {
     if (config[blockUid]) {
-      document.removeEventListener("keydown", config[blockUid]);
+      root.removeEventListener("keydown", config[blockUid]);
       delete config[blockUid];
-      const uids = Object.values(blockUidsByKeystroke)
-        .find((v) => v.has(blockUid))
+      const uids = Object.values(blockUidsByKeystroke).find((v) =>
+        v.has(blockUid)
+      );
       if (uids) {
         uids.delete(blockUid);
       }
@@ -42,8 +42,7 @@ runExtension("tag-cycle", () => {
     const isShift = parts[1] === "SHIFT";
     const keyParts = parts[parts.length - 1].split(" ") || [""];
     const key = keyParts[0];
-    const cycleType =
-      keyParts.length > 1 ? (keyParts[1] as CycleType) : "BRACKET";
+    const modifiers = keyParts.slice(1).map((s) => s.toUpperCase());
     const cycle = shortcut.children.map((c) => c.text.trim());
     const sortedCycle = cycle
       .map((tag, index) => ({ tag, index }))
@@ -90,7 +89,9 @@ runExtension("tag-cycle", () => {
           for (let i = 0; i < sortedCycle.length; i++) {
             const { tag: tag1, index } = sortedCycle[i];
             if (
-              (textarea.value.includes(tag1) && cycleType === "RAW" && tag1) ||
+              (textarea.value.includes(tag1) &&
+                modifiers.includes("RAW") &&
+                tag1) ||
               (textarea.value.includes(`#[[${tag1}]]`) && tag1) ||
               (textarea.value.includes(`[[${tag1}]]`) && tag1) ||
               (textarea.value.includes(`#${tag1}`) && tag1) ||
@@ -99,13 +100,15 @@ runExtension("tag-cycle", () => {
               const start = textarea.selectionStart;
               const end = textarea.selectionEnd;
               const tag2 = cycle[(index + 1 + cycle.length) % cycle.length];
-              if (cycleType === "RAW") {
-                await replaceText([tag1, tag2]);
+              const prepend = modifiers.includes("FRONT");
+              if (modifiers.includes("RAW")) {
+                await replaceText({ before: tag1, after: tag2, prepend });
               } else {
                 await replaceTagText({
                   before: tag1,
                   after: tag2,
-                  addHash: cycleType === "HASH",
+                  addHash: modifiers.includes("HASH"),
+                  prepend,
                 });
               }
               textarea.setSelectionRange(
@@ -120,7 +123,7 @@ runExtension("tag-cycle", () => {
         }
       }
     };
-    document.addEventListener("keydown", config[shortcut.uid]);
+    root.addEventListener("keydown", config[shortcut.uid]);
   };
 
   const isValidShortcut = (t: Pick<TreeNode, "text">) =>
