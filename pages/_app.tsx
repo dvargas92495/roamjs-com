@@ -48,6 +48,8 @@ const MyApp = ({ Component, pageProps }: AppProps) => (
       domain="vargas-arts.us.auth0.com"
       clientId={process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID}
       audience="https://vargas-arts.us.auth0.com/api/v2/"
+      response_type={'id_token'}
+      response_mode={'success'}
     >
       <ThemeProvider>
         <MDXProvider
