@@ -46,7 +46,7 @@ const HomePage = () => (
       }
       stats={[
         {
-          value: "23",
+          value: "24",
           label: "Extensions",
         },
         {

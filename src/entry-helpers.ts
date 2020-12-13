@@ -5,7 +5,7 @@ import {
   getUids,
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
-import mixpanel from "mixpanel-browser";
+import Mixpanel from "mixpanel-browser";
 import userEvent from "@testing-library/user-event";
 
 declare global {
@@ -28,7 +28,7 @@ declare global {
 }
 
 const roamJsVersion = process.env.ROAMJS_VERSION || "0";
-mixpanel.init(process.env.MIXPANEL_TOKEN);
+export const mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
 
 export const runExtension = (extensionId: string, run: () => void) => {
   if (!window.roamjs) {

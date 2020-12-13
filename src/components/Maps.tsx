@@ -5,6 +5,7 @@ import {
   addStyle,
   getPageUidByPageTitle,
   getTextTreeByBlockUid,
+  mixpanel,
 } from "../entry-helpers";
 import { MapContainer, Marker, TileLayer, Popup } from "react-leaflet";
 import { LatLngExpression, Icon } from "leaflet";
@@ -75,8 +76,10 @@ const Maps = ({
     <EditContainer blockId={blockId}>
       <MapContainer center={center} zoom={zoom} id={id} style={{ height: 400 }}>
         <TileLayer
-          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
+          url="https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}"
+          accessToken={process.env.MAPBOX_TOKEN}
+          id="mapbox/streets-v11"
         />
         {markers.map((m, i) => (
           <Marker position={[m.x, m.y]} key={i} icon={MarkerIcon} title={m.tag}>
@@ -88,15 +91,18 @@ const Maps = ({
   );
 };
 
-const getCoords = (tag: string) => axios
-.get(
-  `https://api.mapbox.com/geocoding/v5/mapbox.places/${extractTag(tag)}.json?access_token=${process.env.MAPBOX_TOKEN}`
-)
-.then((r) =>
-  r.data.features?.length
-    ? (r.data.features[0].center as number[]).reverse()
-    : [NaN, NaN]
-);
+const getCoords = (tag: string) =>
+  axios
+    .get(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${extractTag(
+        tag
+      )}.json?access_token=${process.env.MAPBOX_TOKEN}`
+    )
+    .then((r) =>
+      r.data.features?.length
+        ? (r.data.features[0].center as number[]).reverse()
+        : [NaN, NaN]
+    );
 
 export const render = (b: HTMLButtonElement) => {
   const block = b.closest(".roam-block");
@@ -129,7 +135,7 @@ export const render = (b: HTMLButtonElement) => {
             ? Promise.resolve(
                 m.children[0].text.split(",").map((s) => parseFloat(s.trim()))
               )
-            : getCoords(tag)
+            : getCoords(tag);
           return coords.then(([x, y]) => ({
             tag,
             x,
@@ -138,7 +144,11 @@ export const render = (b: HTMLButtonElement) => {
         })
       ).then((markers) => markers.filter(({ x, y }) => !isNaN(x) && !isNaN(y)))
     : Promise.resolve([]);
-  getMarkers.then((markers) =>
+  getMarkers.then((markers) => {
+    mixpanel.track("Use Extension", {
+      extensionId: 'maps',
+      action: 'Render',
+    });
     ReactDOM.render(
       <Maps
         blockId={blockId}
@@ -151,8 +161,8 @@ export const render = (b: HTMLButtonElement) => {
         markers={markers}
       />,
       b.parentElement
-    )
-  );
+    );
+  });
 };
 
 export default Maps;
