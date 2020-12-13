@@ -2,7 +2,6 @@ import React from "react";
 import { Body, H4, Landing } from "@dvargas92495/ui";
 import Layout from "../components/Layout";
 import LandingUndraw from "../components/svg/LandingUndraw.svg";
-import Head from "next/head";
 import dynamic from "next/dynamic";
 
 const ConvertKitComponent = dynamic(() => import("../components/ConvertKit"), {
@@ -54,7 +53,7 @@ const HomePage = () => (
           label: "Daily Downloads",
         },
         {
-          value: "100+",
+          value: "110+",
           label: "Subscribers",
         },
       ]}
