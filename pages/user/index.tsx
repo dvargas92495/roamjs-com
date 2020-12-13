@@ -10,7 +10,6 @@ import {
   StringField,
   Subtitle,
 } from "@dvargas92495/ui";
-import { useUser } from "react-manage-users";
 
 const Settings = ({ name }: { name: string }) => {
   const [isEditable, setIsEditable] = useState({
