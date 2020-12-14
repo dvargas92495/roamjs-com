@@ -69,6 +69,16 @@ td.addRule("a", {
   },
 });
 
+const tabObj = {
+  bubbles: true,
+  cancelable: true,
+  key: "Tab",
+  keyCode: 9,
+  code: "Tab",
+  which: 9,
+};
+const shiftTabObj = { ...tabObj, shiftKey: true };
+
 export const importArticle = ({
   url,
   blockId,
@@ -101,14 +111,8 @@ export const importArticle = ({
       await userEvent.clear(textarea);
       const markdown = td.turndown(content);
       const nodes = markdown.split("\n").filter((c) => !!c.trim());
-      const pasteBlock = async ({
-        index,
-        firstHeaderFound,
-      }: {
-        index: number;
-        firstHeaderFound: boolean;
-      }) => {
-        const node = nodes[index];
+      let firstHeaderFound = false;
+      for (const node of nodes) {
         const textarea = document.activeElement as HTMLTextAreaElement;
         const isHeader =
           node.startsWith("# ") ||
@@ -121,34 +125,30 @@ export const importArticle = ({
           ? node.substring(2).trim()
           : node;
         if (isHeader) {
-          if (indent && firstHeaderFound) {
-            userEvent.tab({ shift: true });
+          if (indent) {
+            if (firstHeaderFound) {
+              textarea.dispatchEvent(new KeyboardEvent('keydown', shiftTabObj));
+            } else {
+              firstHeaderFound = true;
+            }
           }
           await asyncType(node.substring(0, node.indexOf("# ") + 2));
         }
         if (isBullet) {
-          userEvent.tab();
+          textarea.dispatchEvent(new KeyboardEvent('keydown', tabObj));
         }
         await userEvent.paste(textarea, text, {
           // @ts-ignore - https://github.com/testing-library/user-event/issues/512
           clipboardData: new DataTransfer(),
         });
-        await newBlockEnter();
+        const newTextArea = await newBlockEnter();
+        if (isBullet) {
+          newTextArea.dispatchEvent(new KeyboardEvent('keydown', shiftTabObj));
+        }
         if (indent && isHeader) {
-          userEvent.tab();
+          newTextArea.dispatchEvent(new KeyboardEvent('keydown', tabObj));
         }
-        if (index < nodes.length - 1) {
-          setTimeout(
-            () =>
-              pasteBlock({
-                index: index + 1,
-                firstHeaderFound: firstHeaderFound || (isHeader && indent),
-              }),
-            1
-          );
-        }
-      };
-      await pasteBlock({ index: 0, firstHeaderFound: false });
+      }
     });
 
 const ImportContent = ({
@@ -180,7 +180,7 @@ const ImportContent = ({
       setError(ERROR_MESSAGE);
       setLoading(false);
     });
-  }, [blockId, value, setError, setLoading]);
+  }, [blockId, value, indent, setError, setLoading]);
   const indentOnChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setIndent(e.target.checked),
     [setIndent]
@@ -202,7 +202,7 @@ const ImportContent = ({
           width={1000}
         />
       </div>
-      <div>
+      <div style={{ marginTop: 16 }}>
         <Label>
           Indent Under Header
           <Checkbox checked={indent} onChange={indentOnChange} />
