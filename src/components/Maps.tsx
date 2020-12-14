@@ -5,7 +5,7 @@ import {
   addStyle,
   getPageUidByPageTitle,
   getTextTreeByBlockUid,
-  mixpanel,
+  track,
 } from "../entry-helpers";
 import { MapContainer, Marker, TileLayer, Popup } from "react-leaflet";
 import { LatLngExpression, Icon } from "leaflet";
@@ -145,7 +145,7 @@ export const render = (b: HTMLButtonElement) => {
       ).then((markers) => markers.filter(({ x, y }) => !isNaN(x) && !isNaN(y)))
     : Promise.resolve([]);
   getMarkers.then((markers) => {
-    mixpanel.track("Use Extension", {
+    track("Use Extension", {
       extensionId: 'maps',
       action: 'Render',
     });
