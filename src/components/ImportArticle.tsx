@@ -78,6 +78,7 @@ const tabObj = {
   which: 9,
 };
 const shiftTabObj = { ...tabObj, shiftKey: true };
+const wait = () => new Promise(resolve => setTimeout(resolve, 50));
 
 export const importArticle = ({
   url,
@@ -113,7 +114,6 @@ export const importArticle = ({
       const nodes = markdown.split("\n").filter((c) => !!c.trim());
       let firstHeaderFound = false;
       for (const node of nodes) {
-        const textarea = document.activeElement as HTMLTextAreaElement;
         const isHeader =
           node.startsWith("# ") ||
           node.startsWith("## ") ||
@@ -127,7 +127,8 @@ export const importArticle = ({
         if (isHeader) {
           if (indent) {
             if (firstHeaderFound) {
-              textarea.dispatchEvent(new KeyboardEvent('keydown', shiftTabObj));
+              document.activeElement.dispatchEvent(new KeyboardEvent('keydown', shiftTabObj));
+              wait();
             } else {
               firstHeaderFound = true;
             }
@@ -135,18 +136,21 @@ export const importArticle = ({
           await asyncType(node.substring(0, node.indexOf("# ") + 2));
         }
         if (isBullet) {
-          textarea.dispatchEvent(new KeyboardEvent('keydown', tabObj));
+          document.activeElement.dispatchEvent(new KeyboardEvent('keydown', tabObj));
+          wait();
         }
-        await userEvent.paste(textarea, text, {
+        await userEvent.paste(document.activeElement, text, {
           // @ts-ignore - https://github.com/testing-library/user-event/issues/512
           clipboardData: new DataTransfer(),
         });
-        const newTextArea = await newBlockEnter();
+        await newBlockEnter();
         if (isBullet) {
-          newTextArea.dispatchEvent(new KeyboardEvent('keydown', shiftTabObj));
+          document.activeElement.dispatchEvent(new KeyboardEvent('keydown', shiftTabObj));
+          wait();
         }
         if (indent && isHeader) {
-          newTextArea.dispatchEvent(new KeyboardEvent('keydown', tabObj));
+          document.activeElement.dispatchEvent(new KeyboardEvent('keydown', tabObj));
+          wait();
         }
       }
     });
