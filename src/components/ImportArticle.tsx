@@ -17,10 +17,24 @@ import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 import iconv from "iconv-lite";
 import charset from "charset";
-import { getTextTreeByPageName } from "../entry-helpers";
+import {
+  createHTMLObserver,
+  getTextTreeByPageName,
+} from "../entry-helpers";
 
 export const ERROR_MESSAGE =
   "Error Importing Article. Email link to support@roamjs.com for help!";
+
+const tabListenerRef: { current: (b: HTMLTextAreaElement) => void } = {
+  current: () => {},
+};
+const addTabListener = (listener: (b: HTMLTextAreaElement) => void) =>
+  (tabListenerRef.current = listener);
+createHTMLObserver({
+  tag: "TEXTAREA",
+  className: "rm-block-input",
+  callback: (b) => tabListenerRef.current(b as HTMLTextAreaElement),
+});
 
 const td = new TurndownService({
   hr: "---",
@@ -78,7 +92,14 @@ const tabObj = {
   which: 9,
 };
 const shiftTabObj = { ...tabObj, shiftKey: true };
-const wait = () => new Promise(resolve => setTimeout(resolve, 50));
+const wait = (id: string) =>
+  new Promise((resolve) =>
+    addTabListener((b: HTMLTextAreaElement) => {
+      if (b.id === id) {
+        resolve(id);
+      }
+    })
+  );
 
 export const importArticle = ({
   url,
@@ -127,8 +148,10 @@ export const importArticle = ({
         if (isHeader) {
           if (indent) {
             if (firstHeaderFound) {
-              document.activeElement.dispatchEvent(new KeyboardEvent('keydown', shiftTabObj));
-              await wait();
+              document.activeElement.dispatchEvent(
+                new KeyboardEvent("keydown", shiftTabObj)
+              );
+              await wait(document.activeElement.id);
             } else {
               firstHeaderFound = true;
             }
@@ -136,8 +159,10 @@ export const importArticle = ({
           await asyncType(node.substring(0, node.indexOf("# ") + 2));
         }
         if (isBullet) {
-          document.activeElement.dispatchEvent(new KeyboardEvent('keydown', tabObj));
-          await wait();
+          document.activeElement.dispatchEvent(
+            new KeyboardEvent("keydown", tabObj)
+          );
+          await wait(document.activeElement.id);
         }
         await userEvent.paste(document.activeElement, text, {
           // @ts-ignore - https://github.com/testing-library/user-event/issues/512
@@ -145,12 +170,16 @@ export const importArticle = ({
         });
         await newBlockEnter();
         if (isBullet) {
-          document.activeElement.dispatchEvent(new KeyboardEvent('keydown', shiftTabObj));
-          await wait();
+          document.activeElement.dispatchEvent(
+            new KeyboardEvent("keydown", shiftTabObj)
+          );
+          await wait(document.activeElement.id);
         }
         if (indent && isHeader) {
-          document.activeElement.dispatchEvent(new KeyboardEvent('keydown', tabObj));
-          await wait();
+          document.activeElement.dispatchEvent(
+            new KeyboardEvent("keydown", tabObj)
+          );
+          await wait(document.activeElement.id);
         }
       }
     });
