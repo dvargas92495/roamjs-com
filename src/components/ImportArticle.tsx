@@ -92,7 +92,7 @@ const tabObj = {
   which: 9,
 };
 const shiftTabObj = { ...tabObj, shiftKey: true };
-const wait = (id: string) =>
+const waitForTab = (id: string) =>
   new Promise((resolve) =>
     addTabListener((b: HTMLTextAreaElement) => {
       if (b.id === id) {
@@ -151,7 +151,7 @@ export const importArticle = ({
               document.activeElement.dispatchEvent(
                 new KeyboardEvent("keydown", shiftTabObj)
               );
-              await wait(document.activeElement.id);
+              await waitForTab(document.activeElement.id);
             } else {
               firstHeaderFound = true;
             }
@@ -162,7 +162,7 @@ export const importArticle = ({
           document.activeElement.dispatchEvent(
             new KeyboardEvent("keydown", tabObj)
           );
-          await wait(document.activeElement.id);
+          await waitForTab(document.activeElement.id);
         }
         await userEvent.paste(document.activeElement, text, {
           // @ts-ignore - https://github.com/testing-library/user-event/issues/512
@@ -173,13 +173,13 @@ export const importArticle = ({
           document.activeElement.dispatchEvent(
             new KeyboardEvent("keydown", shiftTabObj)
           );
-          await wait(document.activeElement.id);
+          await waitForTab(document.activeElement.id);
         }
         if (indent && isHeader) {
           document.activeElement.dispatchEvent(
             new KeyboardEvent("keydown", tabObj)
           );
-          await wait(document.activeElement.id);
+          await waitForTab(document.activeElement.id);
         }
       }
     });
