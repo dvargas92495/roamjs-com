@@ -108,7 +108,12 @@ export const importArticle = ({
           node.startsWith("# ") ||
           node.startsWith("## ") ||
           node.startsWith("### ");
-        const text = isHeader ? node.substring(node.indexOf("# ") + 2) : node;
+        const isBullet = node.startsWith("* ");
+        const text = isHeader
+          ? node.substring(node.indexOf("# ") + 2)
+          : isBullet
+          ? node.substring(2).trim()
+          : node;
         if (isHeader) {
           if (indent) {
             if (firstHeaderFound) {
@@ -118,6 +123,9 @@ export const importArticle = ({
             }
           }
           await asyncType(node.substring(0, node.indexOf("# ") + 2));
+        }
+        if (isBullet) {
+          userEvent.tab();
         }
         await userEvent.paste(textarea, text, {
           // @ts-ignore - https://github.com/testing-library/user-event/issues/512
