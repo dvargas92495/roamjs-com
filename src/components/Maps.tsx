@@ -115,12 +115,12 @@ export const render = (b: HTMLButtonElement) => {
   );
   const tree = getTextTreeByBlockUid(blockUid);
   const markerNode = tree.children.find(
-    (c) => c.text.toUpperCase() === "MARKERS"
+    (c) => c.text.trim().toUpperCase() === "MARKERS"
   );
   const centerNode = tree.children.find(
-    (c) => c.text.toUpperCase() === "CENTER"
+    (c) => c.text.trim().toUpperCase() === "CENTER"
   );
-  const zoomNode = tree.children.find((c) => c.text.toUpperCase() === "ZOOM");
+  const zoomNode = tree.children.find((c) => c.text.trim().toUpperCase() === "ZOOM");
   const zoom =
     zoomNode && zoomNode.children[0] && parseInt(zoomNode.children[0].text);
   const center =
