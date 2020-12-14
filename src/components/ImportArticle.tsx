@@ -101,8 +101,14 @@ export const importArticle = ({
       await userEvent.clear(textarea);
       const markdown = td.turndown(content);
       const nodes = markdown.split("\n").filter((c) => !!c.trim());
-      let firstHeaderFound = false;
-      for (const node of nodes) {
+      const pasteBlock = async ({
+        index,
+        firstHeaderFound,
+      }: {
+        index: number;
+        firstHeaderFound: boolean;
+      }) => {
+        const node = nodes[index];
         const textarea = document.activeElement as HTMLTextAreaElement;
         const isHeader =
           node.startsWith("# ") ||
@@ -115,12 +121,8 @@ export const importArticle = ({
           ? node.substring(2).trim()
           : node;
         if (isHeader) {
-          if (indent) {
-            if (firstHeaderFound) {
-              userEvent.tab({ shift: true });
-            } else {
-              firstHeaderFound = true;
-            }
+          if (indent && firstHeaderFound) {
+            userEvent.tab({ shift: true });
           }
           await asyncType(node.substring(0, node.indexOf("# ") + 2));
         }
@@ -135,7 +137,18 @@ export const importArticle = ({
         if (indent && isHeader) {
           userEvent.tab();
         }
-      }
+        if (index < nodes.length - 1) {
+          setTimeout(
+            () =>
+              pasteBlock({
+                index: index + 1,
+                firstHeaderFound: firstHeaderFound || (isHeader && indent),
+              }),
+            1
+          );
+        }
+      };
+      await pasteBlock({ index: 0, firstHeaderFound: false });
     });
 
 const ImportContent = ({
