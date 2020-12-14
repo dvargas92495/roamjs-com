@@ -128,7 +128,7 @@ export const importArticle = ({
           if (indent) {
             if (firstHeaderFound) {
               document.activeElement.dispatchEvent(new KeyboardEvent('keydown', shiftTabObj));
-              wait();
+              await wait();
             } else {
               firstHeaderFound = true;
             }
@@ -137,7 +137,7 @@ export const importArticle = ({
         }
         if (isBullet) {
           document.activeElement.dispatchEvent(new KeyboardEvent('keydown', tabObj));
-          wait();
+          await wait();
         }
         await userEvent.paste(document.activeElement, text, {
           // @ts-ignore - https://github.com/testing-library/user-event/issues/512
@@ -146,11 +146,11 @@ export const importArticle = ({
         await newBlockEnter();
         if (isBullet) {
           document.activeElement.dispatchEvent(new KeyboardEvent('keydown', shiftTabObj));
-          wait();
+          await wait();
         }
         if (indent && isHeader) {
           document.activeElement.dispatchEvent(new KeyboardEvent('keydown', tabObj));
-          wait();
+          await wait();
         }
       }
     });
