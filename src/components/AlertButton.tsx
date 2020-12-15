@@ -56,7 +56,13 @@ export const schedule = (
     }
   }, input.timeout);
 
-const AlertButtonContent = ({ blockId }: { blockId: string }) => {
+const AlertButtonContent = ({
+  blockId,
+  close,
+}: {
+  blockId: string;
+  close: () => void;
+}) => {
   const [when, setWhen] = useState("");
   const onWhenChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setWhen(e.target.value),
@@ -82,6 +88,7 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
     [setAllowNotification]
   );
   const onButtonClick = useCallback(async () => {
+    close();
     const whenDate = parseDate(when);
     const timeout = differenceInMillieseconds(whenDate, new Date());
     const block = document.getElementById(blockId);
@@ -119,7 +126,7 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
     } else {
       await asyncPaste(`Alert scheduled to with an invalid date`);
     }
-  }, [blockId, when, message, allowNotification]);
+  }, [blockId, when, message, allowNotification, close]);
   return (
     <div style={{ padding: 8, paddingRight: 24 }}>
       <InputGroup
@@ -149,11 +156,14 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
 };
 
 const AlertButton = ({ blockId }: { blockId: string }) => {
+  const [isOpen, setIsOpen] = useState(true);
+  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   return (
     <Popover
-      content={<AlertButtonContent blockId={blockId} />}
+      content={<AlertButtonContent blockId={blockId} close={close} />}
       target={<Button text="ALERT" data-roamjs-alert-button />}
-      defaultIsOpen={true}
+      isOpen={isOpen}
+      onInteraction={setIsOpen}
     />
   );
 };
