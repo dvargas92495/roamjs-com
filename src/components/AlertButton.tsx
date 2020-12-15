@@ -13,9 +13,9 @@ import differenceInMillieseconds from "date-fns/differenceInMilliseconds";
 import userEvent from "@testing-library/user-event";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 
-const LOCAL_STORAGE_KEY = "roamjsAlerts";
+export const LOCAL_STORAGE_KEY = "roamjsAlerts";
 
-type AlertContent = {
+export type AlertContent = {
   when: string;
   message: string;
   id: number;
@@ -35,7 +35,7 @@ const removeAlertById = (alertId: number) => {
   );
 };
 
-const schedule = (input: Omit<AlertContent, "when"> & { timeout: number }) =>
+export const schedule = (input: Omit<AlertContent, "when"> & { timeout: number }) =>
   setTimeout(() => {
     if (
       input.allowNotification &&
@@ -155,38 +155,10 @@ const AlertButton = ({ blockId }: { blockId: string }) => {
   );
 };
 
-export const render = (b: HTMLButtonElement) => {
-  const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
-  if (storage) {
-    const { alerts, nextId } = JSON.parse(storage) as {
-      alerts: AlertContent[];
-      nextId: number;
-    };
-    const validAlerts = alerts.filter((a) => {
-      const timeout = differenceInMillieseconds(new Date(a.when), new Date());
-      if (timeout > 0) {
-        schedule({
-          message: a.message,
-          id: a.id,
-          timeout,
-          allowNotification: a.allowNotification,
-        });
-        return true;
-      }
-      return false;
-    });
-    localStorage.setItem(
-      LOCAL_STORAGE_KEY,
-      JSON.stringify({
-        nextId,
-        alerts: validAlerts,
-      })
-    );
-  }
+export const render = (b: HTMLButtonElement) =>
   ReactDOM.render(
     <AlertButton blockId={b.closest(".roam-block").id} />,
     b.parentElement
   );
-};
 
 export default AlertButton;
