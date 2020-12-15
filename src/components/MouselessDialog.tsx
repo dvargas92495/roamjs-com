@@ -177,7 +177,7 @@ const MouselessDialog = () => {
   const previousFocus = useRef(null);
   const [allCommands, setAllCommands] = useState(COMMANDS);
   useEffect(() => {
-    const articleLoaded = window.roamjs.loaded.has("article");
+    const articleLoaded = window.roamjs && window.roamjs.loaded.has("article");
     setAllCommands([
       ...COMMANDS,
       ...(articleLoaded
