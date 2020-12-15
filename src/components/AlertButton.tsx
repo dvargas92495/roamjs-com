@@ -25,20 +25,24 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
     await userEvent.clear(textarea);
     if (timeout > 0) {
       setTimeout(() => window.alert(message), timeout);
+      const oldTitle = document.title;
+      document.title = `* ${oldTitle}`;
       await asyncPaste(
         `Alert scheduled to trigger in ${formatDistanceToNow(whenDate)}`
       );
+      document.title = oldTitle;
     } else {
       await asyncPaste(`Alert scheduled to with an invalid date`);
     }
   }, [blockId, when, message]);
   return (
-    <div style={{ padding: 16 }}>
+    <div style={{ padding: 8 }}>
       <InputGroup
         value={when}
         onChange={onWhenChange}
         placeholder={"When"}
         style={{ margin: 8 }}
+        autoFocus={true}
       />
       <InputGroup
         value={message}
