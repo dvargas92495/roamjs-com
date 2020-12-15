@@ -1,6 +1,11 @@
 import { Button, InputGroup, Popover } from "@blueprintjs/core";
+import { parseDate } from "chrono-node";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
+import { asyncPaste, openBlock } from "roam-client";
+import differenceInMillieseconds from "date-fns/differenceInMilliseconds";
+import userEvent from "@testing-library/user-event";
+import formatDistanceToNow from "date-fns/formatDistanceToNow";
 
 const AlertButtonContent = ({ blockId }: { blockId: string }) => {
   const [when, setWhen] = useState("");
@@ -13,19 +18,35 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
     (e: ChangeEvent<HTMLInputElement>) => setMessage(e.target.value),
     [setMessage]
   );
+  const onButtonClick = useCallback(async () => {
+    const whenDate = parseDate(when);
+    const timeout = differenceInMillieseconds(whenDate, new Date());
+    const textarea = await openBlock(document.getElementById(blockId));
+    await userEvent.clear(textarea);
+    if (timeout > 0) {
+      setTimeout(() => window.alert(message), timeout);
+      await asyncPaste(
+        `Alert scheduled to trigger in ${formatDistanceToNow(whenDate)}`
+      );
+    } else {
+      await asyncPaste(`Alert scheduled to with an invalid date`);
+    }
+  }, [blockId, when, message]);
   return (
     <div style={{ padding: 16 }}>
       <InputGroup
         value={when}
         onChange={onWhenChange}
         placeholder={"When"}
+        style={{ margin: 8 }}
       />
       <InputGroup
         value={message}
         onChange={onMessageChange}
         placeholder={"Message"}
+        style={{ margin: 8 }}
       />
-      <Button text="Schedule" />
+      <Button text="Schedule" onClick={onButtonClick} style={{ margin: 8 }} />
     </div>
   );
 };
