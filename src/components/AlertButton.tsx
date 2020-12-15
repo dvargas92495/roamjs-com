@@ -81,44 +81,46 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
     },
     [setAllowNotification]
   );
-  const onButtonClick = useCallback(() => {
+  const onButtonClick = useCallback(async () => {
     const whenDate = parseDate(when);
     const timeout = differenceInMillieseconds(whenDate, new Date());
-    openBlock(document.getElementById(blockId)).then(async (textarea) => {
-      await userEvent.clear(textarea);
-      if (timeout > 0) {
-        const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
-        const { alerts, nextId: id } = storage
-          ? JSON.parse(storage)
-          : { alerts: [], nextId: 1 };
-        schedule({
-          message,
-          id,
-          timeout,
-          allowNotification,
-        });
-        await asyncPaste(
-          `Alert scheduled to trigger in ${formatDistanceToNow(whenDate)}`
-        );
+    const block = document.getElementById(blockId);
+    // I have no idea why I need to click twice, but it wasn't opening on a new block
+    await openBlock(block);
+    const textarea = await openBlock(block);
+    await userEvent.clear(textarea);
+    if (timeout > 0) {
+      const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const { alerts, nextId: id } = storage
+        ? JSON.parse(storage)
+        : { alerts: [], nextId: 1 };
+      schedule({
+        message,
+        id,
+        timeout,
+        allowNotification,
+      });
+      await asyncPaste(
+        `Alert scheduled to trigger in ${formatDistanceToNow(whenDate)}`
+      );
 
-        localStorage.setItem(
-          LOCAL_STORAGE_KEY,
-          JSON.stringify({
-            alerts: [
-              ...alerts,
-              {
-                when: whenDate.toJSON(),
-                message,
-                id,
-              },
-            ],
-            nextId: id + 1,
-          })
-        );
-      } else {
-        await asyncPaste(`Alert scheduled to with an invalid date`);
-      }
-    });
+      localStorage.setItem(
+        LOCAL_STORAGE_KEY,
+        JSON.stringify({
+          alerts: [
+            ...alerts,
+            {
+              when: whenDate.toJSON(),
+              message,
+              id,
+            },
+          ],
+          nextId: id + 1,
+        })
+      );
+    } else {
+      await asyncPaste(`Alert scheduled to with an invalid date`);
+    }
   }, [blockId, when, message, allowNotification]);
   return (
     <div style={{ padding: 8, paddingRight: 24 }}>
