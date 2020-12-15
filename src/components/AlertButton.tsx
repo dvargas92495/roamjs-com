@@ -154,23 +154,15 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
   );
 };
 
-const AlertButton = ({ blockId }: { blockId: string }) => {
-  const buttonRef = useRef(null);
-  useEffect(() => {
-    if (buttonRef.current) {
-      buttonRef.current.click();
-    }
-  }, [buttonRef]);
-  return (
+const AlertButton = ({ blockId }: { blockId: string }) => (
     <Popover
       content={<AlertButtonContent blockId={blockId} />}
       target={
-        <Button text="ALERT" data-roamjs-alert-button elementRef={buttonRef} />
+        <Button text="ALERT" data-roamjs-alert-button />
       }
-      defaultIsOpen={false}
+      defaultIsOpen={true}
     />
   );
-};
 
 export const render = (b: HTMLButtonElement) =>
   ReactDOM.render(
