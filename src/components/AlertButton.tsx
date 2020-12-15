@@ -85,8 +85,6 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
     const whenDate = parseDate(when);
     const timeout = differenceInMillieseconds(whenDate, new Date());
     const block = document.getElementById(blockId);
-    // I have no idea why I need to click twice, but it wasn't opening on a new block
-    await openBlock(block);
     const textarea = await openBlock(block);
     await userEvent.clear(textarea);
     if (timeout > 0) {

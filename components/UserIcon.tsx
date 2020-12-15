@@ -40,14 +40,14 @@ const UserIcon = () => {
   return isAuthenticated ? (
     <UserAvatar name={user.name} avatarUrl={user.picture} />
   ) : flag ? (
-    <>
+    <div style={{width: 200, display: 'flex', justifyContent: 'space-between'}}>
       <Button variant="contained" color="primary" onClick={signup}>
         Sign Up
       </Button>
       <Button variant="outlined" color="primary" onClick={login}>
         Log In
       </Button>
-    </>
+    </div>
   ) : (
     <AddUser buttonText={"Subscribe"} title="ROAMJS DIGEST">
       <Body>
