@@ -22,9 +22,6 @@ type AlertContent = {
   allowNotification: boolean;
 };
 
-const getTimeoutFromWhen = (when: string) =>
-  differenceInMillieseconds(parseDate(when), new Date());
-
 const removeAlertById = (alertId: number) => {
   const { alerts, nextId } = JSON.parse(
     localStorage.getItem(LOCAL_STORAGE_KEY)
@@ -83,7 +80,8 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
     [setAllowNotification]
   );
   const onButtonClick = useCallback(async () => {
-    const timeout = getTimeoutFromWhen(when);
+    const whenDate = parseDate(when);
+    const timeout = differenceInMillieseconds(whenDate, new Date());
     const textarea = await openBlock(document.getElementById(blockId));
     await userEvent.clear(textarea);
     if (timeout > 0) {
@@ -98,7 +96,7 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
         allowNotification,
       });
       await asyncPaste(
-        `Alert scheduled to trigger in ${formatDistanceToNow(parseDate(when))}`
+        `Alert scheduled to trigger in ${formatDistanceToNow(whenDate)}`
       );
 
       localStorage.setItem(
@@ -107,7 +105,7 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
           alerts: [
             ...alerts,
             {
-              when,
+              when: whenDate.toJSON(),
               message,
               id,
             },
@@ -165,7 +163,7 @@ export const render = (b: HTMLButtonElement) => {
       nextId: number;
     };
     const validAlerts = alerts.filter((a) => {
-      const timeout = getTimeoutFromWhen(a.when);
+      const timeout = differenceInMillieseconds(new Date(a.when), new Date());
       if (timeout > 0) {
         schedule({
           message: a.message,
