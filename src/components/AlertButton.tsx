@@ -6,7 +6,13 @@ import {
   Popover,
 } from "@blueprintjs/core";
 import { parseDate } from "chrono-node";
-import React, { ChangeEvent, useCallback, useState } from "react";
+import React, {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import ReactDOM from "react-dom";
 import { asyncPaste, openBlock } from "roam-client";
 import differenceInMillieseconds from "date-fns/differenceInMilliseconds";
@@ -56,13 +62,7 @@ export const schedule = (
     }
   }, input.timeout);
 
-const AlertButtonContent = ({
-  blockId,
-  close,
-}: {
-  blockId: string;
-  close: () => void;
-}) => {
+const AlertButtonContent = ({ blockId }: { blockId: string }) => {
   const [when, setWhen] = useState("");
   const onWhenChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setWhen(e.target.value),
@@ -88,7 +88,6 @@ const AlertButtonContent = ({
     [setAllowNotification]
   );
   const onButtonClick = useCallback(async () => {
-    close();
     const whenDate = parseDate(when);
     const timeout = differenceInMillieseconds(whenDate, new Date());
     const block = document.getElementById(blockId);
@@ -156,14 +155,19 @@ const AlertButtonContent = ({
 };
 
 const AlertButton = ({ blockId }: { blockId: string }) => {
-  const [isOpen, setIsOpen] = useState(true);
-  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
+  const buttonRef = useRef(null);
+  useEffect(() => {
+    if (buttonRef.current) {
+      buttonRef.current.click();
+    }
+  }, [buttonRef]);
   return (
     <Popover
-      content={<AlertButtonContent blockId={blockId} close={close} />}
-      target={<Button text="ALERT" data-roamjs-alert-button />}
-      isOpen={isOpen}
-      onInteraction={setIsOpen}
+      content={<AlertButtonContent blockId={blockId} />}
+      target={
+        <Button text="ALERT" data-roamjs-alert-button elementRef={buttonRef} />
+      }
+      defaultIsOpen={false}
     />
   );
 };
