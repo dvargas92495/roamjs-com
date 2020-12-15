@@ -36,7 +36,7 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
     }
   }, [blockId, when, message]);
   return (
-    <div style={{ padding: 8 }}>
+    <div style={{ padding: 8, paddingRight: 24 }}>
       <InputGroup
         value={when}
         onChange={onWhenChange}
