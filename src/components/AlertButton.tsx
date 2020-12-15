@@ -1,4 +1,10 @@
-import { Button, InputGroup, Popover } from "@blueprintjs/core";
+import {
+  Button,
+  Checkbox,
+  InputGroup,
+  Label,
+  Popover,
+} from "@blueprintjs/core";
 import { parseDate } from "chrono-node";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
@@ -24,13 +30,15 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
     const textarea = await openBlock(document.getElementById(blockId));
     await userEvent.clear(textarea);
     if (timeout > 0) {
-      setTimeout(() => window.alert(message), timeout);
-      const oldTitle = document.title;
-      document.title = `* ${oldTitle}`;
+      setTimeout(() => {
+        const oldTitle = document.title;
+        document.title = `* ${oldTitle}`;
+        window.alert(message);
+        document.title = oldTitle;
+      }, timeout);
       await asyncPaste(
         `Alert scheduled to trigger in ${formatDistanceToNow(whenDate)}`
       );
-      document.title = oldTitle;
     } else {
       await asyncPaste(`Alert scheduled to with an invalid date`);
     }
@@ -50,6 +58,9 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
         placeholder={"Message"}
         style={{ margin: 8 }}
       />
+      <Label style={{ margin: 8 }}>
+        <Checkbox />
+      </Label>
       <Button text="Schedule" onClick={onButtonClick} style={{ margin: 8 }} />
     </div>
   );
