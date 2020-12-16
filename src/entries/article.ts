@@ -18,8 +18,6 @@ const inlineImportArticle = async (value: string) => {
   if (match) {
     const indent = getIndentConfig();
     const url = match[0];
-    await newBlockEnter();
-    await userEvent.tab();
     await asyncPaste("Loading...");
     await importArticle({
       url,
@@ -29,7 +27,7 @@ const inlineImportArticle = async (value: string) => {
       await userEvent.clear(document.activeElement);
       await asyncPaste(ERROR_MESSAGE);
     });
-    return "";
+    return "[Source](url)";
   } else {
     return "Invalid Article URL";
   }
@@ -47,8 +45,10 @@ runExtension("article", () => {
     if (e.altKey && e.shiftKey && e.key === "I") {
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA") {
-        const textarea = target as HTMLTextAreaElement;
-        await inlineImportArticle(textarea.value);
+        const value = (target as HTMLTextAreaElement).value;
+        await newBlockEnter();
+        await userEvent.tab();
+        await inlineImportArticle(value);
       }
     }
   });
