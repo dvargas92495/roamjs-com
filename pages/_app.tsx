@@ -7,6 +7,7 @@ import { Auth0Provider } from "@auth0/auth0-react";
 import "normalize.css/normalize.css";
 import "@blueprintjs/icons/lib/css/blueprint-icons.css";
 import "@blueprintjs/core/lib/css/blueprint.css";
+import { AUTH0_AUDIENCE, AUTH0_DOMAIN } from "../components/constants";
 
 const Pre: React.FunctionComponent<HTMLPreElement> = ({ children }) => (
   <>{children}</>
@@ -27,11 +28,12 @@ const MdxImage = (props) => <img {...props} style={{ maxWidth: 480 }} />;
 
 const MyApp = ({ Component, pageProps }: AppProps) => (
   <Auth0Provider
-    domain="vargas-arts.us.auth0.com"
+    domain={AUTH0_DOMAIN}
     clientId={process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID}
     useRefreshTokens={true}
     cacheLocation={"localstorage"}
-    audience="https://vargas-arts.us.auth0.com/api/v2/"
+    audience={AUTH0_AUDIENCE}
+    scope={"read:current_user"}
   >
     <ThemeProvider>
       <MDXProvider
