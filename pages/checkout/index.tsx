@@ -2,7 +2,7 @@ import StandardLayout from "../../components/StandardLayout";
 import React, { useEffect, useState } from "react";
 import { H4 } from "@dvargas92495/ui";
 
-const Dashboard = () => {
+const CheckoutPage = (): JSX.Element => {
   const [message, setMessage] = useState("");
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
@@ -22,4 +22,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default CheckoutPage;

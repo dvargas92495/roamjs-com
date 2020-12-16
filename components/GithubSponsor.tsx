@@ -1,6 +1,6 @@
 import React from "react";
 
-const GithubSponsor = () => (
+const GithubSponsor: React.FunctionComponent = () => (
   <iframe
     src="https://github.com/sponsors/dvargas92495/button"
     title="Sponsor dvargas92495"

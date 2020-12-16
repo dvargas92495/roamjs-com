@@ -11,7 +11,7 @@ interface FrontMatter {
 }
 
 declare module "*.mdx" {
-  const MDXComponent: (props: any) => JSX.Element;
+  const MDXComponent: React.FunctionComponent;
   export default MDXComponent;
   export const frontMatter: FrontMatter[];
 }

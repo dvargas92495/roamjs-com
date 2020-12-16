@@ -53,7 +53,7 @@ runExtension("image-tagging", () => {
       const textBullets = text.split("\n");
       const bullets = [];
       let currentText = "";
-      for (var b = 0; b < textBullets.length; b++) {
+      for (let b = 0; b < textBullets.length; b++) {
         const s = textBullets[b];
         if (s) {
           currentText += s;

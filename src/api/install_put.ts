@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { RestClient } from "roam-client";
 import { headers } from "../lambda-helpers";
 
@@ -8,20 +8,20 @@ const codeContent = (scriptIds: string[]) =>
   if (existing) {
     return;
   }  
-  var extension = document.createElement(\"script\");      
-  extension.type = \"text/javascript\";
-  extension.src = \`https://roamjs.com/\$\{name\}.js\`;
+  var extension = document.createElement("script");      
+  extension.type = "text/javascript";
+  extension.src = \`https://roamjs.com/$\{name}.js\`;
   extension.async = true;
   extension.id = name;
-  document.getElementsByTagName(\"head\")[0].appendChild(extension);
+  document.getElementsByTagName("head")[0].appendChild(extension);
 };
   
-${scriptIds
-  .map((f) => `installScript(\"${f}\");`)
-  .join("\n")}
+${scriptIds.map((f) => `installScript("${f}");`).join("\n")}
 \`\`\``;
 
-export const handler = (event: APIGatewayProxyEvent) => {
+export const handler = (
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> => {
   const { graphName, scriptIds = [] } = JSON.parse(event.body);
   const client = new RestClient({
     graphName,

@@ -62,7 +62,7 @@ const QueueItems = ({
   );
 };
 
-const QueuePage = () => {
+const QueuePage = (): JSX.Element => {
   const [search, setSearch] = useState("");
   return (
     <StandardLayout>

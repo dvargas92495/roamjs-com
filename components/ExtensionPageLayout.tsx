@@ -18,12 +18,11 @@ const contributors = {
   "Rodrigo Franco": "https://www.rodrigofranco.com/",
 };
 
-const ExtensionPageLayout = ({
+const ExtensionPageLayout: React.FunctionComponent<{
+  frontMatter: FrontMatter;
+}> = ({
   children,
   frontMatter,
-}: {
-  children: React.ReactNode;
-  frontMatter: FrontMatter;
 }) => {
   const id = pathToId(frontMatter.__resourcePath);
   const [copied, setCopied] = useState(false);

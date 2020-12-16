@@ -83,10 +83,10 @@ const Settings = ({ name }: { name: string }) => {
         ...funding.map((f, i) => ({
           primary: (
             <DataLoader loadAsync={getFunding}>
-              <H6>${balance}</H6>
+              <H6>{f}</H6>
             </DataLoader>
           ),
-          key: 2,
+          key: i + 2,
           avatar: <Subtitle>Funding</Subtitle>,
         })),
       ]}
@@ -94,7 +94,7 @@ const Settings = ({ name }: { name: string }) => {
   );
 };
 
-const UserPage = () => {
+const UserPage = (): JSX.Element => {
   const { isAuthenticated, error, user, logout } = useAuth0();
   const onLogoutClick = useCallback(
     () =>

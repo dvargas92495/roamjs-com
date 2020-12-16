@@ -10,30 +10,28 @@ import {
   Spinner,
   Text,
 } from "@blueprintjs/core";
-import { asyncType, newBlockEnter, openBlock } from "roam-client";
+import { asyncPaste, asyncType, newBlockEnter, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 import iconv from "iconv-lite";
 import charset from "charset";
-import {
-  createHTMLObserver,
-  getTextTreeByPageName,
-} from "../entry-helpers";
+import { createHTMLObserver, getTextTreeByPageName } from "../entry-helpers";
 
 export const ERROR_MESSAGE =
   "Error Importing Article. Email link to support@roamjs.com for help!";
 
 const tabListenerRef: { current: (b: HTMLTextAreaElement) => void } = {
-  current: () => {},
+  current: null,
 };
 const addTabListener = (listener: (b: HTMLTextAreaElement) => void) =>
   (tabListenerRef.current = listener);
 createHTMLObserver({
   tag: "TEXTAREA",
   className: "rm-block-input",
-  callback: (b) => tabListenerRef.current(b as HTMLTextAreaElement),
+  callback: (b) =>
+    tabListenerRef.current && tabListenerRef.current(b as HTMLTextAreaElement),
 });
 
 const td = new TurndownService({
@@ -78,7 +76,7 @@ td.addRule("a", {
     ) {
       return content;
     }
-    var href = anchor.getAttribute("href");
+    const href = anchor.getAttribute("href");
     return "[" + content + "](" + href + ")";
   },
 });
@@ -109,7 +107,7 @@ export const importArticle = ({
   url: string;
   blockId: string;
   indent: boolean;
-}) =>
+}): Promise<void> =>
   axios
     .post(
       `${process.env.REST_API_URL}/article`,
@@ -164,10 +162,7 @@ export const importArticle = ({
           );
           await waitForTab(document.activeElement.id);
         }
-        await userEvent.paste(document.activeElement, text, {
-          // @ts-ignore - https://github.com/testing-library/user-event/issues/512
-          clipboardData: new DataTransfer(),
-        });
+        await asyncPaste(text);
         await newBlockEnter();
         if (isBullet) {
           document.activeElement.dispatchEvent(
@@ -259,7 +254,7 @@ const ImportArticle = ({
 }: {
   blockId: string;
   initialIndent: boolean;
-}) => (
+}): JSX.Element => (
   <Popover
     content={<ImportContent blockId={blockId} initialIndent={initialIndent} />}
     target={<Button text="IMPORT ARTICLE" data-roamjs-import-article />}
@@ -267,14 +262,14 @@ const ImportArticle = ({
   />
 );
 
-export const getIndentConfig = () => {
+export const getIndentConfig = (): boolean => {
   const config = getTextTreeByPageName("roam/js/article");
   return config.some(
     (s) => s.text.trim().toUpperCase() === "INDENT UNDER HEADER"
   );
 };
 
-export const renderImportArticle = (blockId: string, p: HTMLElement) =>
+export const renderImportArticle = (blockId: string, p: HTMLElement): void =>
   ReactDOM.render(
     <ImportArticle blockId={blockId} initialIndent={getIndentConfig()} />,
     p

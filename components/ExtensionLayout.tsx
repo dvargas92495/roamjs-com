@@ -6,19 +6,15 @@ import { frontMatter as frontMatters } from "../pages/docs/extensions/*.mdx";
 
 const INDEX_LABEL = "Getting Started";
 
-export const pathToId = (f: string) =>
+export const pathToId = (f: string): string =>
   f.substring("docs\\extensions\\".length, f.length - ".mdx".length);
 
-export const pathToLabel = (f: string) =>
+export const pathToLabel = (f: string): string =>
   f.endsWith("index.mdx") ? INDEX_LABEL : pathToId(f).replace(/-/g, " ");
 
-const ExtensionLayout = ({
-  children,
-  frontMatter,
-}: {
-  children: React.ReactNode;
+const ExtensionLayout: React.FunctionComponent<{
   frontMatter: FrontMatter;
-}) => {
+}> = ({ children, frontMatter }) => {
   const items = frontMatters
     .map((f) => f.__resourcePath)
     .map((f) => ({

@@ -13,7 +13,6 @@ import {
   ExternalLink,
   H2,
   H4,
-  H5,
   Items,
   Subtitle,
 } from "@dvargas92495/ui";
@@ -25,7 +24,7 @@ const QueueItemPage = ({
 }: {
   issueTitle: "extension" | "enhancement";
   number: string;
-}) => {
+}): JSX.Element => {
   const [issue, setIssue] = useState<{
     link: string;
     title: string;

@@ -2,7 +2,11 @@ import { Button, InputGroup } from "@blueprintjs/core";
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 
-const TallyCounter = ({ initialValue }: { initialValue: number }) => {
+const TallyCounter = ({
+  initialValue,
+}: {
+  initialValue: number;
+}): JSX.Element => {
   const [value, setValue] = useState(initialValue);
   return (
     <div
@@ -22,8 +26,12 @@ const TallyCounter = ({ initialValue }: { initialValue: number }) => {
   );
 };
 
-export const DemoTallyCounter = () => <TallyCounter initialValue={0} />;
-export const renderTallyCounter = (initialValue: number, p: HTMLElement) =>
-  ReactDOM.render(<TallyCounter initialValue={initialValue} />, p);
+export const DemoTallyCounter = (): JSX.Element => (
+  <TallyCounter initialValue={0} />
+);
+export const renderTallyCounter = (
+  initialValue: number,
+  p: HTMLElement
+): void => ReactDOM.render(<TallyCounter initialValue={initialValue} />, p);
 
 export default TallyCounter;

@@ -15,22 +15,17 @@ import isBefore from "date-fns/isBefore";
 
 const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || "");
 
-const FundButton = ({
-  title,
-  name,
-  url,
-}: {
+const FundButton: React.FunctionComponent<{
   title: string;
   name: string;
   url: string;
-}) => {
+}> = ({ title, name, url }) => {
   const user = useUser();
   return (
     <FormDialog
       title={name}
       contentText={`Funding will be charged upon completion of ${title}.`}
       buttonText={"FUND"}
-      onSuccess={() => {}}
       onSave={(body) =>
         axios
           .post(
@@ -43,7 +38,7 @@ const FundButton = ({
             },
             {
               headers: {
-                Authorization: !!user
+                Authorization: user
                   ? `token ${user.accessToken}`
                   : `Basic ${btoa(body.email)}`,
               },
@@ -72,7 +67,7 @@ const FundButton = ({
           validate: (v: Date) =>
             !isBefore(new Date(), v) ? "Due Date must be after today" : "",
         },
-        ...(!!user
+        ...(user
           ? []
           : [
               {

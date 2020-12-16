@@ -9,7 +9,9 @@ import {
 import axios from "axios";
 
 const importGithubIssues = async (
-  _: any,
+  _: {
+    [key: string]: string;
+  },
   blockUid: string,
   parentUid: string
 ) => {
@@ -38,7 +40,10 @@ const importGithubIssues = async (
         await asyncType("No issues assigned to you!");
         return;
       }
-      const bullets = issues.map((i: any) => `[${i.title}](${i.html_url})`);
+      const bullets = issues.map(
+        (i: { title: string; html_url: string }) =>
+          `[${i.title}](${i.html_url})`
+      );
       await pushBullets(bullets, blockUid, parentUid);
     })
     .catch(genericError);
@@ -74,7 +79,7 @@ const importGithubRepos = async (
         await asyncType(`No repos in ${username}'s account!`);
         return;
       }
-      const bullets = repos.map((i: any) => `[[${i.name}]]`);
+      const bullets = repos.map((i: { name: string }) => `[[${i.name}]]`);
       await pushBullets(bullets, blockUid, parentUid);
     })
     .catch(genericError);
@@ -112,7 +117,7 @@ const importGithubProjects = async (
         await asyncType(`No projects in ${repository}`);
         return;
       }
-      const bullets = projects.map((i: any) => `[[${i.name}]]`);
+      const bullets = projects.map((i: { name: string }) => `[[${i.name}]]`);
       await pushBullets(bullets, blockUid, parentUid);
     })
     .catch(genericError);
@@ -152,7 +157,7 @@ const importGithubCards = async (
           return;
         }
         const bullets = cards.map(
-          (i: any) =>
+          (i: { note: string; content_url: string; html_url: string }) =>
             `[${
               i.note
                 ? i.note

@@ -26,7 +26,7 @@ const Code: React.FunctionComponent<HTMLElement> = ({
 
 const MdxImage = (props) => <img {...props} style={{ maxWidth: 480 }} />;
 
-const MyApp = ({ Component, pageProps }: AppProps) => (
+const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => (
   <Auth0Provider
     domain={AUTH0_DOMAIN}
     clientId={process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID}

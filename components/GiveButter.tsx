@@ -1,7 +1,7 @@
 import React from "react";
 import IframeResizer from "iframe-resizer-react";
 
-const GiveButter = () => (
+const GiveButter: React.FunctionComponent = () => (
   <>
     <IframeResizer
       src="https://givebutter.com/embed/c/roamjs"

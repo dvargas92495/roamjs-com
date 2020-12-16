@@ -1,8 +1,8 @@
 import axios from "axios";
 import { wrapAxios, getGithubOpts, userError } from "../lambda-helpers";
-import { APIGatewayEvent } from "aws-lambda";
+import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 
-export const handler = async (event: APIGatewayEvent) => {
+export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult>  => {
   const { username } = event.queryStringParameters;
   if (!username) {
     return userError("username is required");

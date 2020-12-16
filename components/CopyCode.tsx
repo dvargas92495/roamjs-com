@@ -11,7 +11,7 @@ const scriptIds = frontMatters
   .filter((f) => !f.development)
   .map((f) => pathToId(f.__resourcePath)) as string[];
 
-const CopyCode = () => {
+const CopyCode: React.FunctionComponent = () => {
   const user = useUser();
   const [saved, setSaved] = useState(false);
   const onCopySave = useCopyCode(setSaved);
@@ -29,9 +29,9 @@ const CopyCode = () => {
   return (
     <CheckboxForm
       items={scriptIds.map((s) => s.replace(/-/g, " ").toUpperCase())}
-      onSave={!!user ? onRoamInstall : onCopySave}
+      onSave={user ? onRoamInstall : onCopySave}
       buttonText={
-        !!user ? (saved ? "Installed!" : "Install") : saved ? "Copied!" : "Copy"
+        user ? (saved ? "Installed!" : "Install") : saved ? "Copied!" : "Copy"
       }
     />
   );

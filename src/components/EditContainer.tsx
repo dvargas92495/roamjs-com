@@ -13,7 +13,7 @@ const EditContainer = ({
   blockId?: string;
   className?: string;
   children: React.ReactNode;
-}) => {
+}): JSX.Element => {
   const [showEditIcon, setShowEditIcon] = useState(false);
   const appear = useCallback(() => setShowEditIcon(true), [setShowEditIcon]);
   const disappear = useCallback(() => setShowEditIcon(false), [

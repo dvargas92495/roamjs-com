@@ -1,13 +1,14 @@
-import { APIGatewayEvent } from "aws-lambda";
+import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
 import Mixpanel from "mixpanel";
 import { headers } from "../lambda-helpers";
 import charset from "charset";
-import iconv from "iconv-lite";
 
 const mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
 
-export const handler = async (event: APIGatewayEvent) => {
+export const handler = async (
+  event: APIGatewayEvent
+): Promise<APIGatewayProxyResult> => {
   mixpanel.track("Use Extension", {
     extensionId: "article",
     action: "Import",
@@ -17,6 +18,7 @@ export const handler = async (event: APIGatewayEvent) => {
     .get(url, {
       headers: { "Content-type": "text/html" },
       responseType: "document",
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore https://github.com/axios/axios/pull/2619
       responseEncoding: "base64",
     })

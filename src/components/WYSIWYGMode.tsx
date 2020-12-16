@@ -62,7 +62,7 @@ const parseValue = ({
   const applyStyle = (matcher: string, style: string) => {
     const regex = new RegExp(matcher, "g");
     let match;
-    let indices = [];
+    const indices = [];
     while ((match = regex.exec(initialValue))) {
       indices.push(match.index);
     }
@@ -182,7 +182,7 @@ const WYSIWYGMode = ({
     start: number;
     end: number;
   }) => void;
-}) => {
+}) : JSX.Element => {
   const editorRef = useRef<EditorType>(null);
   const outputOnUnmount = useCallback(() => {
     const editorState = editorRef.current.getEditorState();
@@ -319,7 +319,7 @@ export const renderWYSIWYGMode = (
   b: HTMLElement,
   textarea: HTMLTextAreaElement,
   onUnmount: () => void
-) =>
+) : void =>
   ReactDOM.render(
     <WYSIWYGMode
       initialValue={textarea.value}
@@ -368,7 +368,7 @@ const DemoTextArea = React.forwardRef<
   );
 });
 
-export const DemoWYSIWYGMode = () => {
+export const DemoWYSIWYGMode = () : JSX.Element => {
   const [isBlock, setIsBlock] = useState(true);
   const [isOutputting, setIsOutputting] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);

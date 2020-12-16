@@ -119,7 +119,7 @@ runExtension("page-synonyms", () => {
         });
       });
     } else {
-      for (var index in highlightedDivIds) {
+      for (const index in highlightedDivIds) {
         const id = highlightedDivIds[index];
         await openBlock(document.getElementById(id));
         const textArea = document.getElementById(id) as HTMLTextAreaElement;

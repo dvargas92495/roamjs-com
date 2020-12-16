@@ -1,7 +1,7 @@
 import { Logo } from "@dvargas92495/ui";
 import React from "react";
 
-const RoamJSLogo = () => (
+const RoamJSLogo: React.FunctionComponent = () => (
   <Logo viewBoxWidth={1350}>
     <path
       fillRule="evenodd"

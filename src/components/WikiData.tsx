@@ -11,7 +11,7 @@ import {
 import React, { useCallback, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
-import { asyncType, openBlock } from "roam-client";
+import { openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import DemoPopoverWrapper from "./DemoPopoverWrapper";
 import { useArrowKeyDown } from "./hooks";
@@ -77,6 +77,7 @@ const WikiContent = ({
           await openBlock(document.getElementById(blockId));
           await userEvent.clear(document.activeElement);
           await userEvent.paste(document.activeElement, extract, {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore - https://github.com/testing-library/user-event/issues/512
             clipboardData: new DataTransfer(),
           });
@@ -155,7 +156,7 @@ const WikiData = ({
 }: {
   blockId: string;
   defaultIsOpen: boolean;
-}) => {
+}): JSX.Element => {
   const [isOpen, setIsOpen] = useState(defaultIsOpen);
   const open = useCallback(() => setIsOpen(true), [setIsOpen]);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
@@ -181,10 +182,10 @@ const WikiData = ({
   );
 };
 
-export const renderWikiData = (blockId: string, p: HTMLElement) =>
+export const renderWikiData = (blockId: string, p: HTMLElement): void =>
   ReactDOM.render(<WikiData blockId={blockId} defaultIsOpen={true} />, p);
 
-export const DemoWikiData = () => (
+export const DemoWikiData = (): JSX.Element => (
   <DemoPopoverWrapper
     WrappedComponent={WikiData}
     placeholder={"Imported Wiki Data outputted here!"}

@@ -11,7 +11,9 @@ import axios from "axios";
 const TWITTER_REFERENCES_COMMAND = "twitter references";
 
 const twitterReferencesListener = async (
-  _: any,
+  _: {
+    [key: string]: string;
+  },
   blockUid: string,
   parentUid: string
 ) => {
@@ -32,14 +34,14 @@ const twitterReferencesListener = async (
 
   twitterSearch
     .then(async (response) => {
-      let statuses = response.data.statuses;
-      let count = statuses.length;
+      const statuses = response.data.statuses;
+      const count = statuses.length;
       if (count === 0) {
         await asyncType("No tweets found!");
         return;
       }
       const bullets = statuses.map(
-        (i: any) => `https://twitter.com/i/web/status/${i.id_str}`
+        (i: {id_str: string}) => `https://twitter.com/i/web/status/${i.id_str}`
       );
       await pushBullets(bullets, blockUid, parentUid);
     })

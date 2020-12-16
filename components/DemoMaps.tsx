@@ -1,7 +1,7 @@
 import React from "react";
 import dynamic from "next/dynamic";
 
-const DemoMaps = () => {
+const DemoMaps: React.FunctionComponent = () => {
   process.env.MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
   const Map = dynamic(() => import("../src/components/Maps"), { ssr: false });
   return (

@@ -41,7 +41,7 @@ const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
       } else {
         span.innerText = `(${p})`;
       }
-    } else if (!!span) {
+    } else if (span) {
       h.removeChild(span);
     }
 
@@ -61,7 +61,7 @@ const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
   sorts.sort((a, b) => a.priority - b.priority);
   rows.forEach((r) => body.removeChild(r));
   rows.sort((a, b) => {
-    for (var k in sorts) {
+    for (const k in sorts) {
       const config = sorts[k];
       if (config.asc !== undefined) {
         const aData = (a.children[config.index] as HTMLTableDataCellElement)
@@ -130,7 +130,7 @@ const observerCallback = () => {
           sortConfig[key].asc = undefined;
           const oldPriority = sortConfig[key].priority;
           const maxPriority = getMaxPriority(sortConfig);
-          for (var p = oldPriority + 1; p <= maxPriority; p++) {
+          for (let p = oldPriority + 1; p <= maxPriority; p++) {
             const value = values.find((v) => v.priority === p);
             value.priority--;
           }

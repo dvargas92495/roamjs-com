@@ -15,7 +15,13 @@ import {
 const PULL_REFERENCES_COMMAND = "Pull References";
 const REPLACE = "${ref}";
 
-const pullReferences = async (_: any, blockUid: string, parentUid: string) => {
+const pullReferences = async (
+  _: {
+    [key: string]: string;
+  },
+  blockUid: string,
+  parentUid: string
+) => {
   const config = getConfigFromPage("roam/js/pull-references");
   const format = config["Format"] || REPLACE;
   const pageTitle = getPageTitle(document.activeElement);
@@ -40,7 +46,7 @@ const pullReferences = async (_: any, blockUid: string, parentUid: string) => {
       .find((d) => d.className.indexOf("rm-query-content") < 0)
       .getElementsByClassName("roam-block");
     const blockReferenceIds = Array.from(blockReferences).map((b) => b.id);
-    for (var b = 0; b < blockReferenceIds.length; b++) {
+    for (let b = 0; b < blockReferenceIds.length; b++) {
       const block = document.getElementById(blockReferenceIds[b]);
       await openBlock(block);
       const textArea = document.activeElement as HTMLTextAreaElement;

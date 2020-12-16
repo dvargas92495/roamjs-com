@@ -1,4 +1,4 @@
-import { APIGatewayEvent } from "aws-lambda";
+import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios, { AxiosResponse } from "axios";
 import {
   Contracts,
@@ -7,8 +7,10 @@ import {
   headers,
 } from "../lambda-helpers";
 
-export const handler = async (event: APIGatewayEvent) => {
-  const label = event.queryStringParameters.label || 'enhancement';
+export const handler = async (
+  event: APIGatewayEvent
+): Promise<APIGatewayProxyResult> => {
+  const label = event.queryStringParameters.label || "enhancement";
   const opts = getGithubOpts();
   const flossIssues = await getFlossActiveContracts()
     .then((r) =>

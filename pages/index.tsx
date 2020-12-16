@@ -8,7 +8,7 @@ const ConvertKitComponent = dynamic(() => import("../components/ConvertKit"), {
   ssr: false,
 });
 
-const HomePage = () => (
+const HomePage = (): JSX.Element => (
   <Layout>
     <Landing
       Logo={LandingUndraw}

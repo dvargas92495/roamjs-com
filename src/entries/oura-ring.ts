@@ -22,7 +22,13 @@ const secondsToTimeString = (s: number) => {
   )}:${seconds.padStart(2, "0")}`;
 };
 
-const importOuraRing = async (_: any, blockUid: string, parentUid: string) => {
+const importOuraRing = async (
+  _: {
+    [key: string]: string;
+  },
+  blockUid: string,
+  parentUid: string
+) => {
   const config = getConfigFromPage("roam/js/oura-ring");
   const pageTitle = getPageTitle(document.activeElement);
   const dateFromPage = parseRoamDate(pageTitle.textContent);
@@ -94,7 +100,7 @@ const importOuraRing = async (_: any, blockUid: string, parentUid: string) => {
     bullets.push(`Readiness Score:: ${readiness.score}`);
   }
 
-  await pushBullets(bullets);
+  await pushBullets(bullets, blockUid, parentUid);
 };
 
 runExtension("oura-ring", () => {

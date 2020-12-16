@@ -6,13 +6,7 @@ import {
   Popover,
 } from "@blueprintjs/core";
 import { parseDate } from "chrono-node";
-import React, {
-  ChangeEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { ChangeEvent, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import { asyncPaste, openBlock } from "roam-client";
 import differenceInMillieseconds from "date-fns/differenceInMilliseconds";
@@ -43,7 +37,7 @@ const removeAlertById = (alertId: number) => {
 
 export const schedule = (
   input: Omit<AlertContent, "when"> & { timeout: number }
-) =>
+): NodeJS.Timeout =>
   setTimeout(() => {
     if (
       input.allowNotification &&
@@ -154,17 +148,15 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
   );
 };
 
-const AlertButton = ({ blockId }: { blockId: string }) => (
-    <Popover
-      content={<AlertButtonContent blockId={blockId} />}
-      target={
-        <Button text="ALERT" data-roamjs-alert-button />
-      }
-      defaultIsOpen={true}
-    />
-  );
+const AlertButton = ({ blockId }: { blockId: string }): JSX.Element => (
+  <Popover
+    content={<AlertButtonContent blockId={blockId} />}
+    target={<Button text="ALERT" data-roamjs-alert-button />}
+    defaultIsOpen={true}
+  />
+);
 
-export const render = (b: HTMLButtonElement) =>
+export const render = (b: HTMLButtonElement): void =>
   ReactDOM.render(
     <AlertButton blockId={b.closest(".roam-block").id} />,
     b.parentElement

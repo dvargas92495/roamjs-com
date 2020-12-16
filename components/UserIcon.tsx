@@ -10,7 +10,7 @@ const ConvertKitComponent = () => {
   return <Component />;	
 };
 
-const UserIcon = () => {
+const UserIcon: React.FunctionComponent = () => {
   const [flag, setFlag] = useState(false);
   useEffect(() => {
     document.addEventListener("keydown", (e) => {

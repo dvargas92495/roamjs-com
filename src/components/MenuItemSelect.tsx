@@ -4,7 +4,7 @@ import React, { ReactText } from "react";
 
 const MenuItemSelect = <T extends ReactText>(
   props: Omit<ISelectProps<T>, "itemRenderer"> & { ButtonProps?: IButtonProps }
-) => {
+): JSX.Element => {
   const TypeSelect = Select.ofType<T>();
   return (
     <TypeSelect

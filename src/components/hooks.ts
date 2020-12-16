@@ -6,7 +6,10 @@ export const useArrowKeyDown = <T>({
 }: {
   results: T[];
   onEnter: (i: T) => void;
-}) => {
+}): {
+  activeIndex: number;
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+} => {
   const [activeIndex, setActiveIndex] = useState(0);
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -29,7 +32,9 @@ export const useArrowKeyDown = <T>({
   };
 };
 
-export const useDocumentKeyDown = (eventListener: (e: KeyboardEvent) => void) =>
+export const useDocumentKeyDown = (
+  eventListener: (e: KeyboardEvent) => void
+): void =>
   useEffect(() => {
     document.addEventListener("keydown", eventListener);
     return () => document.removeEventListener("keydown", eventListener);

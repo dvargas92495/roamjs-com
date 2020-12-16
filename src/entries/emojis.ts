@@ -18,7 +18,7 @@ runExtension("emojis", () => {
   let currentTarget: HTMLTextAreaElement = document.createElement("textarea");
 
   // The following styling is ripped from Roam's menu style
-  let menu = document.createElement("div");
+  const menu = document.createElement("div");
   menu.className = "bp3-elevation-3";
   menu.style.maxHeight = "300px";
   menu.style.top = "26px";

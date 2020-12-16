@@ -1,7 +1,7 @@
 import Head from "next/head";
 import React, { useEffect, useState } from "react";
 
-const ConvertKit = () => {
+const ConvertKit: React.FunctionComponent = () => {
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     setLoaded(true);

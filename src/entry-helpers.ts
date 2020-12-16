@@ -1,8 +1,4 @@
-import {
-  createIconButton,
-  getAttrConfigFromQuery,
-  getUids,
-} from "roam-client";
+import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel, { Dict } from "mixpanel-browser";
 import userEvent from "@testing-library/user-event";
@@ -29,9 +25,10 @@ declare global {
 const roamJsVersion = process.env.ROAMJS_VERSION || "0";
 mixpanel.init(process.env.MIXPANEL_TOKEN);
 
-export const track = (name: string, properties: Dict) => mixpanel.track(name, properties)
+export const track = (name: string, properties: Dict): void =>
+  mixpanel.track(name, properties);
 
-export const runExtension = (extensionId: string, run: () => void) => {
+export const runExtension = (extensionId: string, run: () => void): void => {
   if (!window.roamjs) {
     window.roamjs = { alerted: false, loaded: new Set() };
   }
@@ -62,7 +59,7 @@ export const replaceText = async ({
   before: string;
   after: string;
   prepend?: boolean;
-}) => {
+}): Promise<void> => {
   const textArea = document.activeElement as HTMLTextAreaElement;
   const index = before
     ? textArea.value.indexOf(before)
@@ -92,7 +89,7 @@ export const replaceTagText = async ({
   after: string;
   addHash?: boolean;
   prepend?: boolean;
-}) => {
+}): Promise<void> => {
   if (before) {
     await replaceText({
       before: `#[[${before}]]`,
@@ -124,7 +121,7 @@ export const replaceTagText = async ({
 
 export const createObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void
-) =>
+): void =>
   createDivObserver(
     mutationCallback,
     document.getElementsByClassName("roam-body")[0]
@@ -166,7 +163,7 @@ export const createHTMLObserver = ({
   callback: (b: HTMLElement) => void;
   tag: string;
   className: string;
-}) => {
+}): void => {
   const blocks = document.getElementsByClassName(className);
   Array.from(blocks).forEach(callback);
 
@@ -184,7 +181,7 @@ export const createHTMLObserver = ({
 export const createBlockObserver = (
   blockCallback: (b: HTMLDivElement) => void,
   blockRefCallback: (b: HTMLSpanElement) => void
-) => {
+): void => {
   createHTMLObserver({
     callback: blockCallback,
     tag: "DIV",
@@ -200,7 +197,7 @@ export const createBlockObserver = (
 export const createPageObserver = (
   name: string,
   callback: (blockUid: string, added: boolean) => void
-) =>
+): void =>
   createObserver((ms) => {
     const addedNodes = getMutatedNodes({
       ms,
@@ -238,7 +235,7 @@ export const createButtonObserver = ({
   shortcut: string;
   attribute: string;
   render: (b: HTMLButtonElement) => void;
-}) =>
+}): void =>
   createHTMLObserver({
     callback: (b) => {
       if (
@@ -259,7 +256,7 @@ export const createButtonObserver = ({
 
 export const createOverlayObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void
-) => createDivObserver(mutationCallback, document.body);
+): void => createDivObserver(mutationCallback, document.body);
 
 const createDivObserver = (
   mutationCallback: (mutationList?: MutationRecord[]) => void,
@@ -274,7 +271,7 @@ const POPOVER_WRAPPER_CLASS = "sort-popover-wrapper";
 export const createSortIcon = (
   refContainer: HTMLDivElement,
   sortCallbacks: { [key: string]: (refContainer: Element) => () => void }
-) => {
+): HTMLSpanElement => {
   // Icon Button
   const popoverWrapper = document.createElement("span");
   popoverWrapper.className = `bp3-popover-wrapper ${POPOVER_WRAPPER_CLASS}`;
@@ -391,7 +388,7 @@ export const createSortIcons = (
   sortCallbacks: { [key: string]: (refContainer: Element) => () => void },
   childIndex?: number,
   shouldCreate?: (container: HTMLDivElement) => boolean
-) => {
+): void => {
   const sortButtonContainers = Array.from(
     document.getElementsByClassName(containerClass)
   ) as HTMLDivElement[];
@@ -419,7 +416,7 @@ export const createSortIcons = (
   });
 };
 
-export const getCreatedTimeByTitle = (title: string) => {
+export const getCreatedTimeByTitle = (title: string): number => {
   const result = window.roamAlphaAPI.q(
     `[:find (pull ?e [:create/time]) :where [?e :node/title "${title.replace(
       /"/g,
@@ -429,7 +426,7 @@ export const getCreatedTimeByTitle = (title: string) => {
   return result || getEditTimeByTitle(title);
 };
 
-export const getEditTimeByTitle = (title: string) =>
+export const getEditTimeByTitle = (title: string): number =>
   window.roamAlphaAPI.q(
     `[:find (pull ?e [:edit/time]) :where [?e :node/title "${title.replace(
       /"/g,
@@ -437,7 +434,9 @@ export const getEditTimeByTitle = (title: string) =>
     )}"]]`
   )[0][0]?.time;
 
-export const getConfigFromBlock = (container: HTMLElement) => {
+export const getConfigFromBlock = (
+  container: HTMLElement
+): { [key: string]: string } => {
   const block = container.closest(".roam-block");
   if (!block) {
     return {};
@@ -466,7 +465,7 @@ const getWordCountByBlockId = (blockId: number): number => {
   );
 };
 
-export const getWordCountByBlockUid = (blockUid: string) => {
+export const getWordCountByBlockUid = (blockUid: string): number => {
   const block = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/children, :block/string]) :where [?e :block/uid "${blockUid}"]]`
   )[0][0];
@@ -503,7 +502,9 @@ const getTextTreeByBlockId = (blockId: number): TreeNode => {
   };
 };
 
-export const getTextTreeByBlockUid = (blockUid: string) => {
+export const getTextTreeByBlockUid = (
+  blockUid: string
+): { text: string; children: TreeNode[] } => {
   const block = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/children, :block/string]) :where [?e :block/uid "${blockUid}"]]`
   )[0][0];
@@ -516,7 +517,7 @@ export const getTextTreeByBlockUid = (blockUid: string) => {
   };
 };
 
-export const getTextTreeByPageName = (name: string) => {
+export const getTextTreeByPageName = (name: string): TreeNode[] => {
   const result = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/children]) :where [?e :node/title "${name}"]]`
   );
@@ -530,7 +531,7 @@ export const getTextTreeByPageName = (name: string) => {
     .sort((a, b) => a.order - b.order);
 };
 
-export const getWordCountByPageTitle = (title: string) => {
+export const getWordCountByPageTitle = (title: string): number => {
   const page = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/children]) :where [?e :node/title "${title}"]]`
   )[0][0];
@@ -540,7 +541,7 @@ export const getWordCountByPageTitle = (title: string) => {
     .reduce((total, cur) => cur + total, 0);
 };
 
-export const getTextByBlockUid = (uid: string) => {
+export const getTextByBlockUid = (uid: string): string => {
   const results = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/string]) :where [?e :block/uid "${uid}"]]`
   );
@@ -550,24 +551,24 @@ export const getTextByBlockUid = (uid: string) => {
   return "";
 };
 
-export const getRefTitlesByBlockUid = (uid: string) =>
+export const getRefTitlesByBlockUid = (uid: string): string[] =>
   window.roamAlphaAPI
     .q(
       `[:find (pull ?r [:node/title]) :where [?e :block/refs ?r] [?e :block/uid "${uid}"]]`
     )
     .map((b) => b[0]?.title || "");
 
-export const getCreateTimeByBlockUid = (uid: string) =>
+export const getCreateTimeByBlockUid = (uid: string): number =>
   window.roamAlphaAPI.q(
     `[:find (pull ?e [:create/time]) :where [?e :block/uid "${uid}"]]`
   )[0][0]?.time;
 
-export const getEditTimeByBlockUid = (uid: string) =>
+export const getEditTimeByBlockUid = (uid: string): number =>
   window.roamAlphaAPI.q(
     `[:find (pull ?e [:edit/time]) :where [?e :block/uid "${uid}"]]`
   )[0][0]?.time;
 
-export const getPageTitle = (e: Element) => {
+export const getPageTitle = (e: Element): ChildNode => {
   const container =
     e.closest(".roam-log-page") || e.closest(".rm-sidebar-outline") || document;
   const heading = container.getElementsByClassName(
@@ -649,7 +650,7 @@ export type RoamBlock = {
   uid?: string;
 };
 
-export const getLinkedPageReferences = (t: string) => {
+export const getLinkedPageReferences = (t: string): RoamBlock[] => {
   const findParentBlock: (b: RoamBlock) => RoamBlock = (b: RoamBlock) =>
     b.title
       ? b
@@ -669,21 +670,21 @@ export const getLinkedPageReferences = (t: string) => {
   return parentBlocks.map((b) => findParentBlock(b[0])) as RoamBlock[];
 };
 
-export const getChildRefStringsByBlockUid = (b: string) =>
+export const getChildRefStringsByBlockUid = (b: string): string[] =>
   window.roamAlphaAPI
     .q(
       `[:find (pull ?r [:block/string]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
     )
     .map((r) => r[0].string);
 
-export const getChildRefUidsByBlockUid = (b: string) =>
+export const getChildRefUidsByBlockUid = (b: string): string[] =>
   window.roamAlphaAPI
     .q(
       `[:find (pull ?r [:block/uid]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
     )
     .map((r) => r[0].uid);
 
-export const getLinkedReferences = (t: string) => {
+export const getLinkedReferences = (t: string): RoamBlock[] => {
   const parentBlocks = window.roamAlphaAPI
     .q(
       `[:find (pull ?referencingBlock [*]) :where [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${t.replace(
@@ -695,7 +696,7 @@ export const getLinkedReferences = (t: string) => {
   return parentBlocks.map((b) => b[0]) as RoamBlock[];
 };
 
-export const createMobileIcon = (id: string, iconType: string) => {
+export const createMobileIcon = (id: string, iconType: string): HTMLButtonElement => {
   const iconButton = document.createElement("button");
   iconButton.id = id;
   iconButton.className =
@@ -715,10 +716,10 @@ export const createMobileIcon = (id: string, iconType: string) => {
 
 export const isApple = isIOS || isMacOs;
 
-export const isControl = (e: KeyboardEvent) =>
+export const isControl = (e: KeyboardEvent): boolean =>
   (e.ctrlKey && !isApple) || (e.metaKey && isApple);
 
-export const addStyle = (content: string) => {
+export const addStyle = (content: string): void => {
   const css = document.createElement("style");
   css.textContent = content;
   document.getElementsByTagName("head")[0].appendChild(css);
@@ -730,7 +731,7 @@ export const createCustomSmartBlockCommand = ({
 }: {
   command: string;
   processor: () => Promise<string[]>;
-}) => {
+}): void => {
   const inputListener = () => {
     if (window.roam42 && window.roam42.smartBlocks) {
       window.roam42.smartBlocks.customCommands.push({

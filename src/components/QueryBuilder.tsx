@@ -246,8 +246,6 @@ const SubqueryContent = ({
           )}
           filterable={false}
           popoverProps={{ minimal: true, captureDismiss: true }}
-          // @ts-ignore
-          onKeyDown={(e) => e.nativeEvent.stopPropagation()}
         >
           <Button
             text={queryState.type}
@@ -469,7 +467,7 @@ const QueryBuilder = ({
   blockId: string;
   defaultIsOpen: boolean;
   initialValue?: string;
-}) => {
+}): JSX.Element => {
   return (
     <Popover
       content={<QueryContent blockId={blockId} initialValue={initialValue} />}
@@ -492,7 +490,7 @@ export const renderQueryBuilder = ({
   blockId: string;
   parent: HTMLElement;
   initialValue?: string;
-}) =>
+}): void =>
   ReactDOM.render(
     <QueryBuilder
       blockId={blockId}
@@ -502,7 +500,7 @@ export const renderQueryBuilder = ({
     parent
   );
 
-export const DemoQueryBuilder = () => {
+export const DemoQueryBuilder = (): JSX.Element => {
   useEffect(() => {
     window.roamAlphaAPI = {
       q: () => [

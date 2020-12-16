@@ -49,7 +49,7 @@ const Maps = ({
   zoom?: number;
   center?: LatLngExpression;
   markers?: { x: number; y: number; tag: string }[];
-}) => {
+}): JSX.Element => {
   const id = useMemo(() => `roamjs-maps-container-id-${blockId}`, [blockId]);
   const [href, setHref] = useState("https://roamresearch.com");
   useEffect(() => {
@@ -104,7 +104,7 @@ const getCoords = (tag: string) =>
         : [NaN, NaN]
     );
 
-export const render = (b: HTMLButtonElement) => {
+export const render = (b: HTMLButtonElement): void => {
   const block = b.closest(".roam-block");
   if (!block) {
     return;
@@ -120,7 +120,9 @@ export const render = (b: HTMLButtonElement) => {
   const centerNode = tree.children.find(
     (c) => c.text.trim().toUpperCase() === "CENTER"
   );
-  const zoomNode = tree.children.find((c) => c.text.trim().toUpperCase() === "ZOOM");
+  const zoomNode = tree.children.find(
+    (c) => c.text.trim().toUpperCase() === "ZOOM"
+  );
   const zoom =
     zoomNode && zoomNode.children[0] && parseInt(zoomNode.children[0].text);
   const center =
@@ -146,8 +148,8 @@ export const render = (b: HTMLButtonElement) => {
     : Promise.resolve([]);
   getMarkers.then((markers) => {
     track("Use Extension", {
-      extensionId: 'maps',
-      action: 'Render',
+      extensionId: "maps",
+      action: "Render",
     });
     ReactDOM.render(
       <Maps

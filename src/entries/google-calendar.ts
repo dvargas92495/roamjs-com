@@ -16,6 +16,16 @@ import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
+type Event = {
+  transparency: "transparent" | "opaque";
+  summary: string;
+  htmlLink: string;
+  hangoutLink: string;
+  location: string;
+  start: { dateTime: string };
+  end: { dateTime: string };
+};
+
 const fetchGoogleCalendar = async () => {
   const config = getConfigFromPage("roam/js/google-calendar");
   const pageTitle = getPageTitle(document.activeElement);
@@ -50,8 +60,8 @@ const fetchGoogleCalendar = async () => {
         return;
       }
       return events
-        .filter((e: any) => !skipFree || e.transparency !== "transparent")
-        .map((e: any) => {
+        .filter((e: Event) => !skipFree || e.transparency !== "transparent")
+        .map((e: Event) => {
           if (format) {
             return format
               .replace("/Summary", e.summary || "No Summary")
@@ -95,7 +105,9 @@ const fetchGoogleCalendar = async () => {
 };
 
 const importGoogleCalendar = async (
-  _?: any,
+  _?: {
+    [key: string]: string;
+  },
   blockUid?: string,
   parentUid?: string
 ) => {

@@ -1,7 +1,7 @@
 import React from "react";
 import Layout from "../../../components/Layout";
 
-const TemplateDailyNotePage = () => (
+const TemplateDailyNotePage = (): JSX.Element => (
   <Layout>
     <div>
       <h1>Template Daily Note</h1>

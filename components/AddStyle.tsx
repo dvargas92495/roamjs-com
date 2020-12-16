@@ -1,7 +1,9 @@
 import React from "react";
 import Head from "next/head";
 
-const AddStyle = ({ styleContent }: { styleContent: string }) => (
+const AddStyle: React.FunctionComponent<{ styleContent: string }> = ({
+  styleContent,
+}) => (
   <Head>
     <style>{styleContent}</style>
   </Head>

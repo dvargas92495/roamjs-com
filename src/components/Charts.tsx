@@ -127,7 +127,7 @@ const Charts = ({
   initialBottomType: AxisType;
   initialLeftType: AxisType;
   initialDateFormat?: string;
-}) => {
+}): JSX.Element => {
   const [dateFormat, setDateFormat] = useState(initialDateFormat);
   const [leftType, setLeftType] = useState<AxisType>(initialLeftType);
   const [bottomType, setBottomType] = useState<AxisType>(initialBottomType);
@@ -214,7 +214,7 @@ export const renderLineChart = ({
 }: {
   blockId: string;
   parent: HTMLElement;
-}) =>
+}): void =>
   ReactDOM.render(
     <Charts type={"line"} {...getProps(blockId)} blockId={blockId} />,
     parent
@@ -226,9 +226,9 @@ export const renderBarChart = ({
 }: {
   blockId: string;
   parent: HTMLElement;
-}) => ReactDOM.render(<Charts type={"bar"} {...getProps(blockId)} />, parent);
+}): void => ReactDOM.render(<Charts type={"bar"} {...getProps(blockId)} />, parent);
 
-export const DemoCharts = () => {
+export const DemoCharts = (): JSX.Element => {
   const [data, setData] = React.useState([
     {
       label: "First",

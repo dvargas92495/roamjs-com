@@ -1,8 +1,10 @@
 import axios from "axios";
-import { APIGatewayProxyEvent } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { getGithubOpts, userError, wrapAxios } from "../lambda-helpers";
 
-export const handler = async (event: APIGatewayProxyEvent) => {
+export const handler = async (
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> => {
   const { repository, project, column } = event.queryStringParameters;
   if (!repository) {
     return userError("repository is required");
@@ -20,7 +22,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   ).then((projects) => {
     const projectName = decodeURIComponent(project).toUpperCase();
     const projectObj = projects.data.find(
-      (p: any) => p.name.toUpperCase() === projectName
+      (p: { name: string }) => p.name.toUpperCase() === projectName
     );
     if (!projectObj) {
       return userError(
@@ -30,7 +32,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     return axios(projectObj.columns_url, opts).then((columns) => {
       const columnName = decodeURIComponent(column).toUpperCase();
       const columnObj = columns.data.find(
-        (c: any) => c.name.toUpperCase() === columnName
+        (c: { name: string }) => c.name.toUpperCase() === columnName
       );
       if (!columnObj) {
         return userError(
@@ -40,7 +42,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       return wrapAxios(
         axios(columnObj.cards_url, opts).then((r) => ({
           ...r,
-          data: r.data.map((i: any) => ({
+          data: r.data.map((i: { html_url: string; id: string }) => ({
             ...i,
             html_url: `${projectObj.html_url}#card-${i.id}`,
           })),

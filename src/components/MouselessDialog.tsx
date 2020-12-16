@@ -166,6 +166,7 @@ const convertShortcut = (shortcut: string): KeyboardEvent => {
     bubbles: true,
     cancelable: true,
     composed: true,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     keyCode: convertKeyCode(parts[parts.length - 1]),
   });
@@ -173,7 +174,7 @@ const convertShortcut = (shortcut: string): KeyboardEvent => {
 
 const ROAMJS_MOUSELESS_SEARCH_INPUT = "roamjs-mouseless-search-input";
 
-const MouselessDialog = () => {
+const MouselessDialog = (): JSX.Element => {
   const previousFocus = useRef(null);
   const [allCommands, setAllCommands] = useState(COMMANDS);
   useEffect(() => {
@@ -289,7 +290,7 @@ const MouselessDialog = () => {
   );
 };
 
-export const renderMouselessDialog = (c: HTMLDivElement) =>
+export const renderMouselessDialog = (c: HTMLDivElement): void =>
   ReactDOM.render(<MouselessDialog />, c);
 
 export default MouselessDialog;

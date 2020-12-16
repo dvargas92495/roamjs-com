@@ -10,7 +10,7 @@ export const DemoPopoverWrapper = ({
     defaultIsOpen: boolean;
   }>;
   placeholder: string;
-}) => {
+}): JSX.Element => {
   useEffect(() => {
     // hack - page is auto scrolling to the top when the button is clicked?!
     const overlayButton = document.getElementsByClassName(
