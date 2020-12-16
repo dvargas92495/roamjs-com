@@ -179,7 +179,7 @@ const onCreateSortIcons = (container: HTMLDivElement) => {
 const randomize = (q: HTMLDivElement) => {
   const config = getConfigFromBlock(q);
   const numRandomResults = Math.max(
-    isNaN(config["Random"]) ? 1 : parseInt(config["Random"]),
+    Number.isNaN(config["Random"]) ? 1 : parseInt(config["Random"]),
     1
   );
   const refsByPageView = q.lastElementChild;
