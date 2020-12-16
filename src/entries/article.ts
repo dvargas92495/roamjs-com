@@ -27,7 +27,7 @@ const inlineImportArticle = async (value: string) => {
       await userEvent.clear(document.activeElement);
       await asyncPaste(ERROR_MESSAGE);
     });
-    return "[Source](url)";
+    return `[Source](${url})`;
   } else {
     return "Invalid Article URL";
   }
