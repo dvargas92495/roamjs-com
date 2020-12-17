@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
@@ -11,8 +11,8 @@ import {
   StringField,
   Subtitle,
 } from "@dvargas92495/ui";
-import axios from "axios";
-import { AUTH0_AUDIENCE, FLOSS_API_URL } from "../../components/constants";
+import { useAuthenticatedAxios } from "../../components/hooks";
+import Link from "next/link";
 
 const Settings = ({ name }: { name: string }) => {
   const [isEditable, setIsEditable] = useState({
@@ -21,27 +21,25 @@ const Settings = ({ name }: { name: string }) => {
   const [editName, setEditName] = useState(name);
   const [balance, setBalance] = useState(0);
   const [funding, setFunding] = useState([]);
-  const { getAccessTokenSilently } = useAuth0();
+  const authenticatedAxios = useAuthenticatedAxios();
   const getBalance = useCallback(
     () =>
-      getAccessTokenSilently({
-        audience: AUTH0_AUDIENCE,
-        scope: "read:current_user",
-      }).then((token) =>
-        axios
-          .get(`${FLOSS_API_URL}/stripe-balance`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          })
-          .then((r) => setBalance(r.data.balance))
+      authenticatedAxios("stripe-balance").then((r) =>
+        setBalance(r.data.balance)
       ),
-    [getAccessTokenSilently, setBalance]
+    [setBalance]
   );
-  const getFunding = useCallback(
-    () => Promise.resolve().then(() => setFunding([])),
-    [setFunding]
-  );
+  useEffect(() => {
+    authenticatedAxios("contract-by-email").then((r) =>
+      setFunding(
+        r.data.contracts.sort(
+          (a, b) =>
+            new Date(a.createdDate).valueOf() -
+            new Date(b.createdDate).valueOf()
+        )
+      )
+    );
+  }, [setFunding]);
   return (
     <Items
       items={[
@@ -82,12 +80,31 @@ const Settings = ({ name }: { name: string }) => {
         },
         ...funding.map((f, i) => ({
           primary: (
-            <DataLoader loadAsync={getFunding}>
-              <H6>{f}</H6>
-            </DataLoader>
+            <div style={{ marginBottom: -24, paddingLeft: 64 }}>
+              <H6>
+                <Link
+                  href={`queue/${f.label}${f.link.substring(
+                    "https://github.com/dvargas92495/roam-js-extensions/issues"
+                      .length
+                  )}`}
+                >
+                  {f.name}
+                </Link>
+              </H6>
+            </div>
+          ),
+          secondary: (
+            <div
+              style={{
+                marginBottom: i === funding.length - 1 ? -16 : -24,
+                paddingLeft: 64,
+              }}
+            >
+              {`$${f.reward} funded on ${f.createdDate} due on ${f.dueDate}`}
+            </div>
           ),
           key: i + 2,
-          avatar: <Subtitle>Funding</Subtitle>,
+          avatar: i === 0 ? <Subtitle>Fund</Subtitle> : <span />,
         })),
       ]}
     />
