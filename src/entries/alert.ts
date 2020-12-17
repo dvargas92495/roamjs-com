@@ -15,16 +15,14 @@ runExtension("alert", () => {
   renderWindowAlert();
   const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (storage) {
-    const { alerts, nextId } = JSON.parse(storage) as {
+    const { alerts } = JSON.parse(storage) as {
       alerts: AlertContent[];
-      nextId: number;
     };
     const validAlerts = alerts.filter((a) => {
       const timeout = differenceInMilliseconds(new Date(a.when), new Date());
       if (timeout > 0) {
         schedule({
           message: a.message,
-          id: a.id,
           timeout,
           allowNotification: a.allowNotification,
         });
@@ -35,7 +33,6 @@ runExtension("alert", () => {
     localStorage.setItem(
       LOCAL_STORAGE_KEY,
       JSON.stringify({
-        nextId,
         alerts: validAlerts,
       })
     );

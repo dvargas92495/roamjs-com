@@ -2,6 +2,8 @@ import {
   Alert,
   Button,
   Checkbox,
+  Dialog,
+  Icon,
   InputGroup,
   Label,
   Popover,
@@ -13,7 +15,7 @@ import { asyncPaste, openBlock } from "roam-client";
 import differenceInMillieseconds from "date-fns/differenceInMilliseconds";
 import userEvent from "@testing-library/user-event";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
-import { getRenderRoot } from "./hooks";
+import { getRenderRoot, useDocumentKeyDown } from "./hooks";
 
 export const LOCAL_STORAGE_KEY = "roamjsAlerts";
 
@@ -30,7 +32,8 @@ const WindowAlert: React.FunctionComponent = () => {
   const [oldTitle, setOldTitle] = useState("");
   const onClose = useCallback(() => {
     document.title = oldTitle;
-  }, [oldTitle]);
+    setIsOpen(false);
+  }, [oldTitle, setIsOpen]);
   window.roamjs.extension.alert.open = useCallback(
     (input: Omit<AlertContent, "when">) => {
       setOldTitle(document.title);
@@ -48,26 +51,69 @@ const WindowAlert: React.FunctionComponent = () => {
   );
 };
 
+const AlertDashboard: React.FunctionComponent = () => {
+  const [alerts, setAlerts] = useState<AlertContent[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const listener = useCallback(
+    (e) => {
+      if (e.altKey && e.shiftKey && e.key === "A") {
+        setIsOpen(true);
+        const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (storage) {
+          const { alerts: storageAlerts } = JSON.parse(storage);
+          setAlerts(storageAlerts);
+        } else {
+          setAlerts([]);
+        }
+      }
+    },
+    [setIsOpen, setAlerts]
+  );
+  useDocumentKeyDown(listener);
+  return (
+    <Dialog isOpen={isOpen}>
+      <ul>
+        {alerts.map((a) => (
+          <li key={a.id}>
+            {a.when} - {a.message}
+            <Button
+              onClick={() => {
+                window.clearTimeout(a.id);
+                removeAlertById(a.id);
+              }}
+            >
+              <Icon icon={"trash"} />
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </Dialog>
+  );
+};
+
 export const renderWindowAlert = (): void =>
-  ReactDOM.render(<WindowAlert />, getRenderRoot());
+  ReactDOM.render(
+    <>
+      <WindowAlert />
+      <AlertDashboard />
+    </>,
+    getRenderRoot()
+  );
 
 const removeAlertById = (alertId: number) => {
-  const { alerts, nextId } = JSON.parse(
-    localStorage.getItem(LOCAL_STORAGE_KEY)
-  );
+  const { alerts } = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
   localStorage.setItem(
     LOCAL_STORAGE_KEY,
     JSON.stringify({
-      nextId,
       alerts: alerts.filter((a: AlertContent) => a.id !== alertId),
     })
   );
 };
 
 export const schedule = (
-  input: Omit<AlertContent, "when"> & { timeout: number }
-): NodeJS.Timeout =>
-  setTimeout(() => {
+  input: Omit<Omit<AlertContent, "when">, "id"> & { timeout: number }
+): number => {
+  const id = window.setTimeout(() => {
     if (
       input.allowNotification &&
       window.Notification.permission === "granted"
@@ -75,11 +121,13 @@ export const schedule = (
       const n = new window.Notification("RoamJS Alert", {
         body: input.message,
       });
-      n.addEventListener("show", () => removeAlertById(input.id));
+      n.addEventListener("show", () => removeAlertById(id));
     } else {
       window.roamjs.extension.alert.open(input);
     }
   }, input.timeout);
+  return id;
+};
 
 const AlertButtonContent = ({ blockId }: { blockId: string }) => {
   const [when, setWhen] = useState("");
@@ -114,12 +162,9 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
     await userEvent.clear(textarea);
     if (timeout > 0) {
       const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
-      const { alerts, nextId: id } = storage
-        ? JSON.parse(storage)
-        : { alerts: [], nextId: 1 };
-      schedule({
+      const { alerts } = storage ? JSON.parse(storage) : { alerts: [] };
+      const id = schedule({
         message,
-        id,
         timeout,
         allowNotification,
       });
@@ -138,7 +183,6 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
               id,
             },
           ],
-          nextId: id + 1,
         })
       );
     } else {
