@@ -13,6 +13,11 @@ import { asyncPaste, openBlock } from "roam-client";
 import differenceInMillieseconds from "date-fns/differenceInMilliseconds";
 import userEvent from "@testing-library/user-event";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import { getRenderRoot } from "./hooks";
+
+window.roamjs.extension.alert = {
+  open: undefined,
+};
 
 export const LOCAL_STORAGE_KEY = "roamjsAlerts";
 
@@ -22,6 +27,33 @@ export type AlertContent = {
   id: number;
   allowNotification: boolean;
 };
+
+const WindowAlert: React.FunctionComponent = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [oldTitle, setOldTitle] = useState("");
+  const onClose = useCallback(() => {
+    document.title = oldTitle;
+  }, [oldTitle]);
+  window.roamjs.extension.alert.open = useCallback(
+    (input: Omit<AlertContent, "when">) => {
+      setOldTitle(document.title);
+      document.title = `* ${document.title}`;
+      setIsOpen(true);
+      setMessage(input.message);
+      removeAlertById(input.id);
+    },
+    [setIsOpen, setMessage, setOldTitle]
+  );
+  return (
+    <Alert isOpen={isOpen} className={"roamjs-window-alert"} onClose={onClose}>
+      {message}
+    </Alert>
+  );
+};
+
+export const renderWindowAlert = (): void =>
+  ReactDOM.render(<WindowAlert />, getRenderRoot());
 
 const removeAlertById = (alertId: number) => {
   const { alerts, nextId } = JSON.parse(
@@ -49,11 +81,7 @@ export const schedule = (
       });
       n.addEventListener("show", () => removeAlertById(input.id));
     } else {
-      const oldTitle = document.title;
-      document.title = `* ${oldTitle}`;
-      window.alert(input.message);
-      document.title = oldTitle;
-      removeAlertById(input.id);
+      window.roamjs.extension.alert.open(input);
     }
   }, input.timeout);
 

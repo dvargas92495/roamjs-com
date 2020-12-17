@@ -3,11 +3,13 @@ import {
   AlertContent,
   LOCAL_STORAGE_KEY,
   render,
+  renderWindowAlert,
   schedule,
 } from "../components/AlertButton";
 import differenceInMilliseconds from "date-fns/differenceInMilliseconds";
 
 runExtension("alert", () => {
+  renderWindowAlert();
   const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (storage) {
     const { alerts, nextId } = JSON.parse(storage) as {

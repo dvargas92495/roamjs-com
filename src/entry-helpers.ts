@@ -8,6 +8,9 @@ declare global {
     roamjs?: {
       alerted: boolean;
       loaded: Set<string>;
+      extension: {
+        [id: string]: { [method: string]: (args?: unknown) => void };
+      };
     };
     roam42?: {
       smartBlocks?: {
