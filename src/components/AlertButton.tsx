@@ -11,10 +11,12 @@ import {
 import { parseDate } from "chrono-node";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
-import { asyncPaste } from "roam-client";
+import { asyncPaste, openBlock } from "roam-client";
 import differenceInMillieseconds from "date-fns/differenceInMilliseconds";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { getRenderRoot, useDocumentKeyDown } from "./hooks";
+import { userError } from "../lambda-helpers";
+import userEvent from "@testing-library/user-event";
 
 export const LOCAL_STORAGE_KEY = "roamjsAlerts";
 
@@ -53,6 +55,7 @@ const WindowAlert: React.FunctionComponent = () => {
 const AlertDashboard: React.FunctionComponent = () => {
   const [alerts, setAlerts] = useState<AlertContent[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const onClose = useCallback(() => setIsOpen(false), [setIsOpen]);
   const listener = useCallback(
     (e) => {
       if (e.altKey && e.shiftKey && e.key === "A") {
@@ -70,7 +73,7 @@ const AlertDashboard: React.FunctionComponent = () => {
   );
   useDocumentKeyDown(listener);
   return (
-    <Dialog isOpen={isOpen}>
+    <Dialog isOpen={isOpen} title={"Live Alerts"} onClose={onClose}>
       <ul>
         {alerts.map((a) => (
           <li key={a.id}>
@@ -79,7 +82,7 @@ const AlertDashboard: React.FunctionComponent = () => {
               onClick={() => {
                 window.clearTimeout(a.id);
                 removeAlertById(a.id);
-                setAlerts(alerts.filter(aa => aa.id !== a.id))
+                setAlerts(alerts.filter((aa) => aa.id !== a.id));
               }}
             >
               <Icon icon={"trash"} />
@@ -219,28 +222,36 @@ const AlertButtonContent = ({
 const ConfirmationDialog: React.FunctionComponent<{
   scheduled: string;
   setScheduled: (scheduled: string) => void;
-}> = ({ scheduled, setScheduled }) => {
+  blockId: string;
+}> = ({ scheduled, setScheduled, blockId }) => {
   const [isOpen, setIsOpen] = useState(true);
   const onClose = useCallback(() => {
     setIsOpen(false);
     setScheduled("");
-  }, [setIsOpen, setScheduled]);
+    openBlock(document.getElementById(blockId)).then((textarea) =>
+      userEvent.clear(textarea)
+    );
+  }, [setIsOpen, setScheduled, blockId]);
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title={'Live Alerts'}>
+    <Dialog isOpen={isOpen} onClose={onClose} title={"Confirmed"}>
       Alert scheduled to trigger in {scheduled}
     </Dialog>
   );
 };
 
-const AlertButton = (): JSX.Element => {
+const AlertButton: React.FunctionComponent<{ blockId: string }> = ({
+  blockId,
+}) => {
   const [scheduled, setScheduled] = useState("");
   return scheduled ? (
-    <ConfirmationDialog scheduled={scheduled} setScheduled={setScheduled} />
+    <ConfirmationDialog
+      scheduled={scheduled}
+      setScheduled={setScheduled}
+      blockId={blockId}
+    />
   ) : (
     <Popover
-      content={
-        <AlertButtonContent setScheduled={setScheduled} />
-      }
+      content={<AlertButtonContent setScheduled={setScheduled} />}
       target={<Button text="ALERT" data-roamjs-alert-button />}
       defaultIsOpen={true}
     />
@@ -249,7 +260,7 @@ const AlertButton = (): JSX.Element => {
 
 export const render = (b: HTMLButtonElement): void =>
   ReactDOM.render(
-    <AlertButton />,
+    <AlertButton blockId={b.closest(".roam-block").id} />,
     b.parentElement
   );
 
