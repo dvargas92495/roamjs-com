@@ -7,7 +7,31 @@ import {
   importArticle,
   renderImportArticle,
 } from "../components/ImportArticle";
-import { createButtonObserver, runExtension } from "../entry-helpers";
+import {
+  createButtonObserver,
+  createCustomSmartBlockCommand,
+  runExtension,
+} from "../entry-helpers";
+
+const inlineImportArticle = async (value: string) => {
+  const match = value.match(urlRegex({ strict: true }));
+  if (match) {
+    const indent = getIndentConfig();
+    const url = match[0];
+    await asyncPaste("Loading...");
+    await importArticle({
+      url,
+      blockId: document.activeElement.id,
+      indent,
+    }).catch(async () => {
+      await userEvent.clear(document.activeElement);
+      await asyncPaste(ERROR_MESSAGE);
+    });
+    return `[Source](${url})`;
+  } else {
+    return "Invalid Article URL";
+  }
+};
 
 runExtension("article", () => {
   createButtonObserver({
@@ -21,24 +45,16 @@ runExtension("article", () => {
     if (e.altKey && e.shiftKey && e.key === "I") {
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA") {
-        const textarea = target as HTMLTextAreaElement;
-        const match = textarea.value.match(urlRegex({ strict: true }));
-        if (match) {
-          const indent = getIndentConfig();
-          const url = match[0];
-          await newBlockEnter();
-          await userEvent.tab();
-          await asyncPaste("Loading...");
-          await importArticle({
-            url,
-            blockId: document.activeElement.id,
-            indent,
-          }).catch(async () => {
-            await userEvent.clear(document.activeElement);
-            await asyncPaste(ERROR_MESSAGE);
-          });
-        }
+        const value = (target as HTMLTextAreaElement).value;
+        await newBlockEnter();
+        await userEvent.tab();
+        await inlineImportArticle(value);
       }
     }
+  });
+
+  createCustomSmartBlockCommand({
+    command: "ARTICLE",
+    processor: (afterColon) => inlineImportArticle(afterColon),
   });
 });

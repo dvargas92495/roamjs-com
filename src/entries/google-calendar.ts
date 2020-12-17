@@ -26,7 +26,9 @@ type Event = {
   end: { dateTime: string };
 };
 
-const fetchGoogleCalendar = async () => {
+const EMPTY_MESSAGE = "No Events Scheduled for Today!";
+
+const fetchGoogleCalendar = async (): Promise<string[]> => {
   const config = getConfigFromPage("roam/js/google-calendar");
   const pageTitle = getPageTitle(document.activeElement);
   const dateFromPage = parseRoamDate(pageTitle.textContent);
@@ -56,8 +58,7 @@ const fetchGoogleCalendar = async () => {
     .then(async (r) => {
       const events = r.data.items;
       if (!events || events.length === 0) {
-        await asyncType("No Events Scheduled for Today!");
-        return;
+        return [EMPTY_MESSAGE];
       }
       return events
         .filter((e: Event) => !skipFree || e.transparency !== "transparent")
@@ -121,5 +122,9 @@ runExtension("google-calendar", () => {
 
 createCustomSmartBlockCommand({
   command: "GOOGLECALENDAR",
-  processor: fetchGoogleCalendar,
+  processor: () => fetchGoogleCalendar().then((bullets) =>
+    pushBullets(bullets.slice(0, bullets.length - 1)).then(() =>
+      bullets.length ? bullets[bullets.length - 1] : EMPTY_MESSAGE
+    )
+  ),
 });

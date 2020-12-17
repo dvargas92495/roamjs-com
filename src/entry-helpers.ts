@@ -14,8 +14,8 @@ declare global {
         customCommands: {
           key: string; // `<% ${string} %> (SmartBlock function)`, sad - https://github.com/microsoft/TypeScript/issues/13969
           icon: "gear";
-          value: string; // `<%${string}%>;
-          processor: () => Promise<string>;
+          value: string;
+          processor: (match: string) => Promise<string>;
         }[];
       };
     };
@@ -696,7 +696,10 @@ export const getLinkedReferences = (t: string): RoamBlock[] => {
   return parentBlocks.map((b) => b[0]) as RoamBlock[];
 };
 
-export const createMobileIcon = (id: string, iconType: string): HTMLButtonElement => {
+export const createMobileIcon = (
+  id: string,
+  iconType: string
+): HTMLButtonElement => {
   const iconButton = document.createElement("button");
   iconButton.id = id;
   iconButton.className =
@@ -730,15 +733,24 @@ export const createCustomSmartBlockCommand = ({
   processor,
 }: {
   command: string;
-  processor: () => Promise<string[]>;
+  processor: (afterColon?: string) => Promise<string>;
 }): void => {
   const inputListener = () => {
     if (window.roam42 && window.roam42.smartBlocks) {
+      const value = `<%${command.toUpperCase()}(:.*)?%>`;
       window.roam42.smartBlocks.customCommands.push({
         key: `<% ${command.toUpperCase()} %> (SmartBlock function)`,
         icon: "gear",
-        processor: () => processor().then((bullets) => bullets.join("\n")),
-        value: `<%${command.toUpperCase()}%>`,
+        processor: (match: string) => {
+          const colonPrefix = `<%${command.toUpperCase()}:`;
+          if (match.startsWith(colonPrefix)) {
+            const afterColon = match.replace("<%${}:", "").replace("%>", "");
+            return processor(afterColon);
+          } else {
+            return processor();
+          }
+        },
+        value,
       });
       document.removeEventListener("input", inputListener);
     }
