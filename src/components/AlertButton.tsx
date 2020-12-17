@@ -11,9 +11,8 @@ import {
 import { parseDate } from "chrono-node";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
-import { asyncPaste, openBlock } from "roam-client";
+import { asyncPaste } from "roam-client";
 import differenceInMillieseconds from "date-fns/differenceInMilliseconds";
-import userEvent from "@testing-library/user-event";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { getRenderRoot, useDocumentKeyDown } from "./hooks";
 
@@ -75,11 +74,12 @@ const AlertDashboard: React.FunctionComponent = () => {
       <ul>
         {alerts.map((a) => (
           <li key={a.id}>
-            {a.when} - {a.message}
+            {new Date(a.when).toLocaleString()} - {a.message}
             <Button
               onClick={() => {
                 window.clearTimeout(a.id);
                 removeAlertById(a.id);
+                setAlerts(alerts.filter(aa => aa.id !== a.id))
               }}
             >
               <Icon icon={"trash"} />
@@ -129,7 +129,11 @@ export const schedule = (
   return id;
 };
 
-const AlertButtonContent = ({ blockId }: { blockId: string }) => {
+const AlertButtonContent = ({
+  setScheduled,
+}: {
+  setScheduled: (s: string) => void;
+}) => {
   const [when, setWhen] = useState("");
   const onWhenChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setWhen(e.target.value),
@@ -157,9 +161,6 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
   const onButtonClick = useCallback(async () => {
     const whenDate = parseDate(when);
     const timeout = differenceInMillieseconds(whenDate, new Date());
-    const block = document.getElementById(blockId);
-    const textarea = await openBlock(block);
-    await userEvent.clear(textarea);
     if (timeout > 0) {
       const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
       const { alerts } = storage ? JSON.parse(storage) : { alerts: [] };
@@ -168,9 +169,7 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
         timeout,
         allowNotification,
       });
-      await asyncPaste(
-        `Alert scheduled to trigger in ${formatDistanceToNow(whenDate)}`
-      );
+      setScheduled(formatDistanceToNow(whenDate));
 
       localStorage.setItem(
         LOCAL_STORAGE_KEY,
@@ -188,7 +187,7 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
     } else {
       await asyncPaste(`Alert scheduled to with an invalid date`);
     }
-  }, [blockId, when, message, allowNotification, close]);
+  }, [when, message, allowNotification, close]);
   return (
     <div style={{ padding: 8, paddingRight: 24 }}>
       <InputGroup
@@ -217,17 +216,40 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
   );
 };
 
-const AlertButton = ({ blockId }: { blockId: string }): JSX.Element => (
-  <Popover
-    content={<AlertButtonContent blockId={blockId} />}
-    target={<Button text="ALERT" data-roamjs-alert-button />}
-    defaultIsOpen={true}
-  />
-);
+const ConfirmationDialog: React.FunctionComponent<{
+  scheduled: string;
+  setScheduled: (scheduled: string) => void;
+}> = ({ scheduled, setScheduled }) => {
+  const [isOpen, setIsOpen] = useState(true);
+  const onClose = useCallback(() => {
+    setIsOpen(false);
+    setScheduled("");
+  }, [setIsOpen, setScheduled]);
+  return (
+    <Dialog isOpen={isOpen} onClose={onClose} title={'Live Alerts'}>
+      Alert scheduled to trigger in {scheduled}
+    </Dialog>
+  );
+};
+
+const AlertButton = (): JSX.Element => {
+  const [scheduled, setScheduled] = useState("");
+  return scheduled ? (
+    <ConfirmationDialog scheduled={scheduled} setScheduled={setScheduled} />
+  ) : (
+    <Popover
+      content={
+        <AlertButtonContent setScheduled={setScheduled} />
+      }
+      target={<Button text="ALERT" data-roamjs-alert-button />}
+      defaultIsOpen={true}
+    />
+  );
+};
 
 export const render = (b: HTMLButtonElement): void =>
   ReactDOM.render(
-    <AlertButton blockId={b.closest(".roam-block").id} />,
+    <AlertButton />,
     b.parentElement
   );
 
