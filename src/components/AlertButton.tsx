@@ -3,6 +3,7 @@ import {
   Button,
   Checkbox,
   Dialog,
+  H6,
   Icon,
   InputGroup,
   Label,
@@ -15,7 +16,6 @@ import { asyncPaste, openBlock } from "roam-client";
 import differenceInMillieseconds from "date-fns/differenceInMilliseconds";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { getRenderRoot, useDocumentKeyDown } from "./hooks";
-import { userError } from "../lambda-helpers";
 import userEvent from "@testing-library/user-event";
 
 export const LOCAL_STORAGE_KEY = "roamjsAlerts";
@@ -47,6 +47,7 @@ const WindowAlert: React.FunctionComponent = () => {
   );
   return (
     <Alert isOpen={isOpen} className={"roamjs-window-alert"} onClose={onClose}>
+      <H6>RoamJS Alert</H6>
       {message}
     </Alert>
   );
@@ -126,7 +127,7 @@ export const schedule = (
       });
       n.addEventListener("show", () => removeAlertById(id));
     } else {
-      window.roamjs.extension.alert.open(input);
+      window.roamjs.extension.alert.open({ ...input, id });
     }
   }, input.timeout);
   return id;
@@ -227,7 +228,7 @@ const ConfirmationDialog: React.FunctionComponent<{
   const [isOpen, setIsOpen] = useState(true);
   const onClose = useCallback(() => {
     setIsOpen(false);
-    setScheduled("");
+    setScheduled("DONE");
     openBlock(document.getElementById(blockId)).then((textarea) =>
       userEvent.clear(textarea)
     );
@@ -243,7 +244,9 @@ const AlertButton: React.FunctionComponent<{ blockId: string }> = ({
   blockId,
 }) => {
   const [scheduled, setScheduled] = useState("");
-  return scheduled ? (
+  return scheduled === "DONE" ? (
+    <div />
+  ) : scheduled ? (
     <ConfirmationDialog
       scheduled={scheduled}
       setScheduled={setScheduled}
