@@ -8,6 +8,9 @@ declare global {
     roamjs?: {
       alerted: boolean;
       loaded: Set<string>;
+      extension: {
+        [id: string]: { [method: string]: (args?: unknown) => void };
+      };
     };
     roam42?: {
       smartBlocks?: {
@@ -30,7 +33,7 @@ export const track = (name: string, properties: Dict): void =>
 
 export const runExtension = (extensionId: string, run: () => void): void => {
   if (!window.roamjs) {
-    window.roamjs = { alerted: false, loaded: new Set() };
+    window.roamjs = { alerted: false, loaded: new Set(), extension: {} };
   }
   if (window.roamjs.loaded.has(extensionId)) {
     return;

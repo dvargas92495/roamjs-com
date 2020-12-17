@@ -2,6 +2,9 @@ import {
   Alert,
   Button,
   Checkbox,
+  Dialog,
+  H6,
+  Icon,
   InputGroup,
   Label,
   Popover,
@@ -11,8 +14,9 @@ import React, { ChangeEvent, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import { asyncPaste, openBlock } from "roam-client";
 import differenceInMillieseconds from "date-fns/differenceInMilliseconds";
-import userEvent from "@testing-library/user-event";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import { getRenderRoot, useDocumentKeyDown } from "./hooks";
+import userEvent from "@testing-library/user-event";
 
 export const LOCAL_STORAGE_KEY = "roamjsAlerts";
 
@@ -23,23 +27,97 @@ export type AlertContent = {
   allowNotification: boolean;
 };
 
-const removeAlertById = (alertId: number) => {
-  const { alerts, nextId } = JSON.parse(
-    localStorage.getItem(LOCAL_STORAGE_KEY)
+const WindowAlert: React.FunctionComponent = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [oldTitle, setOldTitle] = useState("");
+  const onClose = useCallback(() => {
+    document.title = oldTitle;
+    setIsOpen(false);
+  }, [oldTitle, setIsOpen]);
+  window.roamjs.extension.alert.open = useCallback(
+    (input: Omit<AlertContent, "when">) => {
+      setOldTitle(document.title);
+      document.title = `* ${document.title}`;
+      setIsOpen(true);
+      setMessage(input.message);
+      removeAlertById(input.id);
+    },
+    [setIsOpen, setMessage, setOldTitle]
   );
+  return (
+    <Alert isOpen={isOpen} className={"roamjs-window-alert"} onClose={onClose}>
+      <H6>RoamJS Alert</H6>
+      {message}
+    </Alert>
+  );
+};
+
+const AlertDashboard: React.FunctionComponent = () => {
+  const [alerts, setAlerts] = useState<AlertContent[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const onClose = useCallback(() => setIsOpen(false), [setIsOpen]);
+  const listener = useCallback(
+    (e) => {
+      if (e.altKey && e.shiftKey && e.key === "A") {
+        setIsOpen(true);
+        const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (storage) {
+          const { alerts: storageAlerts } = JSON.parse(storage);
+          setAlerts(storageAlerts);
+        } else {
+          setAlerts([]);
+        }
+      }
+    },
+    [setIsOpen, setAlerts]
+  );
+  useDocumentKeyDown(listener);
+  return (
+    <Dialog isOpen={isOpen} title={"Live Alerts"} onClose={onClose}>
+      <ul>
+        {alerts.map((a) => (
+          <li key={a.id}>
+            {new Date(a.when).toLocaleString()} - {a.message}
+            <Button
+              onClick={() => {
+                window.clearTimeout(a.id);
+                removeAlertById(a.id);
+                setAlerts(alerts.filter((aa) => aa.id !== a.id));
+              }}
+            >
+              <Icon icon={"trash"} />
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </Dialog>
+  );
+};
+
+export const renderWindowAlert = (): void =>
+  ReactDOM.render(
+    <>
+      <WindowAlert />
+      <AlertDashboard />
+    </>,
+    getRenderRoot()
+  );
+
+const removeAlertById = (alertId: number) => {
+  const { alerts } = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
   localStorage.setItem(
     LOCAL_STORAGE_KEY,
     JSON.stringify({
-      nextId,
       alerts: alerts.filter((a: AlertContent) => a.id !== alertId),
     })
   );
 };
 
 export const schedule = (
-  input: Omit<AlertContent, "when"> & { timeout: number }
-): NodeJS.Timeout =>
-  setTimeout(() => {
+  input: Omit<Omit<AlertContent, "when">, "id"> & { timeout: number }
+): number => {
+  const id = window.setTimeout(() => {
     if (
       input.allowNotification &&
       window.Notification.permission === "granted"
@@ -47,17 +125,19 @@ export const schedule = (
       const n = new window.Notification("RoamJS Alert", {
         body: input.message,
       });
-      n.addEventListener("show", () => removeAlertById(input.id));
+      n.addEventListener("show", () => removeAlertById(id));
     } else {
-      const oldTitle = document.title;
-      document.title = `* ${oldTitle}`;
-      window.alert(input.message);
-      document.title = oldTitle;
-      removeAlertById(input.id);
+      window.roamjs.extension.alert.open({ ...input, id });
     }
   }, input.timeout);
+  return id;
+};
 
-const AlertButtonContent = ({ blockId }: { blockId: string }) => {
+const AlertButtonContent = ({
+  setScheduled,
+}: {
+  setScheduled: (s: string) => void;
+}) => {
   const [when, setWhen] = useState("");
   const onWhenChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setWhen(e.target.value),
@@ -85,23 +165,15 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
   const onButtonClick = useCallback(async () => {
     const whenDate = parseDate(when);
     const timeout = differenceInMillieseconds(whenDate, new Date());
-    const block = document.getElementById(blockId);
-    const textarea = await openBlock(block);
-    await userEvent.clear(textarea);
     if (timeout > 0) {
       const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
-      const { alerts, nextId: id } = storage
-        ? JSON.parse(storage)
-        : { alerts: [], nextId: 1 };
-      schedule({
+      const { alerts } = storage ? JSON.parse(storage) : { alerts: [] };
+      const id = schedule({
         message,
-        id,
         timeout,
         allowNotification,
       });
-      await asyncPaste(
-        `Alert scheduled to trigger in ${formatDistanceToNow(whenDate)}`
-      );
+      setScheduled(formatDistanceToNow(whenDate));
 
       localStorage.setItem(
         LOCAL_STORAGE_KEY,
@@ -114,13 +186,12 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
               id,
             },
           ],
-          nextId: id + 1,
         })
       );
     } else {
       await asyncPaste(`Alert scheduled to with an invalid date`);
     }
-  }, [blockId, when, message, allowNotification, close]);
+  }, [when, message, allowNotification, close]);
   return (
     <div style={{ padding: 8, paddingRight: 24 }}>
       <InputGroup
@@ -149,13 +220,46 @@ const AlertButtonContent = ({ blockId }: { blockId: string }) => {
   );
 };
 
-const AlertButton = ({ blockId }: { blockId: string }): JSX.Element => (
-  <Popover
-    content={<AlertButtonContent blockId={blockId} />}
-    target={<Button text="ALERT" data-roamjs-alert-button />}
-    defaultIsOpen={true}
-  />
-);
+const ConfirmationDialog: React.FunctionComponent<{
+  scheduled: string;
+  setScheduled: (scheduled: string) => void;
+  blockId: string;
+}> = ({ scheduled, setScheduled, blockId }) => {
+  const [isOpen, setIsOpen] = useState(true);
+  const onClose = useCallback(() => {
+    setIsOpen(false);
+    setScheduled("DONE");
+    openBlock(document.getElementById(blockId)).then((textarea) =>
+      userEvent.clear(textarea)
+    );
+  }, [setIsOpen, setScheduled, blockId]);
+  return (
+    <Dialog isOpen={isOpen} onClose={onClose} title={"Confirmed"}>
+      Alert scheduled to trigger in {scheduled}
+    </Dialog>
+  );
+};
+
+const AlertButton: React.FunctionComponent<{ blockId: string }> = ({
+  blockId,
+}) => {
+  const [scheduled, setScheduled] = useState("");
+  return scheduled === "DONE" ? (
+    <div />
+  ) : scheduled ? (
+    <ConfirmationDialog
+      scheduled={scheduled}
+      setScheduled={setScheduled}
+      blockId={blockId}
+    />
+  ) : (
+    <Popover
+      content={<AlertButtonContent setScheduled={setScheduled} />}
+      target={<Button text="ALERT" data-roamjs-alert-button />}
+      defaultIsOpen={true}
+    />
+  );
+};
 
 export const render = (b: HTMLButtonElement): void =>
   ReactDOM.render(
