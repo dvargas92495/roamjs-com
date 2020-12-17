@@ -15,10 +15,6 @@ import userEvent from "@testing-library/user-event";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { getRenderRoot } from "./hooks";
 
-window.roamjs.extension.alert = {
-  open: undefined,
-};
-
 export const LOCAL_STORAGE_KEY = "roamjsAlerts";
 
 export type AlertContent = {

@@ -9,6 +9,9 @@ import {
 import differenceInMilliseconds from "date-fns/differenceInMilliseconds";
 
 runExtension("alert", () => {
+  window.roamjs.extension.alert = {
+    open: undefined,
+  };
   renderWindowAlert();
   const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (storage) {
