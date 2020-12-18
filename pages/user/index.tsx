@@ -1,71 +1,109 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
   Button,
+  Card,
   DataLoader,
   H1,
   H6,
   Items,
-  Outlined,
   StringField,
   Subtitle,
+  VerticalGridContent,
 } from "@dvargas92495/ui";
 import { useAuthenticatedAxios } from "../../components/hooks";
 import Link from "next/link";
 
-const Settings = ({ name }: { name: string }) => {
-  const [isEditable, setIsEditable] = useState({
-    name: false,
-  });
-  const [editName, setEditName] = useState(name);
+const useEditableSetting = (defaultValue: string) => {
+  const [isEditable, setIsEditable] = useState(false);
+  const [value, setValue] = useState(defaultValue);
+  return {
+    primary: (
+      <div style={{ marginBottom: -24, paddingLeft: 64 }}>
+        {isEditable ? (
+          <StringField value={value} setValue={setValue} />
+        ) : (
+          <H6>{defaultValue}</H6>
+        )}
+      </div>
+    ),
+    action: isEditable ? (
+      <Button startIcon="save" onClick={() => setIsEditable(false)} />
+    ) : (
+      <Button startIcon="edit" onClick={() => setIsEditable(true)} />
+    ),
+  };
+};
+
+const Settings = ({
+  name,
+  email,
+}: {
+  name: string;
+  email: string;
+}) => {
+  const { primary: namePrimary, action: nameAction } = useEditableSetting(name);
+  const { primary: emailPrimary, action: emailAction } = useEditableSetting(
+    email
+  );
+  return (
+    <Items
+      items={[
+        {
+          primary: emailPrimary,
+          key: 0,
+          avatar: <Subtitle>Email</Subtitle>,
+          action: emailAction,
+        },
+        {
+          primary: namePrimary,
+          key: 1,
+          avatar: <Subtitle>Name</Subtitle>,
+          action: nameAction,
+        },
+      ]}
+    />
+  );
+};
+
+const Billing = () => {
   const [balance, setBalance] = useState(0);
-  const [funding, setFunding] = useState([]);
+  const [payment, setPayment] = useState<{
+    brand?: string;
+    last4?: string;
+    id?: string;
+  }>({});
   const authenticatedAxios = useAuthenticatedAxios();
   const getBalance = useCallback(
     () =>
       authenticatedAxios("stripe-balance").then((r) =>
         setBalance(r.data.balance)
       ),
-    [setBalance]
+    [setBalance, authenticatedAxios]
   );
-  useEffect(() => {
-    authenticatedAxios("contract-by-email").then((r) =>
-      setFunding(
-        r.data.contracts.sort(
-          (a, b) =>
-            new Date(a.createdDate).valueOf() -
-            new Date(b.createdDate).valueOf()
-        )
-      )
-    );
-  }, [setFunding]);
+  const getPayment = useCallback(
+    () =>
+      authenticatedAxios("stripe-payment-methods").then((r) =>
+        setPayment(r.data[0])
+      ),
+    [authenticatedAxios]
+  );
   return (
     <Items
       items={[
         {
           primary: (
             <div style={{ marginBottom: -24, paddingLeft: 64 }}>
-              {isEditable.name ? (
-                <StringField value={editName} setValue={setEditName} />
-              ) : (
-                <H6>{name}</H6>
-              )}
+              <DataLoader loadAsync={getPayment}>
+                <H6>
+                  {payment.brand} ends in {payment.last4}
+                </H6>
+              </DataLoader>
             </div>
           ),
           key: 0,
-          avatar: <Subtitle>Name</Subtitle>,
-          action: isEditable.name ? (
-            <Button
-              startIcon="save"
-              onClick={() => setIsEditable({ ...isEditable, name: false })}
-            />
-          ) : (
-            <Button
-              startIcon="edit"
-              onClick={() => setIsEditable({ ...isEditable, name: true })}
-            />
-          ),
+          avatar: <Subtitle>Card</Subtitle>,
         },
         {
           primary: (
@@ -78,7 +116,31 @@ const Settings = ({ name }: { name: string }) => {
           key: 1,
           avatar: <Subtitle>Credit</Subtitle>,
         },
-        ...funding.map((f, i) => ({
+      ]}
+    />
+  );
+};
+
+const Funding = () => {
+  const [items, setItems] = useState([]);
+  const authenticatedAxios = useAuthenticatedAxios();
+  const loadItems = useCallback(
+    () =>
+      authenticatedAxios("contract-by-email").then((r) =>
+        setItems(
+          r.data.contracts.sort(
+            (a, b) =>
+              new Date(a.createdDate).valueOf() -
+              new Date(b.createdDate).valueOf()
+          )
+        )
+      ),
+    [setItems, authenticatedAxios]
+  );
+  return (
+    <DataLoader loadAsync={loadItems}>
+      <Items
+        items={items.map((f, i) => ({
           primary: (
             <div style={{ marginBottom: -24, paddingLeft: 64 }}>
               <H6>
@@ -96,18 +158,18 @@ const Settings = ({ name }: { name: string }) => {
           secondary: (
             <div
               style={{
-                marginBottom: i === funding.length - 1 ? -16 : -24,
+                marginBottom: i === items.length - 1 ? -16 : -24,
                 paddingLeft: 64,
               }}
             >
-              {`$${f.reward} funded on ${f.createdDate} due on ${f.dueDate}`}
+              {`Funded on ${f.createdDate}. Due on ${f.dueDate}`}
             </div>
           ),
-          key: i + 2,
-          avatar: i === 0 ? <Subtitle>Fund</Subtitle> : <span />,
-        })),
-      ]}
-    />
+          key: f.uuid,
+          avatar: <Subtitle>${f.reward}</Subtitle>,
+        }))}
+      />
+    </DataLoader>
   );
 };
 
@@ -122,17 +184,23 @@ const UserPage = (): JSX.Element => {
   );
   return (
     <StandardLayout>
-      <H1>User Settings</H1>
-      <Outlined>
-        {isAuthenticated ? (
-          <Settings {...user} />
-        ) : error ? (
-          <div>{`${error.name}: ${error.message}`}</div>
-        ) : (
-          <div>Not Logged In</div>
-        )}
-      </Outlined>
-      <div style={{ marginTop: 24 }}>
+      <VerticalGridContent>
+        <H1>User Info</H1>
+        <Card header={"Details"}>
+          {isAuthenticated ? (
+            <Settings {...user} />
+          ) : error ? (
+            <div>{`${error.name}: ${error.message}`}</div>
+          ) : (
+            <div>Not Logged In</div>
+          )}
+        </Card>
+        <Card header={"Billing"}>
+          <Billing />
+        </Card>
+        <Card header={"Funding"}>
+          <Funding />
+        </Card>
         {isAuthenticated && (
           <Button
             size="large"
@@ -143,7 +211,7 @@ const UserPage = (): JSX.Element => {
             Log Out
           </Button>
         )}
-      </div>
+      </VerticalGridContent>
     </StandardLayout>
   );
 };
