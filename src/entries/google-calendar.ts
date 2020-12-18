@@ -10,6 +10,7 @@ import {
   pushBullets,
   getConfigFromPage,
   parseRoamDate,
+  newBlockEnter,
 } from "roam-client";
 import axios from "axios";
 import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
@@ -122,9 +123,12 @@ runExtension("google-calendar", () => {
 
 createCustomSmartBlockCommand({
   command: "GOOGLECALENDAR",
-  processor: () => fetchGoogleCalendar().then((bullets) =>
-    pushBullets(bullets.slice(0, bullets.length - 1)).then(() =>
-      bullets.length ? bullets[bullets.length - 1] : EMPTY_MESSAGE
-    )
-  ),
+  processor: () =>
+    fetchGoogleCalendar().then((bullets) =>
+      pushBullets(bullets.slice(0, bullets.length - 1)).then(() =>
+        newBlockEnter().then(() =>
+          bullets.length ? bullets[bullets.length - 1] : EMPTY_MESSAGE
+        )
+      )
+    ),
 });
