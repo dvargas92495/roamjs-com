@@ -15,9 +15,6 @@ module.exports = (env) => ({
     modules: ["node_modules"],
     extensions: [".ts", ".js", ".tsx"],
   },
-  /*externals: [
-    
-  ],*/
   output: {
     path: path.join(__dirname, "build"),
     filename: "[name].js",
@@ -53,9 +50,13 @@ module.exports = (env) => ({
         test: /\.(png|jpe?g|gif)$/i,
         use: [
           {
-            loader: 'file-loader',
+            loader: "file-loader",
           },
         ],
+      },
+      {
+        test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+        loader: "url-loader?limit=100000",
       },
     ],
   },

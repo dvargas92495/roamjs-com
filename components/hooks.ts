@@ -22,7 +22,7 @@ var installScript = name => {
   document.getElementsByTagName("head")[0].appendChild(extension);
 };
 ${scripts}
-    \`\`\``;
+\`\`\``;
   e.clipboardData.setData(
     "text/plain",
     `{{[[roam/js]]}}

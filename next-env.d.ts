@@ -32,3 +32,12 @@ declare module "react-charts" {
     defaultColors?: string[];
   }>;
 }
+
+declare module "reveal.js" {
+  type RevealOptions = { embedded: boolean };
+  declare class Reveal {
+    constructor(options: RevealOptions);
+    initialize: () => void;
+  }
+  export default Reveal;
+}
