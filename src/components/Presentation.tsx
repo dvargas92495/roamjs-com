@@ -1,24 +1,37 @@
 import { Button, Overlay } from "@blueprintjs/core";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import Reveal from "reveal.js";
 import "reveal.js/dist/reveal.css";
 import "reveal.js/dist/theme/black.css";
 
 const Presentation: React.FunctionComponent = () => {
   const [showOverlay, setShowOverlay] = useState(false);
-  const onClose = useCallback(() => setShowOverlay(false), [setShowOverlay]);
+  const [loaded, setLoaded] = useState(false);
+  const onClose = useCallback(() => {
+      setShowOverlay(false);
+      setLoaded(false);
+  }, [setShowOverlay, setLoaded]);
   const open = useCallback(async () => {
-    const Reveal = await import("reveal.js").then((r) => r.default);
     setShowOverlay(true);
-    const deck = new Reveal({
-      embedded: true,
-    });
-    deck.initialize();
   }, [setShowOverlay]);
+  useEffect(() => {
+      if (showOverlay) {
+        setLoaded(true);
+      }
+  }, [showOverlay, setLoaded]);
+  useEffect(() => {
+      if (loaded) {
+        const deck = new Reveal({
+          embedded: true,
+        });
+        deck.initialize();
+      }
+  }, [loaded]);
   return (
     <>
       <Button onClick={open} data-roamjs-presentation text={"PRESENT"} />
-      <Overlay isOpen={showOverlay}>
+      <Overlay canEscapeKeyClose onClose={onClose} isOpen={showOverlay}>
         <div
           style={{
             height: "100%",
@@ -35,17 +48,10 @@ const Presentation: React.FunctionComponent = () => {
             </div>
           </div>
         </div>
-        <Button
-          icon={'cross'}
-          onClick={onClose}
-          style={{ display: "fixed", right: 32, top: 32, zIndex: 3000 }}
-        />
       </Overlay>
     </>
   );
 };
-
-export const DemoPresentation: React.FunctionComponent = () => <Presentation />;
 
 export const render = (b: HTMLButtonElement): void =>
   ReactDOM.render(<Presentation />, b.parentElement);
