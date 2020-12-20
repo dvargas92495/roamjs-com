@@ -1,33 +1,37 @@
 import { Button, Overlay } from "@blueprintjs/core";
-import React, { useCallback, useEffect, useState } from "react";
+import marked from "marked";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import Reveal from "reveal.js";
 import "reveal.js/dist/reveal.css";
 import "reveal.js/dist/theme/black.css";
 
-const Presentation: React.FunctionComponent = () => {
+const Presentation: React.FunctionComponent<{
+  getMarkdown: () => string[];
+}> = ({ getMarkdown }) => {
   const [showOverlay, setShowOverlay] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const onClose = useCallback(() => {
-      setShowOverlay(false);
-      setLoaded(false);
+    setShowOverlay(false);
+    setLoaded(false);
   }, [setShowOverlay, setLoaded]);
   const open = useCallback(async () => {
     setShowOverlay(true);
   }, [setShowOverlay]);
   useEffect(() => {
-      if (showOverlay) {
-        setLoaded(true);
-      }
+    if (showOverlay) {
+      setLoaded(true);
+    }
   }, [showOverlay, setLoaded]);
   useEffect(() => {
-      if (loaded) {
-        const deck = new Reveal({
-          embedded: true,
-        });
-        deck.initialize();
-      }
+    if (loaded) {
+      const deck = new Reveal({
+        embedded: true,
+      });
+      deck.initialize();
+    }
   }, [loaded]);
+  const slides = useMemo(getMarkdown, [getMarkdown]);
   return (
     <>
       <Button onClick={open} data-roamjs-presentation text={"PRESENT"} />
@@ -41,10 +45,12 @@ const Presentation: React.FunctionComponent = () => {
         >
           <div className="reveal">
             <div className="slides">
-              <section>Vertical Slide 1</section>
-              <section>Vertical Slide 2</section>
-              <section>Vertical Slide 3</section>
-              <section>Vertical Slide 4</section>
+              {slides.map((s, i) => (
+                <section
+                  dangerouslySetInnerHTML={{ __html: marked(s) }}
+                  key={i}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -53,7 +59,16 @@ const Presentation: React.FunctionComponent = () => {
   );
 };
 
-export const render = (b: HTMLButtonElement): void =>
-  ReactDOM.render(<Presentation />, b.parentElement);
+export const render = ({
+  button,
+  getMarkdown,
+}: {
+  button: HTMLButtonElement;
+  getMarkdown: () => string[];
+}): void =>
+  ReactDOM.render(
+    <Presentation getMarkdown={getMarkdown} />,
+    button.parentElement
+  );
 
 export default Presentation;
