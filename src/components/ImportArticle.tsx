@@ -132,6 +132,8 @@ export const importArticle = ({
       const markdown = td.turndown(content);
       const nodes = markdown.split("\n").filter((c) => !!c.trim());
       let firstHeaderFound = false;
+      let previousNodeTabbed = false;
+      let bulletIsParagraph = false;
       for (const node of nodes) {
         const isHeader =
           node.startsWith("# ") ||
@@ -143,6 +145,9 @@ export const importArticle = ({
           : isBullet
           ? node.substring(2).trim()
           : node;
+        if (isBullet && previousNodeTabbed) {
+          bulletIsParagraph = true;
+        }
         if (isHeader) {
           if (indent) {
             if (firstHeaderFound) {
@@ -150,13 +155,14 @@ export const importArticle = ({
                 new KeyboardEvent("keydown", shiftTabObj)
               );
               await waitForTab(document.activeElement.id);
+              bulletIsParagraph = false;
             } else {
               firstHeaderFound = true;
             }
           }
           await asyncType(node.substring(0, node.indexOf("# ") + 2));
         }
-        if (isBullet) {
+        if (isBullet && !bulletIsParagraph) {
           document.activeElement.dispatchEvent(
             new KeyboardEvent("keydown", tabObj)
           );
@@ -164,7 +170,7 @@ export const importArticle = ({
         }
         await asyncPaste(text);
         await newBlockEnter();
-        if (isBullet) {
+        if (isBullet && !bulletIsParagraph) {
           document.activeElement.dispatchEvent(
             new KeyboardEvent("keydown", shiftTabObj)
           );
@@ -175,6 +181,9 @@ export const importArticle = ({
             new KeyboardEvent("keydown", tabObj)
           );
           await waitForTab(document.activeElement.id);
+          previousNodeTabbed = true;
+        } else {
+          previousNodeTabbed = false;
         }
       }
     });
