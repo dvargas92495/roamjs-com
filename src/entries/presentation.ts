@@ -10,14 +10,15 @@ runExtension("presentation", () => {
   createButtonObserver({
     attribute: "presentation",
     shortcut: "slides",
-    render: (button: HTMLButtonElement) =>
+    render: (button: HTMLButtonElement) => {
+      const { blockUid } = getUidsFromButton(button);
+      const { children } = getTextTreeByBlockUid(blockUid);
       render({
         button,
         getMarkdown: () => {
-          const { blockUid } = getUidsFromButton(button);
-          const { children } = getTextTreeByBlockUid(blockUid);
           return children.map(t => t.children.map(c => c.text).join('\n\n'));
         },
       }),
+    }
   });
 });
