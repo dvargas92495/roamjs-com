@@ -40,14 +40,16 @@ const DrawerContent = () => {
   return (
     <div>
       {loading ? (
-          <Spinner />
-      ) : extensions.map((e) => (
-        <div key={e.id}>
-          <H4>{e.name}</H4>
-          <H6>Source: {e.src}</H6>
-          <hr />
-        </div>
-      ))}
+        <Spinner />
+      ) : (
+        extensions.map((e) => (
+          <div key={e.id}>
+            <H4>{e.name}</H4>
+            <H6>Source: {e.src}</H6>
+            <hr />
+          </div>
+        ))
+      )}
     </div>
   );
 };
@@ -64,6 +66,7 @@ const Marketplace: React.FunctionComponent = () => {
         position={Position.LEFT}
         onClose={onClose}
         isOpen={isOpen}
+        style={{ zIndex: 1000 }}
       >
         <DrawerContent />
       </Drawer>
@@ -71,6 +74,7 @@ const Marketplace: React.FunctionComponent = () => {
   );
 };
 
-export const render = (s: HTMLSpanElement): void => ReactDOM.render(<Marketplace />, s);
+export const render = (s: HTMLSpanElement): void =>
+  ReactDOM.render(<Marketplace />, s);
 
 export default Marketplace;
