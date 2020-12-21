@@ -18,7 +18,7 @@ runExtension("presentation", () => {
         getMarkdown: () => {
           return children.map(t => t.children.map(c => c.text).join('\n\n'));
         },
-      }),
+      });
     }
   });
 });
