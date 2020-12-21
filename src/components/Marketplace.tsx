@@ -1,4 +1,4 @@
-import { Button, Drawer, H4, H6, Position } from "@blueprintjs/core";
+import { Button, Drawer, H4, H6, Position, Spinner } from "@blueprintjs/core";
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import ReactDOM from "react-dom";
@@ -12,6 +12,7 @@ const DrawerContent = () => {
       featured: boolean;
     }[]
   >([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     axios
       .get(
@@ -33,11 +34,14 @@ const DrawerContent = () => {
             })
           )
         )
-      );
-  }, [setExtensions]);
+      )
+      .finally(() => setLoading(false));
+  }, [setExtensions, setLoading]);
   return (
     <div>
-      {extensions.map((e) => (
+      {loading ? (
+          <Spinner />
+      ) : extensions.map((e) => (
         <div key={e.id}>
           <H4>{e.name}</H4>
           <H6>Source: {e.src}</H6>
