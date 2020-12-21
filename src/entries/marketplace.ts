@@ -1,3 +1,4 @@
+import { render } from "../components/Marketplace";
 import { createHTMLObserver, runExtension } from "../entry-helpers";
 
 runExtension("marketplace", () => {
@@ -5,10 +6,13 @@ runExtension("marketplace", () => {
     tag: "DIV",
     className: "roam-topbar",
     callback: (d: HTMLElement) => {
-       const flexSpacer = d.children[0].getElementsByTagName('div')[0];
-       const parent = document.createElement('span');
-       flexSpacer.parentElement.insertBefore(parent, flexSpacer);
-       
+      if (!d.hasAttribute("data-roamjs-marketplace")) {
+        d.setAttribute("data-roamjs-marketplace", "true");
+        const flexSpacer = d.children[0].getElementsByTagName("div")[0];
+        const parent = document.createElement("span");
+        flexSpacer.parentElement.insertBefore(parent, flexSpacer);
+        render(parent);
+      }
     },
   });
 });

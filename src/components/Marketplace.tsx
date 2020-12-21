@@ -1,6 +1,7 @@
 import { Button, Drawer, H4, H6, Position } from "@blueprintjs/core";
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import ReactDOM from "react-dom";
 
 const DrawerContent = () => {
   const [extensions, setExtensions] = useState<
@@ -65,5 +66,7 @@ const Marketplace: React.FunctionComponent = () => {
     </>
   );
 };
+
+export const render = (s: HTMLSpanElement): void => ReactDOM.render(<Marketplace />, s);
 
 export default Marketplace;
