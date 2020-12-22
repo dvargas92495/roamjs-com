@@ -38,7 +38,18 @@ const EditContainer: React.FunctionComponent<{
 export const render = (d: HTMLElement): void => {
   const div = document.createElement("div");
   d.appendChild(div);
-  ReactDOM.render(<EditContainer />, div);
+  d.style.position = 'absolute';
+  d.style.top = '8px';
+  d.style.right = '8px';
+  d.style.zIndex = '1000';
+  ReactDOM.render(
+    <Button
+      icon="edit"
+      minimal
+      onClick={editCallback(d.closest(".roam-block").id)}
+    />,
+    div
+  );
 };
 
 export default EditContainer;
