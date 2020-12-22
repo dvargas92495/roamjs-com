@@ -2,6 +2,21 @@ import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel, { Dict } from "mixpanel-browser";
 import userEvent from "@testing-library/user-event";
+import * as Sentry from "@sentry/browser";
+import { Integrations } from "@sentry/tracing";
+
+Sentry.init({
+  dsn: 'https://a746170c23b94ca98b066f9b0b8d910e@o494776.ingest.sentry.io/5566413',
+  integrations: [
+    new Integrations.BrowserTracing(),
+  ],
+
+  tracesSampleRate: 1.0,
+});
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+myUndefinedFunction();
 
 declare global {
   interface Window {

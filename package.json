@@ -78,6 +78,8 @@
     "@mapbox/rehype-prism": "^0.5.0",
     "@mdx-js/loader": "^1.6.19",
     "@mozilla/readability": "^0.3.0",
+    "@sentry/browser": "^5.29.2",
+    "@sentry/tracing": "^5.29.2",
     "@stripe/stripe-js": "^1.11.0",
     "@testing-library/dom": "^7.26.3",
     "@testing-library/user-event": "^12.3.0",
