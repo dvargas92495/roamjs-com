@@ -14,6 +14,8 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
+export const capture = (e: Error): string => Sentry.captureException(e);
+
 declare global {
   interface Window {
     roamjs?: {

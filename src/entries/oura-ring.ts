@@ -6,7 +6,7 @@ import {
   parseRoamDate,
   pushBullets,
 } from "roam-client";
-import { getPageTitle, runExtension } from "../entry-helpers";
+import { capture, getPageTitle, runExtension } from "../entry-helpers";
 import axios from "axios";
 import subDays from "date-fns/subDays";
 
@@ -108,14 +108,12 @@ const importOuraRing = async (
 
       return pushBullets(bullets, blockUid, parentUid);
     })
-    .catch(() =>
-      asyncPaste("Unexpected Error thrown. Email support@roamjs.com for help!")
-    );
+    .catch((e) => {
+      capture(e);
+      asyncPaste("Unexpected Error thrown. Email support@roamjs.com for help!");
+    });
 };
 
 runExtension("oura-ring", () => {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  myUndefinedFunction();
   addButtonListener(OURA_COMMAND, importOuraRing);
 });
