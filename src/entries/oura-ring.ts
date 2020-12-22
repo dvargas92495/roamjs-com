@@ -114,5 +114,8 @@ const importOuraRing = async (
 };
 
 runExtension("oura-ring", () => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  myUndefinedFunction();
   addButtonListener(OURA_COMMAND, importOuraRing);
 });

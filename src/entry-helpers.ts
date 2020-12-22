@@ -14,10 +14,6 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-myUndefinedFunction();
-
 declare global {
   interface Window {
     roamjs?: {
