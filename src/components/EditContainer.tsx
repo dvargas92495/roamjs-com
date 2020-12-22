@@ -38,10 +38,10 @@ const EditContainer: React.FunctionComponent<{
 export const render = (d: HTMLElement): void => {
   const div = document.createElement("div");
   d.appendChild(div);
-  d.style.position = 'absolute';
-  d.style.top = '8px';
-  d.style.right = '8px';
-  d.style.zIndex = '1000';
+  div.style.position = 'absolute';
+  div.style.top = '8px';
+  div.style.right = '8px';
+  div.style.zIndex = '1000';
   ReactDOM.render(
     <Button
       icon="edit"
