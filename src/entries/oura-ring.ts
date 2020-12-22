@@ -109,6 +109,9 @@ const importOuraRing = async (
       return pushBullets(bullets, blockUid, parentUid);
     })
     .catch((e) => {
+      if (e.response?.status === 401) {
+        return asyncPaste(`The token used (${token}) is not authorized to access oura ring.`);
+      }
       capture(e);
       asyncPaste("Unexpected Error thrown. Email support@roamjs.com for help!");
     });
