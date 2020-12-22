@@ -38,9 +38,10 @@ const EditContainer: React.FunctionComponent<{
 export const render = (d: HTMLElement): void => {
   const div = document.createElement("div");
   d.appendChild(div);
+  d.style.position = 'relative';
   div.style.position = 'absolute';
-  div.style.top = '8px';
-  div.style.right = '8px';
+  div.style.top = '0';
+  div.style.right = '0';
   div.style.zIndex = '1000';
   ReactDOM.render(
     <Button
