@@ -1,19 +1,15 @@
 import { Button } from "@blueprintjs/core";
 import React, { useCallback, useState } from "react";
+import ReactDOM from "react-dom";
 import { openBlock } from "roam-client";
 
 const editCallback = (blockId?: string) => () =>
   openBlock(document.getElementById(blockId));
 
-const EditContainer = ({
-  blockId,
-  className,
-  children,
-}: {
+const EditContainer: React.FunctionComponent<{
   blockId?: string;
   className?: string;
-  children: React.ReactNode;
-}): JSX.Element => {
+}> = ({ blockId, className, children }) => {
   const [showEditIcon, setShowEditIcon] = useState(false);
   const appear = useCallback(() => setShowEditIcon(true), [setShowEditIcon]);
   const disappear = useCallback(() => setShowEditIcon(false), [
@@ -37,6 +33,12 @@ const EditContainer = ({
       {children}
     </div>
   );
+};
+
+export const render = (d: HTMLElement): void => {
+  const div = document.createElement("div");
+  d.appendChild(div);
+  ReactDOM.render(<EditContainer />, div);
 };
 
 export default EditContainer;
