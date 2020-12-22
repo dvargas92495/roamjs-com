@@ -152,6 +152,7 @@ const observerCallback = () => {
         sortTable(t, sortConfig);
       };
     });
+    
     const defaultSort = (config["Default Sort"]
       ?.split(",")
       ?.map((s: string) => s.trim()) || []) as string[];
@@ -162,6 +163,16 @@ const observerCallback = () => {
     });
     if (defaultSort.length) {
       sortTable(t, sortConfig);
+    }
+
+    const includeColumns = config["Include Columns"]?.split(',')?.map((s: string) => s.trim()) || [] as string[];
+    if (includeColumns.length) {
+      const includeColumnIndices = includeColumns.map((s: string) => ths.findIndex(th => th.innerText === s));
+      const rows = Array.from(t.getElementsByTagName('tr'));
+      rows.forEach(row => {
+        const oldRow = Array.from(row.children).map(c => row.removeChild(c));
+        includeColumnIndices.forEach(i => row.appendChild(oldRow[i]));
+      });
     }
   });
 };
