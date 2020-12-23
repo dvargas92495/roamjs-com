@@ -11,7 +11,7 @@ import {
 import React, { useCallback, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
-import { openBlock } from "roam-client";
+import { asyncPaste, openBlock } from "roam-client";
 import userEvent from "@testing-library/user-event";
 import DemoPopoverWrapper from "./DemoPopoverWrapper";
 import { useArrowKeyDown } from "./hooks";
@@ -76,11 +76,7 @@ const WikiContent = ({
           const { extract } = r.data;
           await openBlock(document.getElementById(blockId));
           await userEvent.clear(document.activeElement);
-          await userEvent.paste(document.activeElement, extract, {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore - https://github.com/testing-library/user-event/issues/512
-            clipboardData: new DataTransfer(),
-          });
+          await asyncPaste(extract);
           closePopover();
         })
         .catch((e) => {
