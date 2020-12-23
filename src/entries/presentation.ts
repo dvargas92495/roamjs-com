@@ -12,6 +12,14 @@ import userEvent from "@testing-library/user-event";
 window.pasteEvent = userEvent.paste;
 
 runExtension("presentation", () => {
+  const revealStylesLoaded = Array.from(
+    document.getElementsByTagName("style")
+  ).filter((s) => s.innerText.includes("reveal.js"));
+  window.roamjs.extension.presentation = {
+    unload: () => revealStylesLoaded.forEach(s => s.parentElement.removeChild(s)),
+    load: () => revealStylesLoaded.forEach(s => document.head.appendChild(s)),
+  };
+  window.roamjs.extension.presentation.unload();
   createButtonObserver({
     attribute: "presentation",
     shortcut: "slides",

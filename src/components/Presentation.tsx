@@ -14,12 +14,12 @@ const Presentation: React.FunctionComponent<{
   const onClose = useCallback(() => {
     setShowOverlay(false);
     setLoaded(false);
-    Array.from(document.getElementsByTagName("style"))
-      .filter((s) => s.innerText.includes("reveal.js"))
-      .forEach((s) => s.parentElement.removeChild(s));
-  }, [setShowOverlay, setLoaded]);
+    window.roamjs.extension.presentation.unload();
+  }, [setLoaded, setShowOverlay]);
+
   const open = useCallback(async () => {
     setShowOverlay(true);
+    window.roamjs.extension.presentation.load();
   }, [setShowOverlay]);
   useEffect(() => {
     if (showOverlay) {
@@ -53,7 +53,7 @@ const Presentation: React.FunctionComponent<{
                   dangerouslySetInnerHTML={{
                     __html: marked(`# ${s.text}
 
-${s.children.map(c => `- ${c.text}\n`)}                    `),
+${s.children.map((c) => `- ${c.text}`).join('\n')}`),
                   }}
                   key={i}
                 />
@@ -66,7 +66,7 @@ ${s.children.map(c => `- ${c.text}\n`)}                    `),
   );
 };
 
-type Slides = {text: string, children: Slides}[]
+type Slides = { text: string; children: Slides }[];
 
 export const render = ({
   button,
