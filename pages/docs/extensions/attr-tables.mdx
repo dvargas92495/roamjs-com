@@ -19,4 +19,10 @@ The `Max Sorts` DB level configuration could also be applied at a table level, b
 
 ### Filtering
 
-[Shawn Murphy](https://twitter.com/shawnpmurphy8) has also built a attribute table filter extension on top of this one. You could find it [here](https://gist.github.com/GitMurf/aece9f105628640cb79925d1310449ec)!
+To filter columns, each table supports an `Include Columns` configuration. As a child of the table, adding `Include Columns` will filter table down to the columns specified in the comma delimited list, in the order specified. For example,
+
+Include Columns:: ---, attr-4, attr-2
+
+Would filter an attr table down to include just the title column first, followed by the column headed by "attr-4", followed by the column headed by "attr-2".
+
+To filter rows, [Shawn Murphy](https://twitter.com/shawnpmurphy8) has built a attribute table filter extension on top of this one. You could find it [here](https://gist.github.com/GitMurf/aece9f105628640cb79925d1310449ec)!
