@@ -44,7 +44,26 @@ module.exports = (env) => ({
       },
       {
         test: /\.css$/i,
-        use: ["style-loader", "css-loader"],
+        use: [
+          (info) => {
+            const relative = path
+              .relative(path.join(__dirname, "node_modules"), info.realResource)
+              .replace(/\//g, "-")
+              .replace(/\\/g, "-")
+              .replace(/\.js/g, "");
+            const className = relative.split("-")[0];
+            return {
+              loader: "style-loader",
+              options: {
+                attributes: {
+                  id: `roamjs-style-${relative}`,
+                  class: `roamjs-style-${className}`,
+                },
+              },
+            };
+          },
+          "css-loader",
+        ],
       },
       {
         test: /\.(png|jpe?g|gif)$/i,
