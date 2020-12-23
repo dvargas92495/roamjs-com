@@ -20,12 +20,7 @@ runExtension("presentation", () => {
       const { children } = getTextTreeByBlockUid(blockUid);
       render({
         button,
-        getSlides: () => {
-          return children.map((t) => ({
-            title: t.text,
-            content: t.children.map((c) => c.text),
-          }));
-        },
+        getSlides: () => children,
       });
     },
   });
