@@ -8,7 +8,6 @@ import {
   parseRoamDate,
   createIconButton,
 } from "roam-client";
-import { render as renderEditContainer } from "../components/EditContainer";
 
 type SortConfig = {
   [column: string]: {
@@ -185,8 +184,6 @@ const observerCallback = () => {
           includeColumnIndices.forEach((i) => row.appendChild(oldRow[i]));
         });
       }
-
-      renderEditContainer(t);
     });
 };
 
