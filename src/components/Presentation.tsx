@@ -6,17 +6,25 @@ import Reveal from "reveal.js";
 import "reveal.js/dist/reveal.css";
 import "reveal.js/dist/theme/black.css";
 
+const renderBullet = ({ c, i }: { c: Slide; i: number }): string =>
+  `${"".padStart(i * 4, " ")}- ${c.text}${c.children
+    .map((nested) => `\n${renderBullet({ c: nested, i: i + 1 })}`)
+    .join("")}`;
+
 const Presentation: React.FunctionComponent<{
-  getMarkdown: () => string[];
-}> = ({ getMarkdown }) => {
+  getSlides: () => Slides;
+}> = ({ getSlides }) => {
   const [showOverlay, setShowOverlay] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const onClose = useCallback(() => {
     setShowOverlay(false);
     setLoaded(false);
-  }, [setShowOverlay, setLoaded]);
+    window.roamjs.extension.presentation.unload();
+  }, [setLoaded, setShowOverlay]);
+
   const open = useCallback(async () => {
     setShowOverlay(true);
+    window.roamjs.extension.presentation.load();
   }, [setShowOverlay]);
   useEffect(() => {
     if (showOverlay) {
@@ -27,11 +35,13 @@ const Presentation: React.FunctionComponent<{
     if (loaded) {
       const deck = new Reveal({
         embedded: true,
+        slideNumber: "c/t",
+        center: false,
       });
       deck.initialize();
     }
   }, [loaded]);
-  const slides = useMemo(getMarkdown, [getMarkdown]);
+  const slides = useMemo(getSlides, [getSlides]);
   return (
     <>
       <Button onClick={open} data-roamjs-presentation text={"PRESENT"} />
@@ -47,8 +57,13 @@ const Presentation: React.FunctionComponent<{
             <div className="slides">
               {slides.map((s, i) => (
                 <section
-                  dangerouslySetInnerHTML={{ __html: marked(s) }}
+                  dangerouslySetInnerHTML={{
+                    __html: marked(`# ${s.text}
+
+${s.children.map((c) => renderBullet({ c, i: 0 })).join("\n")}`),
+                  }}
                   key={i}
+                  className={s.children.length ? "" : "center"}
                 />
               ))}
             </div>
@@ -59,16 +74,17 @@ const Presentation: React.FunctionComponent<{
   );
 };
 
+type Slide = { text: string; children: Slides };
+
+type Slides = Slide[];
+
 export const render = ({
   button,
-  getMarkdown,
+  getSlides,
 }: {
   button: HTMLButtonElement;
-  getMarkdown: () => string[];
+  getSlides: () => Slides;
 }): void =>
-  ReactDOM.render(
-    <Presentation getMarkdown={getMarkdown} />,
-    button.parentElement
-  );
+  ReactDOM.render(<Presentation getSlides={getSlides} />, button.parentElement);
 
 export default Presentation;

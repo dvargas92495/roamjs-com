@@ -1,18 +1,30 @@
 import React from "react";
 import dynamic from "next/dynamic";
 
-const getDemoMd = () => [
-  "# First Slide",
-  "# Second Slide\n\n### With a Subtitle on what we're all about",
-  "# Third Slide\n\nFirst bullet with a point\n\nSecond Bullet supporting that point\n\nThird bullet sealing the deal",
-  '# Final Slide'
-]
+const getSlides = () => [
+  { text: "First Slide", children: [] },
+  {
+    text: "Second Slide",
+    children: [
+      { text: "With a Subtitle on what we're all about", children: [] },
+    ],
+  },
+  {
+    text: "Third Slide",
+    children: [
+      { text: "First bullet with a point", children: [] },
+      { text: "Second Bullet supporting that point", children: [] },
+      { text: "Third bullet sealing the deal", children: [] },
+    ],
+  },
+  { text: "# Final Slide", children: [] },
+];
 
 const DemoPresentation: React.FunctionComponent = () => {
   const Presentation = dynamic(() => import("../src/components/Presentation"), {
     ssr: false,
   });
-  return <Presentation getMarkdown={getDemoMd}/>;
+  return <Presentation getSlides={getSlides} />;
 };
 
 export default DemoPresentation;

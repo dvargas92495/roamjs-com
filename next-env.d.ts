@@ -34,7 +34,11 @@ declare module "react-charts" {
 }
 
 declare module "reveal.js" {
-  type RevealOptions = { embedded: boolean };
+  type RevealOptions = {
+    embedded: boolean;
+    slideNumber: string;
+    center: boolean;
+  };
   declare class Reveal {
     constructor(options: RevealOptions);
     initialize: () => void;
