@@ -2,20 +2,22 @@ import React from "react";
 import dynamic from "next/dynamic";
 
 const getSlides = () => [
-  { title: "First Slide", content: [] },
+  { text: "First Slide", children: [] },
   {
-    title: "Second Slide",
-    content: ["With a Subtitle on what we're all about"],
-  },
-  {
-    title: "Third Slide",
-    content: [
-      "First bullet with a point",
-      "Second Bullet supporting that point",
-      "Third bullet sealing the deal",
+    text: "Second Slide",
+    children: [
+      { text: "With a Subtitle on what we're all about", children: [] },
     ],
   },
-  { title: "# Final Slide", content: [] },
+  {
+    text: "Third Slide",
+    children: [
+      { text: "First bullet with a point", children: [] },
+      { text: "Second Bullet supporting that point", children: [] },
+      { text: "Third bullet sealing the deal", children: [] },
+    ],
+  },
+  { text: "# Final Slide", children: [] },
 ];
 
 const DemoPresentation: React.FunctionComponent = () => {

@@ -51,7 +51,9 @@ const Presentation: React.FunctionComponent<{
               {slides.map((s, i) => (
                 <section
                   dangerouslySetInnerHTML={{
-                    __html: marked(s.content.map((i) => `- ${i}`).join("\n\n")),
+                    __html: marked(`# ${s.text}
+
+${s.children.map(c => `- ${c.text}\n`)}                    `),
                   }}
                   key={i}
                 />
@@ -64,7 +66,7 @@ const Presentation: React.FunctionComponent<{
   );
 };
 
-type Slides = { title: string; content: string[] }[];
+type Slides = {text: string, children: Slides}[]
 
 export const render = ({
   button,
