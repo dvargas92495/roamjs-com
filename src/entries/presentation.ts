@@ -15,7 +15,7 @@ runExtension("presentation", () => {
       const { children } = getTextTreeByBlockUid(blockUid);
       render({
         button,
-        getMarkdown: () => {
+        getSlides: () => {
           return children.map((t) => ({
             title: t.text,
             content: t.children.map((c) => c.text),
