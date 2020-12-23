@@ -72,6 +72,18 @@ const Presentation: React.FunctionComponent<{
       deck.initialize();
     }
   }, [loaded]);
+  const bodyEscape = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    },
+    [onClose]
+  );
+  useEffect(() => {
+    document.body.addEventListener("keydown", bodyEscape);
+    return () => document.body.removeEventListener("keydown", bodyEscape);
+  }, [bodyEscape]);
   const slides = useMemo(getSlides, [getSlides]);
   return (
     <>
