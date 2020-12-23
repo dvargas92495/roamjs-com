@@ -16,6 +16,7 @@ import { useCopyCode } from "./hooks";
 
 const contributors = {
   "Rodrigo Franco": "https://www.rodrigofranco.com/",
+  "David Chelimsky": "http://blog.davidchelimsky.net/",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{
