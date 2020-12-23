@@ -7,13 +7,16 @@ import "reveal.js/dist/reveal.css";
 import "reveal.js/dist/theme/black.css";
 
 const Presentation: React.FunctionComponent<{
-  getMarkdown: () => string[];
-}> = ({ getMarkdown }) => {
+  getSlides: () => Slides;
+}> = ({ getSlides }) => {
   const [showOverlay, setShowOverlay] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const onClose = useCallback(() => {
     setShowOverlay(false);
     setLoaded(false);
+    Array.from(document.getElementsByTagName("style"))
+      .filter((s) => s.innerText.includes("reveal.js"))
+      .forEach((s) => s.parentElement.removeChild(s));
   }, [setShowOverlay, setLoaded]);
   const open = useCallback(async () => {
     setShowOverlay(true);
@@ -31,7 +34,7 @@ const Presentation: React.FunctionComponent<{
       deck.initialize();
     }
   }, [loaded]);
-  const slides = useMemo(getMarkdown, [getMarkdown]);
+  const slides = useMemo(getSlides, [getSlides]);
   return (
     <>
       <Button onClick={open} data-roamjs-presentation text={"PRESENT"} />
@@ -47,7 +50,9 @@ const Presentation: React.FunctionComponent<{
             <div className="slides">
               {slides.map((s, i) => (
                 <section
-                  dangerouslySetInnerHTML={{ __html: marked(s) }}
+                  dangerouslySetInnerHTML={{
+                    __html: marked(s.content.map((i) => `- ${i}`).join("\n\n")),
+                  }}
                   key={i}
                 />
               ))}
@@ -59,16 +64,15 @@ const Presentation: React.FunctionComponent<{
   );
 };
 
+type Slides = { title: string; content: string[] }[];
+
 export const render = ({
   button,
-  getMarkdown,
+  getSlides,
 }: {
   button: HTMLButtonElement;
-  getMarkdown: () => string[];
+  getSlides: () => Slides;
 }): void =>
-  ReactDOM.render(
-    <Presentation getMarkdown={getMarkdown} />,
-    button.parentElement
-  );
+  ReactDOM.render(<Presentation getSlides={getSlides} />, button.parentElement);
 
 export default Presentation;

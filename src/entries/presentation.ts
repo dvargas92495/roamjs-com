@@ -16,9 +16,12 @@ runExtension("presentation", () => {
       render({
         button,
         getMarkdown: () => {
-          return children.map(t => t.children.map(c => c.text).join('\n\n'));
+          return children.map((t) => ({
+            title: t.text,
+            content: t.children.map((c) => c.text),
+          }));
         },
       });
-    }
+    },
   });
 });
