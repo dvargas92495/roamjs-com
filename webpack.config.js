@@ -64,6 +64,7 @@ module.exports = (env) => ({
     new Dotenv({
       path: ".env.local",
       systemvars: true,
+      silent: true,
     }),
     ...(env && env.analyze
       ? [

@@ -5,7 +5,8 @@ import userEvent from "@testing-library/user-event";
 import * as Sentry from "@sentry/browser";
 
 Sentry.init({
-  dsn: 'https://a746170c23b94ca98b066f9b0b8d910e@o494776.ingest.sentry.io/5566413',
+  dsn:
+    "https://a746170c23b94ca98b066f9b0b8d910e@o494776.ingest.sentry.io/5566413",
 });
 
 export const capture = (e: Error): string => Sentry.captureException(e);
@@ -35,8 +36,8 @@ declare global {
 const roamJsVersion = process.env.ROAMJS_VERSION || "0";
 mixpanel.init(process.env.MIXPANEL_TOKEN);
 
-export const track = (name: string, properties: Dict): void =>
-  mixpanel.track(name, properties);
+export const track = (name: string, properties?: Dict): void =>
+  process.env.MIXPANEL_TOKEN && mixpanel.track(name, properties);
 
 export const runExtension = (extensionId: string, run: () => void): void => {
   if (!window.roamjs) {
@@ -51,10 +52,10 @@ export const runExtension = (extensionId: string, run: () => void): void => {
     window.alert(
       'Hey! Thanks for using extensions from roam.davidvargas.me! I\'m currently migrating the extensions to roamjs.com. Please edit the src in your roam/js block, replacing "roam.davidvargas.me/master" with "roamjs.com"'
     );
-    mixpanel.track("Legacy Alerted");
+    track("Legacy Alerted");
   }
 
-  mixpanel.track("Load Extension", {
+  track("Load Extension", {
     extensionId,
     roamJsVersion,
   });
