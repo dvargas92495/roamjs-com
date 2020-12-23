@@ -6,6 +6,11 @@ import Reveal from "reveal.js";
 import "reveal.js/dist/reveal.css";
 import "reveal.js/dist/theme/black.css";
 
+const renderBullet = ({ c, i }: { c: Slide; i: number }): string =>
+  `${"".padStart(i * 4, " ")}- ${c.text}${c.children
+    .map((nested) => `\n${renderBullet({ c: nested, i: i + 1 })}`)
+    .join("")}`;
+
 const Presentation: React.FunctionComponent<{
   getSlides: () => Slides;
 }> = ({ getSlides }) => {
@@ -30,6 +35,8 @@ const Presentation: React.FunctionComponent<{
     if (loaded) {
       const deck = new Reveal({
         embedded: true,
+        slideNumber: "c/t",
+        center: false,
       });
       deck.initialize();
     }
@@ -53,9 +60,10 @@ const Presentation: React.FunctionComponent<{
                   dangerouslySetInnerHTML={{
                     __html: marked(`# ${s.text}
 
-${s.children.map((c) => `- ${c.text}`).join('\n')}`),
+${s.children.map((c) => renderBullet({ c, i: 0 })).join("\n")}`),
                   }}
                   key={i}
+                  className={s.children.length ? "" : "center"}
                 />
               ))}
             </div>
@@ -66,7 +74,9 @@ ${s.children.map((c) => `- ${c.text}`).join('\n')}`),
   );
 };
 
-type Slides = { text: string; children: Slides }[];
+type Slide = { text: string; children: Slides };
+
+type Slides = Slide[];
 
 export const render = ({
   button,
