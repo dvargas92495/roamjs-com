@@ -15,7 +15,10 @@ const getSlides = () => [
     text: "Third Slide",
     children: [
       { text: "First bullet with a point", children: [] },
-      { text: "Second Bullet supporting that point", children: [{text: 'With a nested point!', children:[]}] },
+      {
+        text: "Second Bullet supporting that point",
+        children: [{ text: "With a nested point!", children: [] }],
+      },
       { text: "Third bullet sealing the deal", children: [] },
     ],
   },

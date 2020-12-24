@@ -17,14 +17,14 @@ import { getSingleCodeContent, useCopyCode } from "./hooks";
 const contributors = {
   "Rodrigo Franco": "https://www.rodrigofranco.com/",
   "David Chelimsky": "http://blog.davidchelimsky.net/",
+  "Tomáš Baránek": "https://twitter.com/tombarys",
+  "Abhay Prasanna": "https://twitter.com/AbhayPrasanna",
+  "Brandon Toner": "https://brandontoner.substack.com/",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{
   frontMatter: FrontMatter;
-}> = ({
-  children,
-  frontMatter,
-}) => {
+}> = ({ children, frontMatter }) => {
   const id = pathToId(frontMatter.__resourcePath);
   const [copied, setCopied] = useState(false);
   const onSave = useCopyCode(setCopied);
@@ -57,9 +57,7 @@ const ExtensionPageLayout: React.FunctionComponent<{
         with the text <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam
         DB. Then, copy and paste this code block as a child of the block.
       </Body>
-      <Prism language="javascript">
-        {getSingleCodeContent(id)}
-      </Prism>
+      <Prism language="javascript">{getSingleCodeContent(id)}</Prism>
       <H3>Usage</H3>
       {children}
       <H3>Demo</H3>
@@ -72,16 +70,27 @@ const ExtensionPageLayout: React.FunctionComponent<{
             extension possible:
           </Body>
           <ul>
-            {frontMatter.contributors.split(",").map((s) => (
-              <li key={s}>
-                {contributors[s] ? (
-                  <ExternalLink href={contributors[s]}>{s}</ExternalLink>
-                ) : (
-                  s
-                )}
-              </li>
-            ))}
+            {frontMatter.contributors.split(",").map((s) => {
+              const parts = s.trim().split(" ");
+              const name = parts.slice(0, parts.length - 1).join(" ");
+              const emojis = parts[parts.length - 1];
+              return (
+                <li key={s}>
+                  {contributors[name] ? (
+                    <>
+                      <ExternalLink href={contributors[name]}>
+                        {name}
+                      </ExternalLink>
+                      {` ${emojis}`}
+                    </>
+                  ) : (
+                    s
+                  )}
+                </li>
+              );
+            })}
           </ul>
+          <ExternalLink href={'https://allcontributors.org/docs/en/emoji-key'}>Emoji Key</ExternalLink>  
         </>
       )}
     </ExtensionLayout>

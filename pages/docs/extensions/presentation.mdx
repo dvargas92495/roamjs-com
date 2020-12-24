@@ -1,7 +1,7 @@
 ---
 layout: "ExtensionPageLayout"
 description: "Use this extension to build slideshow presentations from within Roam!"
-development: true
+contributors: Tomáš Baránek 💵, Abhay Prasanna 📓🤔, Adolfo Ramírez Corona 📓
 ---
 
 Type `{{presentation}}` or `{{slides}}` in a block. Clicking the button will overlay a presentation directly from Roam! Exit the presentation by hitting 'ESC'.
@@ -19,6 +19,8 @@ To specify what content is part of the presentation, create a child block for ea
         - Third bullet sealing the deal
     - Final Slide
 
+Any blocks with images will be rendered without a bullet.
+
 There are 11 themes supported, which could be found [here](https://revealjs.com/themes/). To use one, add a `:{theme:[value]}` to the presentation button. For example, the demo below uses the black theme:
 
 - `{{presentation:{theme:black}}}`
@@ -29,7 +31,7 @@ Apart from these themes, you could also use `roam/css` to style the presentation
 - `present` - The current slide
 - `slide-background` - The slide background
 - `navigate-left` - The go left button
-- `navigate-right` - The go right background
+- `navigate-right` - The go right button
 
 import DemoPresentation from '../../../components/DemoPresentation'
 
