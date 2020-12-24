@@ -65,11 +65,13 @@ const ContentSlide = ({
           const scale = containerHeight / contentHeight;
           setTransform(`scale(${scale})`);
         } else {
-          setTransform('initial');
+          setTransform("initial");
         }
       };
       setScale();
-      Array.from(contentRef.current.getElementsByTagName('img')).forEach(i => i.onload = setScale);
+      Array.from(contentRef.current.getElementsByTagName("img")).forEach(
+        (i) => (i.onload = setScale)
+      );
     }
   }, [contentRef.current, setTransform]);
   return (
@@ -89,49 +91,19 @@ const ContentSlide = ({
   );
 };
 
-const Presentation: React.FunctionComponent<{
-  getSlides: () => Slides;
-  theme?: string;
-}> = ({ getSlides, theme }) => {
-  const normalizedTheme = useMemo(
-    () => (VALID_THEMES.includes(theme) ? theme : "black"),
-    []
-  );
-  const [showOverlay, setShowOverlay] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-  const [slides, setSlides] = useState([]);
-  const onClose = useCallback(() => {
-    setShowOverlay(false);
-    setLoaded(false);
-    unload();
-  }, [setLoaded, setShowOverlay]);
-
-  const open = useCallback(async () => {
-    setShowOverlay(true);
-    setSlides(getSlides());
-    revealStylesLoaded
-      .filter(
-        (s) =>
-          s.id.endsWith(`${normalizedTheme}.css`) || s.id.endsWith("reveal.css")
-      )
-      .forEach((s) => document.head.appendChild(s));
-  }, [setShowOverlay, normalizedTheme, getSlides, setSlides]);
+const PresentationContent: React.FunctionComponent<{
+  slides: Slides;
+  onClose: () => void;
+}> = ({ slides, onClose }) => {
   useEffect(() => {
-    if (showOverlay) {
-      setLoaded(true);
-    }
-  }, [showOverlay, setLoaded]);
-  useEffect(() => {
-    if (loaded) {
-      const deck = new Reveal({
-        embedded: true,
-        slideNumber: "c/t",
-        width: window.innerWidth * 0.9,
-        height: window.innerHeight * 0.9,
-      });
-      deck.initialize();
-    }
-  }, [loaded]);
+    const deck = new Reveal({
+      embedded: true,
+      slideNumber: "c/t",
+      width: window.innerWidth * 0.9,
+      height: window.innerHeight * 0.9,
+    });
+    deck.initialize();
+  }, []);
   const bodyEscape = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -145,6 +117,46 @@ const Presentation: React.FunctionComponent<{
     return () => document.body.removeEventListener("keydown", bodyEscape);
   }, [bodyEscape]);
   return (
+    <div className="reveal">
+      <div className="slides">
+        {slides.map((s, i) =>
+          s.children.length ? (
+            <ContentSlide {...s} key={i} />
+          ) : (
+            <TitleSlide text={s.text} key={i} />
+          )
+        )}
+      </div>
+    </div>
+  );
+};
+
+const Presentation: React.FunctionComponent<{
+  getSlides: () => Slides;
+  theme?: string;
+}> = ({ getSlides, theme }) => {
+  const normalizedTheme = useMemo(
+    () => (VALID_THEMES.includes(theme) ? theme : "black"),
+    []
+  );
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [slides, setSlides] = useState([]);
+  const onClose = useCallback(() => {
+    setShowOverlay(false);
+    unload();
+  }, [setShowOverlay]);
+
+  const open = useCallback(async () => {
+    setShowOverlay(true);
+    setSlides(getSlides());
+    revealStylesLoaded
+      .filter(
+        (s) =>
+          s.id.endsWith(`${normalizedTheme}.css`) || s.id.endsWith("reveal.css")
+      )
+      .forEach((s) => document.head.appendChild(s));
+  }, [setShowOverlay, normalizedTheme, getSlides, setSlides]);
+  return (
     <>
       <Button onClick={open} data-roamjs-presentation text={"PRESENT"} />
       <Overlay canEscapeKeyClose onClose={onClose} isOpen={showOverlay}>
@@ -155,17 +167,7 @@ const Presentation: React.FunctionComponent<{
             zIndex: 2000,
           }}
         >
-          <div className="reveal">
-            <div className="slides">
-              {slides.map((s, i) =>
-                s.children.length ? (
-                  <ContentSlide {...s} key={i} />
-                ) : (
-                  <TitleSlide text={s.text} key={i} />
-                )
-              )}
-            </div>
-          </div>
+          <PresentationContent slides={slides} onClose={onClose} />
         </div>
       </Overlay>
     </>
