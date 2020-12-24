@@ -68,6 +68,7 @@ const Presentation: React.FunctionComponent<{
   );
   const [showOverlay, setShowOverlay] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [slides, setSlides] = useState([]);
   const onClose = useCallback(() => {
     setShowOverlay(false);
     setLoaded(false);
@@ -76,13 +77,14 @@ const Presentation: React.FunctionComponent<{
 
   const open = useCallback(async () => {
     setShowOverlay(true);
+    setSlides(getSlides());
     revealStylesLoaded
       .filter(
         (s) =>
           s.id.endsWith(`${normalizedTheme}.css`) || s.id.endsWith("reveal.css")
       )
       .forEach((s) => document.head.appendChild(s));
-  }, [setShowOverlay, normalizedTheme]);
+  }, [setShowOverlay, normalizedTheme, getSlides, setSlides]);
   useEffect(() => {
     if (showOverlay) {
       setLoaded(true);
@@ -110,7 +112,6 @@ const Presentation: React.FunctionComponent<{
     document.body.addEventListener("keydown", bodyEscape);
     return () => document.body.removeEventListener("keydown", bodyEscape);
   }, [bodyEscape]);
-  const slides = useMemo(getSlides, [getSlides]);
   return (
     <>
       <Button onClick={open} data-roamjs-presentation text={"PRESENT"} />
