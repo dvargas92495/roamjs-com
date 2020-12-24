@@ -38,6 +38,7 @@ declare module "reveal.js" {
     embedded?: boolean;
     slideNumber?: string;
     width?: number;
+    height?: number;
   };
   declare class Reveal {
     constructor(options: RevealOptions);

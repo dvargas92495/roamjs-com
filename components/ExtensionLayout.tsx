@@ -28,8 +28,10 @@ const ExtensionLayout: React.FunctionComponent<{
         label={pathToLabel(frontMatter.__resourcePath)}
         title={"ROAMJS DOCS"}
       >
-        {children}
-        <GithubSponsor />
+        <div>{children}</div>
+        <div style={{margin: '16px 0'}}>
+          <GithubSponsor />
+        </div>
       </VerticalNavigationTabs>
     </Layout>
   );

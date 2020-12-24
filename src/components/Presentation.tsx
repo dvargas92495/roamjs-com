@@ -1,6 +1,12 @@
 import { Button, Overlay } from "@blueprintjs/core";
 import marked from "marked";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import ReactDOM from "react-dom";
 import Reveal from "reveal.js";
 
@@ -28,7 +34,9 @@ const unload = () =>
 unload();
 
 const renderBullet = ({ c, i }: { c: Slide; i: number }): string =>
-  `${"".padStart(i * 4, " ")}- ${c.text}${c.children
+  `${"".padStart(i * 4, " ")}${c.text.match("!\\[.*\\]\\(.*\\)") ? "" : "- "}${
+    c.text
+  }${c.children
     .map((nested) => `\n${renderBullet({ c: nested, i: i + 1 })}`)
     .join("")}`;
 
@@ -44,19 +52,42 @@ const ContentSlide = ({
 }: {
   text: string;
   children: Slides;
-}) => (
-  <section style={{ textAlign: "left" }}>
-    <h1>{text}</h1>
-    <div
-      className="r-stretch"
-      dangerouslySetInnerHTML={{
-        __html: marked(
-          children.map((c) => renderBullet({ c, i: 0 })).join("\n")
-        ),
-      }}
-    />
-  </section>
-);
+}) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [transform, setTransform] = useState("initial");
+  useEffect(() => {
+    const containerHeight = contentRef.current?.offsetHeight;
+    if (containerHeight > 0) {
+      const setScale = () => {
+        const contentHeight = (contentRef.current.children[0] as HTMLElement)
+          .offsetHeight;
+        if (contentHeight > containerHeight) {
+          const scale = containerHeight / contentHeight;
+          setTransform(`scale(${scale})`);
+        } else {
+          setTransform('initial');
+        }
+      };
+      setScale();
+      Array.from(contentRef.current.getElementsByTagName('img')).forEach(i => i.onload = setScale);
+    }
+  }, [contentRef.current, setTransform]);
+  return (
+    <section style={{ textAlign: "left" }}>
+      <h1>{text}</h1>
+      <div
+        ref={contentRef}
+        style={{ transform, transformOrigin: "left top" }}
+        className="r-stretch"
+        dangerouslySetInnerHTML={{
+          __html: marked(
+            children.map((c) => renderBullet({ c, i: 0 })).join("\n")
+          ),
+        }}
+      />
+    </section>
+  );
+};
 
 const Presentation: React.FunctionComponent<{
   getSlides: () => Slides;
@@ -96,6 +127,7 @@ const Presentation: React.FunctionComponent<{
         embedded: true,
         slideNumber: "c/t",
         width: window.innerWidth * 0.9,
+        height: window.innerHeight * 0.9,
       });
       deck.initialize();
     }
