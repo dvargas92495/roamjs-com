@@ -32,6 +32,32 @@ const renderBullet = ({ c, i }: { c: Slide; i: number }): string =>
     .map((nested) => `\n${renderBullet({ c: nested, i: i + 1 })}`)
     .join("")}`;
 
+const TitleSlide = ({ text }: { text: string }) => (
+  <section>
+    <h1>{text}</h1>
+  </section>
+);
+
+const ContentSlide = ({
+  text,
+  children,
+}: {
+  text: string;
+  children: Slides;
+}) => (
+  <section style={{ textAlign: "left" }}>
+    <h1>{text}</h1>
+    <div
+      className="r-stretch"
+      dangerouslySetInnerHTML={{
+        __html: marked(
+          children.map((c) => renderBullet({ c, i: 0 })).join("\n")
+        ),
+      }}
+    />
+  </section>
+);
+
 const Presentation: React.FunctionComponent<{
   getSlides: () => Slides;
   theme?: string;
@@ -67,7 +93,7 @@ const Presentation: React.FunctionComponent<{
       const deck = new Reveal({
         embedded: true,
         slideNumber: "c/t",
-        center: false,
+        width: window.innerWidth * 0.9,
       });
       deck.initialize();
     }
@@ -98,17 +124,13 @@ const Presentation: React.FunctionComponent<{
         >
           <div className="reveal">
             <div className="slides">
-              {slides.map((s, i) => (
-                <section
-                  dangerouslySetInnerHTML={{
-                    __html: marked(`# ${s.text}
-
-${s.children.map((c) => renderBullet({ c, i: 0 })).join("\n")}`),
-                  }}
-                  key={i}
-                  className={s.children.length ? "" : "center"}
-                />
-              ))}
+              {slides.map((s, i) =>
+                s.children.length ? (
+                  <ContentSlide {...s} key={i} />
+                ) : (
+                  <TitleSlide text={s.text} key={i} />
+                )
+              )}
             </div>
           </div>
         </div>
