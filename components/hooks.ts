@@ -4,11 +4,25 @@ import { useCallback, useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { AUTH0_AUDIENCE, FLOSS_API_URL } from "./constants";
 
+export const getSingleCodeContent = (
+  id: string
+): string => `var existing = document.getElementById("${id}");
+if (!existing) {
+  var extension = document.createElement("script");
+  extension.src = "https://roamjs.com/${id}.js";
+  extension.id = "${id}";
+  extension.async = true;
+  extension.type = "text/javascript";
+  document.getElementsByTagName("head")[0].appendChild(extension);
+}`;
+
 const copyCode = (items: string[]) => (e) => {
-  const scripts = items
-    .map((f) => `installScript("${f.replace(/ /g, "-").toLowerCase()}");`)
-    .join("\n");
-  const codeContent = `\`\`\`javascript
+  const codeContent =
+    items.length === 1
+      ? `\`\`\`javascript
+${getSingleCodeContent(items[0].replace(/ /g, "-").toLowerCase())}
+\`\`\``
+      : `\`\`\`javascript
 var installScript = name => {
   var existing = document.getElementById(name);
   if (existing) {
@@ -21,7 +35,9 @@ var installScript = name => {
   extension.id = name;
   document.getElementsByTagName("head")[0].appendChild(extension);
 };
-${scripts}
+${items
+  .map((f) => `installScript("${f.replace(/ /g, "-").toLowerCase()}");`)
+  .join("\n")}
 \`\`\``;
   e.clipboardData.setData(
     "text/plain",

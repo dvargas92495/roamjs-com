@@ -12,7 +12,7 @@ import React, { useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import DemoVideo from "./DemoVideo";
 import ExtensionLayout, { pathToId, pathToLabel } from "./ExtensionLayout";
-import { useCopyCode } from "./hooks";
+import { getSingleCodeContent, useCopyCode } from "./hooks";
 
 const contributors = {
   "Rodrigo Franco": "https://www.rodrigofranco.com/",
@@ -58,15 +58,7 @@ const ExtensionPageLayout: React.FunctionComponent<{
         DB. Then, copy and paste this code block as a child of the block.
       </Body>
       <Prism language="javascript">
-        {`var existing = document.getElementById("${id}");
-if (!existing) {
-  var extension = document.createElement("script");
-  extension.src = "https://roamjs.com/${id}.js";
-  extension.id = "${id}";
-  extension.async = false;
-  extension.type = "text/javascript";
-  document.getElementsByTagName("head")[0].appendChild(extension);
-}`}
+        {getSingleCodeContent(id)}
       </Prism>
       <H3>Usage</H3>
       {children}
