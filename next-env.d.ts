@@ -35,9 +35,9 @@ declare module "react-charts" {
 
 declare module "reveal.js" {
   type RevealOptions = {
-    embedded: boolean;
-    slideNumber: string;
-    center: boolean;
+    embedded?: boolean;
+    slideNumber?: string;
+    width?: number;
   };
   declare class Reveal {
     constructor(options: RevealOptions);

@@ -24,14 +24,14 @@ runExtension("presentation", () => {
     shortcut: "slides",
     render: (button: HTMLButtonElement) => {
       const { blockUid } = getUidsFromButton(button);
-      const { text, children } = getTextTreeByBlockUid(blockUid);
+      const { text } = getTextTreeByBlockUid(blockUid);
       const buttonText = text.match('{{(presentation|slides):(.*)}}')?.[2];
       const options = buttonText ? {
         theme: buttonText.match('{theme:(.*)}')?.[1]
       } : {};
       render({
         button,
-        getSlides: () => children,
+        getSlides: () => getTextTreeByBlockUid(blockUid).children,
         options,
       });
     },

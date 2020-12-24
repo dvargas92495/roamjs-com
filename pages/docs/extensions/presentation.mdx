@@ -21,7 +21,15 @@ To specify what content is part of the presentation, create a child block for ea
 
 There are 11 themes supported, which could be found [here](https://revealjs.com/themes/). To use one, add a `:{theme:[value]}` to the presentation button. For example, the demo below uses the black theme:
 
-- {{presentation:{theme:black}}}
+- `{{presentation:{theme:black}}}`
+
+Apart from these themes, you could also use `roam/css` to style the presentation. Here are some classes to keep in mind:
+- `reveal-viewport` - The full presentation container
+- `slides` - The slide container
+- `present` - The current slide
+- `slide-background` - The slide background
+- `navigate-left` - The go left button
+- `navigate-right` - The go right background
 
 import DemoPresentation from '../../../components/DemoPresentation'
 
