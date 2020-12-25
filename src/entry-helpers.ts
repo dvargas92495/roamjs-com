@@ -1,4 +1,9 @@
-import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
+import {
+  createIconButton,
+  getAttrConfigFromQuery,
+  getUids,
+  newBlockEnter,
+} from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel, { Dict } from "mixpanel-browser";
 import userEvent from "@testing-library/user-event";
@@ -737,6 +742,12 @@ export const addStyle = (content: string): void => {
   const css = document.createElement("style");
   css.textContent = content;
   document.getElementsByTagName("head")[0].appendChild(css);
+};
+
+export const smartBlockNewEnter = async (): Promise<void> => {
+  if ((document.activeElement as HTMLTextAreaElement).value) {
+    await newBlockEnter();
+  }
 };
 
 export const createCustomSmartBlockCommand = ({
