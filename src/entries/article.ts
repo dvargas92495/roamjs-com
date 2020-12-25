@@ -11,6 +11,7 @@ import {
   createButtonObserver,
   createCustomSmartBlockCommand,
   runExtension,
+  smartBlockNewEnter,
 } from "../entry-helpers";
 
 const inlineImportArticle = async (value: string) => {
@@ -55,6 +56,9 @@ runExtension("article", () => {
 
   createCustomSmartBlockCommand({
     command: "ARTICLE",
-    processor: (afterColon) => inlineImportArticle(afterColon),
+    processor: async (afterColon) => {
+      await smartBlockNewEnter();
+      return inlineImportArticle(afterColon);
+    }
   });
 });
