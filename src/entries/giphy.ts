@@ -17,7 +17,7 @@ runExtension("giphy", () => {
         const cursorPosition = textarea.selectionStart;
         if (
           cursorPosition > index + PREFIX.length &&
-          cursorPosition < index + full.length - SUFFIX.length
+          cursorPosition <= index + full.length - SUFFIX.length
         ) {
           const capture = match[1];
           console.log("Search GIPHY for", capture);
