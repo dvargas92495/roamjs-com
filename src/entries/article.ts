@@ -58,7 +58,7 @@ runExtension("article", () => {
     command: "ARTICLE",
     processor: async (afterColon) => {
       await smartBlockNewEnter();
-      return inlineImportArticle(afterColon),
+      return inlineImportArticle(afterColon);
     }
   });
 });
