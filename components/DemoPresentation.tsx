@@ -4,25 +4,37 @@ import "reveal.js/dist/reveal.css";
 import "reveal.js/dist/theme/black.css";
 
 const getSlides = () => [
-  { text: "First Slide", children: [] },
+  { text: "First Slide", children: [], open: true },
   {
     text: "Second Slide",
     children: [
-      { text: "With a Subtitle on what we're all about", children: [] },
+      {
+        text: "With a Subtitle on what we're all about",
+        children: [],
+        open: true,
+      },
     ],
+    open: true,
   },
   {
     text: "Third Slide",
     children: [
-      { text: "First bullet with a point", children: [] },
+      { text: "First bullet with a point", children: [], open: true },
       {
         text: "Second Bullet supporting that point",
-        children: [{ text: "With a nested point!", children: [] }],
+        children: [{ text: "With a nested point!", children: [], open: true }],
+        open: true,
       },
-      { text: "Third bullet sealing the deal", children: [] },
+      {
+        text:
+          "Third bullet sealing the absolutely magnificent deal",
+        children: [],
+        open: true,
+      },
     ],
+    open: true,
   },
-  { text: "Final Slide", children: [] },
+  { text: "Final Slide", children: [], open: true },
 ];
 
 const DemoPresentation: React.FunctionComponent = () => {

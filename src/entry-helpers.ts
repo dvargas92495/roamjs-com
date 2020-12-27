@@ -500,11 +500,13 @@ export type TreeNode = {
   order: number;
   children: TreeNode[];
   uid: string;
+  heading: number;
+  open: boolean;
 };
 
 const getTextTreeByBlockId = (blockId: number): TreeNode => {
   const block = window.roamAlphaAPI.pull(
-    "[:block/children, :block/string, :block/order, :block/uid]",
+    "[:block/children, :block/string, :block/order, :block/uid, :block/heading]",
     blockId
   );
   const children = block[":block/children"] || [];
@@ -515,6 +517,8 @@ const getTextTreeByBlockId = (blockId: number): TreeNode => {
     children: children
       .map((c) => getTextTreeByBlockId(c[":db/id"]))
       .sort((a, b) => a.order - b.order),
+    heading: block[':block/heading'],
+    open: block[':block/open']
   };
 };
 
@@ -738,10 +742,11 @@ export const isApple = isIOS || isMacOs;
 export const isControl = (e: KeyboardEvent): boolean =>
   (e.ctrlKey && !isApple) || (e.metaKey && isApple);
 
-export const addStyle = (content: string): void => {
+export const addStyle = (content: string): HTMLStyleElement => {
   const css = document.createElement("style");
   css.textContent = content;
   document.getElementsByTagName("head")[0].appendChild(css);
+  return css;
 };
 
 export const smartBlockNewEnter = async (): Promise<void> => {
