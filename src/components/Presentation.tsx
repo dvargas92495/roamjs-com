@@ -58,7 +58,7 @@ unload();
 // I'll clean this up if anyone asks. My god it's horrendous
 const renderBullet = ({ c, i }: { c: Slide; i: number }): string =>
   `${"".padStart(i * 4, " ")}${c.text.match("!\\[.*\\]\\(.*\\)") ? "" : "- "}${
-    c.heading ? "".padStart(c.heading, "#") : ""
+    c.heading ? `${"".padStart(c.heading, "#")} ` : ""
   }${c.text.replace(new RegExp("__", "g"), "_")}${
     c.open
       ? c.children
@@ -67,10 +67,18 @@ const renderBullet = ({ c, i }: { c: Slide; i: number }): string =>
       : ""
   }`;
 
-const Notes = ({ note }: { note: Slide }) =>
-  note && (
-    <aside className="notes">{marked(renderBullet({ c: note, i: 0 }))}</aside>
-  );
+const Notes = ({ note }: { note: Slide }) => (
+  <>
+    {note && (
+      <aside
+        className="notes"
+        dangerouslySetInnerHTML={{
+          __html: marked(renderBullet({ c: note, i: 0 })),
+        }}
+      />
+    )}
+  </>
+);
 
 const TitleSlide = ({ text, note }: { text: string; note: Slide }) => (
   <section>
