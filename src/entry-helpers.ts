@@ -31,7 +31,7 @@ declare global {
           key: string; // `<% ${string} %> (SmartBlock function)`, sad - https://github.com/microsoft/TypeScript/issues/13969
           icon: "gear";
           value: string;
-          processor: (match: string) => Promise<string>;
+          processor: (match: string) => Promise<string | void>;
         }[];
       };
     };
@@ -760,7 +760,7 @@ export const createCustomSmartBlockCommand = ({
   processor,
 }: {
   command: string;
-  processor: (afterColon?: string) => Promise<string>;
+  processor: (afterColon?: string) => Promise<string | void>;
 }): void => {
   const inputListener = () => {
     if (window.roam42 && window.roam42.smartBlocks) {

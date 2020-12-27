@@ -44,7 +44,10 @@ td.addRule("img", {
     const img = node as HTMLImageElement;
     const src = img.getAttribute("data-src") || img.getAttribute("src");
     const alt = img.getAttribute("alt") || "";
-    return `![${alt.replace(/\n/g, "")}](${src})`;
+    return `![${alt
+      .replace(/\n/g, "")
+      .replace(/\(/g, "")
+      .replace(/\)/g, "")}](${src})`;
   },
 });
 td.addRule("i", {

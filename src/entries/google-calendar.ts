@@ -129,8 +129,6 @@ createCustomSmartBlockCommand({
       if(bullets.length > 1) {
         await smartBlockNewEnter();
       }
-      return pushBullets(bullets.slice(0, bullets.length - 1)).then(() =>
-          bullets.length ? bullets[bullets.length - 1] : EMPTY_MESSAGE
-      )
+      return pushBullets(bullets)
     }),
 });
