@@ -44,7 +44,10 @@ td.addRule("img", {
     const img = node as HTMLImageElement;
     const src = img.getAttribute("data-src") || img.getAttribute("src");
     const alt = img.getAttribute("alt") || "";
-    return `![${alt.replace(/\n/g, "")}](${src})`;
+    return `![${alt
+      .replace(/\n/g, "")
+      .replace(/\(/g, "")
+      .replace(/\)/g, "")}](${src})`;
   },
 });
 td.addRule("i", {
@@ -120,7 +123,7 @@ export const importArticle = ({
       const html = iconv.decode(buffer, enc);
       const headIndex = html.indexOf("<head>") + "<head>".length;
       const base = document.createElement("base");
-      base.href = new URL(url).origin;
+      base.href = url;
       base.target = "_blank";
       const htmlWithBase = `${html.substring(0, headIndex)}${
         base.outerHTML
