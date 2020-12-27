@@ -123,7 +123,7 @@ const ContentSlide = ({
       setLoaded(true);
     }
   }, [contentRef.current, setTransform, loaded, setLoaded]);
-  console.log("render", text);
+  console.log("render", text, loaded);
   return (
     <section style={{ textAlign: "left" }}>
       <h1>{text}</h1>
@@ -203,13 +203,15 @@ const PresentationContent: React.FunctionComponent<{
   return (
     <div className="reveal" id="otherother">
       <div className="slides">
-        {mappedSlides.map((s: Slide & { note: Slide }, i) =>
-          s.children.length ? (
-            <ContentSlide {...s} key={i} />
-          ) : (
-            <TitleSlide text={s.text} key={i} note={s.note} />
-          )
-        )}
+        {mappedSlides.map((s: Slide & { note: Slide }, i) => (
+          <React.Fragment key={i}>
+            {s.children.length ? (
+              <ContentSlide {...s} />
+            ) : (
+              <TitleSlide text={s.text} note={s.note} />
+            )}
+          </React.Fragment>
+        ))}
       </div>
     </div>
   );
