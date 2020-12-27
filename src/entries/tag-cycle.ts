@@ -36,7 +36,11 @@ runExtension("tag-cycle", () => {
     }
   };
 
-  const configureShortcut = (shortcut: Omit<TreeNode, "order">) => {
+  const configureShortcut = (shortcut: {
+    text: string;
+    children: TreeNode[];
+    uid: string;
+  }) => {
     const parts = shortcut.text.split("+").map((s) => s.toUpperCase().trim());
     const modifier = parts[0];
     const isShift = parts[1] === "SHIFT";
@@ -114,10 +118,10 @@ runExtension("tag-cycle", () => {
               }
               const diff = textarea.value.length - initialLength;
               // this is insane. but the cursor wasn't cooperating, probably because of react
-              setTimeout(() => textarea.setSelectionRange(
-                start + diff,
-                end + diff
-              ), 1);
+              setTimeout(
+                () => textarea.setSelectionRange(start + diff, end + diff),
+                1
+              );
               e.preventDefault();
               e.stopPropagation();
               break;
