@@ -99,10 +99,10 @@ const ContentSlide = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const [transform, setTransform] = useState("initial");
   useEffect(() => {
+    contentRef.current.style.display = 'block';
     const containerHeight = contentRef.current?.offsetHeight;
     if (containerHeight > 0) {
       const setScale = () => {
-        contentRef.current.style.display = 'block';
         const contentHeight = (contentRef.current.children[0] as HTMLElement)
           .offsetHeight;
         if (contentHeight > containerHeight) {
