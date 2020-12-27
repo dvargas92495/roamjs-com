@@ -102,6 +102,7 @@ const ContentSlide = ({
     const containerHeight = contentRef.current?.offsetHeight;
     if (containerHeight > 0) {
       const setScale = () => {
+        const title = text;
         const contentHeight = (contentRef.current.children[0] as HTMLElement)
           .offsetHeight;
         if (contentHeight > containerHeight) {
