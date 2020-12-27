@@ -120,7 +120,7 @@ export const importArticle = ({
       const html = iconv.decode(buffer, enc);
       const headIndex = html.indexOf("<head>") + "<head>".length;
       const base = document.createElement("base");
-      base.href = new URL(url).origin;
+      base.href = url;
       base.target = "_blank";
       const htmlWithBase = `${html.substring(0, headIndex)}${
         base.outerHTML
