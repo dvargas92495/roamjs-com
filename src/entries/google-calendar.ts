@@ -11,7 +11,6 @@ import {
   pushBullets,
   getConfigFromPage,
   parseRoamDate,
-  newBlockEnter,
 } from "roam-client";
 import axios from "axios";
 import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
@@ -129,6 +128,8 @@ createCustomSmartBlockCommand({
       if(bullets.length > 1) {
         await smartBlockNewEnter();
       }
-      return pushBullets(bullets)
+      return pushBullets(bullets.slice(0, bullets.length - 1)).then(() =>
+          bullets.length ? bullets[bullets.length - 1] : EMPTY_MESSAGE
+      )
     }),
 });

@@ -760,7 +760,7 @@ export const createCustomSmartBlockCommand = ({
   processor,
 }: {
   command: string;
-  processor: (afterColon?: string) => Promise<string | void>;
+  processor: (afterColon?: string) => Promise<string>;
 }): void => {
   const inputListener = () => {
     if (window.roam42 && window.roam42.smartBlocks) {
