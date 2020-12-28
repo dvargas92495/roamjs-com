@@ -1,5 +1,4 @@
-import { DOMAttributes, DOMElement, FunctionComponent, useCallback, useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import { useCallback, useEffect, useState } from "react";
 
 export const useArrowKeyDown = <T>({
   results,
