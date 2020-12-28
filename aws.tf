@@ -48,6 +48,10 @@ variable "mapbox_token" {
     type = string
 }
 
+variable "giphy_key" {
+    type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -230,4 +234,10 @@ resource "github_actions_secret" "mapbox_token" {
   repository       = "roam-js-extensions"
   secret_name      = "MAPBOX_TOKEN"
   plaintext_value  = var.mapbox_token
+}
+
+resource "github_actions_secret" "giphy_key" {
+  repository       = "roam-js-extensions"
+  secret_name      = "GIPHY_KEY"
+  plaintext_value  = var.giphy_key
 }
