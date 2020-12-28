@@ -1,6 +1,13 @@
-import { runExtension } from "../entry-helpers";
+import { createHTMLObserver, runExtension } from "../entry-helpers";
 import { render } from '../components/GiphyPopover';
 
 runExtension("giphy", () => {
-  render();
+  createHTMLObserver({
+    tag: 'TEXTAREA',
+    className: 'rm-block-input',
+    callback: (t: HTMLTextAreaElement) => {
+      render(t);
+    }
+  })
+  ;
 });

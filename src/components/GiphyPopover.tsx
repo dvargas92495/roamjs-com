@@ -3,16 +3,16 @@ import React, { useCallback, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { GiphyFetch, GifsResult } from "@giphy/js-fetch-api";
 import { Grid } from "@giphy/react-components";
-import { getRenderRoot } from "./hooks";
 
 const PREFIX = "{{GIPHY:";
 const SUFFIX = "}}";
 
 const gf = new GiphyFetch(process.env.GIPHY_KEY);
 
-const GiphyPopover: React.FunctionComponent = () => {
+const GiphyPopover: React.FunctionComponent<{
+  textarea: HTMLTextAreaElement;
+}> = ({ textarea }) => {
   const [fetcher, setFetcher] = useState<() => Promise<GifsResult>>();
-  const [targetId, setTargetId] = useState("");
   const inputListener = useCallback(
     (e: InputEvent) => {
       const target = e.target as HTMLElement;
@@ -30,7 +30,6 @@ const GiphyPopover: React.FunctionComponent = () => {
             cursorPosition <= index + full.length - SUFFIX.length
           ) {
             const capture = match[1];
-            setTargetId;
             setFetcher(() => gf.search(capture));
             return;
           }
@@ -38,23 +37,25 @@ const GiphyPopover: React.FunctionComponent = () => {
       }
       setFetcher(undefined);
     },
-    [setFetcher, setTargetId]
+    [setFetcher]
   );
   useEffect(() => {
-    document.addEventListener("input", inputListener);
-    return () => document.removeEventListener("input", inputListener);
+    textarea.addEventListener("input", inputListener);
+    return () => textarea.removeEventListener("input", inputListener);
   }, [inputListener]);
   return (
     <Popover
       isOpen={!!fetcher}
-      target={""}
+      target={<span />}
       content={<Grid width={800} columns={3} fetchGifs={fetcher} />}
-      portalContainer={document.getElementById(targetId)}
     />
   );
 };
 
-export const render = (): void =>
-  ReactDOM.render(<GiphyPopover />, getRenderRoot());
+export const render = (t: HTMLTextAreaElement): void => {
+  const parent = document.createElement("div");
+  t.parentElement.appendChild(parent);
+  ReactDOM.render(<GiphyPopover textarea={t} />, parent);
+};
 
 export default GiphyPopover;
