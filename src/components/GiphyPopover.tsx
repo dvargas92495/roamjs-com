@@ -12,7 +12,7 @@ const gf = new GiphyFetch(process.env.GIPHY_KEY);
 const GiphyPopover: React.FunctionComponent<{
   textarea: HTMLTextAreaElement;
 }> = ({ textarea }) => {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const fetcher = useCallback(() => gf.search(search), [search]);
   const inputListener = useCallback(
     (e: InputEvent) => {
@@ -50,16 +50,12 @@ const GiphyPopover: React.FunctionComponent<{
   }, [inputListener]);
   return (
     <Popover
-      isOpen={!!fetcher}
+      isOpen={!!search}
       target={<span />}
       position={Position.BOTTOM_LEFT}
       minimal
       content={
-        fetcher ? <Grid
-          width={textarea.offsetWidth}
-          columns={3}
-          fetchGifs={fetcher}
-        /> : <div />
+        <Grid width={textarea.offsetWidth} columns={3} fetchGifs={fetcher} />
       }
     />
   );
