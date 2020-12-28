@@ -95,54 +95,21 @@ const ContentSlide = ({
   text: string;
   children: Slides;
   note: Slide;
-}) => {
-  /*
-  const contentRef = useRef<HTMLDivElement>(null);
-  
-  const [loaded, setLoaded] = useState(false);
-  const [transform, setTransform] = useState("initial");
-  useEffect(() => {
-    if (loaded) {
-      const containerHeight = contentRef.current?.offsetHeight;
-      if (containerHeight > 0) {
-        const setScale = () => {
-          const contentHeight = (contentRef.current.children[0] as HTMLElement)
-            .offsetHeight;
-          if (contentHeight > containerHeight) {
-            const scale = containerHeight / contentHeight;
-            setTransform(`scale(${scale})`);
-          } else {
-            setTransform("initial");
-          }
-        };
-        setScale();
-        Array.from(contentRef.current.getElementsByTagName("img")).forEach(
-          (i) => (i.onload = setScale)
-        );
-      }
-    } else {
-      setLoaded(true);
-      contentRef.current.style.display = "block";
-    }
-  }, [contentRef.current, setTransform, loaded, setLoaded]);
-  */
-  return (
-    <section style={{ textAlign: "left" }}>
-      <h1>{text}</h1>
-      <div
-        //ref={contentRef}
-        style={{ /*transform, */ transformOrigin: "left top" }}
-        className="r-stretch"
-        dangerouslySetInnerHTML={{
-          __html: marked(
-            children.map((c) => renderBullet({ c, i: 0 })).join("\n")
-          ),
-        }}
-      />
-      <Notes note={note} />
-    </section>
-  );
-};
+}) => (
+  <section style={{ textAlign: "left" }}>
+    <h1>{text}</h1>
+    <div
+      style={{ transformOrigin: "left top" }}
+      className="r-stretch"
+      dangerouslySetInnerHTML={{
+        __html: marked(
+          children.map((c) => renderBullet({ c, i: 0 })).join("\n")
+        ),
+      }}
+    />
+    <Notes note={note} />
+  </section>
+);
 
 const observerCallback = (ms: MutationRecord[]) =>
   ms
