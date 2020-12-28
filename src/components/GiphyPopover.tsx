@@ -1,8 +1,10 @@
 import { Popover, Position } from "@blueprintjs/core";
 import React, { useCallback, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import { IGif } from '@giphy/js-types';
 import { GiphyFetch } from "@giphy/js-fetch-api";
-import { Grid } from "@giphy/react-components";
+import { Carousel } from "@giphy/react-components";
+import { asyncPaste, openBlock } from "roam-client";
 
 const PREFIX = "{{GIPHY:";
 const SUFFIX = "}}";
@@ -13,7 +15,11 @@ const GiphyPopover: React.FunctionComponent<{
   textarea: HTMLTextAreaElement;
 }> = ({ textarea }) => {
   const [search, setSearch] = useState("");
-  const fetcher = useCallback(() => gf.search(search), [search]);
+  const fetcher = useCallback(() => gf.search(search, {}), [search]);
+  const onGifClick = useCallback(async (gif: IGif) => {
+      await openBlock(textarea);
+      await asyncPaste(`![${gif.title}](${gif.images.original.url})`);
+  }, [textarea]);
   const inputListener = useCallback(
     (e: InputEvent) => {
       const target = e.target as HTMLElement;
@@ -39,13 +45,13 @@ const GiphyPopover: React.FunctionComponent<{
     },
     [setSearch]
   );
-  const blurListener = useCallback(() => setSearch(""), [setSearch]);
   useEffect(() => {
     textarea.addEventListener("input", inputListener);
-    textarea.addEventListener("blur", blurListener);
     return () => {
       textarea.removeEventListener("input", inputListener);
-      textarea.removeEventListener("blur", blurListener);
+      Array.from(
+        document.getElementsByClassName("roamjs-giphy-portal")
+      ).forEach((p) => p.parentElement.removeChild(p));
     };
   }, [inputListener]);
   return (
@@ -55,8 +61,14 @@ const GiphyPopover: React.FunctionComponent<{
       position={Position.BOTTOM_LEFT}
       minimal
       content={
-        <Grid width={textarea.offsetWidth} columns={3} fetchGifs={fetcher} />
+        <Carousel
+          gifHeight={200}
+          noResultsMessage={`No GIFs found with ${search}`}
+          fetchGifs={fetcher}
+          onGifClick={onGifClick}
+        />
       }
+      portalClassName={"roamjs-giphy-portal"}
     />
   );
 };
