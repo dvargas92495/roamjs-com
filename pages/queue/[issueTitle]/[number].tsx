@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { GetStaticPaths, GetStaticProps, GetStaticPropsContext } from "next";
+import { GetStaticPaths, GetStaticProps } from "next";
 import React, { useCallback, useState } from "react";
 import Markdown from "markdown-to-jsx";
 import {
@@ -35,6 +35,7 @@ const QueueItemPage = ({
       createdDate: string;
       createdBy: string;
       uuid: string;
+      lifecycle: string;
     }[];
   }>({
     link: "",
@@ -51,6 +52,9 @@ const QueueItemPage = ({
         .then((r) => setIssue(r.data)),
     [setIssue]
   );
+  const activeContracts = issue.contracts.filter(
+    (c) => c.lifecycle === "active"
+  );
   return (
     <StandardLayout>
       <DataLoader loadAsync={loadAsync}>
@@ -63,7 +67,7 @@ const QueueItemPage = ({
           <Markdown>{issue.body}</Markdown>
         </div>
         <H4>Backers</H4>
-        {issue.contracts.length === 0 ? (
+        {activeContracts.length === 0 ? (
           <div style={{ marginBottom: 16 }}>
             <Subtitle>
               No one has funded this issue. Fund it to move it up the priority
@@ -72,7 +76,7 @@ const QueueItemPage = ({
           </div>
         ) : (
           <Items
-            items={issue.contracts.map((c) => ({
+            items={activeContracts.map((c) => ({
               primary: c.createdBy,
               secondary: `Funded $${c.reward} on ${c.createdDate}, expiring on ${c.dueDate}.`,
               key: c.uuid,
@@ -113,12 +117,16 @@ export const getStaticPaths: GetStaticPaths = async () =>
     fallback: false,
   }));
 
-export const getStaticProps: GetStaticProps = async (
-  context: GetStaticPropsContext<{
+export const getStaticProps: GetStaticProps<
+  {
     number: string;
     issueTitle: "extension" | "enhancement";
-  }>
-) => ({
+  },
+  {
+    number: string;
+    issueTitle: "extension" | "enhancement";
+  }
+> = async (context) => ({
   props: context.params,
 });
 

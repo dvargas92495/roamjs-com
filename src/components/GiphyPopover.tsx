@@ -1,7 +1,7 @@
 import { Popover, Position } from "@blueprintjs/core";
 import React, { useCallback, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { GiphyFetch, GifsResult } from "@giphy/js-fetch-api";
+import { GiphyFetch } from "@giphy/js-fetch-api";
 import { Grid } from "@giphy/react-components";
 
 const PREFIX = "{{GIPHY:";
@@ -12,7 +12,8 @@ const gf = new GiphyFetch(process.env.GIPHY_KEY);
 const GiphyPopover: React.FunctionComponent<{
   textarea: HTMLTextAreaElement;
 }> = ({ textarea }) => {
-  const [fetcher, setFetcher] = useState<() => Promise<GifsResult>>();
+  const [search, setSearch] = useState('');
+  const fetcher = useCallback(() => gf.search(search), [search]);
   const inputListener = useCallback(
     (e: InputEvent) => {
       const target = e.target as HTMLElement;
@@ -29,17 +30,16 @@ const GiphyPopover: React.FunctionComponent<{
             cursorPosition > index + PREFIX.length &&
             cursorPosition <= index + full.length - SUFFIX.length
           ) {
-            const capture = match[1];
-            setFetcher(() => gf.search(capture));
+            setSearch(match[1]);
             return;
           }
         }
       }
-      setFetcher(undefined);
+      setSearch("");
     },
-    [setFetcher]
+    [setSearch]
   );
-  const blurListener = useCallback(() => setFetcher(undefined), [setFetcher]);
+  const blurListener = useCallback(() => setSearch(""), [setSearch]);
   useEffect(() => {
     textarea.addEventListener("input", inputListener);
     textarea.addEventListener("blur", blurListener);
