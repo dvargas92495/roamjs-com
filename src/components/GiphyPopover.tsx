@@ -1,10 +1,10 @@
 import { Popover, Position } from "@blueprintjs/core";
 import React, { useCallback, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { IGif } from '@giphy/js-types';
+import { IGif } from "@giphy/js-types";
 import { GiphyFetch } from "@giphy/js-fetch-api";
 import { Carousel } from "@giphy/react-components";
-import { asyncPaste, openBlock } from "roam-client";
+import { asyncPaste, asyncType, openBlock } from "roam-client";
 
 const PREFIX = "{{GIPHY:";
 const SUFFIX = "}}";
@@ -15,11 +15,20 @@ const GiphyPopover: React.FunctionComponent<{
   textarea: HTMLTextAreaElement;
 }> = ({ textarea }) => {
   const [search, setSearch] = useState("");
-  const fetcher = useCallback(() => gf.search(search, {}), [search]);
-  const onGifClick = useCallback(async (gif: IGif) => {
+  const fetcher = useCallback(() => gf.search(search), [search]);
+  const onGifClick = useCallback(
+    async (gif: IGif, e: React.SyntheticEvent<HTMLElement, Event>) => {
       await openBlock(textarea);
+      const match = textarea.value.match(
+        new RegExp(`${PREFIX}(.*)${SUFFIX}`, "s")
+      );
+      textarea.setSelectionRange(match.index, match.index + match[0].length);
+      await asyncType("{backspace}");
       await asyncPaste(`![${gif.title}](${gif.images.original.url})`);
-  }, [textarea]);
+      e.stopPropagation();
+    },
+    [textarea]
+  );
   const inputListener = useCallback(
     (e: InputEvent) => {
       const target = e.target as HTMLElement;
@@ -51,7 +60,7 @@ const GiphyPopover: React.FunctionComponent<{
       textarea.removeEventListener("input", inputListener);
       Array.from(
         document.getElementsByClassName("roamjs-giphy-portal")
-      ).forEach((p) => p.parentElement.removeChild(p));
+      ).forEach((p) => p.parentElement.parentElement.removeChild(p.parentElement));
     };
   }, [inputListener]);
   return (
@@ -61,12 +70,14 @@ const GiphyPopover: React.FunctionComponent<{
       position={Position.BOTTOM_LEFT}
       minimal
       content={
-        <Carousel
-          gifHeight={200}
-          noResultsMessage={`No GIFs found with ${search}`}
-          fetchGifs={fetcher}
-          onGifClick={onGifClick}
-        />
+        <div style={{ width: textarea.offsetWidth }}>
+          <Carousel
+            gifHeight={200}
+            noResultsMessage={`No GIFs found with ${search}`}
+            fetchGifs={fetcher}
+            onGifClick={onGifClick}
+          />
+        </div>
       }
       portalClassName={"roamjs-giphy-portal"}
     />
