@@ -1,4 +1,4 @@
-import { Popover } from "@blueprintjs/core";
+import { Popover, Position } from "@blueprintjs/core";
 import React, { useCallback, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { GiphyFetch, GifsResult } from "@giphy/js-fetch-api";
@@ -41,13 +41,19 @@ const GiphyPopover: React.FunctionComponent<{
   );
   useEffect(() => {
     textarea.addEventListener("input", inputListener);
-    return () => textarea.removeEventListener("input", inputListener);
+    return () => {
+        textarea.removeEventListener("input", inputListener)
+    };
   }, [inputListener]);
   return (
     <Popover
       isOpen={!!fetcher}
       target={<span />}
-      content={<Grid width={800} columns={3} fetchGifs={fetcher} />}
+      position={Position.BOTTOM}
+      minimal
+      content={
+        <Grid width={textarea.offsetWidth} columns={3} fetchGifs={fetcher} onGifsFetchError={console.log} />
+      }
     />
   );
 };
@@ -55,6 +61,7 @@ const GiphyPopover: React.FunctionComponent<{
 export const render = (t: HTMLTextAreaElement): void => {
   const parent = document.createElement("div");
   t.parentElement.appendChild(parent);
+  parent.style.height = '0';
   ReactDOM.render(<GiphyPopover textarea={t} />, parent);
 };
 
