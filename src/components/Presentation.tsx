@@ -96,7 +96,9 @@ const ContentSlide = ({
   children: Slides;
   note: Slide;
 }) => {
+  /*
   const contentRef = useRef<HTMLDivElement>(null);
+  
   const [loaded, setLoaded] = useState(false);
   const [transform, setTransform] = useState("initial");
   useEffect(() => {
@@ -123,12 +125,13 @@ const ContentSlide = ({
       contentRef.current.style.display = "block";
     }
   }, [contentRef.current, setTransform, loaded, setLoaded]);
+  */
   return (
     <section style={{ textAlign: "left" }}>
       <h1>{text}</h1>
       <div
-        ref={contentRef}
-        style={{ transform, transformOrigin: "left top" }}
+        //ref={contentRef}
+        style={{ /*transform, */ transformOrigin: "left top" }}
         className="r-stretch"
         dangerouslySetInnerHTML={{
           __html: marked(
@@ -141,12 +144,31 @@ const ContentSlide = ({
   );
 };
 
+const observerCallback = (ms: MutationRecord[]) =>
+  ms
+    .map((m) => m.target as HTMLElement)
+    .filter((m) => m.className === "present")
+    .map((s) => s.getElementsByClassName("r-stretch")[0] as HTMLDivElement)
+    .forEach((d) => {
+      const containerHeight = d.offsetHeight;
+      if (containerHeight > 0) {
+        const contentHeight = (d.children[0] as HTMLElement).offsetHeight;
+        if (contentHeight > containerHeight) {
+          const scale = containerHeight / contentHeight;
+          d.style.transform = `scale(${scale})`;
+        } else {
+          d.style.transform = "initial";
+        }
+      }
+    });
+
 const PresentationContent: React.FunctionComponent<{
   slides: Slides;
   showNotes: boolean;
   onClose: () => void;
 }> = ({ slides, onClose, showNotes }) => {
   const revealRef = useRef(null);
+  const slidesRef = useRef<HTMLDivElement>(null);
   const mappedSlides = showNotes
     ? slides.map((s) => ({
         ...s,
@@ -164,7 +186,13 @@ const PresentationContent: React.FunctionComponent<{
     });
     deck.initialize();
     revealRef.current = deck;
-  }, [revealRef]);
+    const observer = new MutationObserver(observerCallback);
+    observer.observe(slidesRef.current, {
+      attributeFilter: ["class"],
+      subtree: true,
+    });
+    return () => observer.disconnect();
+  }, [revealRef, slidesRef]);
   const bodyEscapePrint = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -201,7 +229,7 @@ const PresentationContent: React.FunctionComponent<{
   }, [bodyEscapePrint]);
   return (
     <div className="reveal" id="otherother">
-      <div className="slides">
+      <div className="slides" ref={slidesRef}>
         {mappedSlides.map((s: Slide & { note: Slide }, i) => (
           <React.Fragment key={i}>
             {s.children.length ? (
