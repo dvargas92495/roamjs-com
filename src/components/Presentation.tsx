@@ -95,45 +95,39 @@ const ContentSlide = ({
   text: string;
   children: Slides;
   note: Slide;
-}) => {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [transform, setTransform] = useState("initial");
-  useEffect(() => {
-    const containerHeight = contentRef.current?.offsetHeight;
-    if (containerHeight > 0) {
-      const setScale = () => {
-        const contentHeight = (contentRef.current.children[0] as HTMLElement)
-          .offsetHeight;
+}) => (
+  <section style={{ textAlign: "left" }}>
+    <h1>{text}</h1>
+    <div
+      style={{ transformOrigin: "left top" }}
+      className="r-stretch"
+      dangerouslySetInnerHTML={{
+        __html: marked(
+          children.map((c) => renderBullet({ c, i: 0 })).join("\n")
+        ),
+      }}
+    />
+    <Notes note={note} />
+  </section>
+);
+
+const observerCallback = (ms: MutationRecord[]) =>
+  ms
+    .map((m) => m.target as HTMLElement)
+    .filter((m) => m.className === "present")
+    .map((s) => s.getElementsByClassName("r-stretch")[0] as HTMLDivElement)
+    .forEach((d) => {
+      const containerHeight = d.offsetHeight;
+      if (containerHeight > 0) {
+        const contentHeight = (d.children[0] as HTMLElement).offsetHeight;
         if (contentHeight > containerHeight) {
           const scale = containerHeight / contentHeight;
-          setTransform(`scale(${scale})`);
+          d.style.transform = `scale(${scale})`;
         } else {
-          setTransform("initial");
+          d.style.transform = "initial";
         }
-      };
-      setScale();
-      Array.from(contentRef.current.getElementsByTagName("img")).forEach(
-        (i) => (i.onload = setScale)
-      );
-    }
-  }, [contentRef.current, setTransform]);
-  return (
-    <section style={{ textAlign: "left" }}>
-      <h1>{text}</h1>
-      <div
-        ref={contentRef}
-        style={{ transform, transformOrigin: "left top" }}
-        className="r-stretch"
-        dangerouslySetInnerHTML={{
-          __html: marked(
-            children.map((c) => renderBullet({ c, i: 0 })).join("\n")
-          ),
-        }}
-      />
-      <Notes note={note} />
-    </section>
-  );
-};
+      }
+    });
 
 const PresentationContent: React.FunctionComponent<{
   slides: Slides;
@@ -141,6 +135,7 @@ const PresentationContent: React.FunctionComponent<{
   onClose: () => void;
 }> = ({ slides, onClose, showNotes }) => {
   const revealRef = useRef(null);
+  const slidesRef = useRef<HTMLDivElement>(null);
   const mappedSlides = showNotes
     ? slides.map((s) => ({
         ...s,
@@ -158,7 +153,13 @@ const PresentationContent: React.FunctionComponent<{
     });
     deck.initialize();
     revealRef.current = deck;
-  }, [revealRef]);
+    const observer = new MutationObserver(observerCallback);
+    observer.observe(slidesRef.current, {
+      attributeFilter: ["class"],
+      subtree: true,
+    });
+    return () => observer.disconnect();
+  }, [revealRef, slidesRef]);
   const bodyEscapePrint = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -195,14 +196,16 @@ const PresentationContent: React.FunctionComponent<{
   }, [bodyEscapePrint]);
   return (
     <div className="reveal" id="otherother">
-      <div className="slides">
-        {mappedSlides.map((s: Slide & { note: Slide }, i) =>
-          s.children.length ? (
-            <ContentSlide {...s} key={i} />
-          ) : (
-            <TitleSlide text={s.text} key={i} note={s.note} />
-          )
-        )}
+      <div className="slides" ref={slidesRef}>
+        {mappedSlides.map((s: Slide & { note: Slide }, i) => (
+          <React.Fragment key={i}>
+            {s.children.length ? (
+              <ContentSlide {...s} />
+            ) : (
+              <TitleSlide text={s.text} note={s.note} />
+            )}
+          </React.Fragment>
+        ))}
       </div>
     </div>
   );
