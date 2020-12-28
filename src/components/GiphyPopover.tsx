@@ -39,20 +39,27 @@ const GiphyPopover: React.FunctionComponent<{
     },
     [setFetcher]
   );
+  const blurListener = useCallback(() => setFetcher(undefined), [setFetcher]);
   useEffect(() => {
     textarea.addEventListener("input", inputListener);
+    textarea.addEventListener("blur", blurListener);
     return () => {
-        textarea.removeEventListener("input", inputListener)
+      textarea.removeEventListener("input", inputListener);
+      textarea.removeEventListener("blur", blurListener);
     };
   }, [inputListener]);
   return (
     <Popover
       isOpen={!!fetcher}
       target={<span />}
-      position={Position.BOTTOM}
+      position={Position.BOTTOM_LEFT}
       minimal
       content={
-        <Grid width={textarea.offsetWidth} columns={3} fetchGifs={fetcher} onGifsFetchError={console.log} />
+        fetcher ? <Grid
+          width={textarea.offsetWidth}
+          columns={3}
+          fetchGifs={fetcher}
+        /> : <div />
       }
     />
   );
@@ -61,7 +68,7 @@ const GiphyPopover: React.FunctionComponent<{
 export const render = (t: HTMLTextAreaElement): void => {
   const parent = document.createElement("div");
   t.parentElement.appendChild(parent);
-  parent.style.height = '0';
+  parent.style.height = "0";
   ReactDOM.render(<GiphyPopover textarea={t} />, parent);
 };
 
