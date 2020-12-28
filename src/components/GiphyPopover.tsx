@@ -14,8 +14,9 @@ const gf = new GiphyFetch(process.env.GIPHY_KEY);
 const GiphyPopover: React.FunctionComponent<{
   textarea: HTMLTextAreaElement;
 }> = ({ textarea }) => {
-  const [search, setSearch] = useState("");
-  const fetcher = useCallback(() => gf.search(search), [search]);
+  // const [search, setSearch] = useState("");
+  const [initialGifs, setInitialGifs] = useState<IGif[]>();
+  //const fetcher = useCallback(() => gf.search(search), [search]);
   const onGifClick = useCallback(
     async (gif: IGif, e: React.SyntheticEvent<HTMLElement, Event>) => {
       await openBlock(textarea);
@@ -26,6 +27,7 @@ const GiphyPopover: React.FunctionComponent<{
       await asyncType("{backspace}");
       await asyncPaste(`![${gif.title}](${gif.images.original.url})`);
       e.stopPropagation();
+      e.preventDefault();
     },
     [textarea]
   );
@@ -45,14 +47,14 @@ const GiphyPopover: React.FunctionComponent<{
             cursorPosition > index + PREFIX.length &&
             cursorPosition <= index + full.length - SUFFIX.length
           ) {
-            setSearch(match[1]);
+            gf.search(match[1]).then(v => setInitialGifs(v.data));
             return;
           }
         }
       }
-      setSearch("");
+      setInitialGifs(undefined);
     },
-    [setSearch]
+    [setInitialGifs]
   );
   useEffect(() => {
     textarea.addEventListener("input", inputListener);
@@ -65,16 +67,19 @@ const GiphyPopover: React.FunctionComponent<{
   }, [inputListener]);
   return (
     <Popover
-      isOpen={!!search}
+      isOpen={!!initialGifs}
       target={<span />}
       position={Position.BOTTOM_LEFT}
       minimal
       content={
         <div style={{ width: textarea.offsetWidth }}>
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment*/}
+          {/*@ts-ignore fetchGifs should be optional*/ }
           <Carousel
             gifHeight={200}
-            noResultsMessage={`No GIFs found with ${search}`}
-            fetchGifs={fetcher}
+            noResultsMessage={`No GIFs found`}
+            //fetchGifs={fetcher}
+            initialGifs={initialGifs}
             onGifClick={onGifClick}
           />
         </div>
