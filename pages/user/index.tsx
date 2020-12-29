@@ -12,10 +12,19 @@ import {
   Subtitle,
   VerticalGridContent,
 } from "@dvargas92495/ui";
-import { useAuthenticatedAxios } from "../../components/hooks";
+import {
+  useAuthenticatedAxios,
+  useAuthenticatedAxiosPost,
+} from "../../components/hooks";
 import Link from "next/link";
 
-const useEditableSetting = (defaultValue: string) => {
+const useEditableSetting = ({
+  defaultValue,
+  onSave = () => Promise.resolve(),
+}: {
+  defaultValue: string;
+  onSave?: (value: string) => Promise<void>;
+}) => {
   const [isEditable, setIsEditable] = useState(false);
   const [value, setValue] = useState(defaultValue);
   return {
@@ -29,24 +38,23 @@ const useEditableSetting = (defaultValue: string) => {
       </div>
     ),
     action: isEditable ? (
-      <Button startIcon="save" onClick={() => setIsEditable(false)} />
+      <Button
+        startIcon="save"
+        onClick={() => onSave(value).then(() => setIsEditable(false))}
+      />
     ) : (
       <Button startIcon="edit" onClick={() => setIsEditable(true)} />
     ),
   };
 };
 
-const Settings = ({
-  name,
-  email,
-}: {
-  name: string;
-  email: string;
-}) => {
-  const { primary: namePrimary, action: nameAction } = useEditableSetting(name);
-  const { primary: emailPrimary, action: emailAction } = useEditableSetting(
-    email
-  );
+const Settings = ({ name, email }: { name: string; email: string }) => {
+  const { primary: namePrimary, action: nameAction } = useEditableSetting({
+    defaultValue: name,
+  });
+  const { primary: emailPrimary, action: emailAction } = useEditableSetting({
+    defaultValue: email,
+  });
   return (
     <Items
       items={[
@@ -115,6 +123,43 @@ const Billing = () => {
           ),
           key: 1,
           avatar: <Subtitle>Credit</Subtitle>,
+        },
+      ]}
+    />
+  );
+};
+
+const Automations = () => {
+  const authenticatedAxiosGet = useAuthenticatedAxios();
+  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
+  const [subdomain, setSubdomain] = useState("");
+  const getSubdomain = useCallback(
+    () =>
+      authenticatedAxiosGet("auth-user-metadata").then((r) =>
+        setSubdomain(r.data.subdomain || "")
+      ),
+    [setSubdomain]
+  );
+  const {
+    primary: subdomainPrimary,
+    action: subdomainAction,
+  } = useEditableSetting({
+    defaultValue: subdomain,
+    onSave: (value) =>
+      authenticatedAxiosPost("deploy", { subdomain: value }).then((r) =>
+        setSubdomain(r.data.subdomain)
+      ),
+  });
+  return (
+    <Items
+      items={[
+        {
+          primary: (
+            <DataLoader loadAsync={getSubdomain}>{subdomainPrimary}</DataLoader>
+          ),
+          key: 0,
+          avatar: <Subtitle>Garden</Subtitle>,
+          action: subdomainAction,
         },
       ]}
     />
@@ -197,6 +242,9 @@ const UserPage = (): JSX.Element => {
         </Card>
         <Card header={"Billing"}>
           <Billing />
+        </Card>
+        <Card header={"Automations"}>
+          <Automations />
         </Card>
         <Card header={"Funding"}>
           <Funding />

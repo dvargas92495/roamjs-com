@@ -2,7 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import axios, { AxiosResponse } from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
-import { AUTH0_AUDIENCE, FLOSS_API_URL } from "./constants";
+import { API_URL, AUTH0_AUDIENCE, FLOSS_API_URL } from "./constants";
 
 export const getSingleCodeContent = (
   id: string
@@ -91,6 +91,25 @@ export const useAuthenticatedAxios = (): ((
         scope: "read:current_user",
       }).then((token) =>
         axios.get(`${FLOSS_API_URL}/${path}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      ),
+    [getAccessTokenSilently]
+  );
+};
+
+export const useAuthenticatedAxiosPost = (): ((
+  path: string,
+  data: Record<string, unknown>
+) => Promise<AxiosResponse>) => {
+  const { getAccessTokenSilently } = useAuth0();
+  return useCallback(
+    (path: string, data: Record<string, unknown>) =>
+      getAccessTokenSilently({
+        audience: AUTH0_AUDIENCE,
+        scope: "read:current_user",
+      }).then((token) =>
+        axios.post(`${API_URL}/${path}`, data, {
           headers: { Authorization: `Bearer ${token}` },
         })
       ),
