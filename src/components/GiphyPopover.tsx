@@ -14,9 +14,8 @@ const gf = new GiphyFetch(process.env.GIPHY_KEY);
 const GiphyPopover: React.FunctionComponent<{
   textarea: HTMLTextAreaElement;
 }> = ({ textarea }) => {
-  // const [search, setSearch] = useState("");
-  const [initialGifs, setInitialGifs] = useState<IGif[]>();
-  //const fetcher = useCallback(() => gf.search(search), [search]);
+  const [search, setSearch] = useState("");
+  const fetcher = useCallback(() => gf.search(search), [search]);
   const onGifClick = useCallback(
     async (gif: IGif, e: React.SyntheticEvent<HTMLElement, Event>) => {
       await openBlock(textarea);
@@ -47,14 +46,14 @@ const GiphyPopover: React.FunctionComponent<{
             cursorPosition > index + PREFIX.length &&
             cursorPosition <= index + full.length - SUFFIX.length
           ) {
-            gf.search(match[1]).then(v => setInitialGifs(v.data));
+            setSearch(match[1]);
             return;
           }
         }
       }
-      setInitialGifs(undefined);
+      setSearch('');
     },
-    [setInitialGifs]
+    [setSearch]
   );
   useEffect(() => {
     textarea.addEventListener("input", inputListener);
@@ -67,19 +66,16 @@ const GiphyPopover: React.FunctionComponent<{
   }, [inputListener]);
   return (
     <Popover
-      isOpen={!!initialGifs}
+      isOpen={!!search}
       target={<span />}
       position={Position.BOTTOM_LEFT}
       minimal
       content={
-        <div style={{ width: textarea.offsetWidth }}>
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment*/}
-          {/*@ts-ignore fetchGifs should be optional*/ }
+        <div style={{ width: textarea.offsetWidth }} key={search}>
           <Carousel
             gifHeight={200}
             noResultsMessage={`No GIFs found`}
-            //fetchGifs={fetcher}
-            initialGifs={initialGifs}
+            fetchGifs={fetcher}
             onGifClick={onGifClick}
           />
         </div>
