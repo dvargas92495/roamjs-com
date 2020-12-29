@@ -56,7 +56,7 @@ module.exports = (env) => ({
               loader: "style-loader",
               options: {
                 attributes: {
-                 // id: `roamjs-style-${relative}`,
+                  id: `roamjs-style-${relative}`,
                   class: `roamjs-style-${className}`,
                 },
               },
