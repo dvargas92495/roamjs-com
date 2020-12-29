@@ -21,7 +21,7 @@ export const handler = async (
   });
 
   if (inputSubdomain !== existingSubdomain) {
-    await axios.post(
+    await axios.put(
       `${process.env.FLOSS_API_URL}/auth-user-metadata`,
       { subdomain: inputSubdomain },
       {

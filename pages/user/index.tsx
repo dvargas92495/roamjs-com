@@ -19,9 +19,11 @@ import {
 import Link from "next/link";
 
 const useEditableSetting = ({
+  name,
   defaultValue,
   onSave = () => Promise.resolve(),
 }: {
+  name: string;
   defaultValue: string;
   onSave?: (value: string) => Promise<void>;
 }) => {
@@ -31,7 +33,7 @@ const useEditableSetting = ({
     primary: (
       <div style={{ marginBottom: -24, paddingLeft: 64 }}>
         {isEditable ? (
-          <StringField value={value} setValue={setValue} />
+          <StringField value={value} name={name} setValue={setValue} />
         ) : (
           <H6>{defaultValue}</H6>
         )}
@@ -51,9 +53,11 @@ const useEditableSetting = ({
 const Settings = ({ name, email }: { name: string; email: string }) => {
   const { primary: namePrimary, action: nameAction } = useEditableSetting({
     defaultValue: name,
+    name: "name",
   });
   const { primary: emailPrimary, action: emailAction } = useEditableSetting({
     defaultValue: email,
+    name: "email",
   });
   return (
     <Items
@@ -144,6 +148,7 @@ const Automations = () => {
     primary: subdomainPrimary,
     action: subdomainAction,
   } = useEditableSetting({
+    name: "subdomain",
     defaultValue: subdomain,
     onSave: (value) =>
       authenticatedAxiosPost("deploy", { subdomain: value }).then((r) =>
