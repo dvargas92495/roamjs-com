@@ -118,7 +118,6 @@ const observerCallback = (ms: MutationRecord[]) =>
     .map((s) => s.getElementsByClassName("r-stretch")[0] as HTMLDivElement)
     .filter((d) => !!d)
     .forEach((d) => {
-      console.log(d);
       const containerHeight = d.offsetHeight;
       if (containerHeight > 0) {
         const contentHeight = (d.children[0] as HTMLElement).offsetHeight;

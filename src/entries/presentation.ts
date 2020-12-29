@@ -3,6 +3,7 @@ import {
   getTextTreeByBlockUid,
   runExtension,
 } from "../entry-helpers";
+/*
 import "reveal.js/dist/reveal.css";
 import "reveal.js/dist/theme/black.css";
 import "reveal.js/dist/theme/white.css";
@@ -15,6 +16,7 @@ import "reveal.js/dist/theme/simple.css";
 import "reveal.js/dist/theme/solarized.css";
 import "reveal.js/dist/theme/blood.css";
 import "reveal.js/dist/theme/moon.css";
+*/
 import { render, VALID_THEMES } from "../components/Presentation";
 import { getUidsFromButton } from "roam-client";
 
