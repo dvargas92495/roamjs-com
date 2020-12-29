@@ -8,5 +8,11 @@ runExtension("giphy", () => {
     callback: (t: HTMLTextAreaElement) => {
       render(t);
     },
+    removeCallback: () =>
+      Array.from(
+        document.getElementsByClassName("roamjs-giphy-portal")
+      ).forEach((p) =>
+        p.parentElement.parentElement.removeChild(p.parentElement)
+      ),
   });
 });

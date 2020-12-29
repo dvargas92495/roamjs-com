@@ -51,7 +51,7 @@ const GiphyPopover: React.FunctionComponent<{
           }
         }
       }
-      setSearch('');
+      setSearch("");
     },
     [setSearch]
   );
@@ -59,9 +59,6 @@ const GiphyPopover: React.FunctionComponent<{
     textarea.addEventListener("input", inputListener);
     return () => {
       textarea.removeEventListener("input", inputListener);
-      Array.from(
-        document.getElementsByClassName("roamjs-giphy-portal")
-      ).forEach((p) => p.parentElement.parentElement.removeChild(p.parentElement));
     };
   }, [inputListener]);
   return (
