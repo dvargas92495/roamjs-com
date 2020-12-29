@@ -33,7 +33,7 @@ runExtension("hex-color-preview", () => {
   const renderColorPreviews = (container: HTMLElement, blockUid: string) => {
     const refs = getRefTitlesByBlockUid(blockUid);
     const renderedRefs = Array.from(
-      container.getElementsByClassName("rm-page-ref-tag")
+      container.getElementsByClassName("rm-page-ref--tag")
     );
     refs
       .filter(

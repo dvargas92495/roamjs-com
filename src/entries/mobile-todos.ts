@@ -43,7 +43,7 @@ runExtension("mobile-todos", () => {
       const modifier = isApple ? "meta" : "ctrl";
       userEvent.type(
         previousActiveElement,
-        `{${modifier}}{enter}{/${modifier}}{backspace}`
+        `{${modifier}}{enter}{/${modifier}}`
       );
     }
   };
