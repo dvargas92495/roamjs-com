@@ -101,7 +101,7 @@ export const renderWindowAlert = (): void =>
       <WindowAlert />
       <AlertDashboard />
     </>,
-    getRenderRoot()
+    getRenderRoot('alerts')
   );
 
 const removeAlertById = (alertId: number) => {

@@ -175,10 +175,12 @@ export const createHTMLObserver = ({
   callback,
   tag,
   className,
+  removeCallback,
 }: {
   callback: (b: HTMLElement) => void;
   tag: string;
   className: string;
+  removeCallback?: (b: HTMLElement) => void;
 }): void => {
   const blocks = document.getElementsByClassName(className);
   Array.from(blocks).forEach(callback);
@@ -191,6 +193,15 @@ export const createHTMLObserver = ({
       className,
     });
     addedNodes.forEach(callback);
+    if (removeCallback) {
+      const removedNodes = getMutatedNodes({
+        ms,
+        nodeList: "removedNodes",
+        tag,
+        className,
+      });
+      removedNodes.forEach(removeCallback);
+    }
   });
 };
 

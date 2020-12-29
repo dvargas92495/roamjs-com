@@ -1,28 +1,18 @@
-import { runExtension } from "../entry-helpers";
-
-const PREFIX = "{{GIPHY:";
-const SUFFIX = "}}";
+import { createHTMLObserver, runExtension } from "../entry-helpers";
+import { render } from "../components/GiphyPopover";
 
 runExtension("giphy", () => {
-  document.addEventListener("input", (e: InputEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.tagName === "TEXTAREA") {
-      const textarea = target as HTMLTextAreaElement;
-      const match = textarea.value.match(
-        new RegExp(`${PREFIX}(.*)${SUFFIX}`, "s")
-      );
-      if (match) {
-        const { index } = match;
-        const full = match[0];
-        const cursorPosition = textarea.selectionStart;
-        if (
-          cursorPosition > index + PREFIX.length &&
-          cursorPosition <= index + full.length - SUFFIX.length
-        ) {
-          const capture = match[1];
-          console.log("Search GIPHY for", capture);
-        }
-      }
-    }
+  createHTMLObserver({
+    tag: "TEXTAREA",
+    className: "rm-block-input",
+    callback: (t: HTMLTextAreaElement) => {
+      render(t);
+    },
+    removeCallback: () =>
+      Array.from(
+        document.getElementsByClassName("roamjs-giphy-portal")
+      ).forEach((p) =>
+        p.parentElement.parentElement.removeChild(p.parentElement)
+      ),
   });
 });
