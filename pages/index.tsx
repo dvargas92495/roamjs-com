@@ -53,7 +53,7 @@ const HomePage = (): JSX.Element => (
           label: "Daily Downloads",
         },
         {
-          value: "120+",
+          value: "130+",
           label: "Subscribers",
         },
       ]}
