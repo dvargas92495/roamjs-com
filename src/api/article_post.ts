@@ -16,7 +16,7 @@ export const handler = async (
   const { url } = JSON.parse(event.body);
   return axios
     .get(url, {
-      headers: { "Content-type": "text/html" },
+      headers: { "Content-type": "text/html", "user-agent": "Mozilla/5.0" },
       responseType: "document",
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore https://github.com/axios/axios/pull/2619
