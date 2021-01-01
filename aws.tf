@@ -69,10 +69,11 @@ module "aws-static-site" {
 
 module "aws_static_site" {
   source  = "dvargas92495/static-site/aws"
-  version = "1.2.1"
+  version = "1.3.0"
 
   domain = "roamjs.com"
   secret = var.secret
+  allowed_origins = ["https://roamresearch.com"]
   tags = {
       Application = "Roam JS Extensions"
   }
