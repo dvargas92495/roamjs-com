@@ -20,6 +20,7 @@ const contributors = {
   "Tomáš Baránek": "https://twitter.com/tombarys",
   "Abhay Prasanna": "https://twitter.com/AbhayPrasanna",
   "Brandon Toner": "https://brandontoner.substack.com/",
+  "Conor White-Sullivan": "https://twitter.com/Conaw",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{
