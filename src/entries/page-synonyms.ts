@@ -1,7 +1,6 @@
 import userEvent from "@testing-library/user-event";
 import { createOverlayObserver, isApple, runExtension } from "../entry-helpers";
 import { asyncPaste, getConfigFromPage, getUids, openBlock } from "roam-client";
-import { waitFor } from "@testing-library/dom";
 
 let blockElementSelected: Element;
 const ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME = "roamjs-alias-page-synonyms";
@@ -77,12 +76,7 @@ const optionCallback = async () => {
       blockElementSelected.tagName === "DIV" ||
       !document.contains(blockElementSelected)
     ) {
-      userEvent.click(document.getElementById(id));
-      await waitFor(() => {
-        if (document.getElementById(id).tagName !== "TEXTAREA") {
-          throw new Error(`Click did not render textarea ${id}`);
-        }
-      });
+      await openBlock(document.getElementById(id));
     }
     const textArea = document.getElementById(id) as HTMLTextAreaElement;
     const newText = replace(textArea.value);
