@@ -174,6 +174,7 @@ runExtension("page-synonyms", () => {
     if (e.code === "KeyA" && e.altKey) {
       blockElementSelected = document.activeElement;
       optionCallback();
+      e.preventDefault();
     }
   });
 });
