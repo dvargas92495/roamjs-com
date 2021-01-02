@@ -1,6 +1,6 @@
 import userEvent from "@testing-library/user-event";
 import { createOverlayObserver, isApple, runExtension } from "../entry-helpers";
-import { getConfigFromPage, getUids, openBlock } from "roam-client";
+import { asyncPaste, getConfigFromPage, getUids, openBlock } from "roam-client";
 import { waitFor } from "@testing-library/dom";
 
 let blockElementSelected: Element;
@@ -80,14 +80,14 @@ const optionCallback = async () => {
       userEvent.click(document.getElementById(id));
       await waitFor(() => {
         if (document.getElementById(id).tagName !== "TEXTAREA") {
-          throw new Error("Click did not render textarea");
+          throw new Error(`Click did not render textarea ${id}`);
         }
       });
     }
     const textArea = document.getElementById(id) as HTMLTextAreaElement;
     const newText = replace(textArea.value);
     userEvent.clear(textArea);
-    userEvent.type(textArea, newText);
+    await asyncPaste(newText);
   }
 };
 
@@ -125,7 +125,7 @@ runExtension("page-synonyms", () => {
         const textArea = document.getElementById(id) as HTMLTextAreaElement;
         const newText = replace(textArea.value);
         userEvent.clear(textArea);
-        userEvent.type(textArea, newText);
+        await asyncPaste(newText);
       }
     }
   });
