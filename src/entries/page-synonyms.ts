@@ -76,6 +76,9 @@ const optionCallback = async () => {
       blockElementSelected.tagName === "DIV" ||
       !document.contains(blockElementSelected)
     ) {
+      Array.from(document.getElementsByClassName("bp3-overlay-open"))
+        .map((d) => d as HTMLElement)
+        .forEach((d) => d.click());
       await openBlock(document.getElementById(id));
     }
     const textArea = document.getElementById(id) as HTMLTextAreaElement;
@@ -155,7 +158,7 @@ runExtension("page-synonyms", () => {
       htmlTarget.className === "rm-bullet" ||
       htmlTarget.className ===
         "bp3-icon-standard bp3-icon-caret-down rm-caret rm-caret-open rm-caret-hidden" ||
-        htmlTarget.className === "rm-bullet__inner"
+      htmlTarget.className === "rm-bullet__inner"
     ) {
       const bullet = htmlTarget.closest(".controls");
       blockElementSelected = bullet.parentElement.getElementsByClassName(
