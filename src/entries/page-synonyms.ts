@@ -158,10 +158,10 @@ runExtension("page-synonyms", () => {
   document.addEventListener("mousedown", (e) => {
     const htmlTarget = e.target as HTMLElement;
     if (
-      htmlTarget.className === "simple-bullet-outer cursor-pointer" ||
-      htmlTarget.className === "simple-bullet-inner" ||
+      htmlTarget.className === "rm-bullet" ||
       htmlTarget.className ===
-        "bp3-icon-standard bp3-icon-caret-down rm-caret rm-caret-open rm-caret-hidden"
+        "bp3-icon-standard bp3-icon-caret-down rm-caret rm-caret-open rm-caret-hidden" ||
+        htmlTarget.className === "rm-bullet__inner"
     ) {
       const bullet = htmlTarget.closest(".controls");
       blockElementSelected = bullet.parentElement.getElementsByClassName(
@@ -171,7 +171,7 @@ runExtension("page-synonyms", () => {
   });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "a" && e.altKey) {
+    if (e.code === "KeyA" && e.altKey) {
       blockElementSelected = document.activeElement;
       optionCallback();
     }
