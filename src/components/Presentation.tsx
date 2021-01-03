@@ -116,6 +116,7 @@ const observerCallback = (ms: MutationRecord[]) =>
     .map((m) => m.target as HTMLElement)
     .filter((m) => m.className === "present")
     .map((s) => s.getElementsByClassName("r-stretch")[0] as HTMLDivElement)
+    .filter((d) => !!d)
     .forEach((d) => {
       const containerHeight = d.offsetHeight;
       if (containerHeight > 0) {

@@ -1,7 +1,6 @@
 import userEvent from "@testing-library/user-event";
 import { createOverlayObserver, isApple, runExtension } from "../entry-helpers";
-import { getConfigFromPage, getUids, openBlock } from "roam-client";
-import { waitFor } from "@testing-library/dom";
+import { asyncPaste, getConfigFromPage, getUids, openBlock } from "roam-client";
 
 let blockElementSelected: Element;
 const ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME = "roamjs-alias-page-synonyms";
@@ -77,17 +76,32 @@ const optionCallback = async () => {
       blockElementSelected.tagName === "DIV" ||
       !document.contains(blockElementSelected)
     ) {
-      userEvent.click(document.getElementById(id));
-      await waitFor(() => {
-        if (document.getElementById(id).tagName !== "TEXTAREA") {
-          throw new Error("Click did not render textarea");
-        }
+      const overlaysOpen = document.getElementsByClassName('bp3-overlay-open').length;
+      let tries = 0;
+      document.body.click()
+      const success = await new Promise((resolve) => {
+        const interval = setInterval(() => {
+          if (overlaysOpen > document.getElementsByClassName('bp3-overlay-open').length) {
+            clearInterval(interval);
+            resolve(true);
+          } else {
+            tries++;
+          }
+          if (tries > 100) {
+            clearInterval(interval);
+            resolve(false);
+          }
+        }, 50);
       });
+      if (!success) {
+        throw new Error('timed out waiting for overlay to close');
+      }
+      await openBlock(document.getElementById(id));
     }
     const textArea = document.getElementById(id) as HTMLTextAreaElement;
     const newText = replace(textArea.value);
     userEvent.clear(textArea);
-    userEvent.type(textArea, newText);
+    await asyncPaste(newText);
   }
 };
 
@@ -125,7 +139,7 @@ runExtension("page-synonyms", () => {
         const textArea = document.getElementById(id) as HTMLTextAreaElement;
         const newText = replace(textArea.value);
         userEvent.clear(textArea);
-        userEvent.type(textArea, newText);
+        await asyncPaste(newText);
       }
     }
   });
@@ -158,10 +172,10 @@ runExtension("page-synonyms", () => {
   document.addEventListener("mousedown", (e) => {
     const htmlTarget = e.target as HTMLElement;
     if (
-      htmlTarget.className === "simple-bullet-outer cursor-pointer" ||
-      htmlTarget.className === "simple-bullet-inner" ||
+      htmlTarget.className === "rm-bullet" ||
       htmlTarget.className ===
-        "bp3-icon-standard bp3-icon-caret-down rm-caret rm-caret-open rm-caret-hidden"
+        "bp3-icon-standard bp3-icon-caret-down rm-caret rm-caret-open rm-caret-hidden" ||
+      htmlTarget.className === "rm-bullet__inner"
     ) {
       const bullet = htmlTarget.closest(".controls");
       blockElementSelected = bullet.parentElement.getElementsByClassName(
@@ -171,9 +185,10 @@ runExtension("page-synonyms", () => {
   });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "a" && e.altKey) {
+    if (e.code === "KeyA" && e.altKey) {
       blockElementSelected = document.activeElement;
       optionCallback();
+      e.preventDefault();
     }
   });
 });

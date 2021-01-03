@@ -3,15 +3,16 @@ import {
   getTextTreeByBlockUid,
   runExtension,
 } from "../entry-helpers";
+
 import "reveal.js/dist/reveal.css";
 import "reveal.js/dist/theme/black.css";
 import "reveal.js/dist/theme/white.css";
-import "reveal.js/dist/theme/league.css";
 import "reveal.js/dist/theme/beige.css";
 import "reveal.js/dist/theme/sky.css";
 import "reveal.js/dist/theme/night.css";
-import "reveal.js/dist/theme/serif.css";
 import "reveal.js/dist/theme/simple.css";
+import "reveal.js/dist/theme/league.css";
+import "reveal.js/dist/theme/serif.css";
 import "reveal.js/dist/theme/solarized.css";
 import "reveal.js/dist/theme/blood.css";
 import "reveal.js/dist/theme/moon.css";
