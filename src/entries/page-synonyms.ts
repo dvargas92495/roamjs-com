@@ -76,9 +76,26 @@ const optionCallback = async () => {
       blockElementSelected.tagName === "DIV" ||
       !document.contains(blockElementSelected)
     ) {
-      Array.from(document.getElementsByClassName("bp3-overlay-open"))
-        .map((d) => d as HTMLElement)
-        .forEach((d) => d.click());
+      const overlaysOpen = document.getElementsByClassName('bp3-overlay-open').length;
+      let tries = 0;
+      document.body.click()
+      const success = await new Promise((resolve) => {
+        const interval = setInterval(() => {
+          if (overlaysOpen > document.getElementsByClassName('bp3-overlay-open').length) {
+            clearInterval(interval);
+            resolve(true);
+          } else {
+            tries++;
+          }
+          if (tries > 100) {
+            clearInterval(interval);
+            resolve(false);
+          }
+        }, 500);
+      });
+      if (!success) {
+        throw new Error('timed out waiting for overlay to close');
+      }
       await openBlock(document.getElementById(id));
     }
     const textArea = document.getElementById(id) as HTMLTextAreaElement;
