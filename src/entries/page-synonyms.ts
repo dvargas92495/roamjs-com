@@ -91,7 +91,7 @@ const optionCallback = async () => {
             clearInterval(interval);
             resolve(false);
           }
-        }, 500);
+        }, 50);
       });
       if (!success) {
         throw new Error('timed out waiting for overlay to close');
