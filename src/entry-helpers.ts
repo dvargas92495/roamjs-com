@@ -85,7 +85,7 @@ export const replaceText = async ({
   if (index >= 0) {
     textArea.setSelectionRange(index, index + before.length);
     const text = `${before ? "{backspace}" : ""}${after}${
-      !prepend ? "" : !before ? " " : !after ? "{backspace}" : ""
+      !prepend ? "" : !before ? " " : !after ? "{del}" : ""
     }`;
     await userEvent.type(textArea, text, {
       initialSelectionEnd: index + before.length,
