@@ -59,10 +59,15 @@ module.exports = (env) => ({
                   id: `roamjs-style-${relative}`,
                   class: `roamjs-style-${className}`,
                 },
+                injectType: relative.includes() ? "lazyStyleTag" : "styleTag",
               },
             };
           },
-          "css-loader",
+          "@teamsupercell/typings-for-css-modules-loader",
+          {
+            loader: "css-loader",
+            options: { modules: true },
+          },
         ],
       },
       {

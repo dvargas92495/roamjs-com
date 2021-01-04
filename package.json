@@ -39,6 +39,7 @@
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-react": "^7.12.1",
+    "@teamsupercell/typings-for-css-modules-loader": "^2.4.0",
     "@types/aws-lambda": "^8.10.61",
     "@types/charset": "^1.0.2",
     "@types/color": "^3.0.1",

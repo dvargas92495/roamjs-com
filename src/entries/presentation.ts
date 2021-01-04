@@ -3,9 +3,9 @@ import {
   getTextTreeByBlockUid,
   runExtension,
 } from "../entry-helpers";
-import "reveal.js/dist/reveal.css";
-import "reveal.js/dist/theme/black.css";
-import "reveal.js/dist/theme/white.css";
+import revealBase from "reveal.js/dist/reveal.css";
+import revealBlack from "reveal.js/dist/theme/black.css";
+import revealWhite from "reveal.js/dist/theme/white.css";
 import "reveal.js/dist/theme/beige.css";
 import "reveal.js/dist/theme/sky.css";
 import "reveal.js/dist/theme/night.css";
