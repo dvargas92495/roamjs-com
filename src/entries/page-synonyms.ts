@@ -1,5 +1,10 @@
 import userEvent from "@testing-library/user-event";
-import { createOverlayObserver, isApple, runExtension } from "../entry-helpers";
+import {
+  createOverlayObserver,
+  getTextTreeByPageName,
+  isApple,
+  runExtension,
+} from "../entry-helpers";
 import { asyncPaste, getConfigFromPage, getUids, openBlock } from "roam-client";
 
 let blockElementSelected: Element;
@@ -25,6 +30,8 @@ const createMenuOption = (menuOnClick: () => void) => {
 };
 
 const getReplacer = () => {
+  const tree = getTextTreeByPageName("roam/js/page-synonyms");
+  const useTags = tree.some((t) => t.text.toUpperCase() === "USE TAGS");
   const pagesWithAliases = window.roamAlphaAPI
     .q(
       `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "Aliases"]]`
@@ -38,15 +45,16 @@ const getReplacer = () => {
         ?.Aliases?.split(",")
         ?.map((a: string) => a.trim()) || [],
   }));
-  const uidByAlias: { [key: string]: string } = {};
+  const linkByAlias: { [key: string]: string } = {};
   uidWithAliases.forEach((p) => {
-    p.aliases.forEach((a: string) => (uidByAlias[a] = p.uid));
-    uidByAlias[p.title] = p.uid;
+    const link = useTags ? `[[${p.title}]]` : `((${p.uid}))`;
+    p.aliases.forEach((a: string) => (linkByAlias[a] = link));
+    linkByAlias[p.title] = link;
   });
   return (input: string) =>
-    Object.keys(uidByAlias).reduce((prevText: string, alias: string) => {
+    Object.keys(linkByAlias).reduce((prevText: string, alias: string) => {
       const regex = new RegExp(`${alias}`, "g");
-      return prevText.replace(regex, `[${alias}](((${uidByAlias[alias]})))`);
+      return prevText.replace(regex, `[${alias}](${linkByAlias[alias]})`);
     }, input);
 };
 
@@ -76,12 +84,16 @@ const optionCallback = async () => {
       blockElementSelected.tagName === "DIV" ||
       !document.contains(blockElementSelected)
     ) {
-      const overlaysOpen = document.getElementsByClassName('bp3-overlay-open').length;
+      const overlaysOpen = document.getElementsByClassName("bp3-overlay-open")
+        .length;
       let tries = 0;
-      document.body.click()
+      document.body.click();
       const success = await new Promise((resolve) => {
         const interval = setInterval(() => {
-          if (overlaysOpen > document.getElementsByClassName('bp3-overlay-open').length) {
+          if (
+            overlaysOpen >
+            document.getElementsByClassName("bp3-overlay-open").length
+          ) {
             clearInterval(interval);
             resolve(true);
           } else {
@@ -94,7 +106,7 @@ const optionCallback = async () => {
         }, 50);
       });
       if (!success) {
-        throw new Error('timed out waiting for overlay to close');
+        throw new Error("timed out waiting for overlay to close");
       }
       await openBlock(document.getElementById(id));
     }
