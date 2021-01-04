@@ -85,7 +85,7 @@ export const replaceText = async ({
   if (index >= 0) {
     textArea.setSelectionRange(index, index + before.length);
     const text = `${before ? "{backspace}" : ""}${after}${
-      !before && prepend ? " " : ""
+      !prepend ? "" : !before ? " " : !after ? "{del}" : ""
     }`;
     await userEvent.type(textArea, text, {
       initialSelectionEnd: index + before.length,
@@ -528,8 +528,8 @@ const getTextTreeByBlockId = (blockId: number): TreeNode => {
     children: children
       .map((c) => getTextTreeByBlockId(c[":db/id"]))
       .sort((a, b) => a.order - b.order),
-    heading: block[':block/heading'],
-    open: block[':block/open']
+    heading: block[":block/heading"],
+    open: block[":block/open"],
   };
 };
 
