@@ -55,7 +55,7 @@ const getReplacer = () => {
     Object.keys(linkByAlias).reduce((prevText: string, alias: string) => {
       const regex = new RegExp(`${alias}`, "g");
       return prevText.replace(regex, (match, i: number) =>
-        i === 0 || !["#", "["].includes(prevText.charAt(i))
+        i === 0 || !["#", "["].includes(prevText.charAt(i - 1))
           ? `[${alias}](${linkByAlias[alias]})`
           : match
       );
