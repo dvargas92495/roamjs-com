@@ -10,6 +10,8 @@ interface FrontMatter {
   acknowledgements: string;
 }
 
+declare module "*.css";
+
 declare module "*.mdx" {
   const MDXComponent: React.FunctionComponent;
   export default MDXComponent;

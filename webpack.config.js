@@ -63,11 +63,7 @@ module.exports = (env) => ({
               },
             };
           },
-          "@teamsupercell/typings-for-css-modules-loader",
-          {
-            loader: "css-loader",
-            options: { modules: true },
-          },
+          "css-loader",
         ],
       },
       {
