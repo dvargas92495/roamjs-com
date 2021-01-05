@@ -1,7 +1,6 @@
 import { Button, Overlay } from "@blueprintjs/core";
 import marked from "marked";
 import React, {
-  CSSProperties,
   useCallback,
   useEffect,
   useMemo,
@@ -81,17 +80,16 @@ const Notes = ({ note }: { note?: Slide }) => (
 
 type ImageFromTextProps = {
   text: string;
-  style?: CSSProperties;
 };
 
 const ImageFromText: React.FunctionComponent<
   ImageFromTextProps & {
     Alt: React.FunctionComponent<ImageFromTextProps>;
   }
-> = ({ text, Alt, style }) => {
+> = ({ text, Alt }) => {
   const imageMatch = text.match(/!\[(.*)\]\((.*)\)/);
   return imageMatch ? (
-    <img alt={imageMatch[1]} src={imageMatch[2]} style={style} />
+    <img alt={imageMatch[1]} src={imageMatch[2]} />
   ) : (
     <Alt text={text} />
   );
@@ -132,14 +130,12 @@ const ContentSlide = ({
               bullets.map((c) => renderBullet({ c, i: 0 })).join("\n")
             ),
           }}
-          style={{width: isImageLayout ? '50%' : '100%'}}
+          style={{ width: isImageLayout ? "50%" : "100%" }}
         />
         {isImageLayout && (
-          <ImageFromText
-            style={{ width: "50%" }}
-            text={children[0].text}
-            Alt={({ style }) => <div style={style} />}
-          />
+          <div style={{ width: "50%" }}>
+            <ImageFromText text={children[0].text} Alt={() => <div />} />
+          </div>
         )}
       </div>
       <Notes note={note} />
@@ -185,7 +181,9 @@ const PresentationContent: React.FunctionComponent<{
       ...s,
       text,
       layout,
-      children: s.children.slice(0, s.children.length - 1),
+      children: showNotes
+        ? s.children.slice(0, s.children.length - 1)
+        : s.children,
       note: showNotes && s.children[s.children.length - 1],
     };
   });
