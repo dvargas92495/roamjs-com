@@ -88,8 +88,21 @@ const ImageFromText: React.FunctionComponent<
   }
 > = ({ text, Alt }) => {
   const imageMatch = text.match(/!\[(.*)\]\((.*)\)/);
+  const [style, setStyle] = useState({});
+  const imageRef = useRef(null);
+  useEffect(() => {
+    const imageAspectRatio = imageRef.current.width / imageRef.current.height;
+    const containerAspectRatio =
+      imageRef.current.parentElement.offsetWidth /
+      imageRef.current.parentElement.offsetHeight;
+    if (imageAspectRatio > containerAspectRatio) {
+      setStyle({width: '100%'});
+    } else {
+      setStyle({height: '100%'});
+    }
+  }, [setStyle]);
   return imageMatch ? (
-    <img alt={imageMatch[1]} src={imageMatch[2]} />
+    <img alt={imageMatch[1]} src={imageMatch[2]} ref={imageRef} style={style} />
   ) : (
     <Alt text={text} />
   );
@@ -133,7 +146,7 @@ const ContentSlide = ({
           style={{ width: isImageLayout ? "50%" : "100%" }}
         />
         {isImageLayout && (
-          <div style={{ width: "50%" }}>
+          <div style={{ width: "50%", textAlign: "center" }}>
             <ImageFromText text={children[0].text} Alt={() => <div />} />
           </div>
         )}
