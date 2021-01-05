@@ -10,12 +10,13 @@ import React, {
 import ReactDOM from "react-dom";
 import Reveal from "reveal.js";
 import { addStyle, getTextByBlockUid, isControl } from "../entry-helpers";
+import { isSafari } from "mobile-device-detect";
+
+const SAFARI_THEMES = ["black", "white", "beige"];
 
 export const VALID_THEMES = [
-  "black",
-  "white",
+  ...SAFARI_THEMES,
   "league",
-  "beige",
   "sky",
   "night",
   "serif",
@@ -215,7 +216,10 @@ const Presentation: React.FunctionComponent<{
   notes?: string;
 }> = ({ getSlides, theme, notes }) => {
   const normalizedTheme = useMemo(
-    () => (VALID_THEMES.includes(theme) ? theme : "black"),
+    () =>
+      (isSafari ? SAFARI_THEMES : VALID_THEMES).includes(theme)
+        ? theme
+        : "black",
     []
   );
   const showNotes = notes === "true";

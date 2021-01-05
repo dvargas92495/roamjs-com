@@ -53,7 +53,6 @@ module.exports = (env) => ({
               .replace(/\\/g, "-")
               .replace(/\.js/g, "");
             const className = relative.split("-")[0];
-            const isReveal = className.includes('reveal');
             return {
               loader: "style-loader",
               options: {
@@ -63,7 +62,7 @@ module.exports = (env) => ({
                 },
                 injectType: relative.includes() ? "lazyStyleTag" : "styleTag",
                 insert: (element) => {
-                  if (isReveal) {
+                  if (element.className.includes('reveal')) {
                     window.roamjs.dynamicElements.add(element);
                   } else {
                     document.head.appendChild(element);
