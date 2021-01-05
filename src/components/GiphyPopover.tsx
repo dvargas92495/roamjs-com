@@ -10,6 +10,8 @@ const PREFIX = "{{GIPHY:";
 const SUFFIX = "}}";
 
 const gf = new GiphyFetch(process.env.GIPHY_KEY);
+const getMatch = (textarea: HTMLTextAreaElement) =>
+  textarea.value.match(new RegExp(`${PREFIX}(.*)${SUFFIX}`, "si"));
 
 const GiphyPopover: React.FunctionComponent<{
   textarea: HTMLTextAreaElement;
@@ -19,9 +21,7 @@ const GiphyPopover: React.FunctionComponent<{
   const onGifClick = useCallback(
     async (gif: IGif, e: React.SyntheticEvent<HTMLElement, Event>) => {
       await openBlock(textarea);
-      const match = textarea.value.match(
-        new RegExp(`${PREFIX}(.*)${SUFFIX}`, "s")
-      );
+      const match = getMatch(textarea);
       textarea.setSelectionRange(match.index, match.index + match[0].length);
       await asyncType("{backspace}");
       await asyncPaste(`![${gif.title}](${gif.images.original.url})`);
@@ -35,9 +35,7 @@ const GiphyPopover: React.FunctionComponent<{
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA") {
         const textarea = target as HTMLTextAreaElement;
-        const match = textarea.value.match(
-          new RegExp(`${PREFIX}(.*)${SUFFIX}`, "si")
-        );
+        const match = getMatch(textarea);
         if (match) {
           const { index } = match;
           const full = match[0];
