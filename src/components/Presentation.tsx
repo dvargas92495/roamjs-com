@@ -46,11 +46,8 @@ marked.use({
   },
 });
 
-const revealStylesLoaded = Array.from(
-  document.getElementsByClassName("roamjs-style-reveal")
-);
 const unload = () =>
-  revealStylesLoaded
+  Array.from(window.roamjs.dynamicElements)
     .filter((s) => !!s.parentElement)
     .forEach((s) => s.parentElement.removeChild(s));
 unload();
@@ -232,9 +229,7 @@ const Presentation: React.FunctionComponent<{
   const open = useCallback(async () => {
     setShowOverlay(true);
     setSlides(getSlides());
-    // await import("reveal.js/dist/reveal.css");
-    // await import(`reveal.js/dist/theme/${normalizedTheme}.css`);
-    revealStylesLoaded
+    Array.from(window.roamjs.dynamicElements)
       .filter(
         (s) =>
           s.id.endsWith(`${normalizedTheme}.css`) || s.id.endsWith("reveal.css")

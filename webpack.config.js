@@ -53,6 +53,7 @@ module.exports = (env) => ({
               .replace(/\\/g, "-")
               .replace(/\.js/g, "");
             const className = relative.split("-")[0];
+            const isReveal = className.includes('reveal');
             return {
               loader: "style-loader",
               options: {
@@ -61,10 +62,16 @@ module.exports = (env) => ({
                   class: `roamjs-style-${className}`,
                 },
                 injectType: relative.includes() ? "lazyStyleTag" : "styleTag",
+                insert: (element) => {
+                  if (isReveal) {
+                    window.roamjs.dynamicElements.add(element);
+                  } else {
+                    document.head.appendChild(element);
+                  }
+                },
               },
             };
-          },
-          MiniCssExtractPlugin.loader, 
+          }, 
           "css-loader",
         ],
       },

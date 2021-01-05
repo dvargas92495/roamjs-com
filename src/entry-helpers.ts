@@ -22,8 +22,11 @@ declare global {
       alerted: boolean;
       loaded: Set<string>;
       extension: {
-        [id: string]: { [method: string]: (args?: unknown) => void };
+        [id: string]: {
+          [method: string]: (args?: unknown) => void;
+        };
       };
+      dynamicElements: Set<HTMLElement>;
     };
     roam42?: {
       smartBlocks?: {
@@ -46,7 +49,12 @@ export const track = (name: string, properties?: Dict): void =>
 
 export const runExtension = (extensionId: string, run: () => void): void => {
   if (!window.roamjs) {
-    window.roamjs = { alerted: false, loaded: new Set(), extension: {} };
+    window.roamjs = {
+      alerted: false,
+      loaded: new Set(),
+      extension: {},
+      dynamicElements: new Set(),
+    };
   }
   if (window.roamjs.loaded.has(extensionId)) {
     return;
