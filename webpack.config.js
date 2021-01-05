@@ -3,6 +3,7 @@ const path = require("path");
 const Dotenv = require("dotenv-webpack");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
+  const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const extensions = fs.readdirSync("./src/entries/");
 const entry = Object.fromEntries(
@@ -63,6 +64,7 @@ module.exports = (env) => ({
               },
             };
           },
+          MiniCssExtractPlugin.loader, 
           "css-loader",
         ],
       },
@@ -80,7 +82,7 @@ module.exports = (env) => ({
       },
     ],
   },
-  plugins: [
+  plugins: [new MiniCssExtractPlugin(),
     new Dotenv({
       path: ".env.local",
       systemvars: true,
