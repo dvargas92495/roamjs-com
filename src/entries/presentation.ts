@@ -3,22 +3,23 @@ import {
   getTextTreeByBlockUid,
   runExtension,
 } from "../entry-helpers";
-import revealBase from "reveal.js/dist/reveal.css";
-import revealBlack from "reveal.js/dist/theme/black.css";
-import revealWhite from "reveal.js/dist/theme/white.css";
-import "reveal.js/dist/theme/beige.css";
-import "reveal.js/dist/theme/sky.css";
-import "reveal.js/dist/theme/night.css";
-import "reveal.js/dist/theme/simple.css";
-import "reveal.js/dist/theme/league.css";
-import "reveal.js/dist/theme/serif.css";
-import "reveal.js/dist/theme/solarized.css";
-import "reveal.js/dist/theme/blood.css";
-import "reveal.js/dist/theme/moon.css";
-import { render, VALID_THEMES } from "../components/Presentation";
 import { getUidsFromButton } from "roam-client";
 
-runExtension("presentation", () => {
+runExtension("presentation", async () => {
+  await import("reveal.js/dist/reveal.css");
+  await import("reveal.js/dist/theme/black.css");
+  await import("reveal.js/dist/theme/white.css");
+  await import("reveal.js/dist/theme/beige.css");
+  await import("reveal.js/dist/theme/sky.css");
+  await import("reveal.js/dist/theme/night.css");
+  await import("reveal.js/dist/theme/simple.css");
+  await import("reveal.js/dist/theme/league.css");
+  await import("reveal.js/dist/theme/serif.css");
+  await import("reveal.js/dist/theme/solarized.css");
+  await import("reveal.js/dist/theme/blood.css");
+  await import("reveal.js/dist/theme/moon.css");
+  const { render, VALID_THEMES } = await import("../components/Presentation");
+  
   createButtonObserver({
     attribute: "presentation",
     shortcut: "slides",
@@ -29,7 +30,7 @@ runExtension("presentation", () => {
       const options = buttonText
         ? {
             theme: buttonText.match(`{theme:(${VALID_THEMES.join("|")})}`)?.[1],
-            notes: buttonText.match('{notes:(true|false)}')?.[1],
+            notes: buttonText.match("{notes:(true|false)}")?.[1],
           }
         : {};
       render({

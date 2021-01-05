@@ -232,6 +232,8 @@ const Presentation: React.FunctionComponent<{
   const open = useCallback(async () => {
     setShowOverlay(true);
     setSlides(getSlides());
+    // await import("reveal.js/dist/reveal.css");
+    // await import(`reveal.js/dist/theme/${normalizedTheme}.css`);
     revealStylesLoaded
       .filter(
         (s) =>
