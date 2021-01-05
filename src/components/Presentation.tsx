@@ -91,16 +91,18 @@ const ImageFromText: React.FunctionComponent<
   const [style, setStyle] = useState({});
   const imageRef = useRef(null);
   useEffect(() => {
-    const imageAspectRatio = imageRef.current.width / imageRef.current.height;
-    const containerAspectRatio =
-      imageRef.current.parentElement.offsetWidth /
-      imageRef.current.parentElement.offsetHeight;
-    if (imageAspectRatio > containerAspectRatio) {
-      setStyle({width: '100%'});
-    } else {
-      setStyle({height: '100%'});
+    if (imageRef.current) {
+      const imageAspectRatio = imageRef.current.width / imageRef.current.height;
+      const containerAspectRatio =
+        imageRef.current.parentElement.offsetWidth /
+        imageRef.current.parentElement.offsetHeight;
+      if (imageAspectRatio > containerAspectRatio) {
+        setStyle({ width: "100%" });
+      } else {
+        setStyle({ height: "100%" });
+      }
     }
-  }, [setStyle]);
+  }, [setStyle, imageRef]);
   return imageMatch ? (
     <img alt={imageMatch[1]} src={imageMatch[2]} ref={imageRef} style={style} />
   ) : (
