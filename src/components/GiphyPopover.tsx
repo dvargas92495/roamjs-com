@@ -36,7 +36,7 @@ const GiphyPopover: React.FunctionComponent<{
       if (target.tagName === "TEXTAREA") {
         const textarea = target as HTMLTextAreaElement;
         const match = textarea.value.match(
-          new RegExp(`${PREFIX}(.*)${SUFFIX}`, "s")
+          new RegExp(`${PREFIX}(.*)${SUFFIX}`, "si")
         );
         if (match) {
           const { index } = match;

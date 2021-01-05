@@ -78,12 +78,19 @@ const Notes = ({ note }: { note: Slide }) => (
   </>
 );
 
-const TitleSlide = ({ text, note }: { text: string; note: Slide }) => (
-  <section>
-    <h1>{text}</h1>
-    <Notes note={note} />
-  </section>
-);
+const TitleSlide = ({ text, note }: { text: string; note: Slide }) => {
+  const imageMatch = text.match(/!\[(.*)\]\((.*)\)/);
+  return (
+    <section>
+      {imageMatch ? (
+        <img alt={imageMatch[1]} src={imageMatch[2]} />
+      ) : (
+        <h1>{text}</h1>
+      )}
+      <Notes note={note} />
+    </section>
+  );
+};
 
 const ContentSlide = ({
   text,
