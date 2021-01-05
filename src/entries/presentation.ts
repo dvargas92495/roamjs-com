@@ -18,7 +18,7 @@ import "reveal.js/dist/theme/moon.css";
 import { render, VALID_THEMES } from "../components/Presentation";
 import { getUidsFromButton } from "roam-client";
 
-runExtension("presentation", () => {
+runExtension("presentation", async () => {
   createButtonObserver({
     attribute: "presentation",
     shortcut: "slides",
@@ -29,7 +29,7 @@ runExtension("presentation", () => {
       const options = buttonText
         ? {
             theme: buttonText.match(`{theme:(${VALID_THEMES.join("|")})}`)?.[1],
-            notes: buttonText.match('{notes:(true|false)}')?.[1],
+            notes: buttonText.match("{notes:(true|false)}")?.[1],
           }
         : {};
       render({

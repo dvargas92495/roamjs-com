@@ -22,8 +22,11 @@ declare global {
       alerted: boolean;
       loaded: Set<string>;
       extension: {
-        [id: string]: { [method: string]: (args?: unknown) => void };
+        [id: string]: {
+          [method: string]: (args?: unknown) => void;
+        };
       };
+      dynamicElements: Set<HTMLElement>;
     };
     roam42?: {
       smartBlocks?: {
@@ -46,7 +49,12 @@ export const track = (name: string, properties?: Dict): void =>
 
 export const runExtension = (extensionId: string, run: () => void): void => {
   if (!window.roamjs) {
-    window.roamjs = { alerted: false, loaded: new Set(), extension: {} };
+    window.roamjs = {
+      alerted: false,
+      loaded: new Set(),
+      extension: {},
+      dynamicElements: new Set(),
+    };
   }
   if (window.roamjs.loaded.has(extensionId)) {
     return;
@@ -601,10 +609,17 @@ export const getEditTimeByBlockUid = (uid: string): number =>
 
 export const getPageTitle = (e: Element): ChildNode => {
   const container =
-    e.closest(".roam-log-page") || e.closest(".rm-sidebar-outline") || document;
-  const heading = container.getElementsByClassName(
-    "rm-title-display"
-  )[0] as HTMLHeadingElement;
+    e.closest(".roam-log-page") ||
+    e.closest(".rm-sidebar-outline") ||
+    e.closest(".rm-zoom") ||
+    document;
+  const heading =
+    (container.getElementsByClassName(
+      "rm-title-display"
+    )[0] as HTMLHeadingElement) ||
+    (container.getElementsByClassName(
+      "rm-zoom-item-content"
+    )[0] as HTMLSpanElement);
   return Array.from(heading.childNodes).find(
     (n) => n.nodeName === "#text" || n.nodeName === "SPAN"
   );

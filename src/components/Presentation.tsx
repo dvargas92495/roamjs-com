@@ -10,12 +10,13 @@ import React, {
 import ReactDOM from "react-dom";
 import Reveal from "reveal.js";
 import { addStyle, getTextByBlockUid, isControl } from "../entry-helpers";
+import { isSafari } from "mobile-device-detect";
+
+const SAFARI_THEMES = ["black", "white", "beige"];
 
 export const VALID_THEMES = [
-  "black",
-  "white",
+  ...SAFARI_THEMES,
   "league",
-  "beige",
   "sky",
   "night",
   "serif",
@@ -46,11 +47,8 @@ marked.use({
   },
 });
 
-const revealStylesLoaded = Array.from(
-  document.getElementsByClassName("roamjs-style-reveal")
-);
 const unload = () =>
-  revealStylesLoaded
+  Array.from(window.roamjs.dynamicElements)
     .filter((s) => !!s.parentElement)
     .forEach((s) => s.parentElement.removeChild(s));
 unload();
@@ -218,7 +216,10 @@ const Presentation: React.FunctionComponent<{
   notes?: string;
 }> = ({ getSlides, theme, notes }) => {
   const normalizedTheme = useMemo(
-    () => (VALID_THEMES.includes(theme) ? theme : "black"),
+    () =>
+      (isSafari ? SAFARI_THEMES : VALID_THEMES).includes(theme)
+        ? theme
+        : "black",
     []
   );
   const showNotes = notes === "true";
@@ -232,7 +233,7 @@ const Presentation: React.FunctionComponent<{
   const open = useCallback(async () => {
     setShowOverlay(true);
     setSlides(getSlides());
-    revealStylesLoaded
+    Array.from(window.roamjs.dynamicElements)
       .filter(
         (s) =>
           s.id.endsWith(`${normalizedTheme}.css`) || s.id.endsWith("reveal.css")
