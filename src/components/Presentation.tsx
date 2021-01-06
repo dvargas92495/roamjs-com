@@ -84,9 +84,9 @@ const ImageFromText: React.FunctionComponent<
       imageRef.current.parentElement.offsetHeight;
     if (!isNaN(imageAspectRatio) && !isNaN(containerAspectRatio)) {
       if (imageAspectRatio > containerAspectRatio) {
-        setStyle({ height: "100%" });
+        setStyle({ width: "100%", height: "auto" });
       } else {
-        setStyle({ width: "100%" });
+        setStyle({ height: "100%", width: "auto" });
       }
     }
   }, [setStyle, imageRef]);
