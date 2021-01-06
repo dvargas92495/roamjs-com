@@ -119,6 +119,9 @@ const TitleSlide = ({ text, note }: { text: string; note: Slide }) => {
   );
 };
 
+const STARTS_WITH_IMAGE = new RegExp("^image ", "i");
+const ENDS_WITH_LEFT = new RegExp(" left$", "i");
+
 const ContentSlide = ({
   text,
   children,
@@ -130,8 +133,8 @@ const ContentSlide = ({
   note: Slide;
   layout: string;
 }) => {
-  const isImageLayout = layout.startsWith("image ");
-  const isLeftLayout = layout.endsWith(" left");
+  const isImageLayout = STARTS_WITH_IMAGE.test(layout);
+  const isLeftLayout = ENDS_WITH_LEFT.test(layout);
   const bullets = isImageLayout ? children.slice(1) : children;
   return (
     <section style={{ textAlign: "left" }}>
