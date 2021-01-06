@@ -15,7 +15,7 @@ runExtension("filter-embeds", () => {
           // this is the only way I know how to differentiate between the two filters
           if (
             transform.startsWith("translate3d(") &&
-            transform.endsWith("px, 50px, 0px);")
+            transform.endsWith("px, 50px, 0px)")
           ) {
             const includeRemoveContainer = popover.getElementsByClassName(
               "flex-h-box"
