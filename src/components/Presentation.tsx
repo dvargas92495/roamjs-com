@@ -1,5 +1,5 @@
 import { Button, Overlay } from "@blueprintjs/core";
-import marked from "marked";
+import marked from "roam-marked";
 import React, {
   useCallback,
   useEffect,
@@ -26,26 +26,13 @@ export const VALID_THEMES = [
   "moon",
 ];
 
-marked.use({
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore should be optional
-  renderer: {
-    text: (text: string) => {
-      let openingTag = false;
-      const highlightRegex = new RegExp("\\^\\^", "g");
-      const blockRefRegex = new RegExp("\\(\\((..........?)\\)\\)", "g");
-      return text
-        .replace(highlightRegex, (): string => {
-          openingTag = !openingTag;
-          return openingTag ? '<span class="rm-highlight">' : "</span>";
-        })
-        .replace(blockRefRegex, (_, blockUid) => {
-          const reference = getTextByBlockUid(blockUid);
-          return reference || blockUid;
-        });
-    },
-  },
-});
+const blockRefRegex = new RegExp("\\(\\((..........?)\\)\\)", "g");
+const resolveRefs = (text: string) => {
+  return text.replace(blockRefRegex, (_, blockUid) => {
+    const reference = getTextByBlockUid(blockUid);
+    return reference || blockUid;
+  });
+};
 
 const unload = () =>
   Array.from(window.roamjs.dynamicElements)
@@ -57,7 +44,7 @@ unload();
 const renderBullet = ({ c, i }: { c: Slide; i: number }): string =>
   `${"".padStart(i * 4, " ")}${c.text.match("!\\[.*\\]\\(.*\\)") ? "" : "- "}${
     c.heading ? `${"".padStart(c.heading, "#")} ` : ""
-  }${c.text.replace(new RegExp("__", "g"), "_")}${
+  }${resolveRefs(c.text)}${
     c.open
       ? c.children
           .map((nested) => `\n${renderBullet({ c: nested, i: i + 1 })}`)
@@ -90,12 +77,12 @@ const ImageFromText: React.FunctionComponent<
   const imageMatch = text.match(/!\[(.*)\]\((.*)\)/);
   const [style, setStyle] = useState({});
   const imageRef = useRef(null);
-  useEffect(() => {
-    if (imageRef.current) {
-      const imageAspectRatio = imageRef.current.width / imageRef.current.height;
-      const containerAspectRatio =
-        imageRef.current.parentElement.offsetWidth /
-        imageRef.current.parentElement.offsetHeight;
+  const imageOnLoad = useCallback(() => {
+    const imageAspectRatio = imageRef.current.width / imageRef.current.height;
+    const containerAspectRatio =
+      imageRef.current.parentElement.offsetWidth /
+      imageRef.current.parentElement.offsetHeight;
+    if (!isNaN(imageAspectRatio) && !isNaN(containerAspectRatio)) {
       if (imageAspectRatio > containerAspectRatio) {
         setStyle({ height: "100%" });
       } else {
@@ -103,6 +90,11 @@ const ImageFromText: React.FunctionComponent<
       }
     }
   }, [setStyle, imageRef]);
+  useEffect(() => {
+    if (imageRef.current) {
+      imageRef.current.onload = imageOnLoad;
+    }
+  }, [imageOnLoad, imageRef]);
   return imageMatch ? (
     <img alt={imageMatch[1]} src={imageMatch[2]} ref={imageRef} style={style} />
   ) : (
@@ -141,19 +133,22 @@ const ContentSlide = ({
       <h1>{text}</h1>
       <div
         style={{
-          transformOrigin: "left top",
           display: "flex",
           flexDirection: isLeftLayout ? "row-reverse" : "row",
         }}
         className="r-stretch"
       >
         <div
+          className={"roamjs-bullets-container"}
           dangerouslySetInnerHTML={{
             __html: marked(
               bullets.map((c) => renderBullet({ c, i: 0 })).join("\n")
             ),
           }}
-          style={{ width: isImageLayout ? "50%" : "100%" }}
+          style={{
+            width: isImageLayout ? "50%" : "100%",
+            transformOrigin: "left top",
+          }}
         />
         {isImageLayout && (
           <div
@@ -172,7 +167,12 @@ const observerCallback = (ms: MutationRecord[]) =>
   ms
     .map((m) => m.target as HTMLElement)
     .filter((m) => m.className === "present")
-    .map((s) => s.getElementsByClassName("r-stretch")[0] as HTMLDivElement)
+    .map(
+      (s) =>
+        s.getElementsByClassName(
+          "roamjs-bullets-container"
+        )[0] as HTMLDivElement
+    )
     .filter((d) => !!d)
     .forEach((d) => {
       const containerHeight = d.offsetHeight;
