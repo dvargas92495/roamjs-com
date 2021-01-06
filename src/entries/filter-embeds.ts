@@ -17,20 +17,23 @@ runExtension("filter-embeds", () => {
             transform.startsWith("translate3d(") &&
             transform.endsWith("px, 50px, 0px)")
           ) {
-            const includeRemoveContainer = popover.getElementsByClassName(
-              "flex-h-box"
-            )[0];
-            const includes = Array.from(
-              includeRemoveContainer.firstElementChild.getElementsByTagName(
-                "button"
-              )
-            ).map((b) => b.firstChild.nodeValue);
-            const removes = Array.from(
-                includeRemoveContainer.lastElementChild.getElementsByTagName(
-                  "button"
-                )
-              ).map((b) => b.firstChild.nodeValue);
-            console.log(includes, removes);  
+            const targetTag = button.firstChild.nodeValue;
+            const includeRemoveContainer = button.closest(".flex-h-box");
+            if (includeRemoveContainer) {
+              if (includeRemoveContainer.firstElementChild.contains(button)) {
+                console.log("uninclude", targetTag);
+              } else if (
+                includeRemoveContainer.lastElementChild.contains(button)
+              ) {
+                console.log("unremove", targetTag);
+              }
+            } else {
+              if (e.shiftKey) {
+                console.log("remove", targetTag);
+              } else {
+                console.log("include", targetTag);
+              }
+            }
           }
         }
       }
