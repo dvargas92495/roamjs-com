@@ -97,9 +97,9 @@ const ImageFromText: React.FunctionComponent<
         imageRef.current.parentElement.offsetWidth /
         imageRef.current.parentElement.offsetHeight;
       if (imageAspectRatio > containerAspectRatio) {
-        setStyle({ width: "100%" });
-      } else {
         setStyle({ height: "100%" });
+      } else {
+        setStyle({ width: "100%" });
       }
     }
   }, [setStyle, imageRef]);
@@ -131,12 +131,17 @@ const ContentSlide = ({
   layout: string;
 }) => {
   const isImageLayout = layout.startsWith("image ");
+  const isLeftLayout = layout.endsWith(" left");
   const bullets = isImageLayout ? children.slice(1) : children;
   return (
     <section style={{ textAlign: "left" }}>
       <h1>{text}</h1>
       <div
-        style={{ transformOrigin: "left top", display: "flex" }}
+        style={{
+          transformOrigin: "left top",
+          display: "flex",
+          flexDirection: isLeftLayout ? "row-reverse" : "row",
+        }}
         className="r-stretch"
       >
         <div
