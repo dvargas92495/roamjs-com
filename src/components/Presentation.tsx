@@ -65,7 +65,7 @@ const renderBullet = ({ c, i }: { c: Slide; i: number }): string =>
       : ""
   }`;
 
-const Notes = ({ note }: { note: Slide }) => (
+const Notes = ({ note }: { note?: Slide }) => (
   <>
     {note && (
       <aside
@@ -78,15 +78,42 @@ const Notes = ({ note }: { note: Slide }) => (
   </>
 );
 
-const TitleSlide = ({ text, note }: { text: string; note: Slide }) => {
+type ImageFromTextProps = {
+  text: string;
+};
+
+const ImageFromText: React.FunctionComponent<
+  ImageFromTextProps & {
+    Alt: React.FunctionComponent<ImageFromTextProps>;
+  }
+> = ({ text, Alt }) => {
   const imageMatch = text.match(/!\[(.*)\]\((.*)\)/);
+  const [style, setStyle] = useState({});
+  const imageRef = useRef(null);
+  useEffect(() => {
+    if (imageRef.current) {
+      const imageAspectRatio = imageRef.current.width / imageRef.current.height;
+      const containerAspectRatio =
+        imageRef.current.parentElement.offsetWidth /
+        imageRef.current.parentElement.offsetHeight;
+      if (imageAspectRatio > containerAspectRatio) {
+        setStyle({ height: "100%" });
+      } else {
+        setStyle({ width: "100%" });
+      }
+    }
+  }, [setStyle, imageRef]);
+  return imageMatch ? (
+    <img alt={imageMatch[1]} src={imageMatch[2]} ref={imageRef} style={style} />
+  ) : (
+    <Alt text={text} />
+  );
+};
+
+const TitleSlide = ({ text, note }: { text: string; note: Slide }) => {
   return (
     <section>
-      {imageMatch ? (
-        <img alt={imageMatch[1]} src={imageMatch[2]} />
-      ) : (
-        <h1>{text}</h1>
-      )}
+      <ImageFromText text={text} Alt={({ text }) => <h1>{text}</h1>} />
       <Notes note={note} />
     </section>
   );
@@ -96,25 +123,47 @@ const ContentSlide = ({
   text,
   children,
   note,
+  layout,
 }: {
   text: string;
   children: Slides;
   note: Slide;
-}) => (
-  <section style={{ textAlign: "left" }}>
-    <h1>{text}</h1>
-    <div
-      style={{ transformOrigin: "left top" }}
-      className="r-stretch"
-      dangerouslySetInnerHTML={{
-        __html: marked(
-          children.map((c) => renderBullet({ c, i: 0 })).join("\n")
-        ),
-      }}
-    />
-    <Notes note={note} />
-  </section>
-);
+  layout: string;
+}) => {
+  const isImageLayout = layout.startsWith("image ");
+  const isLeftLayout = layout.endsWith(" left");
+  const bullets = isImageLayout ? children.slice(1) : children;
+  return (
+    <section style={{ textAlign: "left" }}>
+      <h1>{text}</h1>
+      <div
+        style={{
+          transformOrigin: "left top",
+          display: "flex",
+          flexDirection: isLeftLayout ? "row-reverse" : "row",
+        }}
+        className="r-stretch"
+      >
+        <div
+          dangerouslySetInnerHTML={{
+            __html: marked(
+              bullets.map((c) => renderBullet({ c, i: 0 })).join("\n")
+            ),
+          }}
+          style={{ width: isImageLayout ? "50%" : "100%" }}
+        />
+        {isImageLayout && (
+          <div
+            style={{ width: "50%", textAlign: "center", alignSelf: "center" }}
+          >
+            <ImageFromText text={children[0].text} Alt={() => <div />} />
+          </div>
+        )}
+      </div>
+      <Notes note={note} />
+    </section>
+  );
+};
 
 const observerCallback = (ms: MutationRecord[]) =>
   ms
@@ -142,13 +191,24 @@ const PresentationContent: React.FunctionComponent<{
 }> = ({ slides, onClose, showNotes }) => {
   const revealRef = useRef(null);
   const slidesRef = useRef<HTMLDivElement>(null);
-  const mappedSlides = showNotes
-    ? slides.map((s) => ({
-        ...s,
-        children: s.children.slice(0, s.children.length - 1),
-        note: s.children[s.children.length - 1],
-      }))
-    : slides;
+  const mappedSlides = slides.map((s) => {
+    let layout = "default";
+    const text = s.text
+      .replace(new RegExp("{layout:(.*)}", "is"), (_, capture) => {
+        layout = capture;
+        return "";
+      })
+      .trim();
+    return {
+      ...s,
+      text,
+      layout,
+      children: showNotes
+        ? s.children.slice(0, s.children.length - 1)
+        : s.children,
+      note: showNotes && s.children[s.children.length - 1],
+    };
+  });
   useEffect(() => {
     const deck = new Reveal({
       embedded: true,
@@ -203,7 +263,7 @@ const PresentationContent: React.FunctionComponent<{
   return (
     <div className="reveal" id="otherother">
       <div className="slides" ref={slidesRef}>
-        {mappedSlides.map((s: Slide & { note: Slide }, i) => (
+        {mappedSlides.map((s: Slide & { note: Slide; layout: string }, i) => (
           <React.Fragment key={i}>
             {s.children.length ? (
               <ContentSlide {...s} />

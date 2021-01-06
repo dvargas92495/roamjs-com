@@ -21,6 +21,8 @@ To specify what content is part of the presentation, create a child block for ea
 
 Any blocks with images will be rendered without a bullet.
 
+#### Themes 
+
 There are 11 themes supported, which could be found [here](https://revealjs.com/themes/). To use one, add a `:{theme:[value]}` to the presentation button. For example, the demo below uses the black theme:
 
 - `{{presentation:{theme:black}}}`
@@ -35,9 +37,22 @@ Apart from these themes, you could also use `roam/css` to style the presentation
 - `navigate-left` - The go left button
 - `navigate-right` - The go right button
 
+#### Notes
+
 To add Speaker notes, add `{notes:true}` to the button text. The last bullet of each child will be used as the speaker notes of the slide. To combine with theme above, the button text would look like this:
 
 - `{{presentation:{theme:sky}{notes:true}}}`
+
+#### Layouts
+
+You could configure layouts per slide. To define a layout, add a `{layout:}` text in the top level block with the slide title. For example, to specify the default layout, it will look like
+
+- `Slide Title {layout:default}`
+
+The following layouts are also supported:
+
+- `Image Right` - Split the slide vertically with the bullets on the left half and the image on the right half. The first bullet will be used for the image.
+- `Image Left` - Split the slide vertically with the bullets on the right half and the image on the left half. The first bullet will be used for the image.
 
 import DemoPresentation from '../../../components/DemoPresentation'
 
