@@ -153,7 +153,9 @@ const ContentSlide = ({
           style={{ width: isImageLayout ? "50%" : "100%" }}
         />
         {isImageLayout && (
-          <div style={{ width: "50%", textAlign: "center" }}>
+          <div
+            style={{ width: "50%", textAlign: "center", alignSelf: "center" }}
+          >
             <ImageFromText text={children[0].text} Alt={() => <div />} />
           </div>
         )}
