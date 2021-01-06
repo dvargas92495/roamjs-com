@@ -21,6 +21,7 @@ const contributors = {
   "Abhay Prasanna": "https://twitter.com/AbhayPrasanna",
   "Brandon Toner": "https://brandontoner.substack.com/",
   "Conor White-Sullivan": "https://twitter.com/Conaw",
+  "Matt Brockwell": "https://twitter.com/Jeanvaljean689",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{
@@ -91,7 +92,9 @@ const ExtensionPageLayout: React.FunctionComponent<{
               );
             })}
           </ul>
-          <ExternalLink href={'https://allcontributors.org/docs/en/emoji-key'}>Emoji Key</ExternalLink>  
+          <ExternalLink href={"https://allcontributors.org/docs/en/emoji-key"}>
+            Emoji Key
+          </ExternalLink>
         </>
       )}
     </ExtensionLayout>
