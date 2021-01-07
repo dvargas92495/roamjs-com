@@ -68,7 +68,6 @@ module.exports = (env) => ({
                       if (window.roamjs && window.roamjs.dynamicElements) {
                         window.roamjs.dynamicElements.add(element);
                         clearInterval(interval);
-                        console.log("loaded", element, "in", tries, "tries");
                       } else {
                         tries++;
                       }

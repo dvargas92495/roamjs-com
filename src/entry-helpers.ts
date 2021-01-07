@@ -49,10 +49,6 @@ export const track = (name: string, properties?: Dict): void =>
   process.env.MIXPANEL_TOKEN && mixpanel.track(name, properties);
 
 export const runExtension = async (extensionId: string, run: () => void): Promise<void> => {
-  await new Promise<void>((resolve) => setTimeout(() => {
-    console.log('dummy timeout', extensionId)
-    resolve();
-  }, 20000));
   if (!window.roamjs) {
     window.roamjs = {
       alerted: false,
