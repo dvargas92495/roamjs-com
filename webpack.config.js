@@ -68,11 +68,16 @@ module.exports = (env) => ({
                       if (window.roamjs && window.roamjs.dynamicElements) {
                         window.roamjs.dynamicElements.add(element);
                         clearInterval(interval);
+                        console.log("loaded", element, "in", tries, "tries");
                       } else {
                         tries++;
                       }
                       if (tries > 1000) {
-                        console.warn('Could not add', element, 'after 1000 tries');
+                        console.warn(
+                          "Could not add",
+                          element,
+                          "after 1000 tries"
+                        );
                         clearInterval(interval);
                       }
                     }, 500);

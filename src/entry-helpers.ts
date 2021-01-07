@@ -48,15 +48,14 @@ mixpanel.init(process.env.MIXPANEL_TOKEN);
 export const track = (name: string, properties?: Dict): void =>
   process.env.MIXPANEL_TOKEN && mixpanel.track(name, properties);
 
-export const runExtension = (extensionId: string, run: () => void): void => {
+export const runExtension = async (extensionId: string, run: () => void): void => {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   if (!window.roamjs) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     window.roamjs = {
       alerted: false,
       loaded: new Set(),
       extension: {},
-     // dynamicElements: new Set(),
+      dynamicElements: new Set(),
     };
   }
   if (window.roamjs.loaded.has(extensionId)) {
