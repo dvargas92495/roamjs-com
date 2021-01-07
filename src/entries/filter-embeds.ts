@@ -19,6 +19,7 @@ runExtension("filter-embeds", () => {
           ) {
             const targetTag = button.firstChild.nodeValue;
             const includeRemoveContainer = button.closest(".flex-h-box");
+            const embeds = document.getElementsByClassName('rm-embed-container');
             if (includeRemoveContainer) {
               if (includeRemoveContainer.firstElementChild.contains(button)) {
                 console.log("uninclude", targetTag);

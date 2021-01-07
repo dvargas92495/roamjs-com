@@ -3,7 +3,7 @@ const path = require("path");
 const Dotenv = require("dotenv-webpack");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
-  const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const extensions = fs.readdirSync("./src/entries/");
 const entry = Object.fromEntries(
@@ -62,15 +62,31 @@ module.exports = (env) => ({
                 },
                 injectType: relative.includes() ? "lazyStyleTag" : "styleTag",
                 insert: (element) => {
-                  if (element.className.includes('reveal')) {
-                    window.roamjs.dynamicElements.add(element);
+                  if (element.className.includes("reveal")) {
+                    let tries = 0;
+                    const interval = setInterval(() => {
+                      if (window.roamjs && window.roamjs.dynamicElements) {
+                        window.roamjs.dynamicElements.add(element);
+                        clearInterval(interval);
+                      } else {
+                        tries++;
+                      }
+                      if (tries > 1000) {
+                        console.warn(
+                          "Could not add",
+                          element,
+                          "after 1000 tries"
+                        );
+                        clearInterval(interval);
+                      }
+                    }, 500);
                   } else {
                     document.head.appendChild(element);
                   }
                 },
               },
             };
-          }, 
+          },
           "css-loader",
         ],
       },
@@ -88,7 +104,8 @@ module.exports = (env) => ({
       },
     ],
   },
-  plugins: [new MiniCssExtractPlugin(),
+  plugins: [
+    new MiniCssExtractPlugin(),
     new Dotenv({
       path: ".env.local",
       systemvars: true,

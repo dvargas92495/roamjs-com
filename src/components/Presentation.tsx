@@ -38,7 +38,6 @@ const unload = () =>
   Array.from(window.roamjs.dynamicElements)
     .filter((s) => !!s.parentElement)
     .forEach((s) => s.parentElement.removeChild(s));
-unload();
 
 // I'll clean this up if anyone asks. My god it's horrendous
 const renderBullet = ({ c, i }: { c: Slide; i: number }): string =>

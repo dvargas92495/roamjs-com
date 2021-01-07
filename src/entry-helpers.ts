@@ -48,7 +48,7 @@ mixpanel.init(process.env.MIXPANEL_TOKEN);
 export const track = (name: string, properties?: Dict): void =>
   process.env.MIXPANEL_TOKEN && mixpanel.track(name, properties);
 
-export const runExtension = (extensionId: string, run: () => void): void => {
+export const runExtension = async (extensionId: string, run: () => void): Promise<void> => {
   if (!window.roamjs) {
     window.roamjs = {
       alerted: false,
