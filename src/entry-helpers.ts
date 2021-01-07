@@ -50,11 +50,13 @@ export const track = (name: string, properties?: Dict): void =>
 
 export const runExtension = (extensionId: string, run: () => void): void => {
   if (!window.roamjs) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     window.roamjs = {
       alerted: false,
       loaded: new Set(),
       extension: {},
-      dynamicElements: new Set(),
+     // dynamicElements: new Set(),
     };
   }
   if (window.roamjs.loaded.has(extensionId)) {
