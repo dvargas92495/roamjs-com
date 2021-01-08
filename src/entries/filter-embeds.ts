@@ -22,34 +22,36 @@ runExtension("filter-embeds", () => {
             const embeds = Array.from(
               document.getElementsByClassName("rm-embed-container")
             );
+            const editBlockStyle = (style: string) =>
+              embeds.forEach((e) => {
+                const blocks = Array.from(
+                  e.getElementsByClassName("roam-block")
+                );
+                blocks
+                  .map((b) => b.closest(".rm-block") as HTMLDivElement)
+                  .filter((b) => !!b)
+                  .forEach((b) => {
+                    const pageLinks = b.getAttribute("data-page-links");
+                    const tags = pageLinks
+                      .substring(1, pageLinks.length - 1)
+                      .split(",")
+                      .map((t) => t.substring(1, t.length - 1));
+                    if (tags.includes(targetTag)) {
+                      b.style.display = style;
+                    }
+                  });
+              });
             if (includeRemoveContainer) {
               if (includeRemoveContainer.firstElementChild.contains(button)) {
                 console.log("uninclude", targetTag);
               } else if (
                 includeRemoveContainer.lastElementChild.contains(button)
               ) {
-                console.log("unremove", targetTag);
+                editBlockStyle('');
               }
             } else {
               if (e.shiftKey) {
-                embeds.forEach((e) => {
-                  const blocks = Array.from(
-                    e.getElementsByClassName("roam-block")
-                  );
-                  blocks
-                    .map((b) => b.closest(".rm-block") as HTMLDivElement)
-                    .filter((b) => !!b)
-                    .forEach((b) => {
-                      const pageLinks = b.getAttribute("data-page-links");
-                      const tags = pageLinks
-                        .substring(0, pageLinks.length - 1)
-                        .split(",")
-                        .map(t => t.substring(1, t.length - 1));
-                      if (tags.includes(targetTag)) {
-                        b.style.display = 'none';
-                      }
-                    });
-                });
+                editBlockStyle('none');
               } else {
                 console.log("include", targetTag);
               }
