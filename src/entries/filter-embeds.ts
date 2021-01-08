@@ -94,7 +94,7 @@ runExtension("filter-embeds", () => {
           ).some(isPopoverThePageFilter)
         ) {
           filter.click();
-          await new Promise((resolve) => setTimeout(resolve, 50));
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
         const filterPopover = Array.from(
           document.getElementsByClassName("bp3-popover-enter-done")
