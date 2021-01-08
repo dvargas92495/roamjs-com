@@ -19,7 +19,9 @@ runExtension("filter-embeds", () => {
           ) {
             const targetTag = button.firstChild.nodeValue;
             const includeRemoveContainer = button.closest(".flex-h-box");
-            const embeds = document.getElementsByClassName('rm-embed-container');
+            const embeds = Array.from(
+              document.getElementsByClassName("rm-embed-container")
+            );
             if (includeRemoveContainer) {
               if (includeRemoveContainer.firstElementChild.contains(button)) {
                 console.log("uninclude", targetTag);
@@ -30,7 +32,24 @@ runExtension("filter-embeds", () => {
               }
             } else {
               if (e.shiftKey) {
-                console.log("remove", targetTag);
+                embeds.forEach((e) => {
+                  const blocks = Array.from(
+                    e.getElementsByClassName("roam-block")
+                  );
+                  blocks
+                    .map((b) => b.closest(".rm-block") as HTMLDivElement)
+                    .filter((b) => !!b)
+                    .forEach((b) => {
+                      const pageLinks = b.getAttribute("data-page-links");
+                      const tags = pageLinks
+                        .substring(0, pageLinks.length - 1)
+                        .split(",")
+                        .map(t => t.substring(1, t.length - 1));
+                      if (tags.includes(targetTag)) {
+                        b.style.display = 'none';
+                      }
+                    });
+                });
               } else {
                 console.log("include", targetTag);
               }
