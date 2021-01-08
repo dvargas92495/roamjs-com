@@ -116,7 +116,6 @@ runExtension("filter-embeds", () => {
           })
         );
       }
-      console.log("heres an embed");
     },
   });
 });

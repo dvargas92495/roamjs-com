@@ -22,6 +22,7 @@ const contributors = {
   "Brandon Toner": "https://brandontoner.substack.com/",
   "Conor White-Sullivan": "https://twitter.com/Conaw",
   "Matt Brockwell": "https://twitter.com/Jeanvaljean689",
+  "Eddie Cohen": "https://eddiecohen.com/",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{
