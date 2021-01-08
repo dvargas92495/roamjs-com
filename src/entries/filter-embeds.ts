@@ -89,7 +89,7 @@ runExtension("filter-embeds", () => {
         .getElementsByClassName("bp3-icon-filter")[0] as HTMLSpanElement;
       if (filter.style.color === "rgb(168, 42, 42)") {
         if (
-          Array.from(
+          !Array.from(
             document.getElementsByClassName("bp3-popover-enter-done")
           ).some(isPopoverThePageFilter)
         ) {
