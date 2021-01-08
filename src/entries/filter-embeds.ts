@@ -94,13 +94,13 @@ runExtension("filter-embeds", () => {
           ).some(isPopoverThePageFilter)
         ) {
           filter.click();
-          await new Promise((resolve) => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
         const filterPopover = Array.from(
           document.getElementsByClassName("bp3-popover-enter-done")
         ).find(isPopoverThePageFilter);
         const includeRemoveContainer = filterPopover.getElementsByClassName(
-          ".flex-h-box"
+          "flex-h-box"
         )[0];
         const removeTags = Array.from(
           includeRemoveContainer.lastElementChild.getElementsByClassName(
