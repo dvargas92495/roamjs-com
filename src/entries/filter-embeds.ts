@@ -94,27 +94,28 @@ runExtension("filter-embeds", () => {
           ).some(isPopoverThePageFilter)
         ) {
           filter.click();
-          await new Promise((resolve) => setTimeout(resolve, 500));
         }
-        const filterPopover = Array.from(
-          document.getElementsByClassName("bp3-popover-enter-done")
-        ).find(isPopoverThePageFilter);
-        const includeRemoveContainer = filterPopover.getElementsByClassName(
-          ".flex-h-box"
-        )[0];
-        const removeTags = Array.from(
-          includeRemoveContainer.lastElementChild.getElementsByClassName(
-            "bp3-button"
-          )
-        ).map((b) => b.firstChild.nodeValue);
-        filter.click();
-        removeTags.forEach((targetTag) =>
-          filterEmbed({
-            e,
-            style: "none",
-            targetTag,
-          })
-        );
+        window.requestAnimationFrame(() => {
+          const filterPopover = Array.from(
+            document.getElementsByClassName("bp3-popover-enter-done")
+          ).find(isPopoverThePageFilter);
+          const includeRemoveContainer = filterPopover.getElementsByClassName(
+            ".flex-h-box"
+          )[0];
+          const removeTags = Array.from(
+            includeRemoveContainer.lastElementChild.getElementsByClassName(
+              "bp3-button"
+            )
+          ).map((b) => b.firstChild.nodeValue);
+          filter.click();
+          removeTags.forEach((targetTag) =>
+            filterEmbed({
+              e,
+              style: "none",
+              targetTag,
+            })
+          );
+        });
       }
       console.log("heres an embed");
     },
