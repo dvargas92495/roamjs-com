@@ -1,4 +1,4 @@
-import { runExtension } from "../entry-helpers";
+import { createHTMLObserver, runExtension } from "../entry-helpers";
 
 runExtension("filter-embeds", () => {
   document.addEventListener("click", (e) => {
@@ -61,4 +61,14 @@ runExtension("filter-embeds", () => {
       }
     }
   });
+  createHTMLObserver({
+    tag: 'DIV',
+    className: 'rm-embed-container',
+    callback: (d: HTMLDivElement) => {
+      console.log('heres an embed');
+    },
+    removeCallback: (d: HTMLDivElement) => {
+      console.log('goodbye embed');
+    }  
+  })
 });
