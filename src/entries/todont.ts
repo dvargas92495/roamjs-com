@@ -1,6 +1,6 @@
 import userEvent from "@testing-library/user-event";
 import { asyncType } from "roam-client";
-import { createMobileIcon, createObserver, runExtension } from "../entry-helpers";
+import { createMobileIcon, createObserver, isControl, runExtension } from "../entry-helpers";
 
 runExtension("todont", () => {
   const TODONT_CLASSNAME = "roamjs-todont";
@@ -102,7 +102,7 @@ runExtension("todont", () => {
   };
 
   const keydownEventListener = async (e: KeyboardEvent) => {
-    if (e.key === "Enter" && e.shiftKey && e.ctrlKey) {
+    if (e.key === "Enter" && e.shiftKey && isControl(e)) {
       todontCallback();
     }
   };
