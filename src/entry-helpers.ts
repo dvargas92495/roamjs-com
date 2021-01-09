@@ -7,15 +7,6 @@ import {
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel, { Dict } from "mixpanel-browser";
 import userEvent from "@testing-library/user-event";
-import * as Sentry from "@sentry/browser";
-
-Sentry.init({
-  dsn:
-    "https://a746170c23b94ca98b066f9b0b8d910e@o494776.ingest.sentry.io/5566413",
-  allowUrls: ["roamjs.com", "src/components", "src/entries"],
-});
-
-export const capture = (e: Error): string => Sentry.captureException(e);
 
 declare global {
   interface Window {

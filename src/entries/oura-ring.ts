@@ -6,7 +6,7 @@ import {
   parseRoamDate,
   pushBullets,
 } from "roam-client";
-import { capture, getPageTitle, runExtension } from "../entry-helpers";
+import { getPageTitle, runExtension } from "../entry-helpers";
 import axios from "axios";
 import subDays from "date-fns/subDays";
 
@@ -112,7 +112,6 @@ const importOuraRing = async (
       if (e.response?.status === 401) {
         return asyncPaste(`The token used (${token}) is not authorized to access oura ring.`);
       }
-      capture(e);
       asyncPaste("Unexpected Error thrown. Email support@roamjs.com for help!");
     });
 };
