@@ -76,7 +76,7 @@ runExtension("filter-embeds", () => {
         const storage = JSON.parse(localStorage.getItem(KEY)) as Filter;
         const includeRemoveContainer = button.closest(".flex-h-box");
         const currentFilters =
-          storage[title].removes || getRemoveTags(includeRemoveContainer);
+          storage[title]?.removes || getRemoveTags(includeRemoveContainer);
         const embeds = Array.from(
           document.getElementsByClassName("rm-embed-container")
         ).map((e) => e as HTMLDivElement);
