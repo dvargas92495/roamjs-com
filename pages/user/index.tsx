@@ -2,15 +2,16 @@ import React, { useCallback, useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
+  Body,
   Button,
   Card,
   DataLoader,
-  H1,
+  FormDialog,
   H6,
   Items,
   StringField,
   Subtitle,
-  VerticalGridContent,
+  VerticalTabs,
 } from "@dvargas92495/ui";
 import {
   useAuthenticatedAxios,
@@ -33,9 +34,15 @@ const useEditableSetting = ({
     primary: (
       <div style={{ marginBottom: -24, paddingLeft: 64 }}>
         {isEditable ? (
-          <StringField value={value} name={name} setValue={setValue} />
+          <StringField
+            value={value}
+            name={name}
+            setValue={setValue}
+            label={name}
+            type={name === "password" ? "password" : "type"}
+          />
         ) : (
-          <H6>{defaultValue}</H6>
+          <Body>{defaultValue}</Body>
         )}
       </div>
     ),
@@ -133,38 +140,107 @@ const Billing = () => {
   );
 };
 
-const Automations = () => {
+type WebsiteData = {
+  url: string;
+  graph: string;
+  status: string;
+};
+
+const Website = () => {
   const authenticatedAxiosGet = useAuthenticatedAxios();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const [subdomain, setSubdomain] = useState("");
-  const getSubdomain = useCallback(
+  const [website, setWebsite] = useState<WebsiteData>();
+  const getWebsite = useCallback(
     () =>
       authenticatedAxiosGet("auth-user-metadata").then((r) =>
-        setSubdomain(r.data.subdomain || "")
+        setWebsite(r.data.website)
       ),
-    [setSubdomain]
+    [setWebsite]
   );
-  const {
-    primary: subdomainPrimary,
-    action: subdomainAction,
-  } = useEditableSetting({
-    name: "subdomain",
-    defaultValue: subdomain,
-    onSave: (value) =>
-      authenticatedAxiosPost("deploy", { subdomain: value }).then((r) =>
-        setSubdomain(r.data.subdomain)
-      ),
+  const launchWebsite = useCallback(
+    (body) => authenticatedAxiosPost("launch-website", body),
+    [authenticatedAxiosPost]
+  );
+  return (
+    <DataLoader loadAsync={getWebsite}>
+      {website ? (
+        <Items
+          items={[
+            {
+              primary: (
+                <div style={{ marginBottom: -24, paddingLeft: 64 }}>
+                  {website.graph}
+                </div>
+              ),
+              key: 0,
+              avatar: <Subtitle>Graph</Subtitle>,
+            },
+            {
+              primary: (
+                <div style={{ marginBottom: -24, paddingLeft: 64 }}>
+                  {website.status}
+                </div>
+              ),
+              key: 0,
+              avatar: <Subtitle>Status</Subtitle>,
+            },
+          ]}
+        />
+      ) : (
+        <>
+          <Body>
+            You don't currently have a live Roam site. Click the button below to
+            start!
+          </Body>
+          <FormDialog
+            onSave={launchWebsite}
+            buttonText={"LAUNCH"}
+            title={"Launch Roam Website"}
+            contentText={
+              "Fill out the info below and your Roam graph will launch as a site in minutes!"
+            }
+            formElements={[
+              {
+                name: "graph",
+                defaultValue: "",
+                component: StringField,
+                validate: () => "",
+              },
+            ]}
+          />
+        </>
+      )}
+    </DataLoader>
+  );
+};
+
+const Connections = () => {
+  const { primary: roamPrimary, action: roamAction } = useEditableSetting({
+    name: "password",
+    defaultValue: "",
   });
   return (
     <Items
       items={[
         {
-          primary: (
-            <DataLoader loadAsync={getSubdomain}>{subdomainPrimary}</DataLoader>
-          ),
+          primary: roamPrimary,
           key: 0,
-          avatar: <Subtitle>Garden</Subtitle>,
-          action: subdomainAction,
+          avatar: <Subtitle>Roam</Subtitle>,
+          action: roamAction,
+        },
+        {
+          primary: (
+            <div style={{ marginBottom: -24, paddingLeft: 64 }}>TODO</div>
+          ),
+          key: 1,
+          avatar: <Subtitle>Google</Subtitle>,
+        },
+        {
+          primary: (
+            <div style={{ marginBottom: -24, paddingLeft: 64 }}>TODO</div>
+          ),
+          key: 2,
+          avatar: <Subtitle>Twitter</Subtitle>,
         },
       ]}
     />
@@ -234,9 +310,8 @@ const UserPage = (): JSX.Element => {
   );
   return (
     <StandardLayout>
-      <VerticalGridContent>
-        <H1>User Info</H1>
-        <Card header={"Details"}>
+      <VerticalTabs title={"User Info"}>
+        <Card title={"Details"}>
           {isAuthenticated ? (
             <Settings {...user} />
           ) : error ? (
@@ -245,26 +320,30 @@ const UserPage = (): JSX.Element => {
             <div>Not Logged In</div>
           )}
         </Card>
-        <Card header={"Billing"}>
+        <Card title={"Connections"}>
+          <Connections />
+        </Card>
+        <Card title={"Billing"}>
           <Billing />
         </Card>
-        <Card header={"Automations"}>
-          <Automations />
+        <Card title={"Website"}>
+          <Website />
         </Card>
-        <Card header={"Funding"}>
+        <Card title={"Funding"}>
           <Funding />
         </Card>
-        {isAuthenticated && (
-          <Button
-            size="large"
-            variant="contained"
-            color="primary"
-            onClick={onLogoutClick}
-          >
-            Log Out
-          </Button>
-        )}
-      </VerticalGridContent>
+      </VerticalTabs>
+      {isAuthenticated && (
+        <Button
+          size="large"
+          variant="contained"
+          color="primary"
+          onClick={onLogoutClick}
+          style={{ marginTop: 24 }}
+        >
+          Log Out
+        </Button>
+      )}
     </StandardLayout>
   );
 };

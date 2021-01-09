@@ -1,6 +1,11 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
 import { headers } from "../lambda-helpers";
+/*
+import AWS from "aws-sdk";
+
+const route53 = new AWS.Route53({ apiVersion: "2013-04-01" });
+*/
 
 export const handler = async (
   event: APIGatewayProxyEvent
