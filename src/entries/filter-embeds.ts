@@ -80,7 +80,7 @@ runExtension("filter-embeds", () => {
         const embeds = Array.from(
           document.getElementsByClassName("rm-embed-container")
         ).map((e) => e as HTMLDivElement);
-        if (!storage) {
+        if (!storage[title]) {
           currentFilters.forEach((t) =>
             embeds.forEach((e) =>
               filterEmbed({ e, targetTag: t, style: "none" })
