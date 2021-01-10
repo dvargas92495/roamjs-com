@@ -20,7 +20,7 @@ export const handler = async (event: {
     }
   }
 }).then((data) => {
-  console.log("Exiting!", data);
+  console.log("Exiting! Data:", data);
 }).catch((e) => {
   console.error(e);
 });
