@@ -52,6 +52,10 @@ variable "giphy_key" {
     type = string
 }
 
+variable "vercel_token" {
+    type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -269,4 +273,10 @@ resource "github_actions_secret" "giphy_key" {
   repository       = "roam-js-extensions"
   secret_name      = "GIPHY_KEY"
   plaintext_value  = var.giphy_key
+}
+
+resource "github_actions_secret" "vercel_token" {
+  repository       = "roam-js-extensions"
+  secret_name      = "VERCEL_TOKEN"
+  plaintext_value  = var.vercel_token
 }
