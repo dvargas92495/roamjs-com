@@ -86,7 +86,6 @@ module "aws-serverless-backend" {
     api_name = "roam-js-extensions"
     paths = [
         "article/post",
-        "deploy/post",
         "github-cards/get",
         "github-issues/get",
         "github-projects/get",
@@ -126,6 +125,34 @@ module "aws_email" {
   tags = {
     Application = "Roam JS Extensions"
   } 
+}
+
+data "aws_iam_role" "cron_role" {
+  name = "RoamJS-lambda-cron"
+}
+
+# lambda resource requires either filename or s3... wow
+data "archive_file" "dummy" {
+  type        = "zip"
+  output_path = "./dummy.zip"
+
+  source {
+    content   = "// TODO IMPLEMENT"
+    filename  = "dummy.js"
+  }
+}
+
+resource "aws_lambda_function" "lambda_function" {
+  function_name    = "roam-js-extensions_deploy"
+  role             = data.aws_iam_role.cron_role.arn
+  handler          = "deploy.handler"
+  runtime          = "nodejs12.x"
+  filename         = "dummy.zip"
+  publish          = false
+  tags             = {
+    Application = "Roam JS Extensions"
+  } 
+  timeout          = 300
 }
 
 data "aws_api_gateway_rest_api" "floss" {

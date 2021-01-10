@@ -86,6 +86,7 @@
     "@testing-library/dom": "^7.26.3",
     "@testing-library/user-event": "^12.3.0",
     "@types/mozilla-readability": "^0.2.0",
+    "@vercel/client": "^9.0.4",
     "aws-sdk": "^2.824.0",
     "axios": "^0.21.0",
     "babel-plugin-import-glob-array": "^0.2.0",
