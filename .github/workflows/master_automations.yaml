@@ -12,6 +12,7 @@ env:
   AWS_DEFAULT_REGION: us-east-1 
   ROAM_CLIENT_API_KEY: ${{ secrets.ROAM_CLIENT_API_KEY }}
   ROAM_CLIENT_API_TOKEN: ${{ secrets.ROAM_CLIENT_API_TOKEN }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
 jobs:
   deploy:
