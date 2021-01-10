@@ -1,4 +1,19 @@
-import { createHTMLObserver, runExtension } from "../entry-helpers";
+import { getUids } from "roam-client";
+import {
+  createHTMLObserver,
+  getPageTitle,
+  getPageTitleByBlockUid,
+  runExtension,
+} from "../entry-helpers";
+
+const KEY = "roamjsPageFilters";
+type Filter = {
+  [pagename: string]: { removes: string[] };
+};
+
+if (!localStorage.getItem(KEY)) {
+  localStorage.setItem(KEY, JSON.stringify({}));
+}
 
 const isPopoverThePageFilter = (popover?: HTMLElement) => {
   if (popover) {
@@ -18,6 +33,11 @@ const isPopoverThePageFilter = (popover?: HTMLElement) => {
   }
   return false;
 };
+
+const getRemoveTags = (includeRemoveContainer: Element) =>
+  Array.from(
+    includeRemoveContainer.lastElementChild.getElementsByClassName("bp3-button")
+  ).map((b) => b.firstChild.nodeValue);
 
 const filterEmbed = ({
   e,
@@ -51,16 +71,35 @@ runExtension("filter-embeds", () => {
       const button = target as HTMLButtonElement;
       const popover = button.closest(".bp3-popover-enter-done") as HTMLElement;
       if (isPopoverThePageFilter(popover)) {
+        const title = getPageTitle(button).textContent;
         const targetTag = button.firstChild.nodeValue;
+        const storage = JSON.parse(localStorage.getItem(KEY)) as Filter;
         const includeRemoveContainer = button.closest(".flex-h-box");
+        const currentFilters =
+          storage[title]?.removes ||
+          getRemoveTags(popover.getElementsByClassName("flex-h-box")[0]);
         const embeds = Array.from(
           document.getElementsByClassName("rm-embed-container")
         ).map((e) => e as HTMLDivElement);
-        const editBlockStyle = (style: string) =>
-          embeds.forEach((e) => filterEmbed({ e, targetTag, style }));
+        if (!storage[title]) {
+          currentFilters.forEach((t) =>
+            embeds.forEach((e) =>
+              filterEmbed({ e, targetTag: t, style: "none" })
+            )
+          );
+        }
         if (includeRemoveContainer) {
           if (includeRemoveContainer.lastElementChild.contains(button)) {
-            editBlockStyle("");
+            embeds.forEach((e) => filterEmbed({ e, targetTag, style: "" }));
+            localStorage.setItem(
+              KEY,
+              JSON.stringify({
+                ...storage,
+                [title]: {
+                  removes: currentFilters.filter((f) => f !== targetTag),
+                },
+              })
+            );
           }
           /* Skipping Includes logic for now
           else if (includeRemoveContainer.firstElementChild.contains(button)) {
@@ -69,7 +108,16 @@ runExtension("filter-embeds", () => {
           */
         } else {
           if (e.shiftKey) {
-            editBlockStyle("none");
+            embeds.forEach((e) => filterEmbed({ e, targetTag, style: "none" }));
+            localStorage.setItem(
+              KEY,
+              JSON.stringify({
+                ...storage,
+                [title]: {
+                  removes: [...currentFilters, targetTag],
+                },
+              })
+            );
           }
           /* Skipping Includes logic for now
           else {
@@ -84,31 +132,24 @@ runExtension("filter-embeds", () => {
     tag: "DIV",
     className: "rm-embed-container",
     callback: async (e: HTMLDivElement) => {
-      const filter = document
-        .getElementsByClassName("roam-topbar")[0]
-        .getElementsByClassName("bp3-icon-filter")[0] as HTMLSpanElement;
-      if (filter.style.color === "rgb(168, 42, 42)") {
-        if (
-          !Array.from(
-            document.getElementsByClassName("bp3-popover-enter-done")
-          ).some(isPopoverThePageFilter)
-        ) {
-          filter.click();
-          await new Promise((resolve) => setTimeout(resolve, 500));
-        }
-        const filterPopover = Array.from(
-          document.getElementsByClassName("bp3-popover-enter-done")
-        ).find(isPopoverThePageFilter);
-        const includeRemoveContainer = filterPopover.getElementsByClassName(
-          "flex-h-box"
-        )[0];
-        const removeTags = Array.from(
-          includeRemoveContainer.lastElementChild.getElementsByClassName(
-            "bp3-button"
-          )
-        ).map((b) => b.firstChild.nodeValue);
-        filter.click();
-        removeTags.forEach((targetTag) =>
+      const topBlock = e.getElementsByClassName(
+        "roam-block"
+      )[0] as HTMLDivElement;
+      const { blockUid } = getUids(topBlock);
+      const title = getPageTitleByBlockUid(blockUid);
+      const storage = JSON.parse(localStorage.getItem(KEY)) as Filter;
+      if (storage[title]) {
+        storage[title].removes.forEach((targetTag) =>
+          filterEmbed({
+            e,
+            style: "none",
+            targetTag,
+          })
+        );
+      }
+      const currentTitle = getPageTitle(e).textContent;
+      if (storage[currentTitle]) {
+        storage[currentTitle].removes.forEach((targetTag) =>
           filterEmbed({
             e,
             style: "none",
