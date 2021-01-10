@@ -165,7 +165,7 @@ data "aws_iam_policy_document" "deploy_policy" {
       "lambda:UpdateFunctionCode"
     ]
 
-    resources = values(aws_lambda_function.lambda_function)[*].arn
+    resources = [aws_lambda_function.lambda_function.arn]
   }
 }
 
