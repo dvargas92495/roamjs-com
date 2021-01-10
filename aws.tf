@@ -147,7 +147,7 @@ data "archive_file" "dummy" {
 }
 
 resource "aws_lambda_function" "lambda_function" {
-  function_name    = "roam-js-extensions_deploy"
+  function_name    = "RoamJS_deploy"
   role             = data.aws_iam_role.cron_role.arn
   handler          = "deploy.handler"
   runtime          = "nodejs12.x"
