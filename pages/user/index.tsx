@@ -14,10 +14,15 @@ import {
   VerticalTabs,
 } from "@dvargas92495/ui";
 import {
-  useAuthenticatedAxios,
+  useAuthenticatedAxiosGet,
   useAuthenticatedAxiosPost,
+  useAuthenticatedAxiosPut,
 } from "../../components/hooks";
 import Link from "next/link";
+
+const UserValue: React.FunctionComponent = ({ children }) => (
+  <div style={{ marginBottom: -24, paddingLeft: 64 }}>{children}</div>
+);
 
 const useEditableSetting = ({
   name,
@@ -32,7 +37,7 @@ const useEditableSetting = ({
   const [value, setValue] = useState(defaultValue);
   return {
     primary: (
-      <div style={{ marginBottom: -24, paddingLeft: 64 }}>
+      <UserValue>
         {isEditable ? (
           <StringField
             value={value}
@@ -44,7 +49,7 @@ const useEditableSetting = ({
         ) : (
           <Body>{defaultValue}</Body>
         )}
-      </div>
+      </UserValue>
     ),
     action: isEditable ? (
       <Button
@@ -58,28 +63,29 @@ const useEditableSetting = ({
 };
 
 const Settings = ({ name, email }: { name: string; email: string }) => {
-  const { primary: namePrimary, action: nameAction } = useEditableSetting({
+  const axiosPut = useAuthenticatedAxiosPut();
+  const onNameSave = useCallback(
+    (n) => axiosPut("name", { name: n }).then(() => console.log("saved")),
+    [axiosPut]
+  );
+  const { primary: namePrimary } = useEditableSetting({
     defaultValue: name,
     name: "name",
-  });
-  const { primary: emailPrimary, action: emailAction } = useEditableSetting({
-    defaultValue: email,
-    name: "email",
+    onSave: onNameSave,
   });
   return (
     <Items
       items={[
         {
-          primary: emailPrimary,
+          primary: <UserValue>{email}</UserValue>,
           key: 0,
           avatar: <Subtitle>Email</Subtitle>,
-          action: emailAction,
         },
         {
           primary: namePrimary,
           key: 1,
           avatar: <Subtitle>Name</Subtitle>,
-          action: nameAction,
+        //  action: nameAction,
         },
       ]}
     />
@@ -93,7 +99,7 @@ const Billing = () => {
     last4?: string;
     id?: string;
   }>({});
-  const authenticatedAxios = useAuthenticatedAxios();
+  const authenticatedAxios = useAuthenticatedAxiosGet();
   const getBalance = useCallback(
     () =>
       authenticatedAxios("stripe-balance").then((r) =>
@@ -113,24 +119,24 @@ const Billing = () => {
       items={[
         {
           primary: (
-            <div style={{ marginBottom: -24, paddingLeft: 64 }}>
+            <UserValue>
               <DataLoader loadAsync={getPayment}>
                 <H6>
                   {payment.brand} ends in {payment.last4}
                 </H6>
               </DataLoader>
-            </div>
+            </UserValue>
           ),
           key: 0,
           avatar: <Subtitle>Card</Subtitle>,
         },
         {
           primary: (
-            <div style={{ marginBottom: -24, paddingLeft: 64 }}>
+            <UserValue>
               <DataLoader loadAsync={getBalance}>
                 <H6>${balance}</H6>
               </DataLoader>
-            </div>
+            </UserValue>
           ),
           key: 1,
           avatar: <Subtitle>Credit</Subtitle>,
@@ -147,7 +153,7 @@ type WebsiteData = {
 };
 
 const Website = () => {
-  const authenticatedAxiosGet = useAuthenticatedAxios();
+  const authenticatedAxiosGet = useAuthenticatedAxiosGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const [website, setWebsite] = useState<WebsiteData>();
   const getWebsite = useCallback(
@@ -167,20 +173,12 @@ const Website = () => {
         <Items
           items={[
             {
-              primary: (
-                <div style={{ marginBottom: -24, paddingLeft: 64 }}>
-                  {website.graph}
-                </div>
-              ),
+              primary: <UserValue>{website.graph}</UserValue>,
               key: 0,
               avatar: <Subtitle>Graph</Subtitle>,
             },
             {
-              primary: (
-                <div style={{ marginBottom: -24, paddingLeft: 64 }}>
-                  {website.status}
-                </div>
-              ),
+              primary: <UserValue>{website.status}</UserValue>,
               key: 0,
               avatar: <Subtitle>Status</Subtitle>,
             },
@@ -229,16 +227,12 @@ const Connections = () => {
           action: roamAction,
         },
         {
-          primary: (
-            <div style={{ marginBottom: -24, paddingLeft: 64 }}>TODO</div>
-          ),
+          primary: <UserValue>TODO</UserValue>,
           key: 1,
           avatar: <Subtitle>Google</Subtitle>,
         },
         {
-          primary: (
-            <div style={{ marginBottom: -24, paddingLeft: 64 }}>TODO</div>
-          ),
+          primary: <UserValue>TODO</UserValue>,
           key: 2,
           avatar: <Subtitle>Twitter</Subtitle>,
         },
@@ -249,7 +243,7 @@ const Connections = () => {
 
 const Funding = () => {
   const [items, setItems] = useState([]);
-  const authenticatedAxios = useAuthenticatedAxios();
+  const authenticatedAxios = useAuthenticatedAxiosGet();
   const loadItems = useCallback(
     () =>
       authenticatedAxios("contract-by-email").then((r) =>
@@ -266,9 +260,9 @@ const Funding = () => {
   return (
     <DataLoader loadAsync={loadItems}>
       <Items
-        items={items.map((f, i) => ({
+        items={items.map((f) => ({
           primary: (
-            <div style={{ marginBottom: -24, paddingLeft: 64 }}>
+            <UserValue>
               <H6>
                 <Link
                   href={`queue/${f.label}${f.link.substring(
@@ -279,17 +273,12 @@ const Funding = () => {
                   {f.name}
                 </Link>
               </H6>
-            </div>
+            </UserValue>
           ),
           secondary: (
-            <div
-              style={{
-                marginBottom: i === items.length - 1 ? -16 : -24,
-                paddingLeft: 64,
-              }}
-            >
+            <UserValue>
               {`Funded on ${f.createdDate}. Due on ${f.dueDate}`}
-            </div>
+            </UserValue>
           ),
           key: f.uuid,
           avatar: <Subtitle>${f.reward}</Subtitle>,

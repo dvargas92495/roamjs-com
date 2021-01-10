@@ -34,6 +34,7 @@ const QueueItemPage = ({
       reward: number;
       createdDate: string;
       createdBy: string;
+      createdByName: string;
       uuid: string;
       lifecycle: string;
     }[];
@@ -77,7 +78,7 @@ const QueueItemPage = ({
         ) : (
           <Items
             items={activeContracts.map((c) => ({
-              primary: c.createdBy,
+              primary: c.createdByName || c.createdBy,
               secondary: `Funded $${c.reward} on ${c.createdDate}, expiring on ${c.dueDate}.`,
               key: c.uuid,
             }))}

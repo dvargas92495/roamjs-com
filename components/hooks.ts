@@ -80,7 +80,7 @@ export const useIsMobile = (): boolean => {
   return mobile;
 };
 
-export const useAuthenticatedAxios = (): ((
+export const useAuthenticatedAxiosGet = (): ((
   path: string
 ) => Promise<AxiosResponse>) => {
   const { getAccessTokenSilently } = useAuth0();
@@ -110,6 +110,25 @@ export const useAuthenticatedAxiosPost = (): ((
         scope: "read:current_user",
       }).then((token) =>
         axios.post(`${API_URL}/${path}`, data, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      ),
+    [getAccessTokenSilently]
+  );
+};
+
+export const useAuthenticatedAxiosPut = (): ((
+  path: string,
+  data: Record<string, unknown>
+) => Promise<AxiosResponse>) => {
+  const { getAccessTokenSilently } = useAuth0();
+  return useCallback(
+    (path: string, data: Record<string, unknown>) =>
+      getAccessTokenSilently({
+        audience: AUTH0_AUDIENCE,
+        scope: "read:current_user",
+      }).then((token) =>
+        axios.put(`${FLOSS_API_URL}/${path}`, data, {
           headers: { Authorization: `Bearer ${token}` },
         })
       ),
