@@ -74,9 +74,10 @@ runExtension("filter-embeds", () => {
         const title = getPageTitle(button).textContent;
         const targetTag = button.firstChild.nodeValue;
         const storage = JSON.parse(localStorage.getItem(KEY)) as Filter;
-        const includeRemoveContainer = popover.getElementsByClassName("flex-h-box")[0];
+        const includeRemoveContainer = button.closest(".flex-h-box");
         const currentFilters =
-          storage[title]?.removes || getRemoveTags(includeRemoveContainer);
+          storage[title]?.removes ||
+          getRemoveTags(popover.getElementsByClassName("flex-h-box")[0]);
         const embeds = Array.from(
           document.getElementsByClassName("rm-embed-container")
         ).map((e) => e as HTMLDivElement);
