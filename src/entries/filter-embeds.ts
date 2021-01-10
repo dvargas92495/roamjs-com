@@ -135,8 +135,8 @@ runExtension("filter-embeds", () => {
       const topBlock = e.getElementsByClassName(
         "roam-block"
       )[0] as HTMLDivElement;
-      const { parentUid } = getUids(topBlock);
-      const title = getPageTitleByBlockUid(parentUid);
+      const { blockUid } = getUids(topBlock);
+      const title = getPageTitleByBlockUid(blockUid);
       const storage = JSON.parse(localStorage.getItem(KEY)) as Filter;
       if (storage[title]) {
         storage[title].removes.forEach((targetTag) =>
