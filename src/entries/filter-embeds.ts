@@ -74,17 +74,22 @@ runExtension("filter-embeds", () => {
         const title = getPageTitle(button).textContent;
         const targetTag = button.firstChild.nodeValue;
         const storage = JSON.parse(localStorage.getItem(KEY)) as Filter;
-        const includeRemoveContainer = button.closest(".flex-h-box");
+        const includeRemoveContainer = popover.getElementsByClassName("flex-h-box")[0];
         const currentFilters =
           storage[title]?.removes || getRemoveTags(includeRemoveContainer);
         const embeds = Array.from(
           document.getElementsByClassName("rm-embed-container")
         ).map((e) => e as HTMLDivElement);
-        const editBlockStyle = (style: string) =>
-          embeds.forEach((e) => filterEmbed({ e, targetTag, style }));
+        if (!storage) {
+          currentFilters.forEach((t) =>
+            embeds.forEach((e) =>
+              filterEmbed({ e, targetTag: t, style: "none" })
+            )
+          );
+        }
         if (includeRemoveContainer) {
           if (includeRemoveContainer.lastElementChild.contains(button)) {
-            editBlockStyle("");
+            embeds.forEach((e) => filterEmbed({ e, targetTag, style: "" }));
             localStorage.setItem(
               KEY,
               JSON.stringify({
@@ -102,7 +107,7 @@ runExtension("filter-embeds", () => {
           */
         } else {
           if (e.shiftKey) {
-            editBlockStyle("none");
+            embeds.forEach((e) => filterEmbed({ e, targetTag, style: "none" }));
             localStorage.setItem(
               KEY,
               JSON.stringify({
