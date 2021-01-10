@@ -21,4 +21,6 @@ export const handler = async (event: {
   }
 }).then((data) => {
   console.log("Exiting!", data);
+}).catch((e) => {
+  console.error(e);
 });
