@@ -174,7 +174,7 @@ data "aws_iam_user" "deploy_lambda" {
 }
 
 resource "aws_iam_user_policy" "deploy_lambda" {
-  user   = data.aws_iam_user.deploy_lambda.name
+  user   = data.aws_iam_user.deploy_lambda.user_name
   policy = data.aws_iam_policy_document.deploy_policy.json
 }
 
