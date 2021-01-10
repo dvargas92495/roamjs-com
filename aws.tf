@@ -159,6 +159,25 @@ resource "aws_lambda_function" "lambda_function" {
   timeout          = 300
 }
 
+data "aws_iam_policy_document" "deploy_policy" {
+  statement {
+    actions = [
+      "lambda:UpdateFunctionCode"
+    ]
+
+    resources = values(aws_lambda_function.lambda_function)[*].arn
+  }
+}
+
+data "aws_iam_user" "deploy_lambda" {
+  user_name  = "RoamJS-cron"
+}
+
+resource "aws_iam_user_policy" "deploy_lambda" {
+  user   = data.aws_iam_user.deploy_lambda.name
+  policy = data.aws_iam_policy_document.deploy_policy.json
+}
+
 data "aws_api_gateway_rest_api" "floss" {
   name = "floss"
 }
