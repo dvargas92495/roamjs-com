@@ -68,12 +68,14 @@ type ImageFromTextProps = {
   text: string;
 };
 
+const IMG_REGEX = /!\[(.*)\]\((.*)\)/;
+
 const ImageFromText: React.FunctionComponent<
   ImageFromTextProps & {
     Alt: React.FunctionComponent<ImageFromTextProps>;
   }
 > = ({ text, Alt }) => {
-  const imageMatch = text.match(/!\[(.*)\]\((.*)\)/);
+  const imageMatch = text.match(IMG_REGEX);
   const [style, setStyle] = useState({});
   const imageRef = useRef(null);
   const imageOnLoad = useCallback(() => {
@@ -102,8 +104,9 @@ const ImageFromText: React.FunctionComponent<
 };
 
 const TitleSlide = ({ text, note }: { text: string; note: Slide }) => {
+  const style = IMG_REGEX.test(text) ? { bottom: 0 } : {};
   return (
-    <section style={{bottom: 0}}>
+    <section style={style}>
       <ImageFromText text={text} Alt={({ text }) => <h1>{text}</h1>} />
       <Notes note={note} />
     </section>
