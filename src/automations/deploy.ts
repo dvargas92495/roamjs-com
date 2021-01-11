@@ -16,7 +16,7 @@ export const handler = async (event: {
       console.log('Deployment ready!');
       return e.payload;
     } else {
-      console.log('Deployment', e.type, '-',new Date().toJSON());
+      console.log('Deployment', e.type, '-', new Date().toJSON());
     }
   }
 }).then((data) => {
