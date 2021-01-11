@@ -155,8 +155,9 @@ resource "aws_lambda_function" "lambda_function" {
   publish          = false
   tags             = {
     Application = "Roam JS Extensions"
-  } 
+  }
   timeout          = 300
+  memory_size      = 1600
 }
 
 data "aws_iam_policy_document" "deploy_policy" {
