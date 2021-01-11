@@ -18,7 +18,7 @@ const Layout: React.FunctionComponent = ({ children }) => (
     <AppBar
       homeIcon={<RoamJSLogo />}
       userIcon={<UserIconAuth0 />}
-      pages={["docs", "automations", "queue", "contribute"]}
+      pages={["docs", "queue", "freelancing", "contribute"]}
     />
     <Main>{children}</Main>
     <Footer
