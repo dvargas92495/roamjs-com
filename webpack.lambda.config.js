@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const Dotenv = require("dotenv-webpack");
+const nodeExternals = require('webpack-node-externals');
 
 const buildEntry = (dir) => {
   const extensions = fs.readdirSync(`./src/${dir}/`);
@@ -12,7 +13,6 @@ const buildEntry = (dir) => {
 
 module.exports = (env) => ({
   target: "node",
-  externals: ["aws-sdk"],
   entry: buildEntry(env.dir || "api"),
   resolve: {
     extensions: [".ts", ".js"],
@@ -47,4 +47,5 @@ module.exports = (env) => ({
       systemvars: true,
     }),
   ],
+  externals: nodeExternals()
 });

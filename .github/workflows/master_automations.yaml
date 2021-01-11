@@ -5,6 +5,8 @@ on:
     paths:
       - "src/automations/**"
       - "src/lambda-helpers.ts"
+      - "webpack.lambda.config.js"
+      - ".github/workflows/master_automations.yaml"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.CRON_AWS_ACCESS_KEY_ID }}
