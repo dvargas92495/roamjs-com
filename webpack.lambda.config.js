@@ -1,7 +1,6 @@
 const fs = require("fs");
 const path = require("path");
 const Dotenv = require("dotenv-webpack");
-const nodeExternals = require('webpack-node-externals');
 
 const buildEntry = (dir) => {
   const extensions = fs.readdirSync(`./src/${dir}/`);
@@ -19,9 +18,10 @@ module.exports = (env) => ({
   },
   mode: "production",
   output: {
-    libraryTarget: "commonjs",
+    libraryTarget: "commonjs2",
     path: path.join(__dirname, "out"),
     filename: "[name].js",
+    strictModuleExceptionHandling: true,
   },
   module: {
     rules: [
@@ -47,5 +47,4 @@ module.exports = (env) => ({
       systemvars: true,
     }),
   ],
-  externals: nodeExternals()
 });

@@ -8,6 +8,7 @@
     "build": "webpack --config ./webpack.production.config.js",
     "build:api": "webpack --config ./webpack.lambda.config.js --env.dir=api",
     "build:automations": "webpack --config ./webpack.lambda.config.js --env.dir=automations --mode development",
+    "build:ncc": "ncc build src/automations/deploy.ts -o out",
     "build:next": "next build",
     "postbuild:next": "next export",
     "prebuild:pr": "echo 'Building extensions: Process will take a couple of minutes...'",
@@ -53,6 +54,7 @@
     "@types/turndown": "^5.0.0",
     "@typescript-eslint/eslint-plugin": "^4.10.0",
     "@typescript-eslint/parser": "^4.10.0",
+    "@vercel/ncc": "^0.26.2",
     "babel-loader": "^8.1.0",
     "babel-preset-env": "^1.7.0",
     "css-loader": "^5.0.1",
@@ -65,10 +67,9 @@
     "ts-loader": "^8.0.3",
     "typescript": "^4.1.2",
     "url-loader": "^4.1.1",
-    "webpack": "^4.44.1",
+    "webpack": "^5.2.0",
     "webpack-bundle-analyzer": "^4.1.0",
-    "webpack-cli": "^3.3.12",
-    "webpack-node-externals": "^2.5.2"
+    "webpack-cli": "^3.3.12"
   },
   "dependencies": {
     "@auth0/auth0-react": "^1.2.0",
