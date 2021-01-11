@@ -103,7 +103,7 @@ const ImageFromText: React.FunctionComponent<
 
 const TitleSlide = ({ text, note }: { text: string; note: Slide }) => {
   return (
-    <section>
+    <section style={{bottom: 0}}>
       <ImageFromText text={text} Alt={({ text }) => <h1>{text}</h1>} />
       <Notes note={note} />
     </section>
