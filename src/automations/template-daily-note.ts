@@ -6,10 +6,6 @@ const client = new RestClient({
 
 export const handler = async (): Promise<void> => {
   try {
-    const vercel = process.env.VERCEL_TOKEN;
-    if (vercel) {
-      console.log('theres vercel');
-    }
     const today = new Date();
     const title = toRoamDate(today);
     const parentUid = toRoamDateUid(today);
