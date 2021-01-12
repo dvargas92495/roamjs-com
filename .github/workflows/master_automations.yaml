@@ -29,11 +29,6 @@ jobs:
         run: npm install
       - name: Build
         run: npm run build:automations
-      - name: Fix deploy.js
-        run: |
-          rm out/deploy.js
-          npm run build:ncc
-          mv out/index.js out/deploy.js
       - name: Upload
         run: |
           for filename in out/*.js; do
