@@ -52,10 +52,6 @@ variable "giphy_key" {
     type = string
 }
 
-variable "vercel_token" {
-    type = string
-}
-
 provider "aws" {
     region = "us-east-1"
 }
@@ -129,54 +125,6 @@ module "aws_email" {
   tags = {
     Application = "Roam JS Extensions"
   } 
-}
-
-data "aws_iam_role" "cron_role" {
-  name = "RoamJS-lambda-cron"
-}
-
-# lambda resource requires either filename or s3... wow
-data "archive_file" "dummy" {
-  type        = "zip"
-  output_path = "./dummy.zip"
-
-  source {
-    content   = "// TODO IMPLEMENT"
-    filename  = "dummy.js"
-  }
-}
-
-resource "aws_lambda_function" "lambda_function" {
-  function_name    = "RoamJS_deploy"
-  role             = data.aws_iam_role.cron_role.arn
-  handler          = "deploy.handler"
-  runtime          = "nodejs12.x"
-  filename         = "dummy.zip"
-  publish          = false
-  tags             = {
-    Application = "Roam JS Extensions"
-  }
-  timeout          = 300
-  memory_size      = 1600
-}
-
-data "aws_iam_policy_document" "deploy_policy" {
-  statement {
-    actions = [
-      "lambda:UpdateFunctionCode"
-    ]
-
-    resources = [aws_lambda_function.lambda_function.arn]
-  }
-}
-
-data "aws_iam_user" "deploy_lambda" {
-  user_name  = "RoamJS-cron"
-}
-
-resource "aws_iam_user_policy" "deploy_lambda" {
-  user   = data.aws_iam_user.deploy_lambda.user_name
-  policy = data.aws_iam_policy_document.deploy_policy.json
 }
 
 data "aws_api_gateway_rest_api" "floss" {
@@ -293,10 +241,4 @@ resource "github_actions_secret" "giphy_key" {
   repository       = "roam-js-extensions"
   secret_name      = "GIPHY_KEY"
   plaintext_value  = var.giphy_key
-}
-
-resource "github_actions_secret" "vercel_token" {
-  repository       = "roam-js-extensions"
-  secret_name      = "VERCEL_TOKEN"
-  plaintext_value  = var.vercel_token
 }
