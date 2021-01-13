@@ -23,6 +23,7 @@ module.exports = (env) => ({
     filename: "[name].js",
     strictModuleExceptionHandling: true,
   },
+  externals: ["aws-sdk"],
   module: {
     rules: [
       {

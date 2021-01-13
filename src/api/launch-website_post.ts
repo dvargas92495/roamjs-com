@@ -1,9 +1,11 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
 import { headers } from "../lambda-helpers";
-import AWS from 'aws-sdk';
+import AWS from "aws-sdk";
+import uuid from "uuid";
 
-const lambda = new AWS.Lambda({apiVersion: '2015-03-31'});
+const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
+const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -22,8 +24,25 @@ export const handler = async (
       statusCode: 400,
       body: JSON.stringify("Target URL is required"),
       headers,
-    }
+    };
   }
+
+  await dynamo
+    .putItem({
+      TableName: "RoamJSWebsiteStatuses",
+      Item: {
+        uuid: {
+          S: uuid.v4(),
+        },
+        action_graph_date: {
+          S: `launch_${graph}_${new Date().toJSON()}`,
+        },
+        status: {
+          S: "INITIALIZING",
+        },
+      },
+    })
+    .promise();
 
   const website = { graph, url };
   await axios.put(
@@ -34,12 +53,14 @@ export const handler = async (
     }
   );
 
-  await lambda.invokeAsync({
-    FunctionName: 'RoamJS_launch',
-    InvokeArgs: {
-      roamGraph: graph,
-    },
-  }).promise();
+  await lambda
+    .invokeAsync({
+      FunctionName: "RoamJS_launch",
+      InvokeArgs: {
+        roamGraph: graph,
+      },
+    })
+    .promise();
 
   return {
     statusCode: 200,
