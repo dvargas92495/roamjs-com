@@ -28,10 +28,13 @@ export const handler = async (
   const statuses = await dynamo
     .query({
       TableName: "RoamJSWebsiteStatuses",
-      KeyConditionExpression: "action_graph_date >= :s",
+      KeyConditionExpression: "action_graph = :a and date >= :d",
       ExpressionAttributeValues: {
-        ":s": {
+        ":a": {
           S: `launch_${website.graph}`,
+        },
+        ":d": {
+          S: "0000-00-00T00:00:00.000Z",
         },
       },
       Limit: 1,
