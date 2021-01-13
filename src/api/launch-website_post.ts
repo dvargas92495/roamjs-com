@@ -58,9 +58,9 @@ export const handler = async (
   await lambda
     .invokeAsync({
       FunctionName: "RoamJS_launch",
-      InvokeArgs: {
+      InvokeArgs: JSON.stringify({
         roamGraph: graph,
-      },
+      }),
     })
     .promise();
 
