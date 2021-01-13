@@ -19,6 +19,7 @@ export const handler = async (
     };
   }
 
+  /*
   if (!url) {
     return {
       statusCode: 400,
@@ -26,6 +27,7 @@ export const handler = async (
       headers,
     };
   }
+  */
 
   await dynamo
     .putItem({
