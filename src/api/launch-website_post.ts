@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
 import { headers } from "../lambda-helpers";
 import AWS from "aws-sdk";
-import uuid from "uuid";
+import { v4 } from "uuid";
 
 const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
@@ -34,7 +34,7 @@ export const handler = async (
       TableName: "RoamJSWebsiteStatuses",
       Item: {
         uuid: {
-          S: uuid.v4(),
+          S: v4(),
         },
         action_graph_date: {
           S: `launch_${graph}_${new Date().toJSON()}`,
