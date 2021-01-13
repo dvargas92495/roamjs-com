@@ -36,6 +36,7 @@ export const handler = async (
       },
       Limit: 1,
       ScanIndexForward: false,
+      IndexName: "primary-index",
     })
     .promise();
 
