@@ -85,7 +85,7 @@ const Settings = ({ name, email }: { name: string; email: string }) => {
           primary: namePrimary,
           key: 1,
           avatar: <Subtitle>Name</Subtitle>,
-        //  action: nameAction,
+          //  action: nameAction,
         },
       ]}
     />
@@ -149,7 +149,6 @@ const Billing = () => {
 type WebsiteData = {
   url: string;
   graph: string;
-  status: string;
 };
 
 const Website = () => {
@@ -158,7 +157,7 @@ const Website = () => {
   const [website, setWebsite] = useState<WebsiteData>();
   const getWebsite = useCallback(
     () =>
-      authenticatedAxiosGet("auth-user-metadata").then((r) =>
+      authenticatedAxiosGet("auth-user-metadata?key=website").then((r) =>
         setWebsite(r.data.website)
       ),
     [setWebsite]
@@ -170,20 +169,23 @@ const Website = () => {
   return (
     <DataLoader loadAsync={getWebsite}>
       {website ? (
-        <Items
-          items={[
-            {
-              primary: <UserValue>{website.graph}</UserValue>,
-              key: 0,
-              avatar: <Subtitle>Graph</Subtitle>,
-            },
-            {
-              primary: <UserValue>{website.status}</UserValue>,
-              key: 0,
-              avatar: <Subtitle>Status</Subtitle>,
-            },
-          ]}
-        />
+        <>
+          <Items
+            items={[
+              {
+                primary: <UserValue>{website.graph}</UserValue>,
+                key: 0,
+                avatar: <Subtitle>Graph</Subtitle>,
+              },
+            ]}
+          />
+          <Button variant={"contained"} color={"primary"}>
+            Manual Deploy
+          </Button>
+          <Button variant={"contained"} color={"secondary"}>
+            Shutdown
+          </Button>
+        </>
       ) : (
         <>
           <Body>
@@ -212,6 +214,7 @@ const Website = () => {
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Connections = () => {
   const { primary: roamPrimary, action: roamAction } = useEditableSetting({
     name: "password",
@@ -309,9 +312,9 @@ const UserPage = (): JSX.Element => {
             <div>Not Logged In</div>
           )}
         </Card>
-        <Card title={"Connections"}>
+        {/*<Card title={"Connections"}>
           <Connections />
-        </Card>
+          </Card>*/}
         <Card title={"Billing"}>
           <Billing />
         </Card>

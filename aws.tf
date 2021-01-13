@@ -94,7 +94,8 @@ module "aws-serverless-backend" {
         "install/put",
         "launch-website/post",
         "queue-issues/get",
-        "twitter-search/get"
+        "twitter-search/get",
+        "website-status/get",
     ]
     tags = {
         Application = "Roam JS Extensions"

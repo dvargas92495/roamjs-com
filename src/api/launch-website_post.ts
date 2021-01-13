@@ -25,7 +25,7 @@ export const handler = async (
     }
   }
 
-  const website = { graph, url, status: 'STARTING'};
+  const website = { graph, url };
   await axios.put(
     `${process.env.FLOSS_API_URL}/auth-user-metadata`,
     { website },
@@ -35,7 +35,7 @@ export const handler = async (
   );
 
   await lambda.invokeAsync({
-    FunctionName: 'roam-js-extensions_deploy',
+    FunctionName: 'RoamJS_launch',
     InvokeArgs: {
       roamGraph: graph,
     },
