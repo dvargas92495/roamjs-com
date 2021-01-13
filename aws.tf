@@ -81,7 +81,7 @@ module "aws_static_site" {
 
 module "aws-serverless-backend" {
     source  = "dvargas92495/serverless-backend/aws"
-    version = "1.3.4"
+    version = "1.3.5"
 
     api_name = "roam-js-extensions"
     paths = [
