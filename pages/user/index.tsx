@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
@@ -14,9 +14,10 @@ import {
   VerticalTabs,
 } from "@dvargas92495/ui";
 import {
-  useAuthenticatedAxiosGet,
+  useAuthenticatedAxiosFlossGet,
   useAuthenticatedAxiosPost,
   useAuthenticatedAxiosPut,
+  useAuthenticatedAxiosRoamJSGet,
 } from "../../components/hooks";
 import Link from "next/link";
 
@@ -99,7 +100,7 @@ const Billing = () => {
     last4?: string;
     id?: string;
   }>({});
-  const authenticatedAxios = useAuthenticatedAxiosGet();
+  const authenticatedAxios = useAuthenticatedAxiosFlossGet();
   const getBalance = useCallback(
     () =>
       authenticatedAxios("stripe-balance").then((r) =>
@@ -149,23 +150,29 @@ const Billing = () => {
 type WebsiteData = {
   url: string;
   graph: string;
+  status: string;
 };
 
 const Website = () => {
-  const authenticatedAxiosGet = useAuthenticatedAxiosGet();
+  const authenticatedAxiosGet = useAuthenticatedAxiosRoamJSGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const [website, setWebsite] = useState<WebsiteData>();
+  const timeoutRef = useRef(0);
   const getWebsite = useCallback(
     () =>
-      authenticatedAxiosGet("auth-user-metadata?key=website").then((r) =>
-        setWebsite(r.data.website)
-      ),
-    [setWebsite]
+      authenticatedAxiosGet("website-status").then((r) => {
+        setWebsite(r.data);
+        if (r.data && r.data.status !== "LIVE") {
+          timeoutRef.current = window.setTimeout(getWebsite, 5000);
+        }
+      }),
+    [setWebsite, timeoutRef]
   );
   const launchWebsite = useCallback(
     (body) => authenticatedAxiosPost("launch-website", body),
     [authenticatedAxiosPost]
   );
+  useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
   return (
     <DataLoader loadAsync={getWebsite}>
       {website ? (
@@ -177,9 +184,19 @@ const Website = () => {
                 key: 0,
                 avatar: <Subtitle>Graph</Subtitle>,
               },
+              {
+                primary: <UserValue>{website.status}</UserValue>,
+                key: 1,
+                avatar: <Subtitle>Status</Subtitle>,
+              },
             ]}
           />
-          <Button variant={"contained"} color={"primary"}>
+          <Button
+            variant={"contained"}
+            color={"primary"}
+            style={{ margin: "0 16px" }}
+            disabled={website.status !== "LIVE"}
+          >
             Manual Deploy
           </Button>
           <Button variant={"contained"} color={"secondary"}>
@@ -246,7 +263,7 @@ const Connections = () => {
 
 const Funding = () => {
   const [items, setItems] = useState([]);
-  const authenticatedAxios = useAuthenticatedAxiosGet();
+  const authenticatedAxios = useAuthenticatedAxiosFlossGet();
   const loadItems = useCallback(
     () =>
       authenticatedAxios("contract-by-email").then((r) =>

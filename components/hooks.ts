@@ -90,12 +90,30 @@ export const useAuthenticatedAxiosGet = (): ((
         audience: AUTH0_AUDIENCE,
         scope: "read:current_user",
       }).then((token) =>
-        axios.get(`${FLOSS_API_URL}/${path}`, {
+        axios.get(path, {
           headers: { Authorization: `Bearer ${token}` },
         })
       ),
     [getAccessTokenSilently]
   );
+};
+
+export const useAuthenticatedAxiosFlossGet = (): ((
+  path: string
+) => Promise<AxiosResponse>) => {
+  const axiosGet = useAuthenticatedAxiosGet();
+  return useCallback((path: string) => axiosGet(`${FLOSS_API_URL}/${path}`), [
+    useAuthenticatedAxiosGet,
+  ]);
+};
+
+export const useAuthenticatedAxiosRoamJSGet = (): ((
+  path: string
+) => Promise<AxiosResponse>) => {
+  const axiosGet = useAuthenticatedAxiosGet();
+  return useCallback((path: string) => axiosGet(`${API_URL}/${path}`), [
+    useAuthenticatedAxiosGet,
+  ]);
 };
 
 export const useAuthenticatedAxiosPost = (): ((

@@ -94,6 +94,7 @@ module "aws-serverless-backend" {
         "install/put",
         "launch-website/post",
         "queue-issues/get",
+        "shutdown-website/post",
         "twitter-search/get",
         "website-status/get",
     ]
