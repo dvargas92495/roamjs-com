@@ -127,11 +127,35 @@ export const useAuthenticatedAxiosPost = (): ((
         audience: AUTH0_AUDIENCE,
         scope: "read:current_user",
       }).then((token) =>
-        axios.post(`${API_URL}/${path}`, data, {
+        axios.post(path, data, {
           headers: { Authorization: `Bearer ${token}` },
         })
       ),
     [getAccessTokenSilently]
+  );
+};
+
+export const useAuthenticatedAxiosFlossPost = (): ((
+  path: string,
+  data: Record<string, unknown>
+) => Promise<AxiosResponse>) => {
+  const axiosPost = useAuthenticatedAxiosPost();
+  return useCallback(
+    (path: string, data: Record<string, unknown>) =>
+      axiosPost(`${FLOSS_API_URL}/${path}`, data),
+    [useAuthenticatedAxiosPost]
+  );
+};
+
+export const useAuthenticatedAxiosRoamJSPost = (): ((
+  path: string,
+  data: Record<string, unknown>
+) => Promise<AxiosResponse>) => {
+  const axiosPost = useAuthenticatedAxiosPost();
+  return useCallback(
+    (path: string, data: Record<string, unknown>) =>
+      axiosPost(`${API_URL}/${path}`, data),
+    [useAuthenticatedAxiosPost]
   );
 };
 

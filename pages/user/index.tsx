@@ -15,14 +15,19 @@ import {
 } from "@dvargas92495/ui";
 import {
   useAuthenticatedAxiosFlossGet,
-  useAuthenticatedAxiosPost,
+  useAuthenticatedAxiosFlossPost,
   useAuthenticatedAxiosPut,
   useAuthenticatedAxiosRoamJSGet,
+  useAuthenticatedAxiosRoamJSPost,
 } from "../../components/hooks";
 import Link from "next/link";
+import axios from "axios";
+import { FLOSS_API_URL } from "../../components/constants";
 
 const UserValue: React.FunctionComponent = ({ children }) => (
-  <div style={{ marginBottom: -24, paddingLeft: 64 }}>{children}</div>
+  <span style={{ marginBottom: -24, paddingLeft: 64, display: "block" }}>
+    {children}
+  </span>
 );
 
 const useEditableSetting = ({
@@ -93,21 +98,48 @@ const Settings = ({ name, email }: { name: string; email: string }) => {
   );
 };
 
+const BuyCancelButton: React.FunctionComponent<{
+  priceId: string;
+  subscriptions: { price: string; id: string }[];
+  onSuccess: () => Promise<void>;
+}> = ({ priceId, subscriptions, onSuccess }) => {
+  const axiosPost = useAuthenticatedAxiosFlossPost();
+  const buySubscription = useCallback(
+    () => axiosPost("stripe-subscribe", { priceId }).then(onSuccess),
+    [axiosPost, onSuccess]
+  );
+  const cancelSubscription = useCallback(
+    () =>
+      axiosPost("stripe-cancel", {
+        subscriptionId: subscriptions.find(({ price }) => priceId === price).id,
+      }).then(onSuccess),
+    [axiosPost, onSuccess]
+  );
+  const pricesSubscribed = new Set(subscriptions.map(({ price }) => price));
+  return pricesSubscribed.has(priceId) ? (
+    <Button
+      variant={"contained"}
+      color={"secondary"}
+      onClick={cancelSubscription}
+    >
+      Cancel
+    </Button>
+  ) : (
+    <Button variant={"contained"} color={"primary"} onClick={buySubscription}>
+      Buy
+    </Button>
+  );
+};
+
 const Billing = () => {
-  const [balance, setBalance] = useState(0);
   const [payment, setPayment] = useState<{
     brand?: string;
     last4?: string;
     id?: string;
   }>({});
+  const [products, setProducts] = useState([]);
+  const [subscriptions, setSubscriptions] = useState([]);
   const authenticatedAxios = useAuthenticatedAxiosFlossGet();
-  const getBalance = useCallback(
-    () =>
-      authenticatedAxios("stripe-balance").then((r) =>
-        setBalance(r.data.balance)
-      ),
-    [setBalance, authenticatedAxios]
-  );
   const getPayment = useCallback(
     () =>
       authenticatedAxios("stripe-payment-methods").then((r) =>
@@ -115,35 +147,71 @@ const Billing = () => {
       ),
     [authenticatedAxios]
   );
+  const getProducts = useCallback(
+    () =>
+      axios
+        .get(`${FLOSS_API_URL}/stripe-products?project=RoamJS`)
+        .then((r) => setProducts(r.data.products)),
+    [setProducts]
+  );
+  const getSubscriptions = useCallback(
+    () =>
+      authenticatedAxios("stripe-subscriptions").then((r) =>
+        setSubscriptions(r.data.subscriptions)
+      ),
+    [setSubscriptions]
+  );
+  const loadAsync = useCallback(
+    () =>
+      Promise.all([getProducts(), getSubscriptions()]).then(() =>
+        console.log("loaded")
+      ),
+    [getProducts, getSubscriptions]
+  );
   return (
-    <Items
-      items={[
-        {
-          primary: (
-            <UserValue>
-              <DataLoader loadAsync={getPayment}>
-                <H6>
-                  {payment.brand} ends in {payment.last4}
-                </H6>
-              </DataLoader>
-            </UserValue>
-          ),
-          key: 0,
-          avatar: <Subtitle>Card</Subtitle>,
-        },
-        {
-          primary: (
-            <UserValue>
-              <DataLoader loadAsync={getBalance}>
-                <H6>${balance}</H6>
-              </DataLoader>
-            </UserValue>
-          ),
-          key: 1,
-          avatar: <Subtitle>Credit</Subtitle>,
-        },
-      ]}
-    />
+    <>
+      <Items
+        items={[
+          {
+            primary: (
+              <UserValue>
+                <DataLoader loadAsync={getPayment}>
+                  <H6>
+                    {payment.brand} ends in {payment.last4}
+                  </H6>
+                </DataLoader>
+              </UserValue>
+            ),
+            key: 0,
+            avatar: <Subtitle>Card</Subtitle>,
+          },
+        ]}
+      />
+      <hr />
+      <H6>Services</H6>
+      <DataLoader loadAsync={loadAsync}>
+        <Items
+          items={products.map((p) => ({
+            primary: <UserValue>{p.name}</UserValue>,
+            secondary: <UserValue>{p.description}</UserValue>,
+            key: p.id,
+            avatar: (
+              <Subtitle>
+                ${p.prices[0].unit_amount / 100}/
+                {p.prices[0].recurring.interval.substring(0, 2)}
+              </Subtitle>
+            ),
+            action: (
+              <BuyCancelButton
+                priceId={p.prices[0].id}
+                subscriptions={subscriptions}
+                onSuccess={loadAsync}
+              />
+            ),
+          }))}
+        />
+      </DataLoader>
+    </>
   );
 };
 
@@ -154,10 +222,19 @@ type WebsiteData = {
 };
 
 const Website = () => {
+  const flossGet = useAuthenticatedAxiosFlossGet();
   const authenticatedAxiosGet = useAuthenticatedAxiosRoamJSGet();
-  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
+  const authenticatedAxiosPost = useAuthenticatedAxiosRoamJSPost();
   const [website, setWebsite] = useState<WebsiteData>();
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const timeoutRef = useRef(0);
+  const getIsSubscribed = useCallback(
+    () =>
+      flossGet(
+        `stripe-is-subscribed?product=${encodeURI("RoamJS Site")}`
+      ).then((r) => setIsSubscribed(r.data.subscribed)),
+    [flossGet, setIsSubscribed]
+  );
   const getWebsite = useCallback(
     () =>
       authenticatedAxiosGet("website-status").then((r) => {
@@ -178,63 +255,72 @@ const Website = () => {
   );
   useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
   return (
-    <DataLoader loadAsync={getWebsite}>
-      {website ? (
-        <>
-          <Items
-            items={[
-              {
-                primary: <UserValue>{website.graph}</UserValue>,
-                key: 0,
-                avatar: <Subtitle>Graph</Subtitle>,
-              },
-              {
-                primary: <UserValue>{website.status}</UserValue>,
-                key: 1,
-                avatar: <Subtitle>Status</Subtitle>,
-              },
-            ]}
-          />
-          <Button
-            variant={"contained"}
-            color={"primary"}
-            style={{ margin: "0 16px" }}
-            disabled={website.status !== "LIVE"}
-          >
-            Manual Deploy
-          </Button>
-          <Button
-            variant={"contained"}
-            color={"secondary"}
-            onClick={shutdownWebsite}
-          >
-            Shutdown
-          </Button>
-        </>
+    <DataLoader loadAsync={getIsSubscribed}>
+      {isSubscribed ? (
+        <DataLoader loadAsync={getWebsite}>
+          {website ? (
+            <>
+              <Items
+                items={[
+                  {
+                    primary: <UserValue>{website.graph}</UserValue>,
+                    key: 0,
+                    avatar: <Subtitle>Graph</Subtitle>,
+                  },
+                  {
+                    primary: <UserValue>{website.status}</UserValue>,
+                    key: 1,
+                    avatar: <Subtitle>Status</Subtitle>,
+                  },
+                ]}
+              />
+              <Button
+                variant={"contained"}
+                color={"primary"}
+                style={{ margin: "0 16px" }}
+                disabled={website.status !== "LIVE"}
+              >
+                Manual Deploy
+              </Button>
+              <Button
+                variant={"contained"}
+                color={"secondary"}
+                onClick={shutdownWebsite}
+              >
+                Shutdown
+              </Button>
+            </>
+          ) : (
+            <>
+              <Body>
+                You don't currently have a live Roam site. Click the button
+                below to start!
+              </Body>
+              <FormDialog
+                onSave={launchWebsite}
+                onSuccess={getWebsite}
+                buttonText={"LAUNCH"}
+                title={"Launch Roam Website"}
+                contentText={
+                  "Fill out the info below and your Roam graph will launch as a site in minutes!"
+                }
+                formElements={[
+                  {
+                    name: "graph",
+                    defaultValue: "",
+                    component: StringField,
+                    validate: () => "",
+                  },
+                ]}
+              />
+            </>
+          )}
+        </DataLoader>
       ) : (
-        <>
-          <Body>
-            You don't currently have a live Roam site. Click the button below to
-            start!
-          </Body>
-          <FormDialog
-            onSave={launchWebsite}
-            onSuccess={getWebsite}
-            buttonText={"LAUNCH"}
-            title={"Launch Roam Website"}
-            contentText={
-              "Fill out the info below and your Roam graph will launch as a site in minutes!"
-            }
-            formElements={[
-              {
-                name: "graph",
-                defaultValue: "",
-                component: StringField,
-                validate: () => "",
-              },
-            ]}
-          />
-        </>
+        <Body>
+          You are not subscribed to the RoamJS Site service. Head to Billing to
+          subscribe!
+        </Body>
       )}
     </DataLoader>
   );
@@ -271,8 +357,16 @@ const Connections = () => {
 };
 
 const Funding = () => {
+  const [balance, setBalance] = useState(0);
   const [items, setItems] = useState([]);
   const authenticatedAxios = useAuthenticatedAxiosFlossGet();
+  const getBalance = useCallback(
+    () =>
+      authenticatedAxios("stripe-balance").then((r) =>
+        setBalance(r.data.balance)
+      ),
+    [setBalance, authenticatedAxios]
+  );
   const loadItems = useCallback(
     () =>
       authenticatedAxios("contract-by-email").then((r) =>
@@ -289,29 +383,42 @@ const Funding = () => {
   return (
     <DataLoader loadAsync={loadItems}>
       <Items
-        items={items.map((f) => ({
-          primary: (
-            <UserValue>
-              <H6>
-                <Link
-                  href={`queue/${f.label}${f.link.substring(
-                    "https://github.com/dvargas92495/roam-js-extensions/issues"
-                      .length
-                  )}`}
-                >
-                  {f.name}
-                </Link>
-              </H6>
-            </UserValue>
-          ),
-          secondary: (
-            <UserValue>
-              {`Funded on ${f.createdDate}. Due on ${f.dueDate}`}
-            </UserValue>
-          ),
-          key: f.uuid,
-          avatar: <Subtitle>${f.reward}</Subtitle>,
-        }))}
+        items={[
+          {
+            primary: (
+              <UserValue>
+                <DataLoader loadAsync={getBalance}>
+                  <H6>${balance}</H6>
+                </DataLoader>
+              </UserValue>
+            ),
+            key: 1,
+            avatar: <Subtitle>Credit</Subtitle>,
+          },
+          ...items.map((f) => ({
+            primary: (
+              <UserValue>
+                <H6>
+                  <Link
+                    href={`queue/${f.label}${f.link.substring(
+                      "https://github.com/dvargas92495/roam-js-extensions/issues"
+                        .length
+                    )}`}
+                  >
+                    {f.name}
+                  </Link>
+                </H6>
+              </UserValue>
+            ),
+            secondary: (
+              <UserValue>
+                {`Funded on ${f.createdDate}. Due on ${f.dueDate}`}
+              </UserValue>
+            ),
+            key: f.uuid,
+            avatar: <Subtitle>${f.reward}</Subtitle>,
+          })),
+        ]}
       />
     </DataLoader>
   );
@@ -347,7 +454,7 @@ const UserPage = (): JSX.Element => {
         <Card title={"Website"}>
           <Website />
         </Card>
-        <Card title={"Funding"}>
+        <Card title={"Projects Funded"}>
           <Funding />
         </Card>
       </VerticalTabs>
