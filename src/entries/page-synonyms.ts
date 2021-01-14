@@ -40,10 +40,9 @@ const getReplacer = () => {
   const uidWithAliases = pagesWithAliases.map((p) => ({
     title: p.title,
     uid: p.uid,
-    aliases:
-      getConfigFromPage(p.title)
-        ?.Aliases?.split(",")
-        ?.map((a: string) => a.trim()) || [],
+    aliases: (getConfigFromPage(p.title)?.Aliases?.split(",") || [])
+      .map((a: string) => a.trim())
+      .filter((a: string) => !!a),
   }));
   const linkByAlias: { [key: string]: string } = {};
   uidWithAliases.forEach((p) => {
@@ -191,7 +190,8 @@ runExtension("page-synonyms", () => {
       htmlTarget.className === "rm-bullet" ||
       htmlTarget.className ===
         "bp3-icon-standard bp3-icon-caret-down rm-caret rm-caret-open rm-caret-hidden" ||
-      htmlTarget.className === "rm-bullet__inner"
+      htmlTarget.className === "rm-bullet__inner" ||
+      htmlTarget.className === "rm-bullet__inner--user-icon"
     ) {
       const bullet = htmlTarget.closest(".controls");
       blockElementSelected = bullet.parentElement.getElementsByClassName(
