@@ -5,6 +5,7 @@ import {
   Body,
   Button,
   Card,
+  ConfirmationDialog,
   DataLoader,
   FormDialog,
   H6,
@@ -105,29 +106,35 @@ const BuyCancelButton: React.FunctionComponent<{
 }> = ({ priceId, subscriptions, onSuccess }) => {
   const axiosPost = useAuthenticatedAxiosFlossPost();
   const buySubscription = useCallback(
-    () => axiosPost("stripe-subscribe", { priceId }).then(onSuccess),
-    [axiosPost, onSuccess]
+    () => axiosPost("stripe-subscribe", { priceId }),
+    [axiosPost]
   );
   const cancelSubscription = useCallback(
     () =>
       axiosPost("stripe-cancel", {
         subscriptionId: subscriptions.find(({ price }) => priceId === price).id,
-      }).then(onSuccess),
-    [axiosPost, onSuccess]
+      }),
+    [axiosPost]
   );
   const pricesSubscribed = new Set(subscriptions.map(({ price }) => price));
   return pricesSubscribed.has(priceId) ? (
-    <Button
-      variant={"contained"}
+    <ConfirmationDialog
       color={"secondary"}
-      onClick={cancelSubscription}
-    >
-      Cancel
-    </Button>
+      action={cancelSubscription}
+      buttonText={"Cancel"}
+      content={"Are you sure you want to cancel this service?"}
+      onSuccess={onSuccess}
+      title={"Cancel RoamJS Service"}
+    />
   ) : (
-    <Button variant={"contained"} color={"primary"} onClick={buySubscription}>
-      Buy
-    </Button>
+    <ConfirmationDialog
+      color={"primary"}
+      action={buySubscription}
+      buttonText={"Buy"}
+      content={"Are you sure you want to buy this service?"}
+      onSuccess={onSuccess}
+      title={"Buy RoamJS Service"}
+    />
   );
 };
 
@@ -250,8 +257,8 @@ const Website = () => {
     [authenticatedAxiosPost]
   );
   const shutdownWebsite = useCallback(
-    () => authenticatedAxiosPost("shutdown-website", {}).then(getWebsite),
-    [authenticatedAxiosPost, timeoutRef, getWebsite]
+    () => authenticatedAxiosPost("shutdown-website", {}),
+    [authenticatedAxiosPost, timeoutRef]
   );
   useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
   return (
@@ -282,13 +289,16 @@ const Website = () => {
               >
                 Manual Deploy
               </Button>
-              <Button
-                variant={"contained"}
+              <ConfirmationDialog
                 color={"secondary"}
-                onClick={shutdownWebsite}
-              >
-                Shutdown
-              </Button>
+                action={shutdownWebsite}
+                buttonText={"Shutdown"}
+                content={
+                  "Are you sure you want to shut down this RoamJS site? This operation is irreversible."
+                }
+                onSuccess={getWebsite}
+                title={"Buy RoamJS Service"}
+              />
             </>
           ) : (
             <>
