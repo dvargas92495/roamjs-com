@@ -36,8 +36,11 @@ export const handler = async (
         uuid: {
           S: v4(),
         },
-        action_graph_date: {
-          S: `launch_${graph}_${new Date().toJSON()}`,
+        action_graph: {
+          S: `launch_${graph}`,
+        },
+        date: {
+          S: new Date().toJSON(),
         },
         status: {
           S: "INITIALIZING",

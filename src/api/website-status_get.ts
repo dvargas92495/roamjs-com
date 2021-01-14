@@ -28,7 +28,7 @@ export const handler = async (
   const statuses = await dynamo
     .query({
       TableName: "RoamJSWebsiteStatuses",
-      KeyConditionExpression: "action_graph = :a and date >= :d",
+      KeyConditionExpression: "action_graph = :a and #d >= :d",
       ExpressionAttributeValues: {
         ":a": {
           S: `launch_${website.graph}`,
@@ -36,6 +36,9 @@ export const handler = async (
         ":d": {
           S: "0000-00-00T00:00:00.000Z",
         },
+      },
+      ExpressionAttributeNames: {
+        '#d': 'date',
       },
       Limit: 1,
       ScanIndexForward: false,
