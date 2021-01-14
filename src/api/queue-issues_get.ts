@@ -30,7 +30,7 @@ export const handler = async (
   );
   const body = await axios
     .get(
-      `https://api.github.com/repos/dvargas92495/roam-js-extensions/issues?labels=${label}`,
+      `https://api.github.com/repos/dvargas92495/roam-js-extensions/issues?labels=${label}&per_page=100`,
       opts
     )
     .then(
