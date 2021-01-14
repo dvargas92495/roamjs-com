@@ -172,6 +172,10 @@ const Website = () => {
     (body) => authenticatedAxiosPost("launch-website", body),
     [authenticatedAxiosPost]
   );
+  const shutdownWebsite = useCallback(
+    () => authenticatedAxiosPost("shutdown-website", {}).then(getWebsite),
+    [authenticatedAxiosPost, timeoutRef, getWebsite]
+  );
   useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
   return (
     <DataLoader loadAsync={getWebsite}>
@@ -199,7 +203,11 @@ const Website = () => {
           >
             Manual Deploy
           </Button>
-          <Button variant={"contained"} color={"secondary"}>
+          <Button
+            variant={"contained"}
+            color={"secondary"}
+            onClick={shutdownWebsite}
+          >
             Shutdown
           </Button>
         </>
@@ -211,6 +219,7 @@ const Website = () => {
           </Body>
           <FormDialog
             onSave={launchWebsite}
+            onSuccess={getWebsite}
             buttonText={"LAUNCH"}
             title={"Launch Roam Website"}
             contentText={
