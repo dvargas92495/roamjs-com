@@ -226,12 +226,12 @@ type WebsiteData = {
   url: string;
   graph: string;
   status: string;
-  deploys: { status: string }[];
+  deploys: { status: string; date: string; uuid: string }[];
 };
 
 const isWebsiteReady = (w: WebsiteData) =>
-    w.status === "LIVE" && w.deploys.length && w.deploys[0].status === "SUCCESS";
-  
+  w.status === "LIVE" && w.deploys.length && w.deploys[0].status === "SUCCESS";
+
 const Website = () => {
   const flossGet = useAuthenticatedAxiosFlossGet();
   const authenticatedAxiosGet = useAuthenticatedAxiosRoamJSGet();
@@ -307,6 +307,17 @@ const Website = () => {
                 }
                 onSuccess={getWebsite}
                 title={"Buy RoamJS Service"}
+              />
+              <hr style={{ margin: "16px 0" }} />
+              <H6>Deploys</H6>
+              <Items
+                items={website.deploys.map((d) => ({
+                  primary: <UserValue>{d.status}</UserValue>,
+                  key: d.uuid,
+                  secondary: (
+                    <UserValue>At {new Date(d.date).toLocaleString()}</UserValue>
+                  ),
+                }))}
               />
             </>
           ) : (
