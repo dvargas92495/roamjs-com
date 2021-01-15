@@ -132,27 +132,25 @@ runExtension("todo-trigger", () => {
     "Strikethrough"
   ];
 
-  createBlockObserver(
-    (b) => {
-      if (isStrikethrough) {
+  if (isStrikethrough) {
+    createBlockObserver(
+      (b) => {
         const { blockUid } = getUids(b);
         if (getTextByBlockUid(blockUid).indexOf("{{[[DONE]]}}") > -1) {
           b.style.textDecoration = "line-through";
         }
-      }
-    },
-    (s) => {
-      if (isStrikethrough) {
+      },
+      (s) => {
         const parent = s.closest(".roam-block") as HTMLDivElement;
         const { blockUid } = getUids(parent);
         const refs = getChildRefStringsByBlockUid(blockUid);
         const index = Array.from(
           parent.getElementsByClassName("rm-block-ref")
         ).indexOf(s);
-        if (refs[index].indexOf("{{[[DONE]]}}") > -1) {
+        if (index < refs.length && refs[index].includes("{{[[DONE]]}}")) {
           s.style.textDecoration = "line-through";
         }
       }
-    }
-  );
+    );
+  }
 });
