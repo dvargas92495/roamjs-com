@@ -147,7 +147,7 @@ runExtension("todo-trigger", () => {
         const index = Array.from(
           parent.getElementsByClassName("rm-block-ref")
         ).indexOf(s);
-        if (refs[index].indexOf("{{[[DONE]]}}") > -1) {
+        if (index < refs.length && refs[index].includes("{{[[DONE]]}}")) {
           s.style.textDecoration = "line-through";
         }
       }

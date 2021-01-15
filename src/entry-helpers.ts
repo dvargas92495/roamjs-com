@@ -39,7 +39,10 @@ mixpanel.init(process.env.MIXPANEL_TOKEN);
 export const track = (name: string, properties?: Dict): void =>
   process.env.MIXPANEL_TOKEN && mixpanel.track(name, properties);
 
-export const runExtension = async (extensionId: string, run: () => void): Promise<void> => {
+export const runExtension = async (
+  extensionId: string,
+  run: () => void
+): Promise<void> => {
   if (!window.roamjs) {
     window.roamjs = {
       alerted: false,
@@ -713,8 +716,8 @@ export const getChildRefStringsByBlockUid = (b: string): string[] =>
     .q(
       `[:find (pull ?r [:block/string]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
     )
-    .filter(r => r.length && r[0])
-    .map((r) => r[0].string);
+    .filter((r) => r.length && r[0])
+    .map((r) => r[0].string || "");
 
 export const getChildRefUidsByBlockUid = (b: string): string[] =>
   window.roamAlphaAPI
