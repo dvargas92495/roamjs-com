@@ -40,11 +40,33 @@ export const handler = async (
     })
     .promise();
 
+  const deployStatuses = await dynamo
+    .query({
+      TableName: "RoamJSWebsiteStatuses",
+      KeyConditionExpression: "action_graph = :a",
+      ExpressionAttributeValues: {
+        ":a": {
+          S: `deploy_${website.graph}`,
+        },
+      },
+      ScanIndexForward: false,
+      IndexName: "primary-index",
+    })
+    .promise();
+  const successDeployStatuses = deployStatuses.Items.filter(
+    (s) => s.status.S === "SUCCESS"
+  );
+  const deploys =
+    successDeployStatuses[0] === deployStatuses.Items[0]
+      ? successDeployStatuses
+      : [deployStatuses.Items[0], ...successDeployStatuses];
+
   return {
     statusCode: 200,
     body: JSON.stringify({
       ...website,
       status: statuses.Items ? statuses.Items[0].status.S : "INITIALIZING",
+      deploys,
     }),
     headers,
   };
