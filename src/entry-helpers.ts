@@ -713,6 +713,7 @@ export const getChildRefStringsByBlockUid = (b: string): string[] =>
     .q(
       `[:find (pull ?r [:block/string]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
     )
+    .filter(r => r.length)
     .map((r) => r[0].string);
 
 export const getChildRefUidsByBlockUid = (b: string): string[] =>
