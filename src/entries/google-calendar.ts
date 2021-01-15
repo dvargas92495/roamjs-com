@@ -28,6 +28,8 @@ type Event = {
 };
 
 const EMPTY_MESSAGE = "No Events Scheduled for Today!";
+const resolveDate = (d: { dateTime?: string }) =>
+  d.dateTime ? new Date(d.dateTime).toLocaleTimeString() : "All Day";
 
 const fetchGoogleCalendar = async (): Promise<string[]> => {
   const config = getConfigFromPage("roam/js/google-calendar");
@@ -70,14 +72,8 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
               .replace("/Link", e.htmlLink || "")
               .replace("/Hangout", e.hangoutLink || "")
               .replace("/Location", e.location || "")
-              .replace(
-                "/Start Time",
-                new Date(e.start.dateTime).toLocaleTimeString()
-              )
-              .replace(
-                "/End Time",
-                new Date(e.end.dateTime).toLocaleTimeString()
-              );
+              .replace("/Start Time", resolveDate(e.start))
+              .replace("/End Time", resolveDate(e.end));
           } else {
             const summaryText = e.summary ? e.summary : "No Summary";
             const summary =
@@ -89,11 +85,9 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
               e.location && e.location.indexOf("zoom.us") > -1
                 ? ` - [Zoom](${e.location})`
                 : "";
-            return `${summary} (${new Date(
-              e.start.dateTime
-            ).toLocaleTimeString()} - ${new Date(
-              e.end.dateTime
-            ).toLocaleTimeString()})${meetLink}${zoomLink}`;
+            return `${summary} (${resolveDate(e.start)} - ${resolveDate(
+              e.end
+            )})${meetLink}${zoomLink}`;
           }
         });
     })
@@ -125,11 +119,11 @@ createCustomSmartBlockCommand({
   command: "GOOGLECALENDAR",
   processor: () =>
     fetchGoogleCalendar().then(async (bullets) => {
-      if(bullets.length > 1) {
+      if (bullets.length > 1) {
         await smartBlockNewEnter();
       }
       return pushBullets(bullets.slice(0, bullets.length - 1)).then(() =>
-          bullets.length ? bullets[bullets.length - 1] : EMPTY_MESSAGE
-      )
+        bullets.length ? bullets[bullets.length - 1] : EMPTY_MESSAGE
+      );
     }),
 });
