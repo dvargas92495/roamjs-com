@@ -226,8 +226,12 @@ type WebsiteData = {
   url: string;
   graph: string;
   status: string;
+  deploys: { status: string }[];
 };
 
+const isWebsiteReady = (w: WebsiteData) =>
+    w.status === "LIVE" && w.deploys.length && w.deploys[0].status === "SUCCESS";
+  
 const Website = () => {
   const flossGet = useAuthenticatedAxiosFlossGet();
   const authenticatedAxiosGet = useAuthenticatedAxiosRoamJSGet();
@@ -246,7 +250,7 @@ const Website = () => {
     () =>
       authenticatedAxiosGet("website-status").then((r) => {
         setWebsite(r.data);
-        if (r.data && r.data.status !== "LIVE") {
+        if (r.data && !isWebsiteReady(r.data)) {
           timeoutRef.current = window.setTimeout(getWebsite, 5000);
         }
       }),
@@ -256,9 +260,13 @@ const Website = () => {
     (body) => authenticatedAxiosPost("launch-website", body),
     [authenticatedAxiosPost]
   );
+  const manualDeploy = useCallback(
+    () => authenticatedAxiosPost("deploy", {}).then(getWebsite),
+    [authenticatedAxiosPost, getWebsite]
+  );
   const shutdownWebsite = useCallback(
     () => authenticatedAxiosPost("shutdown-website", {}),
-    [authenticatedAxiosPost, timeoutRef]
+    [authenticatedAxiosPost]
   );
   useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
   return (
@@ -285,7 +293,8 @@ const Website = () => {
                 variant={"contained"}
                 color={"primary"}
                 style={{ margin: "0 16px" }}
-                disabled={website.status !== "LIVE"}
+                disabled={!isWebsiteReady(website)}
+                onClick={manualDeploy}
               >
                 Manual Deploy
               </Button>

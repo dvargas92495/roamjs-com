@@ -66,7 +66,7 @@ export const handler = async (
     body: JSON.stringify({
       ...website,
       status: statuses.Items ? statuses.Items[0].status.S : "INITIALIZING",
-      deploys,
+      deploys: deploys.map((d) => ({ date: d.date.S, status: d.status.S })),
     }),
     headers,
   };
