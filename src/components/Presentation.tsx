@@ -26,14 +26,6 @@ export const VALID_THEMES = [
   "moon",
 ];
 
-const blockRefRegex = new RegExp("\\(\\((..........?)\\)\\)", "g");
-const resolveRefs = (text: string) => {
-  return text.replace(blockRefRegex, (_, blockUid) => {
-    const reference = getTextByBlockUid(blockUid);
-    return reference || blockUid;
-  });
-};
-
 const unload = () =>
   Array.from(window.roamjs.dynamicElements)
     .filter((s) => !!s.parentElement)

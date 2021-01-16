@@ -1,8 +1,14 @@
 import { Drawer, MenuItem, Position } from "@blueprintjs/core";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
+import { Transformer } from "markmap-lib";
+import { Markmap, loadCSS, loadJS } from "markmap-view";
 
-const MarkmapPanel: React.FunctionComponent = () => {
+const transformer = new Transformer();
+
+const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
+  getMarkdown,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const open = useCallback(() => setIsOpen(true), [setIsOpen]);
@@ -27,9 +33,14 @@ const MarkmapPanel: React.FunctionComponent = () => {
       if (overlay && content) {
         overlay.style.pointerEvents = "none";
         content.style.pointerEvents = "initial";
+        const { root, features } = transformer.transform(getMarkdown());
+        const { styles, scripts } = transformer.getUsedAssets(features);
+        loadCSS(styles);
+        loadJS(scripts);
+        Markmap.create('#roamjs-markmap', null, root);
       }
     }
-  }, [containerRef.current, loaded]);
+  }, [containerRef.current, loaded, getMarkdown]);
   return (
     <>
       <MenuItem text={"Open Markmap"} onClick={open} />
@@ -43,13 +54,20 @@ const MarkmapPanel: React.FunctionComponent = () => {
         canEscapeKeyClose
         enforceFocus={false}
       >
-        <div ref={containerRef}>Markmap!</div>
+        <div ref={containerRef}>
+          <svg id="roamjs-markmap" style={{ width: 800, height: 800 }} />
+        </div>
       </Drawer>
     </>
   );
 };
 
-export const render = (li: HTMLLIElement): void =>
-  ReactDOM.render(<MarkmapPanel />, li);
+export const render = ({
+  parent,
+  getMarkdown,
+}: {
+  parent: HTMLDivElement;
+  getMarkdown: () => string;
+}): void => ReactDOM.render(<MarkmapPanel getMarkdown={getMarkdown} />, parent);
 
 export default MarkmapPanel;

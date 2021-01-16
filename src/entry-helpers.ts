@@ -806,3 +806,11 @@ export const createCustomSmartBlockCommand = ({
   };
   document.addEventListener("input", inputListener);
 };
+
+const blockRefRegex = new RegExp("\\(\\((..........?)\\)\\)", "g");
+export const resolveRefs = (text: string): string => {
+  return text.replace(blockRefRegex, (_, blockUid) => {
+    const reference = getTextByBlockUid(blockUid);
+    return reference || blockUid;
+  });
+};
