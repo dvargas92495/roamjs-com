@@ -2,7 +2,7 @@ import { Button, Drawer, MenuItem, Position } from "@blueprintjs/core";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { Transformer } from "markmap-lib";
-import { Markmap, loadCSS, loadJS } from "markmap-view";
+import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
@@ -35,7 +35,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
       }
     });
     loadCSS(styles);
-    loadJS(scripts);
+    loadJS(scripts, { getMarkmap: () => ({ refreshHook }) });
     markmapRef.current = Markmap.create("#roamjs-markmap", null, root);
   }, [markmapRef, getMarkdown]);
   const open = useCallback(() => setIsOpen(true), [setIsOpen]);
