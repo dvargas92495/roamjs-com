@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import ReactDOM from "react-dom";
 import Reveal from "reveal.js";
-import { addStyle, getTextByBlockUid, isControl } from "../entry-helpers";
+import { addStyle, isControl, resolveRefs } from "../entry-helpers";
 import { isSafari } from "mobile-device-detect";
 
 const SAFARI_THEMES = ["black", "white", "beige"];
