@@ -6,6 +6,10 @@ import { Markmap, loadCSS, loadJS } from "markmap-view";
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
+const SVG_PROPS = {
+  id: "roamjs-markmap",
+  style: { width: "100%", height: "100%" },
+};
 
 const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   getMarkdown,
@@ -17,7 +21,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     Array.from(document.getElementsByClassName(CLASSNAME)).forEach((e) =>
       e.parentElement.removeChild(e)
     );
-    markmapRef.current.destroy();
+    //markmapRef.current.destroy();
   }, [markmapRef]);
   const loadMarkmap = useCallback(() => {
     const { root, features } = transformer.transform(getMarkdown());
@@ -92,8 +96,11 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
         canEscapeKeyClose
         enforceFocus={false}
       >
-        <div ref={containerRef} style={{ height: "100%" }}>
-          <svg id="roamjs-markmap" style={{ width: "100%", height: "100%" }} />
+        <div
+          ref={containerRef}
+          style={{ height: "100%", position: "relative" }}
+        >
+          <svg {...SVG_PROPS} />
           <Button
             minimal
             icon={"refresh"}
