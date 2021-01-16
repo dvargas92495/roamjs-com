@@ -6,10 +6,6 @@ import { Markmap, loadCSS, loadJS } from "markmap-view";
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
-const SVG_PROPS = {
-  id: "roamjs-markmap",
-  style: { width: "100%", height: "100%" },
-};
 
 const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   getMarkdown,
@@ -21,7 +17,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     Array.from(document.getElementsByClassName(CLASSNAME)).forEach((e) =>
       e.parentElement.removeChild(e)
     );
-    //markmapRef.current.destroy();
+    markmapRef.current.destroy();
   }, [markmapRef]);
   const loadMarkmap = useCallback(() => {
     const { root, features } = transformer.transform(getMarkdown());
@@ -52,7 +48,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     )[0] as HTMLDivElement;
     article.style.paddingBottom = "120px";
   }, [setLoaded, setIsOpen, unload]);
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (isOpen) {
       setLoaded(true);
@@ -81,8 +77,12 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   }, [containerRef.current, loaded, loadMarkmap]);
   const refresh = useCallback(() => {
     unload();
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("id", "roamjs-markmap");
+    svg.setAttribute("style", "width: 100%; height: 100%");
+    containerRef.current.insertBefore(svg, containerRef.current.firstChild);
     loadMarkmap();
-  }, [loadMarkmap, unload]);
+  }, [loadMarkmap, unload, containerRef]);
   return (
     <>
       <MenuItem text={"Open Markmap"} onClick={open} />
@@ -100,7 +100,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
           ref={containerRef}
           style={{ height: "100%", position: "relative" }}
         >
-          <svg {...SVG_PROPS} />
+          <svg id="roamjs-markmap" style={{ width: "100%", height: "100%" }} />
           <Button
             minimal
             icon={"refresh"}
