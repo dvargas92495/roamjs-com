@@ -1,16 +1,54 @@
-import { Drawer, MenuItem, Position } from "@blueprintjs/core";
+import { Button, Drawer, MenuItem, Position } from "@blueprintjs/core";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
+import { Transformer } from "markmap-lib";
+import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 
-const MarkmapPanel: React.FunctionComponent = () => {
+const transformer = new Transformer();
+const CLASSNAME = "roamjs-markmap-class";
+
+const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
+  getMarkdown,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const markmapRef = useRef<Markmap>(null);
+  const unload = useCallback(() => {
+    Array.from(document.getElementsByClassName(CLASSNAME)).forEach((e) =>
+      e.parentElement.removeChild(e)
+    );
+    markmapRef.current.destroy();
+  }, [markmapRef]);
+  const loadMarkmap = useCallback(() => {
+    const { root, features } = transformer.transform(getMarkdown());
+    const { styles, scripts } = transformer.getUsedAssets(features);
+    styles.forEach(({ type, data }) => {
+      if (type === "stylesheet") {
+        data["class"] = CLASSNAME;
+      }
+    });
+    scripts.forEach(({ type, data }) => {
+      if (type === "script") {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        data["class"] = CLASSNAME;
+      }
+    });
+    loadCSS(styles);
+    loadJS(scripts, { getMarkmap: () => ({ refreshHook }) });
+    markmapRef.current = Markmap.create("#roamjs-markmap", null, root);
+  }, [markmapRef, getMarkdown]);
   const open = useCallback(() => setIsOpen(true), [setIsOpen]);
   const close = useCallback(() => {
     setIsOpen(false);
     setLoaded(false);
-  }, [setLoaded, setIsOpen]);
-  const containerRef = useRef(null);
+    unload();
+    const article = document.getElementsByClassName(
+      "roam-article"
+    )[0] as HTMLDivElement;
+    article.style.paddingBottom = "120px";
+  }, [setLoaded, setIsOpen, unload]);
+  const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (isOpen) {
       setLoaded(true);
@@ -26,10 +64,25 @@ const MarkmapPanel: React.FunctionComponent = () => {
       ) as HTMLDivElement;
       if (overlay && content) {
         overlay.style.pointerEvents = "none";
+        overlay.style.zIndex = "2000";
         content.style.pointerEvents = "initial";
+        const height = content.offsetHeight;
+        const article = document.getElementsByClassName(
+          "roam-article"
+        )[0] as HTMLDivElement;
+        article.style.paddingBottom = `${height + 120}px`;
+        loadMarkmap();
       }
     }
-  }, [containerRef.current, loaded]);
+  }, [containerRef.current, loaded, loadMarkmap]);
+  const refresh = useCallback(() => {
+    unload();
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("id", "roamjs-markmap");
+    svg.setAttribute("style", "width: 100%; height: 100%");
+    containerRef.current.insertBefore(svg, containerRef.current.firstChild);
+    loadMarkmap();
+  }, [loadMarkmap, unload, containerRef]);
   return (
     <>
       <MenuItem text={"Open Markmap"} onClick={open} />
@@ -43,13 +96,29 @@ const MarkmapPanel: React.FunctionComponent = () => {
         canEscapeKeyClose
         enforceFocus={false}
       >
-        <div ref={containerRef}>Markmap!</div>
+        <div
+          ref={containerRef}
+          style={{ height: "100%", position: "relative" }}
+        >
+          <svg id="roamjs-markmap" style={{ width: "100%", height: "100%" }} />
+          <Button
+            minimal
+            icon={"refresh"}
+            onClick={refresh}
+            style={{ position: "absolute", top: 8, right: 8 }}
+          />
+        </div>
       </Drawer>
     </>
   );
 };
 
-export const render = (li: HTMLLIElement): void =>
-  ReactDOM.render(<MarkmapPanel />, li);
+export const render = ({
+  parent,
+  getMarkdown,
+}: {
+  parent: HTMLDivElement;
+  getMarkdown: () => string;
+}): void => ReactDOM.render(<MarkmapPanel getMarkdown={getMarkdown} />, parent);
 
 export default MarkmapPanel;

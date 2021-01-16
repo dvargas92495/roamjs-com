@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import ReactDOM from "react-dom";
 import Reveal from "reveal.js";
-import { addStyle, getTextByBlockUid, isControl } from "../entry-helpers";
+import { addStyle, isControl, resolveRefs } from "../entry-helpers";
 import { isSafari } from "mobile-device-detect";
 
 const SAFARI_THEMES = ["black", "white", "beige"];
@@ -25,14 +25,6 @@ export const VALID_THEMES = [
   "blood",
   "moon",
 ];
-
-const blockRefRegex = new RegExp("\\(\\((..........?)\\)\\)", "g");
-const resolveRefs = (text: string) => {
-  return text.replace(blockRefRegex, (_, blockUid) => {
-    const reference = getTextByBlockUid(blockUid);
-    return reference || blockUid;
-  });
-};
 
 const unload = () =>
   Array.from(window.roamjs.dynamicElements)
