@@ -8,15 +8,19 @@ const MarkmapPanel: React.FunctionComponent = () => {
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const containerRef = useRef(null);
   useEffect(() => {
-    if (containerRef.current) {
+    if (containerRef.current && isOpen) {
       const overlay = containerRef.current.closest(
         ".bp3-overlay-container"
       ) as HTMLDivElement;
-      if (overlay) {
+      const content = containerRef.current.closest(
+        ".bp3-overlay-content"
+      ) as HTMLDivElement;
+      if (overlay && content) {
         overlay.style.pointerEvents = "none";
+        content.style.pointerEvents = "initial";
       }
     }
-  }, [containerRef]);
+  }, [containerRef.current, isOpen]);
   return (
     <>
       <MenuItem text={"Open Markmap"} onClick={open} />
