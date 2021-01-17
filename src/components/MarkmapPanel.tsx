@@ -101,7 +101,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     const ctx = canvas.getContext("2d");
     const serializer = new XMLSerializer();
     const v = Canvg.fromString(ctx, serializer.serializeToString(svgElement));
-    await v.render();
+    await v.render({ ignoreAnimation: false });
     const blob = await canvas.convertToBlob();
     const fileReader = new FileReader();
     fileReader.onload = (e) =>
