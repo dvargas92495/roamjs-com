@@ -3,15 +3,21 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { Transformer } from "markmap-lib";
 import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
+import { format } from "date-fns";
+import download from "downloadjs";
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
+const SVG_ID = "roamjs-markmap";
 
 const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   getMarkdown,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const expand = useCallback(() => setIsFullScreen(true), [setIsFullScreen]);
+  const collapse = useCallback(() => setIsFullScreen(false), [setIsFullScreen]);
   const markmapRef = useRef<Markmap>(null);
   const unload = useCallback(() => {
     Array.from(document.getElementsByClassName(CLASSNAME)).forEach((e) =>
@@ -36,7 +42,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     });
     loadCSS(styles);
     loadJS(scripts, { getMarkmap: () => ({ refreshHook }) });
-    markmapRef.current = Markmap.create("#roamjs-markmap", null, root);
+    markmapRef.current = Markmap.create(`#${SVG_ID}`, null, root);
   }, [markmapRef, getMarkdown]);
   const open = useCallback(() => setIsOpen(true), [setIsOpen]);
   const close = useCallback(() => {
@@ -78,17 +84,51 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   const refresh = useCallback(() => {
     unload();
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("id", "roamjs-markmap");
+    svg.setAttribute("id", SVG_ID);
     svg.setAttribute("style", "width: 100%; height: 100%");
     containerRef.current.insertBefore(svg, containerRef.current.firstChild);
     loadMarkmap();
   }, [loadMarkmap, unload, containerRef]);
+  const exporter = useCallback(async () => {
+    const svgElement = document.getElementById(SVG_ID);
+    const filename = `${format(new Date(), "yyyyMMddhhmmss")}_mindmap.png`;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = svgElement.parentElement.offsetWidth;
+    canvas.height = svgElement.parentElement.offsetHeight;
+    const ctx = canvas.getContext("2d");
+    const data = new XMLSerializer().serializeToString(svgElement);
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0,0);
+      const uri = canvas.toDataURL('image/png');
+      download(uri, filename, 'image/png');
+    }
+    img.src = `data:image/svg+xml; charset=utf8, ${encodeURIComponent(data)}`;
+  }, []);
+  useEffect(() => {
+    if (containerRef.current) {
+      const content = containerRef.current.closest(
+        ".bp3-overlay-content"
+      ) as HTMLDivElement;
+      if (content) {
+        if (isFullScreen) {
+          content.style.top = "0";
+          content.style.height = "100%";
+        } else {
+          content.style.top = null;
+          content.style.height = null;
+        }
+        refresh();
+      }
+    }
+  }, [isFullScreen, containerRef, refresh]);
   return (
     <>
-      <MenuItem text={"Open Markmap"} onClick={open} />
+      <MenuItem text={"Open Mindmap"} onClick={open} />
       <Drawer
         onClose={close}
-        title="Markmap Panel"
+        title="Mindmap Panel"
         isOpen={isOpen}
         position={Position.BOTTOM}
         hasBackdrop={false}
@@ -100,11 +140,23 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
           ref={containerRef}
           style={{ height: "100%", position: "relative" }}
         >
-          <svg id="roamjs-markmap" style={{ width: "100%", height: "100%" }} />
+          <svg id={SVG_ID} style={{ width: "100%", height: "100%" }} />
+          <Button
+            minimal
+            icon={"export"}
+            onClick={exporter}
+            style={{ position: "absolute", top: 8, right: 100 }}
+          />
           <Button
             minimal
             icon={"refresh"}
             onClick={refresh}
+            style={{ position: "absolute", top: 8, right: 54 }}
+          />
+          <Button
+            minimal
+            icon={isFullScreen ? "collapse-all" : "fullscreen"}
+            onClick={isFullScreen ? collapse : expand}
             style={{ position: "absolute", top: 8, right: 8 }}
           />
         </div>
