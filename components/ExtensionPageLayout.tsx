@@ -23,6 +23,8 @@ const contributors = {
   "Conor White-Sullivan": "https://twitter.com/Conaw",
   "Matt Brockwell": "https://twitter.com/Jeanvaljean689",
   "Eddie Cohen": "https://eddiecohen.com/",
+  "Rushi Bhavsar": "https://twitter.com/RushiBhavsar",
+  "Chris Kunicki": "https://twitter.com/roamhacker",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{

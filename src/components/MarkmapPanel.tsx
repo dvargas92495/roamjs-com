@@ -5,6 +5,7 @@ import { Transformer } from "markmap-lib";
 import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 import { format } from "date-fns";
 import Canvg from "canvg";
+import download from 'downloadjs';
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
@@ -97,7 +98,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     const ctx = canvas.getContext('2d');
     Canvg.fromString(ctx, svgElement.outerHTML);
     const dataUrl = canvas.toDataURL();
-    console.log(filename, dataUrl)
+    download(dataUrl, filename, 'image/png');
   }, []);
   useEffect(() => {
     if (containerRef.current) {
@@ -118,10 +119,10 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   }, [isFullScreen, containerRef, refresh]);
   return (
     <>
-      <MenuItem text={"Open Markmap"} onClick={open} />
+      <MenuItem text={"Open Mindmap"} onClick={open} />
       <Drawer
         onClose={close}
-        title="Markmap Panel"
+        title="Mindmap Panel"
         isOpen={isOpen}
         position={Position.BOTTOM}
         hasBackdrop={false}
