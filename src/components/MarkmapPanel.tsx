@@ -102,8 +102,10 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     const v = Canvg.fromString(ctx, svgElement.outerHTML);
     await v.render();
     const blob = await canvas.convertToBlob();
-    const dataUrl = URL.createObjectURL(blob);
-    download(dataUrl, filename, "image/png");
+    const fileReader = new FileReader();
+    fileReader.onload = (e) =>
+      download(e.target.result as string, filename, "image/png");
+    fileReader.readAsDataURL(blob);
   }, []);
   useEffect(() => {
     if (containerRef.current) {
