@@ -33,7 +33,7 @@ runExtension("markmap", () => {
     callback: (u: HTMLUListElement) => {
       console.log('damnit safari');
       const lis = Array.from(u.getElementsByTagName("li")).map(
-        (l: HTMLLIElement) => l.innerText
+        (l: HTMLLIElement) => l.innerText.trim()
       );
       if (
         lis.includes("Open right sidebar") &&
