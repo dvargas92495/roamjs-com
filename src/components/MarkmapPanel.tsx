@@ -4,7 +4,6 @@ import ReactDOM from "react-dom";
 import { Transformer } from "markmap-lib";
 import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 import { format } from "date-fns";
-import Canvg from "canvg";
 import download from "downloadjs";
 
 const transformer = new Transformer();
@@ -94,19 +93,18 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     const svgElement = document.getElementById(SVG_ID);
     const filename = `${format(new Date(), "yyyyMMddhhmmss")}_mindmap.png`;
 
-    const canvas = new OffscreenCanvas(
-      svgElement.parentElement.offsetWidth,
-      svgElement.parentElement.offsetHeight
-    );
+    const canvas = document.createElement('canvas');
+    canvas.width = svgElement.parentElement.offsetWidth;
+    canvas.height = svgElement.parentElement.offsetHeight;
     const ctx = canvas.getContext("2d");
-    const serializer = new XMLSerializer();
-    const v = Canvg.fromString(ctx, serializer.serializeToString(svgElement));
-    await v.render({ ignoreAnimation: false });
-    const blob = await canvas.convertToBlob();
-    const fileReader = new FileReader();
-    fileReader.onload = (e) =>
-      download(e.target.result as string, filename, "image/png");
-    fileReader.readAsDataURL(blob);
+    const data = new XMLSerializer().serializeToString(svgElement);
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0,0);
+      const uri = canvas.toDataURL('image/png');
+      download(uri, filename, 'image/png');
+    }
+    img.src = `data:image/svg+xml; charset=utf8, ${encodeURIComponent(data)}`;
   }, []);
   useEffect(() => {
     if (containerRef.current) {
