@@ -4,7 +4,7 @@ import ReactDOM from "react-dom";
 import { Transformer } from "markmap-lib";
 import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 import { format } from "date-fns";
-import saveSvgAsPng from "save-svg-as-png";
+import Canvg from "canvg";
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
@@ -89,14 +89,16 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     containerRef.current.insertBefore(svg, containerRef.current.firstChild);
     loadMarkmap();
   }, [loadMarkmap, unload, containerRef]);
-  const exporter = useCallback(
-    () =>
-      saveSvgAsPng(
-        document.getElementById(SVG_ID),
-        `${format(new Date(), "yyyyMMddhhmmss")}_mindmap.png`
-      ),
-    []
-  );
+  const exporter = useCallback(() => {
+    const svgElement = document.getElementById(SVG_ID);
+    const filename = `${format(new Date(), "yyyyMMddhhmmss")}_mindmap.png`;
+    
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    Canvg.fromString(ctx, svgElement.outerHTML);
+    const dataUrl = canvas.toDataURL();
+    console.log(filename, dataUrl)
+  }, []);
   useEffect(() => {
     if (containerRef.current) {
       const content = containerRef.current.closest(
@@ -107,12 +109,13 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
           content.style.top = "0";
           content.style.height = "100%";
         } else {
-          content.style.top = undefined;
-          content.style.height = undefined;
+          content.style.top = null;
+          content.style.height = null;
         }
+        refresh();
       }
     }
-  }, [isFullScreen, containerRef]);
+  }, [isFullScreen, containerRef, refresh]);
   return (
     <>
       <MenuItem text={"Open Markmap"} onClick={open} />
