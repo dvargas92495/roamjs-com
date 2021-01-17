@@ -47,3 +47,8 @@ declare module "reveal.js" {
   }
   export default Reveal;
 }
+
+declare module "save-svg-as-png" {
+  const Save: (e: HTMLElement, s: string) => void;
+  export default Save;
+}

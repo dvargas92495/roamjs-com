@@ -1,8 +1,8 @@
+import { toRoamDateUid } from "roam-client";
 import { render } from "../components/MarkmapPanel";
 import {
   createHTMLObserver,
-  getPageTitle,
-  getTextTreeByPageName,
+  getTextTreeByBlockUid,
   resolveRefs,
   runExtension,
   TreeNode,
@@ -22,26 +22,25 @@ const toMarkdown = ({ c, i }: { c: TreeNode; i: number }): string =>
   }`;
 
 const getMarkdown = (): string => {
-  const title = getPageTitle(document.documentElement);
-  const nodes = getTextTreeByPageName(title.textContent);
+  const match = window.location.href.match("/page/(.*)$");
+  const uid = match ? match[1] : toRoamDateUid(new Date());
+  const nodes = getTextTreeByBlockUid(uid).children;
   return nodes.map((c) => toMarkdown({ c, i: 0 })).join("\n");
 };
 
 runExtension("markmap", () => {
   createHTMLObserver({
     callback: (u: HTMLUListElement) => {
-      if (window.location.href.includes("/page/")) {
-        const lis = Array.from(u.getElementsByTagName("li")).map(
-          (l: HTMLLIElement) => l.innerText
-        );
-        if (
-          lis.includes("Open right sidebar") &&
-          !u.getAttribute("data-roamjs-has-markmap")
-        ) {
-          u.setAttribute("data-roamjs-has-markmap", "true");
-          u.appendChild(div);
-          render({ parent: div, getMarkdown });
-        }
+      const lis = Array.from(u.getElementsByTagName("li")).map(
+        (l: HTMLLIElement) => l.innerText
+      );
+      if (
+        lis.includes("Open right sidebar") &&
+        !u.getAttribute("data-roamjs-has-markmap")
+      ) {
+        u.setAttribute("data-roamjs-has-markmap", "true");
+        u.appendChild(div);
+        render({ parent: div, getMarkdown });
       }
     },
     tag: "UL",
