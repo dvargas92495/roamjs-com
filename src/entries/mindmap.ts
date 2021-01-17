@@ -32,7 +32,7 @@ runExtension("markmap", () => {
   createHTMLObserver({
     callback: (u: HTMLUListElement) => {
       const lis = Array.from(u.getElementsByTagName("li")).map(
-        (l: HTMLLIElement) => l.innerText
+        (l: HTMLLIElement) => l.innerText.trim()
       );
       if (
         lis.includes("Open right sidebar") &&
