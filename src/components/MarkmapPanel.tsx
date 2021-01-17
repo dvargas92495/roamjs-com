@@ -5,7 +5,7 @@ import { Transformer } from "markmap-lib";
 import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 import { format } from "date-fns";
 import Canvg from "canvg";
-import download from 'downloadjs';
+import download from "downloadjs";
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
@@ -90,15 +90,20 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     containerRef.current.insertBefore(svg, containerRef.current.firstChild);
     loadMarkmap();
   }, [loadMarkmap, unload, containerRef]);
-  const exporter = useCallback(() => {
+  const exporter = useCallback(async () => {
     const svgElement = document.getElementById(SVG_ID);
     const filename = `${format(new Date(), "yyyyMMddhhmmss")}_mindmap.png`;
-    
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    Canvg.fromString(ctx, svgElement.outerHTML);
-    const dataUrl = canvas.toDataURL();
-    download(dataUrl, filename, 'image/png');
+
+    const canvas = new OffscreenCanvas(
+      svgElement.parentElement.offsetWidth,
+      svgElement.parentElement.offsetHeight
+    );
+    const ctx = canvas.getContext("2d");
+    const v = Canvg.fromString(ctx, svgElement.outerHTML);
+    await v.render();
+    const blob = await canvas.convertToBlob();
+    const dataUrl = URL.createObjectURL(blob);
+    download(dataUrl, filename, "image/png");
   }, []);
   useEffect(() => {
     if (containerRef.current) {
