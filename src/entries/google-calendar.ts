@@ -6,11 +6,11 @@ import {
 } from "../entry-helpers";
 import {
   addButtonListener,
-  asyncType,
   genericError,
   pushBullets,
   getConfigFromPage,
   parseRoamDate,
+  asyncPaste,
 } from "roam-client";
 import axios from "axios";
 import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
@@ -38,7 +38,7 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
 
   const calendarId = config["Google Calendar"]?.trim();
   if (!calendarId) {
-    await asyncType(
+    await asyncPaste(
       `Error: Could not find the required "Google Calendar" attribute configured in the [[roam/js/google-calendar]] page.`
     );
     return;
@@ -93,7 +93,7 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
     })
     .catch((e) =>
       e.message === "Request failed with status code 404"
-        ? asyncType(
+        ? asyncPaste(
             `Error for calendar ${calendarId}: Could not find calendar or it's not public. For more information on how to make it public, [visit this page](https://roamjs.com/extensions/google-calendar)`
           )
         : genericError(e)
