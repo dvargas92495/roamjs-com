@@ -13,9 +13,10 @@ const div = document.createElement("div");
 const toMarkdown = ({ c, i }: { c: TreeNode; i: number }): string =>
   `${"".padStart(i * 4, " ")}- ${
     c.heading ? `${"".padStart(c.heading, "#")} ` : ""
-  }${resolveRefs(c.text)}${
+  }${resolveRefs(c.text.trim())}${
     c.open
       ? c.children
+          .filter((nested) => !!nested.text || nested.children.length)
           .map((nested) => `\n${toMarkdown({ c: nested, i: i + 1 })}`)
           .join("")
       : ""
