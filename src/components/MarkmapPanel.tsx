@@ -8,17 +8,29 @@ import download from "downloadjs";
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
+export const NODE_CLASSNAME = "roamjs-mindmap-node";
 const SVG_ID = "roamjs-markmap";
 const RENDERED_TODO =
-  '<span><label class="check-container"><input type="checkbox"><span class="checkmark"></span></label></span>';
+  '<span><label class="check-container"><input type="checkbox" disabled=""><span class="checkmark"></span></label></span>';
 const RENDERED_DONE =
-  '<span><label class="check-container"><input type="checkbox" checked=""><span class="checkmark"></span></label></span>';
+  '<span><label class="check-container"><input type="checkbox" checked="" disabled=""><span class="checkmark"></span></label></span>';
 
 const transformRoot = ({ root }: Partial<ITransformResult>) => {
   root.c?.forEach((child) => transformRoot({ root: child }));
   root.v = root.v
     .replace(/{{(?:\[\[)?TODO(?:\]\])?}}/g, RENDERED_TODO)
     .replace(/{{(?:\[\[)?DONE(?:\]\])?}}/g, RENDERED_DONE);
+};
+
+const shiftClickListener = (e: MouseEvent) => {
+  if (e.shiftKey) {
+    const target = e.target as HTMLElement;
+    if (target.tagName === "SPAN" && target.className === NODE_CLASSNAME) {
+      const blockUid = target.getAttribute("data-block-uid");
+      const baseUrl = window.location.href.replace("/page/(.*)$", "");
+      window.location.assign(`${baseUrl}/page/${blockUid}`);
+    }
+  }
 };
 
 const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
@@ -56,7 +68,10 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     loadJS(scripts, { getMarkmap: () => ({ refreshHook }) });
     markmapRef.current = Markmap.create(`#${SVG_ID}`, null, root);
   }, [markmapRef, getMarkdown]);
-  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
+  const open = useCallback(() => {
+    setIsOpen(true)
+    document.addEventListener('click', shiftClickListener);
+  }, [setIsOpen]);
   const close = useCallback(() => {
     setIsOpen(false);
     setLoaded(false);
@@ -65,6 +80,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
       "roam-article"
     )[0] as HTMLDivElement;
     article.style.paddingBottom = "120px";
+    document.removeEventListener('click', shiftClickListener);
   }, [setLoaded, setIsOpen, unload]);
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

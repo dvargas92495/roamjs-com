@@ -1,5 +1,5 @@
 import { toRoamDateUid } from "roam-client";
-import { render } from "../components/MarkmapPanel";
+import { NODE_CLASSNAME, render } from "../components/MarkmapPanel";
 import {
   createHTMLObserver,
   getTextTreeByBlockUid,
@@ -13,7 +13,7 @@ const div = document.createElement("div");
 const toMarkdown = ({ c, i }: { c: TreeNode; i: number }): string =>
   `${"".padStart(i * 4, " ")}- ${
     c.heading ? `${"".padStart(c.heading, "#")} ` : ""
-  }<span class="roamjs-mindmap-node" data-block-uid="${c.uid}">${resolveRefs(
+  }<span class="${NODE_CLASSNAME}" data-block-uid="${c.uid}">${resolveRefs(
     c.text.trim()
   )}</span>${
     c.open
