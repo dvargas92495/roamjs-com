@@ -1,14 +1,37 @@
 import { Button, Drawer, MenuItem, Position } from "@blueprintjs/core";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
-import { Transformer } from "markmap-lib";
+import { ITransformResult, Transformer } from "markmap-lib";
 import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 import { format } from "date-fns";
 import download from "downloadjs";
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
+export const NODE_CLASSNAME = "roamjs-mindmap-node";
 const SVG_ID = "roamjs-markmap";
+const RENDERED_TODO =
+  '<span><label class="check-container"><input type="checkbox" disabled=""><span class="checkmark"></span></label></span>';
+const RENDERED_DONE =
+  '<span><label class="check-container"><input type="checkbox" checked="" disabled=""><span class="checkmark"></span></label></span>';
+
+const transformRoot = ({ root }: Partial<ITransformResult>) => {
+  root.c?.forEach((child) => transformRoot({ root: child }));
+  root.v = root.v
+    .replace(/{{(?:\[\[)?TODO(?:\]\])?}}/g, RENDERED_TODO)
+    .replace(/{{(?:\[\[)?DONE(?:\]\])?}}/g, RENDERED_DONE);
+};
+
+const shiftClickListener = (e: MouseEvent) => {
+  if (e.shiftKey) {
+    const target = e.target as HTMLElement;
+    if (target.tagName === "SPAN" && target.className === NODE_CLASSNAME) {
+      const blockUid = target.getAttribute("data-block-uid");
+      const baseUrl = window.location.href.replace(/\/page\/.*$/, "");
+      window.location.assign(`${baseUrl}/page/${blockUid}`);
+    }
+  }
+};
 
 const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   getMarkdown,
@@ -28,6 +51,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   const loadMarkmap = useCallback(() => {
     const { root, features } = transformer.transform(getMarkdown());
     const { styles, scripts } = transformer.getUsedAssets(features);
+    transformRoot({ root });
     styles.forEach(({ type, data }) => {
       if (type === "stylesheet") {
         data["class"] = CLASSNAME;
@@ -44,7 +68,20 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     loadJS(scripts, { getMarkmap: () => ({ refreshHook }) });
     markmapRef.current = Markmap.create(`#${SVG_ID}`, null, root);
   }, [markmapRef, getMarkdown]);
-  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const refresh = useCallback(() => {
+    unload();
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("id", SVG_ID);
+    svg.setAttribute("style", "width: 100%; height: 100%");
+    containerRef.current.insertBefore(svg, containerRef.current.firstChild);
+    loadMarkmap();
+  }, [loadMarkmap, unload, containerRef]);
+  const open = useCallback(() => {
+    setIsOpen(true);
+    document.addEventListener("click", shiftClickListener);
+    window.addEventListener("popstate", refresh);
+  }, [setIsOpen, refresh]);
   const close = useCallback(() => {
     setIsOpen(false);
     setLoaded(false);
@@ -53,8 +90,9 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
       "roam-article"
     )[0] as HTMLDivElement;
     article.style.paddingBottom = "120px";
+    document.removeEventListener("click", shiftClickListener);
+    window.removeEventListener("popstate", refresh);
   }, [setLoaded, setIsOpen, unload]);
-  const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (isOpen) {
       setLoaded(true);
@@ -81,29 +119,21 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
       }
     }
   }, [containerRef.current, loaded, loadMarkmap]);
-  const refresh = useCallback(() => {
-    unload();
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("id", SVG_ID);
-    svg.setAttribute("style", "width: 100%; height: 100%");
-    containerRef.current.insertBefore(svg, containerRef.current.firstChild);
-    loadMarkmap();
-  }, [loadMarkmap, unload, containerRef]);
   const exporter = useCallback(async () => {
     const svgElement = document.getElementById(SVG_ID);
     const filename = `${format(new Date(), "yyyyMMddhhmmss")}_mindmap.png`;
 
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = svgElement.parentElement.offsetWidth;
     canvas.height = svgElement.parentElement.offsetHeight;
     const ctx = canvas.getContext("2d");
     const data = new XMLSerializer().serializeToString(svgElement);
     const img = new Image();
     img.onload = () => {
-      ctx.drawImage(img, 0,0);
-      const uri = canvas.toDataURL('image/png');
-      download(uri, filename, 'image/png');
-    }
+      ctx.drawImage(img, 0, 0);
+      const uri = canvas.toDataURL("image/png");
+      download(uri, filename, "image/png");
+    };
     img.src = `data:image/svg+xml; charset=utf8, ${encodeURIComponent(data)}`;
   }, []);
   useEffect(() => {
