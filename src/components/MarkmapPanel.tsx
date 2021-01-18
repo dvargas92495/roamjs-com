@@ -1,7 +1,7 @@
 import { Button, Drawer, MenuItem, Position } from "@blueprintjs/core";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
-import { Transformer } from "markmap-lib";
+import { ITransformResult, Transformer } from "markmap-lib";
 import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 import { format } from "date-fns";
 import download from "downloadjs";
@@ -9,6 +9,11 @@ import download from "downloadjs";
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
 const SVG_ID = "roamjs-markmap";
+
+const transformRoot = ({ root }: Partial<ITransformResult>) => {
+  root.c?.forEach(child => transformRoot({ root: child }));
+  root.v = `<span class="bp3-icon bp3-icon-arrow-top-right"></span>${root.v}`;
+}
 
 const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   getMarkdown,
@@ -28,6 +33,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   const loadMarkmap = useCallback(() => {
     const { root, features } = transformer.transform(getMarkdown());
     const { styles, scripts } = transformer.getUsedAssets(features);
+    transformRoot({root });
     styles.forEach(({ type, data }) => {
       if (type === "stylesheet") {
         data["class"] = CLASSNAME;
