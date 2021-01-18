@@ -30,7 +30,7 @@ const toMarkdown = ({ c, i }: { c: TreeNode; i: number }): string =>
 
 const expandEmbeds = (c: TreeNode) => {
   c.children.forEach(expandEmbeds);
-  c.text.replace(
+  c.text = c.text.replace(
     /({{(?:\[\[)?embed(?:\]\]): \(\((..........?)\)\)}})/,
     (_, __, blockuid) => {
       const newNodes = getTextTreeByBlockUid(blockuid);

@@ -27,7 +27,7 @@ const shiftClickListener = (e: MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.tagName === "SPAN" && target.className === NODE_CLASSNAME) {
       const blockUid = target.getAttribute("data-block-uid");
-      const baseUrl = window.location.href.replace("/page/.*$", "");
+      const baseUrl = window.location.href.replace(/\/page\/.*$/, "");
       window.location.assign(`${baseUrl}/page/${blockUid}`);
     }
   }
@@ -78,9 +78,9 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     loadMarkmap();
   }, [loadMarkmap, unload, containerRef]);
   const open = useCallback(() => {
-    setIsOpen(true)
-    document.addEventListener('click', shiftClickListener);
-    window.addEventListener('popstate', refresh);
+    setIsOpen(true);
+    document.addEventListener("click", shiftClickListener);
+    window.addEventListener("popstate", refresh);
   }, [setIsOpen, refresh]);
   const close = useCallback(() => {
     setIsOpen(false);
@@ -90,8 +90,8 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
       "roam-article"
     )[0] as HTMLDivElement;
     article.style.paddingBottom = "120px";
-    document.removeEventListener('click', shiftClickListener);
-    window.removeEventListener('popstate', refresh);
+    document.removeEventListener("click", shiftClickListener);
+    window.removeEventListener("popstate", refresh);
   }, [setLoaded, setIsOpen, unload]);
   useEffect(() => {
     if (isOpen) {
