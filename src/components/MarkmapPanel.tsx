@@ -9,11 +9,17 @@ import download from "downloadjs";
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
 const SVG_ID = "roamjs-markmap";
+const RENDERED_TODO =
+  '<span><label class="check-container"><input type="checkbox"><span class="checkmark"></span></label></span>';
+const RENDERED_DONE =
+  '<span><label class="check-container"><input type="checkbox" checked=""><span class="checkmark"></span></label></span>';
 
 const transformRoot = ({ root }: Partial<ITransformResult>) => {
-  root.c?.forEach(child => transformRoot({ root: child }));
-  root.v = `<span class="bp3-icon bp3-icon-arrow-top-right"></span>${root.v}`;
-}
+  root.c?.forEach((child) => transformRoot({ root: child }));
+  root.v = root.v
+    .replace(/{{(?:\[\[)?TODO(?:\]\])?}}/g, RENDERED_TODO)
+    .replace(/{{(?:\[\[)?DONE(?:\]\])?}}/g, RENDERED_DONE);
+};
 
 const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   getMarkdown,
@@ -33,7 +39,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   const loadMarkmap = useCallback(() => {
     const { root, features } = transformer.transform(getMarkdown());
     const { styles, scripts } = transformer.getUsedAssets(features);
-    transformRoot({root });
+    transformRoot({ root });
     styles.forEach(({ type, data }) => {
       if (type === "stylesheet") {
         data["class"] = CLASSNAME;
@@ -99,17 +105,17 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     const svgElement = document.getElementById(SVG_ID);
     const filename = `${format(new Date(), "yyyyMMddhhmmss")}_mindmap.png`;
 
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = svgElement.parentElement.offsetWidth;
     canvas.height = svgElement.parentElement.offsetHeight;
     const ctx = canvas.getContext("2d");
     const data = new XMLSerializer().serializeToString(svgElement);
     const img = new Image();
     img.onload = () => {
-      ctx.drawImage(img, 0,0);
-      const uri = canvas.toDataURL('image/png');
-      download(uri, filename, 'image/png');
-    }
+      ctx.drawImage(img, 0, 0);
+      const uri = canvas.toDataURL("image/png");
+      download(uri, filename, "image/png");
+    };
     img.src = `data:image/svg+xml; charset=utf8, ${encodeURIComponent(data)}`;
   }, []);
   useEffect(() => {

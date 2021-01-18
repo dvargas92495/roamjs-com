@@ -13,7 +13,9 @@ const div = document.createElement("div");
 const toMarkdown = ({ c, i }: { c: TreeNode; i: number }): string =>
   `${"".padStart(i * 4, " ")}- ${
     c.heading ? `${"".padStart(c.heading, "#")} ` : ""
-  }${resolveRefs(c.text.trim())}${
+  }<span class="roamjs-mindmap-node" data-block-uid="${c.uid}">${resolveRefs(
+    c.text.trim()
+  )}</span>${
     c.open
       ? c.children
           .filter((nested) => !!nested.text || nested.children.length)
@@ -32,9 +34,9 @@ const getMarkdown = (): string => {
 runExtension("markmap", () => {
   createHTMLObserver({
     callback: (u: HTMLUListElement) => {
-      const lis = Array.from(u.getElementsByTagName("li")).map(
-        (l: HTMLLIElement) => l.innerText.trim()
-      );
+      const lis = Array.from(
+        u.getElementsByTagName("li")
+      ).map((l: HTMLLIElement) => l.innerText.trim());
       if (
         lis.includes("Open right sidebar") &&
         !u.getAttribute("data-roamjs-has-markmap")
