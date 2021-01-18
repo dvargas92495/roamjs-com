@@ -68,10 +68,20 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     loadJS(scripts, { getMarkmap: () => ({ refreshHook }) });
     markmapRef.current = Markmap.create(`#${SVG_ID}`, null, root);
   }, [markmapRef, getMarkdown]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const refresh = useCallback(() => {
+    unload();
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("id", SVG_ID);
+    svg.setAttribute("style", "width: 100%; height: 100%");
+    containerRef.current.insertBefore(svg, containerRef.current.firstChild);
+    loadMarkmap();
+  }, [loadMarkmap, unload, containerRef]);
   const open = useCallback(() => {
     setIsOpen(true)
     document.addEventListener('click', shiftClickListener);
-  }, [setIsOpen]);
+    window.addEventListener('popstate', refresh);
+  }, [setIsOpen, refresh]);
   const close = useCallback(() => {
     setIsOpen(false);
     setLoaded(false);
@@ -81,8 +91,8 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     )[0] as HTMLDivElement;
     article.style.paddingBottom = "120px";
     document.removeEventListener('click', shiftClickListener);
+    window.removeEventListener('popstate', refresh);
   }, [setLoaded, setIsOpen, unload]);
-  const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (isOpen) {
       setLoaded(true);
@@ -109,14 +119,6 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
       }
     }
   }, [containerRef.current, loaded, loadMarkmap]);
-  const refresh = useCallback(() => {
-    unload();
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("id", SVG_ID);
-    svg.setAttribute("style", "width: 100%; height: 100%");
-    containerRef.current.insertBefore(svg, containerRef.current.firstChild);
-    loadMarkmap();
-  }, [loadMarkmap, unload, containerRef]);
   const exporter = useCallback(async () => {
     const svgElement = document.getElementById(SVG_ID);
     const filename = `${format(new Date(), "yyyyMMddhhmmss")}_mindmap.png`;
