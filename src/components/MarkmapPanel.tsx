@@ -27,7 +27,7 @@ const shiftClickListener = (e: MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.tagName === "SPAN" && target.className === NODE_CLASSNAME) {
       const blockUid = target.getAttribute("data-block-uid");
-      const baseUrl = window.location.href.replace("/page/(.*)$", "");
+      const baseUrl = window.location.href.replace("/page/.*$", "");
       window.location.assign(`${baseUrl}/page/${blockUid}`);
     }
   }
