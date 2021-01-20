@@ -11,9 +11,9 @@ const CLASSNAME = "roamjs-markmap-class";
 export const NODE_CLASSNAME = "roamjs-mindmap-node";
 const SVG_ID = "roamjs-markmap";
 const RENDERED_TODO =
-  '<span><label class="check-container"><input type="checkbox" disabled=""><span class="checkmark"></span></label></span>';
+  '<span style="-webkit-transform:translateZ(0)"><label class="check-container"><input type="checkbox" disabled=""><span class="checkmark"></span></label></span>';
 const RENDERED_DONE =
-  '<span><label class="check-container"><input type="checkbox" checked="" disabled=""><span class="checkmark"></span></label></span>';
+  '<span style="-webkit-transform:translateZ(0)"><label class="check-container"><input type="checkbox" checked="" disabled=""><span class="checkmark"></span></label></span>';
 
 const transformRoot = ({ root }: Partial<ITransformResult>) => {
   root.c?.forEach((child) => transformRoot({ root: child }));
