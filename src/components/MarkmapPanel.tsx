@@ -5,6 +5,7 @@ import { ITransformResult, Transformer } from "markmap-lib";
 import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 import { format } from "date-fns";
 import download from "downloadjs";
+import "save-svg-as-png/lib/saveSvgAsPng";
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
@@ -122,7 +123,10 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   const exporter = useCallback(async () => {
     const svgElement = document.getElementById(SVG_ID);
     const filename = `${format(new Date(), "yyyyMMddhhmmss")}_mindmap.png`;
-
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    window.saveSvgAsPng(svgElement, filename);
+    /*
     const canvas = document.createElement("canvas");
     canvas.width = svgElement.parentElement.offsetWidth;
     canvas.height = svgElement.parentElement.offsetHeight;
@@ -135,6 +139,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
       download(uri, filename, "image/png");
     };
     img.src = `data:image/svg+xml; charset=utf8, ${encodeURIComponent(data)}`;
+  */
   }, []);
   useEffect(() => {
     if (containerRef.current) {
