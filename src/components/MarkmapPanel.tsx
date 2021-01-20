@@ -4,10 +4,8 @@ import ReactDOM from "react-dom";
 import { ITransformResult, Transformer } from "markmap-lib";
 import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 import { format } from "date-fns";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-ignore
-import { saveSvgAsPng } from "save-svg-as-png/lib/saveSvgAsPng";
 import { isSafari } from "mobile-device-detect";
+import download from "downloadjs";
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
@@ -129,23 +127,21 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   const exporter = useCallback(async () => {
     const svgElement = document.getElementById(SVG_ID);
     const filename = `${format(new Date(), "yyyyMMddhhmmss")}_mindmap.png`;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    saveSvgAsPng(svgElement, filename);
-    /*
+    
     const canvas = document.createElement("canvas");
     canvas.width = svgElement.parentElement.offsetWidth;
     canvas.height = svgElement.parentElement.offsetHeight;
     const ctx = canvas.getContext("2d");
     const data = new XMLSerializer().serializeToString(svgElement);
-    const img = new Image();
+    const img = new Image(canvas.width, canvas.height);
     img.onload = () => {
+      document.body.appendChild(img);
       ctx.drawImage(img, 0, 0);
       const uri = canvas.toDataURL("image/png");
+      img.remove();
       download(uri, filename, "image/png");
     };
     img.src = `data:image/svg+xml; charset=utf8, ${encodeURIComponent(data)}`;
-  */
   }, []);
   useEffect(() => {
     if (containerRef.current) {
