@@ -137,10 +137,10 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     img.onload = () => {
       document.body.appendChild(canvas);
       document.body.appendChild(img);
-      ctx.drawImage(img, 0, 0);
-      const uri = canvas.toDataURL("image/png");
       // hack to allow image to paint on safari
       setTimeout(() => {
+        ctx.drawImage(img, 0, 0);
+        const uri = canvas.toDataURL("image/png");
         download(uri, filename, "image/png");
         img.remove();
         canvas.remove();
