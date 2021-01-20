@@ -4,23 +4,29 @@ import ReactDOM from "react-dom";
 import { ITransformResult, Transformer } from "markmap-lib";
 import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 import { format } from "date-fns";
-import download from "downloadjs";
-import "save-svg-as-png/lib/saveSvgAsPng";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
+import saveSvgAsPng from "save-svg-as-png/lib/saveSvgAsPng";
+import { isSafari } from "mobile-device-detect";
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
 export const NODE_CLASSNAME = "roamjs-mindmap-node";
 const SVG_ID = "roamjs-markmap";
 const RENDERED_TODO =
-  '<span style="-webkit-transform:translateZ(0)"><label class="check-container"><input type="checkbox" disabled=""><span class="checkmark"></span></label></span>';
+  '<span><label class="check-container"><input type="checkbox" disabled=""><span class="checkmark"></span></label></span>';
 const RENDERED_DONE =
-  '<span style="-webkit-transform:translateZ(0)"><label class="check-container"><input type="checkbox" checked="" disabled=""><span class="checkmark"></span></label></span>';
+  '<span><label class="check-container"><input type="checkbox" checked="" disabled=""><span class="checkmark"></span></label></span>';
 
 const transformRoot = ({ root }: Partial<ITransformResult>) => {
   root.c?.forEach((child) => transformRoot({ root: child }));
   root.v = root.v
-    .replace(/{{(?:\[\[)?TODO(?:\]\])?}}/g, RENDERED_TODO)
-    .replace(/{{(?:\[\[)?DONE(?:\]\])?}}/g, RENDERED_DONE);
+    .replace(/{{(?:\[\[)?TODO(?:\]\])?}}/g, (s) =>
+      isSafari ? s : RENDERED_TODO
+    )
+    .replace(/{{(?:\[\[)?DONE(?:\]\])?}}/g, (s) =>
+      isSafari ? s : RENDERED_DONE
+    );
 };
 
 const shiftClickListener = (e: MouseEvent) => {
@@ -125,7 +131,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     const filename = `${format(new Date(), "yyyyMMddhhmmss")}_mindmap.png`;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    window.saveSvgAsPng(svgElement, filename);
+    saveSvgAsPng(svgElement, filename);
     /*
     const canvas = document.createElement("canvas");
     canvas.width = svgElement.parentElement.offsetWidth;
