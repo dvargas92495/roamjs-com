@@ -6,7 +6,7 @@ import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 import { format } from "date-fns";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
-import saveSvgAsPng from "save-svg-as-png/lib/saveSvgAsPng";
+import { saveSvgAsPng } from "save-svg-as-png/lib/saveSvgAsPng";
 import { isSafari } from "mobile-device-detect";
 
 const transformer = new Transformer();
