@@ -127,7 +127,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
   const exporter = useCallback(async () => {
     const svgElement = document.getElementById(SVG_ID);
     const filename = `${format(new Date(), "yyyyMMddhhmmss")}_mindmap.png`;
-    
+
     const canvas = document.createElement("canvas");
     canvas.width = svgElement.parentElement.offsetWidth;
     canvas.height = svgElement.parentElement.offsetHeight;
@@ -135,11 +135,13 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     const data = new XMLSerializer().serializeToString(svgElement);
     const img = new Image(canvas.width, canvas.height);
     img.onload = () => {
+      document.body.appendChild(canvas);
       document.body.appendChild(img);
       ctx.drawImage(img, 0, 0);
       const uri = canvas.toDataURL("image/png");
-      img.remove();
       download(uri, filename, "image/png");
+      img.remove();
+      canvas.remove();
     };
     img.src = `data:image/svg+xml; charset=utf8, ${encodeURIComponent(data)}`;
   }, []);
