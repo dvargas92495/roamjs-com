@@ -4,6 +4,7 @@ import ReactDOM from "react-dom";
 import { ITransformResult, Transformer } from "markmap-lib";
 import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 import { format } from "date-fns";
+import { isSafari } from "mobile-device-detect";
 import download from "downloadjs";
 
 const transformer = new Transformer();
@@ -18,8 +19,12 @@ const RENDERED_DONE =
 const transformRoot = ({ root }: Partial<ITransformResult>) => {
   root.c?.forEach((child) => transformRoot({ root: child }));
   root.v = root.v
-    .replace(/{{(?:\[\[)?TODO(?:\]\])?}}/g, RENDERED_TODO)
-    .replace(/{{(?:\[\[)?DONE(?:\]\])?}}/g, RENDERED_DONE);
+    .replace(/{{(?:\[\[)?TODO(?:\]\])?}}/g, (s) =>
+      isSafari ? s : RENDERED_TODO
+    )
+    .replace(/{{(?:\[\[)?DONE(?:\]\])?}}/g, (s) =>
+      isSafari ? s : RENDERED_DONE
+    );
 };
 
 const shiftClickListener = (e: MouseEvent) => {
@@ -128,11 +133,18 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
     canvas.height = svgElement.parentElement.offsetHeight;
     const ctx = canvas.getContext("2d");
     const data = new XMLSerializer().serializeToString(svgElement);
-    const img = new Image();
+    const img = new Image(canvas.width, canvas.height);
     img.onload = () => {
-      ctx.drawImage(img, 0, 0);
-      const uri = canvas.toDataURL("image/png");
-      download(uri, filename, "image/png");
+      document.body.appendChild(canvas);
+      document.body.appendChild(img);
+      // hack to allow image to paint on safari
+      setTimeout(() => {
+        ctx.drawImage(img, 0, 0);
+        const uri = canvas.toDataURL("image/png");
+        download(uri, filename, "image/png");
+        img.remove();
+        canvas.remove();
+      }, 1);
     };
     img.src = `data:image/svg+xml; charset=utf8, ${encodeURIComponent(data)}`;
   }, []);
