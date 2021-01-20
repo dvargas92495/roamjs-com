@@ -16,7 +16,6 @@ import {
 } from "@dvargas92495/ui";
 import {
   useAuthenticatedAxiosFlossGet,
-  useAuthenticatedAxiosFlossPost,
   useAuthenticatedAxiosPut,
   useAuthenticatedAxiosRoamJSGet,
   useAuthenticatedAxiosRoamJSPost,
@@ -24,6 +23,7 @@ import {
 import Link from "next/link";
 import axios from "axios";
 import { FLOSS_API_URL } from "../../components/constants";
+import awsTlds from "../../components/aws_tlds";
 
 const UserValue: React.FunctionComponent = ({ children }) => (
   <span style={{ marginBottom: -24, paddingLeft: 64, display: "block" }}>
@@ -99,45 +99,6 @@ const Settings = ({ name, email }: { name: string; email: string }) => {
   );
 };
 
-const BuyCancelButton: React.FunctionComponent<{
-  priceId: string;
-  subscriptions: { price: string; id: string }[];
-  onSuccess: () => Promise<void>;
-}> = ({ priceId, subscriptions, onSuccess }) => {
-  const axiosPost = useAuthenticatedAxiosFlossPost();
-  const buySubscription = useCallback(
-    () => axiosPost("stripe-subscribe", { priceId }),
-    [axiosPost]
-  );
-  const cancelSubscription = useCallback(
-    () =>
-      axiosPost("stripe-cancel", {
-        subscriptionId: subscriptions.find(({ price }) => priceId === price).id,
-      }),
-    [axiosPost]
-  );
-  const pricesSubscribed = new Set(subscriptions.map(({ price }) => price));
-  return pricesSubscribed.has(priceId) ? (
-    <ConfirmationDialog
-      color={"secondary"}
-      action={cancelSubscription}
-      buttonText={"Cancel"}
-      content={"Are you sure you want to cancel this service?"}
-      onSuccess={onSuccess}
-      title={"Cancel RoamJS Service"}
-    />
-  ) : (
-    <ConfirmationDialog
-      color={"primary"}
-      action={buySubscription}
-      buttonText={"Buy"}
-      content={"Are you sure you want to buy this service?"}
-      onSuccess={onSuccess}
-      title={"Buy RoamJS Service"}
-    />
-  );
-};
-
 const Billing = () => {
   const [payment, setPayment] = useState<{
     brand?: string;
@@ -145,7 +106,7 @@ const Billing = () => {
     id?: string;
   }>({});
   const [products, setProducts] = useState([]);
-  const [subscriptions, setSubscriptions] = useState([]);
+  const [subscriptions, setSubscriptions] = useState(new Set<string>());
   const authenticatedAxios = useAuthenticatedAxiosFlossGet();
   const getPayment = useCallback(
     () =>
@@ -164,7 +125,9 @@ const Billing = () => {
   const getSubscriptions = useCallback(
     () =>
       authenticatedAxios("stripe-subscriptions").then((r) =>
-        setSubscriptions(r.data.subscriptions)
+        setSubscriptions(
+          new Set(r.data.subscriptions.map(({ price }) => price))
+        )
       ),
     [setSubscriptions]
   );
@@ -198,24 +161,19 @@ const Billing = () => {
       <H6>Services</H6>
       <DataLoader loadAsync={loadAsync}>
         <Items
-          items={products.map((p) => ({
-            primary: <UserValue>{p.name}</UserValue>,
-            secondary: <UserValue>{p.description}</UserValue>,
-            key: p.id,
-            avatar: (
-              <Subtitle>
-                ${p.prices[0].unit_amount / 100}/
-                {p.prices[0].recurring.interval.substring(0, 2)}
-              </Subtitle>
-            ),
-            action: (
-              <BuyCancelButton
-                priceId={p.prices[0].id}
-                subscriptions={subscriptions}
-                onSuccess={loadAsync}
-              />
-            ),
-          }))}
+          items={products
+            .filter((p) => subscriptions.has(p.prices[0].id))
+            .map((p) => ({
+              primary: <UserValue>{p.name}</UserValue>,
+              secondary: <UserValue>{p.description}</UserValue>,
+              key: p.id,
+              avatar: (
+                <Subtitle>
+                  ${p.prices[0].unit_amount / 100}/
+                  {p.prices[0].recurring.interval.substring(0, 2)}
+                </Subtitle>
+              ),
+            }))}
         />
       </DataLoader>
     </>
@@ -232,20 +190,25 @@ type WebsiteData = {
 const isWebsiteReady = (w: WebsiteData) =>
   w.status === "LIVE" && w.deploys.length && w.deploys[0].status === "SUCCESS";
 
+const TLD_REGEX = new RegExp(`\\.${awsTlds.join("|")}`);
+const domainValidate = async (domain: string) => {
+  const valid = TLD_REGEX.test(domain);
+  if (!valid) {
+    return "Invalid domain. Try a .com!";
+  }
+  return axios
+    .get(`${FLOSS_API_URL}/aws-check-domain?domain=${domain}`)
+    .then((r) =>
+      r.data.Availability === "AVAILABLE" ? "" : `${domain} is not available!`
+    )
+    .catch((e) => e.message);
+};
+
 const Website = () => {
-  const flossGet = useAuthenticatedAxiosFlossGet();
   const authenticatedAxiosGet = useAuthenticatedAxiosRoamJSGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosRoamJSPost();
   const [website, setWebsite] = useState<WebsiteData>();
-  const [isSubscribed, setIsSubscribed] = useState(false);
   const timeoutRef = useRef(0);
-  const getIsSubscribed = useCallback(
-    () =>
-      flossGet(
-        `stripe-is-subscribed?product=${encodeURI("RoamJS Site")}`
-      ).then((r) => setIsSubscribed(r.data.subscribed)),
-    [flossGet, setIsSubscribed]
-  );
   const getWebsite = useCallback(
     () =>
       authenticatedAxiosGet("website-status").then((r) => {
@@ -269,88 +232,87 @@ const Website = () => {
     [authenticatedAxiosPost]
   );
   useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
+
   return (
-    <DataLoader loadAsync={getIsSubscribed}>
-      {isSubscribed ? (
-        <DataLoader loadAsync={getWebsite}>
-          {website ? (
-            <>
-              <Items
-                items={[
-                  {
-                    primary: <UserValue>{website.graph}</UserValue>,
-                    key: 0,
-                    avatar: <Subtitle>Graph</Subtitle>,
-                  },
-                  {
-                    primary: <UserValue>{website.status}</UserValue>,
-                    key: 1,
-                    avatar: <Subtitle>Status</Subtitle>,
-                  },
-                ]}
-              />
-              <Button
-                variant={"contained"}
-                color={"primary"}
-                style={{ margin: "0 16px" }}
-                disabled={!isWebsiteReady(website)}
-                onClick={manualDeploy}
-              >
-                Manual Deploy
-              </Button>
-              <ConfirmationDialog
-                color={"secondary"}
-                action={shutdownWebsite}
-                buttonText={"Shutdown"}
-                content={
-                  "Are you sure you want to shut down this RoamJS site? This operation is irreversible."
-                }
-                onSuccess={getWebsite}
-                title={"Buy RoamJS Service"}
-              />
-              <hr style={{ margin: "16px 0" }} />
-              <H6>Deploys</H6>
-              <Items
-                items={website.deploys.map((d) => ({
-                  primary: <UserValue>{d.status}</UserValue>,
-                  key: d.uuid,
-                  secondary: (
-                    <UserValue>At {new Date(d.date).toLocaleString()}</UserValue>
-                  ),
-                }))}
-              />
-            </>
-          ) : (
-            <>
-              <Body>
-                You don't currently have a live Roam site. Click the button
-                below to start!
-              </Body>
-              <FormDialog
-                onSave={launchWebsite}
-                onSuccess={getWebsite}
-                buttonText={"LAUNCH"}
-                title={"Launch Roam Website"}
-                contentText={
-                  "Fill out the info below and your Roam graph will launch as a site in minutes!"
-                }
-                formElements={[
-                  {
-                    name: "graph",
-                    defaultValue: "",
-                    component: StringField,
-                    validate: () => "",
-                  },
-                ]}
-              />
-            </>
-          )}
-        </DataLoader>
+    <DataLoader loadAsync={getWebsite}>
+      {website ? (
+        <>
+          <Items
+            items={[
+              {
+                primary: <UserValue>{website.graph}</UserValue>,
+                key: 0,
+                avatar: <Subtitle>Graph</Subtitle>,
+              },
+              {
+                primary: <UserValue>{website.status}</UserValue>,
+                key: 1,
+                avatar: <Subtitle>Status</Subtitle>,
+              },
+            ]}
+          />
+          <Button
+            variant={"contained"}
+            color={"primary"}
+            style={{ margin: "0 16px" }}
+            disabled={!isWebsiteReady(website)}
+            onClick={manualDeploy}
+          >
+            Manual Deploy
+          </Button>
+          <ConfirmationDialog
+            color={"secondary"}
+            action={shutdownWebsite}
+            buttonText={"Shutdown"}
+            content={
+              "Are you sure you want to shut down this RoamJS site? This operation is irreversible."
+            }
+            onSuccess={getWebsite}
+            title={"Buy RoamJS Service"}
+          />
+          <hr style={{ margin: "16px 0" }} />
+          <H6>Deploys</H6>
+          <Items
+            items={website.deploys.map((d) => ({
+              primary: <UserValue>{d.status}</UserValue>,
+              key: d.uuid,
+              secondary: (
+                <UserValue>At {new Date(d.date).toLocaleString()}</UserValue>
+              ),
+            }))}
+          />
+        </>
       ) : (
-        <Body>
-          You are not subscribed to the RoamJS Site service. Head to Billing to
-          subscribe!
-        </Body>
+        <>
+          <Body>
+            You don't currently have a live Roam site. Click the button below to
+            start!
+          </Body>
+          <FormDialog
+            onSave={launchWebsite}
+            onSuccess={getWebsite}
+            buttonText={"LAUNCH"}
+            title={"Launch Roam Website"}
+            contentText={
+              "Fill out the info below and your Roam graph will launch as a site in minutes! This service will cost $12/month"
+            }
+            formElements={[
+              {
+                name: "graph",
+                defaultValue: "",
+                component: StringField,
+                validate: () => "",
+              },
+              {
+                name: "domain",
+                defaultValue: "",
+                component: StringField,
+                validate: async (value) =>
+                  await domainValidate(value as string),
+              },
+            ]}
+          />
+        </>
       )}
     </DataLoader>
   );

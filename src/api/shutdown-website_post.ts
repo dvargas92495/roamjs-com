@@ -10,14 +10,43 @@ const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  const Authorization = event.headers.Authorization;
+  const opts = {
+    headers: { Authorization },
+  };
+
   const {
     data: { website },
   } = await axios.get(
     `${process.env.FLOSS_API_URL}/auth-user-metadata?key=website`,
-    {
-      headers: { Authorization: event.headers.Authorization },
-    }
+    opts
   );
+
+  const cancelled = await axios
+    .get(
+      `${process.env.FLOSS_API_URL}/stripe-is-subscribed?product=${encodeURI(
+        "RoamJS Site"
+      )}`,
+      opts
+    )
+    .then((r) =>
+      axios
+        .post(
+          "stripe-cancel",
+          {
+            subscriptionId: r.data.subscribedId,
+          },
+          opts
+        )
+        .then((r) => r.data.success)
+    );
+  if (!cancelled) {
+    return {
+      statusCode: 500,
+      body: "Failed to cancel RoamJS Site subscription",
+      headers,
+    };
+  }
 
   await dynamo
     .putItem({
@@ -42,15 +71,13 @@ export const handler = async (
   await axios.put(
     `${process.env.FLOSS_API_URL}/auth-user-metadata`,
     { website: undefined },
-    {
-      headers: { Authorization: event.headers.Authorization },
-    }
+    opts
   );
 
   await lambda
     .invoke({
       FunctionName: "RoamJS_shutdown",
-      InvocationType: 'Event',
+      InvocationType: "Event",
       Payload: JSON.stringify({
         roamGraph: website.graph,
       }),

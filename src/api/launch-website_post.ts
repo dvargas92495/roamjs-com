@@ -10,24 +10,57 @@ const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const { graph, url } = JSON.parse(event.body);
+  const { graph, domain } = JSON.parse(event.body);
   if (!graph) {
     return {
       statusCode: 400,
-      body: JSON.stringify("Roam Graph is required"),
+      body: "Roam Graph is required",
       headers,
     };
   }
 
-  /*
-  if (!url) {
+  if (!domain) {
     return {
       statusCode: 400,
-      body: JSON.stringify("Target URL is required"),
+      body: "Target Domain is required",
       headers,
     };
   }
-  */
+  const available = await axios
+    .get(`${process.env.FLOSS_API_URL}/aws-check-domain?domain=${domain}`)
+    .then((r) => r.data.Availability === "AVAILABLE");
+  if (!available) {
+    return {
+      statusCode: 400,
+      body: `${domain} is not available!`,
+      headers,
+    };
+  }
+
+  const Authorization = event.headers.Authorization;
+
+  const subscriptionActive = await axios
+    .get(`${process.env.FLOSS_API_URL}/stripe-products?project=RoamJS`)
+    .then((r) =>
+      r.data.products.find((p: { name: string }) => p.name === "RoamJS Site")
+    )
+    .then((p) =>
+      axios
+        .post(
+          `${process.env.FLOSS_API_URL}/stripe-subscribe`,
+          { priceId: p.prices[0].id },
+          { headers: { Authorization } }
+        )
+        .then((r) => r.data.active)
+    );
+
+  if (!subscriptionActive) {
+    return {
+      statusCode: 500,
+      body: "Failed to subscribe to RoamJS Site service",
+      headers,
+    };
+  }
 
   await dynamo
     .putItem({
@@ -49,21 +82,22 @@ export const handler = async (
     })
     .promise();
 
-  const website = { graph, url };
+  const website = { graph, domain };
   await axios.put(
     `${process.env.FLOSS_API_URL}/auth-user-metadata`,
     { website },
     {
-      headers: { Authorization: event.headers.Authorization },
+      headers: { Authorization },
     }
   );
 
   await lambda
     .invoke({
       FunctionName: "RoamJS_launch",
-      InvocationType: 'Event',
+      InvocationType: "Event",
       Payload: JSON.stringify({
         roamGraph: graph,
+        domain,
       }),
     })
     .promise();

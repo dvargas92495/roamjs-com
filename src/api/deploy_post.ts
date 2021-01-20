@@ -45,6 +45,7 @@ export const handler = async (
       InvocationType: "Event",
       Payload: JSON.stringify({
         roamGraph: website.graph,
+        domain: website.domain,
       }),
     })
     .promise();
