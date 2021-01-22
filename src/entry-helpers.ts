@@ -80,6 +80,7 @@ export const replaceText = ({
   prepend?: boolean;
 }): void => {
   const textArea = document.activeElement as HTMLTextAreaElement;
+  const id = textArea.id;
   const oldValue = textArea.value;
   const start = textArea.selectionStart;
   const end = textArea.selectionEnd;
@@ -105,7 +106,7 @@ export const replaceText = ({
     const newStart = index > start ? start : start + diff;
     const newEnd = index > end ? end : end + diff;
     if (newStart !== start || newEnd !== newEnd) {
-      setTimeout(() => textArea.setSelectionRange(newStart, newEnd), 100);
+      (document.getElementById(id) as HTMLTextAreaElement).setSelectionRange(newStart, newEnd);
     }
   }
 };
