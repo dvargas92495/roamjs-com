@@ -155,8 +155,9 @@ const ContentSlide = ({
   const isLeftLayout = ENDS_WITH_LEFT.test(layout);
   const bullets = isImageLayout ? children.slice(1) : children;
   const slideRoot = useRef<HTMLDivElement>(null);
+  const [caretsLoaded, setCaretsLoaded] = useState(false);
   useEffect(() => {
-    if (collapsible) {
+    if (collapsible && !caretsLoaded) {
       const lis = Array.from(slideRoot.current.getElementsByTagName("li"));
       let minDepth = Number.MAX_VALUE;
       lis.forEach((l) => {
@@ -184,8 +185,9 @@ const ContentSlide = ({
           l.style.display = "none";
         }
       });
+      setCaretsLoaded(true);
     }
-  }, [collapsible, slideRoot.current]);
+  }, [collapsible, slideRoot.current, caretsLoaded, setCaretsLoaded]);
   const onRootClick = useCallback(
     (e: React.MouseEvent) => {
       if (collapsible) {
