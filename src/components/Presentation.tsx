@@ -175,7 +175,10 @@ const ContentSlide = ({
       const lis = Array.from(slideRoot.current.getElementsByTagName("li"));
       let minDepth = Number.MAX_VALUE;
       lis.forEach((l) => {
-        if (l.getElementsByTagName("ul").length) {
+        if (
+          l.getElementsByTagName("ul").length ||
+          l.getElementsByTagName("ol").length
+        ) {
           const spanIcon = document.createElement("span");
           spanIcon.className =
             "bp3-icon bp3-icon-caret-right roamjs-collapsible-caret";

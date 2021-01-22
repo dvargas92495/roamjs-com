@@ -80,9 +80,6 @@ export const replaceText = async ({
   prepend?: boolean;
 }): Promise<void> => {
   const textArea = document.activeElement as HTMLTextAreaElement;
-  const start = textArea.selectionStart;
-  const end = textArea.selectionEnd;
-  const diff = after.length - before.length;
   const text = !before
     ? prepend
       ? `${after} ${textArea.value}`
@@ -90,7 +87,6 @@ export const replaceText = async ({
     : textArea.value.replace(`${before}${!after && prepend ? " " : ""}`, after);
   const { blockUid } = getUids(textArea);
   window.roamAlphaAPI.updateBlock({ block: { string: text, uid: blockUid } });
-  textArea.setSelectionRange(start + diff, end + diff);
 };
 
 export const replaceTagText = async ({
