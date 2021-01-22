@@ -64,7 +64,7 @@ const renderBullet = ({
             (nested) =>
               `\n${renderBullet({
                 c: nested,
-                i: i + 1,
+                i: parentViewType === "document" ? i : i + 1,
                 parentViewType: c.viewType,
               })}`
           )
@@ -216,7 +216,7 @@ const ContentSlide = ({
               "bp3-icon-caret-down",
               "bp3-icon-caret-right"
             );
-            lisToRestyle.forEach((l) => (l.style.display = "list-item"));
+            lisToRestyle.forEach((l) => (l.style.display = "none"));
           }
         }
       }
