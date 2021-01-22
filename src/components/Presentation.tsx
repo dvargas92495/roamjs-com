@@ -159,23 +159,23 @@ const ContentSlide = ({
     if (collapsible) {
       const lis = Array.from(slideRoot.current.getElementsByTagName("li"));
       let minDepth = Number.MAX_VALUE;
-      lis
-        .filter((l) => !!l.getElementsByTagName("ul").length)
-        .forEach((l) => {
+      lis.forEach((l) => {
+        if (l.getElementsByTagName("ul").length) {
           const spanIcon = document.createElement("span");
           spanIcon.className =
             "bp3-icon bp3-icon-caret-right roamjs-collapsible-caret";
           l.style.position = "relative";
           l.insertBefore(spanIcon, l.childNodes[0]);
-          let depth = 0;
-          let parentElement = l as HTMLElement;
-          while (parentElement !== slideRoot.current) {
-            parentElement = parentElement.parentElement;
-            depth++;
-          }
-          minDepth = Math.min(minDepth, depth);
-          l.setAttribute("data-dom-depth", depth.toString());
-        });
+        }
+        let depth = 0;
+        let parentElement = l as HTMLElement;
+        while (parentElement !== slideRoot.current) {
+          parentElement = parentElement.parentElement;
+          depth++;
+        }
+        minDepth = Math.min(minDepth, depth);
+        l.setAttribute("data-dom-depth", depth.toString());
+      });
       lis.forEach((l) => {
         const depth = parseInt(l.getAttribute("data-dom-depth"));
         if (depth === minDepth) {

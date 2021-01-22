@@ -23,6 +23,7 @@ addStyle(`.roamjs-collapsible-caret {
   position: absolute;
   top: 12px;
   left: -76px;
+  cursor: pointer;
 }`)
 
 runExtension("presentation", async () => {

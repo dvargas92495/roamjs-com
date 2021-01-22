@@ -521,7 +521,7 @@ export type TreeNode = {
 
 const getTextTreeByBlockId = (blockId: number): TreeNode => {
   const block = window.roamAlphaAPI.pull(
-    "[:block/children, :block/string, :block/order, :block/uid, :block/heading, :block/open]",
+    "[:block/children, :block/string, :block/order, :block/uid, :block/heading, :block/open, :block/view-type]",
     blockId
   );
   const children = block[":block/children"] || [];
