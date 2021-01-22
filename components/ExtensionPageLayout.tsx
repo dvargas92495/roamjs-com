@@ -25,6 +25,7 @@ const contributors = {
   "Eddie Cohen": "https://eddiecohen.com/",
   "Rushi Bhavsar": "https://twitter.com/RushiBhavsar",
   "Chris Kunicki": "https://twitter.com/roamhacker",
+  "Ivo Velitchkov": "https://www.strategicstructures.com/",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{

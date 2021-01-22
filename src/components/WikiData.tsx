@@ -11,10 +11,10 @@ import {
 import React, { useCallback, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
-import { asyncPaste, openBlock } from "roam-client";
-import userEvent from "@testing-library/user-event";
+import { getUidsFromId } from "roam-client";
 import DemoPopoverWrapper from "./DemoPopoverWrapper";
 import { useArrowKeyDown } from "./hooks";
+import { getTextByBlockUid } from "../entry-helpers";
 
 const MENUITEM_CLASSNAME = "roamjs-wiki-data-result";
 
@@ -73,10 +73,15 @@ const WikiContent = ({
           )}`
         )
         .then(async (r) => {
+          const { blockUid } = getUidsFromId(blockId);
           const { extract } = r.data;
-          await openBlock(document.getElementById(blockId));
-          await userEvent.clear(document.activeElement);
-          await asyncPaste(extract);
+          const text = getTextByBlockUid(blockUid);
+          window.roamAlphaAPI.updateBlock({
+            block: {
+              uid: blockUid,
+              string: text.replace(/{{wiki(-data)?}}/i, extract),
+            },
+          });
           closePopover();
         })
         .catch((e) => {

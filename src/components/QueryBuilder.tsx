@@ -500,6 +500,7 @@ export const renderQueryBuilder = ({
     parent
   );
 
+const defaultWrite = () => true;
 export const DemoQueryBuilder = (): JSX.Element => {
   useEffect(() => {
     window.roamAlphaAPI = {
@@ -512,6 +513,13 @@ export const DemoQueryBuilder = (): JSX.Element => {
         ":block/children": [],
         ":block/string": "",
       }),
+      createBlock: defaultWrite,
+      updateBlock: defaultWrite,
+      moveBlock: defaultWrite,
+      deleteBlock: defaultWrite,
+      createPage: defaultWrite,
+      updatePage: defaultWrite,
+      deletePage: defaultWrite,
     };
   }, []);
   return (

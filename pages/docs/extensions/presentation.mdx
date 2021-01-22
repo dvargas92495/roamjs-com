@@ -1,7 +1,7 @@
 ---
 layout: "ExtensionPageLayout"
 description: "Use this extension to build slideshow presentations from within Roam!"
-contributors: Tomáš Baránek 💵, Matt Brockwell 💵,Abhay Prasanna 📓🤔, Adolfo Ramírez Corona 📓
+contributors: Tomáš Baránek 💵, Matt Brockwell 💵,Ivo Velitchkov 💵📓, Abhay Prasanna 📓🤔, Adolfo Ramírez Corona 📓
 ---
 
 Type `{{presentation}}` or `{{slides}}` in a block. Clicking the button will overlay a presentation directly from Roam! Exit the presentation by hitting 'ESC'.
@@ -59,6 +59,10 @@ The following layouts are also supported:
 You could configure individual slides to have collapsible bullets. To make a slide collapsible, add the `{collapsible}` attribute next to the slide title like this:
 
 - `Slide Title {collapsible}`
+
+To apply to all of the slides in a presentation, add to it inside the presentation button:
+
+- `{{presentation:{collapsible}}}`
 
 import DemoPresentation from '../../../components/DemoPresentation'
 

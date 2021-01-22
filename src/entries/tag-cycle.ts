@@ -101,9 +101,6 @@ runExtension("tag-cycle", () => {
               (textarea.value.includes(`#${tag1}`) && tag1) ||
               (!tag1 && blockUidsByKeystroke[keyStroke].size === 1)
             ) {
-              const start = textarea.selectionStart;
-              const end = textarea.selectionEnd;
-              const initialLength = textarea.value.length;
               const tag2 = cycle[(index + 1 + cycle.length) % cycle.length];
               const prepend = modifiers.includes("FRONT");
               if (modifiers.includes("RAW")) {
@@ -116,12 +113,6 @@ runExtension("tag-cycle", () => {
                   prepend,
                 });
               }
-              const diff = textarea.value.length - initialLength;
-              // this is insane. but the cursor wasn't cooperating, probably because of react
-              setTimeout(
-                () => textarea.setSelectionRange(start + diff, end + diff),
-                1
-              );
               e.preventDefault();
               e.stopPropagation();
               break;
