@@ -58,17 +58,17 @@ const renderBullet = ({
   `${"".padStart(i * 4, " ")}${
     c.text.match("!\\[.*\\]\\(.*\\)") ? "" : renderViewType(parentViewType)
   }${c.heading ? `${"".padStart(c.heading, "#")} ` : ""}${resolveRefs(c.text)}${
-    c.open
-      ? c.children
+    c.open && c.children.length
+      ? `\n${c.children
           .map(
             (nested) =>
-              `\n${renderBullet({
+              `${renderBullet({
                 c: nested,
                 i: parentViewType === "document" ? i : i + 1,
                 parentViewType: c.viewType,
               })}`
           )
-          .join("")
+          .join(parentViewType === "document" ? "\n\n" : "\n")}`
       : ""
   }`;
 
@@ -137,6 +137,20 @@ const TitleSlide = ({ text, note }: { text: string; note: Slide }) => {
 const STARTS_WITH_IMAGE = new RegExp("^image ", "i");
 const ENDS_WITH_LEFT = new RegExp(" left$", "i");
 
+const onSpanMouseEnter = (e: MouseEvent) => {
+  const span = e.target as HTMLSpanElement;
+  if (span.className === "bp3-icon-caret-down") {
+    span.style.opacity = "1";
+  }
+};
+
+const onSpanMouseLeave = (e: MouseEvent) => {
+  const span = e.target as HTMLSpanElement;
+  if (span.className === "bp3-icon-caret-down") {
+    span.style.opacity = "0";
+  }
+};
+
 type ContentSlideExtras = { note: Slide; layout: string; collapsible: boolean };
 
 const ContentSlide = ({
@@ -165,6 +179,8 @@ const ContentSlide = ({
           const spanIcon = document.createElement("span");
           spanIcon.className =
             "bp3-icon bp3-icon-caret-right roamjs-collapsible-caret";
+          spanIcon.onmouseenter = onSpanMouseEnter;
+          spanIcon.onmouseleave = onSpanMouseLeave;
           l.style.position = "relative";
           l.insertBefore(spanIcon, l.childNodes[0]);
         }
@@ -239,7 +255,7 @@ const ContentSlide = ({
             __html: marked(
               bullets
                 .map((c) => renderBullet({ c, i: 0, parentViewType: viewType }))
-                .join("\n")
+                .join(viewType === "document" ? "\n\n" : "\n")
             ),
           }}
           style={{
@@ -290,12 +306,13 @@ const PresentationContent: React.FunctionComponent<{
   slides: Slides;
   showNotes: boolean;
   onClose: () => void;
-}> = ({ slides, onClose, showNotes }) => {
+  globalCollapsible: boolean;
+}> = ({ slides, onClose, showNotes, globalCollapsible }) => {
   const revealRef = useRef(null);
   const slidesRef = useRef<HTMLDivElement>(null);
   const mappedSlides = slides.map((s) => {
     let layout = "default";
-    let collapsible = false;
+    let collapsible = globalCollapsible || false;
     const text = s.text
       .replace(new RegExp("{layout:(.*)}", "is"), (_, capture) => {
         layout = capture;
@@ -352,6 +369,12 @@ const PresentationContent: React.FunctionComponent<{
     left: 0;
     top: 0;
   }
+  .roamjs-collapsible-caret {
+    position: absolute;
+    top: 12px;
+    left: -76px;
+    cursor: pointer;
+  }
 }`);
         const onAfterPrint = () => {
           injectedStyle.parentElement.removeChild(injectedStyle);
@@ -389,7 +412,8 @@ const Presentation: React.FunctionComponent<{
   getSlides: () => Slides;
   theme?: string;
   notes?: string;
-}> = ({ getSlides, theme, notes }) => {
+  collapsible: boolean;
+}> = ({ getSlides, theme, notes, collapsible }) => {
   const normalizedTheme = useMemo(
     () =>
       (isSafari ? SAFARI_THEMES : VALID_THEMES).includes(theme)
@@ -431,6 +455,7 @@ const Presentation: React.FunctionComponent<{
             slides={slides}
             onClose={onClose}
             showNotes={showNotes}
+            globalCollapsible={collapsible}
           />
           <Button
             icon={"cross"}
@@ -461,7 +486,7 @@ export const render = ({
 }: {
   button: HTMLButtonElement;
   getSlides: () => Slides;
-  options: { [key: string]: string };
+  options: { [key: string]: string | boolean };
 }): void =>
   ReactDOM.render(
     <Presentation getSlides={getSlides} {...options} />,
