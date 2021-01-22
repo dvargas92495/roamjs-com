@@ -412,7 +412,7 @@ const Presentation: React.FunctionComponent<{
   getSlides: () => Slides;
   theme?: string;
   notes?: string;
-  collapsible: boolean;
+  collapsible?: boolean;
 }> = ({ getSlides, theme, notes, collapsible }) => {
   const normalizedTheme = useMemo(
     () =>
