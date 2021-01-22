@@ -509,6 +509,8 @@ export const getWordCountByBlockUid = (blockUid: string): number => {
   );
 };
 
+type ViewType = "bullet" | "document" | "numbered";
+
 export type TreeNode = {
   text: string;
   order: number;
@@ -516,11 +518,12 @@ export type TreeNode = {
   uid: string;
   heading: number;
   open: boolean;
+  viewType: ViewType;
 };
 
 const getTextTreeByBlockId = (blockId: number): TreeNode => {
   const block = window.roamAlphaAPI.pull(
-    "[:block/children, :block/string, :block/order, :block/uid, :block/heading, :block/open]",
+    "[:block/children, :block/string, :block/order, :block/uid, :block/heading, :block/open, :children/view-type]",
     blockId
   );
   const children = block[":block/children"] || [];
@@ -533,6 +536,7 @@ const getTextTreeByBlockId = (blockId: number): TreeNode => {
       .sort((a, b) => a.order - b.order),
     heading: block[":block/heading"],
     open: block[":block/open"],
+    viewType: block[":children/view-type"]?.substring(1) as ViewType,
   };
 };
 
