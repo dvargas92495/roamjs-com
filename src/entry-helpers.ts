@@ -80,22 +80,13 @@ export const replaceText = async ({
   prepend?: boolean;
 }): Promise<void> => {
   const textArea = document.activeElement as HTMLTextAreaElement;
-  const index = before
-    ? textArea.value.indexOf(before)
-    : prepend
-    ? 0
-    : textArea.value.length;
-  if (index >= 0) {
-    textArea.setSelectionRange(index, index + before.length);
-    const text = `${before ? "{backspace}" : ""}${after}${
-      !prepend ? "" : !before ? " " : !after ? "{del}" : ""
-    }`;
-    await userEvent.type(textArea, text, {
-      initialSelectionEnd: index + before.length,
-      initialSelectionStart: index,
-      skipClick: true,
-    });
-  }
+  const text = !before
+    ? prepend
+      ? `${after} ${textArea.value}`
+      : `${textArea.value}${after}`
+    : textArea.value.replace(`${before}${!after && prepend ? " " : ""}`, after);
+  const { blockUid } = getUids(textArea);
+  window.roamAlphaAPI.updateBlock({ block: { string: text, uid: blockUid } });
 };
 
 export const replaceTagText = async ({
