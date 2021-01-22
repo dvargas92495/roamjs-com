@@ -1,4 +1,5 @@
 import {
+  addStyle,
   createButtonObserver,
   getTextTreeByBlockUid,
   runExtension,
@@ -15,8 +16,15 @@ import "reveal.js/dist/theme/serif.css";
 import "reveal.js/dist/theme/solarized.css";
 import "reveal.js/dist/theme/blood.css";
 import "reveal.js/dist/theme/moon.css";
-import { render, VALID_THEMES } from "../components/Presentation";
+import { COLLAPSIBLE_REGEX, render, VALID_THEMES } from "../components/Presentation";
 import { getUidsFromButton } from "roam-client";
+
+addStyle(`.roamjs-collapsible-caret {
+  position: absolute;
+  top: 12px;
+  left: -76px;
+  cursor: pointer;
+}`)
 
 runExtension("presentation", async () => {
   createButtonObserver({
@@ -30,7 +38,7 @@ runExtension("presentation", async () => {
         ? {
             theme: buttonText.match(`{theme:(${VALID_THEMES.join("|")})}`)?.[1],
             notes: buttonText.match("{notes:(true|false)}")?.[1],
-            collapsible: !!buttonText.match(/({collapsible}|\[\[{collapsible}\]\])|{\[\[collapsible\]\]}/i)
+            collapsible: !!buttonText.match(COLLAPSIBLE_REGEX)
           }
         : {};
       render({

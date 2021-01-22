@@ -139,14 +139,14 @@ const ENDS_WITH_LEFT = new RegExp(" left$", "i");
 
 const onSpanMouseEnter = (e: MouseEvent) => {
   const span = e.target as HTMLSpanElement;
-  if (span.className === "bp3-icon-caret-down") {
+  if (span.className.includes("bp3-icon-caret-down")) {
     span.style.opacity = "1";
   }
 };
 
 const onSpanMouseLeave = (e: MouseEvent) => {
   const span = e.target as HTMLSpanElement;
-  if (span.className === "bp3-icon-caret-down") {
+  if (span.className.includes("bp3-icon-caret-down")) {
     span.style.opacity = "0";
   }
 };
@@ -302,6 +302,8 @@ const observerCallback = (ms: MutationRecord[]) =>
       }
     });
 
+export const COLLAPSIBLE_REGEX = /({collapsible}|\[\[{collapsible}\]\])|{\[\[collapsible\]\]}/i;
+
 const PresentationContent: React.FunctionComponent<{
   slides: Slides;
   showNotes: boolean;
@@ -318,7 +320,7 @@ const PresentationContent: React.FunctionComponent<{
         layout = capture;
         return "";
       })
-      .replace(new RegExp("{collapsible}", "i"), () => {
+      .replace(COLLAPSIBLE_REGEX, () => {
         collapsible = true;
         return "";
       })
@@ -368,12 +370,6 @@ const PresentationContent: React.FunctionComponent<{
     position: absolute;
     left: 0;
     top: 0;
-  }
-  .roamjs-collapsible-caret {
-    position: absolute;
-    top: 12px;
-    left: -76px;
-    cursor: pointer;
   }
 }`);
         const onAfterPrint = () => {
