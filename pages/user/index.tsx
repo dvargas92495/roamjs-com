@@ -196,12 +196,7 @@ const domainValidate = async (domain: string) => {
   if (!valid) {
     return "Invalid domain. Try a .com!";
   }
-  return axios
-    .get(`${FLOSS_API_URL}/aws-check-domain?domain=${domain}`)
-    .then((r) =>
-      r.data.Availability === "AVAILABLE" ? "" : `${domain} is not available!`
-    )
-    .catch((e) => e.message);
+  return "";
 };
 
 const Website = () => {

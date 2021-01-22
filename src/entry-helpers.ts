@@ -516,6 +516,7 @@ export type TreeNode = {
   uid: string;
   heading: number;
   open: boolean;
+  viewType: "bullet" | "document" | "numbered";
 };
 
 const getTextTreeByBlockId = (blockId: number): TreeNode => {
@@ -533,6 +534,7 @@ const getTextTreeByBlockId = (blockId: number): TreeNode => {
       .sort((a, b) => a.order - b.order),
     heading: block[":block/heading"],
     open: block[":block/open"],
+    viewType: block[":block/view-type"],
   };
 };
 

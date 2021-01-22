@@ -26,19 +26,48 @@ export const VALID_THEMES = [
   "moon",
 ];
 
+type ViewType = "bullet" | "document" | "numbered";
+
+const renderViewType = (viewType: ViewType) => {
+  switch (viewType) {
+    case "document":
+      return "";
+    case "numbered":
+      return "1. ";
+    case "bullet":
+    default:
+      return "- ";
+  }
+};
+
 const unload = () =>
   Array.from(window.roamjs.dynamicElements)
     .filter((s) => !!s.parentElement)
     .forEach((s) => s.parentElement.removeChild(s));
 
 // I'll clean this up if anyone asks. My god it's horrendous
-const renderBullet = ({ c, i }: { c: Slide; i: number }): string =>
-  `${"".padStart(i * 4, " ")}${c.text.match("!\\[.*\\]\\(.*\\)") ? "" : "- "}${
-    c.heading ? `${"".padStart(c.heading, "#")} ` : ""
-  }${resolveRefs(c.text)}${
+const renderBullet = ({
+  c,
+  i,
+  parentViewType,
+}: {
+  c: Slide;
+  i: number;
+  parentViewType?: ViewType;
+}): string =>
+  `${"".padStart(i * 4, " ")}${
+    c.text.match("!\\[.*\\]\\(.*\\)") ? "" : renderViewType(parentViewType)
+  }${c.heading ? `${"".padStart(c.heading, "#")} ` : ""}${resolveRefs(c.text)}${
     c.open
       ? c.children
-          .map((nested) => `\n${renderBullet({ c: nested, i: i + 1 })}`)
+          .map(
+            (nested) =>
+              `\n${renderBullet({
+                c: nested,
+                i: i + 1,
+                parentViewType: c.viewType,
+              })}`
+          )
           .join("")
       : ""
   }`;
@@ -108,20 +137,90 @@ const TitleSlide = ({ text, note }: { text: string; note: Slide }) => {
 const STARTS_WITH_IMAGE = new RegExp("^image ", "i");
 const ENDS_WITH_LEFT = new RegExp(" left$", "i");
 
+type ContentSlideExtras = { note: Slide; layout: string; collapsible: boolean };
+
 const ContentSlide = ({
   text,
   children,
   note,
   layout,
+  collapsible,
+  viewType,
 }: {
   text: string;
   children: Slides;
-  note: Slide;
-  layout: string;
-}) => {
+  viewType: ViewType;
+} & ContentSlideExtras) => {
   const isImageLayout = STARTS_WITH_IMAGE.test(layout);
   const isLeftLayout = ENDS_WITH_LEFT.test(layout);
   const bullets = isImageLayout ? children.slice(1) : children;
+  const slideRoot = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (collapsible) {
+      const lis = Array.from(slideRoot.current.getElementsByTagName("li"));
+      let minDepth = Number.MAX_VALUE;
+      lis
+        .filter((l) => !!l.getElementsByTagName("ul").length)
+        .forEach((l) => {
+          const spanIcon = document.createElement("span");
+          spanIcon.className =
+            "bp3-icon bp3-icon-caret-right roamjs-collapsible-caret";
+          l.style.position = "relative";
+          l.insertBefore(spanIcon, l.childNodes[0]);
+          let depth = 0;
+          let parentElement = l as HTMLElement;
+          while (parentElement !== slideRoot.current) {
+            parentElement = parentElement.parentElement;
+            depth++;
+          }
+          minDepth = Math.min(minDepth, depth);
+          l.setAttribute("data-dom-depth", depth.toString());
+        });
+      lis.forEach((l) => {
+        const depth = parseInt(l.getAttribute("data-dom-depth"));
+        if (depth === minDepth) {
+          l.style.display = "list-item";
+        } else {
+          l.style.display = "none";
+        }
+      });
+    }
+  }, [collapsible, slideRoot.current]);
+  const onRootClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (collapsible) {
+        const target = e.target as HTMLElement;
+        const className = target.className;
+        if (className.includes("roamjs-collapsible-caret")) {
+          let minDepth = Number.MAX_VALUE;
+          const lis = Array.from(
+            target.parentElement.getElementsByTagName("li")
+          );
+          lis.forEach((l) => {
+            const depth = parseInt(l.getAttribute("data-dom-depth"));
+            minDepth = Math.min(depth, minDepth);
+          });
+          const lisToRestyle = lis.filter(
+            (l) => parseInt(l.getAttribute("data-dom-depth")) === minDepth
+          );
+          if (className.includes("bp3-icon-caret-right")) {
+            target.className = className.replace(
+              "bp3-icon-caret-right",
+              "bp3-icon-caret-down"
+            );
+            lisToRestyle.forEach((l) => (l.style.display = "list-item"));
+          } else if (className.includes("bp3-icon-caret-down")) {
+            target.className = className.replace(
+              "bp3-icon-caret-down",
+              "bp3-icon-caret-right"
+            );
+            lisToRestyle.forEach((l) => (l.style.display = "list-item"));
+          }
+        }
+      }
+    },
+    [collapsible]
+  );
   return (
     <section style={{ textAlign: "left" }}>
       <h1>{text}</h1>
@@ -136,13 +235,17 @@ const ContentSlide = ({
           className={"roamjs-bullets-container"}
           dangerouslySetInnerHTML={{
             __html: marked(
-              bullets.map((c) => renderBullet({ c, i: 0 })).join("\n")
+              bullets
+                .map((c) => renderBullet({ c, i: 0, parentViewType: viewType }))
+                .join("\n")
             ),
           }}
           style={{
             width: isImageLayout ? "50%" : "100%",
             transformOrigin: "left top",
           }}
+          ref={slideRoot}
+          onClick={onRootClick}
         />
         {isImageLayout && (
           <div
@@ -190,9 +293,14 @@ const PresentationContent: React.FunctionComponent<{
   const slidesRef = useRef<HTMLDivElement>(null);
   const mappedSlides = slides.map((s) => {
     let layout = "default";
+    let collapsible = false;
     const text = s.text
       .replace(new RegExp("{layout:(.*)}", "is"), (_, capture) => {
         layout = capture;
+        return "";
+      })
+      .replace(new RegExp("{collapsible}", "i"), () => {
+        collapsible = true;
         return "";
       })
       .trim();
@@ -200,6 +308,7 @@ const PresentationContent: React.FunctionComponent<{
       ...s,
       text,
       layout,
+      collapsible,
       children: showNotes
         ? s.children.slice(0, s.children.length - 1)
         : s.children,
@@ -260,7 +369,7 @@ const PresentationContent: React.FunctionComponent<{
   return (
     <div className="reveal" id="otherother">
       <div className="slides" ref={slidesRef}>
-        {mappedSlides.map((s: Slide & { note: Slide; layout: string }, i) => (
+        {mappedSlides.map((s: Slide & ContentSlideExtras, i) => (
           <React.Fragment key={i}>
             {s.children.length ? (
               <ContentSlide {...s} />
@@ -338,6 +447,7 @@ type Slide = {
   children: Slides;
   heading?: number;
   open: boolean;
+  viewType: ViewType;
 };
 
 type Slides = Slide[];
