@@ -1,5 +1,7 @@
 @builtin "number.ne"
 
+main -> expression
+
 fcn -> "{" method ":" (expression):+ "}" {%
     function(data) {
       return {
@@ -40,7 +42,7 @@ number -> decimal {%
 
 tag -> 
     "[[" [a-zA-Z0-9 ]:+ "]]"
-  | "#[[" [a-zA-Z0-9]:+ "]]"
+  | "#[[" [a-zA-Z0-9 ]:+ "]]"
   | "#" [a-zA-Z0-9]:+ {%
     function(data) {
       return {
