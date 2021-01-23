@@ -850,4 +850,4 @@ export const getTitlesReferencingPagesInSameBlock = (
     .map((r) => r[0] as string);
 };
 
-export const DAILY_NOTE_PAGE_REGEX = /\\[\\[(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]\\]\\]/;
+export const DAILY_NOTE_PAGE_REGEX = /(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]/;

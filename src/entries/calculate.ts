@@ -68,7 +68,7 @@ const calculateExpression = (expression: Expression): string => {
         .toString();
     case "daily":
       return getTitlesReferencingPagesInSameBlock(args)
-        .map((t) => DAILY_NOTE_PAGE_REGEX.test(t))
+        .filter((t) => DAILY_NOTE_PAGE_REGEX.test(t))
         .join(",");
     case "max":
       return args.every((s) => DAILY_NOTE_PAGE_REGEX.test(s))

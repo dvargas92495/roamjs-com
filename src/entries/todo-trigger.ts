@@ -30,7 +30,7 @@ const onTodo = async () => {
       .replace("/Current Time", "[0-2][0-9]:[0-5][0-9]")
       .replace(
         "/Today",
-        DAILY_NOTE_PAGE_REGEX.source
+        `\\[\\[${DAILY_NOTE_PAGE_REGEX.source}\\]\\]`
       )}`;
     const textarea = document.activeElement as HTMLTextAreaElement;
     const value = textarea.value;
