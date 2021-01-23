@@ -36,7 +36,6 @@ type Expression = {
 const parseExpression = (input: string): Expression => {
   const parser = new Parser(Grammar.fromCompiled(grammar));
   parser.feed(input);
-  console.log(parser.results);
   return parser.results[0];
 };
 
