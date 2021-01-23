@@ -5,7 +5,7 @@ main -> expression {% id %}
 
 expression -> tag {% id %} | binop {% id %}
 
-fcn -> "{" method ":" _ (expression {% id %}):+ _ "}" {%
+fcn -> "{" method ":" _ (expression _ {% id %}):+ "}" {%
     function(data) {
       return {
         operation: data[1],
