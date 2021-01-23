@@ -47,3 +47,9 @@ declare module "reveal.js" {
   }
   export default Reveal;
 }
+
+declare module "*.ne" {
+  import Nearley from 'nearley';
+  const Rules: Nearley.CompiledRules;
+  export default Rules;
+}

@@ -6,7 +6,6 @@ import {
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel, { Dict } from "mixpanel-browser";
-import userEvent from "@testing-library/user-event";
 
 declare global {
   interface Window {
@@ -838,3 +837,17 @@ export const resolveRefs = (text: string): string => {
     return reference || blockUid;
   });
 };
+
+export const getTitlesReferencingPagesInSameBlock = (
+  pages: string[]
+): string[] => {
+  return window.roamAlphaAPI
+    .q(
+      `[:find ?title :where [?e :node/title ?title] [?e :block/children ?c] ${pages
+        .map((p, i) => `[?c :block/refs ?d${i}] [?d${i} :node/title "${p}"]`)
+        .join(" ")}]`
+    )
+    .map((r) => r[0] as string);
+};
+
+export const DAILY_NOTE_PAGE_REGEX = /(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]/;

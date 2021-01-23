@@ -1,6 +1,7 @@
 import {
   addStyle,
   createButtonObserver,
+  getTextByBlockUid,
   getTextTreeByBlockUid,
   runExtension,
 } from "../entry-helpers";
@@ -16,7 +17,11 @@ import "reveal.js/dist/theme/serif.css";
 import "reveal.js/dist/theme/solarized.css";
 import "reveal.js/dist/theme/blood.css";
 import "reveal.js/dist/theme/moon.css";
-import { COLLAPSIBLE_REGEX, render, VALID_THEMES } from "../components/Presentation";
+import {
+  COLLAPSIBLE_REGEX,
+  render,
+  VALID_THEMES,
+} from "../components/Presentation";
 import { getUidsFromButton } from "roam-client";
 
 addStyle(`.roamjs-collapsible-caret {
@@ -24,7 +29,7 @@ addStyle(`.roamjs-collapsible-caret {
   top: 12px;
   left: -76px;
   cursor: pointer;
-}`)
+}`);
 
 runExtension("presentation", async () => {
   createButtonObserver({
@@ -32,13 +37,13 @@ runExtension("presentation", async () => {
     shortcut: "slides",
     render: (button: HTMLButtonElement) => {
       const { blockUid } = getUidsFromButton(button);
-      const { text } = getTextTreeByBlockUid(blockUid);
+      const text = getTextByBlockUid(blockUid);
       const buttonText = text.match("{{(presentation|slides):(.*)}}")?.[2];
       const options = buttonText
         ? {
             theme: buttonText.match(`{theme:(${VALID_THEMES.join("|")})}`)?.[1],
             notes: buttonText.match("{notes:(true|false)}")?.[1],
-            collapsible: !!buttonText.match(COLLAPSIBLE_REGEX)
+            collapsible: !!buttonText.match(COLLAPSIBLE_REGEX),
           }
         : {};
       render({
