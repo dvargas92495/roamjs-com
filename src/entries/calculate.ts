@@ -40,9 +40,11 @@ const parseExpression = (input: string): Expression => {
   return parser.results[0];
 };
 
+const DELIM = " , ";
+
 const calculateExpression = (expression: Expression): string => {
   const args = expression.children.flatMap((c) =>
-    calculateExpression(c).split(",")
+    calculateExpression(c).split(DELIM)
   );
 
   switch (expression.operation) {
@@ -69,7 +71,7 @@ const calculateExpression = (expression: Expression): string => {
     case "daily":
       return getTitlesReferencingPagesInSameBlock(args)
         .filter((t) => DAILY_NOTE_PAGE_REGEX.test(t))
-        .join(",");
+        .join(DELIM);
     case "max":
       return args.every((s) => DAILY_NOTE_PAGE_REGEX.test(s))
         ? toRoamDate(
