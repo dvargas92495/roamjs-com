@@ -1,3 +1,5 @@
+@builtin "number.ne"
+
 fcn -> "{" method ":" (expression):+ "}" {%
     function(data) {
       return {
@@ -7,6 +9,8 @@ fcn -> "{" method ":" (expression):+ "}" {%
       }
     }
   %}
+
+method -> "daily" | "max" | "since" | "attr"
 
 binop ->
     expression " + " expression
@@ -24,7 +28,7 @@ binop ->
 
 expression -> number | tag | binop | fcn
 
-number -> [0-9]:+ {%
+number -> decimal {%
     function(data) {
       return {
         operation: "value",
