@@ -1,54 +1,30 @@
 @builtin "number.ne"
 
-main -> expression
+main -> expression {% id %}
 
-fcn -> "{" method ":" (expression):+ "}" {%
-    function(data) {
-      return {
-        operation: data[0],
-        children: data.slice(1),
-        value: "",  
-      }
-    }
-  %}
-
-method -> "daily" | "max" | "since" | "attr"
-
-binop ->
-    expression " + " expression
-  | expression " - " expression
-  | expression " * " expression
-  | expression " / " expression {%
+fcn -> "{" method ":" _ (expression):+ _ "}" {%
     function(data) {
       return {
         operation: data[1],
-        children: [data[0], data[2]],
+        children: data.slice(3, data.length - 1),
         value: "",  
       }
     }
   %}
 
-expression -> number | tag | binop | fcn
+method -> "daily" {% id %} | "max" {% id %} | "since" {% id %} | "attr" {% id %}
 
-number -> decimal {%
-    function(data) {
-      return {
-        operation: "value",
-        children: [],
-        value: data[0],  
-      }
-    }
-  %}
+binop ->
+    expression " + " expression {% ([f, operation, s]) => ({operation, children: [f, s], value: ""}) %}
+  | expression " - " expression {% ([f, operation, s]) => ({operation, children: [f, s], value: ""}) %}
+  | expression " * " expression {% ([f, operation, s]) => ({operation, children: [f, s], value: ""}) %}
+  | expression " / " expression {% ([f, operation, s]) => ({operation, children: [f, s], value: ""}) %}
+
+expression -> number {% id %} | tag {% id %} | binop {% id %} | fcn {% id %}
+
+number -> decimal {% ([value]) => ({operation: "value", children: [], value}) %}
 
 tag -> 
-    "[[" [a-zA-Z0-9 ]:+ "]]"
-  | "#[[" [a-zA-Z0-9 ]:+ "]]"
-  | "#" [a-zA-Z0-9]:+ {%
-    function(data) {
-      return {
-        operation: "value",
-        children: [],
-        value: data[0],  
-      }
-    }
-  %}
+    "[[" [a-zA-Z0-9 ]:+ "]]" {% ([value]) => ({operation: "value", children: [], value}) %}
+  | "#[[" [a-zA-Z0-9 ]:+ "]]" {% ([value]) => ({operation: "value", children: [], value}) %}
+  | "#" [a-zA-Z0-9]:+ {% ([value]) => ({operation: "value", children: [], value}) %}

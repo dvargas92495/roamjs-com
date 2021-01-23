@@ -28,7 +28,7 @@ const parser = new Parser(Grammar.fromCompiled(grammar));
 
 const parseExpression = (input: string): Expression => {
   parser.feed(input);
-  console.log(parser.results);
+  console.log(parser.finish());
   return {
     operation: "*",
     children: [],
