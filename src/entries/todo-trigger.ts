@@ -8,6 +8,7 @@ import {
 } from "roam-client";
 import {
   createBlockObserver,
+  DAILY_NOTE_PAGE_REGEX,
   getChildRefStringsByBlockUid,
   getTextByBlockUid,
   isControl,
@@ -29,7 +30,7 @@ const onTodo = async () => {
       .replace("/Current Time", "[0-2][0-9]:[0-5][0-9]")
       .replace(
         "/Today",
-        "\\[\\[(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]\\]\\]"
+        DAILY_NOTE_PAGE_REGEX.source
       )}`;
     const textarea = document.activeElement as HTMLTextAreaElement;
     const value = textarea.value;
