@@ -3,3 +3,22 @@ layout: "ExtensionPageLayout"
 description: "The Calculate extension adds calculating capabilities that will hopefully one day be integrated with calc!"
 development: true
 ---
+
+Type {{calculate:}} into a block. Everything to the right of the colon will be the expression to be calculated.
+
+An expression could be one of four options:
+- A number
+- A tag
+- A binary operation
+- A function
+
+Numbers and tags are what you would expect. A binary operation combines two expressions with one of these four operations:
+- +
+- -
+- *
+- /
+
+A function is a higher level macro that take one or more expressions as input and produces an output. The syntax of each function is `{name:(expression)+}`. The supported functions are:
+- attr - takes two tag names as input, returning the value assigned to the attribute with the second name on the page with the first name.
+    - `{attr: [[Example Project]] [[Due Date]]}` returns the value assigned to the `Due Date` attribute on the `Example Project` page.
+- 

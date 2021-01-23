@@ -3,6 +3,8 @@
 
 main -> expression {% id %}
 
+expression -> number {% id %} | tag {% id %} | binop {% id %} | fcn {% id %}
+
 fcn -> "{" method ":" _ (expression):+ _ "}" {%
     function(data) {
       return {
@@ -13,19 +15,15 @@ fcn -> "{" method ":" _ (expression):+ _ "}" {%
     }
   %}
 
-method -> "daily" {% id %} | "max" {% id %} | "since" {% id %} | "attr" {% id %}
+method -> ("daily" | "max" | "since" | "attr") {% id %}
 
-binop ->
-    expression " + " expression {% ([f, operation, s]) => ({operation, children: [f, s], value: ""}) %}
-  | expression " - " expression {% ([f, operation, s]) => ({operation, children: [f, s], value: ""}) %}
-  | expression " * " expression {% ([f, operation, s]) => ({operation, children: [f, s], value: ""}) %}
-  | expression " / " expression {% ([f, operation, s]) => ({operation, children: [f, s], value: ""}) %}
-
-expression -> number {% id %} | tag {% id %} | binop {% id %} | fcn {% id %}
-
+binop -> sum {% id %}
+sum ->  sum _ ("+"|"-") _  product {% ([f, _, operation, __, s]) => ({operation, children: [f, s], value: ""}) %} | product {% id %}
+product -> product _ ("*"|"/") _ numberLike {% ([f, _, operation, __, s]) => ({operation, children: [f, s], value: ""}) %} | numberLike {% id %}
+numberLike -> ( number | fcn ) {% id %}
 number -> decimal {% ([value]) => ({operation: "value", children: [], value}) %}
 
 tag -> 
-    "[[" [a-zA-Z0-9 ]:+ "]]" {% ([_, value]) => ({operation: "value", children: [], value}) %}
-  | "#[[" [a-zA-Z0-9 ]:+ "]]" {% ([_, value]) => ({operation: "value", children: [], value}) %}
-  | "#" [a-zA-Z0-9]:+ {% ([_, value]) => ({operation: "value", children: [], value}) %}
+    "[[" [a-zA-Z0-9 ]:+ "]]" {% ([_, value]) => ({operation: "value", children: [], value: value.join("")}) %}
+  | "#[[" [a-zA-Z0-9 ]:+ "]]" {% ([_, value]) => ({operation: "value", children: [], value: value.join("")}) %}
+  | "#" [a-zA-Z0-9]:+ {% ([_, value]) => ({operation: "value", children: [], value: value.join("")}) %}

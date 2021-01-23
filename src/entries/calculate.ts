@@ -12,28 +12,32 @@ import {
   runExtension,
 } from "../entry-helpers";
 import differenceInDays from "date-fns/differenceInDays";
-import {Parser, Grammar} from "nearley";
+import { Parser, Grammar } from "nearley";
 import grammar from "../grammars/calculate.ne";
 
 const attribute = "calculator";
 const shortcut = "calculate";
 
 type Expression = {
-  operation: "*" | "daily" | "max" | "since" | "attr" | "value";
+  operation:
+    | "+"
+    | "-"
+    | "/"
+    | "*"
+    | "daily"
+    | "max"
+    | "since"
+    | "attr"
+    | "value";
   children: Expression[];
   value: string;
 };
 
-const parser = new Parser(Grammar.fromCompiled(grammar));
-
 const parseExpression = (input: string): Expression => {
+  const parser = new Parser(Grammar.fromCompiled(grammar));
   parser.feed(input);
-  console.log(parser.finish());
-  return {
-    operation: "*",
-    children: [],
-    value: "",
-  };
+  console.log(parser.results);
+  return parser.results[0];
 };
 
 const calculateExpression = (expression: Expression): string => {
@@ -42,9 +46,25 @@ const calculateExpression = (expression: Expression): string => {
   );
 
   switch (expression.operation) {
+    case "+":
+      return args
+        .reduce((total, current) => total + parseInt(current), 0)
+        .toString();
+    case "-":
+      return args
+        .reduce((total, current) => total - parseInt(current), 0)
+        .toString();
     case "*":
       return args
         .reduce((total, current) => total * parseInt(current), 1)
+        .toString();
+    case "/":
+      return args
+        .reduce(
+          (total, current, index) =>
+            index === 0 ? parseInt(current) : total / parseInt(current),
+          1
+        )
         .toString();
     case "daily":
       return getTitlesReferencingPagesInSameBlock(args)
