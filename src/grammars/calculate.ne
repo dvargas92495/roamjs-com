@@ -5,7 +5,7 @@ main -> expression {% id %}
 
 expression -> number {% id %} | tag {% id %} | binop {% id %} | fcn {% id %}
 
-fcn -> "{" method ":" _ (expression):+ _ "}" {%
+fcn -> "{" method ":" _ (expression {% id %}):+ _ "}" {%
     function(data) {
       return {
         operation: data[1],
@@ -15,12 +15,12 @@ fcn -> "{" method ":" _ (expression):+ _ "}" {%
     }
   %}
 
-method -> ("daily" | "max" | "since" | "attr") {% id %}
+method -> "daily" {% id %} | "max" {% id %} | "since" {% id %} | "attr" {% id %}
 
 binop -> sum {% id %}
-sum ->  sum _ ("+"|"-") _  product {% ([f, _, operation, __, s]) => ({operation, children: [f, s], value: ""}) %} | product {% id %}
-product -> product _ ("*"|"/") _ numberLike {% ([f, _, operation, __, s]) => ({operation, children: [f, s], value: ""}) %} | numberLike {% id %}
-numberLike -> ( number | fcn ) {% id %}
+sum ->  sum _ ("+" {% id %}|"-" {% id %}) _  product {% ([f, _, operation, __, s]) => ({operation, children: [f, s], value: ""}) %} | product {% id %}
+product -> product _ ("*" {% id %}|"/" {% id %}) _ numberLike {% ([f, _, operation, __, s]) => ({operation, children: [f, s], value: ""}) %} | numberLike {% id %}
+numberLike -> number {% id %} | fcn {% id %}
 number -> decimal {% ([value]) => ({operation: "value", children: [], value}) %}
 
 tag -> 
