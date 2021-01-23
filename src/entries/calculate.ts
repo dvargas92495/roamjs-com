@@ -80,10 +80,10 @@ const calculateExpression = (expression: Expression): string => {
       return differenceInDays(new Date(), parseRoamDate(args[0])).toString();
     case "attr":
       return calculateExpression(
-        parseExpression(getConfigFromPage(args[0])[args[1]])
+        parseExpression(getConfigFromPage(args[0])[args[1]] || '0')
       );
     case "value":
-      return expression.value;
+      return expression.value.toString();
     default:
       return "";
   }

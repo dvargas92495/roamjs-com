@@ -3,7 +3,7 @@
 
 main -> expression {% id %}
 
-expression -> number {% id %} | tag {% id %} | binop {% id %} | fcn {% id %}
+expression -> tag {% id %} | binop {% id %}
 
 fcn -> "{" method ":" _ (expression {% id %}):+ _ "}" {%
     function(data) {
