@@ -10,29 +10,20 @@ import {
   Spinner,
   Text,
 } from "@blueprintjs/core";
-import { asyncPaste, asyncType, newBlockEnter, openBlock } from "roam-client";
-import userEvent from "@testing-library/user-event";
+import { clearBlockById, getUidsFromId } from "roam-client";
 import axios from "axios";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 import iconv from "iconv-lite";
 import charset from "charset";
-import { createHTMLObserver, getTextTreeByPageName } from "../entry-helpers";
+import {
+  getLastChildUidByBlockUid,
+  getTextTreeByPageName,
+} from "../entry-helpers";
+import { getOrderByBlockUid } from "roam-client/lib/queries";
 
 export const ERROR_MESSAGE =
   "Error Importing Article. Email link to support@roamjs.com for help!";
-
-const tabListenerRef: { current: (b: HTMLTextAreaElement) => void } = {
-  current: null,
-};
-const addTabListener = (listener: (b: HTMLTextAreaElement) => void) =>
-  (tabListenerRef.current = listener);
-createHTMLObserver({
-  tag: "TEXTAREA",
-  className: "rm-block-input",
-  callback: (b) =>
-    tabListenerRef.current && tabListenerRef.current(b as HTMLTextAreaElement),
-});
 
 const td = new TurndownService({
   hr: "---",
@@ -84,24 +75,6 @@ td.addRule("a", {
   },
 });
 
-const tabObj = {
-  bubbles: true,
-  cancelable: true,
-  key: "Tab",
-  keyCode: 9,
-  code: "Tab",
-  which: 9,
-};
-const shiftTabObj = { ...tabObj, shiftKey: true };
-const waitForTab = (id: string) =>
-  new Promise((resolve) =>
-    addTabListener((b: HTMLTextAreaElement) => {
-      if (b.id === id) {
-        resolve(id);
-      }
-    })
-  );
-
 export const importArticle = ({
   url,
   blockId,
@@ -130,8 +103,10 @@ export const importArticle = ({
       }${html.substring(headIndex)}`;
       const doc = new DOMParser().parseFromString(htmlWithBase, "text/html");
       const { content } = new Readability(doc).parse();
-      const textarea = await openBlock(document.getElementById(blockId));
-      await userEvent.clear(textarea);
+      clearBlockById(blockId);
+      const { blockUid, parentUid } = getUidsFromId(blockId);
+      const firstOrder = getOrderByBlockUid(blockUid);
+      const stack = [{ "parent-uid": parentUid, order: firstOrder }];
       const markdown = td.turndown(content);
       const nodes = markdown.split("\n").filter((c) => !!c.trim());
       let firstHeaderFound = false;
@@ -143,47 +118,48 @@ export const importArticle = ({
           node.startsWith("## ") ||
           node.startsWith("### ");
         const isBullet = node.startsWith("* ");
-        const text = isHeader
-          ? node.substring(node.indexOf("# ") + 2)
-          : isBullet
-          ? node.substring(2).trim()
-          : node;
+        const text = isBullet ? node.substring(2).trim() : node;
         if (isBullet && previousNodeTabbed) {
           bulletIsParagraph = true;
         }
         if (isHeader) {
           if (indent) {
             if (firstHeaderFound) {
-              document.activeElement.dispatchEvent(
-                new KeyboardEvent("keydown", shiftTabObj)
-              );
-              await waitForTab(document.activeElement.id);
+              stack.pop();
               bulletIsParagraph = false;
             } else {
               firstHeaderFound = true;
             }
           }
-          await asyncType(node.substring(0, node.indexOf("# ") + 2));
         }
+        const location = stack[stack.length - 1];
         if (isBullet && !bulletIsParagraph) {
-          document.activeElement.dispatchEvent(
-            new KeyboardEvent("keydown", tabObj)
+          await new Promise((resolve) => setTimeout(resolve, 1));
+          const newParentUid = getLastChildUidByBlockUid(
+            location["parent-uid"]
           );
-          await waitForTab(document.activeElement.id);
+          stack.push({ order: 0, "parent-uid": newParentUid });
         }
-        await asyncPaste(text);
-        await newBlockEnter();
+        if (stack.length === 1 && location.order === firstOrder) {
+          window.roamAlphaAPI.updateBlock({
+            block: { string: text, uid: blockUid },
+          });
+        } else {
+          window.roamAlphaAPI.createBlock({
+            block: { string: text },
+            location,
+          });
+        }
+        location.order++;
         if (isBullet && !bulletIsParagraph) {
-          document.activeElement.dispatchEvent(
-            new KeyboardEvent("keydown", shiftTabObj)
-          );
-          await waitForTab(document.activeElement.id);
+          stack.pop();
         }
         if (indent && isHeader) {
-          document.activeElement.dispatchEvent(
-            new KeyboardEvent("keydown", tabObj)
+          await new Promise((resolve) => setTimeout(resolve, 1));
+          const newParentUid = getLastChildUidByBlockUid(
+            location["parent-uid"]
           );
-          await waitForTab(document.activeElement.id);
+          stack.push({ order: 0, "parent-uid": newParentUid });
           previousNodeTabbed = true;
         } else {
           previousNodeTabbed = false;

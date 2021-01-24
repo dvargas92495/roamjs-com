@@ -1,8 +1,15 @@
-import userEvent from "@testing-library/user-event";
-import { createMobileIcon, createObserver, isApple, runExtension } from "../entry-helpers";
+import { getUids } from "roam-client";
+import {
+  createMobileIcon,
+  createObserver,
+  runExtension,
+} from "../entry-helpers";
 
 const MOBILE_MORE_ICON_BUTTON_ID = "mobile-more-icon-button";
 const MOBILE_BACK_ICON_BUTTON_ID = "mobile-back-icon-button";
+
+const TODO_REGEX = /{{\[\[TODO\]\]}}/g;
+const DONE_REGEX = /{{\[\[DONE\]\]}} ?/g;
 
 runExtension("mobile-todos", () => {
   let previousActiveElement: HTMLElement;
@@ -40,11 +47,17 @@ runExtension("mobile-todos", () => {
 
   todoIconButton.onclick = () => {
     if (previousActiveElement.tagName === "TEXTAREA") {
-      const modifier = isApple ? "meta" : "ctrl";
-      userEvent.type(
-        previousActiveElement,
-        `{${modifier}}{enter}{/${modifier}}`
-      );
+      const textArea = previousActiveElement as HTMLTextAreaElement;
+      const oldValue = textArea.value;
+      const newValue = TODO_REGEX.test(oldValue)
+        ? oldValue.replace(TODO_REGEX, "{{[[DONE]]}}")
+        : DONE_REGEX.test(oldValue)
+        ? oldValue.replace(DONE_REGEX, "")
+        : `{{[[TODO]]}} ${oldValue}`;
+      const { blockUid } = getUids(textArea);
+      window.roamAlphaAPI.updateBlock({
+        block: { uid: blockUid, string: newValue },
+      });
     }
   };
 

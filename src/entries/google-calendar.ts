@@ -2,7 +2,6 @@ import {
   createCustomSmartBlockCommand,
   getPageTitle,
   runExtension,
-  smartBlockNewEnter,
 } from "../entry-helpers";
 import {
   addButtonListener,
@@ -10,7 +9,8 @@ import {
   pushBullets,
   getConfigFromPage,
   parseRoamDate,
-  asyncPaste,
+  updateActiveBlock,
+  getActiveUids,
 } from "roam-client";
 import axios from "axios";
 import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
@@ -38,7 +38,7 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
 
   const calendarId = config["Google Calendar"]?.trim();
   if (!calendarId) {
-    await asyncPaste(
+    updateActiveBlock(
       `Error: Could not find the required "Google Calendar" attribute configured in the [[roam/js/google-calendar]] page.`
     );
     return;
@@ -93,7 +93,7 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
     })
     .catch((e) =>
       e.message === "Request failed with status code 404"
-        ? asyncPaste(
+        ? updateActiveBlock(
             `Error for calendar ${calendarId}: Could not find calendar or it's not public. For more information on how to make it public, [visit this page](https://roamjs.com/extensions/google-calendar)`
           )
         : genericError(e)
@@ -119,11 +119,8 @@ createCustomSmartBlockCommand({
   command: "GOOGLECALENDAR",
   processor: () =>
     fetchGoogleCalendar().then(async (bullets) => {
-      if (bullets.length > 1) {
-        await smartBlockNewEnter();
-      }
-      return pushBullets(bullets.slice(0, bullets.length - 1)).then(() =>
-        bullets.length ? bullets[bullets.length - 1] : EMPTY_MESSAGE
-      );
+      const { blockUid, parentUid } = getActiveUids();
+      pushBullets(bullets.slice(0, bullets.length - 1), blockUid, parentUid);
+      return bullets.length ? bullets[bullets.length - 1] : EMPTY_MESSAGE;
     }),
 });

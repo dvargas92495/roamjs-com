@@ -1,12 +1,14 @@
-import userEvent from "@testing-library/user-event";
 import { createWorker } from "tesseract.js";
-import { createObserver, runExtension } from "../entry-helpers";
+import {
+  createObserver,
+  getFirstChildUidByBlockUid,
+  runExtension,
+} from "../entry-helpers";
 import {
   getConfigFromPage,
-  newBlockEnter,
-  openBlock,
   pushBullets,
   createIconButton,
+  getUidsFromButton,
 } from "roam-client";
 
 runExtension("image-tagging", () => {
@@ -22,13 +24,17 @@ runExtension("image-tagging", () => {
   const clickCallback = async (htmlTarget: HTMLElement) => {
     const imgContainer = htmlTarget.closest(".hoverparent");
     const img = imgContainer.getElementsByTagName("img")[0];
-    const editButton = imgContainer.getElementsByClassName("bp3-icon-edit")[0];
-    const textarea = await openBlock(editButton);
-    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-    await newBlockEnter();
-    await userEvent.tab();
-    await userEvent.type(document.activeElement, "Loading");
-    const loadingId = document.activeElement.id;
+    const editButton = imgContainer.getElementsByClassName(
+      "bp3-icon-edit"
+    )[0] as HTMLButtonElement;
+    const { blockUid } = getUidsFromButton(editButton);
+    window.roamAlphaAPI.createBlock({
+      block: { string: "Loading..." },
+      location: { "parent-uid": blockUid, order: 0 },
+    });
+    const loadingUid = await new Promise<string>((resolve) =>
+      setTimeout(() => resolve(getFirstChildUidByBlockUid(blockUid)), 1)
+    );
 
     const tesseractImage = document.createElement("img");
     tesseractImage.src = img.src;
@@ -48,8 +54,6 @@ runExtension("image-tagging", () => {
         data: { text },
       } = await worker.recognize(canvas);
       await worker.terminate();
-      await openBlock(document.getElementById(loadingId));
-      await userEvent.clear(document.activeElement);
       const textBullets = text.split("\n");
       const bullets = [];
       let currentText = "";
@@ -68,7 +72,7 @@ runExtension("image-tagging", () => {
           currentText = "";
         }
       }
-      await pushBullets(bullets);
+      await pushBullets(bullets, loadingUid, blockUid);
     };
   };
 

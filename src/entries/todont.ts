@@ -1,6 +1,10 @@
-import userEvent from "@testing-library/user-event";
-import { asyncType } from "roam-client";
-import { createMobileIcon, createObserver, isControl, runExtension } from "../entry-helpers";
+import {
+  createMobileIcon,
+  createObserver,
+  isControl,
+  replaceText,
+  runExtension,
+} from "../entry-helpers";
 
 runExtension("todont", () => {
   const TODONT_CLASSNAME = "roamjs-todont";
@@ -61,42 +65,18 @@ runExtension("todont", () => {
     }
   });
 
-  const resetCursor = (inputStart: number, inputEnd: number) => {
-    const textArea = document.activeElement as HTMLTextAreaElement;
-    const start = Math.max(0, inputStart);
-    const end = Math.max(0, inputEnd);
-
-    // hack to reset cursor in original location
-    setTimeout(() => textArea.setSelectionRange(start, end), 1);
-  };
-
   const todontCallback = async () => {
     if (document.activeElement.tagName === "TEXTAREA") {
       const textArea = document.activeElement as HTMLTextAreaElement;
       const value = textArea.value;
-      const oldStart = textArea.selectionStart;
-      const oldEnd = textArea.selectionEnd;
-      if (
-        value.startsWith("{{[[TODO]]}}") ||
-        value.startsWith("{{[[DONE]]}}")
-      ) {
-        textArea.setSelectionRange(4, 8);
-        await asyncType("{backspace}");
-        await asyncType("ARCHIVED");
-        resetCursor(oldStart + 4, oldEnd + 4);
+      if (value.startsWith("{{[[TODO]]}}")) {
+        replaceText({ before: "{{[[TODO]]}}", after: "{{[[ARCHIVED]]}}" });
+      } else if (value.startsWith("{{[[DONE]]}}")) {
+        replaceText({ before: "{{[[DONE]]}}", after: "{{[[ARCHIVED]]}}" });
       } else if (value.startsWith("{{[[ARCHIVED]]}}")) {
-        const afterArchive = value.substring(16).trim();
-        const end = afterArchive ? value.indexOf(afterArchive) : value.length;
-        textArea.setSelectionRange(0, end);
-        await asyncType("{backspace}");
-        resetCursor(oldStart - end, oldEnd - end);
+        replaceText({ before: "{{[[ARCHIVED]]}}", after: "" });
       } else {
-        textArea.setSelectionRange(0, 0);
-        await userEvent.type(textArea, "{{[[ARCHIVED]]}} ", {
-          initialSelectionStart: 0,
-          initialSelectionEnd: 0,
-        });
-        resetCursor(oldStart + 17, oldEnd + 17);
+        replaceText({ before: "", prepend: true, after: "{{[[ARCHIVED]]}}" });
       }
     }
   };

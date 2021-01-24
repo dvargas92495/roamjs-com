@@ -18,8 +18,7 @@ import "@dvargas92495/react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import ReactDOM from "react-dom";
 import { TextArea } from "@blueprintjs/core";
 import { useDocumentKeyDown } from "./hooks";
-import userEvent from "@testing-library/user-event";
-import { asyncType } from "roam-client";
+import { getUids } from "roam-client";
 
 const ToolbarWarning = () => (
   <span style={{ margin: "0 8px" }}>
@@ -182,7 +181,7 @@ const WYSIWYGMode = ({
     start: number;
     end: number;
   }) => void;
-}) : JSX.Element => {
+}): JSX.Element => {
   const editorRef = useRef<EditorType>(null);
   const outputOnUnmount = useCallback(() => {
     const editorState = editorRef.current.getEditorState();
@@ -319,7 +318,7 @@ export const renderWYSIWYGMode = (
   b: HTMLElement,
   textarea: HTMLTextAreaElement,
   onUnmount: () => void
-) : void =>
+): void =>
   ReactDOM.render(
     <WYSIWYGMode
       initialValue={textarea.value}
@@ -329,10 +328,17 @@ export const renderWYSIWYGMode = (
         ReactDOM.unmountComponentAtNode(b);
         b.parentElement.removeChild(b);
         onUnmount();
-        textarea.focus();
-        await userEvent.clear(textarea);
-        await asyncType(output);
-        textarea.setSelectionRange(start, end);
+        const { blockUid } = getUids(textarea);
+        window.roamAlphaAPI.updateBlock({
+          block: { string: output, uid: blockUid },
+        });
+        setTimeout(() => {
+          const newTextarea = document.getElementById(
+            textarea.id
+          ) as HTMLTextAreaElement;
+          newTextarea.focus();
+          newTextarea.setSelectionRange(start, end);
+        }, 1);
       }}
     />,
     b
@@ -368,7 +374,7 @@ const DemoTextArea = React.forwardRef<
   );
 });
 
-export const DemoWYSIWYGMode = () : JSX.Element => {
+export const DemoWYSIWYGMode = (): JSX.Element => {
   const [isBlock, setIsBlock] = useState(true);
   const [isOutputting, setIsOutputting] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);

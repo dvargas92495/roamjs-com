@@ -14,10 +14,9 @@ import {
   PopoverPosition,
 } from "@blueprintjs/core";
 import { Select } from "@blueprintjs/select";
-import { asyncType, openBlock } from "roam-client";
-import userEvent from "@testing-library/user-event";
+import { getUidsFromId, RoamBlock } from "roam-client";
 import { Icon } from "@blueprintjs/core";
-import { isControl } from "../entry-helpers";
+import { getTextByBlockUid, isControl } from "../entry-helpers";
 import ReactDOM from "react-dom";
 import DemoPopoverWrapper from "./DemoPopoverWrapper";
 import { useArrowKeyDown } from "./hooks";
@@ -69,7 +68,7 @@ const colors = ["red", "green", "blue"];
 const searchPagesByString = (q: string) =>
   window.roamAlphaAPI
     .q("[:find (pull ?e [:node/title]) :in $ :where [?e :node/title]]")
-    .map((a) => a[0]["title"])
+    .map((a: RoamBlock[]) => a[0]["title"])
     .filter((a) => a.toLowerCase().includes(q.toLowerCase()))
     .slice(0, 9);
 
@@ -444,9 +443,12 @@ const QueryContent = ({
   );
   const onSave = useCallback(async () => {
     const outputText = `{{[[query]]: ${toQueryString(queryState)}}}`;
-    await openBlock(document.getElementById(blockId));
-    await userEvent.clear(document.activeElement);
-    await asyncType(outputText);
+    const { blockUid } = getUidsFromId(blockId);
+    const text = getTextByBlockUid(blockUid);
+    const newText = text.replace(/{{(qb|query-builder)}}/, outputText);
+    window.roamAlphaAPI.updateBlock({
+      block: { string: newText, uid: blockUid },
+    });
   }, [queryState]);
 
   return (

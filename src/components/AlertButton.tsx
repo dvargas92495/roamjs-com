@@ -9,14 +9,13 @@ import {
   Label,
   Popover,
 } from "@blueprintjs/core";
+import { getUidsFromId, updateActiveBlock } from "roam-client";
 import { parseDate } from "chrono-node";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
-import { asyncPaste, openBlock } from "roam-client";
 import differenceInMillieseconds from "date-fns/differenceInMilliseconds";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { getRenderRoot, useDocumentKeyDown } from "./hooks";
-import userEvent from "@testing-library/user-event";
 
 export const LOCAL_STORAGE_KEY = "roamjsAlerts";
 
@@ -101,7 +100,7 @@ export const renderWindowAlert = (): void =>
       <WindowAlert />
       <AlertDashboard />
     </>,
-    getRenderRoot('alerts')
+    getRenderRoot("alerts")
   );
 
 const removeAlertById = (alertId: number) => {
@@ -189,7 +188,7 @@ const AlertButtonContent = ({
         })
       );
     } else {
-      await asyncPaste(`Alert scheduled to with an invalid date`);
+      updateActiveBlock(`Alert scheduled to with an invalid date`);
     }
   }, [when, message, allowNotification, close]);
   return (
@@ -229,9 +228,12 @@ const ConfirmationDialog: React.FunctionComponent<{
   const onClose = useCallback(() => {
     setIsOpen(false);
     setScheduled("DONE");
-    openBlock(document.getElementById(blockId)).then((textarea) =>
-      userEvent.clear(textarea)
-    );
+    window.roamAlphaAPI.updateBlock({
+      block: {
+        uid: getUidsFromId(blockId).blockUid,
+        string: "",
+      },
+    });
   }, [setIsOpen, setScheduled, blockId]);
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title={"Confirmed"}>

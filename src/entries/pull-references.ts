@@ -1,19 +1,21 @@
-import userEvent from "@testing-library/user-event";
 import {
   addButtonListener,
-  asyncType,
   getConfigFromPage,
-  openBlock,
+  getUidsFromId,
   pushBullets,
+  updateActiveBlock,
 } from "roam-client";
 import {
   getLinkedReferences,
   getPageTitle,
+  getTextByBlockUid,
   runExtension,
 } from "../entry-helpers";
 
 const PULL_REFERENCES_COMMAND = "Pull References";
 const REPLACE = "${ref}";
+const createTagRegex = (tag: string) =>
+  new RegExp(`#?\\[\\[${tag}\\]\\]|#${tag}`, "g");
 
 const pullReferences = async (
   _: {
@@ -31,7 +33,7 @@ const pullReferences = async (
     format.replace(REPLACE, `((${l.uid}))`)
   );
   if (bullets.length === 0) {
-    await asyncType("No linked references for this page!");
+    updateActiveBlock("No linked references for this page!");
     return;
   }
   await pushBullets(bullets, blockUid, parentUid);
@@ -47,20 +49,14 @@ const pullReferences = async (
       .getElementsByClassName("roam-block");
     const blockReferenceIds = Array.from(blockReferences).map((b) => b.id);
     for (let b = 0; b < blockReferenceIds.length; b++) {
-      const block = document.getElementById(blockReferenceIds[b]);
-      await openBlock(block);
-      const textArea = document.activeElement as HTMLTextAreaElement;
-      const value = textArea.value;
-      const removeTag = async (s: string) => {
-        const index = value.indexOf(s);
-        if (index >= 0) {
-          textArea.setSelectionRange(index, index + s.length);
-          await userEvent.type(textArea, "{backspace}");
-        }
-      };
-      await removeTag(`#[[${pageTitleText}]]`);
-      await removeTag(`[[${pageTitleText}]]`);
-      await removeTag(`#${pageTitleText}`);
+      const { blockUid } = getUidsFromId(blockReferenceIds[b]);
+      const value = getTextByBlockUid(blockUid);
+      window.roamAlphaAPI.updateBlock({
+        block: {
+          string: value.replace(createTagRegex(pageTitleText), ""),
+          uid: blockUid,
+        },
+      });
     }
   }
 };

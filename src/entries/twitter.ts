@@ -1,10 +1,10 @@
 import { getPageTitle, runExtension } from "../entry-helpers";
 import {
   addButtonListener,
-  asyncType,
   pushBullets,
   getConfigFromPage,
   genericError,
+  updateActiveBlock,
 } from "roam-client";
 import axios from "axios";
 
@@ -20,7 +20,7 @@ const twitterReferencesListener = async (
   const config = getConfigFromPage("roam/js/twitter");
   const username = config["Username"];
   if (!username) {
-    await asyncType("Error: Missing required parameter username!");
+    updateActiveBlock("Error: Missing required parameter username!");
     return;
   }
 
@@ -37,7 +37,7 @@ const twitterReferencesListener = async (
       const statuses = response.data.statuses;
       const count = statuses.length;
       if (count === 0) {
-        await asyncType("No tweets found!");
+        updateActiveBlock("No tweets found!");
         return;
       }
       const bullets = statuses.map(

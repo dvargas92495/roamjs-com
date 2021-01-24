@@ -1,10 +1,10 @@
 import format from "date-fns/format";
 import {
   addButtonListener,
-  asyncPaste,
   getConfigFromPage,
   parseRoamDate,
   pushBullets,
+  updateActiveBlock,
 } from "roam-client";
 import { getPageTitle, runExtension } from "../entry-helpers";
 import axios from "axios";
@@ -34,7 +34,7 @@ const importOuraRing = async (
   const dateFromPage = parseRoamDate(pageTitle.textContent);
   const token = config["Token"]?.trim();
   if (!token) {
-    await asyncPaste(
+    await updateActiveBlock(
       `Error: Could not find the required "Token" attribute configured in the [[roam/js/oura-ring]] page.`
     );
     return;
@@ -110,9 +110,9 @@ const importOuraRing = async (
     })
     .catch((e) => {
       if (e.response?.status === 401) {
-        return asyncPaste(`The token used (${token}) is not authorized to access oura ring.`);
+        return updateActiveBlock(`The token used (${token}) is not authorized to access oura ring.`);
       }
-      asyncPaste("Unexpected Error thrown. Email support@roamjs.com for help!");
+      updateActiveBlock("Unexpected Error thrown. Email support@roamjs.com for help!");
     });
 };
 

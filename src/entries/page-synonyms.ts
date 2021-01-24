@@ -1,11 +1,16 @@
-import userEvent from "@testing-library/user-event";
 import {
   createOverlayObserver,
+  getTextByBlockUid,
   getTextTreeByPageName,
   isApple,
   runExtension,
 } from "../entry-helpers";
-import { asyncPaste, getConfigFromPage, getUids, openBlock } from "roam-client";
+import {
+  getConfigFromPage,
+  getUids,
+  getUidsFromId,
+  RoamBlock,
+} from "roam-client";
 
 let blockElementSelected: Element;
 const ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME = "roamjs-alias-page-synonyms";
@@ -36,7 +41,7 @@ const getReplacer = () => {
     .q(
       `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "Aliases"]]`
     )
-    .map((p) => p[0]);
+    .map((p) => p[0] as RoamBlock);
   const uidWithAliases = pagesWithAliases.map((p) => ({
     title: p.title,
     uid: p.uid,
@@ -66,58 +71,15 @@ const optionCallback = async () => {
     return;
   }
   const replace = getReplacer();
-  if (window.roamDatomicAlphaAPI) {
-    const { blockUid } = getUids(blockElementSelected as HTMLDivElement);
-    const blockContent = await window.roamDatomicAlphaAPI({
-      action: "pull",
+  const { blockUid } = getUids(blockElementSelected as HTMLDivElement);
+  const blockContent = getTextByBlockUid(blockUid);
+  const newText = replace(blockContent);
+  window.roamAlphaAPI.updateBlock({
+    block: {
       uid: blockUid,
-      selector: "[:block/string]",
-    });
-    const newText = replace(blockContent.string);
-    await window.roamDatomicAlphaAPI({
-      action: "update-block",
-      block: {
-        uid: blockUid,
-        string: newText,
-      },
-    });
-  } else {
-    const id = blockElementSelected.id;
-    if (
-      blockElementSelected.tagName === "DIV" ||
-      !document.contains(blockElementSelected)
-    ) {
-      const overlaysOpen = document.getElementsByClassName("bp3-overlay-open")
-        .length;
-      let tries = 0;
-      document.body.click();
-      const success = await new Promise((resolve) => {
-        const interval = setInterval(() => {
-          if (
-            overlaysOpen >
-            document.getElementsByClassName("bp3-overlay-open").length
-          ) {
-            clearInterval(interval);
-            resolve(true);
-          } else {
-            tries++;
-          }
-          if (tries > 100) {
-            clearInterval(interval);
-            resolve(false);
-          }
-        }, 50);
-      });
-      if (!success) {
-        throw new Error("timed out waiting for overlay to close");
-      }
-      await openBlock(document.getElementById(id));
-    }
-    const textArea = document.getElementById(id) as HTMLTextAreaElement;
-    const newText = replace(textArea.value);
-    userEvent.clear(textArea);
-    await asyncPaste(newText);
-  }
+      string: newText,
+    },
+  });
 };
 
 runExtension("page-synonyms", () => {
@@ -128,35 +90,17 @@ runExtension("page-synonyms", () => {
     const highlightedDivIds = Array.from(
       document.getElementsByClassName("block-highlight-blue")
     ).map((d) => d.getElementsByClassName("roam-block")[0].id);
-    if (window.roamDatomicAlphaAPI) {
-      highlightedDivIds.forEach(async (id: string) => {
-        const { blockUid } = getUids(
-          document.getElementById(id) as HTMLDivElement
-        );
-        const blockContent = await window.roamDatomicAlphaAPI({
-          action: "pull",
+    highlightedDivIds.forEach(async (id: string) => {
+      const { blockUid } = getUidsFromId(id);
+      const blockContent = getTextByBlockUid(blockUid);
+      const newText = replace(blockContent);
+      window.roamAlphaAPI.updateBlock({
+        block: {
           uid: blockUid,
-          selector: "[:block/string]",
-        });
-        const newText = replace(blockContent.string);
-        await window.roamDatomicAlphaAPI({
-          action: "update-block",
-          block: {
-            uid: blockUid,
-            string: newText,
-          },
-        });
+          string: newText,
+        },
       });
-    } else {
-      for (const index in highlightedDivIds) {
-        const id = highlightedDivIds[index];
-        await openBlock(document.getElementById(id));
-        const textArea = document.getElementById(id) as HTMLTextAreaElement;
-        const newText = replace(textArea.value);
-        userEvent.clear(textArea);
-        await asyncPaste(newText);
-      }
-    }
+    });
   });
 
   createOverlayObserver(() => {
