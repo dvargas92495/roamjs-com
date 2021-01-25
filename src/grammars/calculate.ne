@@ -24,6 +24,6 @@ numberLike -> number {% id %} | fcn {% id %}
 number -> decimal {% ([value]) => ({operation: "value", children: [], value}) %}
 
 tag -> 
-    "[[" [a-zA-Z0-9 ]:+ "]]" {% ([_, value]) => ({operation: "value", children: [], value: value.join("")}) %}
-  | "#[[" [a-zA-Z0-9 ]:+ "]]" {% ([_, value]) => ({operation: "value", children: [], value: value.join("")}) %}
-  | "#" [a-zA-Z0-9]:+ {% ([_, value]) => ({operation: "value", children: [], value: value.join("")}) %}
+    "[[" [a-zA-Z0-9 /]:+ "]]" {% ([_, value]) => ({operation: "value", children: [], value: value.join("")}) %}
+  | "#[[" [a-zA-Z0-9 /]:+ "]]" {% ([_, value]) => ({operation: "value", children: [], value: value.join("")}) %}
+  | "#" [a-zA-Z0-9/]:+ {% ([_, value]) => ({operation: "value", children: [], value: value.join("")}) %}

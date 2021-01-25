@@ -99,7 +99,7 @@ runExtension("calculate", () => {
       const text = getTextByBlockUid(blockUid);
       const buttonText =
         text.match(
-          new RegExp(`{{(${attribute}|${shortcut}):(.*)}}$`, "is")
+          new RegExp(`{{(${attribute}|${shortcut}):(.*)}}`, "is")
         )?.[2] || "";
       if (buttonText) {
         const expression = parseExpression(buttonText.trim());
