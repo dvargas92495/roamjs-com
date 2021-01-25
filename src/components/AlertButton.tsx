@@ -266,7 +266,7 @@ const AlertButton: React.FunctionComponent<{ blockId: string }> = ({
   ) : (
     <Popover
       content={
-        <AlertButtonContent setScheduled={setScheduled} buttonId={buttonId} />
+        <AlertButtonContent setScheduled={setScheduled} blockId={blockId} />
       }
       target={<Button text="ALERT" data-roamjs-alert-button />}
       defaultIsOpen={true}
