@@ -9,6 +9,7 @@ import {
 import {
   createButtonObserver,
   createCustomSmartBlockCommand,
+  getFirstChildUidByBlockUid,
   runExtension,
 } from "../entry-helpers";
 
@@ -27,9 +28,12 @@ const inlineImportArticle = async ({
       block: { string: "Loading..." },
       location: { "parent-uid": parentUid, order: 0 },
     });
+    const blockUid = await new Promise<string>((resolve) =>
+      setTimeout(() => resolve(getFirstChildUidByBlockUid(parentUid)), 1)
+    );
     await importArticle({
       url,
-      blockId: document.activeElement.id,
+      blockUid,
       indent,
     }).catch(() => {
       updateActiveBlock(ERROR_MESSAGE);

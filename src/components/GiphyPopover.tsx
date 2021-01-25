@@ -19,6 +19,7 @@ const GiphyPopover: React.FunctionComponent<{
   textarea: HTMLTextAreaElement;
 }> = ({ textarea }) => {
   const [search, setSearch] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const fetcher = useCallback(() => gf.search(search), [search]);
   const onGifClick = useCallback(
     async (gif: IGif, e: React.SyntheticEvent<HTMLElement, Event>) => {
@@ -33,8 +34,9 @@ const GiphyPopover: React.FunctionComponent<{
       });
       e.stopPropagation();
       e.preventDefault();
+      setIsOpen(false);
     },
-    [textarea]
+    [textarea, setIsOpen]
   );
   const inputListener = useCallback(
     (e: InputEvent) => {
@@ -51,13 +53,15 @@ const GiphyPopover: React.FunctionComponent<{
             cursorPosition <= index + full.length - SUFFIX.length
           ) {
             setSearch(match[1]);
+            setIsOpen(!!match[1]);
             return;
           }
         }
       }
       setSearch("");
+      setIsOpen(false);
     },
-    [setSearch]
+    [setSearch, setIsOpen]
   );
   useEffect(() => {
     textarea.addEventListener("input", inputListener);
@@ -67,7 +71,7 @@ const GiphyPopover: React.FunctionComponent<{
   }, [inputListener]);
   return (
     <Popover
-      isOpen={!!search}
+      isOpen={isOpen}
       target={<span />}
       position={Position.BOTTOM_LEFT}
       minimal

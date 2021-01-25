@@ -23,11 +23,13 @@ const onTodo = (blockUid: string) => {
       .replace(new RegExp("\\|", "g"), "\\|")
       .replace("/Current Time", "[0-2][0-9]:[0-5][0-9]")
       .replace("/Today", `\\[\\[${DAILY_NOTE_PAGE_REGEX.source}\\]\\]`)}`;
-    const oldValue = getTextByBlockUid(blockUid);
-    const newValue = oldValue.replace(new RegExp(formattedText), "");
-    window.roamAlphaAPI.updateBlock({
-      block: { string: newValue, uid: blockUid },
-    });
+    setTimeout(() => {
+      const oldValue = getTextByBlockUid(blockUid);
+      const newValue = oldValue.replace(new RegExp(formattedText), "");
+      window.roamAlphaAPI.updateBlock({
+        block: { string: newValue, uid: blockUid },
+      });
+    }, 1);
   }
   const replaceTags = config["Replace Tags"];
   if (replaceTags) {
@@ -54,10 +56,12 @@ const onDone = (blockUid: string) => {
     const formattedText = ` ${text
       .replace("/Current Time", format(today, "HH:mm"))
       .replace("/Today", `[[${toRoamDate(today)}]]`)}`;
-    const oldValue = getTextByBlockUid(blockUid);
-    window.roamAlphaAPI.updateBlock({
-      block: { uid: blockUid, string: `${oldValue} ${formattedText}` },
-    });
+    setTimeout(() => {
+      const oldValue = getTextByBlockUid(blockUid);
+      window.roamAlphaAPI.updateBlock({
+        block: { uid: blockUid, string: `${oldValue} ${formattedText}` },
+      });
+    }, 1);
   }
   const replaceTags = config["Replace Tags"];
   if (replaceTags) {
@@ -102,28 +106,12 @@ runExtension("todo-trigger", () => {
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA") {
         const textArea = target as HTMLTextAreaElement;
-        const start = textArea.selectionStart;
-        const end = textArea.selectionEnd;
         if (textArea.value.startsWith("{{[[DONE]]}}")) {
           const { blockUid } = getUids(textArea);
           onDone(blockUid);
-          setTimeout(
-            () =>
-              (document.getElementById(
-                textArea.id
-              ) as HTMLTextAreaElement).setSelectionRange(start, end),
-            1
-          );
         } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
           const { blockUid } = getUids(textArea);
           onTodo(blockUid);
-          setTimeout(
-            () =>
-              (document.getElementById(
-                textArea.id
-              ) as HTMLTextAreaElement).setSelectionRange(start, end),
-            1
-          );
         }
       }
     }

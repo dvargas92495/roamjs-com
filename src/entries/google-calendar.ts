@@ -9,7 +9,6 @@ import {
   pushBullets,
   getConfigFromPage,
   parseRoamDate,
-  updateActiveBlock,
   getActiveUids,
 } from "roam-client";
 import axios from "axios";
@@ -38,10 +37,9 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
 
   const calendarId = config["Google Calendar"]?.trim();
   if (!calendarId) {
-    updateActiveBlock(
-      `Error: Could not find the required "Google Calendar" attribute configured in the [[roam/js/google-calendar]] page.`
-    );
-    return;
+    return [
+      `Error: Could not find the required "Google Calendar" attribute configured in the [[roam/js/google-calendar]] page.`,
+    ];
   }
   const includeLink = config["Include Event Link"]?.trim() === "true";
   const skipFree = config["Skip Free"]?.trim() === "true";
@@ -93,9 +91,9 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
     })
     .catch((e) =>
       e.message === "Request failed with status code 404"
-        ? updateActiveBlock(
-            `Error for calendar ${calendarId}: Could not find calendar or it's not public. For more information on how to make it public, [visit this page](https://roamjs.com/extensions/google-calendar)`
-          )
+        ? [
+            `Error for calendar ${calendarId}: Could not find calendar or it's not public. For more information on how to make it public, [visit this page](https://roamjs.com/extensions/google-calendar)`,
+          ]
         : genericError(e)
     );
 };

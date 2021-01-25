@@ -48,6 +48,8 @@ runExtension("mobile-todos", () => {
   todoIconButton.onclick = () => {
     if (previousActiveElement.tagName === "TEXTAREA") {
       const textArea = previousActiveElement as HTMLTextAreaElement;
+      const start = textArea.selectionStart;
+      const end = textArea.selectionEnd;
       const oldValue = textArea.value;
       const newValue = TODO_REGEX.test(oldValue)
         ? oldValue.replace(TODO_REGEX, "{{[[DONE]]}}")
@@ -58,6 +60,11 @@ runExtension("mobile-todos", () => {
       window.roamAlphaAPI.updateBlock({
         block: { uid: blockUid, string: newValue },
       });
+      setTimeout(() => {
+        (document.getElementById(
+          textArea.id
+        ) as HTMLTextAreaElement).setSelectionRange(start, end);
+      }, 1);
     }
   };
 

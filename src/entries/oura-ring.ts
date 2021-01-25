@@ -34,9 +34,12 @@ const importOuraRing = async (
   const dateFromPage = parseRoamDate(pageTitle.textContent);
   const token = config["Token"]?.trim();
   if (!token) {
-    await updateActiveBlock(
-      `Error: Could not find the required "Token" attribute configured in the [[roam/js/oura-ring]] page.`
-    );
+    window.roamAlphaAPI.updateBlock({
+      block: {
+        string: `Error: Could not find the required "Token" attribute configured in the [[roam/js/oura-ring]] page.`,
+        uid: blockUid,
+      },
+    });
     return;
   }
   const dateToUse = isNaN(dateFromPage.valueOf()) ? new Date() : dateFromPage;
@@ -110,9 +113,19 @@ const importOuraRing = async (
     })
     .catch((e) => {
       if (e.response?.status === 401) {
-        return updateActiveBlock(`The token used (${token}) is not authorized to access oura ring.`);
+        return window.roamAlphaAPI.updateBlock({
+          block: {
+            string: `The token used (${token}) is not authorized to access oura ring.`,
+            uid: blockUid,
+          },
+        });
       }
-      updateActiveBlock("Unexpected Error thrown. Email support@roamjs.com for help!");
+      window.roamAlphaAPI.updateBlock({
+        block: {
+          string: "Unexpected Error thrown. Email support@roamjs.com for help!",
+          uid: blockUid,
+        },
+      });
     });
 };
 

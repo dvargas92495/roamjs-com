@@ -434,9 +434,11 @@ const toQueryState = (v: string): QueryState => {
 const QueryContent = ({
   blockId,
   initialValue,
+  close,
 }: {
   blockId: string;
   initialValue: string;
+  close: () => void;
 }) => {
   const [queryState, setQueryState] = useState<QueryState>(
     toQueryState(initialValue)
@@ -449,7 +451,8 @@ const QueryContent = ({
     window.roamAlphaAPI.updateBlock({
       block: { string: newText, uid: blockUid },
     });
-  }, [queryState]);
+    close();
+  }, [queryState, close]);
 
   return (
     <div style={{ padding: 16, maxHeight: "75vh", overflowY: "scroll" }}>
@@ -470,16 +473,27 @@ const QueryBuilder = ({
   defaultIsOpen: boolean;
   initialValue?: string;
 }): JSX.Element => {
+  const [isOpen, setIsOpen] = useState(defaultIsOpen);
+  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
+  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   return (
     <Popover
-      content={<QueryContent blockId={blockId} initialValue={initialValue} />}
+      content={
+        <QueryContent
+          blockId={blockId}
+          initialValue={initialValue}
+          close={close}
+        />
+      }
       target={
         <Button
           text={initialValue ? <Icon icon={"edit"} /> : "QUERY"}
           id={`roamjs-query-builder-button-${blockId}`}
+          onClick={open}
         />
       }
-      defaultIsOpen={defaultIsOpen}
+      isOpen={isOpen}
+      onInteraction={setIsOpen}
     />
   );
 };

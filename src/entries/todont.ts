@@ -65,7 +65,7 @@ runExtension("todont", () => {
     }
   });
 
-  const todontCallback = async () => {
+  const todontCallback = () => {
     if (document.activeElement.tagName === "TEXTAREA") {
       const textArea = document.activeElement as HTMLTextAreaElement;
       const value = textArea.value;
@@ -74,7 +74,7 @@ runExtension("todont", () => {
       } else if (value.startsWith("{{[[DONE]]}}")) {
         replaceText({ before: "{{[[DONE]]}}", after: "{{[[ARCHIVED]]}}" });
       } else if (value.startsWith("{{[[ARCHIVED]]}}")) {
-        replaceText({ before: "{{[[ARCHIVED]]}}", after: "" });
+        replaceText({ before: "{{[[ARCHIVED]]}}", after: "", prepend: true });
       } else {
         replaceText({ before: "", prepend: true, after: "{{[[ARCHIVED]]}}" });
       }

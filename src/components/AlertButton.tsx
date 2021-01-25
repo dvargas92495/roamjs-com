@@ -9,7 +9,7 @@ import {
   Label,
   Popover,
 } from "@blueprintjs/core";
-import { getUidsFromId, updateActiveBlock } from "roam-client";
+import { getUidsFromId } from "roam-client";
 import { parseDate } from "chrono-node";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
@@ -134,8 +134,10 @@ export const schedule = (
 
 const AlertButtonContent = ({
   setScheduled,
+  blockId,
 }: {
   setScheduled: (s: string) => void;
+  blockId: string;
 }) => {
   const [when, setWhen] = useState("");
   const onWhenChange = useCallback(
@@ -188,7 +190,14 @@ const AlertButtonContent = ({
         })
       );
     } else {
-      updateActiveBlock(`Alert scheduled to with an invalid date`);
+      const { blockUid } = getUidsFromId(blockId);
+      setScheduled("DONE");
+      window.roamAlphaAPI.updateBlock({
+        block: {
+          string: `Alert scheduled to with an invalid date`,
+          uid: blockUid,
+        },
+      });
     }
   }, [when, message, allowNotification, close]);
   return (
@@ -256,7 +265,9 @@ const AlertButton: React.FunctionComponent<{ blockId: string }> = ({
     />
   ) : (
     <Popover
-      content={<AlertButtonContent setScheduled={setScheduled} />}
+      content={
+        <AlertButtonContent setScheduled={setScheduled} buttonId={buttonId} />
+      }
       target={<Button text="ALERT" data-roamjs-alert-button />}
       defaultIsOpen={true}
     />

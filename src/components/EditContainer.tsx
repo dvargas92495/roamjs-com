@@ -3,7 +3,9 @@ import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 
 const editCallback = (blockId?: string) => () =>
-  document.getElementById(blockId).click();
+  document
+    .getElementById(blockId)
+    .dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
 
 const EditContainer: React.FunctionComponent<{
   blockId?: string;

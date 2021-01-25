@@ -100,14 +100,14 @@ export const replaceText = ({
     }
     const newStart = index > start ? start : start + diff;
     const newEnd = index > end ? end : end + diff;
-    if (newStart !== start || newEnd !== newEnd) {
+    if (newStart !== start || newEnd !== end) {
       // update-block replaces with a new textarea
       setTimeout(
         () =>
           (document.getElementById(
             id
           ) as HTMLTextAreaElement).setSelectionRange(newStart, newEnd),
-        1
+        100
       );
     }
   }

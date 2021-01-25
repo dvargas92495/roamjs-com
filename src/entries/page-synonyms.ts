@@ -66,7 +66,7 @@ const getReplacer = () => {
     }, input);
 };
 
-const optionCallback = async () => {
+const optionCallback = () => {
   if (!blockElementSelected) {
     return;
   }

@@ -10,7 +10,7 @@ import {
   Spinner,
   Text,
 } from "@blueprintjs/core";
-import { clearBlockById, getUidsFromId } from "roam-client";
+import { clearBlockByUid, getOrderByBlockUid, getUidsFromId } from "roam-client";
 import axios from "axios";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
@@ -18,9 +18,9 @@ import iconv from "iconv-lite";
 import charset from "charset";
 import {
   getLastChildUidByBlockUid,
+  getParentUidByBlockUid,
   getTextTreeByPageName,
 } from "../entry-helpers";
-import { getOrderByBlockUid } from "roam-client/lib/queries";
 
 export const ERROR_MESSAGE =
   "Error Importing Article. Email link to support@roamjs.com for help!";
@@ -77,11 +77,11 @@ td.addRule("a", {
 
 export const importArticle = ({
   url,
-  blockId,
+  blockUid,
   indent,
 }: {
   url: string;
-  blockId: string;
+  blockUid: string;
   indent: boolean;
 }): Promise<void> =>
   axios
@@ -103,8 +103,8 @@ export const importArticle = ({
       }${html.substring(headIndex)}`;
       const doc = new DOMParser().parseFromString(htmlWithBase, "text/html");
       const { content } = new Readability(doc).parse();
-      clearBlockById(blockId);
-      const { blockUid, parentUid } = getUidsFromId(blockId);
+      clearBlockByUid(blockUid);
+      const parentUid = getParentUidByBlockUid(blockUid);
       const firstOrder = getOrderByBlockUid(blockUid);
       const stack = [{ "parent-uid": parentUid, order: firstOrder }];
       const markdown = td.turndown(content);
@@ -174,6 +174,7 @@ const ImportContent = ({
   blockId: string;
   initialIndent: boolean;
 }) => {
+  const { blockUid} = getUidsFromId(blockId);
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [indent, setIndent] = useState(initialIndent);
@@ -192,11 +193,11 @@ const ImportContent = ({
     }
     setError("");
     setLoading(true);
-    importArticle({ url: value, blockId, indent }).catch(() => {
+    importArticle({ url: value, blockUid, indent }).catch(() => {
       setError(ERROR_MESSAGE);
       setLoading(false);
     });
-  }, [blockId, value, indent, setError, setLoading]);
+  }, [blockUid, value, indent, setError, setLoading]);
   const indentOnChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setIndent(e.target.checked),
     [setIndent]
