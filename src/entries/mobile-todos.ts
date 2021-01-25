@@ -2,14 +2,14 @@ import { getUids } from "roam-client";
 import {
   createMobileIcon,
   createObserver,
+  DONE_REGEX,
+  fixCursorById,
   runExtension,
+  TODO_REGEX,
 } from "../entry-helpers";
 
 const MOBILE_MORE_ICON_BUTTON_ID = "mobile-more-icon-button";
 const MOBILE_BACK_ICON_BUTTON_ID = "mobile-back-icon-button";
-
-const TODO_REGEX = /{{\[\[TODO\]\]}}/g;
-const DONE_REGEX = /{{\[\[DONE\]\]}} ?/g;
 
 runExtension("mobile-todos", () => {
   let previousActiveElement: HTMLElement;
@@ -56,15 +56,12 @@ runExtension("mobile-todos", () => {
         : DONE_REGEX.test(oldValue)
         ? oldValue.replace(DONE_REGEX, "")
         : `{{[[TODO]]}} ${oldValue}`;
+    const diff = newValue.length - oldValue.length;
       const { blockUid } = getUids(textArea);
       window.roamAlphaAPI.updateBlock({
         block: { uid: blockUid, string: newValue },
       });
-      setTimeout(() => {
-        (document.getElementById(
-          textArea.id
-        ) as HTMLTextAreaElement).setSelectionRange(start, end);
-      }, 1);
+      fixCursorById({ id: textArea.id, start: start + diff, end: end + diff });
     }
   };
 

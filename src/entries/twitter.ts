@@ -4,6 +4,7 @@ import {
   pushBullets,
   getConfigFromPage,
   genericError,
+  getParentUidByBlockUid,
 } from "roam-client";
 import axios from "axios";
 
@@ -13,9 +14,9 @@ const twitterReferencesListener = async (
   _: {
     [key: string]: string;
   },
-  blockUid: string,
-  parentUid: string
+  blockUid: string
 ) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/twitter");
   const username = config["Username"];
   if (!username) {

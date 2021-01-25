@@ -447,12 +447,14 @@ const QueryContent = ({
     const outputText = `{{[[query]]: ${toQueryString(queryState)}}}`;
     const { blockUid } = getUidsFromId(blockId);
     const text = getTextByBlockUid(blockUid);
-    const newText = text.replace(/{{(qb|query-builder)}}/, outputText);
+    const newText = initialValue
+      ? text.replace(initialValue, outputText)
+      : text.replace(/{{(qb|query-builder)}}/, outputText);
     window.roamAlphaAPI.updateBlock({
       block: { string: newText, uid: blockUid },
     });
     close();
-  }, [queryState, close]);
+  }, [queryState, close, initialValue]);
 
   return (
     <div style={{ padding: 16, maxHeight: "75vh", overflowY: "scroll" }}>

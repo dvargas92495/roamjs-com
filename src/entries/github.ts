@@ -3,6 +3,7 @@ import {
   addButtonListener,
   genericError,
   getConfigFromPage,
+  getParentUidByBlockUid,
   pushBullets,
   RoamBlock,
   updateActiveBlock,
@@ -13,9 +14,9 @@ const importGithubIssues = async (
   _: {
     [key: string]: string;
   },
-  blockUid: string,
-  parentUid: string
+  blockUid: string
 ) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/github");
   const username = config["Username"];
   if (!username) {
@@ -52,9 +53,9 @@ const importGithubIssues = async (
 
 const importGithubRepos = async (
   buttonConfig: { [key: string]: string },
-  blockUid: string,
-  parentUid: string
+  blockUid: string
 ) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/github");
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   if (!username) {
@@ -90,9 +91,9 @@ const importGithubProjects = async (
   buttonConfig: {
     [key: string]: string;
   },
-  blockUid: string,
-  parentUid: string
+  blockUid: string
 ) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/github");
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   const pageTitle = getPageTitle(document.activeElement);
@@ -126,9 +127,9 @@ const importGithubProjects = async (
 
 const importGithubCards = async (
   buttonConfig: { [key: string]: string },
-  blockUid: string,
-  parentUid: string
+  blockUid: string
 ) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/github");
   const pageTitle = getPageTitle(document.activeElement);
   const parentBlocks = window.roamAlphaAPI

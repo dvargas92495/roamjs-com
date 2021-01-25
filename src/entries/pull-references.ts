@@ -1,9 +1,9 @@
 import {
   addButtonListener,
   getConfigFromPage,
+  getParentUidByBlockUid,
   getUidsFromId,
   pushBullets,
-  updateActiveBlock,
 } from "roam-client";
 import {
   getLinkedReferences,
@@ -21,9 +21,9 @@ const pullReferences = async (
   _: {
     [key: string]: string;
   },
-  blockUid: string,
-  parentUid: string
+  blockUid: string
 ) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/pull-references");
   const format = config["Format"] || REPLACE;
   const pageTitle = getPageTitle(document.activeElement);
@@ -33,7 +33,9 @@ const pullReferences = async (
     format.replace(REPLACE, `((${l.uid}))`)
   );
   if (bullets.length === 0) {
-    updateActiveBlock("No linked references for this page!");
+    window.roamAlphaAPI.updateBlock({
+      block: { string: "No linked references for this page!", uid: blockUid },
+    });
     return;
   }
   await pushBullets(bullets, blockUid, parentUid);

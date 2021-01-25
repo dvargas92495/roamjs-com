@@ -10,15 +10,19 @@ import {
   Spinner,
   Text,
 } from "@blueprintjs/core";
-import { clearBlockByUid, getOrderByBlockUid, getUidsFromId } from "roam-client";
+import {
+  clearBlockByUid,
+  getOrderByBlockUid,
+  getUidsFromId,
+  getParentUidByBlockUid,
+} from "roam-client";
 import axios from "axios";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 import iconv from "iconv-lite";
 import charset from "charset";
 import {
-  getLastChildUidByBlockUid,
-  getParentUidByBlockUid,
+  getNthChildUidByBlockUid,
   getTextTreeByPageName,
 } from "../entry-helpers";
 
@@ -135,9 +139,10 @@ export const importArticle = ({
         const location = stack[stack.length - 1];
         if (isBullet && !bulletIsParagraph) {
           await new Promise((resolve) => setTimeout(resolve, 1));
-          const newParentUid = getLastChildUidByBlockUid(
-            location["parent-uid"]
-          );
+          const newParentUid = getNthChildUidByBlockUid({
+            blockUid: location["parent-uid"],
+            order: location["order"],
+          });
           stack.push({ order: 0, "parent-uid": newParentUid });
         }
         if (stack.length === 1 && location.order === firstOrder) {
@@ -156,9 +161,10 @@ export const importArticle = ({
         }
         if (indent && isHeader) {
           await new Promise((resolve) => setTimeout(resolve, 1));
-          const newParentUid = getLastChildUidByBlockUid(
-            location["parent-uid"]
-          );
+          const newParentUid = getNthChildUidByBlockUid({
+            blockUid: location["parent-uid"],
+            order: location["order"],
+          });
           stack.push({ order: 0, "parent-uid": newParentUid });
           previousNodeTabbed = true;
         } else {
@@ -170,11 +176,13 @@ export const importArticle = ({
 const ImportContent = ({
   blockId,
   initialIndent,
+  close,
 }: {
   blockId: string;
   initialIndent: boolean;
+  close: () => void;
 }) => {
-  const { blockUid} = getUidsFromId(blockId);
+  const { blockUid } = getUidsFromId(blockId);
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [indent, setIndent] = useState(initialIndent);
@@ -193,11 +201,13 @@ const ImportContent = ({
     }
     setError("");
     setLoading(true);
-    importArticle({ url: value, blockUid, indent }).catch(() => {
-      setError(ERROR_MESSAGE);
-      setLoading(false);
-    });
-  }, [blockUid, value, indent, setError, setLoading]);
+    importArticle({ url: value, blockUid, indent })
+      .then(close)
+      .catch(() => {
+        setError(ERROR_MESSAGE);
+        setLoading(false);
+      });
+  }, [blockUid, value, indent, setError, setLoading, close]);
   const indentOnChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setIndent(e.target.checked),
     [setIndent]
@@ -243,13 +253,31 @@ const ImportArticle = ({
 }: {
   blockId: string;
   initialIndent: boolean;
-}): JSX.Element => (
-  <Popover
-    content={<ImportContent blockId={blockId} initialIndent={initialIndent} />}
-    target={<Button text="IMPORT ARTICLE" data-roamjs-import-article />}
-    defaultIsOpen={true}
-  />
-);
+}): JSX.Element => {
+  const [isOpen, setIsOpen] = useState(true);
+  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
+  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
+  return (
+    <Popover
+      content={
+        <ImportContent
+          blockId={blockId}
+          initialIndent={initialIndent}
+          close={close}
+        />
+      }
+      target={
+        <Button
+          text="IMPORT ARTICLE"
+          data-roamjs-import-article
+          onClick={open}
+        />
+      }
+      isOpen={isOpen}
+      onInteraction={setIsOpen}
+    />
+  );
+};
 
 export const getIndentConfig = (): boolean => {
   const config = getTextTreeByPageName("roam/js/article");

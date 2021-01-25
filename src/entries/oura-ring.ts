@@ -2,6 +2,7 @@ import format from "date-fns/format";
 import {
   addButtonListener,
   getConfigFromPage,
+  getParentUidByBlockUid,
   parseRoamDate,
   pushBullets,
   updateActiveBlock,
@@ -26,9 +27,9 @@ const importOuraRing = async (
   _: {
     [key: string]: string;
   },
-  blockUid: string,
-  parentUid: string
-) => {
+  blockUid: string
+  ) => {
+    const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/oura-ring");
   const pageTitle = getPageTitle(document.activeElement);
   const dateFromPage = parseRoamDate(pageTitle.textContent);

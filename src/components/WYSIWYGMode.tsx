@@ -19,6 +19,7 @@ import ReactDOM from "react-dom";
 import { TextArea } from "@blueprintjs/core";
 import { useDocumentKeyDown } from "./hooks";
 import { getUids } from "roam-client";
+import { fixCursorById } from "../entry-helpers";
 
 const ToolbarWarning = () => (
   <span style={{ margin: "0 8px" }}>
@@ -332,13 +333,7 @@ export const renderWYSIWYGMode = (
         window.roamAlphaAPI.updateBlock({
           block: { string: output, uid: blockUid },
         });
-        setTimeout(() => {
-          const newTextarea = document.getElementById(
-            textarea.id
-          ) as HTMLTextAreaElement;
-          newTextarea.focus();
-          newTextarea.setSelectionRange(start, end);
-        }, 1);
+        fixCursorById({ id: textarea.id, start, end, focus: true });
       }}
     />,
     b

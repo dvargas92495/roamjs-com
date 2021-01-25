@@ -1,7 +1,6 @@
 import {
   createPageObserver,
   getBlockDepthByBlockUid,
-  getParentUidByBlockUid,
   getTextTreeByBlockUid,
   getTextTreeByPageName,
   replaceTagText,
@@ -9,6 +8,9 @@ import {
   runExtension,
   TreeNode,
 } from "../entry-helpers";
+import {
+  getParentUidByBlockUid,
+} from 'roam-client';
 
 declare global {
   interface Window {

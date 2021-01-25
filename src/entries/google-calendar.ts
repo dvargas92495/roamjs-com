@@ -10,6 +10,7 @@ import {
   getConfigFromPage,
   parseRoamDate,
   getActiveUids,
+  getParentUidByBlockUid,
 } from "roam-client";
 import axios from "axios";
 import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
@@ -102,9 +103,9 @@ const importGoogleCalendar = async (
   _?: {
     [key: string]: string;
   },
-  blockUid?: string,
-  parentUid?: string
+  blockUid?: string
 ) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
   const bullets = await fetchGoogleCalendar();
   await pushBullets(bullets, blockUid, parentUid);
 };

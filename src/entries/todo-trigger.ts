@@ -3,16 +3,19 @@ import { getConfigFromPage, getUids, toRoamDate } from "roam-client";
 import {
   createBlockObserver,
   DAILY_NOTE_PAGE_REGEX,
+  DONE_REGEX,
   getChildRefStringsByBlockUid,
   getTextByBlockUid,
   isControl,
-  replaceTagText,
   runExtension,
+  TODO_REGEX,
 } from "../entry-helpers";
 
 const onTodo = (blockUid: string) => {
   const config = getConfigFromPage("roam/js/todo-trigger");
   const text = config["Append Text"];
+  const oldValue = getTextByBlockUid(blockUid);
+  let value = oldValue;
   if (text) {
     const formattedText = ` ${text
       .replace(new RegExp("\\^", "g"), "\\^")
@@ -23,13 +26,7 @@ const onTodo = (blockUid: string) => {
       .replace(new RegExp("\\|", "g"), "\\|")
       .replace("/Current Time", "[0-2][0-9]:[0-5][0-9]")
       .replace("/Today", `\\[\\[${DAILY_NOTE_PAGE_REGEX.source}\\]\\]`)}`;
-    setTimeout(() => {
-      const oldValue = getTextByBlockUid(blockUid);
-      const newValue = oldValue.replace(new RegExp(formattedText), "");
-      window.roamAlphaAPI.updateBlock({
-        block: { string: newValue, uid: blockUid },
-      });
-    }, 1);
+    value = value.replace(new RegExp(formattedText), "");
   }
   const replaceTags = config["Replace Tags"];
   if (replaceTags) {
@@ -42,26 +39,36 @@ const onTodo = (blockUid: string) => {
         )
         .reverse()
     );
-    formattedPairs.forEach(([before, after]) =>
-      replaceTagText({ before, after })
+    formattedPairs.forEach(([before, after]) => {
+      if (after) {
+        value = value.replace(after, before);
+      } else {
+        value = `${value} #[[${after}]]`;
+      }
+    });
+  }
+  if (value !== oldValue) {
+    value = value.replace(
+      DONE_REGEX,
+      (s) => `{{[[TODO]]}}${s.endsWith(" ") ? " " : ""}`
     );
+    window.roamAlphaAPI.updateBlock({
+      block: { uid: blockUid, string: value },
+    });
   }
 };
 
 const onDone = (blockUid: string) => {
   const config = getConfigFromPage("roam/js/todo-trigger");
   const text = config["Append Text"];
+  const oldValue = getTextByBlockUid(blockUid);
+  let value = oldValue;
   if (text) {
     const today = new Date();
     const formattedText = ` ${text
       .replace("/Current Time", format(today, "HH:mm"))
       .replace("/Today", `[[${toRoamDate(today)}]]`)}`;
-    setTimeout(() => {
-      const oldValue = getTextByBlockUid(blockUid);
-      window.roamAlphaAPI.updateBlock({
-        block: { uid: blockUid, string: `${oldValue} ${formattedText}` },
-      });
-    }, 1);
+    value = `${value} ${formattedText}`;
   }
   const replaceTags = config["Replace Tags"];
   if (replaceTags) {
@@ -73,9 +80,19 @@ const onDone = (blockUid: string) => {
           pp.trim().replace("#", "").replace("[[", "").replace("]]", "")
         )
     );
-    formattedPairs.forEach(([before, after]) =>
-      replaceTagText({ before, after })
-    );
+    formattedPairs.forEach(([before, after]) => {
+      if (after) {
+        value = value.replace(before, after);
+      } else {
+        value = value.replace(before, "");
+      }
+    });
+  }
+  if (value !== oldValue) {
+    value = value.replace(TODO_REGEX, "{{[[DONE]]}}");
+    window.roamAlphaAPI.updateBlock({
+      block: { uid: blockUid, string: value },
+    });
   }
 };
 
