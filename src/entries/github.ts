@@ -6,9 +6,11 @@ import {
   getParentUidByBlockUid,
   pushBullets,
   RoamBlock,
-  updateActiveBlock,
 } from "roam-client";
 import axios from "axios";
+
+const updateBlock = ({ blockUid, text }: { blockUid: string; text: string }) =>
+  window.roamAlphaAPI.updateBlock({ block: { uid: blockUid, string: text } });
 
 const importGithubIssues = async (
   _: {
@@ -20,7 +22,10 @@ const importGithubIssues = async (
   const config = getConfigFromPage("roam/js/github");
   const username = config["Username"];
   if (!username) {
-    updateActiveBlock("Error: Missing required parameter username!");
+    updateBlock({
+      blockUid,
+      text: "Error: Missing required parameter username!",
+    });
     return;
   }
   const token = config["Token"];
@@ -39,7 +44,7 @@ const importGithubIssues = async (
     .then(async (r) => {
       const issues = r.data;
       if (issues.length === 0) {
-        updateActiveBlock("No issues assigned to you!");
+        updateBlock({ blockUid, text: "No issues assigned to you!" });
         return;
       }
       const bullets = issues.map(
@@ -59,7 +64,10 @@ const importGithubRepos = async (
   const config = getConfigFromPage("roam/js/github");
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   if (!username) {
-    updateActiveBlock("Error: Missing required parameter username!");
+    updateBlock({
+      blockUid,
+      text: "Error: Missing required parameter username!",
+    });
     return;
   }
   const token = config["Token"];
@@ -78,7 +86,7 @@ const importGithubRepos = async (
     .then(async (r) => {
       const repos = r.data;
       if (repos.length === 0) {
-        updateActiveBlock(`No repos in ${username}'s account!`);
+        updateBlock({ blockUid, text: `No repos in ${username}'s account!` });
         return;
       }
       const bullets = repos.map((i: { name: string }) => `[[${i.name}]]`);
@@ -116,7 +124,7 @@ const importGithubProjects = async (
     .then(async (r) => {
       const projects = r.data;
       if (projects.length === 0) {
-        updateActiveBlock(`No projects in ${repository}`);
+        updateBlock({ blockUid, text: `No projects in ${repository}` });
         return;
       }
       const bullets = projects.map((i: { name: string }) => `[[${i.name}]]`);
@@ -155,7 +163,7 @@ const importGithubCards = async (
       .then(async (r) => {
         const cards = r.data;
         if (cards.length === 0) {
-          updateActiveBlock(`No cards in ${repository}`);
+          updateBlock({ blockUid, text: `No cards in ${repository}` });
           return;
         }
         const bullets = cards.map(
@@ -172,7 +180,10 @@ const importGithubCards = async (
       })
       .catch(genericError);
   } else {
-    updateActiveBlock("Personal Token currently not supported for cards");
+    updateBlock({
+      blockUid,
+      text: "Personal Token currently not supported for cards",
+    });
   }
 };
 

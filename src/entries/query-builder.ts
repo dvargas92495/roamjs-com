@@ -1,7 +1,9 @@
+import { getUidsFromId } from "roam-client";
 import { renderQueryBuilder } from "../components/QueryBuilder";
 import {
   createButtonObserver,
   createHTMLObserver,
+  getTextByBlockUid,
   runExtension,
 } from "../entry-helpers";
 
@@ -31,10 +33,11 @@ runExtension("query-builder", () => {
         const editButtonRoot = document.createElement("div");
         b.appendChild(editButtonRoot);
         const blockId = b.closest(".roam-block").id;
+        const initialValue = getTextByBlockUid(getUidsFromId(blockId).blockUid);
         renderQueryBuilder({
           blockId,
           parent: editButtonRoot,
-          initialValue: b.textContent,
+          initialValue,
         });
         const editButton = document.getElementById(
           `roamjs-query-builder-button-${blockId}`

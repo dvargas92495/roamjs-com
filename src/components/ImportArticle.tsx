@@ -163,7 +163,7 @@ export const importArticle = ({
           await new Promise((resolve) => setTimeout(resolve, 1));
           const newParentUid = getNthChildUidByBlockUid({
             blockUid: location["parent-uid"],
-            order: location["order"],
+            order: location["order"] - 1,
           });
           stack.push({ order: 0, "parent-uid": newParentUid });
           previousNodeTabbed = true;

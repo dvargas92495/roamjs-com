@@ -11,7 +11,7 @@ import {
   TODO_REGEX,
 } from "../entry-helpers";
 
-const onTodo = (blockUid: string) => {
+const onTodo = (blockUid: string, clear?: boolean) => {
   const config = getConfigFromPage("roam/js/todo-trigger");
   const text = config["Append Text"];
   const oldValue = getTextByBlockUid(blockUid);
@@ -50,7 +50,7 @@ const onTodo = (blockUid: string) => {
   if (value !== oldValue) {
     value = value.replace(
       DONE_REGEX,
-      (s) => `{{[[TODO]]}}${s.endsWith(" ") ? " " : ""}`
+      (s) => clear ? "" : `{{[[TODO]]}}${s.endsWith(" ") ? " " : ""}`
     );
     window.roamAlphaAPI.updateBlock({
       block: { uid: blockUid, string: value },
@@ -128,7 +128,7 @@ runExtension("todo-trigger", () => {
           onDone(blockUid);
         } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
           const { blockUid } = getUids(textArea);
-          onTodo(blockUid);
+          onTodo(blockUid, true);
         }
       }
     }
