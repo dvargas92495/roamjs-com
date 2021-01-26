@@ -667,7 +667,7 @@ export const getPageTitle = (e: Element): ChildNode => {
   const container =
     e.closest(".roam-log-page") ||
     e.closest(".rm-sidebar-outline") ||
-    e.closest(".rm-zoom") ||
+    e.closest(".roam-article") ||
     document;
   const heading =
     (container.getElementsByClassName(

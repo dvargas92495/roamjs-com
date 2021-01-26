@@ -138,16 +138,12 @@ const ENDS_WITH_LEFT = new RegExp(" left$", "i");
 
 const onSpanMouseEnter = (e: MouseEvent) => {
   const span = e.target as HTMLSpanElement;
-  if (span.className.includes("bp3-icon-caret-down")) {
-    span.style.opacity = "1";
-  }
+  span.style.opacity = "1";
 };
 
 const onSpanMouseLeave = (e: MouseEvent) => {
   const span = e.target as HTMLSpanElement;
-  if (span.className.includes("bp3-icon-caret-down")) {
-    span.style.opacity = "0";
-  }
+  span.style.opacity = "0";
 };
 
 type ContentSlideExtras = { note: Slide; layout: string; collapsible: boolean };
@@ -185,6 +181,7 @@ const ContentSlide = ({
           spanIcon.onmouseleave = onSpanMouseLeave;
           l.style.position = "relative";
           l.insertBefore(spanIcon, l.childNodes[0]);
+          l.className = "roamjs-collapsed";
         }
         let depth = 0;
         let parentElement = l as HTMLElement;
@@ -229,12 +226,14 @@ const ContentSlide = ({
               "bp3-icon-caret-down"
             );
             lisToRestyle.forEach((l) => (l.style.display = "list-item"));
+            target.parentElement.className = "roamjs-expanded";
           } else if (className.includes("bp3-icon-caret-down")) {
             target.className = className.replace(
               "bp3-icon-caret-down",
               "bp3-icon-caret-right"
             );
             lisToRestyle.forEach((l) => (l.style.display = "none"));
+            target.parentElement.className = "roamjs-collapsed";
           }
         }
       }

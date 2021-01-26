@@ -29,6 +29,15 @@ addStyle(`.roamjs-collapsible-caret {
   top: 12px;
   left: -76px;
   cursor: pointer;
+}
+.reveal ul {
+  list-style-type: disc !important;
+}
+.roamjs-collapsed {
+  ::marker {
+    border: 4px solid #CED9E0;
+    color: hotpink;
+  }
 }`);
 
 runExtension("presentation", async () => {
