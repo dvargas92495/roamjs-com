@@ -100,12 +100,14 @@ runExtension("todo-trigger", () => {
         const { blockUid } = getUids(
           inputTarget.closest(".roam-block") as HTMLDivElement
         );
-        const oldValue = getTextByBlockUid(blockUid);
-        if (inputTarget.checked) {
-          onTodo(blockUid, oldValue);
-        } else {
-          onDone(blockUid, oldValue);
-        }
+        setTimeout(() => {
+          const oldValue = getTextByBlockUid(blockUid);
+          if (inputTarget.checked) {
+            onTodo(blockUid, oldValue);
+          } else {
+            onDone(blockUid, oldValue);
+          }
+        }, 1);
       }
     }
   });
