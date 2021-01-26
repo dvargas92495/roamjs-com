@@ -11,6 +11,7 @@ import {
   parseRoamDate,
   getActiveUids,
   getParentUidByBlockUid,
+  getOrderByBlockUid,
 } from "roam-client";
 import axios from "axios";
 import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
@@ -116,10 +117,13 @@ runExtension("google-calendar", () => {
 
 createCustomSmartBlockCommand({
   command: "GOOGLECALENDAR",
-  processor: () =>
+  processor: async () =>
     fetchGoogleCalendar().then(async (bullets) => {
-      const { blockUid, parentUid } = getActiveUids();
-      pushBullets(bullets.slice(0, bullets.length - 1), blockUid, parentUid);
-      return bullets.length ? bullets[bullets.length - 1] : EMPTY_MESSAGE;
+      if (bullets.length) {
+        bullets.slice(1).forEach(s => window.roam42.smartBlocks.activeWorkflow.outputAdditionalBlock(s))
+        return bullets[0];
+      } else {
+        return EMPTY_MESSAGE;
+      }
     }),
 });

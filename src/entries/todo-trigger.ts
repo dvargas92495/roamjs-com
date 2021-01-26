@@ -1,9 +1,8 @@
 import format from "date-fns/format";
 import { getConfigFromPage, getUids, toRoamDate } from "roam-client";
 import {
-  createBlockObserver,
+  createHTMLObserver,
   DAILY_NOTE_PAGE_REGEX,
-  getChildRefStringsByBlockUid,
   getTextByBlockUid,
   isControl,
   runExtension,
@@ -134,24 +133,33 @@ runExtension("todo-trigger", () => {
   ];
 
   if (isStrikethrough) {
-    createBlockObserver(
-      (b) => {
-        const { blockUid } = getUids(b);
-        if (getTextByBlockUid(blockUid).indexOf("{{[[DONE]]}}") > -1) {
-          b.style.textDecoration = "line-through";
+    createHTMLObserver({
+      callback: (l: HTMLLabelElement) => {
+        const input = l.getElementsByTagName("input")[0];
+        if (input.checked) {
+          const ref = l.closest(".rm-block-ref") as HTMLSpanElement;
+          if (ref) {
+            ref.style.textDecoration = "line-through";
+            return;
+          }
+          const block = l.closest('.roam-block') as HTMLDivElement;
+          if (block) {
+            block.style.textDecoration = 'line-through';
+          }
+        } else {
+          const ref = l.closest(".rm-block-ref") as HTMLSpanElement;
+          if (ref) {
+            ref.style.textDecoration = "none";
+            return;
+          }
+          const block = l.closest('.roam-block') as HTMLDivElement;
+          if (block) {
+            block.style.textDecoration = 'none';
+          }
         }
       },
-      (s) => {
-        const parent = s.closest(".roam-block") as HTMLDivElement;
-        const { blockUid } = getUids(parent);
-        const refs = getChildRefStringsByBlockUid(blockUid);
-        const index = Array.from(
-          parent.getElementsByClassName("rm-block-ref")
-        ).indexOf(s);
-        if (index < refs.length && refs[index].includes("{{[[DONE]]}}")) {
-          s.style.textDecoration = "line-through";
-        }
-      }
-    );
+      tag: "LABEL",
+      className: "check-container",
+    });
   }
 });
