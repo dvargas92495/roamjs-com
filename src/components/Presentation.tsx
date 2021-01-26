@@ -177,6 +177,7 @@ const ContentSlide = ({
           const spanIcon = document.createElement("span");
           spanIcon.className =
             "bp3-icon bp3-icon-caret-right roamjs-collapsible-caret";
+          spanIcon.style.opacity = '0';
           spanIcon.onmouseenter = onSpanMouseEnter;
           spanIcon.onmouseleave = onSpanMouseLeave;
           l.style.position = "relative";
