@@ -182,6 +182,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
         enforceFocus={false}
       >
         <div
+          id={"roamjs-mindmap-container"}
           ref={containerRef}
           style={{ height: "100%", position: "relative" }}
         >

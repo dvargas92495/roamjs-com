@@ -239,7 +239,7 @@ const ContentSlide = ({
         {caretsLoaded && (
           <style>
             {`.roamjs-collapsible-bullet::marker {
-  color:${document.getElementById("roamjs-revel-root")?.style?.backgroundColor};
+  color:${document.getElementById("roamjs-reveal-root")?.style?.backgroundColor};
 }`}
           </style>
         )}
