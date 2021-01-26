@@ -1,5 +1,4 @@
-import userEvent from "@testing-library/user-event";
-import { asyncPaste, newBlockEnter } from "roam-client";
+import { getActiveUids, getUidsFromId, updateActiveBlock } from "roam-client";
 import urlRegex from "url-regex";
 import {
   ERROR_MESSAGE,
@@ -10,23 +9,34 @@ import {
 import {
   createButtonObserver,
   createCustomSmartBlockCommand,
+  getFirstChildUidByBlockUid,
   runExtension,
-  smartBlockNewEnter,
 } from "../entry-helpers";
 
-const inlineImportArticle = async (value: string) => {
+const inlineImportArticle = async ({
+  value,
+  parentUid,
+}: {
+  value: string;
+  parentUid: string;
+}) => {
   const match = value.match(urlRegex({ strict: true }));
   if (match) {
     const indent = getIndentConfig();
     const url = match[0];
-    await asyncPaste("Loading...");
+    window.roamAlphaAPI.createBlock({
+      block: { string: "Loading..." },
+      location: { "parent-uid": parentUid, order: 0 },
+    });
+    const blockUid = await new Promise<string>((resolve) =>
+      setTimeout(() => resolve(getFirstChildUidByBlockUid(parentUid)), 1)
+    );
     await importArticle({
       url,
-      blockId: document.activeElement.id,
+      blockUid,
       indent,
-    }).catch(async () => {
-      await userEvent.clear(document.activeElement);
-      await asyncPaste(ERROR_MESSAGE);
+    }).catch(() => {
+      updateActiveBlock(ERROR_MESSAGE);
     });
     return `[Source](${url})`;
   } else {
@@ -47,18 +57,17 @@ runExtension("article", () => {
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA") {
         const value = (target as HTMLTextAreaElement).value;
-        await newBlockEnter();
-        await userEvent.tab();
-        await inlineImportArticle(value);
+        const { blockUid } = getUidsFromId(target.id);
+        await inlineImportArticle({ value, parentUid: blockUid });
       }
     }
   });
 
   createCustomSmartBlockCommand({
     command: "ARTICLE",
-    processor: async (afterColon) => {
-      await smartBlockNewEnter();
-      return inlineImportArticle(afterColon);
-    }
+    processor: async (value) => {
+      const { blockUid } = getActiveUids();
+      return inlineImportArticle({ value, parentUid: blockUid });
+    },
   });
 });

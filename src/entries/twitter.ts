@@ -1,10 +1,10 @@
 import { getPageTitle, runExtension } from "../entry-helpers";
 import {
   addButtonListener,
-  asyncType,
   pushBullets,
   getConfigFromPage,
   genericError,
+  getParentUidByBlockUid,
 } from "roam-client";
 import axios from "axios";
 
@@ -14,13 +14,18 @@ const twitterReferencesListener = async (
   _: {
     [key: string]: string;
   },
-  blockUid: string,
-  parentUid: string
+  blockUid: string
 ) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/twitter");
   const username = config["Username"];
   if (!username) {
-    await asyncType("Error: Missing required parameter username!");
+    window.roamAlphaAPI.updateBlock({
+      block: {
+        string: "Error: Missing required parameter username!",
+        uid: blockUid,
+      },
+    });
     return;
   }
 
@@ -37,11 +42,17 @@ const twitterReferencesListener = async (
       const statuses = response.data.statuses;
       const count = statuses.length;
       if (count === 0) {
-        await asyncType("No tweets found!");
+        window.roamAlphaAPI.updateBlock({
+          block: {
+            string: "No tweets found!",
+            uid: blockUid,
+          },
+        });
         return;
       }
       const bullets = statuses.map(
-        (i: {id_str: string}) => `https://twitter.com/i/web/status/${i.id_str}`
+        (i: { id_str: string }) =>
+          `https://twitter.com/i/web/status/${i.id_str}`
       );
       await pushBullets(bullets, blockUid, parentUid);
     })

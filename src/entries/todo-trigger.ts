@@ -1,24 +1,18 @@
 import format from "date-fns/format";
-import {
-  asyncType,
-  getConfigFromPage,
-  getUids,
-  openBlock,
-  toRoamDate,
-} from "roam-client";
+import { getConfigFromPage, getUids, toRoamDate } from "roam-client";
 import {
   createBlockObserver,
   DAILY_NOTE_PAGE_REGEX,
   getChildRefStringsByBlockUid,
   getTextByBlockUid,
   isControl,
-  replaceTagText,
   runExtension,
 } from "../entry-helpers";
 
-const onTodo = async () => {
+const onTodo = (blockUid: string, oldValue: string) => {
   const config = getConfigFromPage("roam/js/todo-trigger");
   const text = config["Append Text"];
+  let value = oldValue;
   if (text) {
     const formattedText = ` ${text
       .replace(new RegExp("\\^", "g"), "\\^")
@@ -28,18 +22,8 @@ const onTodo = async () => {
       .replace(new RegExp("\\)", "g"), "\\)")
       .replace(new RegExp("\\|", "g"), "\\|")
       .replace("/Current Time", "[0-2][0-9]:[0-5][0-9]")
-      .replace(
-        "/Today",
-        `\\[\\[${DAILY_NOTE_PAGE_REGEX.source}\\]\\]`
-      )}`;
-    const textarea = document.activeElement as HTMLTextAreaElement;
-    const value = textarea.value;
-    const results = new RegExp(formattedText).exec(value);
-    if (results) {
-      const len = results[0].length;
-      textarea.setSelectionRange(results.index, results.index + len);
-      await asyncType("{backspace}");
-    }
+      .replace("/Today", `\\[\\[${DAILY_NOTE_PAGE_REGEX.source}\\]\\]`)}`;
+    value = value.replace(new RegExp(formattedText), "");
   }
   const replaceTags = config["Replace Tags"];
   if (replaceTags) {
@@ -52,23 +36,31 @@ const onTodo = async () => {
         )
         .reverse()
     );
-    formattedPairs.forEach(([before, after]) =>
-      replaceTagText({ before, after })
-    );
+    formattedPairs.forEach(([before, after]) => {
+      if (after) {
+        value = value.replace(after, before);
+      } else {
+        value = `${value} #[[${after}]]`;
+      }
+    });
+  }
+  if (value !== oldValue) {
+    window.roamAlphaAPI.updateBlock({
+      block: { uid: blockUid, string: value },
+    });
   }
 };
 
-const onDone = async () => {
+const onDone = (blockUid: string, oldValue: string) => {
   const config = getConfigFromPage("roam/js/todo-trigger");
   const text = config["Append Text"];
+  let value = oldValue;
   if (text) {
-    const textArea = document.activeElement as HTMLTextAreaElement;
-    textArea.setSelectionRange(textArea.value.length, textArea.value.length);
     const today = new Date();
     const formattedText = ` ${text
       .replace("/Current Time", format(today, "HH:mm"))
       .replace("/Today", `[[${toRoamDate(today)}]]`)}`;
-    await asyncType(formattedText);
+    value = `${value}${formattedText}`;
   }
   const replaceTags = config["Replace Tags"];
   if (replaceTags) {
@@ -80,9 +72,18 @@ const onDone = async () => {
           pp.trim().replace("#", "").replace("[[", "").replace("]]", "")
         )
     );
-    formattedPairs.forEach(([before, after]) =>
-      replaceTagText({ before, after })
-    );
+    formattedPairs.forEach(([before, after]) => {
+      if (after) {
+        value = value.replace(before, after);
+      } else {
+        value = value.replace(before, "");
+      }
+    });
+  }
+  if (value !== oldValue) {
+    window.roamAlphaAPI.updateBlock({
+      block: { uid: blockUid, string: value },
+    });
   }
 };
 
@@ -96,13 +97,17 @@ runExtension("todo-trigger", () => {
     ) {
       const inputTarget = target as HTMLInputElement;
       if (inputTarget.type === "checkbox") {
-        await openBlock(inputTarget.closest(".roam-block"));
-        if (inputTarget.checked) {
-          onTodo();
-        } else {
-          await onDone();
-        }
-        document.body.click();
+        const { blockUid } = getUids(
+          inputTarget.closest(".roam-block") as HTMLDivElement
+        );
+        setTimeout(() => {
+          const oldValue = getTextByBlockUid(blockUid);
+          if (inputTarget.checked) {
+            onTodo(blockUid, oldValue);
+          } else {
+            onDone(blockUid, oldValue);
+          }
+        }, 1);
       }
     }
   });
@@ -112,16 +117,11 @@ runExtension("todo-trigger", () => {
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA") {
         const textArea = target as HTMLTextAreaElement;
+        const { blockUid } = getUids(textArea);
         if (textArea.value.startsWith("{{[[DONE]]}}")) {
-          const start = textArea.selectionStart;
-          const end = textArea.selectionEnd;
-          await onDone();
-          textArea.setSelectionRange(start, end);
+          onDone(blockUid, textArea.value);
         } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
-          const start = textArea.selectionStart;
-          const end = textArea.selectionEnd;
-          await onTodo();
-          textArea.setSelectionRange(start, end);
+          onTodo(blockUid, textArea.value);
         }
       }
     }

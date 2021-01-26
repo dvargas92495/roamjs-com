@@ -4,31 +4,39 @@ import ReactDOM from "react-dom";
 import { IGif } from "@giphy/js-types";
 import { GiphyFetch } from "@giphy/js-fetch-api";
 import { Carousel } from "@giphy/react-components";
-import { asyncPaste, asyncType, openBlock } from "roam-client";
+import { getUids } from "roam-client";
+import { getTextByBlockUid } from "../entry-helpers";
 
 const PREFIX = "{{GIPHY:";
 const SUFFIX = "}}";
+const GIPHY_REGEX = new RegExp(`${PREFIX}(.*)${SUFFIX}`, "si");
 
 const gf = new GiphyFetch(process.env.GIPHY_KEY);
 const getMatch = (textarea: HTMLTextAreaElement) =>
-  textarea.value.match(new RegExp(`${PREFIX}(.*)${SUFFIX}`, "si"));
+  textarea.value.match(GIPHY_REGEX);
 
 const GiphyPopover: React.FunctionComponent<{
   textarea: HTMLTextAreaElement;
 }> = ({ textarea }) => {
   const [search, setSearch] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const fetcher = useCallback(() => gf.search(search), [search]);
   const onGifClick = useCallback(
     async (gif: IGif, e: React.SyntheticEvent<HTMLElement, Event>) => {
-      await openBlock(textarea);
-      const match = getMatch(textarea);
-      textarea.setSelectionRange(match.index, match.index + match[0].length);
-      await asyncType("{backspace}");
-      await asyncPaste(`![${gif.title}](${gif.images.original.url})`);
+      const { blockUid } = getUids(textarea);
+      const value = getTextByBlockUid(blockUid);
+      const newValue = value.replace(
+        GIPHY_REGEX,
+        `![${gif.title}](${gif.images.original.url})`
+      );
+      window.roamAlphaAPI.updateBlock({
+        block: { string: newValue, uid: blockUid },
+      });
       e.stopPropagation();
       e.preventDefault();
+      setIsOpen(false);
     },
-    [textarea]
+    [textarea, setIsOpen]
   );
   const inputListener = useCallback(
     (e: InputEvent) => {
@@ -45,13 +53,15 @@ const GiphyPopover: React.FunctionComponent<{
             cursorPosition <= index + full.length - SUFFIX.length
           ) {
             setSearch(match[1]);
+            setIsOpen(!!match[1]);
             return;
           }
         }
       }
       setSearch("");
+      setIsOpen(false);
     },
-    [setSearch]
+    [setSearch, setIsOpen]
   );
   useEffect(() => {
     textarea.addEventListener("input", inputListener);
@@ -61,7 +71,7 @@ const GiphyPopover: React.FunctionComponent<{
   }, [inputListener]);
   return (
     <Popover
-      isOpen={!!search}
+      isOpen={isOpen}
       target={<span />}
       position={Position.BOTTOM_LEFT}
       minimal

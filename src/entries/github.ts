@@ -1,24 +1,31 @@
 import { getPageTitle, runExtension } from "../entry-helpers";
 import {
   addButtonListener,
-  asyncType,
   genericError,
   getConfigFromPage,
+  getParentUidByBlockUid,
   pushBullets,
+  RoamBlock,
 } from "roam-client";
 import axios from "axios";
+
+const updateBlock = ({ blockUid, text }: { blockUid: string; text: string }) =>
+  window.roamAlphaAPI.updateBlock({ block: { uid: blockUid, string: text } });
 
 const importGithubIssues = async (
   _: {
     [key: string]: string;
   },
-  blockUid: string,
-  parentUid: string
+  blockUid: string
 ) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/github");
   const username = config["Username"];
   if (!username) {
-    await asyncType("Error: Missing required parameter username!");
+    updateBlock({
+      blockUid,
+      text: "Error: Missing required parameter username!",
+    });
     return;
   }
   const token = config["Token"];
@@ -37,7 +44,7 @@ const importGithubIssues = async (
     .then(async (r) => {
       const issues = r.data;
       if (issues.length === 0) {
-        await asyncType("No issues assigned to you!");
+        updateBlock({ blockUid, text: "No issues assigned to you!" });
         return;
       }
       const bullets = issues.map(
@@ -51,13 +58,16 @@ const importGithubIssues = async (
 
 const importGithubRepos = async (
   buttonConfig: { [key: string]: string },
-  blockUid: string,
-  parentUid: string
+  blockUid: string
 ) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/github");
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   if (!username) {
-    await asyncType("Error: Missing required parameter username!");
+    updateBlock({
+      blockUid,
+      text: "Error: Missing required parameter username!",
+    });
     return;
   }
   const token = config["Token"];
@@ -76,7 +86,7 @@ const importGithubRepos = async (
     .then(async (r) => {
       const repos = r.data;
       if (repos.length === 0) {
-        await asyncType(`No repos in ${username}'s account!`);
+        updateBlock({ blockUid, text: `No repos in ${username}'s account!` });
         return;
       }
       const bullets = repos.map((i: { name: string }) => `[[${i.name}]]`);
@@ -89,9 +99,9 @@ const importGithubProjects = async (
   buttonConfig: {
     [key: string]: string;
   },
-  blockUid: string,
-  parentUid: string
+  blockUid: string
 ) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/github");
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
   const pageTitle = getPageTitle(document.activeElement);
@@ -114,7 +124,7 @@ const importGithubProjects = async (
     .then(async (r) => {
       const projects = r.data;
       if (projects.length === 0) {
-        await asyncType(`No projects in ${repository}`);
+        updateBlock({ blockUid, text: `No projects in ${repository}` });
         return;
       }
       const bullets = projects.map((i: { name: string }) => `[[${i.name}]]`);
@@ -125,16 +135,16 @@ const importGithubProjects = async (
 
 const importGithubCards = async (
   buttonConfig: { [key: string]: string },
-  blockUid: string,
-  parentUid: string
+  blockUid: string
 ) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/github");
   const pageTitle = getPageTitle(document.activeElement);
   const parentBlocks = window.roamAlphaAPI
     .q(
       `[:find (pull ?parentPage [:node/title]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${pageTitle.textContent}"]]`
     )
-    .filter((block) => block.length);
+    .filter((block) => block.length) as RoamBlock[][];
   const repoAsParent = parentBlocks.length > 0 ? parentBlocks[0][0]?.title : "";
 
   const username = buttonConfig.FOR ? buttonConfig.FOR : config["Username"];
@@ -153,7 +163,7 @@ const importGithubCards = async (
       .then(async (r) => {
         const cards = r.data;
         if (cards.length === 0) {
-          await asyncType(`No cards in ${repository}`);
+          updateBlock({ blockUid, text: `No cards in ${repository}` });
           return;
         }
         const bullets = cards.map(
@@ -170,7 +180,10 @@ const importGithubCards = async (
       })
       .catch(genericError);
   } else {
-    await asyncType("Personal Token currently not supported for cards");
+    updateBlock({
+      blockUid,
+      text: "Personal Token currently not supported for cards",
+    });
   }
 };
 

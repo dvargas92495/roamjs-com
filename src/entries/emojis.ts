@@ -1,6 +1,5 @@
 import emoji from "node-emoji";
-import userEvent from "@testing-library/user-event";
-import { getConfigFromPage } from "roam-client";
+import { getConfigFromPage, updateActiveBlock } from "roam-client";
 import { runExtension } from "../entry-helpers";
 
 runExtension("emojis", () => {
@@ -64,13 +63,7 @@ runExtension("emojis", () => {
 
   const insertEmoji = (target: HTMLTextAreaElement, emojiCode: string) => {
     const initialValue = target.value;
-    const preValue = initialValue.substring(
-      0,
-      initialValue.length - searchText.length
-    );
-    target.setSelectionRange(preValue.length, initialValue.length);
-    userEvent.type(target, "{backspace}");
-    userEvent.type(target, emojiCode);
+    updateActiveBlock(initialValue.replace(searchText, emojiCode));
     turnOffEmoji();
   };
 

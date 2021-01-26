@@ -1,11 +1,7 @@
-import {
-  createIconButton,
-  getAttrConfigFromQuery,
-  getUids,
-  newBlockEnter,
-} from "roam-client";
+import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel, { Dict } from "mixpanel-browser";
+import { RoamBlock } from "roam-client/lib/types";
 
 declare global {
   interface Window {
@@ -69,6 +65,26 @@ export const runExtension = async (
   run();
 };
 
+// update-block replaces with a new textarea
+export const fixCursorById = ({
+  id,
+  start,
+  end,
+  focus,
+}: {
+  id: string;
+  start: number;
+  end: number;
+  focus?: boolean;
+}): number =>
+  window.setTimeout(() => {
+    const textArea = document.getElementById(id) as HTMLTextAreaElement;
+    if (focus) {
+      textArea.focus();
+    }
+    textArea.setSelectionRange(start, end);
+  }, 100);
+
 export const replaceText = ({
   before,
   after,
@@ -104,15 +120,12 @@ export const replaceText = ({
     }
     const newStart = index > start ? start : start + diff;
     const newEnd = index > end ? end : end + diff;
-    if (newStart !== start || newEnd !== newEnd) {
-      // update-block replaces with a new textarea
-      setTimeout(
-        () =>
-          (document.getElementById(
-            id
-          ) as HTMLTextAreaElement).setSelectionRange(newStart, newEnd),
-        1
-      );
+    if (newStart !== start || newEnd !== end) {
+      fixCursorById({
+        id,
+        start: newStart,
+        end: newEnd,
+      });
     }
   }
 };
@@ -471,17 +484,19 @@ export const getCreatedTimeByTitle = (title: string): number => {
       /"/g,
       '\\"'
     )}"]]`
-  )[0][0]?.time;
-  return result || getEditTimeByTitle(title);
+  )[0][0] as RoamBlock;
+  return result?.time || getEditTimeByTitle(title);
 };
 
-export const getEditTimeByTitle = (title: string): number =>
-  window.roamAlphaAPI.q(
+export const getEditTimeByTitle = (title: string): number => {
+  const result = window.roamAlphaAPI.q(
     `[:find (pull ?e [:edit/time]) :where [?e :node/title "${title.replace(
       /"/g,
       '\\"'
     )}"]]`
-  )[0][0]?.time;
+  )[0][0] as RoamBlock;
+  return result?.time;
+};
 
 export const getConfigFromBlock = (
   container: HTMLElement
@@ -517,7 +532,7 @@ const getWordCountByBlockId = (blockId: number): number => {
 export const getWordCountByBlockUid = (blockUid: string): number => {
   const block = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/children, :block/string]) :where [?e :block/uid "${blockUid}"]]`
-  )[0][0];
+  )[0][0] as RoamBlock;
   const children = block.children || [];
   const count = getWordCount(block.string);
   return (
@@ -564,7 +579,7 @@ export const getTextTreeByBlockUid = (
 ): { text: string; children: TreeNode[] } => {
   const block = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/children, :block/string]) :where [?e :block/uid "${blockUid}"]]`
-  )[0][0];
+  )[0][0] as RoamBlock;
   const children = block.children || [];
   return {
     text: block.string,
@@ -581,7 +596,7 @@ export const getTextTreeByPageName = (name: string): TreeNode[] => {
   if (!result.length) {
     return [];
   }
-  const block = result[0][0];
+  const block = result[0][0] as RoamBlock;
   const children = block.children || [];
   return children
     .map((c) => getTextTreeByBlockId(c.id))
@@ -591,7 +606,7 @@ export const getTextTreeByPageName = (name: string): TreeNode[] => {
 export const getWordCountByPageTitle = (title: string): number => {
   const page = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/children]) :where [?e :node/title "${title}"]]`
-  )[0][0];
+  )[0][0] as RoamBlock;
   const children = page.children || [];
   return children
     .map((c) => getWordCountByBlockId(c.id))
@@ -601,7 +616,7 @@ export const getWordCountByPageTitle = (title: string): number => {
 export const getTextByBlockUid = (uid: string): string => {
   const results = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/string]) :where [?e :block/uid "${uid}"]]`
-  );
+  ) as RoamBlock[][];
   if (results.length) {
     return results[0][0]?.string;
   }
@@ -613,17 +628,21 @@ export const getRefTitlesByBlockUid = (uid: string): string[] =>
     .q(
       `[:find (pull ?r [:node/title]) :where [?e :block/refs ?r] [?e :block/uid "${uid}"]]`
     )
-    .map((b) => b[0]?.title || "");
+    .map((b: RoamBlock[]) => b[0]?.title || "");
 
-export const getCreateTimeByBlockUid = (uid: string): number =>
-  window.roamAlphaAPI.q(
+export const getCreateTimeByBlockUid = (uid: string): number => {
+  const block = window.roamAlphaAPI.q(
     `[:find (pull ?e [:create/time]) :where [?e :block/uid "${uid}"]]`
-  )[0][0]?.time;
+  )[0][0] as RoamBlock;
+  return block?.time;
+};
 
-export const getEditTimeByBlockUid = (uid: string): number =>
-  window.roamAlphaAPI.q(
+export const getEditTimeByBlockUid = (uid: string): number => {
+  const block = window.roamAlphaAPI.q(
     `[:find (pull ?e [:edit/time]) :where [?e :block/uid "${uid}"]]`
-  )[0][0]?.time;
+  )[0][0] as RoamBlock;
+  return block?.time;
+};
 
 export const getPageTitle = (e: Element): ChildNode => {
   const container =
@@ -650,7 +669,7 @@ export const getPageTitleByBlockUid = (blockUid: string): string => {
   if (!result.length) {
     return "";
   }
-  const block = result[0][0];
+  const block = result[0][0] as RoamBlock;
   return block.title ? block.title : getPageTitleByBlockUid(block.uid);
 };
 
@@ -661,7 +680,7 @@ export const getPageUidByPageTitle = (title: string): string => {
   if (!result.length) {
     return "";
   }
-  const block = result[0][0];
+  const block = result[0][0] as RoamBlock;
   return block.uid;
 };
 
@@ -672,15 +691,8 @@ export const getBlockDepthByBlockUid = (blockUid: string): number => {
   if (!result.length) {
     return -1;
   }
-  const block = result[0][0];
+  const block = result[0][0] as RoamBlock;
   return block.title ? 1 : getBlockDepthByBlockUid(block.uid) + 1;
-};
-
-export const getParentUidByBlockUid = (blockUid: string): string => {
-  const result = window.roamAlphaAPI.q(
-    `[:find (pull ?c [:block/uid]) :where [?c :block/children ?e] [?e :block/uid "${blockUid}"]]`
-  );
-  return result.length ? result[0][0].uid : "";
 };
 
 const getBlockUidsByBlockId = (blockId: number): string[] => {
@@ -702,16 +714,9 @@ const getBlockUidsByPageTitle = (title: string) => {
   if (!result.length) {
     return new Set();
   }
-  const page = result[0][0];
+  const page = result[0][0] as RoamBlock;
   const children = page.children || [];
   return new Set(children.flatMap((c) => getBlockUidsByBlockId(c.id)));
-};
-
-export type RoamBlock = {
-  title?: string;
-  time?: number;
-  id?: number;
-  uid?: string;
 };
 
 export const getLinkedPageReferences = (t: string): RoamBlock[] => {
@@ -731,7 +736,9 @@ export const getLinkedPageReferences = (t: string): RoamBlock[] => {
       )}"]]`
     )
     .filter((block) => block.length);
-  return parentBlocks.map((b) => findParentBlock(b[0])) as RoamBlock[];
+  return parentBlocks.map((b) =>
+    findParentBlock(b[0] as RoamBlock)
+  ) as RoamBlock[];
 };
 
 export const getChildRefStringsByBlockUid = (b: string): string[] =>
@@ -740,14 +747,28 @@ export const getChildRefStringsByBlockUid = (b: string): string[] =>
       `[:find (pull ?r [:block/string]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
     )
     .filter((r) => r.length && r[0])
-    .map((r) => r[0].string || "");
+    .map((r: RoamBlock[]) => r[0].string || "");
 
 export const getChildRefUidsByBlockUid = (b: string): string[] =>
   window.roamAlphaAPI
     .q(
       `[:find (pull ?r [:block/uid]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
     )
-    .map((r) => r[0].uid);
+    .map((r: RoamBlock[]) => r[0].uid);
+
+export const getNthChildUidByBlockUid = ({
+  blockUid,
+  order,
+}: {
+  blockUid: string;
+  order: number;
+}): string =>
+  window.roamAlphaAPI.q(
+    `[:find ?u :where [?c :block/uid ?u] [?c :block/order ${order}] [?p :block/children ?c] [?p :block/uid "${blockUid}"]]`
+  )?.[0]?.[0] as string;
+
+export const getFirstChildUidByBlockUid = (blockUid: string): string =>
+  getNthChildUidByBlockUid({ blockUid, order: 0 });
 
 export const getLinkedReferences = (t: string): RoamBlock[] => {
   const parentBlocks = window.roamAlphaAPI
@@ -792,12 +813,6 @@ export const addStyle = (content: string): HTMLStyleElement => {
   css.textContent = content;
   document.getElementsByTagName("head")[0].appendChild(css);
   return css;
-};
-
-export const smartBlockNewEnter = async (): Promise<void> => {
-  if ((document.activeElement as HTMLTextAreaElement).value) {
-    await newBlockEnter();
-  }
 };
 
 export const createCustomSmartBlockCommand = ({
@@ -851,3 +866,5 @@ export const getTitlesReferencingPagesInSameBlock = (
 };
 
 export const DAILY_NOTE_PAGE_REGEX = /(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]/;
+export const TODO_REGEX = /{{\[\[TODO\]\]}}/g;
+export const DONE_REGEX = /{{\[\[DONE\]\]}} ?/g;

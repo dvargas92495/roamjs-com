@@ -4,10 +4,9 @@ import {
   createSortIcons,
   getLinkedPageReferences,
   getPageTitle,
-  RoamBlock,
   runExtension,
 } from "../entry-helpers";
-import { getConfigFromPage } from "roam-client";
+import { getConfigFromPage, RoamBlock } from "roam-client";
 
 const menuItemCallback = (
   sortContainer: Element,

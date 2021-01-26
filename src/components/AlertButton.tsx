@@ -9,14 +9,13 @@ import {
   Label,
   Popover,
 } from "@blueprintjs/core";
+import { getUidsFromId } from "roam-client";
 import { parseDate } from "chrono-node";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
-import { asyncPaste, openBlock } from "roam-client";
 import differenceInMillieseconds from "date-fns/differenceInMilliseconds";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { getRenderRoot, useDocumentKeyDown } from "./hooks";
-import userEvent from "@testing-library/user-event";
 
 export const LOCAL_STORAGE_KEY = "roamjsAlerts";
 
@@ -101,7 +100,7 @@ export const renderWindowAlert = (): void =>
       <WindowAlert />
       <AlertDashboard />
     </>,
-    getRenderRoot('alerts')
+    getRenderRoot("alerts")
   );
 
 const removeAlertById = (alertId: number) => {
@@ -135,8 +134,10 @@ export const schedule = (
 
 const AlertButtonContent = ({
   setScheduled,
+  blockId,
 }: {
   setScheduled: (s: string) => void;
+  blockId: string;
 }) => {
   const [when, setWhen] = useState("");
   const onWhenChange = useCallback(
@@ -189,7 +190,14 @@ const AlertButtonContent = ({
         })
       );
     } else {
-      await asyncPaste(`Alert scheduled to with an invalid date`);
+      const { blockUid } = getUidsFromId(blockId);
+      setScheduled("DONE");
+      window.roamAlphaAPI.updateBlock({
+        block: {
+          string: `Alert scheduled to with an invalid date`,
+          uid: blockUid,
+        },
+      });
     }
   }, [when, message, allowNotification, close]);
   return (
@@ -229,9 +237,12 @@ const ConfirmationDialog: React.FunctionComponent<{
   const onClose = useCallback(() => {
     setIsOpen(false);
     setScheduled("DONE");
-    openBlock(document.getElementById(blockId)).then((textarea) =>
-      userEvent.clear(textarea)
-    );
+    window.roamAlphaAPI.updateBlock({
+      block: {
+        uid: getUidsFromId(blockId).blockUid,
+        string: "",
+      },
+    });
   }, [setIsOpen, setScheduled, blockId]);
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title={"Confirmed"}>
@@ -254,7 +265,9 @@ const AlertButton: React.FunctionComponent<{ blockId: string }> = ({
     />
   ) : (
     <Popover
-      content={<AlertButtonContent setScheduled={setScheduled} />}
+      content={
+        <AlertButtonContent setScheduled={setScheduled} blockId={blockId} />
+      }
       target={<Button text="ALERT" data-roamjs-alert-button />}
       defaultIsOpen={true}
     />

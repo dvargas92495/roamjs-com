@@ -1,10 +1,11 @@
 import format from "date-fns/format";
 import {
   addButtonListener,
-  asyncPaste,
   getConfigFromPage,
+  getParentUidByBlockUid,
   parseRoamDate,
   pushBullets,
+  updateActiveBlock,
 } from "roam-client";
 import { getPageTitle, runExtension } from "../entry-helpers";
 import axios from "axios";
@@ -26,17 +27,20 @@ const importOuraRing = async (
   _: {
     [key: string]: string;
   },
-  blockUid: string,
-  parentUid: string
-) => {
+  blockUid: string
+  ) => {
+    const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/oura-ring");
   const pageTitle = getPageTitle(document.activeElement);
   const dateFromPage = parseRoamDate(pageTitle.textContent);
   const token = config["Token"]?.trim();
   if (!token) {
-    await asyncPaste(
-      `Error: Could not find the required "Token" attribute configured in the [[roam/js/oura-ring]] page.`
-    );
+    window.roamAlphaAPI.updateBlock({
+      block: {
+        string: `Error: Could not find the required "Token" attribute configured in the [[roam/js/oura-ring]] page.`,
+        uid: blockUid,
+      },
+    });
     return;
   }
   const dateToUse = isNaN(dateFromPage.valueOf()) ? new Date() : dateFromPage;
@@ -110,9 +114,19 @@ const importOuraRing = async (
     })
     .catch((e) => {
       if (e.response?.status === 401) {
-        return asyncPaste(`The token used (${token}) is not authorized to access oura ring.`);
+        return window.roamAlphaAPI.updateBlock({
+          block: {
+            string: `The token used (${token}) is not authorized to access oura ring.`,
+            uid: blockUid,
+          },
+        });
       }
-      asyncPaste("Unexpected Error thrown. Email support@roamjs.com for help!");
+      window.roamAlphaAPI.updateBlock({
+        block: {
+          string: "Unexpected Error thrown. Email support@roamjs.com for help!",
+          uid: blockUid,
+        },
+      });
     });
 };
 

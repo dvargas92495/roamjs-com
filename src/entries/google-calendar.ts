@@ -2,7 +2,6 @@ import {
   createCustomSmartBlockCommand,
   getPageTitle,
   runExtension,
-  smartBlockNewEnter,
 } from "../entry-helpers";
 import {
   addButtonListener,
@@ -10,7 +9,8 @@ import {
   pushBullets,
   getConfigFromPage,
   parseRoamDate,
-  asyncPaste,
+  getActiveUids,
+  getParentUidByBlockUid,
 } from "roam-client";
 import axios from "axios";
 import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
@@ -38,10 +38,9 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
 
   const calendarId = config["Google Calendar"]?.trim();
   if (!calendarId) {
-    await asyncPaste(
-      `Error: Could not find the required "Google Calendar" attribute configured in the [[roam/js/google-calendar]] page.`
-    );
-    return;
+    return [
+      `Error: Could not find the required "Google Calendar" attribute configured in the [[roam/js/google-calendar]] page.`,
+    ];
   }
   const includeLink = config["Include Event Link"]?.trim() === "true";
   const skipFree = config["Skip Free"]?.trim() === "true";
@@ -93,9 +92,9 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
     })
     .catch((e) =>
       e.message === "Request failed with status code 404"
-        ? asyncPaste(
-            `Error for calendar ${calendarId}: Could not find calendar or it's not public. For more information on how to make it public, [visit this page](https://roamjs.com/extensions/google-calendar)`
-          )
+        ? [
+            `Error for calendar ${calendarId}: Could not find calendar or it's not public. For more information on how to make it public, [visit this page](https://roamjs.com/extensions/google-calendar)`,
+          ]
         : genericError(e)
     );
 };
@@ -104,9 +103,9 @@ const importGoogleCalendar = async (
   _?: {
     [key: string]: string;
   },
-  blockUid?: string,
-  parentUid?: string
+  blockUid?: string
 ) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
   const bullets = await fetchGoogleCalendar();
   await pushBullets(bullets, blockUid, parentUid);
 };
@@ -119,11 +118,8 @@ createCustomSmartBlockCommand({
   command: "GOOGLECALENDAR",
   processor: () =>
     fetchGoogleCalendar().then(async (bullets) => {
-      if (bullets.length > 1) {
-        await smartBlockNewEnter();
-      }
-      return pushBullets(bullets.slice(0, bullets.length - 1)).then(() =>
-        bullets.length ? bullets[bullets.length - 1] : EMPTY_MESSAGE
-      );
+      const { blockUid, parentUid } = getActiveUids();
+      pushBullets(bullets.slice(0, bullets.length - 1), blockUid, parentUid);
+      return bullets.length ? bullets[bullets.length - 1] : EMPTY_MESSAGE;
     }),
 });

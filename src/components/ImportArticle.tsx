@@ -10,29 +10,24 @@ import {
   Spinner,
   Text,
 } from "@blueprintjs/core";
-import { asyncPaste, asyncType, newBlockEnter, openBlock } from "roam-client";
-import userEvent from "@testing-library/user-event";
+import {
+  clearBlockByUid,
+  getOrderByBlockUid,
+  getUidsFromId,
+  getParentUidByBlockUid,
+} from "roam-client";
 import axios from "axios";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 import iconv from "iconv-lite";
 import charset from "charset";
-import { createHTMLObserver, getTextTreeByPageName } from "../entry-helpers";
+import {
+  getNthChildUidByBlockUid,
+  getTextTreeByPageName,
+} from "../entry-helpers";
 
 export const ERROR_MESSAGE =
   "Error Importing Article. Email link to support@roamjs.com for help!";
-
-const tabListenerRef: { current: (b: HTMLTextAreaElement) => void } = {
-  current: null,
-};
-const addTabListener = (listener: (b: HTMLTextAreaElement) => void) =>
-  (tabListenerRef.current = listener);
-createHTMLObserver({
-  tag: "TEXTAREA",
-  className: "rm-block-input",
-  callback: (b) =>
-    tabListenerRef.current && tabListenerRef.current(b as HTMLTextAreaElement),
-});
 
 const td = new TurndownService({
   hr: "---",
@@ -84,32 +79,16 @@ td.addRule("a", {
   },
 });
 
-const tabObj = {
-  bubbles: true,
-  cancelable: true,
-  key: "Tab",
-  keyCode: 9,
-  code: "Tab",
-  which: 9,
-};
-const shiftTabObj = { ...tabObj, shiftKey: true };
-const waitForTab = (id: string) =>
-  new Promise((resolve) =>
-    addTabListener((b: HTMLTextAreaElement) => {
-      if (b.id === id) {
-        resolve(id);
-      }
-    })
-  );
-
 export const importArticle = ({
   url,
-  blockId,
+  blockUid,
   indent,
+  onSuccess,
 }: {
   url: string;
-  blockId: string;
+  blockUid: string;
   indent: boolean;
+  onSuccess?: () => void;
 }): Promise<void> =>
   axios
     .post(
@@ -118,6 +97,9 @@ export const importArticle = ({
       { headers: { "Content-Type": "application/json" } }
     )
     .then(async (r) => {
+      if (onSuccess) {
+        onSuccess();
+      }
       const enc = charset(r.headers) || "utf-8";
       const buffer = iconv.encode(r.data, "base64");
       const html = iconv.decode(buffer, enc);
@@ -130,8 +112,10 @@ export const importArticle = ({
       }${html.substring(headIndex)}`;
       const doc = new DOMParser().parseFromString(htmlWithBase, "text/html");
       const { content } = new Readability(doc).parse();
-      const textarea = await openBlock(document.getElementById(blockId));
-      await userEvent.clear(textarea);
+      clearBlockByUid(blockUid);
+      const parentUid = getParentUidByBlockUid(blockUid);
+      const firstOrder = getOrderByBlockUid(blockUid);
+      const stack = [{ "parent-uid": parentUid, order: firstOrder }];
       const markdown = td.turndown(content);
       const nodes = markdown.split("\n").filter((c) => !!c.trim());
       let firstHeaderFound = false;
@@ -143,47 +127,50 @@ export const importArticle = ({
           node.startsWith("## ") ||
           node.startsWith("### ");
         const isBullet = node.startsWith("* ");
-        const text = isHeader
-          ? node.substring(node.indexOf("# ") + 2)
-          : isBullet
-          ? node.substring(2).trim()
-          : node;
+        const text = isBullet ? node.substring(2).trim() : node;
         if (isBullet && previousNodeTabbed) {
           bulletIsParagraph = true;
         }
         if (isHeader) {
           if (indent) {
             if (firstHeaderFound) {
-              document.activeElement.dispatchEvent(
-                new KeyboardEvent("keydown", shiftTabObj)
-              );
-              await waitForTab(document.activeElement.id);
+              stack.pop();
               bulletIsParagraph = false;
             } else {
               firstHeaderFound = true;
             }
           }
-          await asyncType(node.substring(0, node.indexOf("# ") + 2));
         }
+        const location = stack[stack.length - 1];
         if (isBullet && !bulletIsParagraph) {
-          document.activeElement.dispatchEvent(
-            new KeyboardEvent("keydown", tabObj)
-          );
-          await waitForTab(document.activeElement.id);
+          await new Promise((resolve) => setTimeout(resolve, 1));
+          const newParentUid = getNthChildUidByBlockUid({
+            blockUid: location["parent-uid"],
+            order: location["order"],
+          });
+          stack.push({ order: 0, "parent-uid": newParentUid });
         }
-        await asyncPaste(text);
-        await newBlockEnter();
+        if (stack.length === 1 && location.order === firstOrder) {
+          window.roamAlphaAPI.updateBlock({
+            block: { string: text, uid: blockUid },
+          });
+        } else {
+          window.roamAlphaAPI.createBlock({
+            block: { string: text },
+            location,
+          });
+        }
+        location.order++;
         if (isBullet && !bulletIsParagraph) {
-          document.activeElement.dispatchEvent(
-            new KeyboardEvent("keydown", shiftTabObj)
-          );
-          await waitForTab(document.activeElement.id);
+          stack.pop();
         }
         if (indent && isHeader) {
-          document.activeElement.dispatchEvent(
-            new KeyboardEvent("keydown", tabObj)
-          );
-          await waitForTab(document.activeElement.id);
+          await new Promise((resolve) => setTimeout(resolve, 1));
+          const newParentUid = getNthChildUidByBlockUid({
+            blockUid: location["parent-uid"],
+            order: location["order"] - 1,
+          });
+          stack.push({ order: 0, "parent-uid": newParentUid });
           previousNodeTabbed = true;
         } else {
           previousNodeTabbed = false;
@@ -194,10 +181,13 @@ export const importArticle = ({
 const ImportContent = ({
   blockId,
   initialIndent,
+  close,
 }: {
   blockId: string;
   initialIndent: boolean;
+  close: () => void;
 }) => {
+  const { blockUid } = getUidsFromId(blockId);
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [indent, setIndent] = useState(initialIndent);
@@ -216,11 +206,13 @@ const ImportContent = ({
     }
     setError("");
     setLoading(true);
-    importArticle({ url: value, blockId, indent }).catch(() => {
-      setError(ERROR_MESSAGE);
-      setLoading(false);
-    });
-  }, [blockId, value, indent, setError, setLoading]);
+    importArticle({ url: value, blockUid, indent, onSuccess: close }).catch(
+      () => {
+        setError(ERROR_MESSAGE);
+        setLoading(false);
+      }
+    );
+  }, [blockUid, value, indent, setError, setLoading, close]);
   const indentOnChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setIndent(e.target.checked),
     [setIndent]
@@ -266,13 +258,31 @@ const ImportArticle = ({
 }: {
   blockId: string;
   initialIndent: boolean;
-}): JSX.Element => (
-  <Popover
-    content={<ImportContent blockId={blockId} initialIndent={initialIndent} />}
-    target={<Button text="IMPORT ARTICLE" data-roamjs-import-article />}
-    defaultIsOpen={true}
-  />
-);
+}): JSX.Element => {
+  const [isOpen, setIsOpen] = useState(true);
+  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
+  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
+  return (
+    <Popover
+      content={
+        <ImportContent
+          blockId={blockId}
+          initialIndent={initialIndent}
+          close={close}
+        />
+      }
+      target={
+        <Button
+          text="IMPORT ARTICLE"
+          data-roamjs-import-article
+          onClick={open}
+        />
+      }
+      isOpen={isOpen}
+      onInteraction={setIsOpen}
+    />
+  );
+};
 
 export const getIndentConfig = (): boolean => {
   const config = getTextTreeByPageName("roam/js/article");
