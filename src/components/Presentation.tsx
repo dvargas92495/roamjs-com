@@ -236,11 +236,13 @@ const ContentSlide = ({
         }}
         className="r-stretch"
       >
-        <style>
-          {`.roamjs-collapsible-bullet::marker {
+        {caretsLoaded && (
+          <style>
+            {`.roamjs-collapsible-bullet::marker {
   color:${document.getElementById("roamjs-revel-root")?.style?.backgroundColor};
 }`}
-        </style>
+          </style>
+        )}
         <div
           className={"roamjs-bullets-container"}
           dangerouslySetInnerHTML={{
