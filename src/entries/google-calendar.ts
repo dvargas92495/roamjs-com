@@ -120,8 +120,8 @@ createCustomSmartBlockCommand({
   processor: async () =>
     fetchGoogleCalendar().then(async (bullets) => {
       if (bullets.length) {
-        bullets.forEach(s => window.roam42.smartBlocks.activeWorkflow.outputAdditionalBlock(s))
-        return window.roam42.smartBlocks.outputArrayWrite().then(() => "");
+        bullets.slice(1).forEach(s => window.roam42.smartBlocks.activeWorkflow.outputAdditionalBlock(s))
+        return bullets[0];
       } else {
         return EMPTY_MESSAGE;
       }
