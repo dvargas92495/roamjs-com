@@ -9,10 +9,9 @@ import {
   runExtension,
 } from "../entry-helpers";
 
-const onTodo = (blockUid: string) => {
+const onTodo = (blockUid: string, oldValue: string) => {
   const config = getConfigFromPage("roam/js/todo-trigger");
   const text = config["Append Text"];
-  const oldValue = getTextByBlockUid(blockUid);
   let value = oldValue;
   if (text) {
     const formattedText = ` ${text
@@ -52,10 +51,9 @@ const onTodo = (blockUid: string) => {
   }
 };
 
-const onDone = (blockUid: string) => {
+const onDone = (blockUid: string, oldValue: string) => {
   const config = getConfigFromPage("roam/js/todo-trigger");
   const text = config["Append Text"];
-  const oldValue = getTextByBlockUid(blockUid);
   let value = oldValue;
   if (text) {
     const today = new Date();
@@ -102,13 +100,12 @@ runExtension("todo-trigger", () => {
         const { blockUid } = getUids(
           inputTarget.closest(".roam-block") as HTMLDivElement
         );
-        setTimeout(() => {
-          if (inputTarget.checked) {
-            onTodo(blockUid);
-          } else {
-            onDone(blockUid);
-          }
-        }, 1);
+        const oldValue = getTextByBlockUid(blockUid);
+        if (inputTarget.checked) {
+          onTodo(blockUid, oldValue);
+        } else {
+          onDone(blockUid, oldValue);
+        }
       }
     }
   });
@@ -120,9 +117,9 @@ runExtension("todo-trigger", () => {
         const textArea = target as HTMLTextAreaElement;
         const { blockUid } = getUids(textArea);
         if (textArea.value.startsWith("{{[[DONE]]}}")) {
-          setTimeout(() => onDone(blockUid), 100);
+          onDone(blockUid, textArea.value);
         } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
-          setTimeout(() => onTodo(blockUid), 100);
+          onTodo(blockUid, textArea.value);
         }
       }
     }
