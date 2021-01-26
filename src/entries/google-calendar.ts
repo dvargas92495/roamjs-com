@@ -119,7 +119,11 @@ createCustomSmartBlockCommand({
   processor: () =>
     fetchGoogleCalendar().then(async (bullets) => {
       const { blockUid, parentUid } = getActiveUids();
-      pushBullets(bullets.slice(0, bullets.length - 1), blockUid, parentUid);
-      return bullets.length ? bullets[bullets.length - 1] : EMPTY_MESSAGE;
+      if (bullets.length) {
+        pushBullets(bullets, blockUid, parentUid);
+        return "";
+      } else {
+        return EMPTY_MESSAGE;
+      }
     }),
 });

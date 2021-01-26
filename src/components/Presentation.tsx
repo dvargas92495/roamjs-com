@@ -11,6 +11,7 @@ import ReactDOM from "react-dom";
 import Reveal from "reveal.js";
 import { addStyle, isControl, resolveRefs } from "../entry-helpers";
 import { isSafari } from "mobile-device-detect";
+import { ViewType } from "roam-client";
 
 const SAFARI_THEMES = ["black", "white", "beige"];
 
@@ -25,8 +26,6 @@ export const VALID_THEMES = [
   "blood",
   "moon",
 ];
-
-type ViewType = "bullet" | "document" | "numbered";
 
 const renderViewType = (viewType: ViewType) => {
   switch (viewType) {

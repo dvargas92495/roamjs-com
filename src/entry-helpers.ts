@@ -1,7 +1,7 @@
 import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel, { Dict } from "mixpanel-browser";
-import { RoamBlock } from "roam-client/lib/types";
+import { RoamBlock, ViewType } from "roam-client";
 
 declare global {
   interface Window {
@@ -543,8 +543,6 @@ export const getWordCountByBlockUid = (blockUid: string): number => {
   );
 };
 
-type ViewType = "bullet" | "document" | "numbered";
-
 export type TreeNode = {
   text: string;
   order: number;
@@ -578,30 +576,42 @@ export const getTextTreeByBlockUid = (
   blockUid: string
 ): { text: string; children: TreeNode[] } => {
   const block = window.roamAlphaAPI.q(
-    `[:find (pull ?e [:block/children, :block/string]) :where [?e :block/uid "${blockUid}"]]`
+    `[:find (pull ?e [:block/children, :block/string :children/view-type]) :where [?e :block/uid "${blockUid}"]]`
   )[0][0] as RoamBlock;
   const children = block.children || [];
+  const viewType = block['view-type'] || 'bullet';
   return {
     text: block.string,
     children: children
       .map((c) => getTextTreeByBlockId(c.id))
-      .sort((a, b) => a.order - b.order),
+      .sort((a, b) => a.order - b.order)
+      .map((c) => fixViewType({c, v: viewType})),
   };
 };
 
 export const getTextTreeByPageName = (name: string): TreeNode[] => {
   const result = window.roamAlphaAPI.q(
-    `[:find (pull ?e [:block/children]) :where [?e :node/title "${name}"]]`
+    `[:find (pull ?e [:block/children :children/view-type]) :where [?e :node/title "${name}"]]`
   );
   if (!result.length) {
     return [];
   }
   const block = result[0][0] as RoamBlock;
   const children = block.children || [];
+  const viewType = block['view-type'] || 'bullet';
   return children
     .map((c) => getTextTreeByBlockId(c.id))
-    .sort((a, b) => a.order - b.order);
+    .sort((a, b) => a.order - b.order)
+    .map((c) => fixViewType({c, v: viewType}));
 };
+
+export const fixViewType = ({c,v}: {c: TreeNode, v: ViewType}):TreeNode => {
+  if (!c.viewType) {
+    c.viewType = v;
+  }
+  c.children.forEach((cc) => fixViewType({c: cc, v: c.viewType})); 
+  return c;
+} 
 
 export const getWordCountByPageTitle = (title: string): number => {
   const page = window.roamAlphaAPI.q(
