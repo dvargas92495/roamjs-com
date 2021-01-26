@@ -120,9 +120,9 @@ runExtension("todo-trigger", () => {
         const textArea = target as HTMLTextAreaElement;
         const { blockUid } = getUids(textArea);
         if (textArea.value.startsWith("{{[[DONE]]}}")) {
-          setTimeout(() => onDone(blockUid), 1);
+          setTimeout(() => onDone(blockUid), 100);
         } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
-          setTimeout(() => onTodo(blockUid), 1);
+          setTimeout(() => onTodo(blockUid), 100);
         }
       }
     }
