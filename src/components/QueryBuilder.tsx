@@ -355,6 +355,7 @@ const toQueryStateChildren = (v: string): QueryState[] => {
   return children;
 };
 
+const QUERY_REGEX = /^{{(?:query|\[\[query\]\]):(.*)}}/s
 const toQueryState = (v: string): QueryState => {
   if (!v) {
     return {
@@ -363,8 +364,8 @@ const toQueryState = (v: string): QueryState => {
       key: 0,
     };
   }
-  if (v.startsWith("{{query:")) {
-    const content = v.substring("{{query:".length, v.length - "}}".length);
+  if (QUERY_REGEX.test(v)) {
+    const content = v.match(QUERY_REGEX)[1];
     return toQueryState(content.trim());
   } else if (v.startsWith("{and:")) {
     const andContent = v.substring("{and:".length, v.length - "}".length);

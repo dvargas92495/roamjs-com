@@ -3,15 +3,13 @@ import { getConfigFromPage, getUids, toRoamDate } from "roam-client";
 import {
   createBlockObserver,
   DAILY_NOTE_PAGE_REGEX,
-  DONE_REGEX,
   getChildRefStringsByBlockUid,
   getTextByBlockUid,
   isControl,
   runExtension,
-  TODO_REGEX,
 } from "../entry-helpers";
 
-const onTodo = (blockUid: string, clear?: boolean) => {
+const onTodo = (blockUid: string) => {
   const config = getConfigFromPage("roam/js/todo-trigger");
   const text = config["Append Text"];
   const oldValue = getTextByBlockUid(blockUid);
@@ -48,10 +46,6 @@ const onTodo = (blockUid: string, clear?: boolean) => {
     });
   }
   if (value !== oldValue) {
-    value = value.replace(
-      DONE_REGEX,
-      (s) => clear ? "" : `{{[[TODO]]}}${s.endsWith(" ") ? " " : ""}`
-    );
     window.roamAlphaAPI.updateBlock({
       block: { uid: blockUid, string: value },
     });
@@ -68,7 +62,7 @@ const onDone = (blockUid: string) => {
     const formattedText = ` ${text
       .replace("/Current Time", format(today, "HH:mm"))
       .replace("/Today", `[[${toRoamDate(today)}]]`)}`;
-    value = `${value} ${formattedText}`;
+    value = `${value}${formattedText}`;
   }
   const replaceTags = config["Replace Tags"];
   if (replaceTags) {
@@ -89,7 +83,6 @@ const onDone = (blockUid: string) => {
     });
   }
   if (value !== oldValue) {
-    value = value.replace(TODO_REGEX, "{{[[DONE]]}}");
     window.roamAlphaAPI.updateBlock({
       block: { uid: blockUid, string: value },
     });
@@ -109,11 +102,13 @@ runExtension("todo-trigger", () => {
         const { blockUid } = getUids(
           inputTarget.closest(".roam-block") as HTMLDivElement
         );
-        if (inputTarget.checked) {
-          onTodo(blockUid);
-        } else {
-          onDone(blockUid);
-        }
+        setTimeout(() => {
+          if (inputTarget.checked) {
+            onTodo(blockUid);
+          } else {
+            onDone(blockUid);
+          }
+        }, 1);
       }
     }
   });
@@ -122,14 +117,15 @@ runExtension("todo-trigger", () => {
     if (e.key === "Enter" && isControl(e)) {
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA") {
-        const textArea = target as HTMLTextAreaElement;
-        if (textArea.value.startsWith("{{[[DONE]]}}")) {
+        setTimeout(() => {
+          const textArea = target as HTMLTextAreaElement;
           const { blockUid } = getUids(textArea);
-          onDone(blockUid);
-        } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
-          const { blockUid } = getUids(textArea);
-          onTodo(blockUid, true);
-        }
+          if (textArea.value.startsWith("{{[[DONE]]}}")) {
+            onDone(blockUid);
+          } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
+            onTodo(blockUid);
+          }
+        }, 1);
       }
     }
   };

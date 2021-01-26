@@ -83,10 +83,12 @@ export const importArticle = ({
   url,
   blockUid,
   indent,
+  onSuccess,
 }: {
   url: string;
   blockUid: string;
   indent: boolean;
+  onSuccess?: () => void;
 }): Promise<void> =>
   axios
     .post(
@@ -95,6 +97,9 @@ export const importArticle = ({
       { headers: { "Content-Type": "application/json" } }
     )
     .then(async (r) => {
+      if (onSuccess) {
+        onSuccess();
+      }
       const enc = charset(r.headers) || "utf-8";
       const buffer = iconv.encode(r.data, "base64");
       const html = iconv.decode(buffer, enc);
@@ -201,12 +206,12 @@ const ImportContent = ({
     }
     setError("");
     setLoading(true);
-    importArticle({ url: value, blockUid, indent })
-      .then(close)
-      .catch(() => {
+    importArticle({ url: value, blockUid, indent, onSuccess: close }).catch(
+      () => {
         setError(ERROR_MESSAGE);
         setLoading(false);
-      });
+      }
+    );
   }, [blockUid, value, indent, setError, setLoading, close]);
   const indentOnChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setIndent(e.target.checked),
