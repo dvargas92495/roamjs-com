@@ -25,8 +25,8 @@ declare global {
         }[];
         activeWorkflow: {
           outputAdditionalBlock: (text: string) => void;
-          outputArrayWrite: () => Promise<void>;
         };
+        outputArrayWrite: () => Promise<void>;
       };
     };
   }
