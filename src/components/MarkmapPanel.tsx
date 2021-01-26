@@ -17,7 +17,10 @@ const RENDERED_DONE =
   '<span><label class="check-container"><input type="checkbox" checked="" disabled=""><span class="checkmark"></span></label></span>';
 
 const transformRoot = ({ root }: Partial<ITransformResult>) => {
-  root.c?.forEach((child) => transformRoot({ root: child }));
+  if (root.c) {
+    root.c = root.c.filter((child) => child.v !== "");
+    root.c.forEach((child) => transformRoot({ root: child }));
+  }
   root.v = root.v
     .replace(/{{(?:\[\[)?TODO(?:\]\])?}}/g, (s) =>
       isSafari ? s : RENDERED_TODO
@@ -179,6 +182,7 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
         enforceFocus={false}
       >
         <div
+          id={"roamjs-mindmap-container"}
           ref={containerRef}
           style={{ height: "100%", position: "relative" }}
         >

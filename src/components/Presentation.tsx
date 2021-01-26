@@ -136,20 +136,6 @@ const TitleSlide = ({ text, note }: { text: string; note: Slide }) => {
 const STARTS_WITH_IMAGE = new RegExp("^image ", "i");
 const ENDS_WITH_LEFT = new RegExp(" left$", "i");
 
-const onSpanMouseEnter = (e: MouseEvent) => {
-  const span = e.target as HTMLSpanElement;
-  if (span.className.includes("bp3-icon-caret-down")) {
-    span.style.opacity = "1";
-  }
-};
-
-const onSpanMouseLeave = (e: MouseEvent) => {
-  const span = e.target as HTMLSpanElement;
-  if (span.className.includes("bp3-icon-caret-down")) {
-    span.style.opacity = "0";
-  }
-};
-
 type ContentSlideExtras = { note: Slide; layout: string; collapsible: boolean };
 
 const ContentSlide = ({
@@ -181,10 +167,9 @@ const ContentSlide = ({
           const spanIcon = document.createElement("span");
           spanIcon.className =
             "bp3-icon bp3-icon-caret-right roamjs-collapsible-caret";
-          spanIcon.onmouseenter = onSpanMouseEnter;
-          spanIcon.onmouseleave = onSpanMouseLeave;
           l.style.position = "relative";
           l.insertBefore(spanIcon, l.childNodes[0]);
+          l.className = "roamjs-collapsible-bullet";
         }
         let depth = 0;
         let parentElement = l as HTMLElement;
@@ -251,6 +236,18 @@ const ContentSlide = ({
         }}
         className="r-stretch"
       >
+        {caretsLoaded && (
+          <style>
+            {`.roamjs-collapsible-bullet::marker {
+  color:${
+    document.getElementById("roamjs-reveal-root")
+      ? getComputedStyle(document.getElementById("roamjs-reveal-root"))
+          .backgroundColor
+      : ""
+  };
+}`}
+          </style>
+        )}
         <div
           className={"roamjs-bullets-container"}
           dangerouslySetInnerHTML={{
@@ -365,7 +362,7 @@ const PresentationContent: React.FunctionComponent<{
   body * {
     visibility: hidden;
   }
-  #roamjs-presentation-container #otherother * {
+  #roamjs-presentation-container #roamjs-reveal-root * {
     visibility: visible;
   }
   #roamjs-presentation-container * {
@@ -390,7 +387,7 @@ const PresentationContent: React.FunctionComponent<{
     return () => document.body.removeEventListener("keydown", bodyEscapePrint);
   }, [bodyEscapePrint]);
   return (
-    <div className="reveal" id="otherother">
+    <div className="reveal" id="roamjs-reveal-root">
       <div className="slides" ref={slidesRef}>
         {mappedSlides.map((s: Slide & ContentSlideExtras, i) => (
           <React.Fragment key={i}>

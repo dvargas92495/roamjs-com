@@ -27,9 +27,16 @@ import { getUidsFromButton } from "roam-client";
 addStyle(`.roamjs-collapsible-caret {
   position: absolute;
   top: 12px;
-  left: -76px;
+  left: -45px;
   cursor: pointer;
-}`);
+}
+.reveal ul {
+  list-style-type: disc !important;
+}
+.reveal ol {
+  list-style-type: decimal !important;
+}
+`);
 
 runExtension("presentation", async () => {
   createButtonObserver({
@@ -37,6 +44,9 @@ runExtension("presentation", async () => {
     shortcut: "slides",
     render: (button: HTMLButtonElement) => {
       const { blockUid } = getUidsFromButton(button);
+      if (!blockUid) {
+        return;
+      }
       const text = getTextByBlockUid(blockUid);
       const buttonText = text.match("{{(presentation|slides):(.*)}}")?.[2];
       const options = buttonText
