@@ -355,7 +355,7 @@ const toQueryStateChildren = (v: string): QueryState[] => {
   return children;
 };
 
-const QUERY_REGEX = /^{{(?:query|\[\[query\]\]):(.*)}}/s
+const QUERY_REGEX = /{{(?:query|\[\[query\]\]):(.*)}}/;
 const toQueryState = (v: string): QueryState => {
   if (!v) {
     return {
