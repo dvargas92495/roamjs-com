@@ -146,6 +146,16 @@ runExtension("todo-trigger", () => {
           if (block) {
             block.style.textDecoration = 'line-through';
           }
+        } else {
+          const ref = l.closest(".rm-block-ref") as HTMLSpanElement;
+          if (ref) {
+            ref.style.textDecoration = "none";
+            return;
+          }
+          const block = l.closest('.roam-block') as HTMLDivElement;
+          if (block) {
+            block.style.textDecoration = 'none';
+          }
         }
       },
       tag: "LABEL",

@@ -23,6 +23,10 @@ declare global {
           value: string;
           processor: (match: string) => Promise<string | void>;
         }[];
+        activeWorkflow: {
+          outputAdditionalBlock: (text: string) => void;
+          outputArrayWrite: () => Promise<void>;
+        };
       };
     };
   }
@@ -579,13 +583,13 @@ export const getTextTreeByBlockUid = (
     `[:find (pull ?e [:block/children, :block/string :children/view-type]) :where [?e :block/uid "${blockUid}"]]`
   )[0][0] as RoamBlock;
   const children = block.children || [];
-  const viewType = block['view-type'] || 'bullet';
+  const viewType = block["view-type"] || "bullet";
   return {
     text: block.string,
     children: children
       .map((c) => getTextTreeByBlockId(c.id))
       .sort((a, b) => a.order - b.order)
-      .map((c) => fixViewType({c, v: viewType})),
+      .map((c) => fixViewType({ c, v: viewType })),
   };
 };
 
@@ -598,20 +602,26 @@ export const getTextTreeByPageName = (name: string): TreeNode[] => {
   }
   const block = result[0][0] as RoamBlock;
   const children = block.children || [];
-  const viewType = block['view-type'] || 'bullet';
+  const viewType = block["view-type"] || "bullet";
   return children
     .map((c) => getTextTreeByBlockId(c.id))
     .sort((a, b) => a.order - b.order)
-    .map((c) => fixViewType({c, v: viewType}));
+    .map((c) => fixViewType({ c, v: viewType }));
 };
 
-export const fixViewType = ({c,v}: {c: TreeNode, v: ViewType}):TreeNode => {
+export const fixViewType = ({
+  c,
+  v,
+}: {
+  c: TreeNode;
+  v: ViewType;
+}): TreeNode => {
   if (!c.viewType) {
     c.viewType = v;
   }
-  c.children.forEach((cc) => fixViewType({c: cc, v: c.viewType})); 
+  c.children.forEach((cc) => fixViewType({ c: cc, v: c.viewType }));
   return c;
-} 
+};
 
 export const getWordCountByPageTitle = (title: string): number => {
   const page = window.roamAlphaAPI.q(
