@@ -42,9 +42,9 @@ const parseExpression = (input: string): Expression => {
 const DELIM = " , ";
 
 const calculateExpression = (expression: Expression): string => {
-  const args = expression.children.flatMap((c) =>
-    calculateExpression(c).split(DELIM)
-  );
+  const args = expression.children
+    .flatMap((c) => calculateExpression(c).split(DELIM))
+    .filter((a) => !!a);
 
   switch (expression.operation) {
     case "+":
@@ -78,10 +78,12 @@ const calculateExpression = (expression: Expression): string => {
           )
         : Math.max(...args.map((s) => parseInt(s))).toString();
     case "since":
-      return differenceInDays(new Date(), parseRoamDate(args[0])).toString();
+      return args.length
+        ? differenceInDays(new Date(), parseRoamDate(args[0])).toString()
+        : "0";
     case "attr":
       return calculateExpression(
-        parseExpression(getConfigFromPage(args[0])[args[1]] || '0')
+        parseExpression(getConfigFromPage(args[0])[args[1]] || "0")
       );
     case "value":
       return expression.value.toString();

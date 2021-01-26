@@ -44,6 +44,9 @@ runExtension("presentation", async () => {
     shortcut: "slides",
     render: (button: HTMLButtonElement) => {
       const { blockUid } = getUidsFromButton(button);
+      if (!blockUid) {
+        return;
+      }
       const text = getTextByBlockUid(blockUid);
       const buttonText = text.match("{{(presentation|slides):(.*)}}")?.[2];
       const options = buttonText

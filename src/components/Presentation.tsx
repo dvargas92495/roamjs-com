@@ -238,7 +238,7 @@ const ContentSlide = ({
       >
         <style>
           {`.roamjs-collapsible-bullet::marker {
-  color:${document.getElementById("roamjs-revel-root").style.backgroundColor};
+  color:${document.getElementById("roamjs-revel-root")?.style?.backgroundColor};
 }`}
         </style>
         <div

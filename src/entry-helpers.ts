@@ -877,7 +877,7 @@ export const getTitlesReferencingPagesInSameBlock = (
 ): string[] => {
   return window.roamAlphaAPI
     .q(
-      `[:find ?title :where [?e :node/title ?title] [?e :block/children ?c] ${pages
+      `[:find ?title :where [?e :node/title ?title] [?c :block/page ?e] ${pages
         .map((p, i) => `[?c :block/refs ?d${i}] [?d${i} :node/title "${p}"]`)
         .join(" ")}]`
     )
