@@ -28,7 +28,7 @@ export const handler = async (
   }
   const available = await axios
     .get(`${process.env.FLOSS_API_URL}/aws-check-domain?domain=${domain}`)
-    .then((r) => r.data.Availability === "AVAILABLE");
+    .then((r) => r.data.available);
   if (!available) {
     return {
       statusCode: 400,

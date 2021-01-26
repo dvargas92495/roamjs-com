@@ -27,16 +27,16 @@ import { getUidsFromButton } from "roam-client";
 addStyle(`.roamjs-collapsible-caret {
   position: absolute;
   top: 12px;
-  left: -76px;
+  left: -45px;
   cursor: pointer;
 }
 .reveal ul {
   list-style-type: disc !important;
 }
-.roamjs-collapsed::marker {
-  border: 4px solid #CED9E0;
-  color: hotpink;
-}`);
+.reveal ol {
+  list-style-type: decimal !important;
+}
+`);
 
 runExtension("presentation", async () => {
   createButtonObserver({
