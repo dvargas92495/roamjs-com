@@ -117,15 +117,13 @@ runExtension("todo-trigger", () => {
     if (e.key === "Enter" && isControl(e)) {
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA") {
-        setTimeout(() => {
-          const textArea = target as HTMLTextAreaElement;
-          const { blockUid } = getUids(textArea);
-          if (textArea.value.startsWith("{{[[DONE]]}}")) {
-            onDone(blockUid);
-          } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
-            onTodo(blockUid);
-          }
-        }, 1);
+        const textArea = target as HTMLTextAreaElement;
+        const { blockUid } = getUids(textArea);
+        if (textArea.value.startsWith("{{[[DONE]]}}")) {
+          setTimeout(() => onDone(blockUid), 1);
+        } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
+          setTimeout(() => onTodo(blockUid), 1);
+        }
       }
     }
   };
