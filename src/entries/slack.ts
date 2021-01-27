@@ -4,7 +4,7 @@ import {
   getRefTitlesByBlockUid,
   runExtension,
 } from "../entry-helpers";
-import { render } from '../components/SlackOverlay';
+import { render } from "../components/SlackOverlay";
 
 const ATTRIBUTE = "data-roamjs-slack-overlay";
 
@@ -22,7 +22,7 @@ runExtension("slack", () => {
       renderedRefSpans.forEach((renderedRef) => {
         const newSpan = document.createElement("span");
         renderedRef.appendChild(newSpan);
-        render(newSpan);
+        render({ parent: newSpan, tag: r });
       });
     });
   };

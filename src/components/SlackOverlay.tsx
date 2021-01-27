@@ -1,13 +1,40 @@
-import { Icon } from "@blueprintjs/core";
+import { Button, Icon, Popover } from "@blueprintjs/core";
 import React from "react";
 import ReactDOM from "react-dom";
 import Slack from "../assets/Slack_Mark.svg";
 
-const SlackOverlay: React.FunctionComponent = () => {
-  return <Icon icon={<Slack />} />;
+const SlackContent: React.FunctionComponent<{ tag: string }> = ({ tag }) => {
+  return (
+    <div style={{ padding: 16 }}>
+      <Button text={`Send to ${tag}`} />
+    </div>
+  );
 };
 
-export const render = (parent: HTMLSpanElement): void =>
-  ReactDOM.render(<SlackOverlay />, parent);
+const SlackOverlay: React.FunctionComponent<{ tag: string }> = ({ tag }) => {
+  return (
+    <Popover
+      target={
+        <Icon
+          icon={
+            <Slack
+              viewBox="70 70 130 130"
+              style={{ width: 15, marginLeft: 4 }}
+            />
+          }
+        />
+      }
+      content={<SlackContent tag={tag} />}
+    />
+  );
+};
+
+export const render = ({
+  parent,
+  tag,
+}: {
+  parent: HTMLSpanElement;
+  tag: string;
+}): void => ReactDOM.render(<SlackOverlay tag={tag} />, parent);
 
 export default SlackOverlay;
