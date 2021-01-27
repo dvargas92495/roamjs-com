@@ -17,7 +17,11 @@ const SlackContent: React.FunctionComponent<ContentProps> = ({
   const onClick = useCallback(() => {
     setLoading(true);
     axios
-      .post(getUrl(), { text: "Hello, World!" })
+      .post(
+        getUrl(),
+        { text: "Hello, World!" },
+        { headers: { "Content-Type": "application/json" } }
+      )
       .then(() => setLoading(false));
   }, [getUrl, setLoading]);
   return (
@@ -29,7 +33,7 @@ const SlackContent: React.FunctionComponent<ContentProps> = ({
 };
 
 const SlackOverlay: React.FunctionComponent<ContentProps> = (props) => {
-  const [isOpen, setIsOpen] = useState(false);
+ /* const [isOpen, setIsOpen] = useState(false);
   const open = useCallback(
     (e: React.MouseEvent) => {
       setIsOpen(true);
@@ -37,7 +41,7 @@ const SlackOverlay: React.FunctionComponent<ContentProps> = (props) => {
       e.stopPropagation();
     },
     [setIsOpen]
-  );
+  );*/
   return (
     <Popover
       target={
@@ -48,12 +52,12 @@ const SlackOverlay: React.FunctionComponent<ContentProps> = (props) => {
               style={{ width: 15, marginLeft: 4 }}
             />
           }
-          onMouseDown={open}
+         // onMouseDown={open}
         />
       }
       content={<SlackContent {...props} />}
-      isOpen={isOpen}
-      onInteraction={setIsOpen}
+     // isOpen={isOpen}
+     // onInteraction={setIsOpen}
     />
   );
 };

@@ -29,6 +29,7 @@ runExtension("slack", () => {
       renderedRefSpans.forEach((renderedRef) => {
         const newSpan = document.createElement("span");
         newSpan.style.verticalAlign = "middle";
+        newSpan.onmousedown = (e: MouseEvent) => e.stopPropagation();
         renderedRef.appendChild(newSpan);
         render({ parent: newSpan, tag: r, getUrl });
       });
