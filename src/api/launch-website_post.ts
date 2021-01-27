@@ -91,7 +91,7 @@ export const handler = async (
     }
   );
 
-  await lambda
+  lambda
     .invoke({
       FunctionName: "RoamJS_launch",
       InvocationType: "Event",

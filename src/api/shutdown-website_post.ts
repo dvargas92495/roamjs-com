@@ -32,9 +32,9 @@ export const handler = async (
     .then((r) =>
       axios
         .post(
-          "stripe-cancel",
+          `${process.env.FLOSS_API_URL}/stripe-cancel`,
           {
-            subscriptionId: r.data.subscribedId,
+            subscriptionId: r.data.subscriptionId,
           },
           opts
         )
@@ -74,7 +74,7 @@ export const handler = async (
     opts
   );
 
-  await lambda
+  lambda
     .invoke({
       FunctionName: "RoamJS_shutdown",
       InvocationType: "Event",

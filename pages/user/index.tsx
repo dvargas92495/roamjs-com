@@ -260,7 +260,7 @@ const Website = () => {
             action={shutdownWebsite}
             buttonText={"Shutdown"}
             content={
-              "Are you sure you want to shut down this RoamJS site? This operation is irreversible."
+              "Are you sure you want to shut down this RoamJS site? This operation is irreversible. Your subscription to this Service will end."
             }
             onSuccess={getWebsite}
             title={"Buy RoamJS Service"}
