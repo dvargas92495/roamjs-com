@@ -4,6 +4,7 @@ import {
   getRefTitlesByBlockUid,
   runExtension,
 } from "../entry-helpers";
+import { render } from '../components/SlackOverlay';
 
 const ATTRIBUTE = "data-roamjs-slack-overlay";
 
@@ -18,10 +19,10 @@ runExtension("slack", () => {
       const renderedRefSpans = renderedRefs.filter(
         (s) => s.getAttribute("data-tag") === r && !s.getAttribute(ATTRIBUTE)
       );
-      renderedRefSpans.forEach((renderedRef, i) => {
+      renderedRefSpans.forEach((renderedRef) => {
         const newSpan = document.createElement("span");
-        newSpan.style.backgroundColor = "green";
         renderedRef.appendChild(newSpan);
+        render(newSpan);
       });
     });
   };
