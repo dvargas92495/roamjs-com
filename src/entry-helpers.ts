@@ -245,18 +245,20 @@ export const createHTMLObserver = ({
 
 export const createBlockObserver = (
   blockCallback: (b: HTMLDivElement) => void,
-  blockRefCallback: (b: HTMLSpanElement) => void
+  blockRefCallback?: (b: HTMLSpanElement) => void
 ): void => {
   createHTMLObserver({
     callback: blockCallback,
     tag: "DIV",
     className: "roam-block",
   });
-  createHTMLObserver({
-    callback: blockRefCallback,
-    tag: "SPAN",
-    className: "rm-block-ref",
-  });
+  if (blockRefCallback) {
+    createHTMLObserver({
+      callback: blockRefCallback,
+      tag: "SPAN",
+      className: "rm-block-ref",
+    });
+  }
 };
 
 export const createPageObserver = (
