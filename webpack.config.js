@@ -99,14 +99,16 @@ module.exports = (env) => ({
         ],
       },
       {
-        test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+        test: /\.(svg)$/,
+        loader: "svg-react-loader",
+      },
+      {
+        test: /\.(png|woff|woff2|eot|ttf)$/,
         loader: "url-loader?limit=100000",
       },
       {
         test: /\.ne$/,
-        use: [
-          'nearley-loader',
-        ],
+        use: ["nearley-loader"],
       },
     ],
   },
