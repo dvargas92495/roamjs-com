@@ -2,11 +2,18 @@ import { getUids } from "roam-client";
 import {
   createBlockObserver,
   getRefTitlesByBlockUid,
+  getTextTreeByPageName,
   runExtension,
 } from "../entry-helpers";
 import { render } from "../components/SlackOverlay";
 
 const ATTRIBUTE = "data-roamjs-slack-overlay";
+
+const getUrl = () => {
+  const tree = getTextTreeByPageName("roam/js/slack");
+  const urlNode = tree.find((s) => /url/i.test(s.text.trim()));
+  return urlNode ? urlNode.children[0].text : "";
+};
 
 runExtension("slack", () => {
   const renderSlackOverlay = (container: HTMLDivElement) => {
@@ -21,8 +28,9 @@ runExtension("slack", () => {
       );
       renderedRefSpans.forEach((renderedRef) => {
         const newSpan = document.createElement("span");
+        newSpan.style.verticalAlign = "middle";
         renderedRef.appendChild(newSpan);
-        render({ parent: newSpan, tag: r });
+        render({ parent: newSpan, tag: r, getUrl });
       });
     });
   };

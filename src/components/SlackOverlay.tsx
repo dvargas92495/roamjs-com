@@ -1,23 +1,43 @@
-import { Button, Icon, Popover } from "@blueprintjs/core";
+import { Button, Icon, Popover, Spinner } from "@blueprintjs/core";
+import axios from "axios";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import Slack from "../assets/Slack_Mark.svg";
 
-const SlackContent: React.FunctionComponent<{ tag: string }> = ({ tag }) => {
+type ContentProps = {
+  tag: string;
+  getUrl: () => string;
+};
+
+const SlackContent: React.FunctionComponent<ContentProps> = ({
+  tag,
+  getUrl,
+}) => {
+  const [loading, setLoading] = useState(false);
+  const onClick = useCallback(() => {
+    setLoading(true);
+    axios
+      .post(getUrl(), { text: "Hello, World!" })
+      .then(() => setLoading(false));
+  }, [getUrl, setLoading]);
   return (
     <div style={{ padding: 16 }}>
-      <Button text={`Send to ${tag}`} />
+      <Button text={`Send to ${tag}`} onClick={onClick} />
+      {loading && <Spinner />}
     </div>
   );
 };
 
-const SlackOverlay: React.FunctionComponent<{ tag: string }> = ({ tag }) => {
+const SlackOverlay: React.FunctionComponent<ContentProps> = (props) => {
   const [isOpen, setIsOpen] = useState(false);
-  const open = useCallback((e: React.MouseEvent) => {
-    setIsOpen(true);
-    e.preventDefault();
-    e.stopPropagation();
-  }, [setIsOpen])
+  const open = useCallback(
+    (e: React.MouseEvent) => {
+      setIsOpen(true);
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    [setIsOpen]
+  );
   return (
     <Popover
       target={
@@ -28,10 +48,10 @@ const SlackOverlay: React.FunctionComponent<{ tag: string }> = ({ tag }) => {
               style={{ width: 15, marginLeft: 4 }}
             />
           }
-          onClick={open}
+          onMouseDown={open}
         />
       }
-      content={<SlackContent tag={tag} />}
+      content={<SlackContent {...props} />}
       isOpen={isOpen}
       onInteraction={setIsOpen}
     />
@@ -40,10 +60,10 @@ const SlackOverlay: React.FunctionComponent<{ tag: string }> = ({ tag }) => {
 
 export const render = ({
   parent,
-  tag,
+  ...contentProps
 }: {
   parent: HTMLSpanElement;
-  tag: string;
-}): void => ReactDOM.render(<SlackOverlay tag={tag} />, parent);
+} & ContentProps): void =>
+  ReactDOM.render(<SlackOverlay {...contentProps} />, parent);
 
 export default SlackOverlay;
