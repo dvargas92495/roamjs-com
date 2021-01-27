@@ -18,7 +18,7 @@ const SlackContent: React.FunctionComponent<
     axios
       .post(
         getUrl(),
-        { text: "Hello, World!" },
+        JSON.stringify({ text: "Hello, World!" }),
         {
           withCredentials: false,
           transformRequest: [
