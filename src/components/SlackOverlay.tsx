@@ -9,10 +9,9 @@ type ContentProps = {
   getUrl: () => string;
 };
 
-const SlackContent: React.FunctionComponent<ContentProps> = ({
-  tag,
-  getUrl,
-}) => {
+const SlackContent: React.FunctionComponent<
+  ContentProps & { close: () => void }
+> = ({ tag, getUrl, close }) => {
   const [loading, setLoading] = useState(false);
   const onClick = useCallback(() => {
     setLoading(true);
@@ -20,10 +19,19 @@ const SlackContent: React.FunctionComponent<ContentProps> = ({
       .post(
         getUrl(),
         { text: "Hello, World!" },
-        { headers: { "Content-Type": "application/json" } }
+        {
+          withCredentials: false,
+          transformRequest: [
+            (data, headers) => {
+              delete headers.post["Content-Type"];
+              return data;
+            },
+          ],
+        }
       )
-      .then(() => setLoading(false));
-  }, [getUrl, setLoading]);
+      .then(close)
+      .catch(() => setLoading(false));
+  }, [getUrl, setLoading, close]);
   return (
     <div style={{ padding: 16 }}>
       <Button text={`Send to ${tag}`} onClick={onClick} />
@@ -33,15 +41,9 @@ const SlackContent: React.FunctionComponent<ContentProps> = ({
 };
 
 const SlackOverlay: React.FunctionComponent<ContentProps> = (props) => {
- /* const [isOpen, setIsOpen] = useState(false);
-  const open = useCallback(
-    (e: React.MouseEvent) => {
-      setIsOpen(true);
-      e.preventDefault();
-      e.stopPropagation();
-    },
-    [setIsOpen]
-  );*/
+  const [isOpen, setIsOpen] = useState(false);
+  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
+  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   return (
     <Popover
       target={
@@ -52,12 +54,12 @@ const SlackOverlay: React.FunctionComponent<ContentProps> = (props) => {
               style={{ width: 15, marginLeft: 4 }}
             />
           }
-         // onMouseDown={open}
+          onClick={open}
         />
       }
-      content={<SlackContent {...props} />}
-     // isOpen={isOpen}
-     // onInteraction={setIsOpen}
+      content={<SlackContent {...props} close={close} />}
+      isOpen={isOpen}
+      onInteraction={setIsOpen}
     />
   );
 };
