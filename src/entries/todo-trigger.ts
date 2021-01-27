@@ -144,12 +144,14 @@ runExtension("todo-trigger", () => {
           }
           const zoom = l.closest(".rm-zoom-item-content") as HTMLSpanElement;
           if (zoom) {
-            zoom.style.textDecoration = "line-through";
+            (zoom.firstElementChild
+              .firstElementChild as HTMLDivElement).style.textDecoration =
+              "line-through";
             return;
           }
-          const block = l.closest('.roam-block') as HTMLDivElement;
+          const block = l.closest(".roam-block") as HTMLDivElement;
           if (block) {
-            block.style.textDecoration = 'line-through';
+            block.style.textDecoration = "line-through";
           }
         } else {
           const ref = l.closest(".rm-block-ref") as HTMLSpanElement;
@@ -159,12 +161,14 @@ runExtension("todo-trigger", () => {
           }
           const zoom = l.closest(".rm-zoom-item-content") as HTMLSpanElement;
           if (zoom) {
-            zoom.style.textDecoration = "none";
+            (zoom.firstElementChild
+              .firstElementChild as HTMLDivElement).style.textDecoration =
+              "none";
             return;
           }
-          const block = l.closest('.roam-block') as HTMLDivElement;
+          const block = l.closest(".roam-block") as HTMLDivElement;
           if (block) {
-            block.style.textDecoration = 'none';
+            block.style.textDecoration = "none";
           }
         }
       },
