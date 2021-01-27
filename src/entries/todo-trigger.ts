@@ -142,6 +142,11 @@ runExtension("todo-trigger", () => {
             ref.style.textDecoration = "line-through";
             return;
           }
+          const zoom = l.closest(".rm-zoom-item-content") as HTMLSpanElement;
+          if (zoom) {
+            zoom.style.textDecoration = "line-through";
+            return;
+          }
           const block = l.closest('.roam-block') as HTMLDivElement;
           if (block) {
             block.style.textDecoration = 'line-through';
@@ -150,6 +155,11 @@ runExtension("todo-trigger", () => {
           const ref = l.closest(".rm-block-ref") as HTMLSpanElement;
           if (ref) {
             ref.style.textDecoration = "none";
+            return;
+          }
+          const zoom = l.closest(".rm-zoom-item-content") as HTMLSpanElement;
+          if (zoom) {
+            zoom.style.textDecoration = "none";
             return;
           }
           const block = l.closest('.roam-block') as HTMLDivElement;
