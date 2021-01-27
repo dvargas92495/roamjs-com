@@ -10,7 +10,7 @@ const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const { graph, domain } = JSON.parse(event.body);
+  const { graph, domain, priceId } = JSON.parse(event.body);
   if (!graph) {
     return {
       statusCode: 400,
@@ -40,20 +40,12 @@ export const handler = async (
   const Authorization = event.headers.Authorization;
 
   const subscriptionActive = await axios
-    .get(`${process.env.FLOSS_API_URL}/stripe-products?project=RoamJS`)
-    .then((r) =>
-      r.data.products.find((p: { name: string }) => p.name === "RoamJS Site")
+    .post(
+      `${process.env.FLOSS_API_URL}/stripe-subscribe`,
+      { priceId },
+      { headers: { Authorization } }
     )
-    .then((p) =>
-      axios
-        .post(
-          `${process.env.FLOSS_API_URL}/stripe-subscribe`,
-          { priceId: p.prices[0].id },
-          { headers: { Authorization } }
-        )
-        .then((r) => r.data.active)
-    );
-
+    .then((r) => r.data.active);
   if (!subscriptionActive) {
     return {
       statusCode: 500,

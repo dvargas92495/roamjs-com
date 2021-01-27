@@ -201,8 +201,11 @@ const domainValidate = async (domain: string) => {
 
 const Website = () => {
   const authenticatedAxiosGet = useAuthenticatedAxiosRoamJSGet();
+  const flossGet = useAuthenticatedAxiosFlossGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosRoamJSPost();
   const [website, setWebsite] = useState<WebsiteData>();
+  const [subscriptionId, setSubscriptionId] = useState("");
+  const [priceId, setPriceId] = useState("");
   const timeoutRef = useRef(0);
   const getWebsite = useCallback(
     () =>
@@ -215,7 +218,7 @@ const Website = () => {
     [setWebsite, timeoutRef]
   );
   const launchWebsite = useCallback(
-    (body) => authenticatedAxiosPost("launch-website", body),
+    (body) => authenticatedAxiosPost("launch-website", { ...body, priceId }),
     [authenticatedAxiosPost]
   );
   const manualDeploy = useCallback(
@@ -223,10 +226,26 @@ const Website = () => {
     [authenticatedAxiosPost, getWebsite]
   );
   const shutdownWebsite = useCallback(
-    () => authenticatedAxiosPost("shutdown-website", {}),
-    [authenticatedAxiosPost]
+    () =>
+      authenticatedAxiosPost("shutdown-website", {
+        graph: website.graph,
+        subscriptionId,
+      }),
+    [authenticatedAxiosPost, website, subscriptionId]
   );
   useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
+  useEffect(() => {
+    flossGet(
+      `stripe-is-subscribed?product=${encodeURI("RoamJS Site")}`
+    ).then((r) => setSubscriptionId(r.data.subscriptionId));
+  }, [flossGet]);
+  useEffect(() => {
+    flossGet("stripe-products?project=RoamJS")
+      .then((r) =>
+        r.data.products.find((p: { name: string }) => p.name === "RoamJS Site")
+      )
+      .then((p) => setPriceId(p.prices[0].id));
+  }, [flossGet, setPriceId]);
 
   return (
     <DataLoader loadAsync={getWebsite}>

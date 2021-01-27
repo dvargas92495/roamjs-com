@@ -10,36 +10,21 @@ const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  const { graph, subscriptionId } = JSON.parse(event.body || "{}");
   const Authorization = event.headers.Authorization;
   const opts = {
     headers: { Authorization },
   };
 
-  const {
-    data: { website },
-  } = await axios.get(
-    `${process.env.FLOSS_API_URL}/auth-user-metadata?key=website`,
-    opts
-  );
-
   const cancelled = await axios
-    .get(
-      `${process.env.FLOSS_API_URL}/stripe-is-subscribed?product=${encodeURI(
-        "RoamJS Site"
-      )}`,
+    .post(
+      `${process.env.FLOSS_API_URL}/stripe-cancel`,
+      {
+        subscriptionId,
+      },
       opts
     )
-    .then((r) =>
-      axios
-        .post(
-          `${process.env.FLOSS_API_URL}/stripe-cancel`,
-          {
-            subscriptionId: r.data.subscriptionId,
-          },
-          opts
-        )
-        .then((r) => r.data.success)
-    );
+    .then((r) => r.data.success);
   if (!cancelled) {
     return {
       statusCode: 500,
@@ -56,7 +41,7 @@ export const handler = async (
           S: v4(),
         },
         action_graph: {
-          S: `launch_${website.graph}`,
+          S: `launch_${graph}`,
         },
         date: {
           S: new Date().toJSON(),
@@ -79,14 +64,14 @@ export const handler = async (
       FunctionName: "RoamJS_shutdown",
       InvocationType: "Event",
       Payload: JSON.stringify({
-        roamGraph: website.graph,
+        roamGraph: graph,
       }),
     })
     .promise();
 
   return {
     statusCode: 200,
-    body: JSON.stringify(website),
+    body: JSON.stringify({ success: true }),
     headers,
   };
 };

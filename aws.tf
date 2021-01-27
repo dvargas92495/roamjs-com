@@ -1,11 +1,18 @@
 terraform {
-    backend "remote" {
-        hostname = "app.terraform.io"
-        organization = "VargasArts"
-        workspaces {
-            prefix = "roam-js-extensions"
-        }
+  backend "remote" {
+    hostname = "app.terraform.io"
+    organization = "VargasArts"
+    workspaces {
+      prefix = "roam-js-extensions"
     }
+  }
+  
+  required_providers {
+    github = {
+      source = "integrations/github"
+      version = "4.2.0"
+    }
+  }
 }
 
 variable "roam_api_key" {
