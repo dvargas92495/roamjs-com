@@ -153,7 +153,7 @@ const setDocumentLis = ({
     }
     if (v === "document") {
       li.classList.add("roamjs-document-li");
-    } else if (Array.from(li.children).some((e) => e.tagName === "img")) {
+    } else if (Array.from(li.children).some((e) => e.tagName === "IMG")) {
       li.classList.add("roamjs-document-li");
     }
   });
