@@ -9,10 +9,10 @@ import { render } from "../components/SlackOverlay";
 
 const ATTRIBUTE = "data-roamjs-slack-overlay";
 
-const getUrl = () => {
+const getToken = () => {
   const tree = getTextTreeByPageName("roam/js/slack");
-  const urlNode = tree.find((s) => /url/i.test(s.text.trim()));
-  return urlNode ? urlNode.children[0].text : "";
+  const tokenNode = tree.find((s) => /token/i.test(s.text.trim()));
+  return tokenNode ? tokenNode.children[0].text : "";
 };
 
 runExtension("slack", () => {
@@ -31,7 +31,7 @@ runExtension("slack", () => {
         newSpan.style.verticalAlign = "middle";
         newSpan.onmousedown = (e: MouseEvent) => e.stopPropagation();
         renderedRef.appendChild(newSpan);
-        render({ parent: newSpan, tag: r, getUrl });
+        render({ parent: newSpan, tag: r, getToken });
       });
     });
   };

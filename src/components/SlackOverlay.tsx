@@ -1,37 +1,31 @@
 import { Button, Icon, Popover, Spinner } from "@blueprintjs/core";
-import axios from "axios";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import Slack from "../assets/Slack_Mark.svg";
+import { WebClient } from "@slack/web-api";
 
 type ContentProps = {
   tag: string;
-  getUrl: () => string;
+  getToken: () => string;
 };
+
+const web = new WebClient();
 
 const SlackContent: React.FunctionComponent<
   ContentProps & { close: () => void }
-> = ({ tag, getUrl, close }) => {
+> = ({ tag, getToken, close }) => {
   const [loading, setLoading] = useState(false);
   const onClick = useCallback(() => {
     setLoading(true);
-    axios
-      .post(
-        getUrl(),
-        JSON.stringify({ text: "Hello, World!" }),
-        {
-          withCredentials: false,
-          transformRequest: [
-            (data, headers) => {
-              delete headers.post["Content-Type"];
-              return data;
-            },
-          ],
-        }
-      )
+    const token = getToken();
+    web.users.list({token}).then(r => {
+      const members = r.members as {real_name: string, id: string}[];
+      const memberId = members.find(m => m.real_name === tag)?.id;
+      return web.chat.postMessage({channel: memberId, text: "Hello, big world!"})
+    })
       .then(close)
       .catch(() => setLoading(false));
-  }, [getUrl, setLoading, close]);
+  }, [getToken, setLoading, close, tag]);
   return (
     <div style={{ padding: 16 }}>
       <Button text={`Send to ${tag}`} onClick={onClick} />

@@ -88,6 +88,7 @@
     "@mozilla/readability": "^0.3.0",
     "@sentry/browser": "^5.29.2",
     "@sentry/tracing": "^5.29.2",
+    "@slack/web-api": "^6.0.0",
     "@stripe/stripe-js": "^1.11.0",
     "@types/mozilla-readability": "^0.2.0",
     "aws-sdk": "^2.824.0",
