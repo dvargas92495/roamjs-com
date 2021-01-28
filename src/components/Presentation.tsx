@@ -62,7 +62,7 @@ const renderBullet = ({
             (nested) =>
               `${renderBullet({
                 c: nested,
-                i: parentViewType === "document" ? i : i + 1,
+                i: i + 1,
                 parentViewType: c.viewType,
               })}`
           )
