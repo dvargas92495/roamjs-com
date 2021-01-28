@@ -29,10 +29,9 @@ export const VALID_THEMES = [
 
 const renderViewType = (viewType: ViewType) => {
   switch (viewType) {
-    case "document":
-      return "";
     case "numbered":
       return "1. ";
+    case "document":
     case "bullet":
     default:
       return "- ";
