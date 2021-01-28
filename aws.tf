@@ -270,6 +270,6 @@ resource "github_actions_secret" "slack_client_id" {
 
 resource "github_actions_secret" "slack_client_secret" {
   repository       = "roam-js-extensions"
-  secret_name      = "GIPHY_KEY"
+  secret_name      = "SLACK_CLIENT_SECRET"
   plaintext_value  = var.slack_client_secret
 }
