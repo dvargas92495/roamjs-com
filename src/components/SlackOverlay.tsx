@@ -7,22 +7,25 @@ import { WebClient } from "@slack/web-api";
 type ContentProps = {
   tag: string;
   getToken: () => string;
+  message: string;
 };
 
 const web = new WebClient();
 
 const SlackContent: React.FunctionComponent<
   ContentProps & { close: () => void }
-> = ({ tag, getToken, close }) => {
+> = ({ tag, getToken, close, message }) => {
   const [loading, setLoading] = useState(false);
   const onClick = useCallback(() => {
     setLoading(true);
     const token = getToken();
-    web.users.list({token}).then(r => {
-      const members = r.members as {real_name: string, id: string}[];
-      const memberId = members.find(m => m.real_name === tag)?.id;
-      return web.chat.postMessage({channel: memberId, text: "Hello, big world!"})
-    })
+    web.users
+      .list({ token })
+      .then((r) => {
+        const members = r.members as { real_name: string; id: string }[];
+        const memberId = members.find((m) => m.real_name === tag)?.id;
+        return web.chat.postMessage({ channel: memberId, text: message });
+      })
       .then(close)
       .catch(() => setLoading(false));
   }, [getToken, setLoading, close, tag]);

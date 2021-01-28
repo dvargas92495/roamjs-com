@@ -4,7 +4,7 @@ import { API_URL } from "./constants";
 import { Body } from "@dvargas92495/ui";
 
 const AddToSlack: React.FunctionComponent = () => {
-  const [token, setToken] = useState("blahblah");
+  const [token, setToken] = useState("");
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
     if (query.get("code")) {

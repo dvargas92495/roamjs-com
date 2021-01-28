@@ -7,8 +7,9 @@ import {
 import {
   createButtonObserver,
   DAILY_NOTE_PAGE_REGEX,
+  getAttributeValueFromPage,
   getTextByBlockUid,
-  getTitlesReferencingPagesInSameBlock,
+  getTitlesReferencingPagesInSameBlockTree,
   runExtension,
 } from "../entry-helpers";
 import differenceInDays from "date-fns/differenceInDays";
@@ -68,7 +69,7 @@ const calculateExpression = (expression: Expression): string => {
         )
         .toString();
     case "daily":
-      return getTitlesReferencingPagesInSameBlock(args)
+      return getTitlesReferencingPagesInSameBlockTree(args)
         .filter((t) => DAILY_NOTE_PAGE_REGEX.test(t))
         .join(DELIM);
     case "max":
@@ -92,13 +93,34 @@ const calculateExpression = (expression: Expression): string => {
   }
 };
 
+const getCalculateText = (button: HTMLButtonElement) => {
+  const table = button.closest(".roam-table");
+  if (table) {
+    const trs = Array.from(table.getElementsByTagName("tr"));
+    const targetTr = trs.find((tr) => tr.contains(button));
+    const pageName = targetTr.firstElementChild.textContent;
+    const columnIndex = Array.from(
+      targetTr.getElementsByTagName("td")
+    ).findIndex((td) => td.contains(button));
+    const targetTh = table.getElementsByTagName("th")[columnIndex];
+    const attributeName =
+      targetTh.childNodes[0].nodeValue ||
+      (targetTh.children[0] as HTMLElement).innerText;
+    return getAttributeValueFromPage({
+      pageName,
+      attributeName,
+    });
+  }
+  const { blockUid } = getUidsFromButton(button);
+  return getTextByBlockUid(blockUid);
+};
+
 runExtension("calculate", () => {
   createButtonObserver({
     attribute,
     shortcut,
     render: (button: HTMLButtonElement) => {
-      const { blockUid } = getUidsFromButton(button);
-      const text = getTextByBlockUid(blockUid);
+      const text = getCalculateText(button);
       const buttonText =
         text.match(
           new RegExp(`{{(${attribute}|${shortcut}):(.*)}}`, "is")

@@ -41,9 +41,15 @@ const shiftClickListener = (e: MouseEvent) => {
   }
 };
 
-const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
-  getMarkdown,
-}) => {
+const componentModes = {
+  menu: MenuItem,
+  button: Button,
+};
+
+const MarkmapPanel: React.FunctionComponent<{
+  getMarkdown: () => string;
+  mode: "menu" | "button";
+}> = ({ getMarkdown, mode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -168,9 +174,10 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
       }
     }
   }, [isFullScreen, containerRef, refresh]);
+  const DrawerTarget = componentModes[mode];
   return (
     <>
-      <MenuItem text={"Open Mindmap"} onClick={open} />
+      <DrawerTarget text={"Open Mindmap"} onClick={open} />
       <Drawer
         onClose={close}
         title="Mindmap Panel"
@@ -214,9 +221,15 @@ const MarkmapPanel: React.FunctionComponent<{ getMarkdown: () => string }> = ({
 export const render = ({
   parent,
   getMarkdown,
+  mode,
 }: {
-  parent: HTMLDivElement;
+  parent: HTMLElement;
   getMarkdown: () => string;
-}): void => ReactDOM.render(<MarkmapPanel getMarkdown={getMarkdown} />, parent);
+  mode: "menu" | "button";
+}): void =>
+  ReactDOM.render(
+    <MarkmapPanel getMarkdown={getMarkdown} mode={mode} />,
+    parent
+  );
 
 export default MarkmapPanel;

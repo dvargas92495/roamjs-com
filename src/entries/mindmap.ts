@@ -2,8 +2,10 @@ import { toRoamDateUid } from "roam-client";
 import { NODE_CLASSNAME, render } from "../components/MarkmapPanel";
 import {
   addStyle,
+  createButtonObserver,
   createHTMLObserver,
   getTextTreeByBlockUid,
+  getTextTreeByPageName,
   resolveRefs,
   runExtension,
   TreeNode,
@@ -40,11 +42,22 @@ const expandEmbeds = (c: TreeNode) => {
   );
 };
 
+const hideTagChars = (c: TreeNode) => {
+  c.children.forEach(hideTagChars);
+  c.text = c.text.replace(/#|\[\[|\]\]/g, "");
+};
+
 const getMarkdown = (): string => {
   const match = window.location.href.match("/page/(.*)$");
   const uid = match ? match[1] : toRoamDateUid(new Date());
   const nodes = getTextTreeByBlockUid(uid).children;
   nodes.forEach((c) => expandEmbeds(c));
+  const hideTags = getTextTreeByPageName("roam/js/mindmap").some((t) =>
+    /hide tags/i.test(t.text)
+  );
+  if (hideTags) {
+    nodes.forEach((c) => hideTagChars(c));
+  }
   return nodes.map((c) => toMarkdown({ c, i: 0 })).join("\n");
 };
 
@@ -60,10 +73,17 @@ runExtension("markmap", () => {
       ) {
         u.setAttribute("data-roamjs-has-markmap", "true");
         u.appendChild(div);
-        render({ parent: div, getMarkdown });
+        render({ parent: div, getMarkdown, mode: "menu" });
       }
     },
     tag: "UL",
     className: "bp3-menu",
+  });
+
+  createButtonObserver({
+    shortcut: "mindmap",
+    attribute: "open-mindmap",
+    render: (b: HTMLButtonElement) =>
+      render({ parent: b.parentElement, getMarkdown, mode: "button" }),
   });
 });

@@ -2,6 +2,7 @@ import { getUids } from "roam-client";
 import {
   createBlockObserver,
   getRefTitlesByBlockUid,
+  getTextByBlockUid,
   getTextTreeByPageName,
   runExtension,
 } from "../entry-helpers";
@@ -18,6 +19,7 @@ const getToken = () => {
 runExtension("slack", () => {
   const renderSlackOverlay = (container: HTMLDivElement) => {
     const blockUid = getUids(container).blockUid;
+    const text = getTextByBlockUid(blockUid);
     const refs = getRefTitlesByBlockUid(blockUid);
     const renderedRefs = Array.from(
       container.getElementsByClassName("rm-page-ref--tag")
@@ -31,7 +33,12 @@ runExtension("slack", () => {
         newSpan.style.verticalAlign = "middle";
         newSpan.onmousedown = (e: MouseEvent) => e.stopPropagation();
         renderedRef.appendChild(newSpan);
-        render({ parent: newSpan, tag: r, getToken });
+        render({
+          parent: newSpan,
+          tag: r,
+          getToken,
+          message: text.replace(r, ""),
+        });
       });
     });
   };
