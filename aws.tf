@@ -59,6 +59,14 @@ variable "giphy_key" {
     type = string
 }
 
+variable "slack_client_id" {
+    type = string
+}
+
+variable "slack_client_secret" {
+    type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -102,6 +110,7 @@ module "aws-serverless-backend" {
         "install/put",
         "launch-website/post",
         "queue-issues/get",
+        "slack-url/post",
         "shutdown-website/post",
         "twitter-search/get",
         "website-status/get",
@@ -251,4 +260,16 @@ resource "github_actions_secret" "giphy_key" {
   repository       = "roam-js-extensions"
   secret_name      = "GIPHY_KEY"
   plaintext_value  = var.giphy_key
+}
+
+resource "github_actions_secret" "slack_client_id" {
+  repository       = "roam-js-extensions"
+  secret_name      = "SLACK_CLIENT_ID"
+  plaintext_value  = var.slack_client_id
+}
+
+resource "github_actions_secret" "slack_client_secret" {
+  repository       = "roam-js-extensions"
+  secret_name      = "GIPHY_KEY"
+  plaintext_value  = var.slack_client_secret
 }
