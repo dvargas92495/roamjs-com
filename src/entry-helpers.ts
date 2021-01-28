@@ -886,6 +886,21 @@ export const getTitlesReferencingPagesInSameBlock = (
     .map((r) => r[0] as string);
 };
 
+export const getAttributeValueFromPage = ({
+  pageName,
+  attributeName,
+}: {
+  pageName: string;
+  attributeName: string;
+}): string => {
+  const blockString = window.roamAlphaAPI.q(
+    `[:find ?s :where [?b :block/string ?s] [?r :node/title "${attributeName}"] [?b :block/refs ?r] [?b :block/page ?p] [?p :node/title "${pageName}"]]`
+  )?.[0]?.[0] as string;
+  return blockString
+    ? blockString.match(new RegExp(`${attributeName}::(.*)`))?.[1] || ""
+    : "";
+};
+
 export const DAILY_NOTE_PAGE_REGEX = /(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]/;
 export const TODO_REGEX = /{{\[\[TODO\]\]}}/g;
 export const DONE_REGEX = /{{\[\[DONE\]\]}} ?/g;
