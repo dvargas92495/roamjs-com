@@ -53,7 +53,7 @@ const getMarkdown = (): string => {
   const nodes = getTextTreeByBlockUid(uid).children;
   nodes.forEach((c) => expandEmbeds(c));
   const hideTags = getTextTreeByPageName("roam/js/mindmap").some((t) =>
-    /hide tags/i.test(t.text)
+    /hide tags/ig.test(t.text)
   );
   if (hideTags) {
     nodes.forEach((c) => hideTagChars(c));

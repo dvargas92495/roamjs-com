@@ -897,7 +897,7 @@ export const getTitlesReferencingPagesInSameBlockTree = (
         .slice(1)
         .reduce(
           (prev, cur) =>
-            cur.parents.length > prev.parents.length ? cur : prev,
+            cur.parents.length < prev.parents.length ? cur : prev,
           blocks[0]
         );
       return blocks.every(
