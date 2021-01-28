@@ -9,7 +9,7 @@ import {
   DAILY_NOTE_PAGE_REGEX,
   getAttributeValueFromPage,
   getTextByBlockUid,
-  getTitlesReferencingPagesInSameBlock,
+  getTitlesReferencingPagesInSameBlockTree,
   runExtension,
 } from "../entry-helpers";
 import differenceInDays from "date-fns/differenceInDays";
@@ -69,7 +69,7 @@ const calculateExpression = (expression: Expression): string => {
         )
         .toString();
     case "daily":
-      return getTitlesReferencingPagesInSameBlock(args)
+      return getTitlesReferencingPagesInSameBlockTree(args)
         .filter((t) => DAILY_NOTE_PAGE_REGEX.test(t))
         .join(DELIM);
     case "max":

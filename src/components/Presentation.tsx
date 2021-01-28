@@ -54,9 +54,9 @@ const renderBullet = ({
   i: number;
   parentViewType?: ViewType;
 }): string =>
-  `${"".padStart(i * 4, " ")}${
-    c.text.match("!\\[.*\\]\\(.*\\)") ? "" : renderViewType(parentViewType)
-  }${c.heading ? `${"".padStart(c.heading, "#")} ` : ""}${resolveRefs(c.text)}${
+  `${"".padStart(i * 4, " ")}${renderViewType(parentViewType)}${
+    c.heading ? `${"".padStart(c.heading, "#")} ` : ""
+  }${resolveRefs(c.text)}${
     c.open && c.children.length
       ? `\n${c.children
           .map(
@@ -138,6 +138,28 @@ const ENDS_WITH_LEFT = new RegExp(" left$", "i");
 
 type ContentSlideExtras = { note: Slide; layout: string; collapsible: boolean };
 
+const setDocumentLis = ({
+  e,
+  s,
+  v,
+}: {
+  e: HTMLElement;
+  s: Slides;
+  v: ViewType;
+}): void => {
+  Array.from(e.children).forEach((li: HTMLLIElement, i) => {
+    const lastChild = li.lastElementChild as HTMLElement;
+    if (lastChild.tagName === "ul" || lastChild.tagName === "ol") {
+      setDocumentLis({ e: lastChild, s: s[i].children, v: s[i].viewType });
+    }
+    if (v === "document") {
+      li.classList.add("roamjs-document-li");
+    } else if (Array.from(li.children).some((e) => e.tagName === "img")) {
+      li.classList.add("roamjs-document-li");
+    }
+  });
+};
+
 const ContentSlide = ({
   text,
   children,
@@ -169,7 +191,7 @@ const ContentSlide = ({
             "bp3-icon bp3-icon-caret-right roamjs-collapsible-caret";
           l.style.position = "relative";
           l.insertBefore(spanIcon, l.childNodes[0]);
-          l.className = "roamjs-collapsible-bullet";
+          l.classList.add("roamjs-collapsible-bullet");
         }
         let depth = 0;
         let parentElement = l as HTMLElement;
@@ -191,6 +213,13 @@ const ContentSlide = ({
       setCaretsLoaded(true);
     }
   }, [collapsible, slideRoot.current, caretsLoaded, setCaretsLoaded]);
+  useEffect(() => {
+    setDocumentLis({
+      e: slideRoot.current.firstElementChild as HTMLElement,
+      s: bullets,
+      v: viewType,
+    });
+  }, [bullets, slideRoot.current, viewType]);
   const onRootClick = useCallback(
     (e: React.MouseEvent) => {
       if (collapsible) {
@@ -238,7 +267,7 @@ const ContentSlide = ({
       >
         {caretsLoaded && (
           <style>
-            {`.roamjs-collapsible-bullet::marker {
+            {`.roamjs-collapsible-bullet::marker, .roamjs-document-li::marker {
   color:${
     document.getElementById("roamjs-reveal-root")
       ? getComputedStyle(document.getElementById("roamjs-reveal-root"))

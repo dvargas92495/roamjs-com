@@ -874,15 +874,38 @@ export const resolveRefs = (text: string): string => {
   });
 };
 
-export const getTitlesReferencingPagesInSameBlock = (
+export const getTitlesReferencingPagesInSameBlockTree = (
   pages: string[]
 ): string[] => {
   return window.roamAlphaAPI
     .q(
-      `[:find ?title :where [?e :node/title ?title] [?c :block/page ?e] ${pages
-        .map((p, i) => `[?c :block/refs ?d${i}] [?d${i} :node/title "${p}"]`)
+      `[:find ?title ${pages
+        .map((_, i) => `(pull ?b${i} [:block/parents, :db/id])`)
+        .join(" ")} :where [?e :node/title ?title] ${pages
+        .map(
+          (p, i) =>
+            `[?b${i} :block/page ?e] [?b${i} :block/refs ?d${i}] [?d${i} :node/title "${p}"]`
+        )
         .join(" ")}]`
     )
+    .filter((r) => {
+      const blocks = r.slice(1) as { parents: { id: number }[]; id: number }[];
+      if (new Set(blocks.map((b) => b.id)).size === 1) {
+        return true;
+      }
+      const topMostBlock = blocks
+        .slice(1)
+        .reduce(
+          (prev, cur) =>
+            cur.parents.length > prev.parents.length ? cur : prev,
+          blocks[0]
+        );
+      return blocks.every(
+        (b) =>
+          b === topMostBlock ||
+          b.parents.some(({ id }) => id === topMostBlock.id)
+      );
+    })
     .map((r) => r[0] as string);
 };
 
