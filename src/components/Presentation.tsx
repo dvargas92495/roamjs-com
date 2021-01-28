@@ -149,7 +149,7 @@ const setDocumentLis = ({
 }): void => {
   Array.from(e.children).forEach((li: HTMLLIElement, i) => {
     const lastChild = li.lastElementChild as HTMLElement;
-    if (["ul", "ol"].includes(lastChild?.tagName)) {
+    if (["UL", "OL"].includes(lastChild?.tagName)) {
       setDocumentLis({ e: lastChild, s: s[i].children, v: s[i].viewType });
     }
     if (v === "document") {
