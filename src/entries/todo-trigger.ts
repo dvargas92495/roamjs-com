@@ -106,7 +106,7 @@ runExtension("todo-trigger", () => {
           } else {
             onDone(blockUid, oldValue);
           }
-        }, 1);
+        }, 50);
       }
     }
   });
