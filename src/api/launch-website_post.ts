@@ -26,6 +26,15 @@ export const handler = async (
       headers,
     };
   }
+
+  if (!priceId) {
+    return {
+      statusCode: 400,
+      body: "Missing Product to subscribe to.",
+      headers,
+    };
+  }
+
   const available = await axios
     .get(`${process.env.FLOSS_API_URL}/aws-check-domain?domain=${domain}`)
     .then((r) => r.data.available);

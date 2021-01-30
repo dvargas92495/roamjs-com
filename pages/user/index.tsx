@@ -219,7 +219,7 @@ const Website = () => {
   );
   const launchWebsite = useCallback(
     (body) => authenticatedAxiosPost("launch-website", { ...body, priceId }),
-    [authenticatedAxiosPost]
+    [authenticatedAxiosPost, priceId]
   );
   const manualDeploy = useCallback(
     () => authenticatedAxiosPost("deploy", {}).then(getWebsite),
