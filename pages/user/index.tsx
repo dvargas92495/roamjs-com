@@ -191,7 +191,7 @@ const isWebsiteReady = (w: WebsiteData) =>
   w.status === "LIVE" && w.deploys.length && w.deploys[0].status === "SUCCESS";
 
 const TLD_REGEX = new RegExp(`\\.${awsTlds.join("|")}`);
-const domainValidate = async (domain: string) => {
+const domainValidate = (domain: string) => {
   const valid = TLD_REGEX.test(domain);
   if (!valid) {
     return "Invalid domain. Try a .com!";
@@ -321,8 +321,7 @@ const Website = () => {
                 name: "domain",
                 defaultValue: "",
                 component: StringField,
-                validate: async (value) =>
-                  await domainValidate(value as string),
+                validate: (v) => domainValidate(v as string),
               },
             ]}
           />

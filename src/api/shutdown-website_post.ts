@@ -59,7 +59,7 @@ export const handler = async (
     opts
   );
 
-  lambda
+  await lambda
     .invoke({
       FunctionName: "RoamJS_shutdown",
       InvocationType: "Event",
