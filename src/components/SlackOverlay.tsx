@@ -25,7 +25,11 @@ const SlackContent: React.FunctionComponent<
       .then((r) => {
         const members = r.members as { real_name: string; id: string }[];
         const memberId = members.find((m) => m.real_name === tag)?.id;
-        return web.chat.postMessage({ channel: memberId, text: message });
+        return web.chat.postMessage({
+          channel: memberId,
+          text: message,
+          token,
+        });
       })
       .then(close)
       .catch(() => setLoading(false));
