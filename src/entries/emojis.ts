@@ -157,7 +157,12 @@ runExtension("emojis", () => {
   const inputEventListener = async (e: InputEvent) => {
     if (e.data === ":") {
       if (!emojiOn) {
-        turnOnEmoji();
+        const textarea = e.target as HTMLTextAreaElement;
+        if (
+          !/[a-zA-Z0-9)]/.test(textarea.value.charAt(textarea.selectionStart - 2))
+        ) {
+          turnOnEmoji();
+        }
       } else if (!emoji.hasEmoji(searchText)) {
         turnOffEmoji();
       } else {
