@@ -18,7 +18,8 @@ runExtension("image-tagging", () => {
     "SHIFT CLICK": "click",
     "ICON CLICK": "click",
   };
-  const trigger = config["Trigger"]?.toUpperCase() as keyof typeof events;
+  const trigger =
+    (config["Trigger"]?.toUpperCase() as keyof typeof events) || "ICON CLICK";
   const event = trigger ? events[trigger] : "dblclick";
 
   const clickCallback = async (htmlTarget: HTMLElement) => {
@@ -98,6 +99,15 @@ runExtension("image-tagging", () => {
               e.stopPropagation();
               e.preventDefault();
             };
+            button.style.opacity = "0";
+            img.addEventListener(
+              "mouseenter",
+              () => (button.style.opacity = "1")
+            );
+            img.addEventListener(
+              "mouseleave",
+              () => (button.style.opacity = "0")
+            );
 
             const div = document.createElement("div");
             div.style.position = "absolute";
