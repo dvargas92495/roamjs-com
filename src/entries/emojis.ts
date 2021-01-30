@@ -157,6 +157,9 @@ runExtension("emojis", () => {
   const inputEventListener = async (e: InputEvent) => {
     if (e.data === ":") {
       if (!emojiOn) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore
+        console.log(e.target.value, e.target.selectionStart);
         turnOnEmoji();
       } else if (!emoji.hasEmoji(searchText)) {
         turnOffEmoji();

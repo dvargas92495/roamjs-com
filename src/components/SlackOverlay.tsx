@@ -11,6 +11,7 @@ type ContentProps = {
 };
 
 const web = new WebClient();
+delete web["axios"].defaults.headers["User-Agent"];
 
 const SlackContent: React.FunctionComponent<
   ContentProps & { close: () => void }
