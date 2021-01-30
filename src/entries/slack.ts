@@ -37,7 +37,7 @@ runExtension("slack", () => {
           parent: newSpan,
           tag: r,
           getToken,
-          message: text.replace(r, ""),
+          message: text.replace(`#[[${r}]]`, ""),
         });
       });
     });

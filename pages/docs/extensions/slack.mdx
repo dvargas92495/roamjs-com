@@ -8,4 +8,12 @@ import AddToSlack from '../../../components/AddToSlack';
 
 <AddToSlack />
 
-Anytime you tag a person in a Roam block, a slack icon will render next to the tag.
+Anytime you tag a person in a Roam block, a slack icon will render next to the tag. Clicking the icon and then clicking Send will send the contents of the block to the user matching the full name of the tag. 
+
+For example, this block:
+
+`Sent from Roam!#[[David Vargas]]`
+
+Will send the following message to David Vargas in slack:
+
+`Sent from Roam!`
