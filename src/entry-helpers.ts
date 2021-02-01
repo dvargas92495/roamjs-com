@@ -145,24 +145,29 @@ export const replaceTagText = ({
   prepend?: boolean;
 }): void => {
   if (before) {
-    replaceText({
-      before: `#[[${before}]]`,
-      after: after ? `#[[${after}]]` : "",
-      prepend,
-    });
-    replaceText({
-      before: `[[${before}]]`,
-      after: after ? `[[${after}]]` : "",
-      prepend,
-    });
-    const hashAfter = after.match(/(\s|\[\[.*\]\])/)
-      ? `#[[${after}]]`
-      : `#${after}`;
-    replaceText({
-      before: `#${before}`,
-      after: after ? hashAfter : "",
-      prepend,
-    });
+    const textArea = document.activeElement as HTMLTextAreaElement;
+    if (textArea.value.includes(`#[[${before}]]`)) {
+      replaceText({
+        before: `#[[${before}]]`,
+        after: after ? `#[[${after}]]` : "",
+        prepend,
+      });
+    } else if (textArea.value.includes(`[[${before}]]`)) {
+      replaceText({
+        before: `[[${before}]]`,
+        after: after ? `[[${after}]]` : "",
+        prepend,
+      });
+    } else if (textArea.value.includes(`#${before}`)) {
+      const hashAfter = after.match(/(\s|\[\[.*\]\])/)
+        ? `#[[${after}]]`
+        : `#${after}`;
+      replaceText({
+        before: `#${before}`,
+        after: after ? hashAfter : "",
+        prepend,
+      });
+    }
   } else if (addHash) {
     const hashAfter = after.match(/(\s|\[\[.*\]\])/)
       ? `#[[${after}]]`
@@ -841,4 +846,5 @@ export const getAttributeValueFromPage = ({
 export const DAILY_NOTE_PAGE_REGEX = /(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]/;
 export const TODO_REGEX = /{{\[\[TODO\]\]}}/g;
 export const DONE_REGEX = /{{\[\[DONE\]\]}} ?/g;
-export const createTagRegex = (tag: string): RegExp => new RegExp(`#?\\[\\[${tag}\\]\\]|#${tag}`, "g");
+export const createTagRegex = (tag: string): RegExp =>
+  new RegExp(`#?\\[\\[${tag}\\]\\]|#${tag}`, "g");

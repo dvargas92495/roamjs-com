@@ -111,17 +111,16 @@ const SlackContent: React.FunctionComponent<
           return web.chat.postMessage({
             channel: memberId,
             text: contentFormat
-              .replace(/{block}/i, message.replace(`#[[${r}]]`, ""))
+              .replace(/{block}/i, message.replace(`#[[${tag}]]`, ""))
               .replace(/{last edited by}/i, () =>
                 getEditedUserEmailByBlockUid(blockUid)
               ),
             token,
-          });
+          }).then(close);
         } else {
           setError(`Couldn't find Slack user for tag: ${tag}`);
         }
       })
-      .then(close)
       .catch(({ error, message }) => {
         setError(error || message);
         setLoading(false);
