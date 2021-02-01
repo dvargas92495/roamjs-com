@@ -3,11 +3,16 @@ import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import Slack from "../assets/Slack_Mark.svg";
 import { WebClient } from "@slack/web-api";
-import { getTreeByPageName, TreeNode } from "roam-client";
+import {
+  getTreeByPageName,
+  TreeNode,
+  getEditedUserEmailByBlockUid,
+  getTextByBlockUid,
+} from "roam-client";
 
 type ContentProps = {
   tag: string;
-  message: string;
+  blockUid: string;
 };
 
 type SlackMember = { real_name: string; id: string; name: string };
@@ -46,17 +51,19 @@ export const getUserFormat = (tree: TreeNode[]): string =>
   getSettingValueFromTree({
     tree,
     key: "user format",
-    defaultValue: "@{real name}",
+    defaultValue: "@{username}",
   });
 
-export const getAliases = (tree: TreeNode[]): {[key: string]: string} => getSettingMapFromTree({ key: "aliases", tree });
+export const getAliases = (tree: TreeNode[]): { [key: string]: string } =>
+  getSettingMapFromTree({ key: "aliases", tree });
 
 const web = new WebClient();
 delete web["axios"].defaults.headers["User-Agent"];
 
 const SlackContent: React.FunctionComponent<
   ContentProps & { close: () => void }
-> = ({ tag, close, message }) => {
+> = ({ tag, close, blockUid }) => {
+  const message = getTextByBlockUid(blockUid);
   const [loading, setLoading] = useState(false);
   const onClick = useCallback(() => {
     setLoading(true);
@@ -96,16 +103,15 @@ const SlackContent: React.FunctionComponent<
           name: string;
         }[];
         const memberId = members.find(
-          (m) =>
-            m.name.toUpperCase() === aliasedName ||
-            findFunction(m)
+          (m) => m.name.toUpperCase() === aliasedName || findFunction(m)
         )?.id;
         return web.chat.postMessage({
           channel: memberId,
-          text: contentFormat.replace(
-            "{block}",
-            message.replace(`#[[${r}]]`, "")
-          ),
+          text: contentFormat
+            .replace(/{block}/i, message.replace(`#[[${r}]]`, ""))
+            .replace(/{last edited by}/i, () =>
+              getEditedUserEmailByBlockUid(blockUid)
+            ),
           token,
         });
       })

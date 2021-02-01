@@ -11,10 +11,9 @@ import {
 import React, { useCallback, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
-import { getUidsFromId } from "roam-client";
+import { getUidsFromId, getTextByBlockUid } from "roam-client";
 import DemoPopoverWrapper from "./DemoPopoverWrapper";
 import { useArrowKeyDown } from "./hooks";
-import { getTextByBlockUid } from "../entry-helpers";
 
 const MENUITEM_CLASSNAME = "roamjs-wiki-data-result";
 

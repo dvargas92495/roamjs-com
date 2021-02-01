@@ -2,7 +2,6 @@ import { getTreeByPageName, getUids } from "roam-client";
 import {
   createBlockObserver,
   getRefTitlesByBlockUid,
-  getTextByBlockUid,
   runExtension,
 } from "../entry-helpers";
 import { getAliases, getUserFormat, render } from "../components/SlackOverlay";
@@ -14,10 +13,9 @@ runExtension("slack", () => {
     const blockUid = getUids(container).blockUid;
     const refs = getRefTitlesByBlockUid(blockUid);
     if (refs.length) {
-      const text = getTextByBlockUid(blockUid);
       const tree = getTreeByPageName("roam/js/slack");
       const userFormatRegex = new RegExp(
-        getUserFormat(tree).replace("{real name}|{username}", "(.*)"),
+        getUserFormat(tree).replace(/{real name}|{username}/, "(.*)"),
         "i"
       );
       const aliasKeys = new Set(Object.keys(getAliases(tree)));
@@ -39,7 +37,7 @@ runExtension("slack", () => {
           render({
             parent: newSpan,
             tag: r,
-            message: text,
+            blockUid,
           });
         });
       });

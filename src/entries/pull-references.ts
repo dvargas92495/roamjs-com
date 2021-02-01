@@ -2,20 +2,19 @@ import {
   addButtonListener,
   getConfigFromPage,
   getParentUidByBlockUid,
+  getTextByBlockUid,
   getUidsFromId,
   pushBullets,
 } from "roam-client";
 import {
+  createTagRegex,
   getLinkedReferences,
   getPageTitle,
-  getTextByBlockUid,
   runExtension,
 } from "../entry-helpers";
 
 const PULL_REFERENCES_COMMAND = "Pull References";
 const REPLACE = "${ref}";
-const createTagRegex = (tag: string) =>
-  new RegExp(`#?\\[\\[${tag}\\]\\]|#${tag}`, "g");
 
 const pullReferences = async (
   _: {

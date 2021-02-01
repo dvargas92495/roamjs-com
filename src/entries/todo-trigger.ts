@@ -1,9 +1,14 @@
 import format from "date-fns/format";
-import { getConfigFromPage, getUids, toRoamDate } from "roam-client";
+import {
+  getConfigFromPage,
+  getTextByBlockUid,
+  getUids,
+  toRoamDate,
+} from "roam-client";
 import {
   createHTMLObserver,
+  createTagRegex,
   DAILY_NOTE_PAGE_REGEX,
-  getTextByBlockUid,
   isControl,
   runExtension,
 } from "../entry-helpers";
@@ -39,7 +44,7 @@ const onTodo = (blockUid: string, oldValue: string) => {
       if (after) {
         value = value.replace(after, before);
       } else {
-        value = `${value} #[[${after}]]`;
+        value = `${value} #[[${before}]]`;
       }
     });
   }
@@ -75,7 +80,7 @@ const onDone = (blockUid: string, oldValue: string) => {
       if (after) {
         value = value.replace(before, after);
       } else {
-        value = value.replace(before, "");
+        value = value.replace(createTagRegex(before), "");
       }
     });
   }

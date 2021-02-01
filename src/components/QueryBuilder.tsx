@@ -14,9 +14,9 @@ import {
   PopoverPosition,
 } from "@blueprintjs/core";
 import { Select } from "@blueprintjs/select";
-import { getUidsFromId, RoamBlock } from "roam-client";
+import { getUidsFromId, getTextByBlockUid, RoamBlock } from "roam-client";
 import { Icon } from "@blueprintjs/core";
-import { getTextByBlockUid, isControl } from "../entry-helpers";
+import { isControl } from "../entry-helpers";
 import ReactDOM from "react-dom";
 import DemoPopoverWrapper from "./DemoPopoverWrapper";
 import { useArrowKeyDown } from "./hooks";

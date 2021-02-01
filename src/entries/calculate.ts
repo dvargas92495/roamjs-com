@@ -1,5 +1,6 @@
 import {
   getConfigFromPage,
+  getTextByBlockUid,
   getUidsFromButton,
   parseRoamDate,
   toRoamDate,
@@ -8,7 +9,6 @@ import {
   createButtonObserver,
   DAILY_NOTE_PAGE_REGEX,
   getAttributeValueFromPage,
-  getTextByBlockUid,
   getTitlesReferencingPagesInSameBlockTree,
   runExtension,
 } from "../entry-helpers";
