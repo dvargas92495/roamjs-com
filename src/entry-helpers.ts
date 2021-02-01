@@ -248,6 +248,16 @@ export const createHTMLObserver = ({
   });
 };
 
+export const getReferenceBlockUid = (e: HTMLElement): string => {
+  const parent = e.closest(".roam-block") as HTMLDivElement;
+  const { blockUid } = getUids(parent);
+  const refs = getChildRefUidsByBlockUid(blockUid);
+  const index = Array.from(
+    parent.getElementsByClassName("rm-block-ref")
+  ).indexOf(e);
+  return refs[index];
+};
+
 export const createBlockObserver = (
   blockCallback: (b: HTMLDivElement) => void,
   blockRefCallback?: (b: HTMLSpanElement) => void

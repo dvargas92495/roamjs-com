@@ -1,6 +1,7 @@
 import {
   createBlockObserver,
   getChildRefUidsByBlockUid,
+  getReferenceBlockUid,
   getRefTitlesByBlockUid,
   runExtension,
 } from "../entry-helpers";
@@ -69,13 +70,8 @@ runExtension("hex-color-preview", () => {
   createBlockObserver(
     (b) => renderColorPreviews(b, getUids(b).blockUid),
     (s) => {
-      const parent = s.closest(".roam-block") as HTMLDivElement;
-      const { blockUid } = getUids(parent);
-      const refs = getChildRefUidsByBlockUid(blockUid);
-      const index = Array.from(
-        parent.getElementsByClassName("rm-block-ref")
-      ).indexOf(s);
-      renderColorPreviews(s, refs[index]);
+      const blockUid = getReferenceBlockUid(s);
+      renderColorPreviews(s, blockUid);
     }
   );
 });
