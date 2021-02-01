@@ -118,6 +118,7 @@ const SlackContent: React.FunctionComponent<
             token,
           }).then(close);
         } else {
+          setLoading(false)
           setError(`Couldn't find Slack user for tag: ${tag}`);
         }
       })
