@@ -1,7 +1,6 @@
 import {
   addStyle,
   createButtonObserver,
-  getTextByBlockUid,
   runExtension,
 } from "../entry-helpers";
 import "reveal.js/dist/reveal.css";
@@ -21,7 +20,7 @@ import {
   render,
   VALID_THEMES,
 } from "../components/Presentation";
-import { getUidsFromButton, getTreeByBlockUid } from "roam-client";
+import { getUidsFromButton, getTextByBlockUid, getTreeByBlockUid } from "roam-client";
 
 addStyle(`.roamjs-collapsible-caret {
   position: absolute;

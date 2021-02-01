@@ -6,13 +6,13 @@ import {
   getCreateTimeByBlockUid,
   getEditTimeByBlockUid,
   getEditTimeByTitle,
-  getTextByBlockUid,
   getWordCountByBlockUid,
   getWordCountByPageTitle,
   runExtension,
 } from "../entry-helpers";
 import {
   getConfigFromPage,
+  getTextByBlockUid,
   parseRoamDate,
   createIconButton,
   getUids,

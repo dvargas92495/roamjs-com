@@ -1,7 +1,7 @@
 import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import mixpanel, { Dict } from "mixpanel-browser";
-import { RoamBlock, ViewType } from "roam-client";
+import { getTextByBlockUid, RoamBlock } from "roam-client";
 
 declare global {
   interface Window {
@@ -145,24 +145,29 @@ export const replaceTagText = ({
   prepend?: boolean;
 }): void => {
   if (before) {
-    replaceText({
-      before: `#[[${before}]]`,
-      after: after ? `#[[${after}]]` : "",
-      prepend,
-    });
-    replaceText({
-      before: `[[${before}]]`,
-      after: after ? `[[${after}]]` : "",
-      prepend,
-    });
-    const hashAfter = after.match(/(\s|\[\[.*\]\])/)
-      ? `#[[${after}]]`
-      : `#${after}`;
-    replaceText({
-      before: `#${before}`,
-      after: after ? hashAfter : "",
-      prepend,
-    });
+    const textArea = document.activeElement as HTMLTextAreaElement;
+    if (textArea.value.includes(`#[[${before}]]`)) {
+      replaceText({
+        before: `#[[${before}]]`,
+        after: after ? `#[[${after}]]` : "",
+        prepend,
+      });
+    } else if (textArea.value.includes(`[[${before}]]`)) {
+      replaceText({
+        before: `[[${before}]]`,
+        after: after ? `[[${after}]]` : "",
+        prepend,
+      });
+    } else if (textArea.value.includes(`#${before}`)) {
+      const hashAfter = after.match(/(\s|\[\[.*\]\])/)
+        ? `#[[${after}]]`
+        : `#${after}`;
+      replaceText({
+        before: `#${before}`,
+        after: after ? hashAfter : "",
+        prepend,
+      });
+    }
   } else if (addHash) {
     const hashAfter = after.match(/(\s|\[\[.*\]\])/)
       ? `#[[${after}]]`
@@ -558,16 +563,6 @@ export const getWordCountByPageTitle = (title: string): number => {
     .reduce((total, cur) => cur + total, 0);
 };
 
-export const getTextByBlockUid = (uid: string): string => {
-  const results = window.roamAlphaAPI.q(
-    `[:find (pull ?e [:block/string]) :where [?e :block/uid "${uid}"]]`
-  ) as RoamBlock[][];
-  if (results.length) {
-    return results[0][0]?.string;
-  }
-  return "";
-};
-
 export const getRefTitlesByBlockUid = (uid: string): string[] =>
   window.roamAlphaAPI
     .q(
@@ -851,3 +846,5 @@ export const getAttributeValueFromPage = ({
 export const DAILY_NOTE_PAGE_REGEX = /(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]/;
 export const TODO_REGEX = /{{\[\[TODO\]\]}}/g;
 export const DONE_REGEX = /{{\[\[DONE\]\]}} ?/g;
+export const createTagRegex = (tag: string): RegExp =>
+  new RegExp(`#?\\[\\[${tag}\\]\\]|#${tag}`, "g");

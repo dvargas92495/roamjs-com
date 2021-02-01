@@ -1,9 +1,8 @@
-import { getUidsFromId } from "roam-client";
+import { getTextByBlockUid, getUidsFromId } from "roam-client";
 import { renderQueryBuilder } from "../components/QueryBuilder";
 import {
   createButtonObserver,
   createHTMLObserver,
-  getTextByBlockUid,
   runExtension,
 } from "../entry-helpers";
 

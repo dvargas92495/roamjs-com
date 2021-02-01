@@ -1,11 +1,11 @@
 import {
   createOverlayObserver,
-  getTextByBlockUid,
   isApple,
   runExtension,
 } from "../entry-helpers";
 import {
   getConfigFromPage,
+  getTextByBlockUid,
   getTreeByPageName,
   getUids,
   getUidsFromId,

@@ -4,8 +4,7 @@ import ReactDOM from "react-dom";
 import { IGif } from "@giphy/js-types";
 import { GiphyFetch } from "@giphy/js-fetch-api";
 import { Carousel } from "@giphy/react-components";
-import { getUids } from "roam-client";
-import { getTextByBlockUid } from "../entry-helpers";
+import { getUids, getTextByBlockUid } from "roam-client";
 
 const PREFIX = "{{GIPHY:";
 const SUFFIX = "}}";
