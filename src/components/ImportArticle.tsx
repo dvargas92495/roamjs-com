@@ -13,6 +13,7 @@ import {
 import {
   clearBlockByUid,
   getOrderByBlockUid,
+  getTreeByPageName,
   getUidsFromId,
   getParentUidByBlockUid,
 } from "roam-client";
@@ -23,7 +24,6 @@ import iconv from "iconv-lite";
 import charset from "charset";
 import {
   getNthChildUidByBlockUid,
-  getTextTreeByPageName,
 } from "../entry-helpers";
 
 export const ERROR_MESSAGE =
@@ -285,7 +285,7 @@ const ImportArticle = ({
 };
 
 export const getIndentConfig = (): boolean => {
-  const config = getTextTreeByPageName("roam/js/article");
+  const config = getTreeByPageName("roam/js/article");
   return config.some(
     (s) => s.text.trim().toUpperCase() === "INDENT UNDER HEADER"
   );

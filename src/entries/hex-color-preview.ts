@@ -2,10 +2,9 @@ import {
   createBlockObserver,
   getChildRefUidsByBlockUid,
   getRefTitlesByBlockUid,
-  getTextTreeByPageName,
   runExtension,
 } from "../entry-helpers";
-import { getUids } from "roam-client";
+import { getUids, getTreeByPageName } from "roam-client";
 import Color from "color";
 
 runExtension("hex-color-preview", () => {
@@ -20,7 +19,7 @@ runExtension("hex-color-preview", () => {
     position: relative;
 }`;
   document.getElementsByTagName("head")[0].appendChild(css);
-  const config = getTextTreeByPageName("roam/js/hex-color-preview");
+  const config = getTreeByPageName("roam/js/hex-color-preview");
   const includeLengthsNode = config.find(
     (t) => t.text.toUpperCase() === "INCLUDE LENGTHS"
   );

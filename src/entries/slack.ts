@@ -1,9 +1,8 @@
-import { getUids } from "roam-client";
+import { getUids, getTreeByPageName } from "roam-client";
 import {
   createBlockObserver,
   getRefTitlesByBlockUid,
   getTextByBlockUid,
-  getTextTreeByPageName,
   runExtension,
 } from "../entry-helpers";
 import { render } from "../components/SlackOverlay";
@@ -11,7 +10,7 @@ import { render } from "../components/SlackOverlay";
 const ATTRIBUTE = "data-roamjs-slack-overlay";
 
 const getToken = () => {
-  const tree = getTextTreeByPageName("roam/js/slack");
+  const tree = getTreeByPageName("roam/js/slack");
   const tokenNode = tree.find((s) => /token/i.test(s.text.trim()));
   return tokenNode ? tokenNode.children[0].text : "";
 };

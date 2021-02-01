@@ -7,6 +7,75 @@ Deploy a new website based on your Roam Graph!
 
 #### Motivation
 
+Roam is a powerful CMS (content management system), not just for personal knowledge management but for public information as well. There are a couple of problems though with using Roam itself as the public-facing display of that information:
+- Initial load time is brutally slow
+- Most of the data is rendered client side, so it performs poorly on search engines
+- The user interface is foreign to most consumers of the public information, particularly if they've never seen Roam.
+
+This RoamJS Service allows you to continue using a Roam graph with all of its wonderful networking features as the CMS of your own public website. Launching a RoamJS static site will download the content of your Roam graph and manage a website for you based on your unique website configuration.
+
 #### Setup
 
+Make sure you have a [RoamJS account here](/signup). Once you're signed up, be sure to login.
+
+On your Roam graph, you will need to give the `support@roamjs.com` account **read-only access** to your graph. RoamJS promises to not use this data outside of the purposes of deploying the configured content to your public website.
+
+To grant access, first click the `...` menu on the top right of your graph:
+
+![](/images/static-site-share.png)
+
+Then, when this modal appears, add `support@roamjs.com` to the **Readers** text box on the right:
+
+![](/images/static-site-permission.png)
+
+Then, click enter. You will then see the email added to the list below the text box:
+
+![](/images/static-site-granted.png)
+
+Next, set up the configuration page with the name `roam/js/static-site`. By default, the Service will query your **full Roam graph** to generate the public website. To view the filtering capabilities, see the Configuration section below.
+
+Once the page is configured, head to your [user page](https://roamjs.com/user). Click on the `Static Site` tab on the left, then click the `Launch` button:
+
+![](/images/static-site-launch.png)
+
+Fill out the name of the Roam graph that will generate the public site and the domain that the site will be hosted under. 
+
+![](/images/static-site-demo.png)
+
+RoamJS will register the domain and start setting up the resources necessary to host the site. The process takes about half hour.
+
+#### Configuration
+
+Specify global site configuration by adding settings to the `roam/js/static-site` on your graph. Configure a setting by entering the setting name in a block and the setting value as a child of that block. Visit [this page](https://roamresearch.com/#/app/roam-depot-developers/page/zFYoBQz0n) to see an example that has all of the default settings filled in.
+
+These are the settings supported:
+
+- Index - The page name that will serve as the entry point of the site. Could be raw text or a page link.
+- Filter - A set of rules that specifies which pages to build. If a page matches any child rule, it will be built into the site. The following rules are supported:
+  - Starts With - If a page starts with the given text, it will be included in the site. Useful for namespacing, e.g. `Article/Article`.
+  - Tagged With - If a page contains a tag with the given text, it will be included in the site. Includes pages with any form of tags or attributes. Could be raw text or a page link.
+- Template - An HTML Code block that will be used as the template for every generated HTML file.
+  - It supports a few variables that can be interpolated:
+    - `PAGE_NAME` - The name of the page
+    - `PAGE_CONTENT` - The content of the page
+    - `REFERENCES` - An array of pages that reference the current page
+- Reference Template - An HTML Code block that will be used as the template for every page reference. The REFERENCES variable interpolates to all references each rendered as one instance of the template
+  - It supports a few variables that can be interpolated:
+    - `REFERENCE` - The name of the page referencing the current page
+    - `LINK` - The url of the page in your site
+
+#### Per Page Configuration
+
+You could ignore specific blocks in pages that are included. Nest everything that you would like to keep on the page but have filtered out of the static site under a block that says `[[roam/js/static-site/ignore]]`.
+
+You could override any roam page's default title with the `roam/js/static-site/title::` attribute. The value set to the right of this attribute will be used in place of the `PAGE_NAME` variable during template interpolation.
+
+You could add anything to a page's head with the `roam/js/static-site/head::` attribute. The HTML code block defined as a **child** of this block will be injected into this page's head. 
+
+![](/images/static-site-page-config.png)
+
+Note, that while you'll usually want to have these attributes nested within the ignore block, though it's not a strict requirement.
+
 #### Self-Hosted
+
+If you prefer to host the site instead of RoamJS hosting it for you, you could use the GitHub action found [here](https://github.com/dvargas92495/generate-roam-site-action).

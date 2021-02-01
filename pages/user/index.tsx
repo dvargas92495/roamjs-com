@@ -456,7 +456,7 @@ const UserPage = (): JSX.Element => {
         <Card title={"Billing"}>
           <Billing />
         </Card>
-        <Card title={"Website"}>
+        <Card title={"Static Site"}>
           <Website />
         </Card>
         <Card title={"Projects Funded"}>

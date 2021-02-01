@@ -1,15 +1,15 @@
 import {
   createPageObserver,
   getBlockDepthByBlockUid,
-  getTextTreeByBlockUid,
-  getTextTreeByPageName,
   replaceTagText,
   replaceText,
   runExtension,
-  TreeNode,
 } from "../entry-helpers";
 import {
   getParentUidByBlockUid,
+  getTreeByBlockUid,
+  getTreeByPageName,
+  TreeNode,
 } from 'roam-client';
 
 declare global {
@@ -133,7 +133,7 @@ runExtension("tag-cycle", () => {
     t.text.toUpperCase().startsWith("OPT+") ||
     t.text.toUpperCase().startsWith("WIN+");
 
-  getTextTreeByPageName("roam/js/tag-cycle")
+  getTreeByPageName("roam/js/tag-cycle")
     .filter(isValidShortcut)
     .forEach(configureShortcut);
 
@@ -147,7 +147,7 @@ runExtension("tag-cycle", () => {
       return;
     }
     const uid = depth === 2 ? getParentUidByBlockUid(blockUid) : blockUid;
-    const shortcut = getTextTreeByBlockUid(uid);
+    const shortcut = getTreeByBlockUid(uid);
     if (isValidShortcut(shortcut)) {
       configureShortcut({ ...shortcut, uid });
     }

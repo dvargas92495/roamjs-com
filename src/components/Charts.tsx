@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import { AxisType, Chart, SeriesType } from "react-charts";
-import { getTextTreeByBlockUid } from "../entry-helpers";
 import {
   Card,
   Elevation,
@@ -11,7 +10,7 @@ import {
   Label,
   TextArea,
 } from "@blueprintjs/core";
-import { getUids } from "roam-client";
+import { getUids, getTreeByBlockUid } from "roam-client";
 import MenuItemSelect from "./MenuItemSelect";
 import parse from "date-fns/parse";
 import EditContainer from "./EditContainer";
@@ -78,7 +77,7 @@ const getProps = (blockId: string) => {
   const { blockUid } = getUids(
     document.getElementById(blockId).closest(".roam-block") as HTMLDivElement
   );
-  const tree = getTextTreeByBlockUid(blockUid);
+  const tree = getTreeByBlockUid(blockUid);
   const dataNodes = tree.children.filter((t) => t.text.indexOf("::") <= -1);
   const metaDataNodes = tree.children.filter((t) => t.text.indexOf("::") > -1);
   const bottomTypeNode = metaDataNodes.find((t) =>
