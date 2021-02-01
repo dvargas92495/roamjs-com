@@ -9,9 +9,21 @@ import {
   createHTMLObserver,
   createTagRegex,
   DAILY_NOTE_PAGE_REGEX,
+  getReferenceBlockUid,
   isControl,
   runExtension,
 } from "../entry-helpers";
+
+const getBlockUidFromTarget = (target: HTMLElement) => {
+  const ref = target.closest('.rm-block-ref') as HTMLSpanElement;
+  if (ref) {
+    return getReferenceBlockUid(ref);
+  }
+  const { blockUid } = getUids(
+    target.closest(".roam-block") as HTMLDivElement
+  );
+  return blockUid; 
+}
 
 const onTodo = (blockUid: string, oldValue: string) => {
   const config = getConfigFromPage("roam/js/todo-trigger");
@@ -96,14 +108,11 @@ runExtension("todo-trigger", () => {
     const target = e.target as HTMLElement;
     if (
       target.tagName === "INPUT" &&
-      target.parentElement.className === "check-container" &&
-      !target.closest(".rm-block-ref")
+      target.parentElement.className === "check-container"
     ) {
       const inputTarget = target as HTMLInputElement;
       if (inputTarget.type === "checkbox") {
-        const { blockUid } = getUids(
-          inputTarget.closest(".roam-block") as HTMLDivElement
-        );
+        const blockUid = getBlockUidFromTarget(inputTarget);
         setTimeout(() => {
           const oldValue = getTextByBlockUid(blockUid);
           if (inputTarget.checked) {
