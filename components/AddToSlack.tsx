@@ -24,19 +24,20 @@ const AddToSlack: React.FunctionComponent = () => {
         <code>token</code>, like below
       </Body>
       <ul>
-          <li>
-              token
-              <ul>
-                  <li>{token}</li>
-              </ul>
-          </li>
+        <li>
+          token
+          <ul>
+            <li>{token}</li>
+          </ul>
+        </li>
       </ul>
     </div>
   ) : (
     <div>
       <Body>
-        Add the RoamJS app to your workspace by clicking the button below. When
-        Slack asks you which channel to post to as an app, select Slackbot.
+        Add the RoamJS app to your workspace by clicking the button below. After
+        confirming, you will be redirected to this page where you will find your
+        Slack workspace's token.
       </Body>
       <a
         href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.NEXT_PUBLIC_SLACK_CLIENT_ID}&scope=channels:read,incoming-webhook,im:write,chat:write,users:read&user_scope=`}
