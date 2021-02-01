@@ -1,4 +1,4 @@
-import { Button, Icon, Popover, Spinner } from "@blueprintjs/core";
+import { Button, Icon, Popover, Spinner, Text } from "@blueprintjs/core";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import Slack from "../assets/Slack_Mark.svg";
@@ -65,8 +65,10 @@ const SlackContent: React.FunctionComponent<
 > = ({ tag, close, blockUid }) => {
   const message = getTextByBlockUid(blockUid);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const onClick = useCallback(() => {
     setLoading(true);
+    setError("");
     const tree = getTreeByPageName("roam/js/slack");
     const token = getSettingValueFromTree({ tree, key: "token" });
     const userFormat = getUserFormat(tree);
@@ -105,23 +107,35 @@ const SlackContent: React.FunctionComponent<
         const memberId = members.find(
           (m) => m.name.toUpperCase() === aliasedName || findFunction(m)
         )?.id;
-        return web.chat.postMessage({
-          channel: memberId,
-          text: contentFormat
-            .replace(/{block}/i, message.replace(`#[[${r}]]`, ""))
-            .replace(/{last edited by}/i, () =>
-              getEditedUserEmailByBlockUid(blockUid)
-            ),
-          token,
-        });
+        if (memberId) {
+          return web.chat.postMessage({
+            channel: memberId,
+            text: contentFormat
+              .replace(/{block}/i, message.replace(`#[[${r}]]`, ""))
+              .replace(/{last edited by}/i, () =>
+                getEditedUserEmailByBlockUid(blockUid)
+              ),
+            token,
+          });
+        } else {
+          setError(`Couldn't find Slack user for tag: ${tag}`);
+        }
       })
       .then(close)
-      .catch(() => setLoading(false));
-  }, [setLoading, close, tag]);
+      .catch(({ error, message }) => {
+        setError(error || message);
+        setLoading(false);
+      });
+  }, [setLoading, close, tag, setError]);
   return (
     <div style={{ padding: 16 }}>
       <Button text={`Send to ${tag}`} onClick={onClick} />
       {loading && <Spinner />}
+      {error && (
+        <div style={{ color: "red" }}>
+          <Text>{error}</Text>
+        </div>
+      )}
     </div>
   );
 };
