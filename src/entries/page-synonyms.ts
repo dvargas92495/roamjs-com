@@ -1,12 +1,12 @@
 import {
   createOverlayObserver,
   getTextByBlockUid,
-  getTextTreeByPageName,
   isApple,
   runExtension,
 } from "../entry-helpers";
 import {
   getConfigFromPage,
+  getTreeByPageName,
   getUids,
   getUidsFromId,
   RoamBlock,
@@ -35,7 +35,7 @@ const createMenuOption = (menuOnClick: () => void) => {
 };
 
 const getReplacer = () => {
-  const tree = getTextTreeByPageName("roam/js/page-synonyms");
+  const tree = getTreeByPageName("roam/js/page-synonyms");
   const useTags = tree.some((t) => t.text.toUpperCase() === "USE TAGS");
   const pagesWithAliases = window.roamAlphaAPI
     .q(

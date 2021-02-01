@@ -1,14 +1,16 @@
-import { toRoamDateUid } from "roam-client";
+import {
+  toRoamDateUid,
+  getTreeByBlockUid,
+  getTreeByPageName,
+  TreeNode,
+} from "roam-client";
 import { NODE_CLASSNAME, render } from "../components/MarkmapPanel";
 import {
   addStyle,
   createButtonObserver,
   createHTMLObserver,
-  getTextTreeByBlockUid,
-  getTextTreeByPageName,
   resolveRefs,
   runExtension,
-  TreeNode,
 } from "../entry-helpers";
 
 addStyle(`span.roamjs-mindmap-node {
@@ -35,7 +37,7 @@ const expandEmbeds = (c: TreeNode) => {
   c.text = c.text.replace(
     /({{(?:\[\[)?embed(?:\]\]): \(\((..........?)\)\)}})/,
     (_, __, blockuid) => {
-      const newNodes = getTextTreeByBlockUid(blockuid);
+      const newNodes = getTreeByBlockUid(blockuid);
       c.children.push(...newNodes.children);
       return newNodes.text;
     }
@@ -50,9 +52,9 @@ const hideTagChars = (c: TreeNode) => {
 const getMarkdown = (): string => {
   const match = window.location.href.match("/page/(.*)$");
   const uid = match ? match[1] : toRoamDateUid(new Date());
-  const nodes = getTextTreeByBlockUid(uid).children;
+  const nodes = getTreeByBlockUid(uid).children;
   nodes.forEach((c) => expandEmbeds(c));
-  const hideTags = getTextTreeByPageName("roam/js/mindmap").some((t) =>
+  const hideTags = getTreeByPageName("roam/js/mindmap").some((t) =>
     /hide tags/i.test(t.text)
   );
   if (hideTags) {

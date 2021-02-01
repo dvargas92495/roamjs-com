@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
-import { getUids } from "roam-client";
+import { getUids, getTreeByBlockUid } from "roam-client";
 import {
   addStyle,
   getPageUidByPageTitle,
-  getTextTreeByBlockUid,
   track,
 } from "../entry-helpers";
 import { MapContainer, Marker, TileLayer, Popup } from "react-leaflet";
@@ -113,7 +112,7 @@ export const render = (b: HTMLButtonElement): void => {
   const { blockUid } = getUids(
     document.getElementById(blockId) as HTMLDivElement
   );
-  const tree = getTextTreeByBlockUid(blockUid);
+  const tree = getTreeByBlockUid(blockUid);
   const markerNode = tree.children.find(
     (c) => c.text.trim().toUpperCase() === "MARKERS"
   );
