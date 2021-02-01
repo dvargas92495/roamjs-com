@@ -24,4 +24,9 @@ The Slack extension supports the following configuration options, to be added to
 
 - Token - (Required) The token generated from the RoamJS Slack App. To be added as a child of a Token block.
 - User Format - (Optional) The format that Roam tags must be in to render the slack icon. By default, it uses `@{username}`.
-    - 
+    - Use the placeholder `{username}` to match a user based on their slack username. For example, `@{username}` matches the `#[[@dvargas92495]]` tag.
+    - Use the placeholder `{real name}` to match a user based on their slack full name. For example, `{real name} (Slack)` matches the `#[[David Vargas (Slack)]]` tag.
+- Aliases - (Optional) A specific mapping of Roam tags to Slack usernames to detect for the slack icon. Each alias should be its own block, with the slack username it maps to as a child of that block. For example, the following maps the `#[[This is Vargas!]]` tag to the `dvargas92495` slack username:
+    - This is Vargas!
+        - dvargas92495
+- Content Format - 

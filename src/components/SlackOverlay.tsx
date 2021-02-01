@@ -71,7 +71,7 @@ const SlackContent: React.FunctionComponent<
     const token = getSettingValueFromTree({ tree, key: "token" });
     const userFormat = getUserFormat(tree);
     const aliases = getAliases(tree);
-    const aliasedName = aliases[tag].toUpperCase();
+    const aliasedName = aliases[tag]?.toUpperCase?.();
     const realNameRegex = new RegExp(
       userFormat.replace("{real name}", "(.*)"),
       "i"

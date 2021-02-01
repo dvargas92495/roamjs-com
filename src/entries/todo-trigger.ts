@@ -44,7 +44,7 @@ const onTodo = (blockUid: string, oldValue: string) => {
       if (after) {
         value = value.replace(after, before);
       } else {
-        value = `${value} #[[${before}]]`;
+        value = `${value}#[[${before}]]`;
       }
     });
   }
