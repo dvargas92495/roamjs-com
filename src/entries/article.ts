@@ -1,5 +1,5 @@
 import { getActiveUids, getUidsFromId, updateActiveBlock } from "roam-client";
-import urlRegex from "url-regex";
+import urlRegex from "url-regex-safe";
 import {
   ERROR_MESSAGE,
   getIndentConfig,

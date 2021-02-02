@@ -85,6 +85,12 @@ const Notes = ({ note }: { note?: Slide }) => (
 
 type ImageFromTextProps = {
   text: string;
+  imageResizes?: {
+    [link: string]: {
+      height: number;
+      width: number;
+    };
+  };
 };
 
 const IMG_REGEX = /!\[(.*)\]\((.*)\)/;
@@ -93,23 +99,29 @@ const ImageFromText: React.FunctionComponent<
   ImageFromTextProps & {
     Alt: React.FunctionComponent<ImageFromTextProps>;
   }
-> = ({ text, Alt }) => {
+> = ({ text, Alt, imageResizes }) => {
   const imageMatch = text.match(IMG_REGEX);
   const [style, setStyle] = useState({});
   const imageRef = useRef(null);
+  const imageResize = imageMatch && imageResizes[imageMatch[2]];
   const imageOnLoad = useCallback(() => {
     const imageAspectRatio = imageRef.current.width / imageRef.current.height;
     const containerAspectRatio =
       imageRef.current.parentElement.offsetWidth /
       imageRef.current.parentElement.offsetHeight;
-    if (!isNaN(imageAspectRatio) && !isNaN(containerAspectRatio)) {
+    if (imageResize) {
+      setStyle({
+        width: isNaN(imageResize.width) ? "auto" : imageResize.width,
+        height: isNaN(imageResize.height) ? "auto" : imageResize.height,
+      });
+    } else if (!isNaN(imageAspectRatio) && !isNaN(containerAspectRatio)) {
       if (imageAspectRatio > containerAspectRatio) {
         setStyle({ width: "100%", height: "auto" });
       } else {
         setStyle({ height: "100%", width: "auto" });
       }
     }
-  }, [setStyle, imageRef]);
+  }, [setStyle, imageRef, imageResize]);
   useEffect(() => {
     if (imageRef.current) {
       imageRef.current.onload = imageOnLoad;
@@ -303,7 +315,11 @@ const ContentSlide = ({
               height: "100%",
             }}
           >
-            <ImageFromText text={children[0].text} Alt={() => <div />} />
+            <ImageFromText
+              text={children[0].text}
+              Alt={() => <div />}
+              imageResizes={children[0].props.imageResize}
+            />
           </div>
         )}
       </div>
@@ -508,6 +524,14 @@ type Slide = {
   heading?: number;
   open: boolean;
   viewType: ViewType;
+  props: {
+    imageResize: {
+      [link: string]: {
+        height: number;
+        width: number;
+      };
+    };
+  };
 };
 
 type Slides = Slide[];
