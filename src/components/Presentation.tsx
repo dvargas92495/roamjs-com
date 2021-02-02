@@ -159,6 +159,8 @@ const setDocumentLis = ({
   });
 };
 
+const LAYOUTS = ["Image Left", "Image Right"];
+
 const ContentSlide = ({
   text,
   children,
@@ -294,7 +296,12 @@ const ContentSlide = ({
         />
         {isImageLayout && (
           <div
-            style={{ width: "50%", textAlign: "center", alignSelf: "center" }}
+            style={{
+              width: "50%",
+              textAlign: "center",
+              alignSelf: "center",
+              height: "100%",
+            }}
           >
             <ImageFromText text={children[0].text} Alt={() => <div />} />
           </div>
@@ -343,10 +350,13 @@ const PresentationContent: React.FunctionComponent<{
     let layout = "default";
     let collapsible = globalCollapsible || false;
     const text = s.text
-      .replace(new RegExp("{layout:(.*)}", "is"), (_, capture) => {
-        layout = capture;
-        return "";
-      })
+      .replace(
+        new RegExp(`{layout:(${LAYOUTS.join("|")})}`, "is"),
+        (_, capture) => {
+          layout = capture;
+          return "";
+        }
+      )
       .replace(COLLAPSIBLE_REGEX, () => {
         collapsible = true;
         return "";
