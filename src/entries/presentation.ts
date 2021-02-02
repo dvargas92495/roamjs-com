@@ -46,7 +46,7 @@ runExtension("presentation", async () => {
         return;
       }
       const text = getTextByBlockUid(blockUid);
-      const buttonText = text.match("{{(presentation|slides):(.*)}}")?.[2];
+      const buttonText = text.match("{{(presentation|slides|#?[[presentation]]|#?[[slides]]|#presentation|#slides):(.*)}}")?.[2];
       const options = buttonText
         ? {
             theme: buttonText.match(`{theme:(${VALID_THEMES.join("|")})}`)?.[1],
