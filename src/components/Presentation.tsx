@@ -85,10 +85,10 @@ const Notes = ({ note }: { note?: Slide }) => (
 
 type ImageFromTextProps = {
   text: string;
-  imageResize?: {
+  imageResizes?: {[link: string]: {
     height: number;
     width: number;
-  };
+  }};
 };
 
 const IMG_REGEX = /!\[(.*)\]\((.*)\)/;
@@ -97,10 +97,11 @@ const ImageFromText: React.FunctionComponent<
   ImageFromTextProps & {
     Alt: React.FunctionComponent<ImageFromTextProps>;
   }
-> = ({ text, Alt, imageResize }) => {
+> = ({ text, Alt, imageResizes }) => {
   const imageMatch = text.match(IMG_REGEX);
   const [style, setStyle] = useState({});
   const imageRef = useRef(null);
+  const imageResize = imageMatch && imageResizes[imageMatch[1]];
   const imageOnLoad = useCallback(() => {
     const imageAspectRatio = imageRef.current.width / imageRef.current.height;
     const containerAspectRatio =
@@ -118,7 +119,7 @@ const ImageFromText: React.FunctionComponent<
         setStyle({ height: "100%", width: "auto" });
       }
     }
-  }, [setStyle, imageRef]);
+  }, [setStyle, imageRef, imageResize]);
   useEffect(() => {
     if (imageRef.current) {
       imageRef.current.onload = imageOnLoad;
@@ -308,7 +309,7 @@ const ContentSlide = ({
             <ImageFromText
               text={children[0].text}
               Alt={() => <div />}
-              imageResize={children[0].props.imageResize[children[0].text]}
+              imageResizes={children[0].props.imageResize}
             />
           </div>
         )}
