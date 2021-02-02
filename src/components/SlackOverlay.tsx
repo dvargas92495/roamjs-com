@@ -17,7 +17,12 @@ type ContentProps = {
   blockUid: string;
 };
 
-type SlackMember = { real_name: string; id: string; name: string };
+type SlackMember = {
+  real_name: string;
+  id: string;
+  name: string;
+  profile: { email: string };
+};
 
 const getSettingValueFromTree = ({
   tree,
@@ -103,11 +108,7 @@ const SlackContent: React.FunctionComponent<
     web.users
       .list({ token })
       .then((r) => {
-        const members = r.members as {
-          real_name: string;
-          id: string;
-          name: string;
-        }[];
+        const members = r.members as SlackMember[];
         const memberId = members.find(
           (m) => m.name.toUpperCase() === aliasedName || findFunction(m)
         )?.id;
@@ -116,10 +117,14 @@ const SlackContent: React.FunctionComponent<
             .postMessage({
               channel: memberId,
               text: contentFormat
-                .replace(/{block}/i, message.replace(`#[[${tag}]]`, ""))
-                .replace(/{last edited by}/i, () =>
-                  getEditedUserEmailByBlockUid(blockUid)
-                )
+                .replace(/{block}/i, message)
+                .replace(/{last edited by}/i, () => {
+                  const email = getEditedUserEmailByBlockUid(blockUid);
+                  const memberByEmail = members.find(
+                    (m) => m.profile.email === email
+                  );
+                  return memberByEmail ? `@${memberByEmail.name}` : email;
+                })
                 .replace(/{page}/i, () => getPageTitleByBlockUid(blockUid))
                 .replace(/{parent}/i, () => getParentTextByBlockUid(blockUid))
                 .replace(
