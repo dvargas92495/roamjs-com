@@ -612,17 +612,6 @@ export const getPageTitle = (e: Element): ChildNode => {
   );
 };
 
-export const getPageTitleByBlockUid = (blockUid: string): string => {
-  const result = window.roamAlphaAPI.q(
-    `[:find (pull ?c [:node/title, :block/uid]) :where [?c :block/children ?e] [?e :block/uid "${blockUid}"]]`
-  );
-  if (!result.length) {
-    return "";
-  }
-  const block = result[0][0] as RoamBlock;
-  return block.title ? block.title : getPageTitleByBlockUid(block.uid);
-};
-
 export const getPageUidByPageTitle = (title: string): string => {
   const result = window.roamAlphaAPI.q(
     `[:find (pull ?e [:block/uid]) :where [?e :node/title "${title}"]]`

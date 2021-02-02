@@ -29,6 +29,9 @@ The Slack extension supports the following configuration options, to be added to
 - Aliases - (Optional) A specific mapping of Roam tags to Slack usernames to detect for the slack icon. Each alias should be its own block, with the slack username it maps to as a child of that block. For example, the following maps the `#[[This is Vargas!]]` tag to the `dvargas92495` slack username:
     - This is Vargas!
         - dvargas92495
-- Content Format - (Optional) The format that Roam will use to send the message to Slack. By default, it uses `{block}`
+- Content Format - (Optional) The format that Roam will use to send the message to Slack. By default, it uses `{block}`.
     - Use the placeholder `{block}` to replace with the actual text of the block, without the tag that the notification will send to.
     - Use the placeholder `{last edited by}` to replace with the email of the user who last edited the sending block.
+    - Use the placeholder `{page}` to replace with the name of the page the block lives in.
+    - Use the placeholder `{parent}` to replace with the text of the parent of the current block.
+    - Use the placeholder `{link}` to replace with the link to the zoomed in block.
