@@ -85,6 +85,10 @@ const Notes = ({ note }: { note?: Slide }) => (
 
 type ImageFromTextProps = {
   text: string;
+  imageResize?: {
+    height: number;
+    width: number;
+  };
 };
 
 const IMG_REGEX = /!\[(.*)\]\((.*)\)/;
@@ -93,7 +97,7 @@ const ImageFromText: React.FunctionComponent<
   ImageFromTextProps & {
     Alt: React.FunctionComponent<ImageFromTextProps>;
   }
-> = ({ text, Alt }) => {
+> = ({ text, Alt, imageResize }) => {
   const imageMatch = text.match(IMG_REGEX);
   const [style, setStyle] = useState({});
   const imageRef = useRef(null);
@@ -102,7 +106,12 @@ const ImageFromText: React.FunctionComponent<
     const containerAspectRatio =
       imageRef.current.parentElement.offsetWidth /
       imageRef.current.parentElement.offsetHeight;
-    if (!isNaN(imageAspectRatio) && !isNaN(containerAspectRatio)) {
+    if (imageResize) {
+      setStyle({
+        width: isNaN(imageResize.width) ? "auto" : imageResize.width,
+        height: isNaN(imageResize.height) ? "auto" : imageResize.height,
+      });
+    } else if (!isNaN(imageAspectRatio) && !isNaN(containerAspectRatio)) {
       if (imageAspectRatio > containerAspectRatio) {
         setStyle({ width: "100%", height: "auto" });
       } else {
@@ -296,7 +305,11 @@ const ContentSlide = ({
           <div
             style={{ width: "50%", textAlign: "center", alignSelf: "center" }}
           >
-            <ImageFromText text={children[0].text} Alt={() => <div />} />
+            <ImageFromText
+              text={children[0].text}
+              Alt={() => <div />}
+              imageResize={children[0].props.imageResize[children[0].text]}
+            />
           </div>
         )}
       </div>
@@ -498,6 +511,14 @@ type Slide = {
   heading?: number;
   open: boolean;
   viewType: ViewType;
+  props: {
+    imageResize: {
+      [link: string]: {
+        height: number;
+        width: number;
+      };
+    };
+  };
 };
 
 type Slides = Slide[];
