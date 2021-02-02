@@ -1,8 +1,7 @@
-import { getUids } from "roam-client";
+import { getUids, getPageTitleByBlockUid } from "roam-client";
 import {
   createHTMLObserver,
   getPageTitle,
-  getPageTitleByBlockUid,
   runExtension,
 } from "../entry-helpers";
 

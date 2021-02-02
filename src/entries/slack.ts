@@ -19,8 +19,8 @@ runExtension("slack", () => {
         "i"
       );
       const aliasKeys = new Set(Object.keys(getAliases(tree)));
-      const filteredRefs = refs.filter(
-        (r) => aliasKeys.has(r) || userFormatRegex.test(r)
+      const filteredRefs = refs.filter((r) =>
+        aliasKeys.size ? aliasKeys.has(r) : userFormatRegex.test(r)
       );
       const renderedRefs = Array.from(
         container.getElementsByClassName("rm-page-ref--tag")
@@ -30,6 +30,7 @@ runExtension("slack", () => {
           (s) => s.getAttribute("data-tag") === r && !s.getAttribute(ATTRIBUTE)
         );
         renderedRefSpans.forEach((renderedRef) => {
+          renderedRef.setAttribute(ATTRIBUTE, "true");
           const newSpan = document.createElement("span");
           newSpan.style.verticalAlign = "middle";
           newSpan.onmousedown = (e: MouseEvent) => e.stopPropagation();

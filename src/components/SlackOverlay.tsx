@@ -7,6 +7,8 @@ import {
   getTreeByPageName,
   TreeNode,
   getEditedUserEmailByBlockUid,
+  getPageTitleByBlockUid,
+  getParentTextByBlockUid,
   getTextByBlockUid,
 } from "roam-client";
 
@@ -15,7 +17,12 @@ type ContentProps = {
   blockUid: string;
 };
 
-type SlackMember = { real_name: string; id: string; name: string };
+type SlackMember = {
+  real_name: string;
+  id: string;
+  name: string;
+  profile: { email: string };
+};
 
 const getSettingValueFromTree = ({
   tree,
@@ -27,7 +34,7 @@ const getSettingValueFromTree = ({
   defaultValue?: string;
 }) => {
   const node = tree.find((s) => new RegExp(key, "i").test(s.text.trim()));
-  const value = node ? node.children[0].text : defaultValue;
+  const value = node ? node.children[0].text.trim() : defaultValue;
   return value;
 };
 
@@ -42,7 +49,9 @@ const getSettingMapFromTree = ({
 }) => {
   const node = tree.find((s) => new RegExp(key, "i").test(s.text.trim()));
   const value = node
-    ? Object.fromEntries(node.children.map((s) => [s.text, s.children[0].text]))
+    ? Object.fromEntries(
+        node.children.map((s) => [s.text.trim(), s.children[0].text.trim()])
+      )
     : defaultValue;
   return value;
 };
@@ -99,26 +108,37 @@ const SlackContent: React.FunctionComponent<
     web.users
       .list({ token })
       .then((r) => {
-        const members = r.members as {
-          real_name: string;
-          id: string;
-          name: string;
-        }[];
+        const members = r.members as SlackMember[];
         const memberId = members.find(
           (m) => m.name.toUpperCase() === aliasedName || findFunction(m)
         )?.id;
         if (memberId) {
-          return web.chat.postMessage({
-            channel: memberId,
-            text: contentFormat
-              .replace(/{block}/i, message.replace(`#[[${tag}]]`, ""))
-              .replace(/{last edited by}/i, () =>
-                getEditedUserEmailByBlockUid(blockUid)
-              ),
-            token,
-          }).then(close);
+          return web.chat
+            .postMessage({
+              channel: memberId,
+              text: contentFormat
+                .replace(/{block}/i, message)
+                .replace(/{last edited by}/i, () => {
+                  const email = getEditedUserEmailByBlockUid(blockUid);
+                  const memberByEmail = members.find(
+                    (m) => m.profile.email === email
+                  );
+                  return memberByEmail ? `@${memberByEmail.name}` : email;
+                })
+                .replace(/{page}/i, () => getPageTitleByBlockUid(blockUid))
+                .replace(/{parent}/i, () => getParentTextByBlockUid(blockUid))
+                .replace(
+                  /{link}/i,
+                  `${window.location.href.replace(
+                    /\/page\/.*$/,
+                    ""
+                  )}/page/${blockUid}`
+                ),
+              token,
+            })
+            .then(close);
         } else {
-          setLoading(false)
+          setLoading(false);
           setError(`Couldn't find Slack user for tag: ${tag}`);
         }
       })
