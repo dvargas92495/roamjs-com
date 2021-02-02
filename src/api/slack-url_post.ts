@@ -24,7 +24,7 @@ export const handler = async (
       r.data.ok
         ? {
             statusCode: 200,
-            body: JSON.stringify({ webhook: r.data.incoming_webhook.url, token: r.data.access_token }),
+            body: JSON.stringify({ token: r.data.access_token }),
             headers,
           }
         : {
