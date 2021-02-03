@@ -137,7 +137,7 @@ const SlackContent: React.FunctionComponent<
                           .map((tag) =>
                             getParentTextByBlockUidAndTag({ blockUid, tag })
                           )
-                          .find((s) => !!s)
+                          .find((s) => !!s) || getParentTextByBlockUid(blockUid)
                       : getParentTextByBlockUid(blockUid)
                 )
                 .replace(
