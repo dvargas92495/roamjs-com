@@ -210,13 +210,15 @@ const Website = () => {
   const timeoutRef = useRef(0);
   const getWebsite = useCallback(
     () =>
-      authenticatedAxiosGet("website-status").then((r) => {
-        setWebsite(r.data);
+      authenticatedAxiosGet(
+        website ? "website-status" : `website-status?graph=${website.graph}`
+      ).then((r) => {
+        setWebsite({ ...website, ...r.data});
         if (r.data && !isWebsiteReady(r.data)) {
           timeoutRef.current = window.setTimeout(getWebsite, 5000);
         }
       }),
-    [setWebsite, timeoutRef]
+    [setWebsite, timeoutRef, website]
   );
   const launchWebsite = useCallback(
     (body) =>

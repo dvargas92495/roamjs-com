@@ -8,14 +8,13 @@ const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const {
-    data: { website },
-  } = await axios.get(
-    `${process.env.FLOSS_API_URL}/auth-user-metadata?key=website`,
-    {
-      headers: { Authorization: event.headers.Authorization },
-    }
-  );
+  const website = Object.keys(event.queryStringParameters).length
+    ? event.queryStringParameters
+    : await axios
+        .get(`${process.env.FLOSS_API_URL}/auth-user-metadata?key=website`, {
+          headers: { Authorization: event.headers.Authorization },
+        })
+        .then((r) => r.data.website);
 
   if (!website) {
     return {
