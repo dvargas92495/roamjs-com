@@ -200,6 +200,7 @@ const domainValidate = (domain: string) => {
 };
 
 const Website = () => {
+  const { user } = useAuth0();
   const authenticatedAxiosGet = useAuthenticatedAxiosRoamJSGet();
   const flossGet = useAuthenticatedAxiosFlossGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosRoamJSPost();
@@ -218,8 +219,13 @@ const Website = () => {
     [setWebsite, timeoutRef]
   );
   const launchWebsite = useCallback(
-    (body) => authenticatedAxiosPost("launch-website", { ...body, priceId }),
-    [authenticatedAxiosPost, priceId]
+    (body) =>
+      authenticatedAxiosPost("launch-website", {
+        ...body,
+        priceId,
+        email: user?.email,
+      }),
+    [authenticatedAxiosPost, priceId, user]
   );
   const manualDeploy = useCallback(
     () => authenticatedAxiosPost("deploy", {}).then(getWebsite),

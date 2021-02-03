@@ -10,7 +10,7 @@ const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const { graph, domain, priceId } = JSON.parse(event.body);
+  const { graph, domain, priceId, email } = JSON.parse(event.body);
   if (!graph) {
     return {
       statusCode: 400,
@@ -99,6 +99,7 @@ export const handler = async (
       Payload: JSON.stringify({
         roamGraph: graph,
         domain,
+        email,
       }),
     })
     .promise();
