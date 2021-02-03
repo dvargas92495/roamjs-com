@@ -407,9 +407,11 @@ const PresentationContent: React.FunctionComponent<{
     const deck = new Reveal({
       embedded: true,
       slideNumber: "c/t",
-      width: window.innerWidth * 0.8,
-      height: window.innerHeight * 0.8,
+      width: window.innerWidth * 0.9,
+      height: window.innerHeight * 0.9,
       showNotes,
+      minScale: 1,
+      maxScale: 1,
     });
     deck.initialize();
     revealRef.current = deck;

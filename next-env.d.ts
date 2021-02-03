@@ -40,6 +40,8 @@ declare module "reveal.js" {
     width?: number;
     height?: number;
     showNotes?: boolean;
+    minScale?: number;
+    maxScale?: number;
   };
   declare class Reveal {
     constructor(options: RevealOptions);
