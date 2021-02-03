@@ -1,7 +1,6 @@
 import { getTreeByPageName, getUids } from "roam-client";
 import {
-  createBlockObserver,
-  getRefTitlesByBlockUid,
+  createHTMLObserver,
   runExtension,
 } from "../entry-helpers";
 import { getAliases, getUserFormat, render } from "../components/SlackOverlay";
@@ -9,41 +8,34 @@ import { getAliases, getUserFormat, render } from "../components/SlackOverlay";
 const ATTRIBUTE = "data-roamjs-slack-overlay";
 
 runExtension("slack", () => {
-  const renderSlackOverlay = (container: HTMLDivElement) => {
-    const blockUid = getUids(container).blockUid;
-    const refs = getRefTitlesByBlockUid(blockUid);
-    if (refs.length) {
-      const tree = getTreeByPageName("roam/js/slack");
-      const userFormatRegex = new RegExp(
-        getUserFormat(tree).replace(/{real name}|{username}/, "(.*)"),
-        "i"
-      );
-      const aliasKeys = new Set(Object.keys(getAliases(tree)));
-      const filteredRefs = refs.filter((r) =>
-        aliasKeys.size ? aliasKeys.has(r) : userFormatRegex.test(r)
-      );
-      const renderedRefs = Array.from(
-        container.getElementsByClassName("rm-page-ref--tag")
-      );
-      filteredRefs.forEach((r) => {
-        const renderedRefSpans = renderedRefs.filter(
-          (s) => s.getAttribute("data-tag") === r && !s.getAttribute(ATTRIBUTE)
+  createHTMLObserver({
+    tag: "SPAN",
+    className: "rm-page-ref--tag",
+    callback: (s: HTMLSpanElement) => {
+      if (!s.getAttribute(ATTRIBUTE)) {
+        const tree = getTreeByPageName("roam/js/slack");
+        const userFormatRegex = new RegExp(
+          getUserFormat(tree).replace(/{real name}|{username}/, "(.*)"),
+          "i"
         );
-        renderedRefSpans.forEach((renderedRef) => {
-          renderedRef.setAttribute(ATTRIBUTE, "true");
+        const aliasKeys = new Set(Object.keys(getAliases(tree)));
+        const r = s.getAttribute('data-tag');
+        if (aliasKeys.size ? aliasKeys.has(r) : userFormatRegex.test(r)) {
+          s.setAttribute(ATTRIBUTE, "true");
+          const { blockUid } = getUids(
+            s.closest(".roam-block") as HTMLDivElement
+          );
           const newSpan = document.createElement("span");
           newSpan.style.verticalAlign = "middle";
           newSpan.onmousedown = (e: MouseEvent) => e.stopPropagation();
-          renderedRef.appendChild(newSpan);
+          s.appendChild(newSpan);
           render({
             parent: newSpan,
             tag: r,
             blockUid,
           });
-        });
-      });
-    }
-  };
-
-  createBlockObserver((b) => renderSlackOverlay(b));
+        }
+      }
+    },
+  });
 });
