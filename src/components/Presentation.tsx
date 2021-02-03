@@ -27,6 +27,9 @@ export const VALID_THEMES = [
   "moon",
 ];
 
+const IMG_MAX_WIDTH = 580;
+const IMG_MAX_HEIGHT = 720;
+
 const renderViewType = (viewType: ViewType) => {
   switch (viewType) {
     case "numbered":
@@ -111,8 +114,12 @@ const ImageFromText: React.FunctionComponent<
       imageRef.current.parentElement.offsetHeight;
     if (imageResize) {
       setStyle({
-        width: isNaN(imageResize.width) ? "auto" : imageResize.width,
-        height: isNaN(imageResize.height) ? "auto" : imageResize.height,
+        width: isNaN(imageResize.width)
+          ? "auto"
+          : `${Math.ceil((100 * imageResize.width) / IMG_MAX_WIDTH)}%`,
+        height: isNaN(imageResize.height)
+          ? "auto"
+          : `${(100 * imageResize.height) / IMG_MAX_HEIGHT}%`,
       });
     } else if (!isNaN(imageAspectRatio) && !isNaN(containerAspectRatio)) {
       if (imageAspectRatio > containerAspectRatio) {
@@ -315,6 +322,13 @@ const ContentSlide = ({
               height: "100%",
             }}
           >
+            <span
+              style={{
+                display: "inline-block",
+                verticalAlign: "middle",
+                height: "100%",
+              }}
+            />
             <ImageFromText
               text={children[0].text}
               Alt={() => <div />}
@@ -396,6 +410,8 @@ const PresentationContent: React.FunctionComponent<{
       width: window.innerWidth * 0.9,
       height: window.innerHeight * 0.9,
       showNotes,
+      minScale: 1,
+      maxScale: 1,
     });
     deck.initialize();
     revealRef.current = deck;

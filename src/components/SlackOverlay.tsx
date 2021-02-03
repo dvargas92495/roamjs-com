@@ -9,6 +9,7 @@ import {
   getEditedUserEmailByBlockUid,
   getPageTitleByBlockUid,
   getParentTextByBlockUid,
+  getParentTextByBlockUidAndTag,
   getTextByBlockUid,
 } from "roam-client";
 
@@ -126,7 +127,19 @@ const SlackContent: React.FunctionComponent<
                   return memberByEmail ? `@${memberByEmail.name}` : email;
                 })
                 .replace(/{page}/i, () => getPageTitleByBlockUid(blockUid))
-                .replace(/{parent}/i, () => getParentTextByBlockUid(blockUid))
+                .replace(
+                  /{parent(?::((?:#?\[\[[a-zA-Z0-9 ,/]*\]\])+))?}/i,
+                  (_, t: string) =>
+                    t
+                      ? t
+                          .substring(2, t.length - 2)
+                          .split("]][[")
+                          .map((tag) =>
+                            getParentTextByBlockUidAndTag({ blockUid, tag })
+                          )
+                          .find((s) => !!s) || getParentTextByBlockUid(blockUid)
+                      : getParentTextByBlockUid(blockUid)
+                )
                 .replace(
                   /{link}/i,
                   `${window.location.href.replace(

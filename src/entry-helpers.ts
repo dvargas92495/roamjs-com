@@ -847,3 +847,4 @@ export const TODO_REGEX = /{{\[\[TODO\]\]}}/g;
 export const DONE_REGEX = /{{\[\[DONE\]\]}} ?/g;
 export const createTagRegex = (tag: string): RegExp =>
   new RegExp(`#?\\[\\[${tag}\\]\\]|#${tag}`, "g");
+export const TAG_REGEX = /#?\[\[[a-zA-Z0-9 ,/]*\]\]/;

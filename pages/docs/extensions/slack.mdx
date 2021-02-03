@@ -33,5 +33,8 @@ The Slack extension supports the following configuration options, to be added to
     - Use the placeholder `{block}` to replace with the actual text of the block.
     - Use the placeholder `{last edited by}` to replace with the username of the user who last edited the sending block. If the Roam email address is not in the slack workspace, the Roam email will be inserted instead.
     - Use the placeholder `{page}` to replace with the name of the page the block lives in.
-    - Use the placeholder `{parent}` to replace with the text of the parent of the current block.
+    - Use the placeholder `{parent}` to replace with the text of the parent of the current block. If you add a colon and a tag, it will grab the first parent with the given tag. For example, `{parent: [[Task]]}` will be replaced with `Project [[Task]]` in the following example:
+        - `Project [[Task]]`
+            - `Ignore this block`
+                - `Send to #[[@dvargas92495]]`
     - Use the placeholder `{link}` to replace with the link to the zoomed in block.
