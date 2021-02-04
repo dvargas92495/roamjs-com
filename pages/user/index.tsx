@@ -180,14 +180,7 @@ const Billing = () => {
   );
 };
 
-type WebsiteData = {
-  url: string;
-  graph: string;
-  status: string;
-  deploys: { status: string; date: string; uuid: string }[];
-};
-
-const isWebsiteReady = (w: WebsiteData) =>
+const isWebsiteReady = (w: { status: string; deploys: { status: string }[] }) =>
   w.status === "LIVE" && w.deploys.length && w.deploys[0].status === "SUCCESS";
 
 const TLD_REGEX = new RegExp(`\\.${awsTlds.join("|")}`);
@@ -204,21 +197,38 @@ const Website = () => {
   const authenticatedAxiosGet = useAuthenticatedAxiosRoamJSGet();
   const flossGet = useAuthenticatedAxiosFlossGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosRoamJSPost();
-  const [website, setWebsite] = useState<WebsiteData>();
+  const [graph, setGraph] = useState<string>();
+  const [status, setStatus] = useState<string>();
+  const [deploys, setDeploys] = useState<
+    { status: string; date: string; uuid: string }[]
+  >([]);
   const [subscriptionId, setSubscriptionId] = useState("");
   const [priceId, setPriceId] = useState("");
   const timeoutRef = useRef(0);
-  const getWebsite = useCallback(
-    () =>
-      authenticatedAxiosGet(
-        website ? `website-status?graph=${website.graph}` : "website-status"
-      ).then((r) => {
-        setWebsite({ ...website, ...r.data });
-        if (r.data && !isWebsiteReady(r.data)) {
-          timeoutRef.current = window.setTimeout(getWebsite, 5000);
+  const getStatus = useCallback(
+    (graph: string) =>
+      authenticatedAxiosGet(`website-status?graph=${graph}`).then((r) => {
+        setStatus(r.data.status);
+        setDeploys(r.data.deploys);
+        if (!isWebsiteReady(r.data)) {
+          timeoutRef.current = window.setTimeout(() => getStatus(graph), 5000);
         }
       }),
-    [setWebsite, timeoutRef, website]
+    [setStatus, setDeploys, timeoutRef]
+  );
+  const getWebsite = useCallback(
+    () =>
+      authenticatedAxiosGet("website-status").then((r) => {
+        if (r.data) {
+          setGraph(r.data.graph);
+          setStatus(r.data.status);
+          setDeploys(r.data.deploys);
+          if (!isWebsiteReady(r.data)) {
+            timeoutRef.current = window.setTimeout(() => getStatus(r.data.graph), 5000);
+          }
+        }
+      }),
+    [setGraph, setStatus, setDeploys, timeoutRef, getStatus]
   );
   const launchWebsite = useCallback(
     (body) =>
@@ -230,16 +240,16 @@ const Website = () => {
     [authenticatedAxiosPost, priceId, user]
   );
   const manualDeploy = useCallback(
-    () => authenticatedAxiosPost("deploy", {}).then(getWebsite),
-    [authenticatedAxiosPost, getWebsite]
+    () => authenticatedAxiosPost("deploy", {}).then(() => getStatus(graph)),
+    [authenticatedAxiosPost, getStatus, graph]
   );
   const shutdownWebsite = useCallback(
     () =>
       authenticatedAxiosPost("shutdown-website", {
-        graph: website.graph,
+        graph,
         subscriptionId,
       }),
-    [authenticatedAxiosPost, website, subscriptionId]
+    [authenticatedAxiosPost, graph, subscriptionId]
   );
   useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
   useEffect(() => {
@@ -257,17 +267,17 @@ const Website = () => {
 
   return (
     <DataLoader loadAsync={getWebsite}>
-      {website ? (
+      {graph ? (
         <>
           <Items
             items={[
               {
-                primary: <UserValue>{website.graph}</UserValue>,
+                primary: <UserValue>{graph}</UserValue>,
                 key: 0,
                 avatar: <Subtitle>Graph</Subtitle>,
               },
               {
-                primary: <UserValue>{website.status}</UserValue>,
+                primary: <UserValue>{status}</UserValue>,
                 key: 1,
                 avatar: <Subtitle>Status</Subtitle>,
               },
@@ -277,7 +287,7 @@ const Website = () => {
             variant={"contained"}
             color={"primary"}
             style={{ margin: "0 16px" }}
-            disabled={!isWebsiteReady(website)}
+            disabled={!isWebsiteReady({status, deploys})}
             onClick={manualDeploy}
           >
             Manual Deploy
@@ -295,7 +305,7 @@ const Website = () => {
           <hr style={{ margin: "16px 0" }} />
           <H6>Deploys</H6>
           <Items
-            items={website.deploys.map((d) => ({
+            items={deploys.map((d) => ({
               primary: <UserValue>{d.status}</UserValue>,
               key: d.uuid,
               secondary: (

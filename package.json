@@ -93,6 +93,7 @@
     "@slack/web-api": "^6.0.0",
     "@stripe/stripe-js": "^1.11.0",
     "@types/mozilla-readability": "^0.2.0",
+    "auth0-js": "^9.14.3",
     "aws-sdk": "^2.824.0",
     "axios": "^0.21.1",
     "babel-plugin-import-glob-array": "^0.2.0",
