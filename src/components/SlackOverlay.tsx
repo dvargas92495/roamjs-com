@@ -118,17 +118,17 @@ const SlackContent: React.FunctionComponent<
             .postMessage({
               channel: memberId,
               text: contentFormat
-                .replace(/{block}/i, message)
-                .replace(/{last edited by}/i, () => {
+                .replace(/{block}/ig, message)
+                .replace(/{last edited by}/ig, () => {
                   const email = getEditedUserEmailByBlockUid(blockUid);
                   const memberByEmail = members.find(
                     (m) => m.profile.email === email
                   );
                   return memberByEmail ? `@${memberByEmail.name}` : email;
                 })
-                .replace(/{page}/i, () => getPageTitleByBlockUid(blockUid))
+                .replace(/{page}/ig, () => getPageTitleByBlockUid(blockUid))
                 .replace(
-                  /{parent(?::\s*((?:#?\[\[[a-zA-Z0-9 ,/]*\]\]\s*)+))?}/i,
+                  /{parent(?::\s*((?:#?\[\[[^\]]*\]\]\s*)+))?}/ig,
                   (_, t: string) =>
                     t
                       ? t
@@ -142,7 +142,7 @@ const SlackContent: React.FunctionComponent<
                       : getParentTextByBlockUid(blockUid)
                 )
                 .replace(
-                  /{link}/i,
+                  /{link}/ig,
                   `${window.location.href.replace(
                     /\/page\/.*$/,
                     ""

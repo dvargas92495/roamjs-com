@@ -371,7 +371,7 @@ export const COLLAPSIBLE_REGEX = /({collapsible}|\[\[{collapsible}\]\])|{\[\[col
 const PresentationContent: React.FunctionComponent<{
   slides: Slides;
   showNotes: boolean;
-  onClose: () => void;
+  onClose: (index: number) => void;
   globalCollapsible: boolean;
   startIndex: number;
 }> = ({ slides, onClose, showNotes, globalCollapsible, startIndex }) => {
@@ -404,6 +404,10 @@ const PresentationContent: React.FunctionComponent<{
       note: showNotes && s.children[s.children.length - 1],
     };
   });
+  const onCloseClick = useCallback(
+    () => onClose(revealRef.current.getState().indexh),
+    [onClose, revealRef]
+  );
   const [initialized, setInitialized] = useState(false);
   useEffect(() => {
     const deck = new Reveal({
@@ -422,16 +426,13 @@ const PresentationContent: React.FunctionComponent<{
       attributeFilter: ["class"],
       subtree: true,
     });
-    /*if (startIndex > 0) {
-      deck.on("ready", () => deck.slide(startIndex));
-    }*/
     setInitialized(true);
     return () => observer.disconnect();
-  }, [revealRef, slidesRef, startIndex, setInitialized]);
+  }, [revealRef, slidesRef, setInitialized]);
   const bodyEscapePrint = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        onCloseClick();
       } else if (isControl(e) && e.key === "p" && !e.shiftKey && !e.altKey) {
         revealRef.current.isPrintingPdf = () => true;
         const injectedStyle = addStyle(`@media print {
@@ -456,7 +457,7 @@ const PresentationContent: React.FunctionComponent<{
         e.preventDefault();
       }
     },
-    [onClose]
+    [onCloseClick, revealRef]
   );
   useEffect(() => {
     document.body.addEventListener("keydown", bodyEscapePrint);
@@ -464,23 +465,31 @@ const PresentationContent: React.FunctionComponent<{
   }, [bodyEscapePrint]);
   useEffect(() => {
     if (initialized && startIndex > 0) {
-      revealRef.current.slide(startIndex)
+      revealRef.current.slide(startIndex);
     }
-  }, [revealRef, initialized, startIndex])
+  }, [revealRef, initialized, startIndex]);
   return (
-    <div className="reveal" id="roamjs-reveal-root">
-      <div className="slides" ref={slidesRef}>
-        {mappedSlides.map((s: Slide & ContentSlideExtras, i) => (
-          <React.Fragment key={i}>
-            {s.children.length ? (
-              <ContentSlide {...s} />
-            ) : (
-              <TitleSlide text={s.text} note={s.note} />
-            )}
-          </React.Fragment>
-        ))}
+    <>
+      <div className="reveal" id="roamjs-reveal-root">
+        <div className="slides" ref={slidesRef}>
+          {mappedSlides.map((s: Slide & ContentSlideExtras, i) => (
+            <React.Fragment key={i}>
+              {s.children.length ? (
+                <ContentSlide {...s} />
+              ) : (
+                <TitleSlide text={s.text} note={s.note} />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
       </div>
-    </div>
+      <Button
+        icon={"cross"}
+        onClick={onCloseClick}
+        minimal
+        style={{ position: "absolute", top: 8, right: 8 }}
+      />
+    </>
   );
 };
 
@@ -499,12 +508,20 @@ const Presentation: React.FunctionComponent<{
   );
   const showNotes = notes === "true";
   const [showOverlay, setShowOverlay] = useState(false);
-  const [slides, setSlides] = useState([]);
+  const [slides, setSlides] = useState<Slides>([]);
   const [startIndex, setStartIndex] = useState(0);
-  const onClose = useCallback(() => {
-    setShowOverlay(false);
-    unload();
-  }, [setShowOverlay]);
+  const onClose = useCallback(
+    (currentSlide: number) => {
+      setShowOverlay(false);
+      unload();
+      const uidToFocus = slides[currentSlide].uid;
+      const target = Array.from(
+        document.getElementsByClassName("roam-block")
+      ).find((d) => d.id.endsWith(uidToFocus));
+      target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    },
+    [setShowOverlay, slides]
+  );
 
   const open = useCallback(async () => {
     setShowOverlay(true);
@@ -536,7 +553,7 @@ const Presentation: React.FunctionComponent<{
         text={"PRESENT"}
         onMouseDown={onMouseDown}
       />
-      <Overlay canEscapeKeyClose onClose={onClose} isOpen={showOverlay}>
+      <Overlay isOpen={showOverlay}>
         <div
           style={{
             height: "100%",
@@ -551,12 +568,6 @@ const Presentation: React.FunctionComponent<{
             showNotes={showNotes}
             globalCollapsible={collapsible}
             startIndex={startIndex}
-          />
-          <Button
-            icon={"cross"}
-            onClick={onClose}
-            minimal
-            style={{ position: "absolute", top: 8, right: 8 }}
           />
         </div>
       </Overlay>
