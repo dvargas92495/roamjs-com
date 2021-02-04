@@ -404,6 +404,7 @@ const PresentationContent: React.FunctionComponent<{
       note: showNotes && s.children[s.children.length - 1],
     };
   });
+  const [initialized, setInitialized] = useState(false);
   useEffect(() => {
     const deck = new Reveal({
       embedded: true,
@@ -421,11 +422,12 @@ const PresentationContent: React.FunctionComponent<{
       attributeFilter: ["class"],
       subtree: true,
     });
-    if (startIndex > 0) {
+    /*if (startIndex > 0) {
       deck.on("ready", () => deck.slide(startIndex));
-    }
+    }*/
+    setInitialized(true);
     return () => observer.disconnect();
-  }, [revealRef, slidesRef, startIndex]);
+  }, [revealRef, slidesRef, startIndex, setInitialized]);
   const bodyEscapePrint = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -460,6 +462,11 @@ const PresentationContent: React.FunctionComponent<{
     document.body.addEventListener("keydown", bodyEscapePrint);
     return () => document.body.removeEventListener("keydown", bodyEscapePrint);
   }, [bodyEscapePrint]);
+  useEffect(() => {
+    if (initialized && startIndex > 0) {
+      revealRef.current.slide(startIndex)
+    }
+  }, [revealRef, initialized, startIndex])
   return (
     <div className="reveal" id="roamjs-reveal-root">
       <div className="slides" ref={slidesRef}>
