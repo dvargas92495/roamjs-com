@@ -524,9 +524,14 @@ const Presentation: React.FunctionComponent<{
         ).find((d) => d.id.endsWith(uidToFocus));
         target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
         setTimeout(() => {
-          document
-            .getElementById(target.id)
-            .dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+          const textArea = document.getElementById(
+            target.id
+          ) as HTMLTextAreaElement;
+          textArea.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+          textArea.setSelectionRange(
+            textArea.value.length,
+            textArea.value.length
+          );
         }, 50);
       }, 1);
     },

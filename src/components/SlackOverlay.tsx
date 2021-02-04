@@ -158,7 +158,7 @@ const SlackContent: React.FunctionComponent<
           setError(
             `Couldn't find Slack user for tag: ${tag}.${
               aliasedName ? `\nTried to use alias: ${aliases[tag]}` : ""
-            }\nFound: ${members.map((m) => m.name).join(", ")}`
+            }\nFound: ${members.map(toName).join(", ")}`
           );
         }
       })
