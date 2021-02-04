@@ -405,7 +405,10 @@ const PresentationContent: React.FunctionComponent<{
     };
   });
   const onCloseClick = useCallback(
-    () => onClose(revealRef.current.getState().indexh),
+    (e: Event) => {
+      onClose(revealRef.current.getState().indexh);
+      e.stopImmediatePropagation();
+    },
     [onClose, revealRef]
   );
   const [initialized, setInitialized] = useState(false);
@@ -432,7 +435,7 @@ const PresentationContent: React.FunctionComponent<{
   const bodyEscapePrint = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onCloseClick();
+        onCloseClick(e);
       } else if (isControl(e) && e.key === "p" && !e.shiftKey && !e.altKey) {
         revealRef.current.isPrintingPdf = () => true;
         const injectedStyle = addStyle(`@media print {
@@ -485,7 +488,7 @@ const PresentationContent: React.FunctionComponent<{
       </div>
       <Button
         icon={"cross"}
-        onClick={onCloseClick}
+        onClick={(e: React.MouseEvent) => onCloseClick(e.nativeEvent)}
         minimal
         style={{ position: "absolute", top: 8, right: 8 }}
       />
@@ -513,12 +516,14 @@ const Presentation: React.FunctionComponent<{
   const onClose = useCallback(
     (currentSlide: number) => {
       setShowOverlay(false);
-      unload();
-      const uidToFocus = slides[currentSlide].uid;
-      const target = Array.from(
-        document.getElementsByClassName("roam-block")
-      ).find((d) => d.id.endsWith(uidToFocus));
-      target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      setTimeout(() => {
+        unload();
+        const uidToFocus = slides[currentSlide].uid;
+        const target = Array.from(
+          document.getElementsByClassName("roam-block")
+        ).find((d) => d.id.endsWith(uidToFocus));
+        target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      }, 1);
     },
     [setShowOverlay, slides]
   );
