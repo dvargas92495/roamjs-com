@@ -373,7 +373,8 @@ const PresentationContent: React.FunctionComponent<{
   showNotes: boolean;
   onClose: () => void;
   globalCollapsible: boolean;
-}> = ({ slides, onClose, showNotes, globalCollapsible }) => {
+  startIndex: number;
+}> = ({ slides, onClose, showNotes, globalCollapsible, startIndex }) => {
   const revealRef = useRef(null);
   const slidesRef = useRef<HTMLDivElement>(null);
   const mappedSlides = slides.map((s) => {
@@ -420,6 +421,7 @@ const PresentationContent: React.FunctionComponent<{
       attributeFilter: ["class"],
       subtree: true,
     });
+    console.log("Should have started presentation at slide", startIndex);
     return () => observer.disconnect();
   }, [revealRef, slidesRef]);
   const bodyEscapePrint = useCallback(
@@ -478,7 +480,8 @@ const Presentation: React.FunctionComponent<{
   theme?: string;
   notes?: string;
   collapsible?: boolean;
-}> = ({ getSlides, theme, notes, collapsible }) => {
+  startingBlockUid?: string;
+}> = ({ getSlides, theme, notes, collapsible, startingBlockUid }) => {
   const normalizedTheme = useMemo(
     () =>
       (isSafari ? SAFARI_THEMES : VALID_THEMES).includes(theme)
@@ -489,6 +492,7 @@ const Presentation: React.FunctionComponent<{
   const showNotes = notes === "true";
   const [showOverlay, setShowOverlay] = useState(false);
   const [slides, setSlides] = useState([]);
+  const [startIndex, setStartIndex] = useState(0);
   const onClose = useCallback(() => {
     setShowOverlay(false);
     unload();
@@ -496,14 +500,23 @@ const Presentation: React.FunctionComponent<{
 
   const open = useCallback(async () => {
     setShowOverlay(true);
-    setSlides(getSlides());
+    const slides = getSlides();
+    setSlides(slides);
+    if (startingBlockUid) {
+      const someFcn = (s: Slide) =>
+        s.uid === startingBlockUid || s.children.some(someFcn);
+      const startIndex = slides.findIndex(someFcn);
+      setStartIndex(Math.max(0, startIndex));
+    } else {
+      setStartIndex(0);
+    }
     Array.from(window.roamjs.dynamicElements)
       .filter(
         (s) =>
           s.id.endsWith(`${normalizedTheme}.css`) || s.id.endsWith("reveal.css")
       )
       .forEach((s) => document.head.appendChild(s));
-  }, [setShowOverlay, normalizedTheme, getSlides, setSlides]);
+  }, [setShowOverlay, normalizedTheme, getSlides, setSlides, startingBlockUid]);
   return (
     <>
       <Button onClick={open} data-roamjs-presentation text={"PRESENT"} />
@@ -521,6 +534,7 @@ const Presentation: React.FunctionComponent<{
             onClose={onClose}
             showNotes={showNotes}
             globalCollapsible={collapsible}
+            startIndex={startIndex}
           />
           <Button
             icon={"cross"}
@@ -535,6 +549,7 @@ const Presentation: React.FunctionComponent<{
 };
 
 type Slide = {
+  uid: string;
   text: string;
   children: Slides;
   heading?: number;
@@ -556,13 +571,19 @@ export const render = ({
   button,
   getSlides,
   options,
+  startingBlockUid,
 }: {
   button: HTMLButtonElement;
   getSlides: () => Slides;
   options: { [key: string]: string | boolean };
+  startingBlockUid?: string;
 }): void =>
   ReactDOM.render(
-    <Presentation getSlides={getSlides} {...options} />,
+    <Presentation
+      getSlides={getSlides}
+      {...options}
+      startingBlockUid={startingBlockUid}
+    />,
     button.parentElement
   );
 

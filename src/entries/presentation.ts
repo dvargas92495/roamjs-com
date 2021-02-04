@@ -20,7 +20,7 @@ import {
   render,
   VALID_THEMES,
 } from "../components/Presentation";
-import { getUidsFromButton, getTextByBlockUid, getTreeByBlockUid } from "roam-client";
+import { getUidsFromButton, getTextByBlockUid, getTreeByBlockUid, getUids } from "roam-client";
 
 addStyle(`.roamjs-collapsible-caret {
   position: absolute;
@@ -45,6 +45,7 @@ runExtension("presentation", async () => {
       if (!blockUid) {
         return;
       }
+      const { blockUid: startingBlockUid } = getUids(document.activeElement as HTMLTextAreaElement);
       const text = getTextByBlockUid(blockUid);
       const buttonText = text.match("{{(presentation|slides|#?\\[\\[presentation\\]\\]|#?\\[\\[slides\\]\\]|#presentation|#slides):(.*)}}")?.[2];
       const options = buttonText
@@ -58,6 +59,7 @@ runExtension("presentation", async () => {
         button,
         getSlides: () => getTreeByBlockUid(blockUid).children,
         options,
+        startingBlockUid,
       });
     },
   });
