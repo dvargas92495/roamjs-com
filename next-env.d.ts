@@ -46,6 +46,7 @@ declare module "reveal.js" {
   declare class Reveal {
     constructor(options: RevealOptions);
     initialize: () => void;
+    slide: (h: number) => void;
   }
   export default Reveal;
 }

@@ -421,7 +421,9 @@ const PresentationContent: React.FunctionComponent<{
       attributeFilter: ["class"],
       subtree: true,
     });
-    console.log("Should have started presentation at slide", startIndex);
+    if (startIndex > 0) {
+      deck.slide(startIndex);
+    }
     return () => observer.disconnect();
   }, [revealRef, slidesRef]);
   const bodyEscapePrint = useCallback(

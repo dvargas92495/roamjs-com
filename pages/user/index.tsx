@@ -224,7 +224,10 @@ const Website = () => {
           setStatus(r.data.status);
           setDeploys(r.data.deploys);
           if (!isWebsiteReady(r.data)) {
-            timeoutRef.current = window.setTimeout(() => getStatus(r.data.graph), 5000);
+            timeoutRef.current = window.setTimeout(
+              () => getStatus(r.data.graph),
+              5000
+            );
           }
         }
       }),
@@ -239,10 +242,13 @@ const Website = () => {
       }),
     [authenticatedAxiosPost, priceId, user]
   );
-  const manualDeploy = useCallback(
-    () => authenticatedAxiosPost("deploy", {}).then(() => getStatus(graph)),
-    [authenticatedAxiosPost, getStatus, graph]
-  );
+  const [loading, setLoading] = useState(false);
+  const manualDeploy = useCallback(() => {
+    setLoading(true);
+    authenticatedAxiosPost("deploy", {})
+      .then(() => getStatus(graph))
+      .finally(() => setLoading(false));
+  }, [authenticatedAxiosPost, getStatus, graph]);
   const shutdownWebsite = useCallback(
     () =>
       authenticatedAxiosPost("shutdown-website", {
@@ -287,7 +293,7 @@ const Website = () => {
             variant={"contained"}
             color={"primary"}
             style={{ margin: "0 16px" }}
-            disabled={!isWebsiteReady({status, deploys})}
+            disabled={!isWebsiteReady({ status, deploys })}
             onClick={manualDeploy}
           >
             Manual Deploy
@@ -302,6 +308,7 @@ const Website = () => {
             onSuccess={getWebsite}
             title={"Buy RoamJS Service"}
           />
+          {loading && <span>Loading...</span>}
           <hr style={{ margin: "16px 0" }} />
           <H6>Deploys</H6>
           <Items
