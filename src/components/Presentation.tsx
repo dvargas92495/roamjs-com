@@ -523,6 +523,11 @@ const Presentation: React.FunctionComponent<{
           document.getElementsByClassName("roam-block")
         ).find((d) => d.id.endsWith(uidToFocus));
         target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+        setTimeout(() => {
+          document
+            .getElementById(target.id)
+            .dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+        }, 50);
       }, 1);
     },
     [setShowOverlay, slides]

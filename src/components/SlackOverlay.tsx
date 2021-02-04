@@ -22,8 +22,10 @@ type SlackMember = {
   real_name: string;
   id: string;
   name: string;
-  profile: { email: string };
+  profile: { email: string; display_name?: string };
 };
+
+const toName = (s: SlackMember) => s.profile.display_name || s.name;
 
 const getSettingValueFromTree = ({
   tree,
@@ -98,7 +100,7 @@ const SlackContent: React.FunctionComponent<
           tag.match(realNameRegex)[1].toUpperCase()
       : usernameRegex.test(tag)
       ? (m: SlackMember) =>
-          m.name.toUpperCase() === tag.match(usernameRegex)[1].toUpperCase()
+          toName(m).toUpperCase() === tag.match(usernameRegex)[1].toUpperCase()
       : () => false;
     const contentFormat = getSettingValueFromTree({
       tree,
@@ -111,24 +113,24 @@ const SlackContent: React.FunctionComponent<
       .then((r) => {
         const members = r.members as SlackMember[];
         const memberId = members.find(
-          (m) => m.name.toUpperCase() === aliasedName || findFunction(m)
+          (m) => toName(m).toUpperCase() === aliasedName || findFunction(m)
         )?.id;
         if (memberId) {
           return web.chat
             .postMessage({
               channel: memberId,
               text: contentFormat
-                .replace(/{block}/ig, message)
-                .replace(/{last edited by}/ig, () => {
+                .replace(/{block}/gi, message)
+                .replace(/{last edited by}/gi, () => {
                   const email = getEditedUserEmailByBlockUid(blockUid);
                   const memberByEmail = members.find(
                     (m) => m.profile.email === email
                   );
                   return memberByEmail ? `@${memberByEmail.name}` : email;
                 })
-                .replace(/{page}/ig, () => getPageTitleByBlockUid(blockUid))
+                .replace(/{page}/gi, () => getPageTitleByBlockUid(blockUid))
                 .replace(
-                  /{parent(?::\s*((?:#?\[\[[^\]]*\]\]\s*)+))?}/ig,
+                  /{parent(?::\s*((?:#?\[\[[^\]]*\]\]\s*)+))?}/gi,
                   (_, t: string) =>
                     t
                       ? t
@@ -142,7 +144,7 @@ const SlackContent: React.FunctionComponent<
                       : getParentTextByBlockUid(blockUid)
                 )
                 .replace(
-                  /{link}/ig,
+                  /{link}/gi,
                   `${window.location.href.replace(
                     /\/page\/.*$/,
                     ""
