@@ -155,8 +155,8 @@ const SlackContent: React.FunctionComponent<
           setLoading(false);
           setError(
             `Couldn't find Slack user for tag: ${tag}.${
-              aliasedName ? `\nTried to use alias: ${aliasedName}` : ""
-            }\nFound: ${members.map((m) => m.name).join(",")}`
+              aliasedName ? `\nTried to use alias: ${aliases[tag]}` : ""
+            }\nFound: ${members.map((m) => m.name).join(", ")}`
           );
         }
       })
@@ -170,7 +170,7 @@ const SlackContent: React.FunctionComponent<
       <Button text={`Send to ${tag}`} onClick={onClick} />
       {loading && <Spinner />}
       {error && (
-        <div style={{ color: "red" }}>
+        <div style={{ color: "red", whiteSpace: "pre-line" }}>
           <Text>{error}</Text>
         </div>
       )}

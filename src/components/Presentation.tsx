@@ -11,7 +11,7 @@ import ReactDOM from "react-dom";
 import Reveal from "reveal.js";
 import { addStyle, isControl, resolveRefs } from "../entry-helpers";
 import { isSafari } from "mobile-device-detect";
-import { ViewType } from "roam-client";
+import { getUids, ViewType } from "roam-client";
 
 const SAFARI_THEMES = ["black", "white", "beige"];
 
@@ -480,8 +480,7 @@ const Presentation: React.FunctionComponent<{
   theme?: string;
   notes?: string;
   collapsible?: boolean;
-  startingBlockUid?: string;
-}> = ({ getSlides, theme, notes, collapsible, startingBlockUid }) => {
+}> = ({ getSlides, theme, notes, collapsible }) => {
   const normalizedTheme = useMemo(
     () =>
       (isSafari ? SAFARI_THEMES : VALID_THEMES).includes(theme)
@@ -500,26 +499,34 @@ const Presentation: React.FunctionComponent<{
 
   const open = useCallback(async () => {
     setShowOverlay(true);
-    const slides = getSlides();
-    setSlides(slides);
-    if (startingBlockUid) {
-      const someFcn = (s: Slide) =>
-        s.uid === startingBlockUid || s.children.some(someFcn);
-      const startIndex = slides.findIndex(someFcn);
-      setStartIndex(Math.max(0, startIndex));
-    } else {
-      setStartIndex(0);
-    }
     Array.from(window.roamjs.dynamicElements)
       .filter(
         (s) =>
           s.id.endsWith(`${normalizedTheme}.css`) || s.id.endsWith("reveal.css")
       )
       .forEach((s) => document.head.appendChild(s));
-  }, [setShowOverlay, normalizedTheme, getSlides, setSlides, startingBlockUid]);
+  }, [setShowOverlay, normalizedTheme]);
+  const onMouseDown = useCallback(() => {
+    const slides = getSlides();
+    setSlides(slides);
+    const { blockUid } = getUids(document.activeElement as HTMLTextAreaElement);
+    if (blockUid) {
+      const someFcn = (s: Slide) =>
+        s.uid === blockUid || s.children.some(someFcn);
+      const startIndex = slides.findIndex(someFcn);
+      setStartIndex(Math.max(0, startIndex));
+    } else {
+      setStartIndex(0);
+    }
+  }, [getSlides, setSlides, setStartIndex]);
   return (
     <>
-      <Button onClick={open} data-roamjs-presentation text={"PRESENT"} />
+      <Button
+        onClick={open}
+        data-roamjs-presentation
+        text={"PRESENT"}
+        onMouseDown={onMouseDown}
+      />
       <Overlay canEscapeKeyClose onClose={onClose} isOpen={showOverlay}>
         <div
           style={{
@@ -571,19 +578,13 @@ export const render = ({
   button,
   getSlides,
   options,
-  startingBlockUid,
 }: {
   button: HTMLButtonElement;
   getSlides: () => Slides;
   options: { [key: string]: string | boolean };
-  startingBlockUid?: string;
 }): void =>
   ReactDOM.render(
-    <Presentation
-      getSlides={getSlides}
-      {...options}
-      startingBlockUid={startingBlockUid}
-    />,
+    <Presentation getSlides={getSlides} {...options} />,
     button.parentElement
   );
 
