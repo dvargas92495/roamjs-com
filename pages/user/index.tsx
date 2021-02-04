@@ -211,9 +211,9 @@ const Website = () => {
   const getWebsite = useCallback(
     () =>
       authenticatedAxiosGet(
-        website ? "website-status" : `website-status?graph=${website.graph}`
+        website ? `website-status?graph=${website.graph}` : "website-status"
       ).then((r) => {
-        setWebsite({ ...website, ...r.data});
+        setWebsite({ ...website, ...r.data });
         if (r.data && !isWebsiteReady(r.data)) {
           timeoutRef.current = window.setTimeout(getWebsite, 5000);
         }
@@ -438,7 +438,7 @@ const Funding = () => {
 };
 
 const UserPage = (): JSX.Element => {
-  const { isAuthenticated, error, user, logout } = useAuth0();
+  const { isAuthenticated, error, user, logout, isLoading } = useAuth0();
   const onLogoutClick = useCallback(
     () =>
       logout({
@@ -446,17 +446,17 @@ const UserPage = (): JSX.Element => {
       }),
     [logout]
   );
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      window.location.replace("/login");
+    }
+  }, [isLoading, isAuthenticated]);
   return (
     <StandardLayout>
       <VerticalTabs title={"User Info"}>
         <Card title={"Details"}>
-          {isAuthenticated ? (
-            <Settings {...user} />
-          ) : error ? (
-            <div>{`${error.name}: ${error.message}`}</div>
-          ) : (
-            <div>Not Logged In</div>
-          )}
+          {isAuthenticated && <Settings {...user} />}
+          {error && <div>{`${error.name}: ${error.message}`}</div>}
         </Card>
         {/*<Card title={"Connections"}>
           <Connections />
