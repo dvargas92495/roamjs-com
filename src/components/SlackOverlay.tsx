@@ -128,12 +128,13 @@ const SlackContent: React.FunctionComponent<
                 })
                 .replace(/{page}/i, () => getPageTitleByBlockUid(blockUid))
                 .replace(
-                  /{parent(?::((?:#?\[\[[a-zA-Z0-9 ,/]*\]\])+))?}/i,
+                  /{parent(?::\s*((?:#?\[\[[a-zA-Z0-9 ,/]*\]\]\s*)+))?}/i,
                   (_, t: string) =>
                     t
                       ? t
-                          .substring(2, t.length - 2)
-                          .split("]][[")
+                          .trim()
+                          .substring(2, t.trim().length - 2)
+                          .split(/\]\]\s*\[\[/)
                           .map((tag) =>
                             getParentTextByBlockUidAndTag({ blockUid, tag })
                           )
@@ -152,7 +153,11 @@ const SlackContent: React.FunctionComponent<
             .then(close);
         } else {
           setLoading(false);
-          setError(`Couldn't find Slack user for tag: ${tag}`);
+          setError(
+            `Couldn't find Slack user for tag: ${tag}.${
+              aliasedName ? `\nTried to use alias: ${aliasedName}` : ""
+            }\nFound: ${members.map((m) => m.name).join(",")}`
+          );
         }
       })
       .catch(({ error, message }) => {
