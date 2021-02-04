@@ -422,10 +422,10 @@ const PresentationContent: React.FunctionComponent<{
       subtree: true,
     });
     if (startIndex > 0) {
-      deck.slide(startIndex);
+      deck.on("ready", () => deck.slide(startIndex));
     }
     return () => observer.disconnect();
-  }, [revealRef, slidesRef]);
+  }, [revealRef, slidesRef, startIndex]);
   const bodyEscapePrint = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {

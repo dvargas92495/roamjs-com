@@ -47,12 +47,13 @@ declare module "reveal.js" {
     constructor(options: RevealOptions);
     initialize: () => void;
     slide: (h: number) => void;
+    on: (s: string, callback: () => void) => void;
   }
   export default Reveal;
 }
 
 declare module "*.ne" {
-  import Nearley from 'nearley';
+  import Nearley from "nearley";
   const Rules: Nearley.CompiledRules;
   export default Rules;
 }
