@@ -1,7 +1,7 @@
 ---
 layout: "ExtensionPageLayout"
 description: "Use this extension to build slideshow presentations from within Roam!"
-contributors: Tomáš Baránek 💵, Matt Brockwell 💵,Ivo Velitchkov 💵📓, Abhay Prasanna 📓🤔, Adolfo Ramírez Corona 📓
+contributors: Tomáš Baránek 💵, Matt Brockwell 💵,Ivo Velitchkov 💵📓, Jerry Yu 💵, Abhay Prasanna 📓🤔, Adolfo Ramírez Corona 📓
 ---
 
 Type `{{presentation}}` or `{{slides}}` in a block. Clicking the button will overlay a presentation directly from Roam! Exit the presentation by hitting 'ESC'.
@@ -18,6 +18,8 @@ To specify what content is part of the presentation, create a child block for ea
             - With a nested point!
         - Third bullet sealing the deal
     - Final Slide
+
+By default, presentations start on the first slide. If the cursor is in any of the other slide trees when the button is pressed, the presentation will start on that slide. When the presentation closes, it will return focus to the title block of whichever slide it was on.
 
 Any blocks with images will be rendered without a bullet. Any bullets that are collapsed will be filtered out of the presentation view.
 
