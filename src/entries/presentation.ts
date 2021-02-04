@@ -1,8 +1,4 @@
-import {
-  addStyle,
-  createButtonObserver,
-  runExtension,
-} from "../entry-helpers";
+import { addStyle, createButtonObserver, runExtension } from "../entry-helpers";
 import "reveal.js/dist/reveal.css";
 import "reveal.js/dist/theme/black.css";
 import "reveal.js/dist/theme/white.css";
@@ -20,7 +16,11 @@ import {
   render,
   VALID_THEMES,
 } from "../components/Presentation";
-import { getUidsFromButton, getTextByBlockUid, getTreeByBlockUid } from "roam-client";
+import {
+  getUidsFromButton,
+  getTextByBlockUid,
+  getTreeByBlockUid,
+} from "roam-client";
 
 addStyle(`.roamjs-collapsible-caret {
   position: absolute;
@@ -46,7 +46,9 @@ runExtension("presentation", async () => {
         return;
       }
       const text = getTextByBlockUid(blockUid);
-      const buttonText = text.match("{{(presentation|slides|#?\\[\\[presentation\\]\\]|#?\\[\\[slides\\]\\]|#presentation|#slides):(.*)}}")?.[2];
+      const buttonText = text.match(
+        "{{(presentation|slides|#?\\[\\[presentation\\]\\]|#?\\[\\[slides\\]\\]|#presentation|#slides):(.*)}}"
+      )?.[2];
       const options = buttonText
         ? {
             theme: buttonText.match(`{theme:(${VALID_THEMES.join("|")})}`)?.[1],

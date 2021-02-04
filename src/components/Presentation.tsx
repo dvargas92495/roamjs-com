@@ -11,7 +11,7 @@ import ReactDOM from "react-dom";
 import Reveal from "reveal.js";
 import { addStyle, isControl, resolveRefs } from "../entry-helpers";
 import { isSafari } from "mobile-device-detect";
-import { ViewType } from "roam-client";
+import { getUids, ViewType } from "roam-client";
 
 const SAFARI_THEMES = ["black", "white", "beige"];
 
@@ -371,9 +371,10 @@ export const COLLAPSIBLE_REGEX = /({collapsible}|\[\[{collapsible}\]\])|{\[\[col
 const PresentationContent: React.FunctionComponent<{
   slides: Slides;
   showNotes: boolean;
-  onClose: () => void;
+  onClose: (index: number) => void;
   globalCollapsible: boolean;
-}> = ({ slides, onClose, showNotes, globalCollapsible }) => {
+  startIndex: number;
+}> = ({ slides, onClose, showNotes, globalCollapsible, startIndex }) => {
   const revealRef = useRef(null);
   const slidesRef = useRef<HTMLDivElement>(null);
   const mappedSlides = slides.map((s) => {
@@ -403,6 +404,14 @@ const PresentationContent: React.FunctionComponent<{
       note: showNotes && s.children[s.children.length - 1],
     };
   });
+  const onCloseClick = useCallback(
+    (e: Event) => {
+      onClose(revealRef.current.getState().indexh);
+      e.stopImmediatePropagation();
+    },
+    [onClose, revealRef]
+  );
+  const [initialized, setInitialized] = useState(false);
   useEffect(() => {
     const deck = new Reveal({
       embedded: true,
@@ -420,12 +429,13 @@ const PresentationContent: React.FunctionComponent<{
       attributeFilter: ["class"],
       subtree: true,
     });
+    setInitialized(true);
     return () => observer.disconnect();
-  }, [revealRef, slidesRef]);
+  }, [revealRef, slidesRef, setInitialized]);
   const bodyEscapePrint = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        onCloseClick(e);
       } else if (isControl(e) && e.key === "p" && !e.shiftKey && !e.altKey) {
         revealRef.current.isPrintingPdf = () => true;
         const injectedStyle = addStyle(`@media print {
@@ -450,26 +460,39 @@ const PresentationContent: React.FunctionComponent<{
         e.preventDefault();
       }
     },
-    [onClose]
+    [onCloseClick, revealRef]
   );
   useEffect(() => {
     document.body.addEventListener("keydown", bodyEscapePrint);
     return () => document.body.removeEventListener("keydown", bodyEscapePrint);
   }, [bodyEscapePrint]);
+  useEffect(() => {
+    if (initialized && startIndex > 0) {
+      revealRef.current.slide(startIndex);
+    }
+  }, [revealRef, initialized, startIndex]);
   return (
-    <div className="reveal" id="roamjs-reveal-root">
-      <div className="slides" ref={slidesRef}>
-        {mappedSlides.map((s: Slide & ContentSlideExtras, i) => (
-          <React.Fragment key={i}>
-            {s.children.length ? (
-              <ContentSlide {...s} />
-            ) : (
-              <TitleSlide text={s.text} note={s.note} />
-            )}
-          </React.Fragment>
-        ))}
+    <>
+      <div className="reveal" id="roamjs-reveal-root">
+        <div className="slides" ref={slidesRef}>
+          {mappedSlides.map((s: Slide & ContentSlideExtras, i) => (
+            <React.Fragment key={i}>
+              {s.children.length ? (
+                <ContentSlide {...s} />
+              ) : (
+                <TitleSlide text={s.text} note={s.note} />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
       </div>
-    </div>
+      <Button
+        icon={"cross"}
+        onClick={(e: React.MouseEvent) => onCloseClick(e.nativeEvent)}
+        minimal
+        style={{ position: "absolute", top: 8, right: 8 }}
+      />
+    </>
   );
 };
 
@@ -488,26 +511,64 @@ const Presentation: React.FunctionComponent<{
   );
   const showNotes = notes === "true";
   const [showOverlay, setShowOverlay] = useState(false);
-  const [slides, setSlides] = useState([]);
-  const onClose = useCallback(() => {
-    setShowOverlay(false);
-    unload();
-  }, [setShowOverlay]);
+  const [slides, setSlides] = useState<Slides>([]);
+  const [startIndex, setStartIndex] = useState(0);
+  const onClose = useCallback(
+    (currentSlide: number) => {
+      setShowOverlay(false);
+      setTimeout(() => {
+        unload();
+        const uidToFocus = slides[currentSlide].uid;
+        const target = Array.from(
+          document.getElementsByClassName("roam-block")
+        ).find((d) => d.id.endsWith(uidToFocus));
+        target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+        setTimeout(() => {
+          const textArea = document.getElementById(
+            target.id
+          ) as HTMLTextAreaElement;
+          textArea.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+          textArea.setSelectionRange(
+            textArea.value.length,
+            textArea.value.length
+          );
+        }, 50);
+      }, 1);
+    },
+    [setShowOverlay, slides]
+  );
 
   const open = useCallback(async () => {
     setShowOverlay(true);
-    setSlides(getSlides());
     Array.from(window.roamjs.dynamicElements)
       .filter(
         (s) =>
           s.id.endsWith(`${normalizedTheme}.css`) || s.id.endsWith("reveal.css")
       )
       .forEach((s) => document.head.appendChild(s));
-  }, [setShowOverlay, normalizedTheme, getSlides, setSlides]);
+  }, [setShowOverlay, normalizedTheme]);
+  const onMouseDown = useCallback(() => {
+    const slides = getSlides();
+    setSlides(slides);
+    const { blockUid } = getUids(document.activeElement as HTMLTextAreaElement);
+    if (blockUid) {
+      const someFcn = (s: Slide) =>
+        s.uid === blockUid || s.children.some(someFcn);
+      const startIndex = slides.findIndex(someFcn);
+      setStartIndex(Math.max(0, startIndex));
+    } else {
+      setStartIndex(0);
+    }
+  }, [getSlides, setSlides, setStartIndex]);
   return (
     <>
-      <Button onClick={open} data-roamjs-presentation text={"PRESENT"} />
-      <Overlay canEscapeKeyClose onClose={onClose} isOpen={showOverlay}>
+      <Button
+        onClick={open}
+        data-roamjs-presentation
+        text={"PRESENT"}
+        onMouseDown={onMouseDown}
+      />
+      <Overlay isOpen={showOverlay}>
         <div
           style={{
             height: "100%",
@@ -521,12 +582,7 @@ const Presentation: React.FunctionComponent<{
             onClose={onClose}
             showNotes={showNotes}
             globalCollapsible={collapsible}
-          />
-          <Button
-            icon={"cross"}
-            onClick={onClose}
-            minimal
-            style={{ position: "absolute", top: 8, right: 8 }}
+            startIndex={startIndex}
           />
         </div>
       </Overlay>
@@ -535,6 +591,7 @@ const Presentation: React.FunctionComponent<{
 };
 
 type Slide = {
+  uid: string;
   text: string;
   children: Slides;
   heading?: number;
