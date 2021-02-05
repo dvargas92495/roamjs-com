@@ -18,7 +18,7 @@ const RENDERED_DONE =
 
 const transformRoot = ({ root }: Partial<ITransformResult>) => {
   if (root.c) {
-    root.c = root.c.filter((child) => child.v !== "");
+    root.c = root.c.filter((child) => child.v !== "" || child.c?.length);
     root.c.forEach((child) => transformRoot({ root: child }));
   }
   root.v = root.v
