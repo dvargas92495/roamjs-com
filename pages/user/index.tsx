@@ -293,7 +293,7 @@ const Website = () => {
             variant={"contained"}
             color={"primary"}
             style={{ margin: "0 16px" }}
-            disabled={!isWebsiteReady({ status, deploys })}
+            disabled={loading || !isWebsiteReady({ status, deploys })}
             onClick={manualDeploy}
           >
             Manual Deploy

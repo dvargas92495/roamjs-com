@@ -14,7 +14,7 @@ const UserIcon: React.FunctionComponent = () => {
   const [flag, setFlag] = useState(false);
   useEffect(() => {
     document.addEventListener("keydown", (e) => {
-      if (e.altKey && e.key.toLowerCase() === "u") {
+      if (e.metaKey && e.key.toLowerCase() === "u") {
         setFlag(e.shiftKey);
       }
     });
