@@ -22,7 +22,7 @@ import {
 } from "../../components/hooks";
 import Link from "next/link";
 import axios from "axios";
-import { FLOSS_API_URL } from "../../components/constants";
+import { AUTH0_AUDIENCE, FLOSS_API_URL } from "../../components/constants";
 import awsTlds from "../../components/aws_tlds";
 
 const UserValue: React.FunctionComponent = ({ children }) => (
@@ -455,7 +455,7 @@ const Funding = () => {
 };
 
 const UserPage = (): JSX.Element => {
-  const { isAuthenticated, error, user, logout, isLoading } = useAuth0();
+  const { isAuthenticated, error, user, logout, isLoading, loginWithPopup } = useAuth0();
   const onLogoutClick = useCallback(
     () =>
       logout({
@@ -464,40 +464,46 @@ const UserPage = (): JSX.Element => {
     [logout]
   );
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      window.location.replace("/login");
+    if (!isLoading && !isAuthenticated && typeof window !== 'undefined') {
+      loginWithPopup({
+        audience: AUTH0_AUDIENCE,
+      });
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading, isAuthenticated, loginWithPopup]);
   return (
     <StandardLayout>
-      <VerticalTabs title={"User Info"}>
-        <Card title={"Details"}>
-          {isAuthenticated && <Settings {...user} />}
-          {error && <div>{`${error.name}: ${error.message}`}</div>}
-        </Card>
-        {/*<Card title={"Connections"}>
+      {isLoading && "Loading..."}
+      {error && <div>{error.name}: {error.message}</div>}
+      {isAuthenticated && (
+        <>
+          <VerticalTabs title={"User Info"}>
+            <Card title={"Details"}>
+              <Settings {...user} />
+            </Card>
+            {/*<Card title={"Connections"}>
           <Connections />
           </Card>*/}
-        <Card title={"Billing"}>
-          <Billing />
-        </Card>
-        <Card title={"Static Site"}>
-          <Website />
-        </Card>
-        <Card title={"Projects Funded"}>
-          <Funding />
-        </Card>
-      </VerticalTabs>
-      {isAuthenticated && (
-        <Button
-          size="large"
-          variant="contained"
-          color="primary"
-          onClick={onLogoutClick}
-          style={{ marginTop: 24 }}
-        >
-          Log Out
-        </Button>
+            <Card title={"Billing"}>
+              <Billing />
+            </Card>
+            <Card title={"Static Site"}>
+              <Website />
+            </Card>
+            <Card title={"Projects Funded"}>
+              <Funding />
+            </Card>
+          </VerticalTabs>
+
+          <Button
+            size="large"
+            variant="contained"
+            color="primary"
+            onClick={onLogoutClick}
+            style={{ marginTop: 24 }}
+          >
+            Log Out
+          </Button>
+        </>
       )}
     </StandardLayout>
   );

@@ -26,6 +26,7 @@ const LoginPage = (): JSX.Element => {
   }, [email, password]);
   return (
     <Layout>
+      <div>UNDER DEVELOPMENT: Embedded Log In Still Not Working</div>
       <div style={{ display: "flex", flexDirection: "column", width: 400 }}>
         <StringField
           variant={"outlined"}
