@@ -455,7 +455,7 @@ const Funding = () => {
 };
 
 const UserPage = (): JSX.Element => {
-  const { isAuthenticated, error, user, logout, isLoading, loginWithPopup } = useAuth0();
+  const { isAuthenticated, error, user, logout, isLoading, loginWithRedirect } = useAuth0();
   const onLogoutClick = useCallback(
     () =>
       logout({
@@ -465,11 +465,12 @@ const UserPage = (): JSX.Element => {
   );
   useEffect(() => {
     if (!isLoading && !isAuthenticated && typeof window !== 'undefined') {
-      loginWithPopup({
+      loginWithRedirect({
         audience: AUTH0_AUDIENCE,
+        redirectUri: `${window.location.origin}/user`
       });
     }
-  }, [isLoading, isAuthenticated, loginWithPopup]);
+  }, [isLoading, isAuthenticated, loginWithRedirect]);
   return (
     <StandardLayout>
       {isLoading && "Loading..."}
