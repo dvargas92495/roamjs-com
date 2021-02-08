@@ -18,10 +18,12 @@ const TwitterContent: React.FunctionComponent<
     setLoading(true);
     setError("");
     // const tree = getTreeByPageName("roam/js/slack");
-    Promise.resolve(console.log(message)).catch(({ error, message }) => {
-      setError(error || message);
-      setLoading(false);
-    });
+    Promise.resolve(console.log(message))
+      .then(close)
+      .catch(({ error, message }) => {
+        setError(error || message);
+        setLoading(false);
+      });
   }, [setLoading, close, setError]);
   return (
     <div style={{ padding: 16 }}>
@@ -44,7 +46,7 @@ const TweetOverlay: React.FunctionComponent<ContentProps> = (props) => {
     <Popover
       target={
         <Icon
-          icon={<Twitter style={{ width: 15, marginLeft: 4 }} />}
+          icon={<Twitter style={{ width: 15, marginLeft: 4, cursor: 'pointer' }} />}
           onClick={open}
         />
       }
