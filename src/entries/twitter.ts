@@ -1,12 +1,14 @@
-import { getPageTitle, runExtension } from "../entry-helpers";
+import { createButtonObserver, getPageTitle, runExtension } from "../entry-helpers";
 import {
   addButtonListener,
   pushBullets,
   getConfigFromPage,
   genericError,
   getParentUidByBlockUid,
+  getUidsFromButton,
 } from "roam-client";
 import axios from "axios";
+import { render } from "../components/TweetOverlay";
 
 const TWITTER_REFERENCES_COMMAND = "twitter references";
 
@@ -61,4 +63,13 @@ const twitterReferencesListener = async (
 
 runExtension("twitter", () => {
   addButtonListener(TWITTER_REFERENCES_COMMAND, twitterReferencesListener);
+
+  createButtonObserver({
+    shortcut: 'tweet',
+    attribute: 'write-tweet'
+    render: (b: HTMLButtonElement) => {
+      const {blockUid} = getUidsFromButton(b);
+      render({parent: b.parentElement, blockUid })
+    },
+  })
 });
