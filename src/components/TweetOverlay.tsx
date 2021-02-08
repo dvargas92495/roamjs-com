@@ -2,9 +2,7 @@ import { Button, Icon, Popover, Spinner, Text } from "@blueprintjs/core";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import Twitter from "../assets/Twitter.svg";
-import {
-  getTreeByBlockUid,
-} from "roam-client";
+import { getTreeByBlockUid } from "roam-client";
 
 type ContentProps = {
   blockUid: string;
@@ -13,7 +11,7 @@ type ContentProps = {
 const TwitterContent: React.FunctionComponent<
   ContentProps & { close: () => void }
 > = ({ close, blockUid }) => {
-  const message = getTreeByBlockUid(blockUid).children.map(t => t.text);
+  const message = getTreeByBlockUid(blockUid).children.map((t) => t.text);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const onClick = useCallback(() => {
@@ -46,12 +44,7 @@ const TweetOverlay: React.FunctionComponent<ContentProps> = (props) => {
     <Popover
       target={
         <Icon
-          icon={
-            <Twitter
-              viewBox="70 70 130 130"
-              style={{ width: 15, marginLeft: 4 }}
-            />
-          }
+          icon={<Twitter style={{ width: 15, marginLeft: 4 }} />}
           onClick={open}
         />
       }
