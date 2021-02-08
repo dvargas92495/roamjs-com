@@ -1,6 +1,8 @@
 import { AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
 import { APIGatewayProxyResult } from "aws-lambda";
+import OAuth from "oauth-1.0a";
+import crypto from "crypto";
 
 export const headers = {
   "Access-Control-Allow-Origin": "*",
@@ -91,3 +93,14 @@ export const getFlossActiveContracts = (): Promise<{
     .then(
       (r: AxiosResponse<{ projects: Contracts; issues: Contracts }>) => r.data
     );
+
+export const twitterOAuth = new OAuth({
+  consumer: {
+    key: process.env.TWITTER_CONSUMER_KEY || "",
+    secret: process.env.TWITTER_CONSUMER_SECRET || "",
+  },
+  signature_method: "HMAC-SHA1",
+  hash_function(base_string, key) {
+    return crypto.createHmac("sha1", key).update(base_string).digest("base64");
+  },
+});
