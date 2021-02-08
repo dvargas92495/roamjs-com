@@ -54,7 +54,7 @@ const onTodo = (blockUid: string, oldValue: string) => {
     );
     formattedPairs.forEach(([before, after]) => {
       if (after) {
-        value = value.replace(after, before);
+        value = value.replace(before, after);
       } else {
         value = `${value}#[[${before}]]`;
       }
