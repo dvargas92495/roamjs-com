@@ -26,6 +26,7 @@ const contributors = {
   "Rushi Bhavsar": "https://twitter.com/RushiBhavsar",
   "Chris Kunicki": "https://twitter.com/roamhacker",
   "Ivo Velitchkov": "https://www.strategicstructures.com/",
+  "Mathew McGann": "http://www.mcgannfreestone.com.au/",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{
