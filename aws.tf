@@ -115,6 +115,7 @@ module "aws-serverless-backend" {
         "twitter-auth/post",
         "twitter-login/post",
         "twitter-search/get",
+        "twitter-tweet/post",
         "website-status/get",
     ]
     tags = {
