@@ -1,8 +1,4 @@
-import {
-  createOverlayObserver,
-  isApple,
-  runExtension,
-} from "../entry-helpers";
+import { createOverlayObserver, isApple, runExtension } from "../entry-helpers";
 import {
   getConfigFromPage,
   getTextByBlockUid,
@@ -14,6 +10,7 @@ import {
 
 let blockElementSelected: Element;
 const ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME = "roamjs-alias-page-synonyms";
+const ALIAS_PAGE_SYNONYM_ATTRIBUTE = "data-roamjs-has-alias-option";
 
 const createMenuOption = (menuOnClick: () => void) => {
   const option = document.createElement("li");
@@ -105,27 +102,30 @@ runExtension("page-synonyms", () => {
 
   createOverlayObserver(() => {
     const uls = document.getElementsByClassName("bp3-menu bp3-text-small");
-    Array.from(uls).forEach((u) => {
-      if (
-        u.tagName === "UL" &&
-        !u.getElementsByClassName(ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME).length
-      ) {
-        const ul = u as HTMLUListElement;
-        const dividers = Array.from(
-          ul.getElementsByClassName("bp3-menu-divider")
-        );
-        if (dividers.length > 0 && !ul.contains(option)) {
-          const divider = dividers[0];
-          ul.insertBefore(option, divider);
-        } else if (
-          !ul.contains(multiOption) &&
-          dividers.length === 0 &&
-          ul.innerText.indexOf("Jump to block") === -1
+    Array.from(uls)
+      .filter((u) => !u.hasAttribute(ALIAS_PAGE_SYNONYM_ATTRIBUTE))
+      .forEach((u) => {
+        if (
+          u.tagName === "UL" &&
+          !u.getElementsByClassName(ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME).length
         ) {
-          ul.appendChild(multiOption);
+          const ul = u as HTMLUListElement;
+          ul.setAttribute(ALIAS_PAGE_SYNONYM_ATTRIBUTE, "true");
+          const dividers = Array.from(
+            ul.getElementsByClassName("bp3-menu-divider")
+          );
+          if (dividers.length > 0 && !ul.contains(option)) {
+            const divider = dividers[0];
+            ul.insertBefore(option, divider);
+          } else if (
+            !ul.contains(multiOption) &&
+            dividers.length === 0 &&
+            ul.innerText.indexOf("Jump to block") === -1
+          ) {
+            ul.appendChild(multiOption);
+          }
         }
-      }
-    });
+      });
   });
 
   document.addEventListener("mousedown", (e) => {
