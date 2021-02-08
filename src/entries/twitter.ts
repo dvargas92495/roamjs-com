@@ -66,7 +66,7 @@ runExtension("twitter", () => {
 
   createButtonObserver({
     shortcut: 'tweet',
-    attribute: 'write-tweet'
+    attribute: 'write-tweet',
     render: (b: HTMLButtonElement) => {
       const {blockUid} = getUidsFromButton(b);
       render({parent: b.parentElement, blockUid })
