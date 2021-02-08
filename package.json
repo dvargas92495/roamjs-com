@@ -123,6 +123,7 @@
     "next-mdx-enhanced": "^5.0.0",
     "next-optimized-images": "^2.6.2",
     "node-emoji": "^1.10.0",
+    "oauth-1.0a": "^2.2.6",
     "react": "^17.0.1",
     "react-charts": "^2.0.0-beta.7",
     "react-dom": "^17.0.1",

@@ -112,6 +112,8 @@ module "aws-serverless-backend" {
         "queue-issues/get",
         "slack-url/post",
         "shutdown-website/post",
+        "twitter-auth/post",
+        "twitter-login/post",
         "twitter-search/get",
         "website-status/get",
     ]
