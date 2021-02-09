@@ -82,9 +82,9 @@ runExtension("twitter", () => {
 
   createHTMLObserver({
     tag: "div",
-    className: "rm-block-children",
+    className: "roam-article",
     callback: (d: HTMLDivElement) => {
-      const title = getPageTitle(d).textContent;
+      const title = d.getElementsByClassName('rm-title-display')[0]?.textContent;
       if (title === "roam/js/twitter") {
         if (!d.hasAttribute("data-roamjs-twitter-login")) {
           const tree = getTreeByPageName("roam/js/twitter");

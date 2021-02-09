@@ -21,7 +21,7 @@ const TwitterLogin: React.FunctionComponent = () => {
         const loginWindow = window.open(
           `https://api.twitter.com/oauth/authenticate?oauth_token=${r.data.token}`,
           "roamjs:twitter:login",
-          `left=${left},top=${top},width=${width},height=${height},resizable,scrollbars=yes,status=1`
+          `left=${left},top=${top},width=${width},height=${height},status=1`
         );
         loginWindow.addEventListener("popstate", () => {
           const query = new URLSearchParams(loginWindow.location.search);
@@ -45,6 +45,7 @@ const TwitterLogin: React.FunctionComponent = () => {
             }
           }
         });
+        loginWindow.addEventListener('message', console.log)
       }),
     [windowRef]
   );
