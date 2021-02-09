@@ -6,6 +6,7 @@ import { WebClient } from "@slack/web-api";
 import {
   getTreeByPageName,
   TreeNode,
+  getDisplayNameByEmail,
   getEditedUserEmailByBlockUid,
   getPageTitleByBlockUid,
   getParentTextByBlockUid,
@@ -13,6 +14,7 @@ import {
   getTextByBlockUid,
 } from "roam-client";
 import { getSettingValueFromTree } from "./hooks";
+import { resolveRefs } from "../entry-helpers";
 
 type ContentProps = {
   tag: string;
@@ -25,6 +27,13 @@ type SlackMember = {
   name: string;
   profile: { email: string; display_name?: string };
 };
+
+type SlackChannel = {
+  id: string;
+  name: string;
+};
+
+const aliasRegex = new RegExp(`\\[([^\\]]*)\\]\\(([^\\)]*)\\)`, "g");
 
 const toName = (s: SlackMember) => s.profile.display_name || s.name;
 
@@ -53,6 +62,13 @@ export const getUserFormat = (tree: TreeNode[]): string =>
     defaultValue: "@{username}",
   });
 
+export const getChannelFormat = (tree: TreeNode[]): string =>
+  getSettingValueFromTree({
+    tree,
+    key: "channel format",
+    defaultValue: "#{channel}",
+  });
+
 export const getAliases = (tree: TreeNode[]): { [key: string]: string } =>
   getSettingMapFromTree({ key: "aliases", tree });
 
@@ -71,6 +87,7 @@ const SlackContent: React.FunctionComponent<
     const tree = getTreeByPageName("roam/js/slack");
     const token = getSettingValueFromTree({ tree, key: "token" });
     const userFormat = getUserFormat(tree);
+    const channelFormat = getChannelFormat(tree);
     const aliases = getAliases(tree);
     const aliasedName = aliases[tag]?.toUpperCase?.();
     const realNameRegex = new RegExp(
@@ -81,6 +98,10 @@ const SlackContent: React.FunctionComponent<
       userFormat.replace("{username}", "(.*)"),
       "i"
     );
+    const channelRegex = new RegExp(
+      channelFormat.replace("{channel}", "(.*)"),
+      "i"
+    );
     const findFunction = realNameRegex.test(tag)
       ? (m: SlackMember) =>
           m.real_name.toUpperCase() ===
@@ -89,46 +110,59 @@ const SlackContent: React.FunctionComponent<
       ? (m: SlackMember) =>
           toName(m).toUpperCase() === tag.match(usernameRegex)[1].toUpperCase()
       : () => false;
+    const channelFindFunction = channelRegex.test(tag)
+      ? (c: SlackChannel) =>
+          c.name.toUpperCase() === tag.match(channelRegex)[1].toUpperCase()
+      : () => false;
     const contentFormat = getSettingValueFromTree({
       tree,
       key: "content format",
       defaultValue: "{block}",
     });
-
-    web.users
-      .list({ token })
-      .then((r) => {
-        const members = r.members as SlackMember[];
+    Promise.all([web.users.list({ token }), web.conversations.list({ token })])
+      .then(([userResponse, channelResponse]) => {
+        const members = userResponse.members as SlackMember[];
+        const channels = channelResponse.channels as SlackChannel[];
         const memberId = members.find(
           (m) => toName(m).toUpperCase() === aliasedName || findFunction(m)
         )?.id;
-        if (memberId) {
+        const channelId = channels.find(
+          (c) => c.name.toUpperCase() === aliasedName || channelFindFunction(c)
+        )?.id;
+        const channel = memberId || channelId;
+        if (channel) {
           return web.chat
             .postMessage({
-              channel: memberId,
+              channel,
               text: contentFormat
-                .replace(/{block}/gi, message)
+                .replace(/{block}/gi, resolveRefs(message))
                 .replace(/{last edited by}/gi, () => {
                   const email = getEditedUserEmailByBlockUid(blockUid);
+                  const displayName = getDisplayNameByEmail(email);
                   const memberByEmail = members.find(
                     (m) => m.profile.email === email
                   );
-                  return memberByEmail ? `@${memberByEmail.name}` : email;
+                  return memberByEmail
+                    ? `<@${memberByEmail.id}>`
+                    : displayName || email;
                 })
                 .replace(/{page}/gi, () => getPageTitleByBlockUid(blockUid))
                 .replace(
                   /{parent(?::\s*((?:#?\[\[[^\]]*\]\]\s*)+))?}/gi,
                   (_, t: string) =>
-                    t
-                      ? t
-                          .trim()
-                          .substring(2, t.trim().length - 2)
-                          .split(/\]\]\s*\[\[/)
-                          .map((tag) =>
-                            getParentTextByBlockUidAndTag({ blockUid, tag })
-                          )
-                          .find((s) => !!s) || getParentTextByBlockUid(blockUid)
-                      : getParentTextByBlockUid(blockUid)
+                    resolveRefs(
+                      t
+                        ? t
+                            .trim()
+                            .substring(2, t.trim().length - 2)
+                            .split(/\]\]\s*\[\[/)
+                            .map((tag) =>
+                              getParentTextByBlockUidAndTag({ blockUid, tag })
+                            )
+                            .find((s) => !!s) ||
+                            getParentTextByBlockUid(blockUid)
+                        : getParentTextByBlockUid(blockUid)
+                    )
                 )
                 .replace(
                   /{link}/gi,
@@ -136,7 +170,8 @@ const SlackContent: React.FunctionComponent<
                     /\/page\/.*$/,
                     ""
                   )}/page/${blockUid}`
-                ),
+                )
+                .replace(aliasRegex, (_, alias, url) => `<${url}|${alias}>`),
               token,
             })
             .then(close);

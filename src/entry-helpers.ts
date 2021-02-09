@@ -784,12 +784,31 @@ export const createCustomSmartBlockCommand = ({
   document.addEventListener("input", inputListener);
 };
 
+export const getRoamUrl = (blockUid: string): string =>
+  `${window.location.href.replace(/\/page\/.*$/, "")}/page/${blockUid}`;
+
 const blockRefRegex = new RegExp("\\(\\((..........?)\\)\\)", "g");
+const aliasRefRegex = new RegExp(
+  `\\[[^\\]]*\\]\\((${blockRefRegex.source})\\)`,
+  "g"
+);
+const aliasTagRegex = new RegExp(
+  `\\[[^\\]]*\\]\\((\\[\\[([^\\]]*)\\]\\])\\)`,
+  "g"
+);
 export const resolveRefs = (text: string): string => {
-  return text.replace(blockRefRegex, (_, blockUid) => {
-    const reference = getTextByBlockUid(blockUid);
-    return reference || blockUid;
-  });
+  return text
+    .replace(aliasTagRegex, (alias, del, pageName) => {
+      const blockUid = getPageUidByPageTitle(pageName);
+      return alias.replace(del, `${getRoamUrl(blockUid)}`);
+    })
+    .replace(aliasRefRegex, (alias, del, blockUid) => {
+      return alias.replace(del, `${getRoamUrl(blockUid)}`);
+    })
+    .replace(blockRefRegex, (_, blockUid) => {
+      const reference = getTextByBlockUid(blockUid);
+      return reference || blockUid;
+    });
 };
 
 export const getTitlesReferencingPagesInSameBlockTree = (
