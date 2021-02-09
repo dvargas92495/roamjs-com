@@ -406,6 +406,7 @@ const PresentationContent: React.FunctionComponent<{
   });
   const onCloseClick = useCallback(
     (e: Event) => {
+      revealRef.current.getRevealElement().style.display = "none";
       onClose(revealRef.current.getState().indexh);
       e.stopImmediatePropagation();
     },
@@ -522,17 +523,21 @@ const Presentation: React.FunctionComponent<{
         const target = Array.from(
           document.getElementsByClassName("roam-block")
         ).find((d) => d.id.endsWith(uidToFocus));
-        target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-        setTimeout(() => {
-          const textArea = document.getElementById(
-            target.id
-          ) as HTMLTextAreaElement;
-          textArea.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-          textArea.setSelectionRange(
-            textArea.value.length,
-            textArea.value.length
-          );
-        }, 50);
+        if (target) {
+          target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+          setTimeout(() => {
+            const textArea = document.getElementById(
+              target.id
+            ) as HTMLTextAreaElement;
+            textArea.dispatchEvent(
+              new MouseEvent("mouseup", { bubbles: true })
+            );
+            textArea.setSelectionRange(
+              textArea.value.length,
+              textArea.value.length
+            );
+          }, 50);
+        }
       }, 1);
     },
     [setShowOverlay, slides]
