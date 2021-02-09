@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { TreeNode } from "roam-client";
 
 export const useArrowKeyDown = <T>({
   results,
@@ -47,3 +48,20 @@ export const getRenderRoot = (id: string): HTMLDivElement => {
   app.parentElement.appendChild(newRoot);
   return newRoot;
 };
+
+export const getSettingValueFromTree = ({
+  tree,
+  key,
+  defaultValue = "",
+}: {
+  tree: TreeNode[];
+  key: string;
+  defaultValue?: string;
+}): string => {
+  const node = tree.find((s) => new RegExp(key, "i").test(s.text.trim()));
+  const value = node ? node.children[0].text.trim() : defaultValue;
+  return value;
+};
+
+export const API_URL =
+  "https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production";

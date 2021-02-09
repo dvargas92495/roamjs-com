@@ -1,4 +1,9 @@
-import { createButtonObserver, getPageTitle, runExtension } from "../entry-helpers";
+import {
+  createButtonObserver,
+  createHTMLObserver,
+  getPageTitle,
+  runExtension,
+} from "../entry-helpers";
 import {
   addButtonListener,
   pushBullets,
@@ -6,9 +11,11 @@ import {
   genericError,
   getParentUidByBlockUid,
   getUidsFromButton,
+  getTreeByPageName,
 } from "roam-client";
 import axios from "axios";
 import { render } from "../components/TweetOverlay";
+import { render as loginRender } from "../components/TwitterLogin";
 
 const TWITTER_REFERENCES_COMMAND = "twitter references";
 
@@ -65,11 +72,30 @@ runExtension("twitter", () => {
   addButtonListener(TWITTER_REFERENCES_COMMAND, twitterReferencesListener);
 
   createButtonObserver({
-    shortcut: 'tweet',
-    attribute: 'write-tweet',
+    shortcut: "tweet",
+    attribute: "write-tweet",
     render: (b: HTMLButtonElement) => {
-      const {blockUid} = getUidsFromButton(b);
-      render({parent: b.parentElement, blockUid })
+      const { blockUid } = getUidsFromButton(b);
+      render({ parent: b.parentElement, blockUid });
     },
-  })
+  });
+
+  createHTMLObserver({
+    tag: "div",
+    className: "roam-article",
+    callback: (d: HTMLDivElement) => {
+      const title = d.getElementsByClassName('rm-title-display')[0]?.textContent;
+      if (title === "roam/js/twitter") {
+        if (!d.hasAttribute("data-roamjs-twitter-login")) {
+          const tree = getTreeByPageName("roam/js/twitter");
+          const oauthNode = tree.find((t) => /oauth/i.test(t.text.trim()));
+          if (!oauthNode) {
+            const span = document.createElement("span");
+            d.insertBefore(span, d.firstElementChild);
+            loginRender(span);
+          }
+        }
+      }
+    },
+  });
 });
