@@ -1,8 +1,5 @@
 import { getTreeByPageName, getUids } from "roam-client";
-import {
-  createHTMLObserver,
-  runExtension,
-} from "../entry-helpers";
+import { createHTMLObserver, runExtension } from "../entry-helpers";
 import { getAliases, getUserFormat, render } from "../components/SlackOverlay";
 
 const ATTRIBUTE = "data-roamjs-slack-overlay";
@@ -18,9 +15,17 @@ runExtension("slack", () => {
           getUserFormat(tree).replace(/{real name}|{username}/, "(.*)"),
           "i"
         );
+        const channelFormatRegex = new RegExp(
+          getUserFormat(tree).replace(/{real name}|{username}/, "(.*)"),
+          "i"
+        );
         const aliasKeys = new Set(Object.keys(getAliases(tree)));
-        const r = s.getAttribute('data-tag');
-        if (aliasKeys.size ? aliasKeys.has(r) : userFormatRegex.test(r)) {
+        const r = s.getAttribute("data-tag");
+        if (
+          aliasKeys.size
+            ? aliasKeys.has(r)
+            : userFormatRegex.test(r) || channelFormatRegex.test(r)
+        ) {
           s.setAttribute(ATTRIBUTE, "true");
           const { blockUid } = getUids(
             s.closest(".roam-block") as HTMLDivElement

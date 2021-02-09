@@ -13,6 +13,7 @@ import {
   getTextByBlockUid,
 } from "roam-client";
 import { getSettingValueFromTree } from "./hooks";
+import { resolveRefs } from "../entry-helpers";
 
 type ContentProps = {
   tag: string;
@@ -53,6 +54,13 @@ export const getUserFormat = (tree: TreeNode[]): string =>
     defaultValue: "@{username}",
   });
 
+export const getChannelFormat = (tree: TreeNode[]): string =>
+  getSettingValueFromTree({
+    tree,
+    key: "channel format",
+    defaultValue: "#{channel}",
+  });
+
 export const getAliases = (tree: TreeNode[]): { [key: string]: string } =>
   getSettingMapFromTree({ key: "aliases", tree });
 
@@ -71,6 +79,7 @@ const SlackContent: React.FunctionComponent<
     const tree = getTreeByPageName("roam/js/slack");
     const token = getSettingValueFromTree({ tree, key: "token" });
     const userFormat = getUserFormat(tree);
+    const channelFormat = getChannelFormat(tree);
     const aliases = getAliases(tree);
     const aliasedName = aliases[tag]?.toUpperCase?.();
     const realNameRegex = new RegExp(
@@ -94,20 +103,19 @@ const SlackContent: React.FunctionComponent<
       key: "content format",
       defaultValue: "{block}",
     });
-
-    web.users
-      .list({ token })
-      .then((r) => {
-        const members = r.members as SlackMember[];
+    Promise.all([web.users.list({ token }), web.channels.list({ token })])
+      .then(([userResponse, channelResponse]) => {
+        const members = userResponse.members as SlackMember[];
         const memberId = members.find(
           (m) => toName(m).toUpperCase() === aliasedName || findFunction(m)
         )?.id;
+        const channelId = 0;
         if (memberId) {
           return web.chat
             .postMessage({
               channel: memberId,
               text: contentFormat
-                .replace(/{block}/gi, message)
+                .replace(/{block}/gi, resolveRefs(message))
                 .replace(/{last edited by}/gi, () => {
                   const email = getEditedUserEmailByBlockUid(blockUid);
                   const memberByEmail = members.find(
@@ -119,16 +127,19 @@ const SlackContent: React.FunctionComponent<
                 .replace(
                   /{parent(?::\s*((?:#?\[\[[^\]]*\]\]\s*)+))?}/gi,
                   (_, t: string) =>
-                    t
-                      ? t
-                          .trim()
-                          .substring(2, t.trim().length - 2)
-                          .split(/\]\]\s*\[\[/)
-                          .map((tag) =>
-                            getParentTextByBlockUidAndTag({ blockUid, tag })
-                          )
-                          .find((s) => !!s) || getParentTextByBlockUid(blockUid)
-                      : getParentTextByBlockUid(blockUid)
+                    resolveRefs(
+                      t
+                        ? t
+                            .trim()
+                            .substring(2, t.trim().length - 2)
+                            .split(/\]\]\s*\[\[/)
+                            .map((tag) =>
+                              getParentTextByBlockUidAndTag({ blockUid, tag })
+                            )
+                            .find((s) => !!s) ||
+                            getParentTextByBlockUid(blockUid)
+                        : getParentTextByBlockUid(blockUid)
+                    )
                 )
                 .replace(
                   /{link}/gi,
