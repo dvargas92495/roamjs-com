@@ -28,6 +28,13 @@ type SlackMember = {
   profile: { email: string; display_name?: string };
 };
 
+type SlackChannel = {
+  id: string;
+  name: string;
+};
+
+const aliasRegex = new RegExp(`\\[([^\\]]*)\\]\\(([^\\)]*)\\)`, "g");
+
 const toName = (s: SlackMember) => s.profile.display_name || s.name;
 
 const getSettingMapFromTree = ({
@@ -91,6 +98,10 @@ const SlackContent: React.FunctionComponent<
       userFormat.replace("{username}", "(.*)"),
       "i"
     );
+    const channelRegex = new RegExp(
+      channelFormat.replace("{channel}", "(.*)"),
+      "i"
+    );
     const findFunction = realNameRegex.test(tag)
       ? (m: SlackMember) =>
           m.real_name.toUpperCase() ===
@@ -98,6 +109,10 @@ const SlackContent: React.FunctionComponent<
       : usernameRegex.test(tag)
       ? (m: SlackMember) =>
           toName(m).toUpperCase() === tag.match(usernameRegex)[1].toUpperCase()
+      : () => false;
+    const channelFindFunction = channelRegex.test(tag)
+      ? (c: SlackChannel) =>
+          c.name.toUpperCase() === tag.match(channelRegex)[1].toUpperCase()
       : () => false;
     const contentFormat = getSettingValueFromTree({
       tree,
@@ -107,14 +122,18 @@ const SlackContent: React.FunctionComponent<
     Promise.all([web.users.list({ token }), web.conversations.list({ token })])
       .then(([userResponse, channelResponse]) => {
         const members = userResponse.members as SlackMember[];
+        const channels = channelResponse.channels as SlackChannel[];
         const memberId = members.find(
           (m) => toName(m).toUpperCase() === aliasedName || findFunction(m)
         )?.id;
-        const channelId = 0;
-        if (memberId) {
+        const channelId = channels.find(
+          (c) => c.name.toUpperCase() === aliasedName || channelFindFunction(c)
+        )?.id;
+        const channel = memberId || channelId;
+        if (channel) {
           return web.chat
             .postMessage({
-              channel: memberId,
+              channel,
               text: contentFormat
                 .replace(/{block}/gi, resolveRefs(message))
                 .replace(/{last edited by}/gi, () => {
@@ -124,7 +143,7 @@ const SlackContent: React.FunctionComponent<
                     (m) => m.profile.email === email
                   );
                   return memberByEmail
-                    ? `@${toName(memberByEmail)}`
+                    ? `<@${memberByEmail.id}>`
                     : displayName || email;
                 })
                 .replace(/{page}/gi, () => getPageTitleByBlockUid(blockUid))
@@ -151,7 +170,8 @@ const SlackContent: React.FunctionComponent<
                     /\/page\/.*$/,
                     ""
                   )}/page/${blockUid}`
-                ),
+                )
+                .replace(aliasRegex, (_, alias, url) => `<${url}|${alias}>`),
               token,
             })
             .then(close);
