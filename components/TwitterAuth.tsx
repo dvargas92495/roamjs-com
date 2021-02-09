@@ -11,7 +11,7 @@ const TwitterAuth: React.FunctionComponent = () => {
         if (oauth_token && oauth_verifier) {
           window.postMessage(
             JSON.stringify({ oauth_token, oauth_verifier }),
-            "https://roamresearch.com"
+            "https://roamjs.com"
           );
         }
       }
