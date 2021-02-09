@@ -21,22 +21,27 @@ const TwitterLogin: React.FunctionComponent = () => {
           "roamjs:twitter:login",
           `left=${left},top=${top},width=${width},height=${height},status=1`
         );
-        loginWindow.addEventListener("message", (e) => {
-          loginWindow.close();
-          axios
-            .post(`${API_URL}/twitter-auth`, JSON.parse(e.data))
-            .then((rr) => {
-              const blockUid = "RjsTwrTok";
-              window.roamAlphaAPI.createBlock({
-                location: { "parent-uid": pageUid, order: 0 },
-                block: { string: "oauth", uid: blockUid },
+        const messageEventListener = (e: MessageEvent) => {
+          console.log(e);
+          if (e.origin === "https://roamjs.com") {
+            loginWindow.close();
+            axios
+              .post(`${API_URL}/twitter-auth`, JSON.parse(e.data))
+              .then((rr) => {
+                const blockUid = "RjsTwrTok";
+                window.roamAlphaAPI.createBlock({
+                  location: { "parent-uid": pageUid, order: 0 },
+                  block: { string: "oauth", uid: blockUid },
+                });
+                window.roamAlphaAPI.createBlock({
+                  location: { "parent-uid": blockUid, order: 0 },
+                  block: { string: JSON.stringify(rr.data) },
+                });
+                window.removeEventListener('message', messageEventListener);
               });
-              window.roamAlphaAPI.createBlock({
-                location: { "parent-uid": blockUid, order: 0 },
-                block: { string: JSON.stringify(rr.data) },
-              });
-            });
-        });
+          }
+        }
+        window.addEventListener("message", messageEventListener);
       }),
     [windowRef]
   );
