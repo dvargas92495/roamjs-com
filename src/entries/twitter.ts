@@ -15,6 +15,7 @@ import {
 } from "roam-client";
 import axios from "axios";
 import { render } from "../components/TweetOverlay";
+import { render as loginRender } from "../components/TwitterLogin";
 
 const TWITTER_REFERENCES_COMMAND = "twitter references";
 
@@ -89,7 +90,9 @@ runExtension("twitter", () => {
           const tree = getTreeByPageName('roam/js/twitter');
           const oauthNode = tree.find((t) => /oauth/i.test(t.text.trim()));
           if (!oauthNode) {
-            
+            const span = document.createElement('span');
+            h1.appendChild(span);
+            loginRender(span);
           }
         }
       }
