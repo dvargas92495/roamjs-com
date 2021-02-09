@@ -1,6 +1,6 @@
 import { getTreeByPageName, getUids } from "roam-client";
 import { createHTMLObserver, runExtension } from "../entry-helpers";
-import { getAliases, getUserFormat, render } from "../components/SlackOverlay";
+import { getAliases, getChannelFormat, getUserFormat, render } from "../components/SlackOverlay";
 
 const ATTRIBUTE = "data-roamjs-slack-overlay";
 
@@ -16,7 +16,7 @@ runExtension("slack", () => {
           "i"
         );
         const channelFormatRegex = new RegExp(
-          getUserFormat(tree).replace(/{real name}|{username}/, "(.*)"),
+          getChannelFormat(tree).replace(/{channel}/, "(.*)"),
           "i"
         );
         const aliasKeys = new Set(Object.keys(getAliases(tree)));

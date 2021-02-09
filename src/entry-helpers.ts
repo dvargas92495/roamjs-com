@@ -792,8 +792,16 @@ const aliasRefRegex = new RegExp(
   `\\[[^\\]]*\\]\\((${blockRefRegex.source})\\)`,
   "g"
 );
+const aliasTagRegex = new RegExp(
+  `\\[[^\\]]*\\]\\((\\[\\[([^\\]]*)\\]\\])\\)`,
+  "g"
+);
 export const resolveRefs = (text: string): string => {
   return text
+    .replace(aliasTagRegex, (alias, del, pageName) => {
+      const blockUid = getPageUidByPageTitle(pageName);
+      return alias.replace(del, `${getRoamUrl(blockUid)}`);
+    })
     .replace(aliasRefRegex, (alias, del, blockUid) => {
       return alias.replace(del, `${getRoamUrl(blockUid)}`);
     })
