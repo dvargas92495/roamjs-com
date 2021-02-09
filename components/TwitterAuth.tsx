@@ -9,9 +9,9 @@ const TwitterAuth: React.FunctionComponent = () => {
         const oauth_token = query.get("oauth_token");
         const oauth_verifier = query.get("oauth_verifier");
         if (oauth_token && oauth_verifier) {
-          window.postMessage(
+          window.opener.postMessage(
             JSON.stringify({ oauth_token, oauth_verifier }),
-            "https://roamjs.com"
+            "https://roamresearch.com"
           );
         }
       }
