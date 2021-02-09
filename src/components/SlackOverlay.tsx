@@ -6,6 +6,7 @@ import { WebClient } from "@slack/web-api";
 import {
   getTreeByPageName,
   TreeNode,
+  getDisplayNameByEmail,
   getEditedUserEmailByBlockUid,
   getPageTitleByBlockUid,
   getParentTextByBlockUid,
@@ -103,7 +104,7 @@ const SlackContent: React.FunctionComponent<
       key: "content format",
       defaultValue: "{block}",
     });
-    Promise.all([web.users.list({ token }), web.channels.list({ token })])
+    Promise.all([web.users.list({ token }), web.conversations.list({ token })])
       .then(([userResponse, channelResponse]) => {
         const members = userResponse.members as SlackMember[];
         const memberId = members.find(
@@ -118,10 +119,13 @@ const SlackContent: React.FunctionComponent<
                 .replace(/{block}/gi, resolveRefs(message))
                 .replace(/{last edited by}/gi, () => {
                   const email = getEditedUserEmailByBlockUid(blockUid);
+                  const displayName = getDisplayNameByEmail(email);
                   const memberByEmail = members.find(
                     (m) => m.profile.email === email
                   );
-                  return memberByEmail ? `@${memberByEmail.name}` : email;
+                  return memberByEmail
+                    ? `@${toName(memberByEmail)}`
+                    : displayName || email;
                 })
                 .replace(/{page}/gi, () => getPageTitleByBlockUid(blockUid))
                 .replace(
