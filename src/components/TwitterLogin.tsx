@@ -2,6 +2,7 @@ import { Button, Icon } from "@blueprintjs/core";
 import axios from "axios";
 import React, { useCallback, useMemo } from "react";
 import ReactDOM from "react-dom";
+import { generateBlockUid } from "roam-client";
 import Twitter from "../assets/Twitter.svg";
 import { getPageUidByPageTitle } from "../entry-helpers";
 import { API_URL } from "./hooks";
@@ -26,17 +27,14 @@ const TwitterLogin: React.FunctionComponent<{onSuccess: () => void}> = ({onSucce
             axios
               .post(`${API_URL}/twitter-auth`, JSON.parse(e.data))
               .then((rr) => {
-                const blockUid = "RjsTwrTok";
+                const blockUid = generateBlockUid();
                 window.roamAlphaAPI.createBlock({
                   location: { "parent-uid": pageUid, order: 0 },
-                  block: { string: "oauth", uid: blockUid },
+                  block: { open: false, string: "oauth", uid: blockUid },
                 });
                 window.roamAlphaAPI.createBlock({
                   location: { "parent-uid": blockUid, order: 0 },
                   block: { string: JSON.stringify(rr.data) },
-                });
-                window.roamAlphaAPI.updateBlock({
-                  block: {open: false, uid: blockUid}
                 });
                 window.removeEventListener('message', messageEventListener);
                 onSuccess();

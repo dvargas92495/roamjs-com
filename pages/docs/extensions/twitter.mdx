@@ -7,6 +7,8 @@ import TwitterAuth from "../../../components/TwitterAuth";
 
 <TwitterAuth />
 
+### Searching Tweets
+
 The script supports the following configuration attributes, to be added in the `[[roam/js/twitter]]` page:
 
 - `Username` - (Required) This is your twitter handle.
@@ -18,3 +20,27 @@ Here's an example configuration page:
 In any page, create a `Twitter References` button by typing in `{{twitter references}}` (case-insensitive) in a block. Upon clicking the button, the extension will clear the button and fill the page in with the tweets where you've mentioned that page title. So, if you've tweeted about `books` a lot on twitter, you can head over to the `books` page on roam, and then pull all your tweets about `books`!
 
 One caveat is that this can only pull tweets made in the last 7 days.
+
+### Sending Tweets
+
+THIS SECTION IS STILL UNDER DEVELOPMENT
+
+When navigating to a `roam/js/twitter` page, a log in with Twitter button will be rendered on the screen.
+
+![](/images/twitter-login.png)
+
+A popup window will appear, prompting you to authorize RoamJS to be able to send tweets on your behalf. You may need to allow popups from Roam for this to work. After authorizing RoamJS, a block will be created in your `roam/js/twitter` page:
+
+![](/images/twitter-oauth.png)
+
+This block contains access tokens that RoamJS could use to send Tweets. **DO NOT SHARE THIS BLOCK WITH ANYONE.**
+
+To send a tweet, create a `{{tweet}}` button and nest the content of the tweet as a child. 
+
+![](/images/twitter-block.png)
+
+The button will be replaced with a Twitter icon. Clicking the icon will render an overlay with a "Send Tweet" button. 
+
+![](/images/tweet-overlay.png)
+
+Clicking "Send Tweet" will send the first child as the content of the Tweet!
