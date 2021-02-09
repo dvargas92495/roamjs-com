@@ -1,14 +1,13 @@
 import { Button, Icon } from "@blueprintjs/core";
 import axios from "axios";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useMemo } from "react";
 import ReactDOM from "react-dom";
 import Twitter from "../assets/Twitter.svg";
 import { getPageUidByPageTitle } from "../entry-helpers";
 import { API_URL } from "./hooks";
 
-const TwitterLogin: React.FunctionComponent = () => {
+const TwitterLogin: React.FunctionComponent<{onSuccess: () => void}> = ({onSuccess}) => {
   const pageUid = useMemo(() => getPageUidByPageTitle("roam/js/twitter"), []);
-  const windowRef = useRef<Window>();
   const onClick = useCallback(
     () =>
       axios.post(`${API_URL}/twitter-login`).then((r) => {
@@ -38,12 +37,13 @@ const TwitterLogin: React.FunctionComponent = () => {
                   block: { string: JSON.stringify(rr.data) },
                 });
                 window.removeEventListener('message', messageEventListener);
+                onSuccess();
               });
           }
         }
         window.addEventListener("message", messageEventListener);
       }),
-    [windowRef]
+    [onSuccess]
   );
   return (
     <Button
@@ -62,6 +62,6 @@ const TwitterLogin: React.FunctionComponent = () => {
 };
 
 export const render = (p: HTMLElement): void =>
-  ReactDOM.render(<TwitterLogin />, p);
+  ReactDOM.render(<TwitterLogin onSuccess={() => p.remove()}/>, p);
 
 export default TwitterLogin;
