@@ -9,9 +9,7 @@ import {
   pushBullets,
   getConfigFromPage,
   parseRoamDate,
-  getActiveUids,
   getParentUidByBlockUid,
-  getOrderByBlockUid,
 } from "roam-client";
 import axios from "axios";
 import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
