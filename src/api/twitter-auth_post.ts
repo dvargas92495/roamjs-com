@@ -22,7 +22,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       );
       const { oauth_token, oauth_token_secret } = parsedData;
       return {
-        statusCode: 500,
+        statusCode: 200,
         body: JSON.stringify({ oauth_token, oauth_token_secret }),
         headers,
       };
