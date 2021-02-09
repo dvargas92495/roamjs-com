@@ -61,7 +61,9 @@ const TwitterLogin: React.FunctionComponent<{onSuccess: () => void}> = ({onSucce
   );
 };
 
-export const render = (p: HTMLElement): void =>
+export const render = (p: HTMLElement): void => {
+  console.log('log the button!');
   ReactDOM.render(<TwitterLogin onSuccess={() => p.remove()}/>, p);
+}
 
 export default TwitterLogin;
