@@ -2,7 +2,9 @@ import { Button, Icon, Popover, Spinner, Text } from "@blueprintjs/core";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import Twitter from "../assets/Twitter.svg";
-import { getTreeByBlockUid } from "roam-client";
+import { getTreeByBlockUid, getTreeByPageName } from "roam-client";
+import { API_URL, getSettingValueFromTree } from "./hooks";
+import axios from "axios";
 
 type ContentProps = {
   blockUid: string;
@@ -17,8 +19,18 @@ const TwitterContent: React.FunctionComponent<
   const onClick = useCallback(() => {
     setLoading(true);
     setError("");
-    // const tree = getTreeByPageName("roam/js/slack");
-    Promise.resolve(console.log(message))
+    const tree = getTreeByPageName("roam/js/twitter");
+    const oauth = getSettingValueFromTree({
+      tree,
+      key: "oauth",
+      defaultValue: "{}",
+    });
+    Promise.resolve(
+      axios.post(`${API_URL}/twitter-tweet`, {
+        oauthData: JSON.parse(oauth),
+        content: message[0],
+      })
+    )
       .then(close)
       .catch(({ error, message }) => {
         setError(error || message);
@@ -46,7 +58,9 @@ const TweetOverlay: React.FunctionComponent<ContentProps> = (props) => {
     <Popover
       target={
         <Icon
-          icon={<Twitter style={{ width: 15, marginLeft: 4, cursor: 'pointer' }} />}
+          icon={
+            <Twitter style={{ width: 15, marginLeft: 4, cursor: "pointer" }} />
+          }
           onClick={open}
         />
       }

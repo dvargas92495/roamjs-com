@@ -4,9 +4,7 @@ import React, { useCallback, useMemo, useRef } from "react";
 import ReactDOM from "react-dom";
 import Twitter from "../assets/Twitter.svg";
 import { getPageUidByPageTitle } from "../entry-helpers";
-
-const API_URL =
-  "https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production";
+import { API_URL } from "./hooks";
 
 const TwitterLogin: React.FunctionComponent = () => {
   const pageUid = useMemo(() => getPageUidByPageTitle("roam/js/twitter"), []);

@@ -12,6 +12,7 @@ import {
   getParentTextByBlockUidAndTag,
   getTextByBlockUid,
 } from "roam-client";
+import { getSettingValueFromTree } from "./hooks";
 
 type ContentProps = {
   tag: string;
@@ -26,20 +27,6 @@ type SlackMember = {
 };
 
 const toName = (s: SlackMember) => s.profile.display_name || s.name;
-
-const getSettingValueFromTree = ({
-  tree,
-  key,
-  defaultValue = "",
-}: {
-  tree: TreeNode[];
-  key: string;
-  defaultValue?: string;
-}) => {
-  const node = tree.find((s) => new RegExp(key, "i").test(s.text.trim()));
-  const value = node ? node.children[0].text.trim() : defaultValue;
-  return value;
-};
 
 const getSettingMapFromTree = ({
   tree,
