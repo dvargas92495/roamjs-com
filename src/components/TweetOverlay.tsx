@@ -25,12 +25,11 @@ const TwitterContent: React.FunctionComponent<
       key: "oauth",
       defaultValue: "{}",
     });
-    Promise.resolve(
-      axios.post(`${API_URL}/twitter-tweet`, {
+    axios
+      .post(`${API_URL}/twitter-tweet`, {
         oauthData: JSON.parse(oauth),
         content: message[0],
       })
-    )
       .then(close)
       .catch(({ error, message }) => {
         setError(error || message);

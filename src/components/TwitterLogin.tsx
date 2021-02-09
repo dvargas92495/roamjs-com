@@ -21,29 +21,22 @@ const TwitterLogin: React.FunctionComponent = () => {
           "roamjs:twitter:login",
           `left=${left},top=${top},width=${width},height=${height},status=1`
         );
-        loginWindow.addEventListener("popstate", () => {
-          const query = new URLSearchParams(loginWindow.location.search);
-          const isAuth = query.get("auth");
-          if (isAuth) {
-            const oauth_token = query.get("oauth_token");
-            const oauth_verifier = query.get("oauth_verifier");
-            if (oauth_token && oauth_verifier) {
-              return axios
-                .post(`${API_URL}/twitter-auth`, {
-                  oauth_token,
-                  oauth_verifier,
-                })
-                .then((rr) =>
-                  window.roamAlphaAPI.createBlock({
-                    location: { "parent-uid": pageUid, order: 0 },
-                    block: { string: JSON.stringify(rr.data) },
-                  })
-                )
-                .then(() => loginWindow.close());
-            }
-          }
+        loginWindow.addEventListener("message", (e) => {
+          loginWindow.close();
+          axios
+            .post(`${API_URL}/twitter-auth`, JSON.parse(e.data))
+            .then((rr) => {
+              const blockUid = "RjsTwrTok";
+              window.roamAlphaAPI.createBlock({
+                location: { "parent-uid": pageUid, order: 0 },
+                block: { string: "oauth", uid: blockUid },
+              });
+              window.roamAlphaAPI.createBlock({
+                location: { "parent-uid": blockUid, order: 0 },
+                block: { string: JSON.stringify(rr.data) },
+              });
+            });
         });
-        loginWindow.addEventListener('message', console.log)
       }),
     [windowRef]
   );
