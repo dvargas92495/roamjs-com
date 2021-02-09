@@ -25,9 +25,11 @@ const TwitterContent: React.FunctionComponent<
       key: "oauth",
       defaultValue: "{}",
     });
+    const { oauth_token: key, oauth_token_secret: secret } = JSON.parse(oauth);
     axios
       .post(`${API_URL}/twitter-tweet`, {
-        oauthData: JSON.parse(oauth),
+        key,
+        secret,
         content: message[0],
       })
       .then(close)

@@ -21,7 +21,6 @@ const TwitterLogin: React.FunctionComponent<{onSuccess: () => void}> = ({onSucce
           `left=${left},top=${top},width=${width},height=${height},status=1`
         );
         const messageEventListener = (e: MessageEvent) => {
-          console.log(e);
           if (e.origin === "https://roamjs.com") {
             loginWindow.close();
             axios
@@ -36,6 +35,9 @@ const TwitterLogin: React.FunctionComponent<{onSuccess: () => void}> = ({onSucce
                   location: { "parent-uid": blockUid, order: 0 },
                   block: { string: JSON.stringify(rr.data) },
                 });
+                window.roamAlphaAPI.updateBlock({
+                  block: {open: false, uid: blockUid}
+                });
                 window.removeEventListener('message', messageEventListener);
                 onSuccess();
               });
@@ -43,7 +45,7 @@ const TwitterLogin: React.FunctionComponent<{onSuccess: () => void}> = ({onSucce
         }
         window.addEventListener("message", messageEventListener);
       }),
-    [onSuccess]
+    [onSuccess, pageUid]
   );
   return (
     <Button
