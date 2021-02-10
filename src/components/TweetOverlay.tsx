@@ -6,7 +6,7 @@ import {
   Spinner,
   Text,
 } from "@blueprintjs/core";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import Twitter from "../assets/Twitter.svg";
 import {
@@ -21,17 +21,17 @@ import axios from "axios";
 
 const mapError = (e: { errors?: { code: number }[]; message: string }) =>
   e.errors
-    ? e.message
-    : e.errors
+    ? e.errors
         .map(({ code }) => {
           switch (code) {
             case 220:
               return "Invalid credentials. Try logging in through the roam/js/twitter page";
             default:
-              return "Unknown error. Email support@roamjs.com for help!";
+              return `Unknown error code (${code}). Email support@roamjs.com for help!`;
           }
         })
-        .join("\n");
+        .join("\n")
+    : e.message;
 
 const TwitterContent: React.FunctionComponent<{
   blockUid: string;
@@ -74,7 +74,7 @@ const TwitterContent: React.FunctionComponent<{
         },
       });
     }
-    let inReplyToStatusId = 0;
+    let in_reply_to_status_id = 0;
     let name = "";
     let success = true;
     for (let index = 0; index < message.length; index++) {
@@ -84,18 +84,15 @@ const TwitterContent: React.FunctionComponent<{
         .post(`${API_URL}/twitter-tweet`, {
           key,
           secret,
-          content: `${inReplyToStatusId ? `@${name} ` : ""}${content}${
-            inReplyToStatusId
-              ? `&in_reply_to_status_id=${inReplyToStatusId}`
-              : ""
-          }`,
+          content: `${in_reply_to_status_id ? `@${name} ` : ""}${content}`,
+          in_reply_to_status_id,
         })
         .then((r) => {
           const {
-            id,
+            id_str,
             user: { screen_name },
           } = r.data;
-          inReplyToStatusId = id;
+          in_reply_to_status_id = id_str;
           name = screen_name;
           if (sentBlockUid) {
             window.roamAlphaAPI.moveBlock({
@@ -144,7 +141,11 @@ const TweetOverlay: React.FunctionComponent<{
   const open = useCallback(() => setIsOpen(true), [setIsOpen]);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const calcCounts = useCallback(
-    () => getTreeByBlockUid(blockUid).children.map((t) => t.text.length),
+    () =>
+      getTreeByBlockUid(blockUid).children.map((t) => ({
+        count: t.text.length,
+        uid: t.uid,
+      })),
     [blockUid]
   );
   const calcBlocks = useCallback(
@@ -161,6 +162,7 @@ const TweetOverlay: React.FunctionComponent<{
   );
   const [counts, setCounts] = useState(calcCounts);
   const [blocks, setBlocks] = useState(calcBlocks);
+  const timeoutRef = useRef(0);
   const inputCallback = useCallback(
     (e: InputEvent) => {
       const target = e.target as HTMLElement;
@@ -168,12 +170,18 @@ const TweetOverlay: React.FunctionComponent<{
         const { blockUid: currentUid } = getUids(target as HTMLTextAreaElement);
         const parentUid = getParentUidByBlockUid(currentUid);
         if (parentUid === blockUid) {
-          setCounts(calcCounts());
-          setBlocks(calcBlocks());
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+          }
+          timeoutRef.current = window.setTimeout(() => {
+            setCounts(calcCounts());
+            setBlocks(calcBlocks());
+            timeoutRef.current = 0;
+          }, 50);
         }
       }
     },
-    [blockUid, setCounts, calcCounts, setBlocks, calcBlocks]
+    [blockUid, setCounts, calcCounts, setBlocks, calcBlocks, timeoutRef]
   );
   useEffect(() => {
     childrenRef.addEventListener("input", inputCallback);
@@ -196,8 +204,14 @@ const TweetOverlay: React.FunctionComponent<{
         isOpen={isOpen}
         onInteraction={setIsOpen}
       />
-      {counts.map((count, i) => (
-        <Portal container={blocks[i]}>{count}/280</Portal>
+      {counts.map(({ count, uid }, i) => (
+        <Portal
+          container={blocks[i]}
+          key={uid}
+          className={"roamjs-twitter-count"}
+        >
+          {count}/280
+        </Portal>
       ))}
     </>
   );

@@ -1,4 +1,5 @@
 import {
+  addStyle,
   createButtonObserver,
   createHTMLObserver,
   getPageTitle,
@@ -16,6 +17,10 @@ import {
 import axios from "axios";
 import { render } from "../components/TweetOverlay";
 import { render as loginRender } from "../components/TwitterLogin";
+
+addStyle(`.roamjs-twitter-count {
+  position: relative;
+}`);
 
 const TWITTER_REFERENCES_COMMAND = "twitter references";
 
