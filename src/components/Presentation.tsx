@@ -1,4 +1,4 @@
-import { Button, Overlay } from "@blueprintjs/core";
+import { Button, Overlay, Dialog } from "@blueprintjs/core";
 import marked from "roam-marked";
 import React, {
   useCallback,
@@ -197,6 +197,7 @@ const ContentSlide = ({
   const bullets = isImageLayout ? children.slice(1) : children;
   const slideRoot = useRef<HTMLDivElement>(null);
   const [caretsLoaded, setCaretsLoaded] = useState(false);
+  const [imageDialogSrc, setImageDialogSrc] = useState("");
   useEffect(() => {
     if (collapsible && !caretsLoaded) {
       const lis = Array.from(slideRoot.current.getElementsByTagName("li"));
@@ -242,7 +243,10 @@ const ContentSlide = ({
   }, [bullets, slideRoot.current, viewType]);
   const onRootClick = useCallback(
     (e: React.MouseEvent) => {
-      if (collapsible) {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "IMG") {
+        setImageDialogSrc((target as HTMLImageElement).src);
+      } else if (collapsible) {
         const target = e.target as HTMLElement;
         const className = target.className;
         if (className.includes("roamjs-collapsible-caret")) {
@@ -275,6 +279,7 @@ const ContentSlide = ({
     },
     [collapsible]
   );
+  const onDialogClose = useCallback(() => setImageDialogSrc(''), [setImageDialogSrc])
   return (
     <section style={{ textAlign: "left" }}>
       <h1>{text}</h1>
@@ -285,9 +290,8 @@ const ContentSlide = ({
         }}
         className="r-stretch"
       >
-        {caretsLoaded && (
-          <style>
-            {`.roamjs-collapsible-bullet::marker, .roamjs-document-li::marker {
+        <style>
+          {`.roamjs-collapsible-bullet::marker, .roamjs-document-li::marker {
   color:${
     document.getElementById("roamjs-reveal-root")
       ? getComputedStyle(document.getElementById("roamjs-reveal-root"))
@@ -295,8 +299,7 @@ const ContentSlide = ({
       : ""
   };
 }`}
-          </style>
-        )}
+        </style>
         <div
           className={"roamjs-bullets-container"}
           dangerouslySetInnerHTML={{
@@ -338,6 +341,9 @@ const ContentSlide = ({
         )}
       </div>
       <Notes note={note} />
+      <Dialog isOpen={!!imageDialogSrc} onClose={onDialogClose}>
+        <img src={imageDialogSrc} />
+      </Dialog>
     </section>
   );
 };
@@ -355,10 +361,15 @@ const observerCallback = (ms: MutationRecord[]) =>
     .filter((d) => !!d)
     .forEach((d) => {
       const containerHeight = d.offsetHeight;
-      if (containerHeight > 0) {
+      const containerWidth = d.offsetWidth;
+      if (containerHeight > 0 && containerWidth > 0) {
         const contentHeight = (d.children[0] as HTMLElement).offsetHeight;
-        if (contentHeight > containerHeight) {
-          const scale = containerHeight / contentHeight;
+        const contentWidth = (d.children[0] as HTMLElement).offsetWidth;
+        if (contentHeight > containerHeight || contentWidth > containerWidth) {
+          const scale = Math.min(
+            containerHeight / contentHeight,
+            containerWidth / contentWidth
+          );
           d.style.transform = `scale(${scale})`;
         } else {
           d.style.transform = "initial";
