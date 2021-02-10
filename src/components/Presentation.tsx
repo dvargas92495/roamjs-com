@@ -347,6 +347,7 @@ const ContentSlide = ({
         isOpen={!!imageDialogSrc}
         onClose={onDialogClose}
         portalClassName={"roamjs-presentation-img-dialog"}
+        style={{ paddingBottom: 0 }}
       >
         <img src={imageDialogSrc} />
       </Dialog>
