@@ -247,7 +247,6 @@ const ContentSlide = ({
       if (target.tagName === "IMG") {
         setImageDialogSrc((target as HTMLImageElement).src);
       } else if (collapsible) {
-        const target = e.target as HTMLElement;
         const className = target.className;
         if (className.includes("roamjs-collapsible-caret")) {
           let minDepth = Number.MAX_VALUE;
@@ -344,7 +343,11 @@ const ContentSlide = ({
         )}
       </div>
       <Notes note={note} />
-      <Dialog isOpen={!!imageDialogSrc} onClose={onDialogClose}>
+      <Dialog
+        isOpen={!!imageDialogSrc}
+        onClose={onDialogClose}
+        portalClassName={"roamjs-presentation-img-dialog"}
+      >
         <img src={imageDialogSrc} />
       </Dialog>
     </section>

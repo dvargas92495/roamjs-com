@@ -34,6 +34,9 @@ addStyle(`.roamjs-collapsible-caret {
 .reveal ol {
   list-style-type: decimal !important;
 }
+.roamjs-presentation-img-dialog {
+  z-index: 2100;
+}
 `);
 
 runExtension("presentation", async () => {
