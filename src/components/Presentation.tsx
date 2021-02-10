@@ -366,7 +366,7 @@ const observerCallback = (ms: MutationRecord[]) =>
       }
     });
 
-export const COLLAPSIBLE_REGEX = /({collapsible}|\[\[{collapsible}\]\])|{\[\[collapsible\]\]}/i;
+export const COLLAPSIBLE_REGEX = /(?:{|\[\[{|{\[\[)collapsible(:ignore)?(?:}|\[\[}|}\[\[)/i;
 
 const PresentationContent: React.FunctionComponent<{
   slides: Slides;
@@ -388,8 +388,8 @@ const PresentationContent: React.FunctionComponent<{
           return "";
         }
       )
-      .replace(COLLAPSIBLE_REGEX, () => {
-        collapsible = true;
+      .replace(COLLAPSIBLE_REGEX, (_, ignore) => {
+        collapsible = !ignore;
         return "";
       })
       .trim();
