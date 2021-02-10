@@ -277,9 +277,11 @@ const ContentSlide = ({
         }
       }
     },
-    [collapsible]
+    [collapsible, setImageDialogSrc]
   );
-  const onDialogClose = useCallback(() => setImageDialogSrc(''), [setImageDialogSrc])
+  const onDialogClose = useCallback(() => setImageDialogSrc(""), [
+    setImageDialogSrc,
+  ]);
   return (
     <section style={{ textAlign: "left" }}>
       <h1>{text}</h1>
@@ -289,6 +291,7 @@ const ContentSlide = ({
           flexDirection: isLeftLayout ? "row-reverse" : "row",
         }}
         className="r-stretch"
+        onClick={onRootClick}
       >
         <style>
           {`.roamjs-collapsible-bullet::marker, .roamjs-document-li::marker {
@@ -312,9 +315,9 @@ const ContentSlide = ({
           style={{
             width: isImageLayout ? "50%" : "100%",
             transformOrigin: "left top",
+            wordBreak: "break-word",
           }}
           ref={slideRoot}
-          onClick={onRootClick}
         />
         {isImageLayout && (
           <div
