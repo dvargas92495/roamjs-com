@@ -76,7 +76,10 @@ runExtension("twitter", () => {
     attribute: "write-tweet",
     render: (b: HTMLButtonElement) => {
       const { blockUid } = getUidsFromButton(b);
-      render({ parent: b.parentElement, blockUid });
+      render({
+        parent: b.parentElement,
+        blockUid,
+      });
     },
   });
 
@@ -84,15 +87,16 @@ runExtension("twitter", () => {
     tag: "div",
     className: "roam-article",
     callback: (d: HTMLDivElement) => {
-      const title = d.getElementsByClassName('rm-title-display')[0]?.textContent;
+      const title = d.getElementsByClassName("rm-title-display")[0]
+        ?.textContent;
       if (title === "roam/js/twitter") {
-        console.log('twitter title', title);
+        console.log("twitter title", title);
         if (!d.hasAttribute("data-roamjs-twitter-login")) {
-          console.log('no attribute', title);
+          console.log("no attribute", title);
           const tree = getTreeByPageName("roam/js/twitter");
           const oauthNode = tree.find((t) => /oauth/i.test(t.text.trim()));
           if (!oauthNode) {
-            console.log('no existing oauth!', title);
+            console.log("no existing oauth!", title);
             const span = document.createElement("span");
             d.insertBefore(span, d.firstElementChild);
             loginRender(span);
