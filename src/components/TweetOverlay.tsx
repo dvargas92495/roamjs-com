@@ -19,6 +19,20 @@ import {
 import { API_URL, getSettingValueFromTree } from "./hooks";
 import axios from "axios";
 
+const mapError = (e: { errors?: { code: number }[]; message: string }) =>
+  e.errors
+    ? e.message
+    : e.errors
+        .map(({ code }) => {
+          switch (code) {
+            case 220:
+              return "Invalid credentials. Try logging in through the roam/js/twitter page";
+            default:
+              return "Unknown error. Email support@roamjs.com for help!";
+          }
+        })
+        .join("\n");
+
 const TwitterContent: React.FunctionComponent<{
   blockUid: string;
   close: () => void;
@@ -37,6 +51,12 @@ const TwitterContent: React.FunctionComponent<{
       key: "oauth",
       defaultValue: "{}",
     });
+    if (!oauth) {
+      setError(
+        "Need to log in with Twitter to send Tweets! Head to roam/js/twitter page to log in."
+      );
+      return;
+    }
     const { oauth_token: key, oauth_token_secret: secret } = JSON.parse(oauth);
     const sentBlockUid = getSettingValueFromTree({
       tree,
@@ -86,7 +106,7 @@ const TwitterContent: React.FunctionComponent<{
           return true;
         })
         .catch((e) => {
-          setError(e.message);
+          setError(mapError(e));
           setTweetsSent(0);
           return false;
         });
@@ -99,7 +119,7 @@ const TwitterContent: React.FunctionComponent<{
     }
   }, [setTweetsSent, close, setError]);
   return (
-    <div style={{ padding: 16 }}>
+    <div style={{ padding: 16, maxWidth: 400 }}>
       <Button text={`Send Tweet`} onClick={onClick} />
       {tweetsSent > 0 && (
         <div>
@@ -127,7 +147,20 @@ const TweetOverlay: React.FunctionComponent<{
     () => getTreeByBlockUid(blockUid).children.map((t) => t.text.length),
     [blockUid]
   );
+  const calcBlocks = useCallback(
+    () =>
+      Array.from(childrenRef.children)
+        .filter((c) => c.className.includes("roam-block-container"))
+        .map(
+          (c) =>
+            Array.from(c.children).find((c) =>
+              c.className.includes("rm-block-main")
+            ) as HTMLDivElement
+        ),
+    [childrenRef]
+  );
   const [counts, setCounts] = useState(calcCounts);
+  const [blocks, setBlocks] = useState(calcBlocks);
   const inputCallback = useCallback(
     (e: InputEvent) => {
       const target = e.target as HTMLElement;
@@ -136,10 +169,11 @@ const TweetOverlay: React.FunctionComponent<{
         const parentUid = getParentUidByBlockUid(currentUid);
         if (parentUid === blockUid) {
           setCounts(calcCounts());
+          setBlocks(calcBlocks());
         }
       }
     },
-    [blockUid, setCounts, calcCounts]
+    [blockUid, setCounts, calcCounts, setBlocks, calcBlocks]
   );
   useEffect(() => {
     childrenRef.addEventListener("input", inputCallback);
@@ -163,9 +197,7 @@ const TweetOverlay: React.FunctionComponent<{
         onInteraction={setIsOpen}
       />
       {counts.map((count, i) => (
-        <Portal container={childrenRef.children[i] as HTMLElement}>
-          {count}/280
-        </Portal>
+        <Portal container={blocks[i]}>{count}/280</Portal>
       ))}
     </>
   );
