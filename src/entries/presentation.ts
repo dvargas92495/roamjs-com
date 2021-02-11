@@ -43,6 +43,19 @@ addStyle(`.roamjs-collapsible-caret {
 .roamjs-bullets-container h1, .roamjs-bullets-container h2, .roamjs-bullets-container h3, .roamjs-bullets-container h4, .roamjs-bullets-container h5, .roamjs-bullets-container h6 {
   margin-bottom: 0;
 }
+.roamjs-bullets-container .check-container input:checked~.checkmark:after {
+  display: block;
+  width: 15px;
+  height: 30px;
+  left: 11.5px;
+  top: 0.75px;
+  border-width: 0 6px 6px 0;
+}
+.roamjs-bullets-container .check-container {
+  height: 36px;
+  width: 36px;
+  top: 3px;
+}
 `);
 
 runExtension("presentation", async () => {
