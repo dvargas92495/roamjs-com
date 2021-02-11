@@ -292,11 +292,6 @@ const ContentSlide = ({
         className="r-stretch"
         onClick={onRootClick}
       >
-        <style>
-          {`.roamjs-collapsible-bullet, .roamjs-document-li {
-  list-style: none;
-}`}
-        </style>
         <div
           className={"roamjs-bullets-container"}
           dangerouslySetInnerHTML={{
