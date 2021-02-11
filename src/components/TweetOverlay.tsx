@@ -195,7 +195,7 @@ const TweetOverlay: React.FunctionComponent<{
     return () => childrenRef.removeEventListener("input", inputCallback);
   }, [childrenRef, inputCallback]);
   useEffect(() => {
-    if (rootRef.current && !document.contains(rootRef.current)) {
+    if (rootRef.current && !document.contains(rootRef.current.targetElement)) {
       unmount();
     }
   });
