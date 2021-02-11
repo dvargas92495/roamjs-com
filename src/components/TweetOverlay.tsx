@@ -6,7 +6,13 @@ import {
   Spinner,
   Text,
 } from "@blueprintjs/core";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import ReactDOM from "react-dom";
 import Twitter from "../assets/Twitter.svg";
 import {
@@ -14,7 +20,6 @@ import {
   getTreeByPageName,
   generateBlockUid,
   getUids,
-  getParentUidByBlockUid,
 } from "roam-client";
 import { API_URL, getSettingValueFromTree } from "./hooks";
 import axios from "axios";
@@ -82,7 +87,7 @@ const TwitterContent: React.FunctionComponent<{
           name = screen_name;
           if (sentBlockUid) {
             window.roamAlphaAPI.moveBlock({
-              location: { "parent-uid": sourceUid, order: 0 },
+              location: { "parent-uid": sourceUid, order: index },
               block: { uid },
             });
           }
@@ -138,10 +143,10 @@ const TwitterContent: React.FunctionComponent<{
 const TweetOverlay: React.FunctionComponent<{
   blockUid: string;
   childrenRef: HTMLDivElement;
-}> = ({ childrenRef, blockUid }) => {
+  unmount: () => void;
+}> = ({ childrenRef, blockUid, unmount }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
-  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
+  const iconRef = useRef(null);
   const calcCounts = useCallback(
     () =>
       getTreeByBlockUid(blockUid).children.map((t) => ({
@@ -164,23 +169,23 @@ const TweetOverlay: React.FunctionComponent<{
   );
   const [counts, setCounts] = useState(calcCounts);
   const blocks = useRef(calcBlocks());
+  const valid = useMemo(() => counts.every((c) => c.count <= 280), [counts]);
+  const open = useCallback(() => setIsOpen(valid), [setIsOpen, valid]);
+  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const inputCallback = useCallback(
     (e: InputEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA") {
         const textarea = target as HTMLTextAreaElement;
         const { blockUid: currentUid } = getUids(textarea);
-        const parentUid = getParentUidByBlockUid(currentUid);
-        if (parentUid === blockUid) {
-          blocks.current = calcBlocks();
-          setCounts(
-            calcCounts().map((c) =>
-              c.uid === currentUid
-                ? { uid: currentUid, count: textarea.value.length }
-                : c
-            )
-          );
-        }
+        blocks.current = calcBlocks();
+        setCounts(
+          calcCounts().map((c) =>
+            c.uid === currentUid
+              ? { uid: currentUid, count: textarea.value.length }
+              : c
+          )
+        );
       }
     },
     [blockUid, setCounts, calcCounts, calcBlocks, blocks]
@@ -189,6 +194,11 @@ const TweetOverlay: React.FunctionComponent<{
     childrenRef.addEventListener("input", inputCallback);
     return () => childrenRef.removeEventListener("input", inputCallback);
   }, [childrenRef, inputCallback]);
+  useEffect(() => {
+    if (!document.contains(iconRef.current)) {
+      unmount();
+    }
+  });
   return (
     <>
       <Popover
@@ -196,25 +206,34 @@ const TweetOverlay: React.FunctionComponent<{
           <Icon
             icon={
               <Twitter
-                style={{ width: 15, marginLeft: 4, cursor: "pointer" }}
+                style={{
+                  width: 15,
+                  marginLeft: 4,
+                  cursor: valid ? "pointer" : "not-allowed",
+                }}
               />
             }
             onClick={open}
+            ref={iconRef}
           />
         }
         content={<TwitterContent blockUid={blockUid} close={close} />}
         isOpen={isOpen}
         onInteraction={setIsOpen}
       />
-      {counts.filter((_, i) => !!blocks.current[i]).map(({ count, uid }, i) => (
-        <Portal
-          container={blocks.current[i]}
-          key={uid}
-          className={"roamjs-twitter-count"}
-        >
-          {count}/280
-        </Portal>
-      ))}
+      {counts
+        .filter((_, i) => !!blocks.current[i])
+        .map(({ count, uid }, i) => (
+          <Portal
+            container={blocks.current[i]}
+            key={uid}
+            className={"roamjs-twitter-count"}
+          >
+            <span style={{ color: count > 280 ? "red" : "black" }}>
+              {count}/280
+            </span>
+          </Portal>
+        ))}
     </>
   );
 };
@@ -232,7 +251,11 @@ export const render = ({
     childrenRef.getElementsByClassName("roamjs-twitter-count")
   ).forEach((s) => s.remove());
   ReactDOM.render(
-    <TweetOverlay blockUid={blockUid} childrenRef={childrenRef} />,
+    <TweetOverlay
+      blockUid={blockUid}
+      childrenRef={childrenRef}
+      unmount={() => ReactDOM.unmountComponentAtNode(parent)}
+    />,
     parent
   );
 };
