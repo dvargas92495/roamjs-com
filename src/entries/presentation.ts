@@ -40,7 +40,7 @@ addStyle(`.roamjs-collapsible-caret {
 .roamjs-collapsible-bullet, .roamjs-document-li {
   list-style: none;
 }
-.roamjs-bullets-container h1, .roamjs-bullets-container h2, .roamjs-bullets-container h3, .roamjs-bullets-container h4, .roamjs-bullets-container h5, .roamjs-bullets-container h6 {
+.reveal .roamjs-bullets-container h1, .reveal .roamjs-bullets-container h2, .reveal .roamjs-bullets-container h3, .reveal .roamjs-bullets-container h4, .reveal .roamjs-bullets-container h5, .reveal .roamjs-bullets-container h6 {
   margin-bottom: 0;
 }
 .roamjs-bullets-container .check-container input:checked~.checkmark:after {
