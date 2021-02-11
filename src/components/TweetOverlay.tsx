@@ -6,7 +6,7 @@ import {
   Spinner,
   Text,
 } from "@blueprintjs/core";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import Twitter from "../assets/Twitter.svg";
 import {
@@ -163,7 +163,7 @@ const TweetOverlay: React.FunctionComponent<{
     [childrenRef]
   );
   const [counts, setCounts] = useState(calcCounts);
-  const [blocks, setBlocks] = useState(calcBlocks);
+  const blocks = useRef(calcBlocks());
   const inputCallback = useCallback(
     (e: InputEvent) => {
       const target = e.target as HTMLElement;
@@ -172,6 +172,7 @@ const TweetOverlay: React.FunctionComponent<{
         const { blockUid: currentUid } = getUids(textarea);
         const parentUid = getParentUidByBlockUid(currentUid);
         if (parentUid === blockUid) {
+          blocks.current = calcBlocks();
           setCounts(
             calcCounts().map((c) =>
               c.uid === currentUid
@@ -179,11 +180,10 @@ const TweetOverlay: React.FunctionComponent<{
                 : c
             )
           );
-          setBlocks(calcBlocks());
         }
       }
     },
-    [blockUid, setCounts, calcCounts, setBlocks, calcBlocks]
+    [blockUid, setCounts, calcCounts, calcBlocks, blocks]
   );
   useEffect(() => {
     childrenRef.addEventListener("input", inputCallback);
@@ -206,9 +206,9 @@ const TweetOverlay: React.FunctionComponent<{
         isOpen={isOpen}
         onInteraction={setIsOpen}
       />
-      {counts.map(({ count, uid }, i) => (
+      {counts.filter((_, i) => !!blocks.current[i]).map(({ count, uid }, i) => (
         <Portal
-          container={blocks[i]}
+          container={blocks.current[i]}
           key={uid}
           className={"roamjs-twitter-count"}
         >
