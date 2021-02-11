@@ -6,7 +6,7 @@ import {
   Spinner,
   Text,
 } from "@blueprintjs/core";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import Twitter from "../assets/Twitter.svg";
 import {
@@ -18,20 +18,6 @@ import {
 } from "roam-client";
 import { API_URL, getSettingValueFromTree } from "./hooks";
 import axios from "axios";
-
-const mapError = (e: { errors?: { code: number }[]; message: string }) =>
-  e.errors
-    ? e.errors
-        .map(({ code }) => {
-          switch (code) {
-            case 220:
-              return "Invalid credentials. Try logging in through the roam/js/twitter page";
-            default:
-              return `Unknown error code (${code}). Email support@roamjs.com for help!`;
-          }
-        })
-        .join("\n")
-    : e.message;
 
 const TwitterContent: React.FunctionComponent<{
   blockUid: string;
@@ -51,7 +37,7 @@ const TwitterContent: React.FunctionComponent<{
       key: "oauth",
       defaultValue: "{}",
     });
-    if (!oauth) {
+    if (oauth === "{}") {
       setError(
         "Need to log in with Twitter to send Tweets! Head to roam/js/twitter page to log in."
       );
@@ -69,7 +55,7 @@ const TwitterContent: React.FunctionComponent<{
       window.roamAlphaAPI.createBlock({
         location: { "parent-uid": sentBlockUid, order: 0 },
         block: {
-          string: `Sent at ${new Date().toISOString()}`,
+          string: `Sent at ${new Date().toLocaleString()}`,
           uid: sourceUid,
         },
       });
@@ -103,7 +89,23 @@ const TwitterContent: React.FunctionComponent<{
           return true;
         })
         .catch((e) => {
-          setError(mapError(e));
+          if (sentBlockUid) {
+            window.roamAlphaAPI.deleteBlock({ block: { uid: sourceUid } });
+          }
+          setError(
+            e.response?.data?.errors
+              ? e.response?.data?.errors
+                  .map(({ code }: { code: number }) => {
+                    switch (code) {
+                      case 220:
+                        return "Invalid credentials. Try logging in through the roam/js/twitter page";
+                      default:
+                        return `Unknown error code (${code}). Email support@roamjs.com for help!`;
+                    }
+                  })
+                  .join("\n")
+              : e.message
+          );
           setTweetsSent(0);
           return false;
         });
@@ -162,26 +164,26 @@ const TweetOverlay: React.FunctionComponent<{
   );
   const [counts, setCounts] = useState(calcCounts);
   const [blocks, setBlocks] = useState(calcBlocks);
-  const timeoutRef = useRef(0);
   const inputCallback = useCallback(
     (e: InputEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA") {
-        const { blockUid: currentUid } = getUids(target as HTMLTextAreaElement);
+        const textarea = target as HTMLTextAreaElement;
+        const { blockUid: currentUid } = getUids(textarea);
         const parentUid = getParentUidByBlockUid(currentUid);
         if (parentUid === blockUid) {
-          if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-          }
-          timeoutRef.current = window.setTimeout(() => {
-            setCounts(calcCounts());
-            setBlocks(calcBlocks());
-            timeoutRef.current = 0;
-          }, 50);
+          setCounts(
+            calcCounts().map((c) =>
+              c.uid === currentUid
+                ? { uid: currentUid, count: textarea.value.length }
+                : c
+            )
+          );
+          setBlocks(calcBlocks());
         }
       }
     },
-    [blockUid, setCounts, calcCounts, setBlocks, calcBlocks, timeoutRef]
+    [blockUid, setCounts, calcCounts, setBlocks, calcBlocks]
   );
   useEffect(() => {
     childrenRef.addEventListener("input", inputCallback);
@@ -223,15 +225,16 @@ export const render = ({
 }: {
   parent: HTMLSpanElement;
   blockUid: string;
-}): void =>
+}): void => {
+  const childrenRef = parent.closest(".rm-block-main")
+    ?.nextElementSibling as HTMLDivElement;
+  Array.from(
+    childrenRef.getElementsByClassName("roamjs-twitter-count")
+  ).forEach((s) => s.remove());
   ReactDOM.render(
-    <TweetOverlay
-      blockUid={blockUid}
-      childrenRef={
-        parent.closest(".rm-block-main")?.nextElementSibling as HTMLDivElement
-      }
-    />,
+    <TweetOverlay blockUid={blockUid} childrenRef={childrenRef} />,
     parent
   );
+};
 
 export default TweetOverlay;
