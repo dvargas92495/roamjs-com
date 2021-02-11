@@ -27,6 +27,7 @@ const contributors = {
   "Chris Kunicki": "https://twitter.com/roamhacker",
   "Ivo Velitchkov": "https://www.strategicstructures.com/",
   "Mathew McGann": "http://www.mcgannfreestone.com.au/",
+  "Bardia Pourvakil": "https://twitter.com/thepericulum",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{

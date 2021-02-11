@@ -1,6 +1,11 @@
 import { getTreeByPageName, getUids } from "roam-client";
 import { createHTMLObserver, runExtension } from "../entry-helpers";
-import { getAliases, getChannelFormat, getUserFormat, render } from "../components/SlackOverlay";
+import {
+  getAliases,
+  getChannelFormat,
+  getUserFormat,
+  render,
+} from "../components/SlackOverlay";
 
 const ATTRIBUTE = "data-roamjs-slack-overlay";
 
@@ -11,6 +16,12 @@ runExtension("slack", () => {
     callback: (s: HTMLSpanElement) => {
       if (!s.getAttribute(ATTRIBUTE)) {
         const tree = getTreeByPageName("roam/js/slack");
+        const userFormatIsDefault = tree.every(
+          (t) => !/user format/i.test(t.text.trim())
+        );
+        const channelFormatIsDefault = tree.every(
+          (t) => !/channel format/i.test(t.text.trim())
+        );
         const userFormatRegex = new RegExp(
           getUserFormat(tree).replace(/{real name}|{username}/, "(.*)"),
           "i"
@@ -23,7 +34,9 @@ runExtension("slack", () => {
         const r = s.getAttribute("data-tag");
         if (
           aliasKeys.size
-            ? aliasKeys.has(r)
+            ? aliasKeys.has(r) ||
+              (!userFormatIsDefault && userFormatRegex.test(r)) ||
+              (!channelFormatIsDefault && channelFormatRegex.test(r))
             : userFormatRegex.test(r) || channelFormatRegex.test(r)
         ) {
           s.setAttribute(ATTRIBUTE, "true");
