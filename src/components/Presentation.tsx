@@ -294,12 +294,7 @@ const ContentSlide = ({
       >
         <style>
           {`.roamjs-collapsible-bullet::marker, .roamjs-document-li::marker {
-  color:${
-    document.getElementById("roamjs-reveal-root")
-      ? getComputedStyle(document.getElementById("roamjs-reveal-root"))
-          .backgroundColor
-      : ""
-  };
+  list-style: none;
 }`}
         </style>
         <div
