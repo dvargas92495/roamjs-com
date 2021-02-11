@@ -37,6 +37,9 @@ addStyle(`.roamjs-collapsible-caret {
 .roamjs-presentation-img-dialog {
   z-index: 2100;
 }
+.roamjs-collapsible-bullet, .roamjs-document-li {
+  list-style: none;
+}
 `);
 
 runExtension("presentation", async () => {
