@@ -1,17 +1,23 @@
-import { Button, Icon } from "@blueprintjs/core";
+import { Button, Icon, Spinner, Text } from "@blueprintjs/core";
 import axios from "axios";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import { generateBlockUid } from "roam-client";
 import Twitter from "../assets/Twitter.svg";
 import { getPageUidByPageTitle } from "../entry-helpers";
 import { API_URL } from "./hooks";
 
-const TwitterLogin: React.FunctionComponent<{onSuccess: () => void}> = ({onSuccess}) => {
+const TwitterLogin: React.FunctionComponent<{ onSuccess: () => void }> = ({
+  onSuccess,
+}) => {
   const pageUid = useMemo(() => getPageUidByPageTitle("roam/js/twitter"), []);
-  const onClick = useCallback(
-    () =>
-      axios.post(`${API_URL}/twitter-login`).then((r) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const onClick = useCallback(() => {
+    setLoading(true);
+    axios
+      .post(`${API_URL}/twitter-login`)
+      .then((r) => {
         const width = 400;
         const height = 600;
         const left = window.screenX + (window.innerWidth - width) / 2;
@@ -36,34 +42,44 @@ const TwitterLogin: React.FunctionComponent<{onSuccess: () => void}> = ({onSucce
                   location: { "parent-uid": blockUid, order: 0 },
                   block: { string: JSON.stringify(rr.data) },
                 });
-                window.removeEventListener('message', messageEventListener);
+                window.removeEventListener("message", messageEventListener);
                 onSuccess();
               });
           }
-        }
+        };
         window.addEventListener("message", messageEventListener);
-      }),
-    [onSuccess, pageUid]
-  );
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [onSuccess, pageUid, setLoading, setError]);
   return (
-    <Button
-      icon={
-        <Icon
-          icon={
-            <Twitter style={{ width: 15, marginLeft: 4, cursor: "pointer" }} />
-          }
-        />
-      }
-      onClick={onClick}
-    >
-      Login With Twitter
-    </Button>
+    <>
+      <Button
+        icon={
+          <Icon
+            icon={
+              <Twitter
+                style={{ width: 15, marginLeft: 4, cursor: "pointer" }}
+              />
+            }
+          />
+        }
+        onClick={onClick}
+        disabled={loading}
+      >
+        Login With Twitter
+      </Button>
+      {loading && <Spinner size={Spinner.SIZE_SMALL} />}
+      {error && (
+        <div style={{ color: "red", whiteSpace: "pre-line" }}>
+          <Text>{error}</Text>
+        </div>
+      )}
+    </>
   );
 };
 
-export const render = (p: HTMLElement): void => {
-  console.log('log the button!');
-  ReactDOM.render(<TwitterLogin onSuccess={() => p.remove()}/>, p);
-}
+export const render = (p: HTMLElement): void =>
+  ReactDOM.render(<TwitterLogin onSuccess={() => p.remove()} />, p);
 
 export default TwitterLogin;
