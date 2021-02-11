@@ -104,6 +104,8 @@ const TwitterContent: React.FunctionComponent<{
                     switch (code) {
                       case 220:
                         return "Invalid credentials. Try logging in through the roam/js/twitter page";
+                      case 186:
+                        return "Tweet is too long. Make it shorter!";
                       default:
                         return `Unknown error code (${code}). Email support@roamjs.com for help!`;
                     }
@@ -170,7 +172,7 @@ const TweetOverlay: React.FunctionComponent<{
   const [counts, setCounts] = useState(calcCounts);
   const blocks = useRef(calcBlocks());
   const valid = useMemo(() => counts.every((c) => c.count <= 280), [counts]);
-  const open = useCallback(() => setIsOpen(valid), [setIsOpen, valid]);
+  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const inputCallback = useCallback(
     (e: InputEvent) => {
@@ -218,7 +220,7 @@ const TweetOverlay: React.FunctionComponent<{
         }
         content={<TwitterContent blockUid={blockUid} close={close} />}
         isOpen={isOpen}
-        onInteraction={setIsOpen}
+        onInteraction={(next) => setIsOpen(next && valid)}
         ref={rootRef}
       />
       {counts
