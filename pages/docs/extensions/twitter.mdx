@@ -29,7 +29,7 @@ When navigating to a `roam/js/twitter` page, a log in with Twitter button will b
 
 ![](/images/twitter-login.png)
 
-A popup window will appear, prompting you to authorize RoamJS to be able to send tweets on your behalf. You may need to allow popups from Roam for this to work. After authorizing RoamJS, a block will be created in your `roam/js/twitter` page:
+Clicking the button will create a popup window, prompting you to authorize RoamJS to be able to send tweets on your behalf. You may need to allow popups from Roam for this to work. After authorizing RoamJS, a block will be created in your `roam/js/twitter` page:
 
 ![](/images/twitter-oauth.png)
 
@@ -45,7 +45,9 @@ The button will be replaced with a Twitter icon. Clicking the icon will render a
 
 Clicking "Send Tweet" will send the first child as the content of the Tweet!
 
-If there are multiple children, clicking "Send Tweet" will send each block as a tweet as part of a single Tweet thread.
+If the tweet button has multiple children, clicking "Send Tweet" will send each block as a tweet as part of a single Tweet thread.
+
+![](/images/tweet-thread.png)
 
 On the `roam/js/twitter` page, you could add a block that says 'Sent' with a block reference as a child. This will move all the blocks sent as children of this block upon sending.
 
