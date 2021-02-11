@@ -293,7 +293,7 @@ const ContentSlide = ({
         onClick={onRootClick}
       >
         <style>
-          {`.roamjs-collapsible-bullet::marker, .roamjs-document-li::marker {
+          {`.roamjs-collapsible-bullet, .roamjs-document-li {
   list-style: none;
 }`}
         </style>
