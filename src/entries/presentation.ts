@@ -40,6 +40,9 @@ addStyle(`.roamjs-collapsible-caret {
 .roamjs-collapsible-bullet, .roamjs-document-li {
   list-style: none;
 }
+.roamjs-bullets-container h1, .roamjs-bullets-container h2, .roamjs-bullets-container h3, .roamjs-bullets-container h4, .roamjs-bullets-container h5, .roamjs-bullets-container h6 {
+  margin-bottom: 0;
+}
 `);
 
 runExtension("presentation", async () => {
