@@ -146,7 +146,7 @@ const TweetOverlay: React.FunctionComponent<{
   unmount: () => void;
 }> = ({ childrenRef, blockUid, unmount }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const iconRef = useRef(null);
+  const rootRef = useRef(null);
   const calcCounts = useCallback(
     () =>
       getTreeByBlockUid(blockUid).children.map((t) => ({
@@ -195,7 +195,7 @@ const TweetOverlay: React.FunctionComponent<{
     return () => childrenRef.removeEventListener("input", inputCallback);
   }, [childrenRef, inputCallback]);
   useEffect(() => {
-    if (!document.contains(iconRef.current)) {
+    if (rootRef.current && !document.contains(rootRef.current)) {
       unmount();
     }
   });
@@ -214,12 +214,12 @@ const TweetOverlay: React.FunctionComponent<{
               />
             }
             onClick={open}
-            ref={iconRef}
           />
         }
         content={<TwitterContent blockUid={blockUid} close={close} />}
         isOpen={isOpen}
         onInteraction={setIsOpen}
+        ref={rootRef}
       />
       {counts
         .filter((_, i) => !!blocks.current[i])
