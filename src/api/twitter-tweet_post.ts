@@ -10,9 +10,13 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   const data = in_reply_to_status_id
     ? { status: content, in_reply_to_status_id }
     : { status: content };
-  const url = `https://api.twitter.com/1.1/statuses/update.json?${querystring.stringify(
-    data
-  )}`;
+  const url = `https://api.twitter.com/1.1/statuses/update.json?${querystring
+    .stringify(data)
+    .replace(/!/g, "%21")
+    .replace(/'/g, "%27")
+    .replace(/\(/g, "%28")
+    .replace(/\)/g, "%29")
+    .replace(/\*/g, "%2A")}`;
   const oauthHeaders = twitterOAuth.toHeader(
     twitterOAuth.authorize(
       {
@@ -38,7 +42,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }))
     .catch((e) => ({
       statusCode: 500,
-      body: JSON.stringify({ message: e.message, url, ...e.response?.data, }),
+      body: JSON.stringify({ message: e.message, url, ...e.response?.data }),
       headers,
     }));
 };
