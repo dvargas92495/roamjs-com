@@ -111,7 +111,7 @@ runExtension("twitter", () => {
 
   createHTMLObserver({
     className: 'twitter-tweet',
-    tag: 'div',
+    tag: 'DIV',
     callback: (d: HTMLDivElement) => {
       const iframe = d.getElementsByTagName('iframe')[0];
       const tweetId = iframe.getAttribute('tweet-id');
