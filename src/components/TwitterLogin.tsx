@@ -12,7 +12,7 @@ const TwitterLogin: React.FunctionComponent<{ onSuccess: () => void }> = ({
 }) => {
   const pageUid = useMemo(() => getPageUidByPageTitle("roam/js/twitter"), []);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const onClick = useCallback(() => {
     setLoading(true);
     axios
@@ -36,11 +36,14 @@ const TwitterLogin: React.FunctionComponent<{ onSuccess: () => void }> = ({
                 const blockUid = generateBlockUid();
                 window.roamAlphaAPI.createBlock({
                   location: { "parent-uid": pageUid, order: 0 },
-                  block: { open: false, string: "oauth", uid: blockUid },
+                  block: { string: "oauth", uid: blockUid },
                 });
                 window.roamAlphaAPI.createBlock({
                   location: { "parent-uid": blockUid, order: 0 },
                   block: { string: JSON.stringify(rr.data) },
+                });
+                window.roamAlphaAPI.updateBlock({
+                  block: { open: false, string: "oauth", uid: blockUid },
                 });
                 window.removeEventListener("message", messageEventListener);
                 onSuccess();
