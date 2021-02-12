@@ -13,6 +13,7 @@ import {
   getParentUidByBlockUid,
   getUidsFromButton,
   getTreeByPageName,
+  getUids,
 } from "roam-client";
 import axios from "axios";
 import { render } from "../components/TweetOverlay";
@@ -107,4 +108,22 @@ runExtension("twitter", () => {
       }
     },
   });
+
+  createHTMLObserver({
+    className: 'twitter-tweet',
+    tag: 'div',
+    callback: (d: HTMLDivElement) => {
+      const iframe = d.getElementsByTagName('iframe')[0];
+      const tweetId = iframe.getAttribute('tweet-id');
+      const block = d.closest('.roam-block') as HTMLDivElement;
+      const { blockUid } = getUids(block);
+      const span = document.createElement('span');
+      d.appendChild(span);
+      render({
+        parent: span,
+        blockUid,
+        tweetId,
+      });
+    }
+  })
 });
