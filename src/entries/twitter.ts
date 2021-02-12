@@ -90,19 +90,24 @@ runExtension("twitter", () => {
   });
 
   createHTMLObserver({
-    tag: "div",
-    className: "roam-article",
-    callback: (d: HTMLDivElement) => {
-      const title = d.getElementsByClassName("rm-title-display")[0]
-        ?.textContent;
-      if (title === "roam/js/twitter") {
+    tag: "H1",
+    className: "rm-title-display",
+    callback: (title: HTMLHeadingElement) => {
+      const d = title.closest('.roam-article');
+      if (title.innerText === "roam/js/twitter") {
         if (!d.hasAttribute("data-roamjs-twitter-login")) {
           const tree = getTreeByPageName("roam/js/twitter");
           const oauthNode = tree.find((t) => /oauth/i.test(t.text.trim()));
           if (!oauthNode) {
             const span = document.createElement("span");
+            span.id = 'roamjs-twitter-login'
             d.insertBefore(span, d.firstElementChild);
             loginRender(span);
+          }
+        } else {
+          const span = document.getElementById('roamjs-twitter-login');
+          if (span) {
+            span.remove();
           }
         }
       }
