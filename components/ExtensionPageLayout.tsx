@@ -28,6 +28,7 @@ const contributors = {
   "Ivo Velitchkov": "https://www.strategicstructures.com/",
   "Mathew McGann": "http://www.mcgannfreestone.com.au/",
   "Bardia Pourvakil": "https://twitter.com/thepericulum",
+  "Gene Kim": "https://twitter.com/RealGeneKim",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{

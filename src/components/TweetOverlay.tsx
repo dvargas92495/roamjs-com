@@ -23,15 +23,21 @@ import {
 } from "roam-client";
 import { API_URL, getSettingValueFromTree } from "./hooks";
 import axios from "axios";
+import twitter from "twitter-text";
 
 const TwitterContent: React.FunctionComponent<{
   blockUid: string;
+  tweetId?: string;
   close: () => void;
-}> = ({ close, blockUid }) => {
-  const message = getTreeByBlockUid(blockUid).children.map((t) => ({
-    content: t.text,
-    uid: t.uid,
-  }));
+}> = ({ close, blockUid, tweetId }) => {
+  const message = useMemo(
+    () =>
+      getTreeByBlockUid(blockUid).children.map((t) => ({
+        content: t.text,
+        uid: t.uid,
+      })),
+    [blockUid]
+  );
   const [error, setError] = useState("");
   const [tweetsSent, setTweetsSent] = useState(0);
   const onClick = useCallback(async () => {
@@ -65,8 +71,7 @@ const TwitterContent: React.FunctionComponent<{
         },
       });
     }
-    let in_reply_to_status_id = 0;
-    let name = "";
+    let in_reply_to_status_id = tweetId;
     let success = true;
     for (let index = 0; index < message.length; index++) {
       setTweetsSent(index + 1);
@@ -75,16 +80,13 @@ const TwitterContent: React.FunctionComponent<{
         .post(`${API_URL}/twitter-tweet`, {
           key,
           secret,
-          content: `${in_reply_to_status_id ? `@${name} ` : ""}${content}`,
+          content: `${content}`,
           in_reply_to_status_id,
+          auto_populate_reply_metadata: !!in_reply_to_status_id,
         })
         .then((r) => {
-          const {
-            id_str,
-            user: { screen_name },
-          } = r.data;
+          const { id_str } = r.data;
           in_reply_to_status_id = id_str;
-          name = screen_name;
           if (sentBlockUid) {
             window.roamAlphaAPI.moveBlock({
               location: { "parent-uid": sourceUid, order: index },
@@ -94,7 +96,7 @@ const TwitterContent: React.FunctionComponent<{
           return true;
         })
         .catch((e) => {
-          if (sentBlockUid) {
+          if (sentBlockUid && index === 0) {
             window.roamAlphaAPI.deleteBlock({ block: { uid: sourceUid } });
           }
           setError(
@@ -106,6 +108,10 @@ const TwitterContent: React.FunctionComponent<{
                         return "Invalid credentials. Try logging in through the roam/js/twitter page";
                       case 186:
                         return "Tweet is too long. Make it shorter!";
+                      case 170:
+                        return "Tweet failed to send because it was empty.";
+                      case 187:
+                        return "Tweet failed to send because Twitter detected it was a duplicate.";
                       default:
                         return `Unknown error code (${code}). Email support@roamjs.com for help!`;
                     }
@@ -123,10 +129,10 @@ const TwitterContent: React.FunctionComponent<{
     if (success) {
       close();
     }
-  }, [setTweetsSent, close, setError]);
+  }, [setTweetsSent, close, setError, tweetId]);
   return (
     <div style={{ padding: 16, maxWidth: 400 }}>
-      <Button text={`Send Tweet`} onClick={onClick} />
+      <Button text={tweetId ? "Send Reply" : "Send Tweet"} onClick={onClick} />
       {tweetsSent > 0 && (
         <div>
           Sending {tweetsSent} of {message.length} tweets.{" "}
@@ -144,17 +150,22 @@ const TwitterContent: React.FunctionComponent<{
 
 const TweetOverlay: React.FunctionComponent<{
   blockUid: string;
+  tweetId?: string;
   childrenRef: HTMLDivElement;
   unmount: () => void;
-}> = ({ childrenRef, blockUid, unmount }) => {
+}> = ({ childrenRef, blockUid, unmount, tweetId }) => {
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef(null);
   const calcCounts = useCallback(
     () =>
-      getTreeByBlockUid(blockUid).children.map((t) => ({
-        count: t.text.length,
-        uid: t.uid,
-      })),
+      getTreeByBlockUid(blockUid).children.map((t) => {
+        const { weightedLength, valid } = twitter.parseTweet(t.text);
+        return {
+          count: weightedLength,
+          valid,
+          uid: t.uid,
+        };
+      }),
     [blockUid]
   );
   const calcBlocks = useCallback(
@@ -171,7 +182,7 @@ const TweetOverlay: React.FunctionComponent<{
   );
   const [counts, setCounts] = useState(calcCounts);
   const blocks = useRef(calcBlocks());
-  const valid = useMemo(() => counts.every((c) => c.count <= 280), [counts]);
+  const valid = useMemo(() => counts.every(({ valid }) => valid), [counts]);
   const open = useCallback(() => setIsOpen(true), [setIsOpen]);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const inputCallback = useCallback(
@@ -182,11 +193,16 @@ const TweetOverlay: React.FunctionComponent<{
         const { blockUid: currentUid } = getUids(textarea);
         blocks.current = calcBlocks();
         setCounts(
-          calcCounts().map((c) =>
-            c.uid === currentUid
-              ? { uid: currentUid, count: textarea.value.length }
-              : c
-          )
+          calcCounts().map((c) => {
+            if (c.uid === currentUid) {
+              const { weightedLength, valid } = twitter.parseTweet(
+                textarea.value
+              );
+              return { uid: currentUid, count: weightedLength, valid };
+            } else {
+              return c;
+            }
+          })
         );
       }
     },
@@ -218,7 +234,9 @@ const TweetOverlay: React.FunctionComponent<{
             onClick={open}
           />
         }
-        content={<TwitterContent blockUid={blockUid} close={close} />}
+        content={
+          <TwitterContent blockUid={blockUid} tweetId={tweetId} close={close} />
+        }
         isOpen={isOpen}
         onInteraction={(next) => setIsOpen(next && valid)}
         ref={rootRef}
@@ -243,9 +261,11 @@ const TweetOverlay: React.FunctionComponent<{
 export const render = ({
   parent,
   blockUid,
+  tweetId,
 }: {
   parent: HTMLSpanElement;
   blockUid: string;
+  tweetId?: string;
 }): void => {
   const childrenRef = parent.closest(".rm-block-main")
     ?.nextElementSibling as HTMLDivElement;
@@ -255,6 +275,7 @@ export const render = ({
   ReactDOM.render(
     <TweetOverlay
       blockUid={blockUid}
+      tweetId={tweetId}
       childrenRef={childrenRef}
       unmount={() => ReactDOM.unmountComponentAtNode(parent)}
     />,

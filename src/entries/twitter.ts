@@ -13,6 +13,7 @@ import {
   getParentUidByBlockUid,
   getUidsFromButton,
   getTreeByPageName,
+  getUids,
 } from "roam-client";
 import axios from "axios";
 import { render } from "../components/TweetOverlay";
@@ -89,22 +90,45 @@ runExtension("twitter", () => {
   });
 
   createHTMLObserver({
-    tag: "div",
-    className: "roam-article",
-    callback: (d: HTMLDivElement) => {
-      const title = d.getElementsByClassName("rm-title-display")[0]
-        ?.textContent;
-      if (title === "roam/js/twitter") {
+    tag: "H1",
+    className: "rm-title-display",
+    callback: (title: HTMLHeadingElement) => {
+      const d = title.closest('.roam-article');
+      if (title.innerText === "roam/js/twitter") {
         if (!d.hasAttribute("data-roamjs-twitter-login")) {
           const tree = getTreeByPageName("roam/js/twitter");
           const oauthNode = tree.find((t) => /oauth/i.test(t.text.trim()));
           if (!oauthNode) {
             const span = document.createElement("span");
+            span.id = 'roamjs-twitter-login'
             d.insertBefore(span, d.firstElementChild);
             loginRender(span);
           }
+        } else {
+          const span = document.getElementById('roamjs-twitter-login');
+          if (span) {
+            span.remove();
+          }
         }
       }
+    },
+  });
+
+  createHTMLObserver({
+    className: "twitter-tweet",
+    tag: "DIV",
+    callback: (d: HTMLDivElement) => {
+      const block = d.closest(".roam-block") as HTMLDivElement;
+      const sub = block.getElementsByTagName("sub")[0];
+      const tweetId = /\/status\/([0-9]*)\??/.exec(sub?.innerText)?.[1];
+      const { blockUid } = getUids(block);
+      const span = document.createElement("span");
+      d.appendChild(span);
+      render({
+        parent: span,
+        blockUid,
+        tweetId,
+      });
     },
   });
 });
