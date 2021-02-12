@@ -4,6 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { API_URL, AUTH0_AUDIENCE, FLOSS_API_URL } from "./constants";
 
+export const cleanCode = (text: string): string =>
+  text.replace(/\n/g, "\\n").replace(/"/g, '\\"');
+
 export const getSingleCodeContent = (
   id: string
 ): string => `var existing = document.getElementById("${id}");
@@ -47,12 +50,9 @@ ${items
   );
   e.clipboardData.setData(
     "roam/data",
-    `["^ ","~:type","~:copy","~:copied-data",[["^ ","~:block/string","{{[[roam/js]]}}","~:block/children",[["^ ","~:block/string","~${codeContent
-      .replace(/\n/g, "\\n")
-      .replace(
-        /"/g,
-        '\\"'
-      )}","~:block/open",true,"~:block/order",0]],"~:block/open",true]]]`
+    `["^ ","~:type","~:copy","~:copied-data",[["^ ","~:block/string","{{[[roam/js]]}}","~:block/children",[["^ ","~:block/string","~${cleanCode(
+      codeContent
+    )}","~:block/open",true,"~:block/order",0]],"~:block/open",true]]]`
   );
   e.preventDefault();
 };
