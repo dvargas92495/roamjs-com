@@ -22,11 +22,11 @@ Clicking the button will create a popup window, prompting you to authorize RoamJ
 
 This block contains access tokens that RoamJS could use to send Tweets. **DO NOT SHARE THIS BLOCK WITH ANYONE.**
 
-To send a tweet, create a `{{tweet}}` button and nest the content of the tweet as a child. 
+To send a tweet, create a `{{tweet}}` button and nest the content of the tweet as a child.
 
 ![](/images/twitter-block.png)
 
-The button will be replaced with a Twitter icon. Clicking the icon will render an overlay with a "Send Tweet" button. 
+The button will be replaced with a Twitter icon. Clicking the icon will render an overlay with a "Send Tweet" button.
 
 ![](/images/tweet-overlay.png)
 
@@ -36,13 +36,35 @@ If the tweet button has multiple children, clicking "Send Tweet" will send each 
 
 ![](/images/tweet-thread.png)
 
-It could be useful to denote which blocks in Roam have already been sent as tweets. On the `roam/js/twitter` page, you could add a block that says 'Sent' with a block reference as a child. 
+It could be useful to denote which blocks in Roam have already been sent as tweets. On the `roam/js/twitter` page, you could add a block that says 'Sent' with a block reference as a child.
 
 ![](/images/tweet-sent.png)
 
 This will move all the blocks sent as children of this block upon sending.
 
 ![](/images/tweet-nest.png)
+
+#### Demo
+
+<div
+  style={{
+    position: "relative",
+    paddingBottom: "66.66666666666666%",
+    height: 0,
+  }}
+>
+  <iframe
+    src="https://www.loom.com/embed/59efa05227f042258dee87bc0d7387e2"
+    allowFullScreen
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+    }}
+  />
+</div>
 
 ### Searching Tweets
 
