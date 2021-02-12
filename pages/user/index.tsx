@@ -10,6 +10,7 @@ import {
   FormDialog,
   H6,
   Items,
+  Loading,
   StringField,
   Subtitle,
   VerticalTabs,
@@ -270,6 +271,7 @@ const Website = () => {
       )
       .then((p) => setPriceId(p.prices[0].id));
   }, [flossGet, setPriceId]);
+  const siteDeploying = loading || !isWebsiteReady({ status, deploys });
 
   return (
     <DataLoader loadAsync={getWebsite}>
@@ -293,7 +295,7 @@ const Website = () => {
             variant={"contained"}
             color={"primary"}
             style={{ margin: "0 16px" }}
-            disabled={loading || !isWebsiteReady({ status, deploys })}
+            disabled={siteDeploying}
             onClick={manualDeploy}
           >
             Manual Deploy
@@ -308,7 +310,7 @@ const Website = () => {
             onSuccess={getWebsite}
             title={"Buy RoamJS Service"}
           />
-          {loading && <span>Loading...</span>}
+          <Loading loading={siteDeploying} />
           <hr style={{ margin: "16px 0" }} />
           <H6>Deploys</H6>
           <Items
@@ -455,7 +457,14 @@ const Funding = () => {
 };
 
 const UserPage = (): JSX.Element => {
-  const { isAuthenticated, error, user, logout, isLoading, loginWithRedirect } = useAuth0();
+  const {
+    isAuthenticated,
+    error,
+    user,
+    logout,
+    isLoading,
+    loginWithRedirect,
+  } = useAuth0();
   const onLogoutClick = useCallback(
     () =>
       logout({
@@ -464,17 +473,21 @@ const UserPage = (): JSX.Element => {
     [logout]
   );
   useEffect(() => {
-    if (!isLoading && !isAuthenticated && typeof window !== 'undefined') {
+    if (!isLoading && !isAuthenticated && typeof window !== "undefined") {
       loginWithRedirect({
         audience: AUTH0_AUDIENCE,
-        redirectUri: `${window.location.origin}/user`
+        redirectUri: `${window.location.origin}/user`,
       });
     }
   }, [isLoading, isAuthenticated, loginWithRedirect]);
   return (
     <StandardLayout>
       {isLoading && "Loading..."}
-      {error && <div>{error.name}: {error.message}</div>}
+      {error && (
+        <div>
+          {error.name}: {error.message}
+        </div>
+      )}
       {isAuthenticated && (
         <>
           <VerticalTabs title={"User Info"}>
