@@ -110,20 +110,20 @@ runExtension("twitter", () => {
   });
 
   createHTMLObserver({
-    className: 'twitter-tweet',
-    tag: 'DIV',
+    className: "twitter-tweet",
+    tag: "DIV",
     callback: (d: HTMLDivElement) => {
-      const iframe = d.getElementsByTagName('iframe')[0];
-      const tweetId = iframe.getAttribute('tweet-id');
-      const block = d.closest('.roam-block') as HTMLDivElement;
+      const block = d.closest(".roam-block") as HTMLDivElement;
+      const sub = block.getElementsByTagName("sub")[0];
+      const tweetId = /\/status\/([0-9]*)\??/.exec(sub?.innerText)?.[1];
       const { blockUid } = getUids(block);
-      const span = document.createElement('span');
+      const span = document.createElement("span");
       d.appendChild(span);
       render({
         parent: span,
         blockUid,
         tweetId,
       });
-    }
-  })
+    },
+  });
 });
