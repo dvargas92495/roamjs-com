@@ -93,19 +93,19 @@ runExtension("twitter", () => {
     tag: "H1",
     className: "rm-title-display",
     callback: (title: HTMLHeadingElement) => {
-      const d = title.closest('.roam-article');
+      const d = title.closest(".roam-article");
       if (title.innerText === "roam/js/twitter") {
         if (!d.hasAttribute("data-roamjs-twitter-login")) {
           const tree = getTreeByPageName("roam/js/twitter");
           const oauthNode = tree.find((t) => /oauth/i.test(t.text.trim()));
           if (!oauthNode) {
             const span = document.createElement("span");
-            span.id = 'roamjs-twitter-login'
+            span.id = "roamjs-twitter-login";
             d.insertBefore(span, d.firstElementChild);
             loginRender(span);
           }
         } else {
-          const span = document.getElementById('roamjs-twitter-login');
+          const span = document.getElementById("roamjs-twitter-login");
           if (span) {
             span.remove();
           }
@@ -118,17 +118,21 @@ runExtension("twitter", () => {
     className: "twitter-tweet",
     tag: "DIV",
     callback: (d: HTMLDivElement) => {
-      const block = d.closest(".roam-block") as HTMLDivElement;
-      const sub = block.getElementsByTagName("sub")[0];
-      const tweetId = /\/status\/([0-9]*)\??/.exec(sub?.innerText)?.[1];
-      const { blockUid } = getUids(block);
-      const span = document.createElement("span");
-      d.appendChild(span);
-      render({
-        parent: span,
-        blockUid,
-        tweetId,
-      });
+      if (!d.hasAttribute("data-roamjs-twitter-reply")) {
+        d.setAttribute("data-roamjs-twitter-reply", "true");
+        const block = d.closest(".roam-block") as HTMLDivElement;
+        const sub = block.getElementsByTagName("sub")[0];
+        const tweetMatch = /\/([a-zA-Z0-9_]{1,15})\/status\/([0-9]*)\??/.exec(sub?.innerText);
+        const { blockUid } = getUids(block);
+        const span = document.createElement("span");
+        d.appendChild(span);
+        render({
+          parent: span,
+          blockUid,
+          tweetUsername: tweetMatch?.[1],
+          tweetId: tweetMatch?.[2],
+        });
+      }
     },
   });
 });
