@@ -122,14 +122,15 @@ runExtension("twitter", () => {
         d.setAttribute("data-roamjs-twitter-reply", "true");
         const block = d.closest(".roam-block") as HTMLDivElement;
         const sub = block.getElementsByTagName("sub")[0];
-        const tweetId = /\/status\/([0-9]*)\??/.exec(sub?.innerText)?.[1];
+        const tweetMatch = /\/([a-zA-Z0-9_]{1,15})\/status\/([0-9]*)\??/.exec(sub?.innerText)?.[1];
         const { blockUid } = getUids(block);
         const span = document.createElement("span");
         d.appendChild(span);
         render({
           parent: span,
           blockUid,
-          tweetId,
+          tweetUsername: tweetMatch[1],
+          tweetId: tweetMatch[2],
         });
       }
     },

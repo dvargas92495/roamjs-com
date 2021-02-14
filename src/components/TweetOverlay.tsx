@@ -28,8 +28,9 @@ import twitter from "twitter-text";
 const TwitterContent: React.FunctionComponent<{
   blockUid: string;
   tweetId?: string;
+  tweetUsername?: string;
   close: () => void;
-}> = ({ close, blockUid, tweetId }) => {
+}> = ({ close, blockUid, tweetId, tweetUsername }) => {
   const message = useMemo(
     () =>
       getTreeByBlockUid(blockUid).children.map((t) => ({
@@ -80,7 +81,7 @@ const TwitterContent: React.FunctionComponent<{
         .post(`${API_URL}/twitter-tweet`, {
           key,
           secret,
-          content: `${content}`,
+          content: `${tweetUsername && index === 0 ? `@${tweetUsername} ` : ""}${content}`,
           in_reply_to_status_id,
           auto_populate_reply_metadata: !!in_reply_to_status_id,
         })
@@ -129,7 +130,7 @@ const TwitterContent: React.FunctionComponent<{
     if (success) {
       close();
     }
-  }, [setTweetsSent, close, setError, tweetId]);
+  }, [setTweetsSent, close, setError, tweetId, tweetUsername]);
   return (
     <div style={{ padding: 16, maxWidth: 400 }}>
       <Button text={tweetId ? "Send Reply" : "Send Tweet"} onClick={onClick} />
@@ -151,6 +152,7 @@ const TwitterContent: React.FunctionComponent<{
 const TweetOverlay: React.FunctionComponent<{
   blockUid: string;
   tweetId?: string;
+  tweetUsername?: string;
   childrenRef: HTMLDivElement;
   unmount: () => void;
 }> = ({ childrenRef, blockUid, unmount, tweetId }) => {
@@ -266,6 +268,7 @@ export const render = ({
   parent: HTMLSpanElement;
   blockUid: string;
   tweetId?: string;
+  tweetUsername?: string;
 }): void => {
   const childrenRef = parent.closest(".rm-block-main")
     ?.nextElementSibling as HTMLDivElement;
@@ -276,6 +279,7 @@ export const render = ({
     <TweetOverlay
       blockUid={blockUid}
       tweetId={tweetId}
+      tweetUsername={tweetUsername}
       childrenRef={childrenRef}
       unmount={() => ReactDOM.unmountComponentAtNode(parent)}
     />,
