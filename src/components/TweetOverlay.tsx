@@ -81,7 +81,9 @@ const TwitterContent: React.FunctionComponent<{
         .post(`${API_URL}/twitter-tweet`, {
           key,
           secret,
-          content: `${tweetUsername && index === 0 ? `@${tweetUsername} ` : ""}${content}`,
+          content: `${
+            tweetUsername && index === 0 ? `@${tweetUsername} ` : ""
+          }${content}`,
           in_reply_to_status_id,
           auto_populate_reply_metadata: !!in_reply_to_status_id,
         })
@@ -155,7 +157,7 @@ const TweetOverlay: React.FunctionComponent<{
   tweetUsername?: string;
   childrenRef: HTMLDivElement;
   unmount: () => void;
-}> = ({ childrenRef, blockUid, unmount, tweetId }) => {
+}> = ({ childrenRef, blockUid, unmount, tweetId, tweetUsername }) => {
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef(null);
   const calcCounts = useCallback(
@@ -237,7 +239,12 @@ const TweetOverlay: React.FunctionComponent<{
           />
         }
         content={
-          <TwitterContent blockUid={blockUid} tweetId={tweetId} close={close} />
+          <TwitterContent
+            blockUid={blockUid}
+            tweetId={tweetId}
+            close={close}
+            tweetUsername={tweetUsername}
+          />
         }
         isOpen={isOpen}
         onInteraction={(next) => setIsOpen(next && valid)}
