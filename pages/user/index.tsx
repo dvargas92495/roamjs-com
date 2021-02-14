@@ -310,7 +310,7 @@ const Website = () => {
             onSuccess={getWebsite}
             title={"Buy RoamJS Service"}
           />
-          <Loading loading={siteDeploying} />
+          <Loading loading={siteDeploying} size={18} />
           <hr style={{ margin: "16px 0" }} />
           <H6>Deploys</H6>
           <Items
