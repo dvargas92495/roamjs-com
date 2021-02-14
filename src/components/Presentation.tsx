@@ -196,44 +196,50 @@ const ContentSlide = ({
   const isLeftLayout = ENDS_WITH_LEFT.test(layout);
   const bullets = isImageLayout ? children.slice(1) : children;
   const slideRoot = useRef<HTMLDivElement>(null);
-  const [caretsLoaded, setCaretsLoaded] = useState(false);
+  const [htmlEditsLoaded, setHtmlEditsLoaded] = useState(false);
   const [imageDialogSrc, setImageDialogSrc] = useState("");
   useEffect(() => {
-    if (collapsible && !caretsLoaded) {
-      const lis = Array.from(slideRoot.current.getElementsByTagName("li"));
-      let minDepth = Number.MAX_VALUE;
-      lis.forEach((l) => {
-        if (
-          l.getElementsByTagName("ul").length ||
-          l.getElementsByTagName("ol").length
-        ) {
-          const spanIcon = document.createElement("span");
-          spanIcon.className =
-            "bp3-icon bp3-icon-caret-right roamjs-collapsible-caret";
-          l.style.position = "relative";
-          l.insertBefore(spanIcon, l.childNodes[0]);
-          l.classList.add("roamjs-collapsible-bullet");
-        }
-        let depth = 0;
-        let parentElement = l as HTMLElement;
-        while (parentElement !== slideRoot.current) {
-          parentElement = parentElement.parentElement;
-          depth++;
-        }
-        minDepth = Math.min(minDepth, depth);
-        l.setAttribute("data-dom-depth", depth.toString());
+    if (!htmlEditsLoaded) {
+      if (collapsible) {
+        const lis = Array.from(slideRoot.current.getElementsByTagName("li"));
+        let minDepth = Number.MAX_VALUE;
+        lis.forEach((l) => {
+          if (
+            l.getElementsByTagName("ul").length ||
+            l.getElementsByTagName("ol").length
+          ) {
+            const spanIcon = document.createElement("span");
+            spanIcon.className =
+              "bp3-icon bp3-icon-caret-right roamjs-collapsible-caret";
+            l.style.position = "relative";
+            l.insertBefore(spanIcon, l.childNodes[0]);
+            l.classList.add("roamjs-collapsible-bullet");
+          }
+          let depth = 0;
+          let parentElement = l as HTMLElement;
+          while (parentElement !== slideRoot.current) {
+            parentElement = parentElement.parentElement;
+            depth++;
+          }
+          minDepth = Math.min(minDepth, depth);
+          l.setAttribute("data-dom-depth", depth.toString());
+        });
+        lis.forEach((l) => {
+          const depth = parseInt(l.getAttribute("data-dom-depth"));
+          if (depth === minDepth) {
+            l.style.display = "list-item";
+          } else {
+            l.style.display = "none";
+          }
+        });
+      }
+      Array.from(slideRoot.current.getElementsByTagName("a")).forEach((a) => {
+        a.target = "_blank";
+        a.rel = "noopener";
       });
-      lis.forEach((l) => {
-        const depth = parseInt(l.getAttribute("data-dom-depth"));
-        if (depth === minDepth) {
-          l.style.display = "list-item";
-        } else {
-          l.style.display = "none";
-        }
-      });
-      setCaretsLoaded(true);
+      setHtmlEditsLoaded(true);
     }
-  }, [collapsible, slideRoot.current, caretsLoaded, setCaretsLoaded]);
+  }, [collapsible, slideRoot.current, htmlEditsLoaded, setHtmlEditsLoaded]);
   useEffect(() => {
     setDocumentLis({
       e: slideRoot.current.firstElementChild as HTMLElement,
