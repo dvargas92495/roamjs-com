@@ -264,6 +264,7 @@ export const render = ({
   parent,
   blockUid,
   tweetId,
+  tweetUsername,
 }: {
   parent: HTMLSpanElement;
   blockUid: string;
