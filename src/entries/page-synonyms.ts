@@ -53,14 +53,16 @@ const getReplacer = () => {
     linkByAlias[p.title] = link;
   });
   return (input: string) =>
-    Object.keys(linkByAlias).reduce((prevText: string, alias: string) => {
-      const regex = new RegExp(`${alias}`, "g");
-      return prevText.replace(regex, (match, i: number) =>
-        i === 0 || !["#", "["].includes(prevText.charAt(i - 1))
-          ? `[${alias}](${linkByAlias[alias]})`
-          : match
-      );
-    }, input);
+    Object.keys(linkByAlias)
+      .sort((a, b) => b.length - a.length)
+      .reduce((prevText: string, alias: string) => {
+        const regex = new RegExp(`${alias}`, "g");
+        return prevText.replace(regex, (match, i: number) =>
+          i === 0 || !["#", "["].includes(prevText.charAt(i - 1))
+            ? `[${alias}](${linkByAlias[alias]})`
+            : match
+        );
+      }, input);
 };
 
 const optionCallback = () => {
