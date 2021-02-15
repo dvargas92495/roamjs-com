@@ -415,6 +415,7 @@ const observerCallback = (ms: MutationRecord[]) =>
     });
 
 export const COLLAPSIBLE_REGEX = /(?:\[\[{|{\[\[|{)collapsible(:ignore)?(?:\]\]}|}\]\]|})/i;
+const HIDE_REGEX = /(?:\[\[{|{\[\[|{)hide(?:\]\]}|}\]\]|})/i;
 
 const PresentationContent: React.FunctionComponent<{
   slides: Slides;
@@ -425,33 +426,40 @@ const PresentationContent: React.FunctionComponent<{
 }> = ({ slides, onClose, showNotes, globalCollapsible, startIndex }) => {
   const revealRef = useRef(null);
   const slidesRef = useRef<HTMLDivElement>(null);
-  const mappedSlides = slides.map((s) => {
-    let layout = "default";
-    let collapsible = globalCollapsible || false;
-    const text = s.text
-      .replace(
-        new RegExp(`(?:\\[\\[{|{\\[\\[|{)layout:(${LAYOUTS.join("|")})(?:\\]\\]}|}\\]\\]|})`, "is"),
-        (_, capture) => {
-          layout = capture;
+  const mappedSlides = slides
+    .filter((s) => !HIDE_REGEX.test(s.text))
+    .map((s) => {
+      let layout = "default";
+      let collapsible = globalCollapsible || false;
+      const text = s.text
+        .replace(
+          new RegExp(
+            `(?:\\[\\[{|{\\[\\[|{)layout:(${LAYOUTS.join(
+              "|"
+            )})(?:\\]\\]}|}\\]\\]|})`,
+            "is"
+          ),
+          (_, capture) => {
+            layout = capture;
+            return "";
+          }
+        )
+        .replace(COLLAPSIBLE_REGEX, (_, ignore) => {
+          collapsible = !ignore;
           return "";
-        }
-      )
-      .replace(COLLAPSIBLE_REGEX, (_, ignore) => {
-        collapsible = !ignore;
-        return "";
-      })
-      .trim();
-    return {
-      ...s,
-      text,
-      layout,
-      collapsible,
-      children: showNotes
-        ? s.children.slice(0, s.children.length - 1)
-        : s.children,
-      note: showNotes && s.children[s.children.length - 1],
-    };
-  });
+        })
+        .trim();
+      return {
+        ...s,
+        text,
+        layout,
+        collapsible,
+        children: showNotes
+          ? s.children.slice(0, s.children.length - 1)
+          : s.children,
+        note: showNotes && s.children[s.children.length - 1],
+      };
+    });
   const onCloseClick = useCallback(
     (e: Event) => {
       revealRef.current.getRevealElement().style.display = "none";
