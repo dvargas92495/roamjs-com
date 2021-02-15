@@ -73,8 +73,8 @@ runExtension("presentation", async () => {
       )?.[2];
       const options = buttonText
         ? {
-            theme: buttonText.match(`{theme:(${VALID_THEMES.join("|")})}`)?.[1],
-            notes: buttonText.match("{notes:(true|false)}")?.[1],
+            theme: buttonText.match(`(?:\\[\\[{|{\\[\\[|{)theme:(${VALID_THEMES.join("|")})(?:\\]\\]}|}\\]\\]|})`)?.[1],
+            notes: buttonText.match("(?:\\[\\[{|{\\[\\[|{)notes:(true|false)(?:\\]\\]}|}\\]\\]|})")?.[1],
             collapsible: !!buttonText.match(COLLAPSIBLE_REGEX),
           }
         : {};

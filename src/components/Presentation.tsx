@@ -430,7 +430,7 @@ const PresentationContent: React.FunctionComponent<{
     let collapsible = globalCollapsible || false;
     const text = s.text
       .replace(
-        new RegExp(`{layout:(${LAYOUTS.join("|")})}`, "is"),
+        new RegExp(`(?:\\[\\[{|{\\[\\[|{)layout:(${LAYOUTS.join("|")})(?:\\]\\]}|}\\]\\]|})`, "is"),
         (_, capture) => {
           layout = capture;
           return "";
