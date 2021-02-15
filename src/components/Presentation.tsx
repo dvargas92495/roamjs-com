@@ -97,14 +97,14 @@ type ImageFromTextProps = {
 };
 
 const IMG_REGEX = /!\[(.*)\]\((.*)\)/;
-const getResizeStyle = (imageResize?: {width: number, height: number}) => ({
+const getResizeStyle = (imageResize?: { width: number; height: number }) => ({
   width: isNaN(imageResize?.width)
     ? "auto"
     : `${Math.ceil((100 * imageResize?.width) / IMG_MAX_WIDTH)}%`,
   height: isNaN(imageResize?.height)
     ? "auto"
     : `${(100 * imageResize?.height) / IMG_MAX_HEIGHT}%`,
-})
+});
 
 const ImageFromText: React.FunctionComponent<
   ImageFromTextProps & {
@@ -257,21 +257,29 @@ const ContentSlide = ({
       Array.from(slideRoot.current.getElementsByTagName("img")).forEach(
         (img) => {
           const src = img.src;
-          const resizeProps = findImageResize({src, slides: children})
-          const {width, height} = getResizeStyle(resizeProps[src]);
+          const resizeProps = findImageResize({ src, slides: children });
+          const { width, height } = getResizeStyle(resizeProps[src]);
           img.style.width = width;
-          img.style.height = height; 
+          img.style.height = height;
         }
       );
       setHtmlEditsLoaded(true);
     }
-  }, [collapsible, slideRoot.current, htmlEditsLoaded, setHtmlEditsLoaded, children]);
+  }, [
+    collapsible,
+    slideRoot.current,
+    htmlEditsLoaded,
+    setHtmlEditsLoaded,
+    children,
+  ]);
   useEffect(() => {
-    setDocumentLis({
-      e: slideRoot.current.firstElementChild as HTMLElement,
-      s: bullets,
-      v: viewType,
-    });
+    if (bullets.length) {
+      setDocumentLis({
+        e: slideRoot.current.firstElementChild as HTMLElement,
+        s: bullets,
+        v: viewType,
+      });
+    }
   }, [bullets, slideRoot.current, viewType]);
   const onRootClick = useCallback(
     (e: React.MouseEvent) => {
