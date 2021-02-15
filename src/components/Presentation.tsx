@@ -58,7 +58,7 @@ const renderBullet = ({
 }): string =>
   `${"".padStart(i * 4, " ")}${renderViewType(parentViewType)}${
     c.heading ? `${"".padStart(c.heading, "#")} ` : ""
-  }${resolveRefs(c.text)}${
+  }${resolveRefs(c.text.replace(/^\* /, "\\* "))}${
     c.open && c.children.length
       ? `\n${c.children
           .map(
@@ -97,6 +97,14 @@ type ImageFromTextProps = {
 };
 
 const IMG_REGEX = /!\[(.*)\]\((.*)\)/;
+const getResizeStyle = (imageResize?: { width: number; height: number }) => ({
+  width: isNaN(imageResize?.width)
+    ? "auto"
+    : `${Math.ceil((100 * imageResize?.width) / IMG_MAX_WIDTH)}%`,
+  height: isNaN(imageResize?.height)
+    ? "auto"
+    : `${(100 * imageResize?.height) / IMG_MAX_HEIGHT}%`,
+});
 
 const ImageFromText: React.FunctionComponent<
   ImageFromTextProps & {
@@ -113,14 +121,7 @@ const ImageFromText: React.FunctionComponent<
       imageRef.current.parentElement.offsetWidth /
       imageRef.current.parentElement.offsetHeight;
     if (imageResize) {
-      setStyle({
-        width: isNaN(imageResize.width)
-          ? "auto"
-          : `${Math.ceil((100 * imageResize.width) / IMG_MAX_WIDTH)}%`,
-        height: isNaN(imageResize.height)
-          ? "auto"
-          : `${(100 * imageResize.height) / IMG_MAX_HEIGHT}%`,
-      });
+      setStyle(getResizeStyle(imageResize));
     } else if (!isNaN(imageAspectRatio) && !isNaN(containerAspectRatio)) {
       if (imageAspectRatio > containerAspectRatio) {
         setStyle({ width: "100%", height: "auto" });
@@ -179,6 +180,22 @@ const setDocumentLis = ({
 };
 
 const LAYOUTS = ["Image Left", "Image Right"];
+const findImageResize = ({
+  src,
+  slides,
+}: {
+  slides: Slides;
+  src: string;
+}): ImageResize => {
+  if (slides.length === 0) {
+    return {};
+  }
+  const slideWithImage = slides.find((s) => s.text.includes(src));
+  if (slideWithImage) {
+    return slideWithImage.props.imageResize;
+  }
+  return findImageResize({ src, slides: slides.flatMap((s) => s.children) });
+};
 
 const ContentSlide = ({
   text,
@@ -237,15 +254,32 @@ const ContentSlide = ({
         a.target = "_blank";
         a.rel = "noopener";
       });
+      Array.from(slideRoot.current.getElementsByTagName("img")).forEach(
+        (img) => {
+          const src = img.src;
+          const resizeProps = findImageResize({ src, slides: children });
+          const { width, height } = getResizeStyle(resizeProps[src]);
+          img.style.width = width;
+          img.style.height = height;
+        }
+      );
       setHtmlEditsLoaded(true);
     }
-  }, [collapsible, slideRoot.current, htmlEditsLoaded, setHtmlEditsLoaded]);
+  }, [
+    collapsible,
+    slideRoot.current,
+    htmlEditsLoaded,
+    setHtmlEditsLoaded,
+    children,
+  ]);
   useEffect(() => {
-    setDocumentLis({
-      e: slideRoot.current.firstElementChild as HTMLElement,
-      s: bullets,
-      v: viewType,
-    });
+    if (bullets.length) {
+      setDocumentLis({
+        e: slideRoot.current.firstElementChild as HTMLElement,
+        s: bullets,
+        v: viewType,
+      });
+    }
   }, [bullets, slideRoot.current, viewType]);
   const onRootClick = useCallback(
     (e: React.MouseEvent) => {
@@ -381,6 +415,7 @@ const observerCallback = (ms: MutationRecord[]) =>
     });
 
 export const COLLAPSIBLE_REGEX = /(?:\[\[{|{\[\[|{)collapsible(:ignore)?(?:\]\]}|}\]\]|})/i;
+const HIDE_REGEX = /(?:\[\[{|{\[\[|{)hide(?:\]\]}|}\]\]|})/i;
 
 const PresentationContent: React.FunctionComponent<{
   slides: Slides;
@@ -391,33 +426,40 @@ const PresentationContent: React.FunctionComponent<{
 }> = ({ slides, onClose, showNotes, globalCollapsible, startIndex }) => {
   const revealRef = useRef(null);
   const slidesRef = useRef<HTMLDivElement>(null);
-  const mappedSlides = slides.map((s) => {
-    let layout = "default";
-    let collapsible = globalCollapsible || false;
-    const text = s.text
-      .replace(
-        new RegExp(`{layout:(${LAYOUTS.join("|")})}`, "is"),
-        (_, capture) => {
-          layout = capture;
+  const mappedSlides = slides
+    .filter((s) => !HIDE_REGEX.test(s.text))
+    .map((s) => {
+      let layout = "default";
+      let collapsible = globalCollapsible || false;
+      const text = s.text
+        .replace(
+          new RegExp(
+            `(?:\\[\\[{|{\\[\\[|{)layout:(${LAYOUTS.join(
+              "|"
+            )})(?:\\]\\]}|}\\]\\]|})`,
+            "is"
+          ),
+          (_, capture) => {
+            layout = capture;
+            return "";
+          }
+        )
+        .replace(COLLAPSIBLE_REGEX, (_, ignore) => {
+          collapsible = !ignore;
           return "";
-        }
-      )
-      .replace(COLLAPSIBLE_REGEX, (_, ignore) => {
-        collapsible = !ignore;
-        return "";
-      })
-      .trim();
-    return {
-      ...s,
-      text,
-      layout,
-      collapsible,
-      children: showNotes
-        ? s.children.slice(0, s.children.length - 1)
-        : s.children,
-      note: showNotes && s.children[s.children.length - 1],
-    };
-  });
+        })
+        .trim();
+      return {
+        ...s,
+        text,
+        layout,
+        collapsible,
+        children: showNotes
+          ? s.children.slice(0, s.children.length - 1)
+          : s.children,
+        note: showNotes && s.children[s.children.length - 1],
+      };
+    });
   const onCloseClick = useCallback(
     (e: Event) => {
       revealRef.current.getRevealElement().style.display = "none";
@@ -609,6 +651,13 @@ const Presentation: React.FunctionComponent<{
   );
 };
 
+type ImageResize = {
+  [link: string]: {
+    height: number;
+    width: number;
+  };
+};
+
 type Slide = {
   uid: string;
   text: string;
@@ -617,12 +666,7 @@ type Slide = {
   open: boolean;
   viewType: ViewType;
   props: {
-    imageResize: {
-      [link: string]: {
-        height: number;
-        width: number;
-      };
-    };
+    imageResize: ImageResize;
   };
 };
 
