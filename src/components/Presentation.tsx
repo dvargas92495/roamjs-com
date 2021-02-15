@@ -58,7 +58,7 @@ const renderBullet = ({
 }): string =>
   `${"".padStart(i * 4, " ")}${renderViewType(parentViewType)}${
     c.heading ? `${"".padStart(c.heading, "#")} ` : ""
-  }${resolveRefs(c.text)}${
+  }${resolveRefs(c.text.replace(/^\* /, "\\* "))}${
     c.open && c.children.length
       ? `\n${c.children
           .map(
