@@ -62,7 +62,7 @@ const TwitterContent: React.FunctionComponent<{
       .replace("))", "");
     const sentLabel = getSettingValueFromTree({
       tree,
-      key: "sent label",
+      key: "label",
       defaultValue: "Sent at {now}",
     });
     const appendText = getSettingValueFromTree({
