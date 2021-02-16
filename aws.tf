@@ -67,6 +67,10 @@ variable "slack_client_secret" {
     type = string
 }
 
+variable "clerk_api_key" {
+    type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -109,9 +113,11 @@ module "aws-serverless-backend" {
         "google-calendar/get",
         "install/put",
         "launch-website/post",
+        "payment-methods/get",
         "queue-issues/get",
         "slack-url/post",
         "shutdown-website/post",
+        "subscriptions/get",
         "twitter-auth/post",
         "twitter-login/post",
         "twitter-search/get",
@@ -275,4 +281,10 @@ resource "github_actions_secret" "slack_client_secret" {
   repository       = "roam-js-extensions"
   secret_name      = "SLACK_CLIENT_SECRET"
   plaintext_value  = var.slack_client_secret
+}
+
+resource "github_actions_secret" "clerk_api_key" {
+  repository       = "roam-js-extensions"
+  secret_name      = "CLERK_API_KEY"
+  plaintext_value  = var.clerk_api_key
 }

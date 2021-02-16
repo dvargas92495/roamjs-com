@@ -11,7 +11,7 @@ import format from "date-fns/format";
 import { loadStripe } from "@stripe/stripe-js";
 import addMonths from "date-fns/addMonths";
 import isBefore from "date-fns/isBefore";
-import { useAuth0 } from "@auth0/auth0-react";
+// import { useClerk } from "@clerk/clerk-react";
 
 const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || "");
 
@@ -20,32 +20,35 @@ const FundButton: React.FunctionComponent<{
   name: string;
   url: string;
 }> = ({ title, name, url }) => {
-  const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+  //const { session } = useClerk();
+  const session = undefined;
+  const user = undefined;
+  const apiUrl = new URL(`${FLOSS_API_URL}/stripe-session`);
+  if (session) {
+    apiUrl.searchParams.set("_clerk_session_id", session.id);
+  }
   return (
     <FormDialog
       title={name}
       contentText={`Funding will be charged upon completion of ${title}.`}
       buttonText={"FUND"}
       onSave={(body) =>
-        (isAuthenticated
-          ? getAccessTokenSilently().then((t) => `Bearer ${t}`)
-          : Promise.resolve(`Basic ${btoa(body.email)}`)
-        )
-          .then((Authorization) =>
-            axios.post(
-              `${FLOSS_API_URL}/stripe-session`,
-              {
-                link: url,
-                reward: body.funding,
-                dueDate: format(body.due, "yyyy-MM-dd"),
-                mode: "setup",
+        axios
+          .post(
+            apiUrl.toString(),
+            {
+              link: url,
+              reward: body.funding,
+              dueDate: format(body.due, "yyyy-MM-dd"),
+              mode: "setup",
+            },
+            {
+              headers: {
+                Authorization: session
+                  ? ""
+                  : `Basic ${btoa(body.email)}`,
               },
-              {
-                headers: {
-                  Authorization,
-                },
-              }
-            )
+            }
           )
           .then((r) =>
             stripe.then((s) =>

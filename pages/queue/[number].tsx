@@ -6,8 +6,8 @@ import {
   API_URL,
   FLOSS_API_URL,
   QueueItemResponse,
-} from "../../../components/constants";
-import StandardLayout from "../../../components/StandardLayout";
+} from "../../components/constants";
+import StandardLayout from "../../components/StandardLayout";
 import {
   DataLoader,
   ExternalLink,
@@ -16,7 +16,7 @@ import {
   Items,
   Subtitle,
 } from "@dvargas92495/ui";
-import FundButton from "../../../components/FundButton";
+import FundButton from "../../components/FundButton";
 
 const QueueItemPage = ({
   number,

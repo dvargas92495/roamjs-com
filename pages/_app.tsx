@@ -3,11 +3,10 @@ import { Body, H2, ThemeProvider, H1, H3, H4, H5, H6 } from "@dvargas92495/ui";
 import React from "react";
 import { MDXProvider } from "@mdx-js/react";
 import { Prism } from "react-syntax-highlighter";
-import { Auth0Provider } from "@auth0/auth0-react";
+import { ClerkProvider } from "@clerk/clerk-react";
 import "normalize.css/normalize.css";
 import "@blueprintjs/icons/lib/css/blueprint-icons.css";
 import "@blueprintjs/core/lib/css/blueprint.css";
-import { AUTH0_AUDIENCE, AUTH0_DOMAIN } from "../components/constants";
 import useTawkTo from "../components/tawkto";
 
 const Pre: React.FunctionComponent<HTMLPreElement> = ({ children }) => (
@@ -49,14 +48,7 @@ const MdxImage = (props) => (
 const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
   useTawkTo();
   return (
-    <Auth0Provider
-      domain={AUTH0_DOMAIN}
-      clientId={process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID}
-      useRefreshTokens={true}
-      cacheLocation={"localstorage"}
-      audience={AUTH0_AUDIENCE}
-      scope={"read:current_user"}
-    >
+    <ClerkProvider frontendApi={process.env.NEXT_PUBLIC_CLERK_FRONTEND_API}>
       <ThemeProvider>
         <MDXProvider
           components={{
@@ -76,7 +68,7 @@ const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
           <Component {...pageProps} />
         </MDXProvider>
       </ThemeProvider>
-    </Auth0Provider>
+    </ClerkProvider>
   );
 };
 

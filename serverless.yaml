@@ -1,0 +1,38 @@
+service: floss
+provider: aws
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin
+custom:
+  serverless-offline:
+    httpPort: 3003
+    lambdaPort: 3004
+functions:
+  payment-methods-get:
+    handler: out/payment-methods_get.handler
+    events:
+      - http:
+          path: payment-methods
+          method: get
+          cors: true
+  queue-issues-get:
+    handler: out/queue-issues_get.handler
+    events:
+      - http:
+          path: queue-issues
+          method: get
+          cors: true
+  subscriptions-get:
+    handler: out/subscriptions_get.handler
+    events:
+      - http:
+          path: subscriptions
+          method: get
+          cors: true
+  website-status-get:
+    handler: out/website-status_get.handler
+    events:
+      - http:
+          path: website-status
+          method: get
+          cors: true

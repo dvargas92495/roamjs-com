@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
-import { useAuth0 } from "@auth0/auth0-react";
 import {
   Body,
   Button,
@@ -16,15 +15,15 @@ import {
   VerticalTabs,
 } from "@dvargas92495/ui";
 import {
-  useAuthenticatedAxiosFlossGet,
+  useAuthenticatedAxiosGet,
   useAuthenticatedAxiosPut,
-  useAuthenticatedAxiosRoamJSGet,
-  useAuthenticatedAxiosRoamJSPost,
+  useAuthenticatedAxiosPost,
 } from "../../components/hooks";
 import Link from "next/link";
 import axios from "axios";
-import { AUTH0_AUDIENCE, FLOSS_API_URL } from "../../components/constants";
+import { FLOSS_API_URL } from "../../components/constants";
 import awsTlds from "../../components/aws_tlds";
+import { useUser, SignedIn, SignedOut, SignUp } from "@clerk/clerk-react";
 
 const UserValue: React.FunctionComponent = ({ children }) => (
   <span style={{ marginBottom: -24, paddingLeft: 64, display: "block" }}>
@@ -108,10 +107,10 @@ const Billing = () => {
   }>({});
   const [products, setProducts] = useState([]);
   const [subscriptions, setSubscriptions] = useState(new Set<string>());
-  const authenticatedAxios = useAuthenticatedAxiosFlossGet();
+  const authenticatedAxios = useAuthenticatedAxiosGet();
   const getPayment = useCallback(
     () =>
-      authenticatedAxios("stripe-payment-methods").then((r) =>
+      authenticatedAxios("payment-methods").then((r) =>
         setPayment(r.data[0])
       ),
     [authenticatedAxios]
@@ -125,7 +124,7 @@ const Billing = () => {
   );
   const getSubscriptions = useCallback(
     () =>
-      authenticatedAxios("stripe-subscriptions").then((r) =>
+      authenticatedAxios("subscriptions").then((r) =>
         setSubscriptions(
           new Set(r.data.subscriptions.map(({ price }) => price))
         )
@@ -194,10 +193,9 @@ const domainValidate = (domain: string) => {
 };
 
 const Website = () => {
-  const { user } = useAuth0();
-  const authenticatedAxiosGet = useAuthenticatedAxiosRoamJSGet();
-  const flossGet = useAuthenticatedAxiosFlossGet();
-  const authenticatedAxiosPost = useAuthenticatedAxiosRoamJSPost();
+  const user = useUser();
+  const authenticatedAxiosGet = useAuthenticatedAxiosGet();
+  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const [graph, setGraph] = useState<string>();
   const [status, setStatus] = useState<string>();
   const [deploys, setDeploys] = useState<
@@ -239,7 +237,7 @@ const Website = () => {
       authenticatedAxiosPost("launch-website", {
         ...body,
         priceId,
-        email: user?.email,
+        email: user.primaryEmailAddress.emailAddress,
       }),
     [authenticatedAxiosPost, priceId, user]
   );
@@ -260,17 +258,17 @@ const Website = () => {
   );
   useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
   useEffect(() => {
-    flossGet(
+    authenticatedAxiosGet(
       `stripe-is-subscribed?product=${encodeURI("RoamJS Site")}`
     ).then((r) => setSubscriptionId(r.data.subscriptionId));
-  }, [flossGet]);
+  }, [authenticatedAxiosGet]);
   useEffect(() => {
-    flossGet("stripe-products?project=RoamJS")
+    authenticatedAxiosGet("stripe-products?project=RoamJS")
       .then((r) =>
         r.data.products.find((p: { name: string }) => p.name === "RoamJS Site")
       )
       .then((p) => setPriceId(p.prices[0].id));
-  }, [flossGet, setPriceId]);
+  }, [authenticatedAxiosGet, setPriceId]);
   const siteDeploying = loading || !isWebsiteReady({ status, deploys });
 
   return (
@@ -341,12 +339,16 @@ const Website = () => {
               {
                 name: "graph",
                 defaultValue: "",
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 component: StringField,
                 validate: () => "",
               },
               {
                 name: "domain",
                 defaultValue: "",
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 component: StringField,
                 validate: (v) => domainValidate(v as string),
               },
@@ -391,7 +393,7 @@ const Connections = () => {
 const Funding = () => {
   const [balance, setBalance] = useState(0);
   const [items, setItems] = useState([]);
-  const authenticatedAxios = useAuthenticatedAxiosFlossGet();
+  const authenticatedAxios = useAuthenticatedAxiosGet();
   const getBalance = useCallback(
     () =>
       authenticatedAxios("stripe-balance").then((r) =>
@@ -456,69 +458,45 @@ const Funding = () => {
   );
 };
 
-const UserPage = (): JSX.Element => {
-  const {
-    isAuthenticated,
-    error,
-    user,
-    logout,
-    isLoading,
-    loginWithRedirect,
-  } = useAuth0();
-  const onLogoutClick = useCallback(
-    () =>
-      logout({
-        returnTo: window.location.origin,
-      }),
-    [logout]
-  );
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated && typeof window !== "undefined") {
-      loginWithRedirect({
-        audience: AUTH0_AUDIENCE,
-        redirectUri: `${window.location.origin}/user`,
-      });
-    }
-  }, [isLoading, isAuthenticated, loginWithRedirect]);
+const Profile = () => {
+  const user = useUser();
   return (
-    <StandardLayout>
-      {isLoading && "Loading..."}
-      {error && (
-        <div>
-          {error.name}: {error.message}
-        </div>
-      )}
-      {isAuthenticated && (
-        <>
-          <VerticalTabs title={"User Info"}>
-            <Card title={"Details"}>
-              <Settings {...user} />
-            </Card>
-            {/*<Card title={"Connections"}>
+    <>
+      <VerticalTabs title={"User Info"}>
+        <Card title={"Details"}>
+          <Settings
+            name={user.fullName}
+            email={user.primaryEmailAddress.emailAddress}
+          />
+        </Card>
+        {/*<Card title={"Connections"}>
           <Connections />
           </Card>*/}
-            <Card title={"Billing"}>
-              <Billing />
-            </Card>
-            <Card title={"Static Site"}>
-              <Website />
-            </Card>
-            <Card title={"Projects Funded"}>
-              <Funding />
-            </Card>
-          </VerticalTabs>
+        <Card title={"Billing"}>
+          <Billing />
+        </Card>
+        <Card title={"Static Site"}>
+          <Website />
+        </Card>
+        <Card title={"Projects Funded"}>
+          <Funding />
+        </Card>
+      </VerticalTabs>
+    </>
+  );
+};
 
-          <Button
-            size="large"
-            variant="contained"
-            color="primary"
-            onClick={onLogoutClick}
-            style={{ marginTop: 24 }}
-          >
-            Log Out
-          </Button>
-        </>
-      )}
+const UserPage = (): JSX.Element => {
+  return (
+    <StandardLayout>
+      <SignedIn>
+        <Profile />
+      </SignedIn>
+      <SignedOut>
+        <div style={{ marginBottom: 64 }}>
+          <SignUp />
+        </div>
+      </SignedOut>
     </StandardLayout>
   );
 };

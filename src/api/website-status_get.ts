@@ -1,13 +1,21 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import AWS from "aws-sdk";
 import axios from "axios";
-import { headers } from "../lambda-helpers";
+import { getClerkEmail, headers } from "../lambda-helpers";
 
 const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  const email = getClerkEmail(event);
+  if (!email) {
+    return {
+      statusCode: 401,
+      body: "No Active Session",
+      headers,
+    };
+  }
   const website =
     event.queryStringParameters ||
     (await axios

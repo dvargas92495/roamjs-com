@@ -1,13 +1,10 @@
-import { Body, H1, Queue, StringField } from "@dvargas92495/ui";
+import { Queue, StringField } from "@dvargas92495/ui";
 import Link from "next/link";
 import React, { useCallback, useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
 import axios from "axios";
 import { API_URL, QueueItemResponse } from "../../components/constants";
 import FundButton from "../../components/FundButton";
-
-const toLabel = (title: string) =>
-  title.toLowerCase().substring(0, title.length - 1);
 
 const QueueItems = ({
   title,
@@ -20,23 +17,25 @@ const QueueItems = ({
 }) => {
   const loadItems = useCallback(
     () =>
-      axios.get(`${API_URL}/queue-issues?label=${toLabel(title)}`).then((r) =>
+      axios.get(`${API_URL}/queue-issues`).then((r) =>
         (r.data || []).map((item: QueueItemResponse) => ({
           avatar: <div>${item.total}</div>,
           primary: item.name,
           secondary: (
-            <Link
-              href={`queue/${toLabel(title)}/${item.htmlUrl.substring(
-                "https://github.com/dvargas92495/roam-js-extensions/issues/"
-                  .length
-              )}`}
-            >
-              Details
-            </Link>
+            <span>
+              <Link
+                href={`queue/${item.htmlUrl.substring(
+                  "https://github.com/dvargas92495/roam-js-extensions/issues/"
+                    .length
+                )}`}
+              >
+                {`${item.label.substring(0, 1).toUpperCase()}${item.label.substring(1)} Details`}
+              </Link>
+            </span>
           ),
           action: (
             <FundButton
-              title={toLabel(title)}
+              title={item.label}
               name={item.name}
               url={item.htmlUrl}
             />
@@ -51,7 +50,7 @@ const QueueItems = ({
     [search]
   );
   return (
-    <div style={{ padding: 8, width: "50%" }}>
+    <div style={{ padding: 8, width: "100%", height: 512, marginBottom: 64 }}>
       <Queue
         title={title}
         loadItems={loadItems}
@@ -66,11 +65,6 @@ const QueuePage = (): JSX.Element => {
   const [search, setSearch] = useState("");
   return (
     <StandardLayout>
-      <H1>Queue</H1>
-      <Body>
-        This page contains all the new extensions and enhancements coming to
-        RoamJS. Directly sponsor one to prioritize it higher in the queue!
-      </Body>
       <div style={{ marginBottom: 16, padding: "0 16px" }}>
         <StringField
           value={search}
@@ -79,18 +73,13 @@ const QueuePage = (): JSX.Element => {
           fullWidth
         />
       </div>
-      <div style={{ display: "flex", maxHeight: 600, height: 600 }}>
-        <QueueItems
-          title={"Extensions"}
-          search={search}
-          description={"New releases"}
-        />
-        <QueueItems
-          title={"Enhancements"}
-          search={search}
-          description={"Improvements to existing extensions"}
-        />
-      </div>
+      <QueueItems
+        title={"Queue"}
+        search={search}
+        description={
+          "All the new extensions and enhancements coming to RoamJS. Fund one to move it up the Queue!"
+        }
+      />
     </StandardLayout>
   );
 };

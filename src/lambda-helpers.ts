@@ -1,6 +1,8 @@
 import { AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
-import { APIGatewayProxyResult } from "aws-lambda";
+import Cookies from "universal-cookie";
+import { sessions, users } from "@clerk/clerk-sdk-node";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import OAuth from "oauth-1.0a";
 import crypto from "crypto";
 
@@ -104,3 +106,18 @@ export const twitterOAuth = new OAuth({
     return crypto.createHmac("sha1", key).update(base_string).digest("base64");
   },
 });
+
+export const getClerkEmail = async (
+  event: APIGatewayProxyEvent
+): Promise<string> => {
+  const cookies = new Cookies(event.headers.Cookie);
+  const sessionToken = cookies.get("__session");
+  if (!sessionToken) {
+    return undefined;
+  }
+  const sessionId = event.queryStringParameters._clerk_session_id;
+  const session = await sessions.verifySession(sessionId, sessionToken);
+  const user = await users.getUser(session.userId);
+  return user.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)
+    ?.emailAddress;
+};

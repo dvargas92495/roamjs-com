@@ -1,8 +1,8 @@
-import { useAuth0 } from "@auth0/auth0-react";
+import { useClerk } from "@clerk/clerk-react";
 import axios, { AxiosResponse } from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
-import { API_URL, AUTH0_AUDIENCE, FLOSS_API_URL } from "./constants";
+import { API_URL, FLOSS_API_URL } from "./constants";
 
 export const cleanCode = (text: string): string =>
   text.replace(/\n/g, "\\n").replace(/"/g, '\\"');
@@ -83,79 +83,33 @@ export const useIsMobile = (): boolean => {
 export const useAuthenticatedAxiosGet = (): ((
   path: string
 ) => Promise<AxiosResponse>) => {
-  const { getAccessTokenSilently } = useAuth0();
+  const { session } = useClerk();
   return useCallback(
-    (path: string) =>
-      getAccessTokenSilently({
-        audience: AUTH0_AUDIENCE,
-        scope: "read:current_user",
-      }).then((token) =>
-        axios.get(path, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-      ),
-    [getAccessTokenSilently]
+    (path: string) => {
+      const url = new URL(`${API_URL}/${path}`);
+      url.searchParams.set("_clerk_session_id", session.id);
+      return axios.get(url.toString(), {
+        withCredentials: true,
+      });
+    },
+    [session]
   );
-};
-
-export const useAuthenticatedAxiosFlossGet = (): ((
-  path: string
-) => Promise<AxiosResponse>) => {
-  const axiosGet = useAuthenticatedAxiosGet();
-  return useCallback((path: string) => axiosGet(`${FLOSS_API_URL}/${path}`), [
-    useAuthenticatedAxiosGet,
-  ]);
-};
-
-export const useAuthenticatedAxiosRoamJSGet = (): ((
-  path: string
-) => Promise<AxiosResponse>) => {
-  const axiosGet = useAuthenticatedAxiosGet();
-  return useCallback((path: string) => axiosGet(`${API_URL}/${path}`), [
-    useAuthenticatedAxiosGet,
-  ]);
 };
 
 export const useAuthenticatedAxiosPost = (): ((
   path: string,
   data: Record<string, unknown>
 ) => Promise<AxiosResponse>) => {
-  const { getAccessTokenSilently } = useAuth0();
+  const { session } = useClerk();
   return useCallback(
-    (path: string, data: Record<string, unknown>) =>
-      getAccessTokenSilently({
-        audience: AUTH0_AUDIENCE,
-        scope: "read:current_user",
-      }).then((token) =>
-        axios.post(path, data, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-      ),
-    [getAccessTokenSilently]
-  );
-};
-
-export const useAuthenticatedAxiosFlossPost = (): ((
-  path: string,
-  data: Record<string, unknown>
-) => Promise<AxiosResponse>) => {
-  const axiosPost = useAuthenticatedAxiosPost();
-  return useCallback(
-    (path: string, data: Record<string, unknown>) =>
-      axiosPost(`${FLOSS_API_URL}/${path}`, data),
-    [useAuthenticatedAxiosPost]
-  );
-};
-
-export const useAuthenticatedAxiosRoamJSPost = (): ((
-  path: string,
-  data: Record<string, unknown>
-) => Promise<AxiosResponse>) => {
-  const axiosPost = useAuthenticatedAxiosPost();
-  return useCallback(
-    (path: string, data: Record<string, unknown>) =>
-      axiosPost(`${API_URL}/${path}`, data),
-    [useAuthenticatedAxiosPost]
+    (path: string, data: Record<string, unknown>) => {
+      const url = new URL(`${API_URL}/${path}`);
+      url.searchParams.set("_clerk_session_id", session.id);
+      return axios.post(url.toString(), data, {
+        withCredentials: true,
+      });
+    },
+    [session]
   );
 };
 
@@ -163,17 +117,15 @@ export const useAuthenticatedAxiosPut = (): ((
   path: string,
   data: Record<string, unknown>
 ) => Promise<AxiosResponse>) => {
-  const { getAccessTokenSilently } = useAuth0();
+  const { session } = useClerk();
   return useCallback(
-    (path: string, data: Record<string, unknown>) =>
-      getAccessTokenSilently({
-        audience: AUTH0_AUDIENCE,
-        scope: "read:current_user",
-      }).then((token) =>
-        axios.put(`${FLOSS_API_URL}/${path}`, data, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-      ),
-    [getAccessTokenSilently]
+    (path: string, data: Record<string, unknown>) => {
+      const url = new URL(path, FLOSS_API_URL);
+      url.searchParams.set("_clerk_session_id", session.id);
+      return axios.put(url.toString(), data, {
+        withCredentials: true,
+      });
+    },
+    [session]
   );
 };
