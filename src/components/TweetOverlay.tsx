@@ -16,6 +16,7 @@ import React, {
 import ReactDOM from "react-dom";
 import Twitter from "../assets/Twitter.svg";
 import {
+  getEditTimeByBlockUid,
   getTreeByBlockUid,
   getTreeByPageName,
   generateBlockUid,
@@ -25,20 +26,17 @@ import { API_URL, getSettingValueFromTree } from "./hooks";
 import axios from "axios";
 import twitter from "twitter-text";
 
+const ATTACHMENT_REGEX = /!\[[^\]]*\]\(([^\s)]*)\)/g;
+
 const TwitterContent: React.FunctionComponent<{
   blockUid: string;
   tweetId?: string;
   tweetUsername?: string;
   close: () => void;
 }> = ({ close, blockUid, tweetId, tweetUsername }) => {
-  const message = useMemo(
-    () =>
-      getTreeByBlockUid(blockUid).children.map((t) => ({
-        content: t.text,
-        uid: t.uid,
-      })),
-    [blockUid]
-  );
+  const message = useMemo(() => getTreeByBlockUid(blockUid).children, [
+    blockUid,
+  ]);
   const [error, setError] = useState("");
   const [tweetsSent, setTweetsSent] = useState(0);
   const onClick = useCallback(async () => {
@@ -62,12 +60,23 @@ const TwitterContent: React.FunctionComponent<{
     })
       .replace("((", "")
       .replace("))", "");
+    const sentLabel = getSettingValueFromTree({
+      tree,
+      key: "sent label",
+      defaultValue: "Sent at {now}",
+    });
+    const appendText = getSettingValueFromTree({
+      tree,
+      key: "append text",
+    });
+    const sentBlockIsValid =
+      sentBlockUid && !!getEditTimeByBlockUid(sentBlockUid);
     const sourceUid = generateBlockUid();
-    if (sentBlockUid) {
+    if (sentBlockIsValid) {
       window.roamAlphaAPI.createBlock({
         location: { "parent-uid": sentBlockUid, order: 0 },
         block: {
-          string: `Sent at ${new Date().toLocaleString()}`,
+          string: sentLabel.replace("{now}", new Date().toLocaleString()),
           uid: sourceUid,
         },
       });
@@ -76,7 +85,12 @@ const TwitterContent: React.FunctionComponent<{
     let success = true;
     for (let index = 0; index < message.length; index++) {
       setTweetsSent(index + 1);
-      const { content, uid } = message[index];
+      const { text, uid } = message[index];
+      const attachments = [];
+      const content = text.replace(ATTACHMENT_REGEX, (_, url) => {
+        attachments.push(url);
+        return "";
+      });
       success = await axios
         .post(`${API_URL}/twitter-tweet`, {
           key,
@@ -88,9 +102,21 @@ const TwitterContent: React.FunctionComponent<{
           auto_populate_reply_metadata: !!in_reply_to_status_id,
         })
         .then((r) => {
-          const { id_str } = r.data;
+          const {
+            id_str,
+            screen_name: { name },
+          } = r.data;
           in_reply_to_status_id = id_str;
-          if (sentBlockUid) {
+          if (appendText) {
+            const link = `https://twitter.com/${name}/status/${id_str}`;
+            window.roamAlphaAPI.updateBlock({
+              block: {
+                uid,
+                string: `${text} ${appendText.replace("{link}", link)}`,
+              },
+            });
+          }
+          if (sentBlockIsValid) {
             window.roamAlphaAPI.moveBlock({
               location: { "parent-uid": sourceUid, order: index },
               block: { uid },
@@ -99,7 +125,7 @@ const TwitterContent: React.FunctionComponent<{
           return true;
         })
         .catch((e) => {
-          if (sentBlockUid && index === 0) {
+          if (sentBlockIsValid && index === 0) {
             window.roamAlphaAPI.deleteBlock({ block: { uid: sourceUid } });
           }
           setError(
@@ -163,7 +189,9 @@ const TweetOverlay: React.FunctionComponent<{
   const calcCounts = useCallback(
     () =>
       getTreeByBlockUid(blockUid).children.map((t) => {
-        const { weightedLength, valid } = twitter.parseTweet(t.text);
+        const { weightedLength, valid } = twitter.parseTweet(
+          t.text.replace(ATTACHMENT_REGEX, "")
+        );
         return {
           count: weightedLength,
           valid,
@@ -200,7 +228,7 @@ const TweetOverlay: React.FunctionComponent<{
           calcCounts().map((c) => {
             if (c.uid === currentUid) {
               const { weightedLength, valid } = twitter.parseTweet(
-                textarea.value
+                textarea.value.replace(ATTACHMENT_REGEX, "")
               );
               return { uid: currentUid, count: weightedLength, valid };
             } else {
