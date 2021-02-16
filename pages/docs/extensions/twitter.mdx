@@ -36,6 +36,8 @@ If the tweet button has multiple children, clicking "Send Tweet" will send each 
 
 ![](/images/tweet-thread.png)
 
+#### After Sending
+
 It could be useful to denote which blocks in Roam have already been sent as tweets. On the `roam/js/twitter` page, you could add a block that says 'Sent' with a block reference as a child.
 
 ![](/images/tweet-sent.png)
@@ -43,6 +45,22 @@ It could be useful to denote which blocks in Roam have already been sent as twee
 This will move all the blocks sent as children of this block upon sending.
 
 ![](/images/tweet-nest.png)
+
+The label by which Sent tweets are nested under could be configured with a block that says 'Label'.
+
+![](/images/tweet-label-config.png)
+
+The child of that block will be used as the label. `{now}` will be replaced with the time the tweet was successfully sent.
+
+![](/images/tweet-label.png)
+
+Instead of moving blocks, tweeted blocks could also be edited upon sending. This could be configured with a block that says 'Append Text'.
+
+![](/images/tweet-append-config.png)
+
+The child will be appended to the end of the tweeted block. `{link}` will be replaced with the link of the created tweet.
+
+![](/images/tweet-append.png)
 
 #### Demo
 

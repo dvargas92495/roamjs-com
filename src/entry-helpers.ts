@@ -580,20 +580,6 @@ export const getRefTitlesByBlockUid = (uid: string): string[] =>
     )
     .map((b: RoamBlock[]) => b[0]?.title || "");
 
-export const getCreateTimeByBlockUid = (uid: string): number => {
-  const block = window.roamAlphaAPI.q(
-    `[:find (pull ?e [:create/time]) :where [?e :block/uid "${uid}"]]`
-  )[0][0] as RoamBlock;
-  return block?.time;
-};
-
-export const getEditTimeByBlockUid = (uid: string): number => {
-  const block = window.roamAlphaAPI.q(
-    `[:find (pull ?e [:edit/time]) :where [?e :block/uid "${uid}"]]`
-  )[0][0] as RoamBlock;
-  return block?.time;
-};
-
 export const getPageTitle = (e: Element): ChildNode => {
   const container =
     e.closest(".roam-log-page") ||
