@@ -20,10 +20,11 @@ import {
   useAuthenticatedAxiosPost,
 } from "../../components/hooks";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import axios from "axios";
 import { FLOSS_API_URL } from "../../components/constants";
 import awsTlds from "../../components/aws_tlds";
-import { useUser, SignedIn, SignedOut, SignUp } from "@clerk/clerk-react";
+import { useUser, SignedIn, SignedOut } from "@clerk/clerk-react";
 
 const UserValue: React.FunctionComponent = ({ children }) => (
   <span style={{ marginBottom: -24, paddingLeft: 64, display: "block" }}>
@@ -110,9 +111,7 @@ const Billing = () => {
   const authenticatedAxios = useAuthenticatedAxiosGet();
   const getPayment = useCallback(
     () =>
-      authenticatedAxios("payment-methods").then((r) =>
-        setPayment(r.data[0])
-      ),
+      authenticatedAxios("payment-methods").then((r) => setPayment(r.data[0])),
     [authenticatedAxios]
   );
   const getProducts = useCallback(
@@ -486,6 +485,19 @@ const Profile = () => {
   );
 };
 
+const Redirect = () => {
+  const router = useRouter();
+  useEffect(() => {
+    router.push("/login");
+  });
+  return (
+    <div>
+      <Loading loading />
+      <span style={{ marginLeft: 32 }}>Redirecting to login...</span>
+    </div>
+  );
+};
+
 const UserPage = (): JSX.Element => {
   return (
     <StandardLayout>
@@ -493,9 +505,7 @@ const UserPage = (): JSX.Element => {
         <Profile />
       </SignedIn>
       <SignedOut>
-        <div style={{ marginBottom: 64 }}>
-          <SignUp />
-        </div>
+        <Redirect />
       </SignedOut>
     </StandardLayout>
   );

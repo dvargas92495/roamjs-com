@@ -203,6 +203,21 @@ resource "aws_route53_record" "clerk-mail" {
   records = ["mail.q5lvvno2col9.clerk.services"]
 }
 
+resource "aws_dynamodb_table" "roamjs-clerk-users" {
+  name           = "RoamJSClerkUsers"
+  billing_mode   = "PAY_PER_REQUEST"
+  hash_key       = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  tags = {
+    Application = "Roam JS Extensions"
+  }
+}
+
 data "aws_api_gateway_rest_api" "floss" {
   name = "floss"
 }
