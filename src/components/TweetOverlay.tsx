@@ -104,11 +104,11 @@ const TwitterContent: React.FunctionComponent<{
         .then((r) => {
           const {
             id_str,
-            screen_name: { name },
+            user: { screen_name },
           } = r.data;
           in_reply_to_status_id = id_str;
           if (appendText) {
-            const link = `https://twitter.com/${name}/status/${id_str}`;
+            const link = `https://twitter.com/${screen_name}/status/${id_str}`;
             window.roamAlphaAPI.updateBlock({
               block: {
                 uid,
