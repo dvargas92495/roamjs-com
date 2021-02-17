@@ -31,14 +31,14 @@ const UPLOAD_URL = `${process.env.REST_API_URL}/twitter-upload`;
 const TWITTER_MAX_SIZE = 5000000;
 
 const toCategory = (mime: string) => {
-  if (mime.startsWith('video')) {
-    return 'tweet_video';
-  } else if (mime.endsWith('gif')) {
-    return 'tweet_gif';
+  if (mime.startsWith("video")) {
+    return "tweet_video";
+  } else if (mime.endsWith("gif")) {
+    return "tweet_gif";
   } else {
-    return 'tweet_image';
+    return "tweet_image";
   }
-}
+};
 
 const uploadAttachments = async ({
   attachmentUrls,
@@ -91,6 +91,28 @@ const uploadAttachments = async ({
       secret,
       params: { command: "FINALIZE", media_id },
     });
+
+    await new Promise<void>((resolve, reject) => {
+      const getStatus = () =>
+        axios
+          .post(UPLOAD_URL, {
+            key,
+            secret,
+            params: { command: "STATUS", media_id },
+          })
+          .then((r) => r.data.processing_info)
+          .then(({ state, check_after_secs, error }) => {
+            if (state === "succeeded") {
+              resolve();
+            } else if (state === "failed") {
+              reject(error.message);
+            } else {
+              setTimeout(getStatus, check_after_secs * 1000);
+            }
+          });
+      return getStatus();
+    });
+
     mediaIds.push(media_id);
   }
   return mediaIds;
