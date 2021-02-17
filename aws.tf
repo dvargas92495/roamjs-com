@@ -105,6 +105,7 @@ module "aws-serverless-backend" {
     api_name = "roam-js-extensions"
     paths = [
         "article/post",
+        "balance/get",
         "deploy/post",
         "github-cards/get",
         "github-issues/get",
@@ -112,11 +113,14 @@ module "aws-serverless-backend" {
         "github-repositories/get",
         "google-calendar/get",
         "install/put",
+        "is-subscribed/get",
         "launch-website/post",
         "payment-methods/get",
+        "products/get",
         "queue-issues/get",
         "slack-url/post",
         "shutdown-website/post",
+        "sponsorships/get",
         "subscriptions/get",
         "twitter-auth/post",
         "twitter-login/post",
