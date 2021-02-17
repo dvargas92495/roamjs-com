@@ -9,7 +9,7 @@ env:
   MIXPANEL_TOKEN: ${{ secrets.MIXPANEL_TOKEN }}
   MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
   GIPHY_KEY: ${{ secrets.GIPHY_KEY }}
-  REST_API_URL: https://${{ secrets.REST_API_ID }}.execute-api.us-east-1.amazonaws.com/production
+  REST_API_URL: http://localhost:3003/dev
 
 jobs:
   deploy:

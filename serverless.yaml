@@ -78,6 +78,20 @@ functions:
           path: subscriptions
           method: get
           cors: true
+  twitter-tweet-post:
+    handler: out/twitter-tweet_post.handler
+    events:
+      - http:
+          path: twitter-tweet
+          method: post
+          cors: true
+  twitter-upload-post:
+    handler: out/twitter-upload_post.handler
+    events:
+      - http:
+          path: twitter-upload
+          method: post
+          cors: true
   website-status-get:
     handler: out/website-status_get.handler
     events:

@@ -22,11 +22,101 @@ import {
   generateBlockUid,
   getUids,
 } from "roam-client";
-import { API_URL, getSettingValueFromTree } from "./hooks";
+import { getSettingValueFromTree } from "./hooks";
 import axios from "axios";
 import twitter from "twitter-text";
 
 const ATTACHMENT_REGEX = /!\[[^\]]*\]\(([^\s)]*)\)/g;
+const UPLOAD_URL = `${process.env.REST_API_URL}/twitter-upload`;
+const TWITTER_MAX_SIZE = 5000000;
+
+const toCategory = (mime: string) => {
+  if (mime.startsWith("video")) {
+    return "tweet_video";
+  } else if (mime.endsWith("gif")) {
+    return "tweet_gif";
+  } else {
+    return "tweet_image";
+  }
+};
+
+const uploadAttachments = async ({
+  attachmentUrls,
+  key,
+  secret,
+}: {
+  attachmentUrls: string[];
+  key: string;
+  secret: string;
+}): Promise<string[]> => {
+  if (!attachmentUrls.length) {
+    return Promise.resolve([]);
+  }
+  const mediaIds = [];
+  for (const attachmentUrl of attachmentUrls) {
+    const attachment = await axios
+      .get(attachmentUrl, { responseType: "blob" })
+      .then((r) => r.data as Blob);
+    const media_id = await axios
+      .post(UPLOAD_URL, {
+        key,
+        secret,
+        params: {
+          command: "INIT",
+          total_bytes: attachment.size,
+          media_type: attachment.type,
+          media_category: toCategory(attachment.type),
+        },
+      })
+      .then((r) => r.data.media_id_string);
+    const reader = new FileReader();
+    const data = await new Promise<string>((resolve) => {
+      reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
+      reader.readAsDataURL(attachment);
+    });
+    for (let i = 0; i < data.length; i += TWITTER_MAX_SIZE) {
+      await axios.post(UPLOAD_URL, {
+        key,
+        secret,
+        params: {
+          command: "APPEND",
+          media_id,
+          media_data: data.slice(i, i + TWITTER_MAX_SIZE),
+          segment_index: i / TWITTER_MAX_SIZE,
+        },
+      });
+    }
+    await axios.post(UPLOAD_URL, {
+      key,
+      secret,
+      params: { command: "FINALIZE", media_id },
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      const getStatus = () =>
+        axios
+          .post(UPLOAD_URL, {
+            key,
+            secret,
+            params: { command: "STATUS", media_id },
+          })
+          .then((r) => r.data.processing_info)
+          .then(({ state, check_after_secs, error }) => {
+            if (state === "succeeded") {
+              resolve();
+            } else if (state === "failed") {
+              reject(error.message);
+            } else {
+              setTimeout(getStatus, check_after_secs * 1000);
+            }
+          });
+      return getStatus();
+    });
+
+    mediaIds.push(media_id);
+  }
+  return mediaIds;
+};
 
 const TwitterContent: React.FunctionComponent<{
   blockUid: string;
@@ -86,20 +176,32 @@ const TwitterContent: React.FunctionComponent<{
     for (let index = 0; index < message.length; index++) {
       setTweetsSent(index + 1);
       const { text, uid } = message[index];
-      const attachments = [];
+      const attachmentUrls: string[] = [];
       const content = text.replace(ATTACHMENT_REGEX, (_, url) => {
-        attachments.push(url);
+        attachmentUrls.push(url);
         return "";
       });
+      const media_ids = await uploadAttachments({
+        attachmentUrls,
+        key,
+        secret,
+      }).catch((e) => {
+        console.error(e.response?.data || e.message);
+        return [];
+      });
+      if (media_ids.length < attachmentUrls.length) {
+        setTweetsSent(0);
+        setError("Some attachments failed to upload");
+        return "";
+      }
       success = await axios
-        .post(`${API_URL}/twitter-tweet`, {
+        .post(`${process.env.REST_API_URL}/twitter-tweet`, {
           key,
           secret,
-          content: `${
-            tweetUsername && index === 0 ? `@${tweetUsername} ` : ""
-          }${content}`,
+          content,
           in_reply_to_status_id,
           auto_populate_reply_metadata: !!in_reply_to_status_id,
+          media_ids,
         })
         .then((r) => {
           const {
