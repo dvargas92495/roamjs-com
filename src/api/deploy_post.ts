@@ -1,6 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import axios from "axios";
-import { headers } from "../lambda-helpers";
+import { getClerkUser, headers } from "../lambda-helpers";
 import AWS from "aws-sdk";
 import { v4 } from "uuid";
 
@@ -10,14 +9,26 @@ const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const {
-    data: { website },
-  } = await axios.get(
-    `${process.env.FLOSS_API_URL}/auth-user-metadata?key=website`,
-    {
-      headers: { Authorization: event.headers.Authorization },
-    }
-  );
+  const user = await getClerkUser(event);
+  if (!user) {
+    return {
+      statusCode: 401,
+      body: "No Active Session",
+      headers,
+    };
+  }
+
+  const website = await dynamo
+    .getItem({
+      TableName: "RoamJSClerkUsers",
+      Key: { id: { S: user.id } },
+    })
+    .promise()
+    .then((r) =>
+      r.Item
+        ? { graph: r.Item?.website_graph?.S, domain: r.Item?.website_domain?.S }
+        : {}
+    );
 
   await dynamo
     .putItem({

@@ -1,30 +1,29 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import AWS from "aws-sdk";
-import axios from "axios";
-import { getClerkEmail, headers } from "../lambda-helpers";
+import { getClerkUser, headers } from "../lambda-helpers";
 
 const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const email = getClerkEmail(event);
-  if (!email) {
+  const user = await getClerkUser(event);
+  if (!user) {
     return {
       statusCode: 401,
       body: "No Active Session",
       headers,
     };
   }
-  const website =
-    event.queryStringParameters ||
-    (await axios
-      .get(`${process.env.FLOSS_API_URL}/auth-user-metadata?key=website`, {
-        headers: { Authorization: event.headers.Authorization },
-      })
-      .then((r) => r.data.website));
+  
+  const graph =
+    event.queryStringParameters?.graph ||
+    (await dynamo
+      .getItem({ TableName: "RoamJSClerkUsers", Key: { id: { S: user.id } } })
+      .promise()
+      .then((r) => r.Item?.website_graph?.S));
 
-  if (!website) {
+  if (!graph) {
     return {
       statusCode: 204,
       body: JSON.stringify({}),
@@ -38,7 +37,7 @@ export const handler = async (
       KeyConditionExpression: "action_graph = :a",
       ExpressionAttributeValues: {
         ":a": {
-          S: `launch_${website.graph}`,
+          S: `launch_${graph}`,
         },
       },
       Limit: 1,
@@ -53,7 +52,7 @@ export const handler = async (
       KeyConditionExpression: "action_graph = :a",
       ExpressionAttributeValues: {
         ":a": {
-          S: `deploy_${website.graph}`,
+          S: `deploy_${graph}`,
         },
       },
       ScanIndexForward: false,
@@ -71,7 +70,7 @@ export const handler = async (
   return {
     statusCode: 200,
     body: JSON.stringify({
-      ...website,
+      graph,
       status: statuses.Items ? statuses.Items[0].status.S : "INITIALIZING",
       statusProps: statuses.Items ? statuses.Items[0].status_props?.S : "{}",
       deploys: deploys

@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
-import { headers } from "../lambda-helpers";
+import { getClerkUser, headers } from "../lambda-helpers";
 import AWS from "aws-sdk";
 import { v4 } from "uuid";
 
@@ -10,7 +10,7 @@ const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const { graph, domain, priceId, email } = JSON.parse(event.body);
+  const { graph, domain, priceId } = JSON.parse(event.body);
   if (!graph) {
     return {
       statusCode: 400,
@@ -35,32 +35,48 @@ export const handler = async (
     };
   }
 
-  const available = await axios
-    .get(`${process.env.FLOSS_API_URL}/aws-check-domain?domain=${domain}`)
-    .then((r) => r.data.available);
-  if (!available) {
+  const user = await getClerkUser(event);
+  if (!user) {
     return {
-      statusCode: 400,
-      body: `${domain} is not available!`,
+      statusCode: 401,
+      body: "No Active Session",
       headers,
     };
   }
 
-  const Authorization = event.headers.Authorization;
-
-  const subscriptionActive = await axios
+  const email = user.emailAddresses.find(
+    (e) => e.id === user.primaryEmailAddressId
+  )?.emailAddress;
+  const { active, id } = await axios
     .post(
       `${process.env.FLOSS_API_URL}/stripe-subscribe`,
-      { priceId },
-      { headers: { Authorization } }
+      { priceId, successParams: { callback: "launch-website", graph, domain } },
+      {
+        headers: {
+          Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
+          Origin: event.headers.Origin,
+        },
+      }
     )
-    .then((r) => r.data.active);
-  if (!subscriptionActive) {
-    return {
-      statusCode: 500,
-      body: "Failed to subscribe to RoamJS Site service",
-      headers,
-    };
+    .then((r) => r.data)
+    .catch((e) => {
+      console.error(e.response?.data);
+      return { active: false };
+    });
+  if (!active) {
+    if (id) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ sessionId: id }),
+        headers,
+      };
+    } else {
+      return {
+        statusCode: 500,
+        body: "Failed to subscribe to RoamJS Site service",
+        headers,
+      };
+    }
   }
 
   await dynamo
@@ -84,13 +100,23 @@ export const handler = async (
     .promise();
 
   const website = { graph, domain };
-  await axios.put(
-    `${process.env.FLOSS_API_URL}/auth-user-metadata`,
-    { website },
-    {
-      headers: { Authorization },
-    }
-  );
+  await dynamo.updateItem({
+    TableName: "RoamJSClerkUsers",
+    Key: { id: { S: user.id } },
+    ExpressionAttributeNames: {
+      "#WG": "website_graph",
+      "#WD": "website_domain",
+    },
+    ExpressionAttributeValues: {
+      ":g": {
+        S: graph,
+      },
+      ":d": {
+        S: domain,
+      },
+    },
+    UpdateExpression: "SET #WG = :g, #WD = :d",
+  });
 
   await lambda
     .invoke({

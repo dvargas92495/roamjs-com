@@ -6,14 +6,11 @@ import {
 } from "@dvargas92495/ui";
 import React from "react";
 import axios from "axios";
-import { FLOSS_API_URL } from "./constants";
+import { FLOSS_API_URL, stripe } from "./constants";
 import format from "date-fns/format";
-import { loadStripe } from "@stripe/stripe-js";
 import addMonths from "date-fns/addMonths";
 import isBefore from "date-fns/isBefore";
 // import { useClerk } from "@clerk/clerk-react";
-
-const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || "");
 
 const FundButton: React.FunctionComponent<{
   title: string;

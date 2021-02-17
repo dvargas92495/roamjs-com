@@ -4,4 +4,9 @@ import { flossGet } from "../lambda-helpers";
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> =>
-  flossGet({ event, path: "stripe-subscriptions" });
+  flossGet({
+    event,
+    path: `stripe-is-subscribed?product=${encodeURI(
+      event.queryStringParameters?.product
+    )}`,
+  });

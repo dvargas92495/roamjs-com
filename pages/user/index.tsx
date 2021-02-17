@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import StandardLayout from "../../components/StandardLayout";
 import {
   Body,
@@ -22,7 +22,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { FLOSS_API_URL } from "../../components/constants";
+import { FLOSS_API_URL, stripe } from "../../components/constants";
 import awsTlds from "../../components/aws_tlds";
 import { useUser, SignedIn, SignedOut } from "@clerk/clerk-react";
 
@@ -100,19 +100,25 @@ const Settings = ({ name, email }: { name: string; email: string }) => {
   );
 };
 
+type PaymentMethod = {
+  brand: string;
+  last4: string;
+  id: string;
+};
+
 const Billing = () => {
-  const [payment, setPayment] = useState<{
-    brand?: string;
-    last4?: string;
-    id?: string;
-  }>({});
+  const [payment, setPayment] = useState<PaymentMethod>();
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [products, setProducts] = useState([]);
   const [subscriptions, setSubscriptions] = useState(new Set<string>());
   const authenticatedAxios = useAuthenticatedAxiosGet();
   const getPayment = useCallback(
     () =>
-      authenticatedAxios("payment-methods").then((r) => setPayment(r.data[0])),
-    [authenticatedAxios]
+      authenticatedAxios("payment-methods").then((r) => {
+        setPayment(r.data.defaultPaymentMethod);
+        setPaymentMethods(r.data.paymentMethods);
+      }),
+    [authenticatedAxios, setPayment, setPaymentMethods]
   );
   const getProducts = useCallback(
     () =>
@@ -145,9 +151,39 @@ const Billing = () => {
             primary: (
               <UserValue>
                 <DataLoader loadAsync={getPayment}>
-                  <H6>
-                    {payment.brand} ends in {payment.last4}
-                  </H6>
+                  {payment ? (
+                    <Body>
+                      {payment.brand} ends in {payment.last4}
+                    </Body>
+                  ) : (
+                    <Body>No default card saved!</Body>
+                  )}
+                  <Items
+                    items={paymentMethods.map((pm) => ({
+                      primary: `${pm.brand} ends in ${pm.last4}`,
+                      key: pm.id,
+                      action: (
+                        <>
+                          <Button>Make Default</Button>
+                          <Button
+                            onClick={() =>
+                              axios
+                                .delete(
+                                  `${FLOSS_API_URL}/stripe-payment-method?payment_method_id=${pm.id}`
+                                )
+                                .then(() =>
+                                  setPaymentMethods(
+                                    paymentMethods.filter((p) => p.id !== pm.id)
+                                  )
+                                )
+                            }
+                          >
+                            Delete
+                          </Button>
+                        </>
+                      ),
+                    }))}
+                  />
                 </DataLoader>
               </UserValue>
             ),
@@ -236,8 +272,15 @@ const Website = () => {
       authenticatedAxiosPost("launch-website", {
         ...body,
         priceId,
-        email: user.primaryEmailAddress.emailAddress,
-      }),
+      }).then(
+        (r) =>
+          r.data.sessionId &&
+          stripe.then((s) =>
+            s.redirectToCheckout({
+              sessionId: r.data.sessionId,
+            })
+          )
+      ),
     [authenticatedAxiosPost, priceId, user]
   );
   const [loading, setLoading] = useState(false);
@@ -258,11 +301,11 @@ const Website = () => {
   useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
   useEffect(() => {
     authenticatedAxiosGet(
-      `stripe-is-subscribed?product=${encodeURI("RoamJS Site")}`
+      `is-subscribed?product=${encodeURI("RoamJS Site")}`
     ).then((r) => setSubscriptionId(r.data.subscriptionId));
   }, [authenticatedAxiosGet]);
   useEffect(() => {
-    authenticatedAxiosGet("stripe-products?project=RoamJS")
+    authenticatedAxiosGet("products")
       .then((r) =>
         r.data.products.find((p: { name: string }) => p.name === "RoamJS Site")
       )
@@ -394,15 +437,12 @@ const Funding = () => {
   const [items, setItems] = useState([]);
   const authenticatedAxios = useAuthenticatedAxiosGet();
   const getBalance = useCallback(
-    () =>
-      authenticatedAxios("stripe-balance").then((r) =>
-        setBalance(r.data.balance)
-      ),
+    () => authenticatedAxios("balance").then((r) => setBalance(r.data.balance)),
     [setBalance, authenticatedAxios]
   );
   const loadItems = useCallback(
     () =>
-      authenticatedAxios("contract-by-email").then((r) =>
+      authenticatedAxios("sponsorships").then((r) =>
         setItems(
           r.data.contracts.sort(
             (a, b) =>
@@ -459,9 +499,17 @@ const Funding = () => {
 
 const Profile = () => {
   const user = useUser();
+  const initialValue = useMemo(() => {
+    const query = new URLSearchParams(window.location.search);
+    const callback = query.get('callback');
+    if (callback === 'launch-website') {
+      return 2;
+    }
+    return 0;
+  }, []);
   return (
     <>
-      <VerticalTabs title={"User Info"}>
+      <VerticalTabs title={"User Info"} initialValue={initialValue}>
         <Card title={"Details"}>
           <Settings
             name={user.fullName}

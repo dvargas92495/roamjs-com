@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
-import { headers } from "../lambda-helpers";
+import { getClerkUser, headers } from "../lambda-helpers";
 import AWS from "aws-sdk";
 import { v4 } from "uuid";
 
@@ -11,11 +11,24 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const { graph, subscriptionId } = JSON.parse(event.body || "{}");
-  const Authorization = event.headers.Authorization;
-  const opts = {
-    headers: { Authorization },
-  };
 
+  const user = await getClerkUser(event);
+  if (!user) {
+    return {
+      statusCode: 401,
+      body: "No Active Session",
+      headers,
+    };
+  }
+
+  const email = user.emailAddresses.find(
+    (e) => e.id === user.primaryEmailAddressId
+  )?.emailAddress;
+  const opts = {
+    headers: {
+      Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
+    },
+  };
   const cancelled = await axios
     .post(
       `${process.env.FLOSS_API_URL}/stripe-cancel`,
@@ -53,11 +66,15 @@ export const handler = async (
     })
     .promise();
 
-  await axios.put(
-    `${process.env.FLOSS_API_URL}/auth-user-metadata`,
-    { website: undefined },
-    opts
-  );
+  await dynamo.updateItem({
+    TableName: "RoamJSClerkUsers",
+    Key: { id: { S: user.id } },
+    ExpressionAttributeNames: {
+      "#WG": "website_graph",
+      "#WD": "website_domain",
+    },
+    UpdateExpression: "REMOVE #WG, #WD",
+  });
 
   await lambda
     .invoke({

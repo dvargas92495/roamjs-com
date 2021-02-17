@@ -5,6 +5,7 @@ import { sessions, users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import OAuth from "oauth-1.0a";
 import crypto from "crypto";
+import { User } from "@clerk/clerk-sdk-node/dist/resources/User";
 
 export const headers = {
   "Access-Control-Allow-Origin": "*",
@@ -107,9 +108,9 @@ export const twitterOAuth = new OAuth({
   },
 });
 
-export const getClerkEmail = async (
+export const getClerkUser = async (
   event: APIGatewayProxyEvent
-): Promise<string> => {
+): Promise<User> => {
   const cookies = new Cookies(event.headers.Cookie);
   const sessionToken = cookies.get("__session");
   if (!sessionToken) {
@@ -117,7 +118,40 @@ export const getClerkEmail = async (
   }
   const sessionId = event.queryStringParameters._clerk_session_id;
   const session = await sessions.verifySession(sessionId, sessionToken);
-  const user = await users.getUser(session.userId);
+  return await users.getUser(session.userId);
+};
+
+export const getClerkEmail = async (
+  event: APIGatewayProxyEvent
+): Promise<string> => {
+  const user = await getClerkUser(event);
   return user.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)
     ?.emailAddress;
 };
+
+export const flossGet = ({
+  event,
+  path,
+}: {
+  event: APIGatewayProxyEvent;
+  path: string;
+}): Promise<APIGatewayProxyResult> =>
+  getClerkEmail(event).then((email) =>
+    email
+      ? axios
+          .get(`${process.env.FLOSS_API_URL}/${path}`, {
+            headers: {
+              Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
+            },
+          })
+          .then((r) => ({
+            statusCode: 200,
+            body: JSON.stringify(r.data),
+            headers,
+          }))
+      : Promise.resolve({
+          statusCode: 401,
+          body: "No Active Session",
+          headers,
+        })
+  );

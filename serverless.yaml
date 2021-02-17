@@ -8,6 +8,34 @@ custom:
     httpPort: 3003
     lambdaPort: 3004
 functions:
+  balance-get:
+    handler: out/balance_get.handler
+    events:
+      - http:
+          path: balance
+          method: get
+          cors: true
+  deploy-post:
+    handler: out/deploy_post.handler
+    events:
+      - http:
+          path: deploy
+          method: post
+          cors: true
+  is-subscribed-get:
+    handler: out/is-subscribed_get.handler
+    events:
+      - http:
+          path: is-subscribed
+          method: get
+          cors: true
+  launch-website-post:
+    handler: out/launch-website_post.handler
+    events:
+      - http:
+          path: launch-website
+          method: post
+          cors: true
   payment-methods-get:
     handler: out/payment-methods_get.handler
     events:
@@ -15,11 +43,32 @@ functions:
           path: payment-methods
           method: get
           cors: true
+  products-get:
+    handler: out/products_get.handler
+    events:
+      - http:
+          path: products
+          method: get
+          cors: true
   queue-issues-get:
     handler: out/queue-issues_get.handler
     events:
       - http:
           path: queue-issues
+          method: get
+          cors: true
+  shutdown-post:
+    handler: out/shutdown_post.handler
+    events:
+      - http:
+          path: shutdown
+          method: post
+          cors: true
+  sponsorships-get:
+    handler: out/sponsorships_get.handler
+    events:
+      - http:
+          path: sponsorships
           method: get
           cors: true
   subscriptions-get:
