@@ -30,6 +30,16 @@ const ATTACHMENT_REGEX = /!\[[^\]]*\]\(([^\s)]*)\)/g;
 const UPLOAD_URL = `${process.env.REST_API_URL}/twitter-upload`;
 const TWITTER_MAX_SIZE = 5000000;
 
+const toCategory = (mime: string) => {
+  if (mime.startsWith('video')) {
+    return 'tweet_image';
+  } else if (mime.endsWith('gif')) {
+    return 'tweet_gif';
+  } else {
+    return 'tweet_image';
+  }
+}
+
 const uploadAttachments = async ({
   attachmentUrls,
   key,
@@ -55,6 +65,7 @@ const uploadAttachments = async ({
           command: "INIT",
           total_bytes: attachment.size,
           media_type: attachment.type,
+          media_category: toCategory(attachment.type),
         },
       })
       .then((r) => r.data.media_id_string);
@@ -157,6 +168,7 @@ const TwitterContent: React.FunctionComponent<{
         return [];
       });
       if (media_ids.length < attachmentUrls.length) {
+        setTweetsSent(0);
         setError("Some attachments failed to upload");
         return "";
       }
