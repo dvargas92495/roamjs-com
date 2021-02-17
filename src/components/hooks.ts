@@ -62,6 +62,3 @@ export const getSettingValueFromTree = ({
   const value = node ? node.children[0].text.trim() : defaultValue;
   return value;
 };
-
-export const API_URL =
-  "https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production";

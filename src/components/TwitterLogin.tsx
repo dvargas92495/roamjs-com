@@ -5,7 +5,6 @@ import ReactDOM from "react-dom";
 import { generateBlockUid } from "roam-client";
 import Twitter from "../assets/Twitter.svg";
 import { getPageUidByPageTitle } from "../entry-helpers";
-import { API_URL } from "./hooks";
 
 const TwitterLogin: React.FunctionComponent<{ onSuccess: () => void }> = ({
   onSuccess,
@@ -16,7 +15,7 @@ const TwitterLogin: React.FunctionComponent<{ onSuccess: () => void }> = ({
   const onClick = useCallback(() => {
     setLoading(true);
     axios
-      .post(`${API_URL}/twitter-login`)
+      .post(`${process.env.REST_API_URL}/twitter-login`)
       .then((r) => {
         const width = 400;
         const height = 600;

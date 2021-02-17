@@ -4,19 +4,11 @@ import { headers, twitterOAuth } from "../lambda-helpers";
 import querystring from "querystring";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  const { key, secret, content, in_reply_to_status_id, auto_populate_reply_metadata, media_ids } = JSON.parse(
+  const { key, secret, params } = JSON.parse(
     event.body || "{}"
   );
-  const data = auto_populate_reply_metadata
-    ? { status: content, in_reply_to_status_id, auto_populate_reply_metadata, media_ids }
-    : { status: content, media_ids };
-  const url = `https://api.twitter.com/1.1/statuses/update.json?${querystring
-    .stringify(data)
-    .replace(/!/g, "%21")
-    .replace(/'/g, "%27")
-    .replace(/\(/g, "%28")
-    .replace(/\)/g, "%29")
-    .replace(/\*/g, "%2A")}`;
+  const url = `https://upload.twitter.com/1.1/media/upload.json?${querystring
+    .stringify(params)}`;
   const oauthHeaders = twitterOAuth.toHeader(
     twitterOAuth.authorize(
       {
