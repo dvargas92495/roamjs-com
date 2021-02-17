@@ -32,7 +32,7 @@ const TWITTER_MAX_SIZE = 5000000;
 
 const toCategory = (mime: string) => {
   if (mime.startsWith('video')) {
-    return 'tweet_image';
+    return 'tweet_video';
   } else if (mime.endsWith('gif')) {
     return 'tweet_gif';
   } else {
