@@ -4,12 +4,21 @@ import { headers, twitterOAuth } from "../lambda-helpers";
 import querystring from "querystring";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  const { key, secret, content, in_reply_to_status_id, auto_populate_reply_metadata, media_ids } = JSON.parse(
-    event.body || "{}"
-  );
-  const data = auto_populate_reply_metadata
-    ? { status: content, in_reply_to_status_id, auto_populate_reply_metadata, media_ids }
-    : { status: content, media_ids };
+  const {
+    key,
+    secret,
+    content,
+    in_reply_to_status_id,
+    auto_populate_reply_metadata,
+    media_ids,
+  } = JSON.parse(event.body || "{}");
+  const data = {
+    status: content,
+    ...(media_ids.length ? { media_ids } : {}),
+    ...(auto_populate_reply_metadata
+      ? { in_reply_to_status_id, auto_populate_reply_metadata }
+      : {}),
+  };
   const url = `https://api.twitter.com/1.1/statuses/update.json?${querystring
     .stringify(data)
     .replace(/!/g, "%21")

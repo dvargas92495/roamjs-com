@@ -60,7 +60,7 @@ const uploadAttachments = async ({
       .then((r) => r.data.media_id_string);
     const reader = new FileReader();
     const data = await new Promise<string>((resolve) => {
-      reader.onloadend = () => resolve(reader.result as string);
+      reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
       reader.readAsDataURL(attachment);
     });
     for (let i = 0; i < data.length; i += TWITTER_MAX_SIZE) {
@@ -91,7 +91,6 @@ const TwitterContent: React.FunctionComponent<{
   tweetUsername?: string;
   close: () => void;
 }> = ({ close, blockUid, tweetId, tweetUsername }) => {
-  console.log("Log to ensure we are calling localhost instead of AWS");
   const message = useMemo(() => getTreeByBlockUid(blockUid).children, [
     blockUid,
   ]);
@@ -157,6 +156,10 @@ const TwitterContent: React.FunctionComponent<{
         console.error(e.response?.data || e.message);
         return [];
       });
+      if (media_ids.length < attachmentUrls.length) {
+        setError("Some attachments failed to upload");
+        return "";
+      }
       success = await axios
         .post(`${process.env.REST_API_URL}/twitter-tweet`, {
           key,
