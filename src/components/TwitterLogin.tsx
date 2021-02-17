@@ -30,7 +30,7 @@ const TwitterLogin: React.FunctionComponent<{ onSuccess: () => void }> = ({
           if (e.origin === "https://roamjs.com") {
             loginWindow.close();
             axios
-              .post(`${API_URL}/twitter-auth`, JSON.parse(e.data))
+              .post(`${process.env.REST_API_URL}/twitter-auth`, JSON.parse(e.data))
               .then((rr) => {
                 const blockUid = generateBlockUid();
                 window.roamAlphaAPI.createBlock({

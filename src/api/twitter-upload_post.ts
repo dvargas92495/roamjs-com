@@ -4,11 +4,10 @@ import { headers, twitterOAuth } from "../lambda-helpers";
 import querystring from "querystring";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  const { key, secret, params } = JSON.parse(
-    event.body || "{}"
-  );
-  const url = `https://upload.twitter.com/1.1/media/upload.json?${querystring
-    .stringify(params)}`;
+  const { key, secret, params } = JSON.parse(event.body || "{}");
+  const url = `https://upload.twitter.com/1.1/media/upload.json?${querystring.stringify(
+    params
+  )}`;
   const oauthHeaders = twitterOAuth.toHeader(
     twitterOAuth.authorize(
       {
@@ -24,7 +23,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       url,
       {},
       {
-        headers: oauthHeaders,
+        headers: { ...oauthHeaders, "Content-Type": "multipart/form-data" },
       }
     )
     .then((r) => ({

@@ -1,6 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 const Dotenv = require("dotenv-webpack");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
+  .BundleAnalyzerPlugin;
 
 const buildEntry = (dir) => {
   const extensions = fs.readdirSync(`./src/${dir}/`);
@@ -47,5 +49,12 @@ module.exports = (env) => ({
       path: ".env.local",
       systemvars: true,
     }),
+    ...(env && env.analyze
+      ? [
+          new BundleAnalyzerPlugin({
+            analyzerMode: "static",
+          }),
+        ]
+      : [])
   ],
 });
