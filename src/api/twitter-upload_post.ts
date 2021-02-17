@@ -14,7 +14,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     twitterOAuth.authorize(
       {
         url,
-        method: "POST",
+        method: isStatus ? "GET" : "POST",
       },
       { key, secret }
     )
