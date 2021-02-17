@@ -30,9 +30,15 @@ const ATTACHMENT_REGEX = /!\[[^\]]*\]\(([^\s)]*)\)/g;
 const UPLOAD_URL = `${process.env.REST_API_URL}/twitter-upload`;
 const TWITTER_MAX_SIZE = 5000000;
 
-const uploadAttachments = async (
-  attachmentUrls: string[]
-): Promise<string[]> => {
+const uploadAttachments = async ({
+  attachmentUrls,
+  key,
+  secret,
+}: {
+  attachmentUrls: string[];
+  key: string;
+  secret: string;
+}): Promise<string[]> => {
   if (!attachmentUrls.length) {
     return Promise.resolve([]);
   }
@@ -43,9 +49,13 @@ const uploadAttachments = async (
       .then((r) => r.data as Blob);
     const media_id = await axios
       .post(UPLOAD_URL, {
-        command: "INIT",
-        total_bytes: attachment.size,
-        media_type: attachment.type,
+        key,
+        secret,
+        params: {
+          command: "INIT",
+          total_bytes: attachment.size,
+          media_type: attachment.type,
+        },
       })
       .then((r) => r.data.media_id_string);
     const reader = new FileReader();
@@ -55,13 +65,21 @@ const uploadAttachments = async (
     });
     for (let i = 0; i < data.length; i += TWITTER_MAX_SIZE) {
       await axios.post(UPLOAD_URL, {
-        command: "APPEND",
-        media_id,
-        media_data: data.slice(i, i + TWITTER_MAX_SIZE),
-        segment_index: i / TWITTER_MAX_SIZE,
+        key,
+        secret,
+        params: {
+          command: "APPEND",
+          media_id,
+          media_data: data.slice(i, i + TWITTER_MAX_SIZE),
+          segment_index: i / TWITTER_MAX_SIZE,
+        },
       });
     }
-    await axios.post(UPLOAD_URL, { command: "FINALIZE", media_id });
+    await axios.post(UPLOAD_URL, {
+      key,
+      secret,
+      params: { command: "FINALIZE", media_id },
+    });
     mediaIds.push(media_id);
   }
   return mediaIds;
@@ -126,12 +144,16 @@ const TwitterContent: React.FunctionComponent<{
     for (let index = 0; index < message.length; index++) {
       setTweetsSent(index + 1);
       const { text, uid } = message[index];
-      const attachments: string[] = [];
+      const attachmentUrls: string[] = [];
       const content = text.replace(ATTACHMENT_REGEX, (_, url) => {
-        attachments.push(url);
+        attachmentUrls.push(url);
         return "";
       });
-      const media_ids = await uploadAttachments(attachments).catch((e) => {
+      const media_ids = await uploadAttachments({
+        attachmentUrls,
+        key,
+        secret,
+      }).catch((e) => {
         console.error(e.response?.data || e.message);
         return [];
       });
