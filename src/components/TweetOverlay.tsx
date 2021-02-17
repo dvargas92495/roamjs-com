@@ -30,7 +30,9 @@ const ATTACHMENT_REGEX = /!\[[^\]]*\]\(([^\s)]*)\)/g;
 const UPLOAD_URL = `${process.env.REST_API_URL}/twitter-upload`;
 const TWITTER_MAX_SIZE = 5000000;
 
-const uploadAttachments = async (attachmentUrls: string[]): Promise<string[]> => {
+const uploadAttachments = async (
+  attachmentUrls: string[]
+): Promise<string[]> => {
   if (!attachmentUrls.length) {
     return Promise.resolve([]);
   }
@@ -59,7 +61,7 @@ const uploadAttachments = async (attachmentUrls: string[]): Promise<string[]> =>
         segment_index: i / TWITTER_MAX_SIZE,
       });
     }
-    await axios.post(UPLOAD_URL, {command: 'FINALIZE', media_id});
+    await axios.post(UPLOAD_URL, { command: "FINALIZE", media_id });
     mediaIds.push(media_id);
   }
   return mediaIds;
@@ -129,7 +131,10 @@ const TwitterContent: React.FunctionComponent<{
         attachments.push(url);
         return "";
       });
-      const media_ids = await uploadAttachments(attachments);
+      const media_ids = await uploadAttachments(attachments).catch((e) => {
+        console.error(e.response?.data || e.message);
+        return [];
+      });
       success = await axios
         .post(`${process.env.REST_API_URL}/twitter-tweet`, {
           key,

@@ -53,6 +53,7 @@ module.exports = (env) => ({
       ? [
           new BundleAnalyzerPlugin({
             analyzerMode: "static",
+            generateStatsFile: true,
           }),
         ]
       : [])
