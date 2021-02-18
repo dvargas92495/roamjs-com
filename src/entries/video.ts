@@ -14,6 +14,7 @@ runExtension("video", () => {
             const video = document.createElement("video");
             video.controls = true;
             video.src = src;
+            video.width = 580;
             img.parentElement.insertBefore(video, img);
             img.remove();
           }
