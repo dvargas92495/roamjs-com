@@ -100,9 +100,10 @@ module "aws_static_site" {
 
 module "aws-serverless-backend" {
     source  = "dvargas92495/serverless-backend/aws"
-    version = "1.3.9"
+    version = "1.4.0"
 
     api_name = "roam-js-extensions"
+    domain = "roamjs.com"
     paths = [
         "article/post",
         "balance/get",
@@ -112,6 +113,7 @@ module "aws-serverless-backend" {
         "github-projects/get",
         "github-repositories/get",
         "google-calendar/get",
+        "finish-launch-website/post",
         "install/put",
         "is-subscribed/get",
         "launch-website/post",
@@ -223,10 +225,6 @@ resource "aws_dynamodb_table" "roamjs-clerk-users" {
   }
 }
 
-data "aws_api_gateway_rest_api" "floss" {
-  name = "floss"
-}
-
 provider "github" {
     owner = "dvargas92495"
 }
@@ -301,12 +299,6 @@ resource "github_actions_secret" "rest_api_id" {
   repository       = "roam-js-extensions"
   secret_name      = "REST_API_ID"
   plaintext_value  = module.aws-serverless-backend.rest_api_id
-}
-
-resource "github_actions_secret" "floss_rest_api_id" {
-  repository       = "roam-js-extensions"
-  secret_name      = "FLOSS_API_ID"
-  plaintext_value  = data.aws_api_gateway_rest_api.floss.id
 }
 
 resource "github_actions_secret" "stripe_public" {
