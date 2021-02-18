@@ -5,6 +5,7 @@ import {
   addStyle,
   getPageUidByPageTitle,
   track,
+  extractTag,
 } from "../entry-helpers";
 import { MapContainer, Marker, TileLayer, Popup } from "react-leaflet";
 import { LatLngExpression, Icon } from "leaflet";
@@ -15,15 +16,6 @@ import axios from "axios";
 addStyle(`.leaflet-pane {
   z-index: 10 !important;
 }`);
-
-const extractTag = (tag: string) =>
-  tag.startsWith("#[[") && tag.endsWith("]]")
-    ? tag.substring(3, tag.length - 2)
-    : tag.startsWith("[[") && tag.endsWith("]]")
-    ? tag.substring(2, tag.length - 2)
-    : tag.startsWith("#")
-    ? tag.substring(1)
-    : tag;
 
 // https://github.com/Leaflet/Leaflet/blob/c0bf09ba32e71fdf29f91808c8b31bbb5946cc74/src/layer/marker/Icon.Default.js
 const MarkerIcon = new Icon({
