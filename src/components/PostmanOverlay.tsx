@@ -55,7 +55,7 @@ const PostmanOverlay: React.FunctionComponent<PostmanProps> = ({
     axios
       .post(url, body, { headers })
       .then((r) => {
-        setMessage(`Success! Response: ${JSON.stringify(r.data)}`);
+        setMessage(`Success! Response: ${JSON.stringify(r.data, null, 4)}`);
         setIsError(false);
         setTimeout(() => setIsOpen(false), 10000);
       })
@@ -64,13 +64,19 @@ const PostmanOverlay: React.FunctionComponent<PostmanProps> = ({
   }, [setIsOpen, setLoading, setIsError, setMessage]);
   return (
     <Popover
-      target={<Icon icon={"send-message"} onClick={onClick} />}
+      target={
+        <Icon
+          icon={"send-message"}
+          onClick={onClick}
+          style={{ marginLeft: 8 }}
+        />
+      }
       content={
         <div style={{ padding: 16 }}>
           {loading ? (
             <Spinner />
           ) : (
-            <div style={{ color: isError ? "darkgreen" : "darkred" }}>
+            <div style={{ color: isError ? "darkred" : "darkgreen" }}>
               <Text>{message}</Text>
             </div>
           )}
