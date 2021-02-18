@@ -154,6 +154,7 @@ const TitleSlide = ({ text, note }: { text: string; note: Slide }) => {
 
 const STARTS_WITH_IMAGE = new RegExp("^image ", "i");
 const ENDS_WITH_LEFT = new RegExp(" left$", "i");
+const ENDS_WITH_CENTER = new RegExp(" center$", "i");
 
 type ContentSlideExtras = { note: Slide; layout: string; collapsible: boolean };
 
@@ -179,7 +180,7 @@ const setDocumentLis = ({
   });
 };
 
-const LAYOUTS = ["Image Left", "Image Right"];
+const LAYOUTS = ["Image Left", "Image Center", "Image Right"];
 const findImageResize = ({
   src,
   slides,
@@ -211,6 +212,7 @@ const ContentSlide = ({
 } & ContentSlideExtras) => {
   const isImageLayout = STARTS_WITH_IMAGE.test(layout);
   const isLeftLayout = ENDS_WITH_LEFT.test(layout);
+  const isCenterLayout = ENDS_WITH_CENTER.test(layout);
   const bullets = isImageLayout ? children.slice(1) : children;
   const slideRoot = useRef<HTMLDivElement>(null);
   const [htmlEditsLoaded, setHtmlEditsLoaded] = useState(false);
@@ -345,13 +347,14 @@ const ContentSlide = ({
             width: isImageLayout ? "50%" : "100%",
             transformOrigin: "left top",
             wordBreak: "break-word",
+            display: isCenterLayout ? "none" : "block",
           }}
           ref={slideRoot}
         />
         {isImageLayout && (
           <div
             style={{
-              width: "50%",
+              width: isCenterLayout ? "100%" : "50%",
               textAlign: "center",
               alignSelf: "center",
               height: "100%",

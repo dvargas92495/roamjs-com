@@ -42,6 +42,7 @@ addStyle(`.roamjs-collapsible-caret {
 }
 .reveal .roamjs-bullets-container h1, .reveal .roamjs-bullets-container h2, .reveal .roamjs-bullets-container h3, .reveal .roamjs-bullets-container h4, .reveal .roamjs-bullets-container h5, .reveal .roamjs-bullets-container h6 {
   margin-bottom: 0;
+  text-transform: none;
 }
 .roamjs-bullets-container .check-container input:checked~.checkmark:after {
   display: block;
