@@ -3,3 +3,29 @@ layout: "ExtensionPageLayout"
 description: "Send Roam Blocks data to any third party API!"
 development: true
 ---
+
+When the extension is installed, it will set up a config page for you at `roam/js/postman` like the one below:
+
+![](/images/postman-config.png)
+
+The structure of the config is as follows:
+- apis - The set of all endpoints you have configured to hit. Each child is labelled with the tag that the extension will detect to send data.
+    - url - The url of the API, set as the child of this block
+    - body - The data to send on the POST request. Each child of body is a key and each child of the key is a value. Values could be interpolated with the block's content, using `{block}`
+    - headers - The set of headers to send with the request, useful for sending Authorization or other headers. Just like body, each child represents the header name, and the child of the header name is the header value.
+
+The image above renders an icon next to any `#[[PostmanExample]]` tags. Clicking the icon on a block that says `Send This! #[[PostmanExample]]` would send the following request:
+
+```json
+{
+    "url": "https://deckofcardsapi.com/api/deck/new/shuffle",
+    "body": {
+        "deck_count": "1",
+        "block_content": "Contents: Send This! #[[PostmanExample]]",
+    },
+    "method": "POST",
+    "headers": {
+        "Content-Type": "application/json"
+    } 
+}
+```

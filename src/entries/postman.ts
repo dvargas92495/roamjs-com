@@ -66,7 +66,7 @@ runExtension("postman", () => {
       block: { uid: ctUid, string: "Content-Type" },
     });
     window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": headerUid, order: 0 },
+      location: { "parent-uid": ctUid, order: 0 },
       block: { string: "application/json" },
     });
   }
@@ -77,7 +77,7 @@ runExtension("postman", () => {
       const tag = s.getAttribute("data-tag");
       const apis = tree.find((t) => APIS_REGEX.test(t.text)).children;
       const api = apis.find(
-        (a) => tag.toUpperCase() === extractTag(a.text.trim())
+        (a) => tag.toUpperCase() === extractTag(a.text.trim()).toUpperCase()
       );
       if (api) {
         const { blockUid } = getUids(
