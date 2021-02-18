@@ -248,6 +248,23 @@ export const createHTMLObserver = ({
   });
 };
 
+export const createHashtagObserver = ({
+  callback,
+  attribute,
+} : {
+  callback: (s: HTMLSpanElement) => void;
+  attribute: string;
+}): void => createHTMLObserver({
+  tag: "SPAN",
+  className: "rm-page-ref--tag",
+  callback: (s: HTMLSpanElement) => {
+    if (!s.getAttribute(attribute)) {
+      s.setAttribute(attribute, 'true')
+      callback(s);
+    }
+  }
+})
+
 export const getReferenceBlockUid = (e: HTMLElement): string => {
   const parent = e.closest(".roam-block") as HTMLDivElement;
   const { blockUid } = getUids(parent);
@@ -852,3 +869,12 @@ export const TODO_REGEX = /{{\[\[TODO\]\]}}/g;
 export const DONE_REGEX = /{{\[\[DONE\]\]}} ?/g;
 export const createTagRegex = (tag: string): RegExp =>
   new RegExp(`#?\\[\\[${tag}\\]\\]|#${tag}`, "g");
+
+export const extractTag = (tag: string): string =>
+tag.startsWith("#[[") && tag.endsWith("]]")
+  ? tag.substring(3, tag.length - 2)
+  : tag.startsWith("[[") && tag.endsWith("]]")
+  ? tag.substring(2, tag.length - 2)
+  : tag.startsWith("#")
+  ? tag.substring(1)
+  : tag;
