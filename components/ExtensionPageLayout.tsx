@@ -11,6 +11,7 @@ import {
 import React, { useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import DemoVideo from "./DemoVideo";
+import Loom from "./Loom";
 import ExtensionLayout, { pathToId, pathToLabel } from "./ExtensionLayout";
 import { getSingleCodeContent, useCopyCode } from "./hooks";
 
@@ -70,7 +71,11 @@ const ExtensionPageLayout: React.FunctionComponent<{
       <H3>Usage</H3>
       {children}
       <H3>Demo</H3>
-      <DemoVideo src={pathToId(frontMatter.__resourcePath)} />
+      {frontMatter.loom ? (
+        <Loom id={frontMatter.loom} />
+      ) : (
+        <DemoVideo src={pathToId(frontMatter.__resourcePath)} />
+      )}
       {frontMatter.contributors && (
         <>
           <H3>Contributors</H3>
