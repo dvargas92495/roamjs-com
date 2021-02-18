@@ -74,7 +74,7 @@ export const handler = async (
       "#WD": "website_domain",
     },
     UpdateExpression: "REMOVE #WG, #WD",
-  });
+  }).promise();
 
   await lambda
     .invoke({

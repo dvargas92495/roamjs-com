@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 import StandardLayout from "../../components/StandardLayout";
 import {
   Body,
@@ -159,30 +165,34 @@ const Billing = () => {
                     <Body>No default card saved!</Body>
                   )}
                   <Items
-                    items={paymentMethods.map((pm) => ({
-                      primary: `${pm.brand} ends in ${pm.last4}`,
-                      key: pm.id,
-                      action: (
-                        <>
-                          <Button>Make Default</Button>
-                          <Button
-                            onClick={() =>
-                              axios
-                                .delete(
-                                  `${FLOSS_API_URL}/stripe-payment-method?payment_method_id=${pm.id}`
-                                )
-                                .then(() =>
-                                  setPaymentMethods(
-                                    paymentMethods.filter((p) => p.id !== pm.id)
+                    items={paymentMethods
+                      .filter((pm) => pm.id !== payment?.id)
+                      .map((pm) => ({
+                        primary: `${pm.brand} ends in ${pm.last4}`,
+                        key: pm.id,
+                        action: (
+                          <>
+                            <Button>Make Default</Button>
+                            <Button
+                              onClick={() =>
+                                axios
+                                  .delete(
+                                    `${FLOSS_API_URL}/stripe-payment-method?payment_method_id=${pm.id}`
                                   )
-                                )
-                            }
-                          >
-                            Delete
-                          </Button>
-                        </>
-                      ),
-                    }))}
+                                  .then(() =>
+                                    setPaymentMethods(
+                                      paymentMethods.filter(
+                                        (p) => p.id !== pm.id
+                                      )
+                                    )
+                                  )
+                              }
+                            >
+                              Delete
+                            </Button>
+                          </>
+                        ),
+                      }))}
                   />
                 </DataLoader>
               </UserValue>
@@ -348,7 +358,7 @@ const Website = () => {
               "Are you sure you want to shut down this RoamJS site? This operation is irreversible. Your subscription to this Service will end."
             }
             onSuccess={getWebsite}
-            title={"Buy RoamJS Service"}
+            title={"Shutdown RoamJS Static Site Service"}
           />
           <Loading loading={siteDeploying} size={18} />
           <hr style={{ margin: "16px 0" }} />
@@ -501,8 +511,8 @@ const Profile = () => {
   const user = useUser();
   const initialValue = useMemo(() => {
     const query = new URLSearchParams(window.location.search);
-    const callback = query.get('callback');
-    if (callback === 'launch-website') {
+    const tab = query.get("tab");
+    if (tab === "static_site") {
       return 2;
     }
     return 0;

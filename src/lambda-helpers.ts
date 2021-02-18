@@ -6,6 +6,11 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import OAuth from "oauth-1.0a";
 import crypto from "crypto";
 import { User } from "@clerk/clerk-sdk-node/dist/resources/User";
+import { v4 } from "uuid";
+import AWS from "aws-sdk";
+
+const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
+export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 
 export const headers = {
   "Access-Control-Allow-Origin": "*",
@@ -155,3 +160,62 @@ export const flossGet = ({
           headers,
         })
   );
+
+export const launchWebsite = async ({
+  userId,
+  email,
+  graph,
+  domain,
+}: {
+  userId: string;
+  email: string;
+  graph: string;
+  domain: string;
+}): Promise<APIGatewayProxyResult> => {
+  await dynamo
+    .putItem({
+      TableName: "RoamJSWebsiteStatuses",
+      Item: {
+        uuid: {
+          S: v4(),
+        },
+        action_graph: {
+          S: `launch_${graph}`,
+        },
+        date: {
+          S: new Date().toJSON(),
+        },
+        status: {
+          S: "INITIALIZING",
+        },
+      },
+    })
+    .promise();
+
+  await dynamo.updateItem({
+    TableName: "RoamJSClerkUsers",
+    Key: { id: { S: userId } },
+    ExpressionAttributeNames: {
+      "#WT": "website_token",
+    },
+    UpdateExpression: "REMOVE #WT",
+  }).promise();
+
+  await lambda
+    .invoke({
+      FunctionName: "RoamJS_launch",
+      InvocationType: "Event",
+      Payload: JSON.stringify({
+        roamGraph: graph,
+        domain,
+        email,
+      }),
+    })
+    .promise();
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ graph, domain }),
+    headers,
+  };
+};

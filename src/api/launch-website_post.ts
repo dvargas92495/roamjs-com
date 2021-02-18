@@ -1,11 +1,12 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
-import { getClerkUser, headers } from "../lambda-helpers";
-import AWS from "aws-sdk";
 import { v4 } from "uuid";
-
-const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
-const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
+import {
+  dynamo,
+  getClerkUser,
+  headers,
+  launchWebsite,
+} from "../lambda-helpers";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -43,6 +44,51 @@ export const handler = async (
       headers,
     };
   }
+  
+  await dynamo
+    .putItem({
+      TableName: "RoamJSWebsiteStatuses",
+      Item: {
+        uuid: {
+          S: v4(),
+        },
+        action_graph: {
+          S: `launch_${graph}`,
+        },
+        date: {
+          S: new Date().toJSON(),
+        },
+        status: {
+          S: "SUBSCRIBING",
+        },
+      },
+    })
+    .promise();
+
+  const callbackToken = v4();
+  await dynamo
+    .updateItem({
+      TableName: "RoamJSClerkUsers",
+      Key: { id: { S: user.id } },
+      ExpressionAttributeNames: {
+        "#WG": "website_graph",
+        "#WD": "website_domain",
+        "#WT": "website_token",
+      },
+      ExpressionAttributeValues: {
+        ":g": {
+          S: graph,
+        },
+        ":d": {
+          S: domain,
+        },
+        ":t": {
+          S: callbackToken,
+        },
+      },
+      UpdateExpression: "SET #WG = :g, #WD = :d, #WT = :t",
+    })
+    .promise();
 
   const email = user.emailAddresses.find(
     (e) => e.id === user.primaryEmailAddressId
@@ -50,7 +96,18 @@ export const handler = async (
   const { active, id } = await axios
     .post(
       `${process.env.FLOSS_API_URL}/stripe-subscribe`,
-      { priceId, successParams: { callback: "launch-website", graph, domain } },
+      {
+        priceId,
+        successParams: { tab: "static_site" },
+        metadata: {
+          graph,
+          domain,
+          userId: user.id,
+          email,
+          callbackToken,
+          url: `${process.env.API_URL}/finish-launch-website`,
+        },
+      },
       {
         headers: {
           Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
@@ -79,60 +136,5 @@ export const handler = async (
     }
   }
 
-  await dynamo
-    .putItem({
-      TableName: "RoamJSWebsiteStatuses",
-      Item: {
-        uuid: {
-          S: v4(),
-        },
-        action_graph: {
-          S: `launch_${graph}`,
-        },
-        date: {
-          S: new Date().toJSON(),
-        },
-        status: {
-          S: "INITIALIZING",
-        },
-      },
-    })
-    .promise();
-
-  const website = { graph, domain };
-  await dynamo.updateItem({
-    TableName: "RoamJSClerkUsers",
-    Key: { id: { S: user.id } },
-    ExpressionAttributeNames: {
-      "#WG": "website_graph",
-      "#WD": "website_domain",
-    },
-    ExpressionAttributeValues: {
-      ":g": {
-        S: graph,
-      },
-      ":d": {
-        S: domain,
-      },
-    },
-    UpdateExpression: "SET #WG = :g, #WD = :d",
-  });
-
-  await lambda
-    .invoke({
-      FunctionName: "RoamJS_launch",
-      InvocationType: "Event",
-      Payload: JSON.stringify({
-        roamGraph: graph,
-        domain,
-        email,
-      }),
-    })
-    .promise();
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(website),
-    headers,
-  };
+  return launchWebsite({ userId: user.id, email, domain, graph });
 };

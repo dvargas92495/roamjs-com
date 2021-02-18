@@ -22,6 +22,13 @@ functions:
           path: deploy
           method: post
           cors: true
+  finish-launch-website-post:
+    handler: out/finish-launch-website_post.handler
+    events:
+      - http:
+          path: finish-launch-website
+          method: post
+          cors: true
   is-subscribed-get:
     handler: out/is-subscribed_get.handler
     events:
@@ -57,11 +64,11 @@ functions:
           path: queue-issues
           method: get
           cors: true
-  shutdown-post:
-    handler: out/shutdown_post.handler
+  shutdown-website-post:
+    handler: out/shutdown-website_post.handler
     events:
       - http:
-          path: shutdown
+          path: shutdown-website
           method: post
           cors: true
   sponsorships-get:
