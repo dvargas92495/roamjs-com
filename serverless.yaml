@@ -29,6 +29,13 @@ functions:
           path: finish-launch-website
           method: post
           cors: true
+  finish-shutdown-website-post:
+    handler: out/finish-shutdown-website_post.handler
+    events:
+      - http:
+          path: finish-shutdown-website
+          method: post
+          cors: true
   is-subscribed-get:
     handler: out/is-subscribed_get.handler
     events:
