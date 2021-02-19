@@ -16,33 +16,37 @@ const QueueItems = ({
   description: string;
 }) => {
   const loadItems = useCallback(
-    () =>
-      axios.get(`${API_URL}/queue-issues`).then((r) =>
-        (r.data || []).map((item: QueueItemResponse) => ({
-          avatar: <div>${item.total}</div>,
-          primary: item.name,
-          secondary: (
-            <span>
-              <Link
-                href={`queue/${item.htmlUrl.substring(
-                  "https://github.com/dvargas92495/roam-js-extensions/issues/"
-                    .length
-                )}`}
-              >
-                {`${item.label.substring(0, 1).toUpperCase()}${item.label.substring(1)} Details`}
-              </Link>
-            </span>
-          ),
-          action: (
-            <FundButton
-              title={item.label}
-              name={item.name}
-              url={item.htmlUrl}
-            />
-          ),
-        }))
-      ),
+    () => axios.get(`${API_URL}/queue-issues`).then((r) => r.data || []),
     [title]
+  );
+  const mapper = useCallback(
+    (item: QueueItemResponse, refresh: () => Promise<void>) => ({
+      avatar: <div>${item.total}</div>,
+      primary: item.name,
+      secondary: (
+        <span>
+          <Link
+            href={`queue/${item.htmlUrl.substring(
+              "https://github.com/dvargas92495/roam-js-extensions/issues/"
+                .length
+            )}`}
+          >
+            {`${item.label.substring(0, 1).toUpperCase()}${item.label.substring(
+              1
+            )} Details`}
+          </Link>
+        </span>
+      ),
+      action: (
+        <FundButton
+          title={item.label}
+          name={item.name}
+          url={item.htmlUrl}
+          onSuccess={refresh}
+        />
+      ),
+    }),
+    []
   );
   const filter = useCallback(
     (item) =>
@@ -54,6 +58,7 @@ const QueueItems = ({
       <Queue
         title={title}
         loadItems={loadItems}
+        mapper={mapper}
         filter={filter}
         subheader={description}
       />

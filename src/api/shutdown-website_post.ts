@@ -66,15 +66,22 @@ export const handler = async (
     })
     .promise();
 
-  await dynamo.updateItem({
-    TableName: "RoamJSClerkUsers",
-    Key: { id: { S: user.id } },
-    ExpressionAttributeNames: {
-      "#WG": "website_graph",
-      "#WD": "website_domain",
-    },
-    UpdateExpression: "REMOVE #WG, #WD",
-  }).promise();
+  const callbackToken = v4();
+  await dynamo
+    .updateItem({
+      TableName: "RoamJSClerkUsers",
+      Key: { id: { S: user.id } },
+      ExpressionAttributeNames: {
+        "#WT": "website_token",
+      },
+      ExpressionAttributeValues: {
+        ":t": {
+          S: callbackToken,
+        },
+      },
+      UpdateExpression: "SET #WT = :t",
+    })
+    .promise();
 
   await lambda
     .invoke({
@@ -82,6 +89,11 @@ export const handler = async (
       InvocationType: "Event",
       Payload: JSON.stringify({
         roamGraph: graph,
+        shutdownCallback: {
+          callbackToken,
+          url: `${process.env.API_URL}/finish-shutdown-website`,
+          userId: user.id,
+        }
       }),
     })
     .promise();

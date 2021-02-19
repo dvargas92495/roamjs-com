@@ -1,4 +1,8 @@
-import { AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
+import {
+  AxiosPromise,
+  AxiosRequestConfig,
+  AxiosResponse,
+} from "axios";
 import axios from "axios";
 import Cookies from "universal-cookie";
 import { sessions, users } from "@clerk/clerk-sdk-node";
@@ -119,6 +123,7 @@ export const getClerkUser = async (
   const cookies = new Cookies(event.headers.Cookie);
   const sessionToken = cookies.get("__session");
   if (!sessionToken) {
+    console.warn("No cookie found", JSON.stringify(event.headers, null, 4));
     return undefined;
   }
   const sessionId = event.queryStringParameters._clerk_session_id;
@@ -130,9 +135,17 @@ export const getClerkEmail = async (
   event: APIGatewayProxyEvent
 ): Promise<string> => {
   const user = await getClerkUser(event);
-  return user.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)
-    ?.emailAddress;
+  return user
+    ? user.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)
+        ?.emailAddress
+    : "";
 };
+
+export const getClerkOpts = (email: string): AxiosRequestConfig => ({
+  headers: {
+    Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
+  },
+});
 
 export const flossGet = ({
   event,
@@ -144,11 +157,7 @@ export const flossGet = ({
   getClerkEmail(event).then((email) =>
     email
       ? axios
-          .get(`${process.env.FLOSS_API_URL}/${path}`, {
-            headers: {
-              Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
-            },
-          })
+          .get(`${process.env.FLOSS_API_URL}/${path}`, getClerkOpts(email))
           .then((r) => ({
             statusCode: 200,
             body: JSON.stringify(r.data),
@@ -192,14 +201,16 @@ export const launchWebsite = async ({
     })
     .promise();
 
-  await dynamo.updateItem({
-    TableName: "RoamJSClerkUsers",
-    Key: { id: { S: userId } },
-    ExpressionAttributeNames: {
-      "#WT": "website_token",
-    },
-    UpdateExpression: "REMOVE #WT",
-  }).promise();
+  await dynamo
+    .updateItem({
+      TableName: "RoamJSClerkUsers",
+      Key: { id: { S: userId } },
+      ExpressionAttributeNames: {
+        "#WT": "website_token",
+      },
+      UpdateExpression: "REMOVE #WT",
+    })
+    .promise();
 
   await lambda
     .invoke({

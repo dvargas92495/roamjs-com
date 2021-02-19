@@ -36,6 +36,13 @@ functions:
           path: finish-shutdown-website
           method: post
           cors: true
+  fund-post:
+    handler: out/fund_post.handler
+    events:
+      - http:
+          path: fund
+          method: post
+          cors: true
   is-subscribed-get:
     handler: out/is-subscribed_get.handler
     events:
@@ -56,6 +63,13 @@ functions:
       - http:
           path: payment-methods
           method: get
+          cors: true
+  postman-post:
+    handler: out/postman_post.handler
+    events:
+      - http:
+          path: postman
+          method: post
           cors: true
   products-get:
     handler: out/products_get.handler

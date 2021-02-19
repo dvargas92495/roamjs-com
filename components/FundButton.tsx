@@ -1,29 +1,18 @@
-import {
-  DateField,
-  FormDialog,
-  NumberField,
-  StringField,
-} from "@dvargas92495/ui";
+import { DateField, FormDialog, NumberField } from "@dvargas92495/ui";
 import React from "react";
-import axios from "axios";
-import { FLOSS_API_URL, stripe } from "./constants";
+import axios, { AxiosRequestConfig } from "axios";
+import { API_URL, FLOSS_API_URL, stripe } from "./constants";
 import format from "date-fns/format";
 import addMonths from "date-fns/addMonths";
 import isBefore from "date-fns/isBefore";
-// import { useClerk } from "@clerk/clerk-react";
+import { useClerk, SignedIn, SignedOut } from "@clerk/clerk-react";
 
-const FundButton: React.FunctionComponent<{
-  title: string;
-  name: string;
-  url: string;
-}> = ({ title, name, url }) => {
-  //const { session } = useClerk();
-  const session = undefined;
-  const user = undefined;
-  const apiUrl = new URL(`${FLOSS_API_URL}/stripe-session`);
-  if (session) {
-    apiUrl.searchParams.set("_clerk_session_id", session.id);
+const FundButtonDialog: React.FunctionComponent<
+  FundButtonProps & {
+    apiUrl: string;
+    apiOpts?: AxiosRequestConfig;
   }
+> = ({ title, name, url, apiUrl, apiOpts = {}, onSuccess }) => {
   return (
     <FormDialog
       title={name}
@@ -37,22 +26,20 @@ const FundButton: React.FunctionComponent<{
               link: url,
               reward: body.funding,
               dueDate: format(body.due, "yyyy-MM-dd"),
-              mode: "setup",
+              name,
             },
-            {
-              headers: {
-                Authorization: session
-                  ? ""
-                  : `Basic ${btoa(body.email)}`,
-              },
-            }
+            apiOpts
           )
           .then((r) =>
-            stripe.then((s) =>
-              s.redirectToCheckout({
-                sessionId: r.data.id,
-              })
-            )
+            r.data.active
+              ? onSuccess()
+              : stripe
+                  .then((s) =>
+                    s.redirectToCheckout({
+                      sessionId: r.data.id,
+                    })
+                  )
+                  .then(() => Promise.resolve())
           )
       }
       formElements={[
@@ -60,31 +47,68 @@ const FundButton: React.FunctionComponent<{
           name: "funding",
           defaultValue: 50,
           component: NumberField,
-          validate: (v: number) =>
+          validate: (v) =>
             v > 0 ? "" : "Funding amount must be greater than 0",
         },
         {
           name: "due",
           defaultValue: addMonths(new Date(), 1),
           component: DateField,
-          validate: (v: Date) =>
-            !isBefore(new Date(), v) ? "Due Date must be after today" : "",
+          validate: (v) =>
+            !isBefore(new Date(), v as Date)
+              ? "Due Date must be after today"
+              : "",
         },
-        ...(user
-          ? []
-          : [
-              {
-                name: "email",
-                defaultValue: "",
-                component: StringField,
-                validate: (v: string) =>
-                  v.indexOf("@") > -1
-                    ? ""
-                    : "Please enter a valid email address",
-              },
-            ]),
       ]}
     />
+  );
+};
+
+const SignedInFundButton: React.FunctionComponent<FundButtonProps> = (
+  props
+) => {
+  const { session } = useClerk();
+  const apiUrl = new URL(`${API_URL}/fund`);
+  apiUrl.searchParams.set("_clerk_session_id", session.id);
+  return (
+    <FundButtonDialog
+      {...props}
+      apiUrl={apiUrl.toString()}
+      apiOpts={{
+        withCredentials: true,
+      }}
+    />
+  );
+};
+
+const SignedOutFundButton: React.FunctionComponent<FundButtonProps> = (
+  props
+) => {
+  return (
+    <FundButtonDialog
+      {...props}
+      apiUrl={`${FLOSS_API_URL}/stripe-setup-intent`}
+    />
+  );
+};
+
+type FundButtonProps = {
+  title: string;
+  name: string;
+  url: string;
+  onSuccess: () => Promise<void>;
+};
+
+const FundButton: React.FunctionComponent<FundButtonProps> = (props) => {
+  return (
+    <>
+      <SignedIn>
+        <SignedInFundButton {...props} />
+      </SignedIn>
+      <SignedOut>
+        <SignedOutFundButton {...props} />
+      </SignedOut>
+    </>
   );
 };
 

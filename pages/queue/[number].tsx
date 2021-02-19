@@ -18,17 +18,12 @@ import {
 } from "@dvargas92495/ui";
 import FundButton from "../../components/FundButton";
 
-const QueueItemPage = ({
-  number,
-  issueTitle,
-}: {
-  issueTitle: "extension" | "enhancement";
-  number: string;
-}): JSX.Element => {
+const QueueItemPage = ({ number }: { number: string }): JSX.Element => {
   const [issue, setIssue] = useState<{
     link: string;
     title: string;
     body: string;
+    label: string;
     contracts: {
       dueDate: string;
       reward: number;
@@ -42,6 +37,7 @@ const QueueItemPage = ({
     link: "",
     title: "",
     body: "",
+    label: "",
     contracts: [],
   });
   const loadAsync = useCallback(
@@ -84,25 +80,23 @@ const QueueItemPage = ({
             }))}
           />
         )}
-        <FundButton title={issueTitle} name={issue.title} url={issue.link} />
+        <FundButton
+          title={issue.label}
+          name={issue.title}
+          url={issue.link}
+          onSuccess={loadAsync}
+        />
       </DataLoader>
     </StandardLayout>
   );
 };
 
-const mapIssues = ({
-  res,
-  issueTitle,
-}: {
-  res: AxiosResponse<QueueItemResponse[]>;
-  issueTitle: "extension" | "enhancement";
-}) =>
+const mapIssues = ({ res }: { res: AxiosResponse<QueueItemResponse[]> }) =>
   res.data.map((i) => ({
     params: {
       number: i.htmlUrl.substring(
         "https://github.com/dvargas92495/roam-js-extensions/issues/".length
       ),
-      issueTitle,
     },
   }));
 
@@ -111,21 +105,16 @@ export const getStaticPaths: GetStaticPaths = async () =>
     axios.get<QueueItemResponse[]>(`${API_URL}/queue-issues?label=enhancement`),
     axios.get<QueueItemResponse[]>(`${API_URL}/queue-issues?label=extension`),
   ]).then(([enh, ext]) => ({
-    paths: [
-      ...mapIssues({ res: ext, issueTitle: "extension" }),
-      ...mapIssues({ res: enh, issueTitle: "enhancement" }),
-    ],
+    paths: [...mapIssues({ res: ext }), ...mapIssues({ res: enh })],
     fallback: false,
   }));
 
 export const getStaticProps: GetStaticProps<
   {
     number: string;
-    issueTitle: "extension" | "enhancement";
   },
   {
     number: string;
-    issueTitle: "extension" | "enhancement";
   }
 > = async (context) => ({
   props: context.params,
