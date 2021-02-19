@@ -26,7 +26,6 @@ const FundButtonDialog: React.FunctionComponent<
               link: url,
               reward: body.funding,
               dueDate: format(body.due, "yyyy-MM-dd"),
-              name,
             },
             apiOpts
           )
