@@ -6,8 +6,16 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => ({
   statusCode: 200,
   body: JSON.stringify({
-    body: `This was the body sent: ${event.body}`,
-    headers: `These were the headers sent: ${event.headers}`,
+    body: `This was the body sent: ${JSON.stringify(
+      JSON.parse(event.body),
+      null,
+      4
+    )}`,
+    headers: `These were the headers sent: ${JSON.stringify(
+      event.headers,
+      null,
+      4
+    )}`,
   }),
   headers,
 });

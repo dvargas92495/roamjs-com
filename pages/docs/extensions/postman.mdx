@@ -11,17 +11,20 @@ When the extension is installed, it will set up a config page for you at `roam/j
 The structure of the config is as follows:
 - apis - The set of all endpoints you have configured to hit. Each child is labelled with the tag that the extension will detect to send data.
     - url - The url of the API, set as the child of this block
-    - body - The data to send on the POST request. Each child of body is a key and each child of the key is a value. Values could be interpolated with the block's content, using `{block}`
+    - body - The data to send on the POST request. Each child of body is a key and each child of the key is a value. Values could be interpolated with the following variables:
+        - `{block}` - The text contents of the current block
+        - `{tree}` - The full contents of the block tree, in a stringified JSON.
     - headers - The set of headers to send with the request, useful for sending Authorization or other headers. Just like body, each child represents the header name, and the child of the header name is the header value.
 
 The image above renders an icon next to any `#[[PostmanExample]]` tags. Clicking the icon on a block that says `Send This! #[[PostmanExample]]` would send the following request:
 
 ```json
 {
-    "url": "https://deckofcardsapi.com/api/deck/new/shuffle",
+    "url": "https://api.roamjs.com/postman",
     "body": {
-        "deck_count": "1",
+        "foo": "bar",
         "block_content": "Contents: Send This! #[[PostmanExample]]",
+        "tree_content": "{}",
     },
     "method": "POST",
     "headers": {
@@ -29,3 +32,5 @@ The image above renders an icon next to any `#[[PostmanExample]]` tags. Clicking
     } 
 }
 ```
+
+The RoamJS `postman` endpoint is available to help test your configuration. The config page should include the URLs that you actually want to hit for each tag.
