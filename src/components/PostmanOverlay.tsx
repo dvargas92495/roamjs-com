@@ -2,12 +2,17 @@ import { Icon, Popover, Spinner, Text } from "@blueprintjs/core";
 import axios from "axios";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
-import { getTreeByBlockUid } from "roam-client";
+import { getTreeByBlockUid, TreeNode, TextNode } from "roam-client";
 
 type PostmanProps = {
   apiUid: string;
   blockUid: string;
 };
+
+const toTextNode = (t: TreeNode): TextNode => ({
+  text: t.text,
+  children: t.children.map(toTextNode),
+});
 
 const PostmanOverlay: React.FunctionComponent<PostmanProps> = ({
   apiUid,
@@ -34,13 +39,16 @@ const PostmanOverlay: React.FunctionComponent<PostmanProps> = ({
     }
     const url = urlNode.children[0].text.trim();
     const blockTree = getTreeByBlockUid(blockUid);
+    const blockTreeText = blockTree.children.map(toTextNode);
 
     const bodyNode = tree.children.find((t) => /body/i.test(t.text));
     const body = bodyNode
       ? Object.fromEntries(
           bodyNode.children.map((t) => [
             t.text,
-            (t.children[0]?.text || "")?.replace("{block}", blockTree.text),
+            (t.children[0]?.text || "")
+              ?.replace("{block}", blockTree.text)
+              .replace("{tree}", JSON.stringify(blockTreeText)),
           ])
         )
       : {};
