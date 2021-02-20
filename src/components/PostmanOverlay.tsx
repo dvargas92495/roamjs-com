@@ -84,7 +84,13 @@ const PostmanOverlay: React.FunctionComponent<PostmanProps> = ({
           {loading ? (
             <Spinner />
           ) : (
-            <div style={{ color: isError ? "darkred" : "darkgreen" }}>
+            <div
+              style={{
+                color: isError ? "darkred" : "darkgreen",
+                whiteSpace: "pre-wrap",
+                maxWidth: 600,
+              }}
+            >
               <Text>{message}</Text>
             </div>
           )}

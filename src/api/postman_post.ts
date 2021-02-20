@@ -23,7 +23,7 @@ export const handler = async (
         4
       )}`,
       headers: `These were the headers sent: ${JSON.stringify(
-        event.headers,
+        filteredHeaders,
         null,
         4
       )}`,
