@@ -9,65 +9,81 @@ import {
 
 const APIS_REGEX = /apis/i;
 
+type TextNode = {
+  text: string;
+  children: TextNode[];
+};
+
+const createBlock = ({
+  node,
+  parentUid,
+  order,
+}: {
+  node: TextNode;
+  parentUid: string;
+  order: number;
+}) => {
+  const uid = generateBlockUid();
+  window.roamAlphaAPI.createBlock({
+    location: { "parent-uid": parentUid, order },
+    block: { uid, string: node.text },
+  });
+  node.children.forEach((n, o) =>
+    createBlock({ node: n, parentUid: uid, order: o })
+  );
+};
+
+const createPage = ({ title, tree }: { title: string; tree: TextNode[] }) => {
+  const uid = generateBlockUid();
+  window.roamAlphaAPI.createPage({ page: { title, uid } });
+  tree.forEach((node, order) => createBlock({ node, parentUid: uid, order }));
+};
+
 runExtension("postman", () => {
   if (!getPageUidByPageTitle("roam/js/postman")) {
-    const uid = generateBlockUid();
-    window.roamAlphaAPI.createPage({ page: { title: "roam/js/postman", uid } });
-    const apiUid = generateBlockUid();
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": uid, order: 0 },
-      block: { uid: apiUid, string: "apis" },
-    });
-    const exampleUid = generateBlockUid();
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": apiUid, order: 0 },
-      block: { uid: exampleUid, string: "PostmanExample" },
-    });
-    const urlUid = generateBlockUid();
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": exampleUid, order: 0 },
-      block: { uid: urlUid, string: "url" },
-    });
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": urlUid, order: 0 },
-      block: { string: "https://deckofcardsapi.com/api/deck/new/shuffle" },
-    });
-    const bodyUid = generateBlockUid();
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": exampleUid, order: 1 },
-      block: { uid: bodyUid, string: "body" },
-    });
-    const dcUid = generateBlockUid();
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": bodyUid, order: 0 },
-      block: { uid: dcUid, string: "deck_count" },
-    });
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": dcUid, order: 0 },
-      block: { string: "1" },
-    });
-    const bcUid = generateBlockUid();
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": bodyUid, order: 1 },
-      block: { uid: bcUid, string: "body_content" },
-    });
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": bcUid, order: 0 },
-      block: { string: "Contents: {block}" },
-    });
-    const headerUid = generateBlockUid();
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": exampleUid, order: 2 },
-      block: { uid: headerUid, string: "headers" },
-    });
-    const ctUid = generateBlockUid();
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": headerUid, order: 0 },
-      block: { uid: ctUid, string: "Content-Type" },
-    });
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": ctUid, order: 0 },
-      block: { string: "application/json" },
+    createPage({
+      title: "roam/js/postman",
+      tree: [
+        {
+          text: "apis",
+          children: [
+            {
+              text: "PostmanExample",
+              children: [
+                {
+                  text: "url",
+                  children: [
+                    { text: "https://api.roamjs.com/postman", children: [] },
+                  ],
+                },
+                {
+                  text: "body",
+                  children: [
+                    { text: "foo", children: [{ text: "bar", children: [] }] },
+                    {
+                      text: "body_content",
+                      children: [{ text: "Contents: {block}", children: [] }],
+                    },
+                    {
+                      text: "tree_content",
+                      children: [{ text: "{tree}", children: [] }],
+                    },
+                  ],
+                },
+                {
+                  text: "headers",
+                  children: [
+                    {
+                      text: "Content-Type",
+                      children: [{ text: "application/json", children: [] }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
   }
   createHashtagObserver({

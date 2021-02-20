@@ -57,6 +57,7 @@ const uploadAttachments = async ({
     const attachment = await axios
       .get(attachmentUrl, { responseType: "blob" })
       .then((r) => r.data as Blob);
+    const media_category = toCategory(attachment.type);
     const media_id = await axios
       .post(UPLOAD_URL, {
         key,
@@ -65,7 +66,7 @@ const uploadAttachments = async ({
           command: "INIT",
           total_bytes: attachment.size,
           media_type: attachment.type,
-          media_category: toCategory(attachment.type),
+          media_category,
         },
       })
       .then((r) => r.data.media_id_string);
@@ -92,26 +93,28 @@ const uploadAttachments = async ({
       params: { command: "FINALIZE", media_id },
     });
 
-    await new Promise<void>((resolve, reject) => {
-      const getStatus = () =>
-        axios
-          .post(UPLOAD_URL, {
-            key,
-            secret,
-            params: { command: "STATUS", media_id },
-          })
-          .then((r) => r.data.processing_info)
-          .then(({ state, check_after_secs, error }) => {
-            if (state === "succeeded") {
-              resolve();
-            } else if (state === "failed") {
-              reject(error.message);
-            } else {
-              setTimeout(getStatus, check_after_secs * 1000);
-            }
-          });
-      return getStatus();
-    });
+    if (media_category !== "tweet_image") {
+      await new Promise<void>((resolve, reject) => {
+        const getStatus = () =>
+          axios
+            .post(UPLOAD_URL, {
+              key,
+              secret,
+              params: { command: "STATUS", media_id },
+            })
+            .then((r) => r.data.processing_info)
+            .then(({ state, check_after_secs, error }) => {
+              if (state === "succeeded") {
+                resolve();
+              } else if (state === "failed") {
+                reject(error.message);
+              } else {
+                setTimeout(getStatus, check_after_secs * 1000);
+              }
+            });
+        return getStatus();
+      });
+    }
 
     mediaIds.push(media_id);
   }
