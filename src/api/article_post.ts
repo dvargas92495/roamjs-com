@@ -1,10 +1,7 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios, { AxiosError } from "axios";
-import Mixpanel from "mixpanel";
-import { headers } from "../lambda-helpers";
+import { headers, mixpanel } from "../lambda-helpers";
 import charset from "charset";
-
-const mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
 
 export const handler = async (
   event: APIGatewayEvent

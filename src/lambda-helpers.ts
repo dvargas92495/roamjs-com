@@ -12,9 +12,11 @@ import crypto from "crypto";
 import { User } from "@clerk/clerk-sdk-node/dist/resources/User";
 import { v4 } from "uuid";
 import AWS from "aws-sdk";
+import Mixpanel from "mixpanel";
 
 const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
+export const mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
 
 export const headers = {
   "Access-Control-Allow-Origin": "*",
