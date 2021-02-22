@@ -93,17 +93,6 @@ const convertNodeToValue = ({
       ) === "boolean"
     );
   } else if (valueType === "object") {
-    return (
-      convertTextToValue({ text: t.text, blockTree, tag }).replace(
-        /{boolean}/i,
-        ""
-      ) === "boolean"
-    );
-  } else if (valueType === "array") {
-    return t.children.map((c) =>
-      convertNodeToValue({ t: c, defaultType: "string", blockTree, tag })
-    ) as BodyValue[];
-  } else {
     return Object.fromEntries(
       t.children.map((c) => [
         c.text,
@@ -115,6 +104,12 @@ const convertNodeToValue = ({
         }),
       ])
     );
+  } else if (valueType === "array") {
+    return t.children.map((c) =>
+      convertNodeToValue({ t: c, defaultType: "string", blockTree, tag })
+    ) as BodyValue[];
+  } else {
+    return "";
   }
 };
 
