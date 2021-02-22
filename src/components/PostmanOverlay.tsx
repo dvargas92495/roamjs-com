@@ -3,6 +3,8 @@ import axios from "axios";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import { getTreeByBlockUid, TreeNode, TextNode } from "roam-client";
+import { createTagRegex, extractTag } from "../entry-helpers";
+import marked from "roam-marked";
 
 type PostmanProps = {
   apiUid: string;
@@ -13,6 +15,108 @@ const toTextNode = (t: TreeNode): TextNode => ({
   text: t.text,
   children: t.children.map(toTextNode),
 });
+
+const toText = ({ t, i }: { t: TreeNode; i: number }): string => {
+  const line = `${"".padEnd(i * 2, " ")}${t}\n`;
+  const lines = toText({ t, i: i + 1 });
+  return `${line}${lines}`;
+};
+
+const toHtml = ({ t }: { t: TreeNode }): string => {
+  const html = marked(t.text);
+  if (t.children.length) {
+    const ul = `<ul>${t.children.map(
+      (c) => `<li>${toHtml({ t: c })}</li>`
+    )}</ul>`;
+    return `${html}${ul}`;
+  }
+  return html;
+};
+
+const convertTextToValue = ({
+  text,
+  blockTree,
+  tag,
+}: {
+  text: string;
+  blockTree: { text: string; children: TreeNode[] };
+  tag: string;
+}): string =>
+  text
+    ?.replace(/{block(:clean)}/i, (_, clean) =>
+      clean
+        ? blockTree.text.replace(createTagRegex(extractTag(tag)), "")
+        : blockTree.text
+    )
+    .replace(/{tree(:text|html)}/i, (_, format) => {
+      if (format.toUpperCase() === "HTML") {
+        return `<ul>${blockTree.children.map((t) => toHtml({ t }))}</ul>`;
+      } else if (format.toUpperCase() === "TEXT") {
+        return blockTree.children.map((t) => toText({ t, i: 0 })).join("");
+      } else {
+        return JSON.stringify(blockTree.children.map(toTextNode));
+      }
+    });
+
+type BodyValue = string | boolean | Record<string, unknown> | number;
+
+const convertNodeToValue = ({
+  t,
+  defaultType,
+  blockTree,
+  tag,
+}: {
+  t: TextNode;
+  defaultType: string;
+  blockTree: { text: string; children: TreeNode[] };
+  tag: string;
+}): BodyValue | Array<BodyValue> => {
+  const valueType =
+    /{(string|number|boolean|object|array)}/i.exec(t.text)?.[1] || defaultType;
+  if (valueType === "string") {
+    return convertTextToValue({ text: t.text, blockTree, tag }).replace(
+      /{string}/i,
+      ""
+    );
+  } else if (valueType === "number") {
+    return parseInt(
+      convertTextToValue({ text: t.text, blockTree, tag }).replace(
+        /{number}/i,
+        ""
+      )
+    );
+  } else if (valueType === "boolean") {
+    return (
+      convertTextToValue({ text: t.text, blockTree, tag }).replace(
+        /{boolean}/i,
+        ""
+      ) === "boolean"
+    );
+  } else if (valueType === "object") {
+    return (
+      convertTextToValue({ text: t.text, blockTree, tag }).replace(
+        /{boolean}/i,
+        ""
+      ) === "boolean"
+    );
+  } else if (valueType === "array") {
+    return t.children.map((c) =>
+      convertNodeToValue({ t: c, defaultType: "string", blockTree, tag })
+    ) as BodyValue[];
+  } else {
+    return Object.fromEntries(
+      t.children.map((c) => [
+        c.text,
+        convertNodeToValue({
+          t: c.children[0],
+          blockTree,
+          tag,
+          defaultType: "string",
+        }),
+      ])
+    );
+  }
+};
 
 const PostmanOverlay: React.FunctionComponent<PostmanProps> = ({
   apiUid,
@@ -39,18 +143,15 @@ const PostmanOverlay: React.FunctionComponent<PostmanProps> = ({
     }
     const url = urlNode.children[0].text.trim();
     const blockTree = getTreeByBlockUid(blockUid);
-    const blockTreeText = blockTree.children.map(toTextNode);
 
     const bodyNode = tree.children.find((t) => /body/i.test(t.text));
     const body = bodyNode
-      ? Object.fromEntries(
-          bodyNode.children.map((t) => [
-            t.text,
-            (t.children[0]?.text || "")
-              ?.replace("{block}", blockTree.text)
-              .replace("{tree}", JSON.stringify(blockTreeText)),
-          ])
-        )
+      ? convertNodeToValue({
+          t: bodyNode,
+          defaultType: "object",
+          blockTree,
+          tag: tree.text,
+        })
       : {};
     const headersNode = tree.children.find((t) => /headers/i.test(t.text));
     const headers = headersNode
