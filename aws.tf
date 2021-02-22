@@ -128,6 +128,7 @@ module "aws-serverless-backend" {
         "shutdown-website/post",
         "sponsorships/get",
         "subscriptions/get",
+        "subscribe-sponsorship/post",
         "twitter-auth/post",
         "twitter-login/post",
         "twitter-search/get",

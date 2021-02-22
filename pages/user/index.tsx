@@ -26,11 +26,11 @@ import {
   useAuthenticatedAxiosPost,
 } from "../../components/hooks";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import axios from "axios";
 import { FLOSS_API_URL, stripe } from "../../components/constants";
 import awsTlds from "../../components/aws_tlds";
-import { useUser, SignedIn, SignedOut } from "@clerk/clerk-react";
+import { useUser, SignedIn } from "@clerk/clerk-react";
+import RedirectToLogin from "../../components/RedirectToLogin";
 
 const UserValue: React.FunctionComponent = ({ children }) => (
   <span style={{ marginBottom: -24, paddingLeft: 64, display: "block" }}>
@@ -544,28 +544,13 @@ const Profile = () => {
   );
 };
 
-const Redirect = () => {
-  const router = useRouter();
-  useEffect(() => {
-    router.push("/login");
-  });
-  return (
-    <div>
-      <Loading loading />
-      <span style={{ marginLeft: 32 }}>Redirecting to login...</span>
-    </div>
-  );
-};
-
 const UserPage = (): JSX.Element => {
   return (
     <StandardLayout>
       <SignedIn>
         <Profile />
       </SignedIn>
-      <SignedOut>
-        <Redirect />
-      </SignedOut>
+      <RedirectToLogin />
     </StandardLayout>
   );
 };

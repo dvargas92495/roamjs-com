@@ -1,8 +1,4 @@
-import {
-  AxiosPromise,
-  AxiosRequestConfig,
-  AxiosResponse,
-} from "axios";
+import { AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
 import Cookies from "universal-cookie";
 import { sessions, users, User } from "@clerk/clerk-sdk-node";
@@ -15,7 +11,8 @@ import Mixpanel from "mixpanel";
 
 const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
-export const mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
+export const mixpanel =
+  process.env.MIXPANEL_TOKEN && Mixpanel.init(process.env.MIXPANEL_TOKEN);
 
 export const headers = {
   "Access-Control-Allow-Origin": "*",
