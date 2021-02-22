@@ -48,10 +48,11 @@ const convertTextToValue = ({
         ? blockTree.text.replace(createTagRegex(extractTag(tag)), "")
         : blockTree.text
     )
-    .replace(/{tree(:text|html)?}/i, (_, format) => {
-      if (format.toUpperCase() === "HTML") {
+    .replace(/{tree(:text|html)?}/i, (_, f) => {
+      const format = f?.toUpperCase?.();
+      if (format === "HTML") {
         return `<ul>${blockTree.children.map((t) => toHtml({ t }))}</ul>`;
-      } else if (format.toUpperCase() === "TEXT") {
+      } else if (format === "TEXT") {
         return blockTree.children.map((t) => toText({ t, i: 0 })).join("");
       } else {
         return JSON.stringify(blockTree.children.map(toTextNode));

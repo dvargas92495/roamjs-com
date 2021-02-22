@@ -53,3 +53,23 @@ The `body` has a default type of `{object}`. We could change this by using one o
 ```
 
 All other values have a default type of `{string}`. See the example below for how to specify a value of each type:
+
+![](/images/postman-types.png)
+
+This example would send the following body:
+```json
+{
+    "booleanKey": true,
+    "numberKey": 5,
+    "stringKey": "foo",
+    "arrayKey": [
+        "foo",
+        "bar",
+        "baz",
+    ],
+    "objectKey": {
+        "foo": "bar",
+        "baz": "hello, world"
+    }
+}
+```
