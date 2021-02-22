@@ -5,11 +5,10 @@ import {
 } from "axios";
 import axios from "axios";
 import Cookies from "universal-cookie";
-import { sessions, users } from "@clerk/clerk-sdk-node";
+import { sessions, users, User } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import OAuth from "oauth-1.0a";
 import crypto from "crypto";
-import { User } from "@clerk/clerk-sdk-node/dist/resources/User";
 import { v4 } from "uuid";
 import AWS from "aws-sdk";
 import Mixpanel from "mixpanel";

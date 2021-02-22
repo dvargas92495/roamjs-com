@@ -87,7 +87,7 @@
     "@blueprintjs/core": "^3.35.0",
     "@blueprintjs/select": "^3.14.3",
     "@clerk/clerk-react": "^1.1.2",
-    "@clerk/clerk-sdk-node": "0.0.5",
+    "@clerk/clerk-sdk-node": "^0.1.0",
     "@dvargas92495/react-draft-wysiwyg": "^1.15.1",
     "@dvargas92495/ui": "^0.28.5",
     "@giphy/js-fetch-api": "^2.0.1",

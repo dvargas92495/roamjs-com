@@ -219,6 +219,7 @@ const Billing = () => {
                 </Subtitle>
               ),
             }))}
+          noItemMessage="No Currently Subscribed Services"
         />
       </DataLoader>
     </>
