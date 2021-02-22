@@ -48,7 +48,7 @@ const convertTextToValue = ({
         ? blockTree.text.replace(createTagRegex(extractTag(tag)), "")
         : blockTree.text
     )
-    .replace(/{tree(:text|html)?}/i, (_, f) => {
+    .replace(/{tree(?::(text|html))?}/i, (_, f) => {
       const format = f?.toUpperCase?.();
       if (format === "HTML") {
         return `<ul>${blockTree.children.map((t) => toHtml({ t }))}</ul>`;
