@@ -119,6 +119,7 @@ module "aws-serverless-backend" {
         "install/put",
         "is-subscribed/get",
         "launch-website/post",
+        "mixpanel/post",
         "payment-methods/get",
         "postman/post",
         "products/get",
