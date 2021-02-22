@@ -17,7 +17,7 @@ const toTextNode = (t: TreeNode): TextNode => ({
 });
 
 const toText = ({ t, i }: { t: TreeNode; i: number }): string => {
-  const line = `${"".padEnd(i * 2, " ")}${t}\n`;
+  const line = `${"".padEnd(i * 2, " ")}${t.text}\n`;
   const lines = t.children.map(c => toText({ t: c, i: i + 1 })).join("");
   return `${line}${lines}`;
 };
