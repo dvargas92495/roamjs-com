@@ -56,7 +56,8 @@ const convertTextToValue = ({
       } else {
         return JSON.stringify(blockTree.children.map(toTextNode));
       }
-    });
+    })
+    .trim();
 
 type BodyValue = string | boolean | Record<string, unknown> | number;
 
@@ -90,7 +91,7 @@ const convertNodeToValue = ({
       convertTextToValue({ text: t.text, blockTree, tag }).replace(
         /{boolean}/i,
         ""
-      ) === "boolean"
+      ) === "true"
     );
   } else if (valueType === "object") {
     return Object.fromEntries(
