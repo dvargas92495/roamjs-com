@@ -1,7 +1,8 @@
 import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
-import mixpanel, { Dict } from "mixpanel-browser";
+import { Dict } from "mixpanel-browser";
 import { getTextByBlockUid, RoamBlock } from "roam-client";
+import axios, { AxiosResponse } from "axios";
 
 declare global {
   interface Window {
@@ -32,10 +33,9 @@ declare global {
 }
 
 const roamJsVersion = process.env.ROAMJS_VERSION || "0";
-mixpanel.init(process.env.MIXPANEL_TOKEN);
 
-export const track = (name: string, properties?: Dict): void =>
-  process.env.MIXPANEL_TOKEN && mixpanel.track(name, properties);
+export const track = (eventName: string, properties?: Dict): Promise<AxiosResponse> =>
+  axios.post('https://api.roamjs.com/mixpanel', {eventName, properties});
 
 export const runExtension = async (
   extensionId: string,
