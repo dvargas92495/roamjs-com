@@ -18,16 +18,16 @@ const toTextNode = (t: TreeNode): TextNode => ({
 
 const toText = ({ t, i }: { t: TreeNode; i: number }): string => {
   const line = `${"".padEnd(i * 2, " ")}${t.text}\n`;
-  const lines = t.children.map(c => toText({ t: c, i: i + 1 })).join("");
+  const lines = t.children.map((c) => toText({ t: c, i: i + 1 })).join("");
   return `${line}${lines}`;
 };
 
 const toHtml = ({ t }: { t: TreeNode }): string => {
   const html = marked(t.text);
   if (t.children.length) {
-    const ul = `<ul>${t.children.map(
-      (c) => `<li>${toHtml({ t: c })}</li>`
-    ).join("")}</ul>`;
+    const ul = `<ul>${t.children
+      .map((c) => `<li>${toHtml({ t: c })}</li>`)
+      .join("")}</ul>`;
     return `${html}${ul}`;
   }
   return html;
@@ -51,7 +51,9 @@ const convertTextToValue = ({
     .replace(/{tree(?::(text|html))?}/i, (_, f) => {
       const format = f?.toUpperCase?.();
       if (format === "HTML") {
-        return `<ul>${blockTree.children.map((t) => toHtml({ t }))}</ul>`;
+        return `<ul>${blockTree.children
+          .map((t) => toHtml({ t }))
+          .join("")}</ul>`;
       } else if (format === "TEXT") {
         return blockTree.children.map((t) => toText({ t, i: 0 })).join("");
       } else {
