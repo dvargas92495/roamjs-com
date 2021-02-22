@@ -27,7 +27,7 @@ const toHtml = ({ t }: { t: TreeNode }): string => {
   if (t.children.length) {
     const ul = `<ul>${t.children.map(
       (c) => `<li>${toHtml({ t: c })}</li>`
-    )}</ul>`;
+    ).join("")}</ul>`;
     return `${html}${ul}`;
   }
   return html;
