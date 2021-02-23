@@ -39,7 +39,7 @@ const convertTextToValue = ({
   tag,
 }: {
   text: string;
-  blockTree: { text: string; children: TreeNode[] };
+  blockTree: { text: string; children: TreeNode[]; blockUid: string };
   tag: string;
 }): string =>
   text
@@ -60,6 +60,7 @@ const convertTextToValue = ({
         return JSON.stringify(blockTree.children.map(toTextNode));
       }
     })
+    .replace(/{id}/i, blockTree.blockUid)
     .trim();
 
 type BodyValue = string | boolean | Record<string, unknown> | number;
@@ -72,7 +73,7 @@ const convertNodeToValue = ({
 }: {
   t: TextNode;
   defaultType: string;
-  blockTree: { text: string; children: TreeNode[] };
+  blockTree: { text: string; children: TreeNode[]; blockUid: string };
   tag: string;
 }): BodyValue | Array<BodyValue> => {
   const valueType =
@@ -138,17 +139,20 @@ const PostmanOverlay: React.FunctionComponent<PostmanProps> = ({
     const tree = getTreeByBlockUid(apiUid);
     const urlNode = tree.children.find((t) => /url/i.test(t.text));
     if (!urlNode) {
-      fail(`No URL configured for API ${tree.text}`);
+      return fail(`No URL configured for API ${tree.text}`);
     }
-    const url = urlNode.children[0].text.trim();
+    if (!urlNode.children.length) {
+      return fail("Set URL as a child of the URL block");
+    }
     const blockTree = getTreeByBlockUid(blockUid);
+    const url = urlNode.children[0].text.replace(/{id}/i, blockUid).trim();
 
     const bodyNode = tree.children.find((t) => /body/i.test(t.text));
     const body = bodyNode
       ? convertNodeToValue({
           t: bodyNode,
           defaultType: "object",
-          blockTree,
+          blockTree: { ...blockTree, blockUid },
           tag: tree.text,
         })
       : {};

@@ -42,6 +42,7 @@ runExtension("mouseless", () => {
             const { blockUid } = getUids(element as HTMLTextAreaElement);
             navigator.clipboard.writeText(`((${blockUid}))`);
             e.preventDefault();
+            e.stopPropagation();
           }
         }
       }
