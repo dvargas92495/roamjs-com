@@ -286,7 +286,7 @@ const TweetOverlay: React.FunctionComponent<{
   blockUid: string;
   tweetId?: string;
   tweetUsername?: string;
-  childrenRef: HTMLDivElement;
+  childrenRef?: HTMLDivElement;
   unmount: () => void;
 }> = ({ childrenRef, blockUid, unmount, tweetId, tweetUsername }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -307,7 +307,7 @@ const TweetOverlay: React.FunctionComponent<{
   );
   const calcBlocks = useCallback(
     () =>
-      Array.from(childrenRef.children)
+      Array.from(childrenRef?.children || [])
         .filter((c) => c.className.includes("roam-block-container"))
         .map(
           (c) =>
@@ -346,8 +346,10 @@ const TweetOverlay: React.FunctionComponent<{
     [blockUid, setCounts, calcCounts, calcBlocks, blocks]
   );
   useEffect(() => {
-    childrenRef.addEventListener("input", inputCallback);
-    return () => childrenRef.removeEventListener("input", inputCallback);
+    if (childrenRef) {
+      childrenRef.addEventListener("input", inputCallback);
+      return () => childrenRef.removeEventListener("input", inputCallback);
+    }
   }, [childrenRef, inputCallback]);
   useEffect(() => {
     if (rootRef.current && !document.contains(rootRef.current.targetElement)) {
@@ -413,9 +415,11 @@ export const render = ({
 }): void => {
   const childrenRef = parent.closest(".rm-block-main")
     ?.nextElementSibling as HTMLDivElement;
-  Array.from(
-    childrenRef.getElementsByClassName("roamjs-twitter-count")
-  ).forEach((s) => s.remove());
+  if (childrenRef) {
+    Array.from(
+      childrenRef.getElementsByClassName("roamjs-twitter-count")
+    ).forEach((s) => s.remove());
+  }
   ReactDOM.render(
     <TweetOverlay
       blockUid={blockUid}
