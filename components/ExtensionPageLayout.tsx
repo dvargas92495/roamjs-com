@@ -30,6 +30,7 @@ const contributors = {
   "Mathew McGann": "http://www.mcgannfreestone.com.au/",
   "Bardia Pourvakil": "https://twitter.com/thepericulum",
   "Gene Kim": "https://twitter.com/RealGeneKim",
+  "Tony Ennis": "https://tonyennis.com",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{

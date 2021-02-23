@@ -1,7 +1,7 @@
 ---
 layout: "ExtensionPageLayout"
 description: "Send Roam Blocks data to any third party API!"
-development: true
+contributors: Tony Ennis 💵📓
 ---
 
 When the extension is installed, it will set up a config page for you at `roam/js/postman` like the one below:
@@ -10,8 +10,10 @@ When the extension is installed, it will set up a config page for you at `roam/j
 
 The structure of the config is as follows:
 - apis - The set of all endpoints you have configured to hit. Each child is labelled with the tag that the extension will detect to send data.
-    - url - The url of the API, set as the child of this block
+    - url - The url of the API, set as the child of this block. Values could be interpolated with the following variables:
+        - `{id}` - The block reference id of the current block 
     - body - The data to send on the POST request. Each child of body is a key and each child of the key is a value. Values could be interpolated with the following variables:
+        - `{id}` - The block reference id of the current block 
         - `{block}` - The text contents of the current block. Use `{block:clean}` to omit the tag used to setup the endpoint.
         - `{tree}` - The full contents of the block tree, in a stringified JSON. Use `{tree:text}` to get the tree in a plain text format and `{text:html}` to get the tree in a HTML format.
     - headers - The set of headers to send with the request, useful for sending Authorization or other headers. Just like body, each child represents the header name, and the child of the header name is the header value.
