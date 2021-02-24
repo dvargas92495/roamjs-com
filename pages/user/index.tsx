@@ -443,7 +443,10 @@ const Funding = () => {
   const authenticatedAxios = useAuthenticatedAxiosGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const getBalance = useCallback(
-    () => authenticatedAxios("balance").then((r) => setBalance(r.data.balance)),
+    () =>
+      authenticatedAxios("balance").then((r) =>
+        setBalance(parseFloat(r.data.balance))
+      ),
     [setBalance, authenticatedAxios]
   );
   const loadItems = useCallback(
@@ -472,13 +475,19 @@ const Funding = () => {
         if (r.data.active) {
           setLoading(false);
           setSubscriptionId(r.data.id);
-          setBalance(sponsorship * 1.25);
+          setBalance(balance + sponsorship * 1.25);
         } else {
           stripe.then((s) => s.redirectToCheckout({ sessionId: r.data.id }));
         }
       }
     );
-  }, [sponsorship, authenticatedAxiosPost, setSubscriptionId, setBalance]);
+  }, [
+    balance,
+    sponsorship,
+    authenticatedAxiosPost,
+    setSubscriptionId,
+    setBalance,
+  ]);
   return (
     <DataLoader loadAsync={loadItems}>
       {!subscriptionId && (
@@ -506,7 +515,12 @@ const Funding = () => {
               label="Sponsorship"
               dimension="money"
             />
-            <Button variant={"contained"} color={"primary"} onClick={onClick}>
+            <Button
+              variant={"contained"}
+              color={"primary"}
+              onClick={onClick}
+              disabled={loading}
+            >
               SUBSCRIBE
             </Button>
             <Loading loading={loading} />

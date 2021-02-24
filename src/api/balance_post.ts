@@ -19,13 +19,17 @@ export const handler = async (
     .then((l) =>
       l.find((u) => u.emailAddresses.some((e) => e.emailAddress === email))
     );
+  const publicMetadata = JSON.stringify({
+    balance: (
+      (parseFloat((user.publicMetadata as { balance?: string }).balance) || 0) +
+      quantity / 100
+    ).toString(),
+  });
   return users
     .updateUser(user.id, {
-      publicMetadata: {
-        balance:
-          parseInt((user.publicMetadata as { balance?: string }).balance) +
-          quantity / 100,
-      },
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
+      publicMetadata,
     })
     .then(() => ({
       statusCode: 200,
