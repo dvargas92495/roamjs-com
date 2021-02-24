@@ -71,6 +71,10 @@ variable "clerk_api_key" {
     type = string
 }
 
+variable "floss_token" {
+    type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -107,6 +111,7 @@ module "aws-serverless-backend" {
     paths = [
         "article/post",
         "balance/get",
+        "balance/post",
         "deploy/post",
         "fund/post",
         "github-cards/get",
@@ -352,4 +357,10 @@ resource "github_actions_secret" "clerk_api_key" {
   repository       = "roam-js-extensions"
   secret_name      = "CLERK_API_KEY"
   plaintext_value  = var.clerk_api_key
+}
+
+resource "github_actions_secret" "floss_token" {
+  repository       = "roam-js-extensions"
+  secret_name      = "FLOSS_TOKEN"
+  plaintext_value  = var.floss_token
 }
