@@ -12,10 +12,12 @@ import {
   Card,
   ConfirmationDialog,
   DataLoader,
+  ExternalLink,
   FormDialog,
   H6,
   Items,
   Loading,
+  NumberField,
   StringField,
   Subtitle,
   VerticalTabs,
@@ -112,11 +114,18 @@ type PaymentMethod = {
   id: string;
 };
 
+type Subscription = {
+  name: string;
+  description: string;
+  id: string;
+  amount: number;
+  interval: "mo" | "yr";
+};
+
 const Billing = () => {
   const [payment, setPayment] = useState<PaymentMethod>();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [products, setProducts] = useState([]);
-  const [subscriptions, setSubscriptions] = useState(new Set<string>());
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const authenticatedAxios = useAuthenticatedAxiosGet();
   const getPayment = useCallback(
     () =>
@@ -126,28 +135,12 @@ const Billing = () => {
       }),
     [authenticatedAxios, setPayment, setPaymentMethods]
   );
-  const getProducts = useCallback(
-    () =>
-      axios
-        .get(`${FLOSS_API_URL}/stripe-products?project=RoamJS`)
-        .then((r) => setProducts(r.data.products)),
-    [setProducts]
-  );
   const getSubscriptions = useCallback(
     () =>
       authenticatedAxios("subscriptions").then((r) =>
-        setSubscriptions(
-          new Set(r.data.subscriptions.map(({ price }) => price))
-        )
+        setSubscriptions(r.data.subscriptions)
       ),
     [setSubscriptions]
-  );
-  const loadAsync = useCallback(
-    () =>
-      Promise.all([getProducts(), getSubscriptions()]).then(() =>
-        console.log("loaded")
-      ),
-    [getProducts, getSubscriptions]
   );
   return (
     <>
@@ -193,6 +186,7 @@ const Billing = () => {
                           </>
                         ),
                       }))}
+                    noItemMessage={null}
                   />
                 </DataLoader>
               </UserValue>
@@ -204,21 +198,18 @@ const Billing = () => {
       />
       <hr />
       <H6>Services</H6>
-      <DataLoader loadAsync={loadAsync}>
+      <DataLoader loadAsync={getSubscriptions}>
         <Items
-          items={products
-            .filter((p) => subscriptions.has(p.prices[0].id))
-            .map((p) => ({
-              primary: <UserValue>{p.name}</UserValue>,
-              secondary: <UserValue>{p.description}</UserValue>,
-              key: p.id,
-              avatar: (
-                <Subtitle>
-                  ${p.prices[0].unit_amount / 100}/
-                  {p.prices[0].recurring.interval.substring(0, 2)}
-                </Subtitle>
-              ),
-            }))}
+          items={subscriptions.map((p) => ({
+            primary: <UserValue>{p.name}</UserValue>,
+            secondary: <UserValue>{p.description}</UserValue>,
+            key: p.id,
+            avatar: (
+              <Subtitle>
+                ${p.amount}/{p.interval}
+              </Subtitle>
+            ),
+          }))}
           noItemMessage="No Currently Subscribed Services"
         />
       </DataLoader>
@@ -445,27 +436,87 @@ const Connections = () => {
 
 const Funding = () => {
   const [balance, setBalance] = useState(0);
+  const [subscriptionId, setSubscriptionId] = useState(0);
+  const [sponsorship, setSponsorship] = useState(20);
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
   const authenticatedAxios = useAuthenticatedAxiosGet();
+  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const getBalance = useCallback(
     () => authenticatedAxios("balance").then((r) => setBalance(r.data.balance)),
     [setBalance, authenticatedAxios]
   );
   const loadItems = useCallback(
     () =>
-      authenticatedAxios("sponsorships").then((r) =>
+      Promise.all([
+        authenticatedAxios(
+          `is-subscribed?product=${encodeURI("RoamJS Sponsor")}`
+        ),
+        authenticatedAxios("sponsorships"),
+      ]).then(([s, r]) => {
+        setSubscriptionId(s.data.subscriptionId);
         setItems(
           r.data.contracts.sort(
             (a, b) =>
               new Date(a.createdDate).valueOf() -
               new Date(b.createdDate).valueOf()
           )
-        )
-      ),
-    [setItems, authenticatedAxios]
+        );
+      }),
+    [setItems, setSubscriptionId, authenticatedAxios]
   );
+  const onClick = useCallback(() => {
+    setLoading(true);
+    authenticatedAxiosPost("subscribe-sponsorship", { sponsorship }).then(
+      (r) => {
+        if (r.data.active) {
+          setLoading(false);
+          setSubscriptionId(r.data.id);
+          setBalance(sponsorship * 1.25);
+        } else {
+          stripe.then((s) => s.redirectToCheckout({ sessionId: r.data.id }));
+        }
+      }
+    );
+  }, [sponsorship, authenticatedAxiosPost, setSubscriptionId, setBalance]);
   return (
     <DataLoader loadAsync={loadItems}>
+      {!subscriptionId && (
+        <div>
+          <Body>
+            As a thank you for your recurring support, you will receive 125% of
+            your monthly sponsorship amount as RoamJS credit which you could
+            then use to prioritize projects on the{" "}
+            <ExternalLink href="/queue">Queue</ExternalLink>. You will also be
+            added to the <b>Thank You</b> section in the{" "}
+            <ExternalLink href="/contribute">Contribute</ExternalLink> page.
+          </Body>
+          <div
+            style={{
+              padding: "32px 0",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-around",
+            }}
+          >
+            <NumberField
+              value={sponsorship}
+              setValue={setSponsorship}
+              variant="filled"
+              label="Sponsorship"
+              dimension="money"
+            />
+            <Button variant={"contained"} color={"primary"} onClick={onClick}>
+              SUBSCRIBE
+            </Button>
+            <Loading loading={loading} />
+          </div>
+          <Body>
+            This ${sponsorship} subscription will give you ${sponsorship * 1.25}{" "}
+            in RoamJS credit each month!
+          </Body>
+        </div>
+      )}
       <Items
         items={[
           {
@@ -536,7 +587,7 @@ const Profile = () => {
         <Card title={"Static Site"}>
           <Website />
         </Card>
-        <Card title={"Projects Funded"}>
+        <Card title={"Sponsorships"}>
           <Funding />
         </Card>
       </VerticalTabs>

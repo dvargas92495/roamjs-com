@@ -15,6 +15,13 @@ functions:
           path: balance
           method: get
           cors: true
+  balance-post:
+    handler: out/balance_post.handler
+    events:
+      - http:
+          path: balance
+          method: post
+          cors: true
   deploy-post:
     handler: out/deploy_post.handler
     events:
@@ -105,6 +112,13 @@ functions:
       - http:
           path: subscriptions
           method: get
+          cors: true
+  subscribe-sponsorship-post:
+    handler: out/subscribe-sponsorship_post.handler
+    events:
+      - http:
+          path: subscribe-sponsorship
+          method: post
           cors: true
   twitter-tweet-post:
     handler: out/twitter-tweet_post.handler
