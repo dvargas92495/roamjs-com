@@ -50,11 +50,7 @@ runExtension("emojis", () => {
 
   const turnOffEmoji = () => {
     if (emojiOn) {
-      const parentDiv = document.activeElement.parentElement as HTMLDivElement;
-      if (parentDiv.contains(menu)) {
-        parentDiv.removeChild(menu);
-        clearMenu();
-      }
+      menu.remove();
       emojiOn = false;
     }
     searchText = "";
@@ -63,8 +59,8 @@ runExtension("emojis", () => {
 
   const insertEmoji = (target: HTMLTextAreaElement, emojiCode: string) => {
     const initialValue = target.value;
-    updateActiveBlock(initialValue.replace(searchText, emojiCode));
     turnOffEmoji();
+    updateActiveBlock(initialValue.replace(searchText, emojiCode));
   };
 
   const createMenuElement = (size: number) => (
