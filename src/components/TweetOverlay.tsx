@@ -58,7 +58,7 @@ const uploadAttachments = async ({
       .get(attachmentUrl, { responseType: "blob" })
       .then((r) => r.data as Blob);
     const media_category = toCategory(attachment.type);
-    const media_id = await axios
+    const { media_id, error } = await axios
       .post(UPLOAD_URL, {
         key,
         secret,
@@ -69,7 +69,11 @@ const uploadAttachments = async ({
           media_category,
         },
       })
-      .then((r) => r.data.media_id_string);
+      .then((r) => ({ media_id: r.data.media_id_string, error: "" }))
+      .catch((e) => ({ error: e.error, media_id: "" }));
+    if (error) {
+      return Promise.reject({ roamjsError: error });
+    }
     const reader = new FileReader();
     const data = await new Promise<string>((resolve) => {
       reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
@@ -189,12 +193,18 @@ const TwitterContent: React.FunctionComponent<{
         key,
         secret,
       }).catch((e) => {
-        console.error(e.response?.data || e.message);
+        console.error(e.response?.data || e.message || e);
+        setTweetsSent(0);
+        if (e.roamjsError) {
+          setError(e.roamjsError);
+        } else {
+          setError(
+            "Some attachments failed to upload. Email support@roamjs.com for help!"
+          );
+        }
         return [];
       });
       if (media_ids.length < attachmentUrls.length) {
-        setTweetsSent(0);
-        setError("Some attachments failed to upload");
         return "";
       }
       success = await axios

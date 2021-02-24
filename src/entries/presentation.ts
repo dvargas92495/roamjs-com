@@ -37,6 +37,13 @@ addStyle(`.roamjs-collapsible-caret {
 .roamjs-presentation-img-dialog {
   z-index: 2100;
 }
+.roamjs-presentation-img-dialog .bp3-dialog-container {
+  padding: 32px;
+}
+.roamjs-presentation-img-dialog .bp3-dialog {
+  height: 100%;
+  width: 100%;
+}
 .roamjs-collapsible-bullet, .roamjs-document-li {
   list-style: none;
 }
@@ -74,8 +81,14 @@ runExtension("presentation", async () => {
       )?.[2];
       const options = buttonText
         ? {
-            theme: buttonText.match(`(?:\\[\\[{|{\\[\\[|{)theme:(${VALID_THEMES.join("|")})(?:\\]\\]}|}\\]\\]|})`)?.[1],
-            notes: buttonText.match("(?:\\[\\[{|{\\[\\[|{)notes:(true|false)(?:\\]\\]}|}\\]\\]|})")?.[1],
+            theme: buttonText.match(
+              `(?:\\[\\[{|{\\[\\[|{)theme:(${VALID_THEMES.join(
+                "|"
+              )})(?:\\]\\]}|}\\]\\]|})`
+            )?.[1],
+            notes: buttonText.match(
+              "(?:\\[\\[{|{\\[\\[|{)notes:(true|false)(?:\\]\\]}|}\\]\\]|})"
+            )?.[1],
             collapsible: !!buttonText.match(COLLAPSIBLE_REGEX),
           }
         : {};
