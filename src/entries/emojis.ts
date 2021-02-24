@@ -62,6 +62,7 @@ runExtension("emojis", () => {
   };
 
   const insertEmoji = (target: HTMLTextAreaElement, emojiCode: string) => {
+    console.log("Inserting", emojiCode)
     const initialValue = target.value;
     updateActiveBlock(initialValue.replace(searchText, emojiCode));
     turnOffEmoji();
