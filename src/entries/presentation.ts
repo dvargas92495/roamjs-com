@@ -37,12 +37,14 @@ addStyle(`.roamjs-collapsible-caret {
 .roamjs-presentation-img-dialog {
   z-index: 2100;
 }
-.roamjs-presentation-img-dialog .bp3-dialog-container {
-  padding: 32px;
-}
 .roamjs-presentation-img-dialog .bp3-dialog {
-  height: 100%;
-  width: 100%;
+  position: absolute;
+  top: 32px;
+  bottom: 32px;
+  left: 32px;
+  right: 32px;
+  width: unset;
+  background-color: transparent;
 }
 .roamjs-collapsible-bullet, .roamjs-document-li {
   list-style: none;

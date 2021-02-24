@@ -50,11 +50,7 @@ runExtension("emojis", () => {
 
   const turnOffEmoji = () => {
     if (emojiOn) {
-      const parentDiv = document.activeElement.parentElement as HTMLDivElement;
-      if (parentDiv.contains(menu)) {
-        parentDiv.removeChild(menu);
-        clearMenu();
-      }
+      menu.remove();
       emojiOn = false;
     }
     searchText = "";

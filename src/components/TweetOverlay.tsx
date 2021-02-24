@@ -70,7 +70,7 @@ const uploadAttachments = async ({
         },
       })
       .then((r) => ({ media_id: r.data.media_id_string, error: "" }))
-      .catch((e) => ({ error: e.error, media_id: "" }));
+      .catch((e) => ({ error: e.response.data.error, media_id: "" }));
     if (error) {
       return Promise.reject({ roamjsError: error });
     }
