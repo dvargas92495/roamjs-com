@@ -34,8 +34,11 @@ declare global {
 
 const roamJsVersion = process.env.ROAMJS_VERSION || "0";
 
-export const track = (eventName: string, properties?: Dict): Promise<AxiosResponse> =>
-  axios.post('https://api.roamjs.com/mixpanel', {eventName, properties});
+export const track = (
+  eventName: string,
+  properties?: Dict
+): Promise<AxiosResponse> =>
+  axios.post("https://api.roamjs.com/mixpanel", { eventName, properties });
 
 export const runExtension = async (
   extensionId: string,
@@ -251,19 +254,20 @@ export const createHTMLObserver = ({
 export const createHashtagObserver = ({
   callback,
   attribute,
-} : {
+}: {
   callback: (s: HTMLSpanElement) => void;
   attribute: string;
-}): void => createHTMLObserver({
-  tag: "SPAN",
-  className: "rm-page-ref--tag",
-  callback: (s: HTMLSpanElement) => {
-    if (!s.getAttribute(attribute)) {
-      s.setAttribute(attribute, 'true')
-      callback(s);
-    }
-  }
-})
+}): void =>
+  createHTMLObserver({
+    tag: "SPAN",
+    className: "rm-page-ref--tag",
+    callback: (s: HTMLSpanElement) => {
+      if (!s.getAttribute(attribute)) {
+        s.setAttribute(attribute, "true");
+        callback(s);
+      }
+    },
+  });
 
 export const getReferenceBlockUid = (e: HTMLElement): string => {
   const parent = e.closest(".roam-block") as HTMLDivElement;
@@ -871,10 +875,10 @@ export const createTagRegex = (tag: string): RegExp =>
   new RegExp(`#?\\[\\[${tag}\\]\\]|#${tag}`, "g");
 
 export const extractTag = (tag: string): string =>
-tag.startsWith("#[[") && tag.endsWith("]]")
-  ? tag.substring(3, tag.length - 2)
-  : tag.startsWith("[[") && tag.endsWith("]]")
-  ? tag.substring(2, tag.length - 2)
-  : tag.startsWith("#")
-  ? tag.substring(1)
-  : tag;
+  tag.startsWith("#[[") && tag.endsWith("]]")
+    ? tag.substring(3, tag.length - 2)
+    : tag.startsWith("[[") && tag.endsWith("]]")
+    ? tag.substring(2, tag.length - 2)
+    : tag.startsWith("#")
+    ? tag.substring(1)
+    : tag;

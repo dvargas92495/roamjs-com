@@ -1,5 +1,5 @@
 import emoji from "node-emoji";
-import { getConfigFromPage, updateActiveBlock } from "roam-client";
+import { getConfigFromPage, getUids } from "roam-client";
 import { runExtension } from "../entry-helpers";
 
 runExtension("emojis", () => {
@@ -59,8 +59,13 @@ runExtension("emojis", () => {
 
   const insertEmoji = (target: HTMLTextAreaElement, emojiCode: string) => {
     const initialValue = target.value;
+    window.roamAlphaAPI.updateBlock({
+      block: {
+        uid: getUids(menu.parentElement.getElementsByTagName('textarea')[0]).blockUid,
+        string: initialValue.replace(searchText, emojiCode),
+      },
+    });
     turnOffEmoji();
-    updateActiveBlock(initialValue.replace(searchText, emojiCode));
   };
 
   const createMenuElement = (size: number) => (
