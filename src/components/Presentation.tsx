@@ -466,10 +466,13 @@ const PresentationContent: React.FunctionComponent<{
   const onCloseClick = useCallback(
     (e: Event) => {
       revealRef.current.getRevealElement().style.display = "none";
-      onClose(revealRef.current.getState().indexh);
+      const actualStartIndex = slides.findIndex(
+        (s) => s.uid === mappedSlides[revealRef.current.getState().indexh].uid
+      );
+      onClose(actualStartIndex);
       e.stopImmediatePropagation();
     },
-    [onClose, revealRef]
+    [onClose, revealRef, slides, mappedSlides]
   );
   const [initialized, setInitialized] = useState(false);
   useEffect(() => {
@@ -528,9 +531,12 @@ const PresentationContent: React.FunctionComponent<{
   }, [bodyEscapePrint]);
   useEffect(() => {
     if (initialized && startIndex > 0) {
-      revealRef.current.slide(startIndex);
+      const actualStartIndex = mappedSlides.findIndex(
+        (s) => s.uid === slides[startIndex].uid
+      );
+      revealRef.current.slide(actualStartIndex);
     }
-  }, [revealRef, initialized, startIndex]);
+  }, [revealRef, initialized, startIndex, slides, mappedSlides]);
   return (
     <>
       <div className="reveal" id="roamjs-reveal-root">
