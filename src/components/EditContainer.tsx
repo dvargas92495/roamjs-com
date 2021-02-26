@@ -10,7 +10,9 @@ const editCallback = (blockId?: string) => () =>
 const EditContainer: React.FunctionComponent<{
   blockId?: string;
   className?: string;
-}> = ({ blockId, className, children }) => {
+  containerStyleProps?: React.CSSProperties;
+  refresh?: () => void;
+}> = ({ blockId, className, children, containerStyleProps = {}, refresh }) => {
   const [showEditIcon, setShowEditIcon] = useState(false);
   const appear = useCallback(() => setShowEditIcon(true), [setShowEditIcon]);
   const disappear = useCallback(() => setShowEditIcon(false), [
@@ -21,7 +23,7 @@ const EditContainer: React.FunctionComponent<{
       className={className}
       onMouseOver={appear}
       onMouseLeave={disappear}
-      style={{ position: "relative" }}
+      style={{ position: "relative", ...containerStyleProps }}
     >
       {blockId && showEditIcon && (
         <Button
@@ -29,6 +31,14 @@ const EditContainer: React.FunctionComponent<{
           minimal
           style={{ position: "absolute", top: 8, right: 8, zIndex: 1000 }}
           onClick={editCallback(blockId)}
+        />
+      )}
+      {refresh && (
+        <Button
+          icon={"refresh"}
+          onClick={refresh}
+          minimal
+          style={{ position: "absolute", top: 8, right: 48, zIndex: 1000 }}
         />
       )}
       {children}
