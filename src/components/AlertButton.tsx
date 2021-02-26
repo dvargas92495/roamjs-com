@@ -58,8 +58,7 @@ const AlertDashboard: React.FunctionComponent = () => {
   const onClose = useCallback(() => setIsOpen(false), [setIsOpen]);
   const listener = useCallback(
     (e) => {
-      console.log(e);
-      if (e.altKey && e.shiftKey && e.key === "A") {
+      if (e.altKey && e.shiftKey && e.code === "KeyA") {
         setIsOpen(true);
         const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (storage) {
