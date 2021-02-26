@@ -75,7 +75,7 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
     <EditContainer
       refresh={refresh}
       blockId={blockId}
-      containerStyleProps={{ backgroundColor: "#CCCCCC", width: "200%" }}
+      containerStyleProps={{ backgroundColor: "#CCCCCC", width: "150%" }}
     >
       <VerticalTimeline>
         {timelineElements.map((t) => (
