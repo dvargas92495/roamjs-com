@@ -1,19 +1,27 @@
 import {
   Body,
+  Breadcrumbs,
   Button,
+  CardGrid,
   ExternalLink,
   H1,
   H2,
   H3,
   H4,
+  IconButton,
   Subtitle,
 } from "@dvargas92495/ui";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import DemoVideo from "./DemoVideo";
 import Loom from "./Loom";
-import ExtensionLayout, { pathToId, pathToLabel } from "./ExtensionLayout";
+import { pathToId, pathToLabel, prodItems } from "./ExtensionLayout";
 import { getSingleCodeContent, useCopyCode } from "./hooks";
+import StandardLayout from "./StandardLayout";
+import GithubSponsor from "./GithubSponsor";
+
+const total = prodItems.length;
+const rowLength = 4;
 
 const contributors = {
   "Rodrigo Franco": "https://www.rodrigofranco.com/",
@@ -37,12 +45,44 @@ const ExtensionPageLayout: React.FunctionComponent<{
   frontMatter: FrontMatter;
 }> = ({ children, frontMatter }) => {
   const id = pathToId(frontMatter.__resourcePath);
+  const label = pathToLabel(frontMatter.__resourcePath).toUpperCase();
   const [copied, setCopied] = useState(false);
   const onSave = useCopyCode(setCopied);
+
+  const randomItems = useMemo(
+    () =>
+      prodItems
+        .map((a) => ({ sort: Math.random(), value: a }))
+        .sort((a, b) => a.sort - b.sort)
+        .map((a) => a.value),
+    []
+  );
+  const [pagination, setPagination] = useState(0);
+  const onClickLeft = useCallback(
+    () => setPagination((pagination - rowLength + total) % total),
+    [pagination, setPagination]
+  );
+  const onClickRight = useCallback(
+    () => setPagination((pagination + rowLength + total) % total),
+    [pagination, setPagination]
+  );
   return (
-    <ExtensionLayout frontMatter={frontMatter}>
+    <StandardLayout>
+      <Breadcrumbs
+        page={label}
+        links={[
+          {
+            text: "HOME",
+            href: "/docs",
+          },
+          {
+            text: "EXTENSIONS",
+            href: "/docs",
+          },
+        ]}
+      />
       {frontMatter.development && <H2>UNDER DEVELOPMENT</H2>}
-      <H1>{pathToLabel(frontMatter.__resourcePath).toUpperCase()}</H1>
+      <H1>{label}</H1>
       <Subtitle>
         {frontMatter.description} The name of the script is <code>{id}</code>.
       </Subtitle>
@@ -110,7 +150,39 @@ const ExtensionPageLayout: React.FunctionComponent<{
           </ExternalLink>
         </>
       )}
-    </ExtensionLayout>
+      <div style={{ margin: "16px 0" }}>
+        <GithubSponsor />
+      </div>
+      <H3>Other Extensions</H3>
+      <div
+        style={{
+          margin: "16px 0",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <IconButton
+          icon={"chevronLeft"}
+          onClick={onClickLeft}
+          style={{ height: 48 }}
+        />
+        <CardGrid
+          items={[
+            ...randomItems.slice(pagination, pagination + rowLength),
+            ...(pagination + rowLength > total
+              ? randomItems.slice(0, pagination + rowLength - total)
+              : []),
+          ]}
+          width={3}
+        />
+        <IconButton
+          icon={"chevronRight"}
+          onClick={onClickRight}
+          style={{ height: 48 }}
+        />
+      </div>
+    </StandardLayout>
   );
 };
 
