@@ -2,16 +2,6 @@
 /// <reference types="next/types/global" />
 /// <reference types="next-react-svg" />
 
-// https://github.com/jescalan/babel-plugin-import-glob-array/issues/7
-export interface FrontMatter {
-  __resourcePath: string;
-  description: string;
-  development?: boolean;
-  acknowledgements?: string;
-  loom?: string;
-  contributors?: string;
-}
-
 declare module "*.mdx" {
   const MDXComponent: React.FunctionComponent;
   export default MDXComponent;

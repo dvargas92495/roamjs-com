@@ -30,7 +30,7 @@ const importGithubIssues = async (
   }
   const token = config["Token"];
   const githubReq = token
-    ? axios.get(`https://api.github.com/repos`, {
+    ? axios.get(`https://api.github.com/issues`, {
         headers: {
           Authorization: `Basic ${Buffer.from(`${username}:${token}`).toString(
             "base64"
@@ -38,7 +38,7 @@ const importGithubIssues = async (
         },
       })
     : axios.get(
-        `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-issues?username=${username}`
+        `${process.env.REST_API_URL}/github-issues?username=${username}`
       );
   githubReq
     .then(async (r) => {
@@ -80,7 +80,7 @@ const importGithubRepos = async (
         },
       })
     : axios.get(
-        `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-repositories?username=${username}`
+        `${process.env.REST_API_URL}/github-repositories?username=${username}`
       );
   githubReq
     .then(async (r) => {
@@ -118,7 +118,7 @@ const importGithubProjects = async (
         },
       })
     : axios.get(
-        `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-projects?repository=${repository}`
+        `${process.env.REST_API_URL}/github-projects?repository=${repository}`
       );
   githubReq
     .then(async (r) => {
@@ -158,7 +158,7 @@ const importGithubCards = async (
   if (!config["Token"]) {
     axios
       .get(
-        `https://12cnhscxfe.execute-api.us-east-1.amazonaws.com/production/github-cards?repository=${repository}&project=${project}&column=${column}`
+        `${process.env.REST_API_URL}/github-cards?repository=${repository}&project=${project}&column=${column}`
       )
       .then(async (r) => {
         const cards = r.data;

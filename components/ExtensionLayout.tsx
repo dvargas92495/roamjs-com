@@ -6,6 +6,15 @@ import { Body, CardGrid, H4 } from "@dvargas92495/ui";
 
 const INDEX_LABEL = "Getting Started";
 
+export interface FrontMatter {
+  __resourcePath: string;
+  description: string;
+  development?: boolean;
+  acknowledgements?: string;
+  loom?: string;
+  contributors?: string;
+}
+
 export const pathToId = (f: string): string =>
   f.substring("docs\\extensions\\".length, f.length - ".mdx".length);
 

@@ -15,11 +15,10 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import DemoVideo from "./DemoVideo";
 import Loom from "./Loom";
-import { pathToId, pathToLabel, prodItems } from "./ExtensionLayout";
+import { FrontMatter, pathToId, pathToLabel, prodItems } from "./ExtensionLayout";
 import { getSingleCodeContent, useCopyCode } from "./hooks";
 import StandardLayout from "./StandardLayout";
 import GithubSponsor from "./GithubSponsor";
-import { FrontMatter} from '../next-env';
 
 const total = prodItems.length;
 const rowLength = 4;
