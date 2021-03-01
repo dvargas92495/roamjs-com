@@ -126,7 +126,7 @@ const HomePage = (): JSX.Element => (
             label: "Daily Downloads",
           },
           {
-            value: "200+",
+            value: "220+",
             label: "Subscribers",
           },
         ]}
