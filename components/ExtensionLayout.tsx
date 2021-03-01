@@ -19,7 +19,7 @@ const items = frontMatters.map((f) => ({
     .join(" "),
   description: f.description,
   image: `/thumbnails/${pathToId(f.__resourcePath)}.png`,
-  href: f.__resourcePath.replace(/\.mdx$/, ""),
+  href: `/${f.__resourcePath.replace(/\.mdx$/, "")}`,
   development: !!f.development,
 }));
 export const prodItems = items.filter((f) => !f.development);
