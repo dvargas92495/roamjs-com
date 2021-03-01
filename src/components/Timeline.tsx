@@ -175,7 +175,6 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
             backgroundColor: showSettings
               ? "rgba(115,134,148,0.3)"
               : "transparent",
-            display: 'none',
           }}
           minimal
         />
