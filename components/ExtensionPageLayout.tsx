@@ -111,11 +111,15 @@ const ExtensionPageLayout: React.FunctionComponent<{
       <Prism language="javascript">{getSingleCodeContent(id)}</Prism>
       <H3>Usage</H3>
       {children}
-      <H3>Demo</H3>
-      {frontMatter.loom ? (
-        <Loom id={frontMatter.loom} />
-      ) : (
-        <DemoVideo src={pathToId(frontMatter.__resourcePath)} />
+      {!frontMatter.development && (
+        <>
+          <H3>Demo</H3>
+          {frontMatter.loom ? (
+            <Loom id={frontMatter.loom} />
+          ) : (
+            <DemoVideo src={pathToId(frontMatter.__resourcePath)} />
+          )}
+        </>
       )}
       {frontMatter.contributors && (
         <>
