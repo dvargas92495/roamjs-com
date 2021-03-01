@@ -54,7 +54,7 @@ const QueueItems = ({
     [search]
   );
   return (
-    <div style={{ padding: 8, width: "100%", height: 512, marginBottom: 64 }}>
+    <div style={{ padding: 8, width: "100%", height: 512 }}>
       <Queue
         title={title}
         loadItems={loadItems}

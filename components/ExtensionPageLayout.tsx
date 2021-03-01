@@ -19,6 +19,7 @@ import { pathToId, pathToLabel, prodItems } from "./ExtensionLayout";
 import { getSingleCodeContent, useCopyCode } from "./hooks";
 import StandardLayout from "./StandardLayout";
 import GithubSponsor from "./GithubSponsor";
+import { FrontMatter} from '../next-env';
 
 const total = prodItems.length;
 const rowLength = 4;
@@ -52,10 +53,11 @@ const ExtensionPageLayout: React.FunctionComponent<{
   const randomItems = useMemo(
     () =>
       prodItems
+        .filter(a => a.title !== label)
         .map((a) => ({ sort: Math.random(), value: a }))
         .sort((a, b) => a.sort - b.sort)
         .map((a) => a.value),
-    []
+    [label]
   );
   const [pagination, setPagination] = useState(0);
   const onClickLeft = useCallback(

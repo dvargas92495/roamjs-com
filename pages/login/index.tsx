@@ -5,9 +5,7 @@ import Layout from "../../components/Layout";
 const LoginPage = (): JSX.Element => {
   return (
     <Layout>
-      <div style={{ marginBottom: 64 }}>
-        <SignIn />
-      </div>
+      <SignIn />
     </Layout>
   );
 };
