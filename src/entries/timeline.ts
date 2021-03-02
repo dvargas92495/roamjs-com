@@ -1,5 +1,20 @@
 import { render } from "../components/Timeline";
-import { createButtonObserver, runExtension } from "../entry-helpers";
+import { addStyle, createButtonObserver, runExtension } from "../entry-helpers";
+
+addStyle(`.roamjs-timeline-date > a, 
+.roamjs-timeline-date > a:hover,
+.roamjs-timeline-date > a:focus,
+.vertical-timeline-element-subtitle > a,
+.vertical-timeline-element-subtitle > a:hover,
+.vertical-timeline-element-subtitle > a:focus {
+  color: #ffffff;
+}
+.vertical-timeline--two-columns .vertical-timeline-element-content .vertical-timeline-element-date{
+  left: 130%;
+}
+.vertical-timeline--two-columns .vertical-timeline-element:nth-child(even):not(.vertical-timeline-element--left) .vertical-timeline-element-content .vertical-timeline-element-date {
+  right: 130%;
+}`);
 
 runExtension("timeline", () => {
   createButtonObserver({

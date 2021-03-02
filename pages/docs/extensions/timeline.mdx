@@ -6,6 +6,20 @@ development: true
 
 Enter `{{timeline}}` in any block to render the timeline view. By default, no events will be added.
 
-Click the settings wrench to toggle on and off the Timeline configuration. Enter the tag that you would like to visualize across daily note pages. Click the refresh button once you're done configuring the timeline to get a refreshed view.
+Click the settings wrench to toggle on and off the Timeline configuration. Enter the tag that you would like to visualize across daily note pages. Blocks that reference both the tag and a daily note page will also be included. Click the refresh button once you're done configuring the timeline to get a refreshed view.
 
 The timeline configuration will create blocks as children to the timeline component. You could edit the configuration by also editing these child blocks directly, hitting refresh once you're done.
+
+#### Customization
+
+By default, all the elements render using the `#2196f3` color. To define your own list of colors for the timeline to cycle through, add a child block called `colors` with each color on its own block.
+
+![](/images/timeline-color.png)
+
+#### Reverse
+
+By default, all the elements in the timeline render from latest to earliest. To reverse this setting so that the order is from earliest to latest, add a child block to the timeline with the text `reverse`.
+
+#### Creation Date
+
+By default, all the blocks queried use the associated daily note page for ordering. To use the blocks' creation date instead for ordering, add a child block to the timeline with the text `Creation Date`.

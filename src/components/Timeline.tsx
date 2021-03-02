@@ -10,34 +10,30 @@ import { Button, Icon, InputGroup, Label } from "@blueprintjs/core";
 import {
   generateBlockUid,
   getTreeByBlockUid,
-  getTreeByPageName,
   getUidsFromId,
   parseRoamDate,
+  toRoamDate,
+  toRoamDateUid,
   TreeNode,
 } from "roam-client";
+import { parseInline } from "roam-marked";
 import {
   createTagRegex,
   DAILY_NOTE_PAGE_REGEX,
+  DAILY_NOTE_TAG_REGEX,
   extractTag,
-  getTitlesReferencingPagesInSameBlockTree,
+  getRoamUrl,
   resolveRefs,
 } from "../entry-helpers";
 
 type TimelineProps = { blockId: string };
 
-const flatMapper = (t: TreeNode): TreeNode[] => [
-  t,
-  ...t.children.flatMap(flatMapper),
-];
-
 const reduceChildren = (prev: string, cur: TreeNode, l: number): string =>
-  `${prev}${"".padEnd(l * 2, " ")}${cur.text}\n${cur.children.reduce(
-    (p, c) => reduceChildren(p, c, l + 1),
-    ""
-  )}`;
+  `${prev}<span>${"".padEnd(l * 2, " ")}</span>${parseInline(
+    cur.text
+  )}<br/>${cur.children.reduce((p, c) => reduceChildren(p, c, l + 1), "")}`;
 
-const getTag = (blockId: string) => {
-  const { blockUid } = getUidsFromId(blockId);
+const getTag = (blockUid: string) => {
   const tree = getTreeByBlockUid(blockUid);
   const tagNode = tree.children.find((t) => /tag/i.test(t.text));
   if (tagNode && tagNode.children.length) {
@@ -46,45 +42,88 @@ const getTag = (blockId: string) => {
   return "";
 };
 
+const getColors = (blockUid: string) => {
+  const tree = getTreeByBlockUid(blockUid);
+  const colorNode = tree.children.find((t) => /colors/i.test(t.text));
+  if (colorNode && colorNode.children.length) {
+    return colorNode.children.map((c) => c.text);
+  }
+  return ["#2196f3"];
+};
+
+const getReverse = (blockUid: string) => {
+  const tree = getTreeByBlockUid(blockUid);
+  return tree.children.some((t) => /reverse/i.test(t.text));
+};
+
+const getCreationDate = (blockUid: string) => {
+  const tree = getTreeByBlockUid(blockUid);
+  return tree.children.some((t) => /creation date/i.test(t.text));
+};
+
 const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
+  const { blockUid } = getUidsFromId(blockId);
   const getTimelineElements = useCallback(() => {
-    const tag = getTag(blockId);
+    const tag = getTag(blockUid);
+    const reverse = getReverse(blockUid);
+    const useCreationDate = getCreationDate(blockUid);
     if (tag) {
-      const pages = getTitlesReferencingPagesInSameBlockTree([
-        tag,
-      ]).filter((t) => DAILY_NOTE_PAGE_REGEX.test(t));
-      return pages
-        .flatMap((p) => {
-          const pageTree = getTreeByPageName(p);
-          const nodes = pageTree
-            .flatMap(flatMapper)
-            .filter((t) => createTagRegex(tag).test(t.text));
-          return nodes.map(({ uid, text, children }) => ({
-            date: p,
+      const blocks = window.roamAlphaAPI.q(
+        `[:find ?s ?pt ?u ?cd :where [?b :create/time ?cd] [?b :block/uid ?u] [?b :block/string ?s] [?p :node/title ?pt] [?b :block/page ?p] [?b :block/refs ?t] [?t :node/title "${tag}"]]`
+      ) as string[][];
+      return blocks
+        .filter(
+          ([text, pageTitle]) =>
+            useCreationDate ||
+            DAILY_NOTE_PAGE_REGEX.test(pageTitle) ||
+            DAILY_NOTE_TAG_REGEX.test(text)
+        )
+        .map(([text, pageTitle, uid, creationDate]) => {
+          const { children } = getTreeByBlockUid(uid);
+          return {
+            date: useCreationDate
+              ? toRoamDate(new Date(creationDate))
+              : DAILY_NOTE_PAGE_REGEX.test(pageTitle)
+              ? pageTitle
+              : text.match(DAILY_NOTE_TAG_REGEX)[1],
             uid,
-            text: resolveRefs(text.replace(createTagRegex(tag), "")).trim(),
+            text: resolveRefs(
+              text
+                .replace(createTagRegex(tag), "")
+                .replace(DAILY_NOTE_TAG_REGEX, "")
+            ).trim(),
             body: resolveRefs(
               children.reduce((prev, cur) => reduceChildren(prev, cur, 0), "")
             ),
-          }));
+          };
         })
-        .sort(
-          ({ date: a }, { date: b }) =>
-            parseRoamDate(b).valueOf() - parseRoamDate(a).valueOf()
-        );
+        .sort(({ date: a }, { date: b }) => {
+          const bDate = parseRoamDate(b).valueOf();
+          const aDate = parseRoamDate(a).valueOf();
+          return reverse ? aDate - bDate : bDate - aDate;
+        });
     }
     return [];
   }, [blockId]);
   const [timelineElements, setTimelineElements] = useState(getTimelineElements);
+  const [colors, setColors] = useState(() => getColors(blockUid));
   const refresh = useCallback(() => {
     setTimelineElements(getTimelineElements());
-  }, [setTimelineElements, getTimelineElements]);
+    setColors(getColors(blockUid));
+  }, [
+    setTimelineElements,
+    getTimelineElements,
+    setColors,
+    getColors,
+    blockUid,
+  ]);
+
   const [showSettings, setShowSettings] = useState(false);
   const toggleSettings = useCallback(() => setShowSettings(!showSettings), [
     setShowSettings,
     showSettings,
   ]);
-  const [tagSetting, setTagSetting] = useState(() => getTag(blockId));
+  const [tagSetting, setTagSetting] = useState(() => getTag(blockUid));
   const onTagBlur = useCallback(() => {
     const { blockUid } = getUidsFromId(blockId);
     const tree = getTreeByBlockUid(blockUid);
@@ -138,17 +177,31 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
       <EditContainer
         refresh={refresh}
         blockId={blockId}
-        containerStyleProps={{ backgroundColor: "#CCCCCC", width: "175%" }}
+        containerStyleProps={{
+          backgroundColor: "#CCCCCC",
+          width: "100%",
+          minWidth: 840,
+        }}
       >
         <VerticalTimeline>
-          {timelineElements.map((t) => (
+          {timelineElements.map((t, i) => (
             <VerticalTimelineElement
-              contentStyle={{ background: "rgb(33, 150, 243)", color: "#fff" }}
-              contentArrowStyle={{
-                borderRight: "7px solid  rgb(33, 150, 243)",
+              contentStyle={{
+                backgroundColor: colors[i % colors.length],
+                color: "#fff",
               }}
-              date={t.date}
-              iconStyle={{ background: "rgb(33, 150, 243)", color: "#fff" }}
+              contentArrowStyle={{
+                borderRight: `7px solid ${colors[i % colors.length]}`,
+              }}
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore could technically take react node
+              date={
+                <a href={getRoamUrl(toRoamDateUid(parseRoamDate(t.date)))}>
+                  {t.date}
+                </a>
+              }
+              dateClassName={"roamjs-timeline-date"}
+              iconStyle={{ backgroundColor: colors[i % colors.length], color: "#fff" }}
               icon={
                 <Icon
                   icon="calendar"
@@ -160,8 +213,14 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
               <h3 className="vertical-timeline-element-title">
                 {t.text || "Empty Block"}
               </h3>
-              <h4 className="vertical-timeline-element-subtitle">{t.uid}</h4>
-              <p>{t.body}</p>
+              <h4 className="vertical-timeline-element-subtitle">
+                <a href={getRoamUrl(t.uid)}>{t.uid}</a>
+              </h4>
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: t.body,
+                }}
+              />
             </VerticalTimelineElement>
           ))}
         </VerticalTimeline>
