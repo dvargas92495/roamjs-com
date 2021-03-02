@@ -1,11 +1,13 @@
 import {
   Button,
+  Dialog,
   Icon,
   Popover,
   Portal,
   Spinner,
   Text,
 } from "@blueprintjs/core";
+import { DatePicker } from "@blueprintjs/datetime";
 import React, {
   useCallback,
   useEffect,
@@ -25,6 +27,8 @@ import {
 import { getSettingValueFromTree } from "./hooks";
 import axios from "axios";
 import twitter from "twitter-text";
+import addYears from "date-fns/addYears";
+import endOfYear from "date-fns/endOfYear";
 
 const ATTACHMENT_REGEX = /!\[[^\]]*\]\(([^\s)]*)\)/g;
 const UPLOAD_URL = `${process.env.REST_API_URL}/twitter-upload`;
@@ -39,6 +43,15 @@ const toCategory = (mime: string) => {
     return "tweet_image";
   }
 };
+
+const Error: React.FunctionComponent<{ error: string }> = ({ error }) =>
+  error ? (
+    <div style={{ color: "red", whiteSpace: "pre-line" }}>
+      <Text>{error}</Text>
+    </div>
+  ) : (
+    <></>
+  );
 
 const uploadAttachments = async ({
   attachmentUrls,
@@ -130,7 +143,8 @@ const TwitterContent: React.FunctionComponent<{
   tweetId?: string;
   tweetUsername?: string;
   close: () => void;
-}> = ({ close, blockUid, tweetId, tweetUsername }) => {
+  setDialogMessage: (m: string) => void;
+}> = ({ close, blockUid, tweetId, tweetUsername, setDialogMessage }) => {
   const message = useMemo(() => getTreeByBlockUid(blockUid).children, [
     blockUid,
   ]);
@@ -274,19 +288,89 @@ const TwitterContent: React.FunctionComponent<{
       close();
     }
   }, [setTweetsSent, close, setError, tweetId, tweetUsername]);
+
+  const socialToken = useMemo(
+    () =>
+      getTreeByPageName("roam/js/social").find((t) => /token/i.test(t.text))
+        ?.children?.[0]?.text,
+    []
+  );
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState(new Date());
+  const openSchedule = useCallback(() => setShowSchedule(true), [
+    setShowSchedule,
+  ]);
+  const closeSchedule = useCallback(() => setShowSchedule(false), [
+    setShowSchedule,
+  ]);
+  const onScheduleClick = useCallback(() => {
+    setLoading(true);
+    axios
+      .post(`${process.env.REST_API_URL}/tweet-schedule`, {
+        scheduleDate: scheduleDate.toJSON(),
+        token: socialToken,
+      })
+      .then(() => {
+        setDialogMessage(
+          `Tweet Successfully Scheduled to post at ${scheduleDate.toJSON()}!`
+        );
+      })
+      .catch((e) => {
+        setError(e.response?.data);
+        setLoading(false);
+        return false;
+      })
+      .then((success: boolean) => success && close());
+  }, [
+    setError,
+    close,
+    setLoading,
+    scheduleDate,
+    socialToken,
+    setDialogMessage,
+  ]);
   return (
     <div style={{ padding: 16, maxWidth: 400 }}>
-      <Button text={tweetId ? "Send Reply" : "Send Tweet"} onClick={onClick} />
-      {tweetsSent > 0 && (
-        <div>
-          Sending {tweetsSent} of {message.length} tweets.{" "}
-          <Spinner size={Spinner.SIZE_SMALL} />
-        </div>
-      )}
-      {error && (
-        <div style={{ color: "red", whiteSpace: "pre-line" }}>
-          <Text>{error}</Text>
-        </div>
+      {showSchedule ? (
+        <>
+          <Button icon="arrow-left" minimal onClick={closeSchedule} />
+          <div>
+            <DatePicker
+              value={scheduleDate}
+              onChange={setScheduleDate}
+              maxDate={addYears(endOfYear(new Date()), 5)}
+              timePrecision={"minute"}
+              highlightCurrentDay
+              timePickerProps={{ useAmPm: true, showArrowButtons: true }}
+            />
+            <Button text={"schedule"} onClick={onScheduleClick} />
+            {loading && <Spinner size={Spinner.SIZE_SMALL} />}
+            <Error error={error} />
+          </div>
+        </>
+      ) : (
+        <>
+          <Button
+            text={tweetId ? "Send Reply" : "Send Tweet"}
+            onClick={onClick}
+          />
+          {tweetsSent > 0 && (
+            <div>
+              Sending {tweetsSent} of {message.length} tweets.{" "}
+              <Spinner size={Spinner.SIZE_SMALL} />
+            </div>
+          )}
+          <Error error={error} />
+          {!!socialToken && (
+            <div style={{ marginTop: 16 }}>
+              <Button
+                text={tweetId ? "Schedule Reply" : "Schedule Tweet"}
+                onClick={openSchedule}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -300,6 +384,7 @@ const TweetOverlay: React.FunctionComponent<{
   unmount: () => void;
 }> = ({ childrenRef, blockUid, unmount, tweetId, tweetUsername }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("");
   const rootRef = useRef(null);
   const calcCounts = useCallback(
     () =>
@@ -332,6 +417,9 @@ const TweetOverlay: React.FunctionComponent<{
   const valid = useMemo(() => counts.every(({ valid }) => valid), [counts]);
   const open = useCallback(() => setIsOpen(true), [setIsOpen]);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
+  const closeDialog = useCallback(() => setDialogMessage(""), [
+    setDialogMessage,
+  ]);
   const inputCallback = useCallback(
     (e: InputEvent) => {
       const target = e.target as HTMLElement;
@@ -389,6 +477,7 @@ const TweetOverlay: React.FunctionComponent<{
             tweetId={tweetId}
             close={close}
             tweetUsername={tweetUsername}
+            setDialogMessage={setDialogMessage}
           />
         }
         isOpen={isOpen}
@@ -408,6 +497,9 @@ const TweetOverlay: React.FunctionComponent<{
             </span>
           </Portal>
         ))}
+      <Dialog isOpen={!!dialogMessage} onClose={closeDialog}>
+        {dialogMessage}
+      </Dialog>
     </>
   );
 };

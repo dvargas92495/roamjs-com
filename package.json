@@ -87,6 +87,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.35.0",
+    "@blueprintjs/datetime": "^3.20.5",
     "@blueprintjs/select": "^3.14.3",
     "@clerk/clerk-react": "^1.1.2",
     "@clerk/clerk-sdk-node": "^0.1.0",

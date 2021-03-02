@@ -1,0 +1,39 @@
+---
+layout: "ServiceLayout"
+development: true
+price: 3
+---
+
+Schedule social media content to be automatically posted at a later date!
+
+#### Overview
+
+RoamJS already supports various extensions to post to sites like Twitter directly from Roam. But each of these posts are immediate. It's often useful to create a bunch of content in one sitting, and schedule them to be sent at a later date! This allows the inconsistent cadence of your creativity to align with a desired consistent cadence of publishing.
+
+This RoamJS Service works with other RoamJS extensions to allow you to schedule when content should be published. You can draft, schedule, and view pending requests all from within Roam!
+
+#### Setup
+
+Make sure you have a RoamJS account by [signing up here](/signup).
+
+On your [user page](/user), you should see a "Connections" Tab where you could find your RoamJS Token. **DO NOT SHARE THIS TOKEN WITH ANYONE**. If you do or lose it by mistake, you could generate a new one. Copy this token.
+
+In your Roam database, create a `[[roam/js/social]]` page and a block that says `Token`. As a child of that block, paste in your RoamJS token:
+
+![](/images/social-config.png)
+
+#### Usage
+
+Now that we're all set up, using RoamJS Social will vary based on the extension we are using.
+
+##### Twitter
+
+First, be sure to install the ![](/docs/extensions/twitter) extension to your Roam Graph and set it up to **send tweets.** Now when you draft a Tweet and click the Twitter icon, you should see a new button that says `Schedule Tweet`.
+
+![](/images/schedule-tweet.png)
+
+Clicking the button will bring you to a datepicker where you could decide when the tweet should be published. 
+
+![](/images/schedule-tweet-submit.png)
+
+Hitting "Schedule" will queue the tweet to be executed.
