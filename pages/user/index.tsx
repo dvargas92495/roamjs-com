@@ -28,7 +28,7 @@ import {
   useAuthenticatedAxiosPost,
 } from "../../components/hooks";
 import Link from "next/link";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { FLOSS_API_URL, stripe } from "../../components/constants";
 import awsTlds from "../../components/aws_tlds";
 import { useUser, SignedIn } from "@clerk/clerk-react";
@@ -39,6 +39,14 @@ const UserValue: React.FunctionComponent = ({ children }) => (
     {children}
   </span>
 );
+
+const handleCheckout = (r: AxiosResponse) =>
+  r.data.sessionId &&
+  stripe.then((s) =>
+    s.redirectToCheckout({
+      sessionId: r.data.sessionId,
+    })
+  );
 
 const useEditableSetting = ({
   name,
@@ -229,6 +237,54 @@ const domainValidate = (domain: string) => {
   return "";
 };
 
+const Social = () => {
+  const authenticatedAxiosGet = useAuthenticatedAxiosGet();
+  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
+  const [socialToken, setSocialToken] = useState("");
+  const getSocialToken = useCallback(
+    () =>
+      authenticatedAxiosGet("social-token").then((r) =>
+        setSocialToken(r.data.token)
+      ),
+    [authenticatedAxiosGet]
+  );
+  const launchSocial = useCallback(
+    () => authenticatedAxiosPost("launch-social", {}).then(handleCheckout),
+    [authenticatedAxiosPost]
+  );
+  return (
+    <DataLoader loadAsync={getSocialToken}>
+      {socialToken ? (
+        <>
+          <StringField
+            value={socialToken}
+            disabled
+            setValue={setSocialToken}
+            label={"RoamJS Social Token"}
+            fullWidth
+          />
+        </>
+      ) : (
+        <>
+          <Body>
+            You are not subscribed to RoamJS Social. Click the button below to
+            gain access to RoamJS Social automations!
+          </Body>
+          <ConfirmationDialog
+            action={launchSocial}
+            buttonText={"Generate Token"}
+            content={
+              "Click submit below to generate a RoamJS Social token! This service costs $3/month."
+            }
+            onSuccess={getSocialToken}
+            title={"Subscribe to RoamJS Social"}
+          />
+        </>
+      )}
+    </DataLoader>
+  );
+};
+
 const Website = () => {
   const user = useUser();
   const authenticatedAxiosGet = useAuthenticatedAxiosGet();
@@ -274,15 +330,7 @@ const Website = () => {
       authenticatedAxiosPost("launch-website", {
         ...body,
         priceId,
-      }).then(
-        (r) =>
-          r.data.sessionId &&
-          stripe.then((s) =>
-            s.redirectToCheckout({
-              sessionId: r.data.sessionId,
-            })
-          )
-      ),
+      }).then(handleCheckout),
     [authenticatedAxiosPost, priceId, user]
   );
   const [loading, setLoading] = useState(false);
@@ -401,36 +449,6 @@ const Website = () => {
         </>
       )}
     </DataLoader>
-  );
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Connections = () => {
-  const { primary: roamPrimary, action: roamAction } = useEditableSetting({
-    name: "password",
-    defaultValue: "",
-  });
-  return (
-    <Items
-      items={[
-        {
-          primary: roamPrimary,
-          key: 0,
-          avatar: <Subtitle>Roam</Subtitle>,
-          action: roamAction,
-        },
-        {
-          primary: <UserValue>TODO</UserValue>,
-          key: 1,
-          avatar: <Subtitle>Google</Subtitle>,
-        },
-        {
-          primary: <UserValue>TODO</UserValue>,
-          key: 2,
-          avatar: <Subtitle>Twitter</Subtitle>,
-        },
-      ]}
-    />
   );
 };
 
@@ -592,17 +610,17 @@ const Profile = () => {
             email={user.primaryEmailAddress.emailAddress}
           />
         </Card>
-        {/*<Card title={"Connections"}>
-          <Connections />
-          </Card>*/}
         <Card title={"Billing"}>
           <Billing />
         </Card>
-        <Card title={"Static Site"}>
-          <Website />
-        </Card>
         <Card title={"Sponsorships"}>
           <Funding />
+        </Card>
+        <Card title={"Social"}>
+          <Social />
+        </Card>
+        <Card title={"Static Site"}>
+          <Website />
         </Card>
       </VerticalTabs>
     </>

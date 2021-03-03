@@ -73,6 +73,7 @@ const ServiceLayout: React.FunctionComponent<{
         key: pathToId(f.__resourcePath),
       };
     });
+  console.log(frontMatters)
   return (
     <StandardLayout>
       {frontMatter.development && <H2>UNDER DEVELOPMENT</H2>}

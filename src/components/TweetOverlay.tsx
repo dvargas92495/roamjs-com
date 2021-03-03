@@ -310,8 +310,15 @@ const TwitterContent: React.FunctionComponent<{
       .post(`${process.env.REST_API_URL}/tweet-schedule`, {
         scheduleDate: scheduleDate.toJSON(),
         token: socialToken,
+        payload: JSON.stringify(message),
+        oauth: getSettingValueFromTree({
+          tree: getTreeByPageName("roam/js/twitter"),
+          key: "oauth",
+          defaultValue: "{}",
+        }),
       })
       .then(() => {
+        setLoading(false);
         setDialogMessage(
           `Tweet Successfully Scheduled to post at ${scheduleDate.toJSON()}!`
         );
@@ -329,6 +336,7 @@ const TwitterContent: React.FunctionComponent<{
     scheduleDate,
     socialToken,
     setDialogMessage,
+    message,
   ]);
   return (
     <div style={{ padding: 16, maxWidth: 400 }}>
