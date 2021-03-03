@@ -51,7 +51,7 @@ const FundButtonDialog: React.FunctionComponent<
         },
         {
           name: "due",
-          defaultValue: addMonths(new Date(), 1),
+          defaultValue: addMonths(new Date(), 2),
           component: DateField,
           validate: (v) =>
             !isBefore(new Date(), v as Date)

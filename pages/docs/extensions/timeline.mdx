@@ -16,6 +16,19 @@ By default, all the elements render using the `#2196f3` color. To define your ow
 
 ![](/images/timeline-color.png)
 
+The blocks themselves could also be customized through using `roam/css`. 
+- `.vertical-timeline-element` is the container for each entry
+- `.vertical-timeline-element-content` is the container for each card
+- `.vertical-timeline-element-title` is the title within the content
+- `.vertical-timeline-element-subtitle` is the subtitle within the content
+- `.vertical-timeline-element-body` is the rest of the content body
+
+#### Layout
+By default, the timeline runs down the middle and elements alternate alignment left and right. To change the layout of the timeline, add a child block called `layout`. As a child of that block, you can set one of three values:
+- `alt` - (default) Elements alternate left and right of the timeline
+- `left` - The Timeline is aligned to the left, with the elements on the right
+- `right` - The Timeline is aligned to the right, with the elements on the left
+
 #### Reverse
 
 By default, all the elements in the timeline render from latest to earliest. To reverse this setting so that the order is from earliest to latest, add a child block to the timeline with the text `reverse`. This setting could also be toggled on and off from the timeline configuration.

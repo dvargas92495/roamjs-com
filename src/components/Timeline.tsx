@@ -25,6 +25,7 @@ import {
   getRoamUrl,
   resolveRefs,
 } from "../entry-helpers";
+import MenuItemSelect from "./MenuItemSelect";
 
 type TimelineProps = { blockId: string };
 
@@ -40,6 +41,25 @@ const getTag = (blockUid: string) => {
     return extractTag(tagNode.children[0].text);
   }
   return "";
+};
+
+const LAYOUTS = {
+  LEFT: "1-column-left",
+  RIGHT: "1-column-right",
+  ALT: "2-columns",
+};
+
+const getLayout = (blockUid: string) => {
+  const tree = getTreeByBlockUid(blockUid);
+  const layoutNode = tree.children.find((t) => /layout/i.test(t.text));
+  if (layoutNode && layoutNode.children.length) {
+    return (
+      LAYOUTS[
+        layoutNode.children[0].text.toUpperCase() as keyof typeof LAYOUTS
+      ] || "2-columns"
+    );
+  }
+  return "2-columns";
 };
 
 const getColors = (blockUid: string) => {
@@ -159,14 +179,18 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
   }, [blockId]);
   const [timelineElements, setTimelineElements] = useState(getTimelineElements);
   const [colors, setColors] = useState(() => getColors(blockUid));
+  const [layout, setLayout] = useState(() => getLayout(blockUid));
   const refresh = useCallback(() => {
     setTimelineElements(getTimelineElements());
     setColors(getColors(blockUid));
+    setLayout(getLayout(blockUid));
   }, [
     setTimelineElements,
     getTimelineElements,
     setColors,
     getColors,
+    setLayout,
+    getLayout,
     blockUid,
   ]);
 
@@ -200,8 +224,37 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
         block: { string: tagSetting },
       });
     }
-    setTimeout(() => setTimelineElements(getTimelineElements()), 1);
-  }, [blockId, setTimelineElements, getTimelineElements, tagSetting]);
+    setTimeout(refresh, 1);
+  }, [blockId, refresh, tagSetting]);
+  const onLayoutSelect = useCallback(
+    (key: keyof typeof LAYOUTS) => {
+      const { blockUid } = getUidsFromId(blockId);
+      const tree = getTreeByBlockUid(blockUid);
+      const layoutNode = tree.children.find((t) => /layout/i.test(t.text));
+      if (layoutNode && layoutNode.children.length) {
+        window.roamAlphaAPI.updateBlock({
+          block: { uid: layoutNode.children[0].uid, string: key.toLowerCase() },
+        });
+      } else if (!layoutNode) {
+        const uid = generateBlockUid();
+        window.roamAlphaAPI.createBlock({
+          location: { "parent-uid": blockUid, order: 0 },
+          block: { string: "layout", uid },
+        });
+        window.roamAlphaAPI.createBlock({
+          location: { "parent-uid": uid, order: 0 },
+          block: { string: key.toLowerCase() },
+        });
+      } else {
+        window.roamAlphaAPI.createBlock({
+          location: { "parent-uid": layoutNode.uid, order: 0 },
+          block: { string: key.toLowerCase() },
+        });
+      }
+      setTimeout(refresh, 1);
+    },
+    [setLayout, refresh]
+  );
   return (
     <>
       {showSettings && (
@@ -239,6 +292,16 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
             refresh={refresh}
             name={"Clean"}
           />
+          <Label>
+            Layout
+            <MenuItemSelect
+              items={Object.keys(LAYOUTS)}
+              activeItem={Object.keys(LAYOUTS).find(
+                (k) => LAYOUTS[k as keyof typeof LAYOUTS] === layout
+              )}
+              onItemSelect={onLayoutSelect}
+            />
+          </Label>
         </div>
       )}
       <EditContainer
@@ -250,7 +313,11 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
           minWidth: 840,
         }}
       >
-        <VerticalTimeline>
+        <VerticalTimeline
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore types doesn't support left/right
+          layout={layout}
+        >
           {timelineElements.map((t, i) => (
             <VerticalTimelineElement
               contentStyle={{
@@ -290,6 +357,7 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
                 <a href={getRoamUrl(t.uid)}>{t.uid}</a>
               </h4>
               <p
+                className="vertical-timeline-element-body"
                 dangerouslySetInnerHTML={{
                   __html: t.body,
                 }}
