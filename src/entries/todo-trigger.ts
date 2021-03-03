@@ -150,7 +150,7 @@ runExtension("todo-trigger", () => {
     createHTMLObserver({
       callback: (l: HTMLLabelElement) => {
         const input = l.getElementsByTagName("input")[0];
-        if (input.checked) {
+        if (input.checked && !input.disabled) {
           const ref = l.closest(".rm-block-ref") as HTMLSpanElement;
           if (ref) {
             ref.style.textDecoration = "line-through";

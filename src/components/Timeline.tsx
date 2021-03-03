@@ -6,7 +6,7 @@ import {
   VerticalTimelineElement,
 } from "react-vertical-timeline-component";
 import "react-vertical-timeline-component/style.min.css";
-import { Button, Icon, InputGroup, Label } from "@blueprintjs/core";
+import { Button, Checkbox, Icon, InputGroup, Label } from "@blueprintjs/core";
 import {
   generateBlockUid,
   getTreeByBlockUid,
@@ -61,12 +61,62 @@ const getCreationDate = (blockUid: string) => {
   return tree.children.some((t) => /creation date/i.test(t.text));
 };
 
+const getHideTags = (blockUid: string) => {
+  const tree = getTreeByBlockUid(blockUid);
+  return tree.children.some((t) => /clean/i.test(t.text));
+};
+
+const BooleanSetting = ({
+  blockUid,
+  name,
+  refresh,
+}: {
+  blockUid: string;
+  name: string;
+  refresh: () => void;
+}) => {
+  const regex = new RegExp(name, "i");
+  const [booleanSetting, setBooleanSetting] = useState(() => {
+    const tree = getTreeByBlockUid(blockUid);
+    return tree.children.some((t) => regex.test(t.text));
+  });
+  const onBooleanChange = useCallback(
+    (e: React.FormEvent<HTMLInputElement>) => {
+      const newValue = (e.target as HTMLInputElement).checked;
+      setBooleanSetting(newValue);
+      if (newValue) {
+        window.roamAlphaAPI.createBlock({
+          location: { "parent-uid": blockUid, order: 0 },
+          block: { string: name },
+        });
+      } else {
+        const uid = getTreeByBlockUid(blockUid).children.find((t) =>
+          regex.test(t.text)
+        ).uid;
+        window.roamAlphaAPI.deleteBlock({
+          block: { uid },
+        });
+      }
+      setTimeout(refresh, 1);
+    },
+    [setBooleanSetting, blockUid, refresh]
+  );
+  return (
+    <Checkbox
+      label={name}
+      onChange={onBooleanChange}
+      checked={booleanSetting}
+    />
+  );
+};
+
 const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
   const { blockUid } = getUidsFromId(blockId);
   const getTimelineElements = useCallback(() => {
     const tag = getTag(blockUid);
     const reverse = getReverse(blockUid);
     const useCreationDate = getCreationDate(blockUid);
+    const useHideTags = getHideTags(blockUid);
     if (tag) {
       const blocks = window.roamAlphaAPI.q(
         `[:find ?s ?pt ?u ?cd :where [?b :create/time ?cd] [?b :block/uid ?u] [?b :block/string ?s] [?p :node/title ?pt] [?b :block/page ?p] [?b :block/refs ?t] [?t :node/title "${tag}"]]`
@@ -88,9 +138,11 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
               : text.match(DAILY_NOTE_TAG_REGEX)[1],
             uid,
             text: resolveRefs(
-              text
-                .replace(createTagRegex(tag), "")
-                .replace(DAILY_NOTE_TAG_REGEX, "")
+              parseInline(
+                text
+                  .replace(createTagRegex(tag), (a) => (useHideTags ? "" : a))
+                  .replace(DAILY_NOTE_TAG_REGEX, (a) => (useHideTags ? "" : a))
+              )
             ).trim(),
             body: resolveRefs(
               children.reduce((prev, cur) => reduceChildren(prev, cur, 0), "")
@@ -172,6 +224,21 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
               onBlur={onTagBlur}
             />
           </Label>
+          <BooleanSetting
+            blockUid={blockUid}
+            refresh={refresh}
+            name={"Reverse"}
+          />
+          <BooleanSetting
+            blockUid={blockUid}
+            refresh={refresh}
+            name={"Creation Date"}
+          />
+          <BooleanSetting
+            blockUid={blockUid}
+            refresh={refresh}
+            name={"Clean"}
+          />
         </div>
       )}
       <EditContainer
@@ -201,7 +268,10 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
                 </a>
               }
               dateClassName={"roamjs-timeline-date"}
-              iconStyle={{ backgroundColor: colors[i % colors.length], color: "#fff" }}
+              iconStyle={{
+                backgroundColor: colors[i % colors.length],
+                color: "#fff",
+              }}
               icon={
                 <Icon
                   icon="calendar"
@@ -210,9 +280,12 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
               }
               key={t.uid}
             >
-              <h3 className="vertical-timeline-element-title">
-                {t.text || "Empty Block"}
-              </h3>
+              <h3
+                className="vertical-timeline-element-title"
+                dangerouslySetInnerHTML={{
+                  __html: t.text || "Empty Block",
+                }}
+              />
               <h4 className="vertical-timeline-element-subtitle">
                 <a href={getRoamUrl(t.uid)}>{t.uid}</a>
               </h4>

@@ -155,11 +155,11 @@ functions:
           path: twitter-tweet
           method: post
           cors: true
-  tweet-schedule-post:
-    handler: out/tweet-schedule_post.handler
+  twitter-schedule-post:
+    handler: out/twitter-schedule_post.handler
     events:
       - http:
-          path: tweet-schedule
+          path: twitter-schedule
           method: post
           cors: true
   twitter-upload-post:

@@ -39,6 +39,8 @@ const contributors = {
   "Bardia Pourvakil": "https://twitter.com/thepericulum",
   "Gene Kim": "https://twitter.com/RealGeneKim",
   "Tony Ennis": "https://tonyennis.com",
+  "Sharon Dale": "http://www.sharondale.co.uk/",
+  "Eric Anderson": "http://ecanderson.com/",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{

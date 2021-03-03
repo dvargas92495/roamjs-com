@@ -1,7 +1,7 @@
 ---
 layout: "ExtensionPageLayout"
 description: "Create a Timeline View From Your Roam Graph!"
-development: true
+contributors: Sharon Dale 💵📓, Eric Anderson 💵, Jerry Yu 💵 
 ---
 
 Enter `{{timeline}}` in any block to render the timeline view. By default, no events will be added.
@@ -18,8 +18,12 @@ By default, all the elements render using the `#2196f3` color. To define your ow
 
 #### Reverse
 
-By default, all the elements in the timeline render from latest to earliest. To reverse this setting so that the order is from earliest to latest, add a child block to the timeline with the text `reverse`.
+By default, all the elements in the timeline render from latest to earliest. To reverse this setting so that the order is from earliest to latest, add a child block to the timeline with the text `reverse`. This setting could also be toggled on and off from the timeline configuration.
 
 #### Creation Date
 
-By default, all the blocks queried use the associated daily note page for ordering. To use the blocks' creation date instead for ordering, add a child block to the timeline with the text `Creation Date`.
+By default, all the blocks queried use the associated daily note page for ordering. To use the blocks' creation date instead for ordering, add a child block to the timeline with the text `Creation Date`. This setting could also be toggled on and off from the timeline configuration.
+
+#### Clean
+
+By default, all the blocks queried keep the query tag in its block text. To filter out both the tag and the daily note tag from the block text, add a child block to the timeline with the text `Clean`. This setting could also be toggled on and off from the timeline configuration.
