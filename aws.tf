@@ -119,6 +119,7 @@ module "aws-serverless-backend" {
         "github-projects/get",
         "github-repositories/get",
         "google-calendar/get",
+        "finish-launch-social/post",
         "finish-launch-website/post",
         "finish-shutdown-website/post",
         "install/put",

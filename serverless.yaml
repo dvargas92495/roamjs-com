@@ -29,6 +29,13 @@ functions:
           path: deploy
           method: post
           cors: true
+  finish-launch-social-post:
+    handler: out/finish-launch-social_post.handler
+    events:
+      - http:
+          path: finish-launch-social
+          method: post
+          cors: true
   finish-launch-website-post:
     handler: out/finish-launch-website_post.handler
     events:
@@ -114,10 +121,10 @@ functions:
           method: get
           cors: true
   social-token-get:
-    handler: out/sponsorships_get.handler
+    handler: out/social-token_get.handler
     events:
       - http:
-          path: sponsorships
+          path: social-token
           method: get
           cors: true
   sponsorships-get:
