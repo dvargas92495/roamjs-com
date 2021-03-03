@@ -57,6 +57,13 @@ functions:
           path: is-subscribed
           method: get
           cors: true
+  launch-social-post:
+    handler: out/launch-social_post.handler
+    events:
+      - http:
+          path: launch-social
+          method: post
+          cors: true
   launch-website-post:
     handler: out/launch-website_post.handler
     events:
@@ -99,6 +106,20 @@ functions:
           path: shutdown-website
           method: post
           cors: true
+  social-schedules-get:
+    handler: out/social-schedules_get.handler
+    events:
+      - http:
+          path: social-schedules
+          method: get
+          cors: true
+  social-token-get:
+    handler: out/sponsorships_get.handler
+    events:
+      - http:
+          path: sponsorships
+          method: get
+          cors: true
   sponsorships-get:
     handler: out/sponsorships_get.handler
     events:
@@ -126,6 +147,13 @@ functions:
       - http:
           path: twitter-tweet
           method: post
+          cors: true
+  twitter-schedule-get:
+    handler: out/twitter-schedule_get.handler
+    events:
+      - http:
+          path: twitter-schedule
+          method: tge
           cors: true
   twitter-upload-post:
     handler: out/twitter-upload_post.handler
