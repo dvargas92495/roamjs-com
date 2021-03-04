@@ -143,7 +143,8 @@ module "aws-serverless-backend" {
         "website-status/get",
     ]
     cors = [
-      "launch-website"
+      "launch-website",
+      "shutdown-website"
     ]
     tags = {
         Application = "Roam JS Extensions"
