@@ -14,9 +14,6 @@ const UserIcon: React.FunctionComponent = () => {
   return (
     <>
       <SignedIn>
-        <style>{`.cl-user-button-popup-switches {
-  display: none;
-}`}</style>
         <UserButton />
       </SignedIn>
       <SignedOut>
