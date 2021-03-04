@@ -30,7 +30,7 @@ import {
 import Link from "next/link";
 import axios, { AxiosResponse } from "axios";
 import { FLOSS_API_URL, stripe } from "../../components/constants";
-import awsTlds from "../../components/aws_tlds";
+// import awsTlds from "../../components/aws_tlds";
 import { useUser, SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
 
@@ -243,10 +243,10 @@ const Billing = () => {
 const isWebsiteReady = (w: { status: string; deploys: { status: string }[] }) =>
   w.status === "LIVE" && w.deploys.length && w.deploys[0].status === "SUCCESS";
 
-const TLD_REGEX = new RegExp(`\\.${awsTlds.join("|")}`);
+// const TLD_REGEX = new RegExp(`\\.${awsTlds.join("|")}`);
 const domainValidate = (domain: string) => {
-  const valid = TLD_REGEX.test(domain);
-  if (!valid) {
+  // const valid = TLD_REGEX.test(domain);
+  if (!domain) {
     return "Invalid domain. Try a .com!";
   }
   return "";
