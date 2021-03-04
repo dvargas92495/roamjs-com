@@ -3,6 +3,8 @@ import axios from "axios";
 import { getClerkUser, headers } from "../lambda-helpers";
 import AWS from "aws-sdk";
 import { v4 } from "uuid";
+import { users } from "@clerk/clerk-sdk-node";
+import randomstring from 'randomstring';
 
 const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
@@ -29,7 +31,7 @@ export const handler = async (
       Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
     },
   };
-  const cancelled = await axios
+  const { success, message } = await axios
     .post(
       `${process.env.FLOSS_API_URL}/stripe-cancel`,
       {
@@ -37,11 +39,12 @@ export const handler = async (
       },
       opts
     )
-    .then((r) => r.data.success);
-  if (!cancelled) {
+    .then((r) => r.data.success)
+    .catch((r) => ({ success: false, message: r.response.data }));
+  if (!success) {
     return {
       statusCode: 500,
-      body: "Failed to cancel RoamJS Site subscription",
+      body: `Failed to cancel RoamJS Site subscription: ${message}`,
       headers,
     };
   }
@@ -66,22 +69,15 @@ export const handler = async (
     })
     .promise();
 
-  const callbackToken = v4();
-  await dynamo
-    .updateItem({
-      TableName: "RoamJSClerkUsers",
-      Key: { id: { S: user.id } },
-      ExpressionAttributeNames: {
-        "#WT": "website_token",
-      },
-      ExpressionAttributeValues: {
-        ":t": {
-          S: callbackToken,
-        },
-      },
-      UpdateExpression: "SET #WT = :t",
-    })
-    .promise();
+  const callbackToken = randomstring.generate();
+  await users.updateUser(user.id, {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore PR up to adress this
+    privateMetadata: JSON.stringify({
+      ...user.privateMetadata,
+      websiteToken: callbackToken,
+    }),
+  });
 
   await lambda
     .invoke({
@@ -93,7 +89,7 @@ export const handler = async (
           callbackToken,
           url: `${process.env.API_URL}/finish-shutdown-website`,
           userId: user.id,
-        }
+        },
       }),
     })
     .promise();

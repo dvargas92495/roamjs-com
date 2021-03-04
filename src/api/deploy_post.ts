@@ -18,17 +18,10 @@ export const handler = async (
     };
   }
 
-  const website = await dynamo
-    .getItem({
-      TableName: "RoamJSClerkUsers",
-      Key: { id: { S: user.id } },
-    })
-    .promise()
-    .then((r) =>
-      r.Item
-        ? { graph: r.Item?.website_graph?.S, domain: r.Item?.website_domain?.S }
-        : {}
-    );
+  const { websiteGraph, websiteDomain } = user.privateMetadata as {
+    websiteGraph: string;
+    websiteDomain: string;
+  };
 
   await dynamo
     .putItem({
@@ -38,7 +31,7 @@ export const handler = async (
           S: v4(),
         },
         action_graph: {
-          S: `deploy_${website.graph}`,
+          S: `deploy_${websiteGraph}`,
         },
         date: {
           S: new Date().toJSON(),
@@ -55,8 +48,8 @@ export const handler = async (
       FunctionName: "RoamJS_deploy",
       InvocationType: "Event",
       Payload: JSON.stringify({
-        roamGraph: website.graph,
-        domain: website.domain,
+        roamGraph: websiteGraph,
+        domain: websiteDomain,
       }),
     })
     .promise();

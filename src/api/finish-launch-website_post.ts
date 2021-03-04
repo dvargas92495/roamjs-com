@@ -1,12 +1,12 @@
+import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { dynamo, headers, launchWebsite } from "../lambda-helpers";
+import { v4 } from "uuid";
+import { dynamo, headers, lambda } from "../lambda-helpers";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const { graph, domain, userId, email, callbackToken } = JSON.parse(
-    event.body
-  );
+  const { graph, domain, userId, callbackToken } = JSON.parse(event.body);
   if (!graph) {
     return {
       statusCode: 400,
@@ -31,29 +31,18 @@ export const handler = async (
     };
   }
 
-  if (!email) {
-    return {
-      statusCode: 400,
-      body: "Email is required",
-      headers,
-    };
-  }
-
-  const storedToken = await dynamo
-    .getItem({
-      TableName: "RoamJSClerkUsers",
-      Key: { id: { S: userId } },
-    })
-    .promise()
-    .then((r) => r.Item?.website_token?.S);
-  if (!storedToken) {
+  const user = await users.getUser(userId);
+  const { websiteToken, ...rest } = user.privateMetadata as {
+    websiteToken: string;
+  };
+  if (!websiteToken) {
     return {
       statusCode: 401,
       body: "User not awaiting a website launch.",
       headers,
     };
   }
-  if (storedToken !== callbackToken) {
+  if (websiteToken !== callbackToken) {
     return {
       statusCode: 401,
       body: "Unauthorized call to finish website launch.",
@@ -61,5 +50,50 @@ export const handler = async (
     };
   }
 
-  return launchWebsite({ userId, email, graph, domain });
+  await dynamo
+    .putItem({
+      TableName: "RoamJSWebsiteStatuses",
+      Item: {
+        uuid: {
+          S: v4(),
+        },
+        action_graph: {
+          S: `launch_${graph}`,
+        },
+        date: {
+          S: new Date().toJSON(),
+        },
+        status: {
+          S: "INITIALIZING",
+        },
+      },
+    })
+    .promise();
+
+  await users.updateUser(user.id, {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    privateMetadata: JSON.stringify(rest),
+  });
+
+  const email = user.emailAddresses.find(
+    (e) => e.id === user.primaryEmailAddressId
+  ).emailAddress;
+  await lambda
+    .invoke({
+      FunctionName: "RoamJS_launch",
+      InvocationType: "Event",
+      Payload: JSON.stringify({
+        roamGraph: graph,
+        domain,
+        email,
+      }),
+    })
+    .promise();
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ graph, domain }),
+    headers,
+  };
 };

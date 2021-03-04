@@ -1,12 +1,9 @@
+import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
 import { v4 } from "uuid";
-import {
-  dynamo,
-  getClerkUser,
-  headers,
-  launchWebsite,
-} from "../lambda-helpers";
+import { dynamo, getClerkUser, headers, lambda } from "../lambda-helpers";
+import randomstring from "randomstring";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -44,7 +41,7 @@ export const handler = async (
       headers,
     };
   }
-  
+
   await dynamo
     .putItem({
       TableName: "RoamJSWebsiteStatuses",
@@ -65,30 +62,16 @@ export const handler = async (
     })
     .promise();
 
-  const callbackToken = v4();
-  await dynamo
-    .updateItem({
-      TableName: "RoamJSClerkUsers",
-      Key: { id: { S: user.id } },
-      ExpressionAttributeNames: {
-        "#WG": "website_graph",
-        "#WD": "website_domain",
-        "#WT": "website_token",
-      },
-      ExpressionAttributeValues: {
-        ":g": {
-          S: graph,
-        },
-        ":d": {
-          S: domain,
-        },
-        ":t": {
-          S: callbackToken,
-        },
-      },
-      UpdateExpression: "SET #WG = :g, #WD = :d, #WT = :t",
-    })
-    .promise();
+  const callbackToken = randomstring.generate();
+  const updatedUser = await users.updateUser(user.id, {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    privateMetadata: JSON.stringify({
+      ...user.privateMetadata,
+      websiteGraph: graph,
+      websiteDomain: domain,
+    }),
+  });
 
   const email = user.emailAddresses.find(
     (e) => e.id === user.primaryEmailAddressId
@@ -103,7 +86,6 @@ export const handler = async (
           graph,
           domain,
           userId: user.id,
-          email,
           callbackToken,
           url: `${process.env.API_URL}/finish-launch-website`,
         },
@@ -122,6 +104,14 @@ export const handler = async (
     });
   if (!active) {
     if (id) {
+      await users.updateUser(user.id, {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore
+        privateMetadata: JSON.stringify({
+          ...updatedUser.privateMetadata,
+          websiteToken: callbackToken,
+        }),
+      });
       return {
         statusCode: 200,
         body: JSON.stringify({ sessionId: id }),
@@ -136,5 +126,41 @@ export const handler = async (
     }
   }
 
-  return launchWebsite({ userId: user.id, email, domain, graph });
+  await dynamo
+    .putItem({
+      TableName: "RoamJSWebsiteStatuses",
+      Item: {
+        uuid: {
+          S: v4(),
+        },
+        action_graph: {
+          S: `launch_${graph}`,
+        },
+        date: {
+          S: new Date().toJSON(),
+        },
+        status: {
+          S: "INITIALIZING",
+        },
+      },
+    })
+    .promise();
+
+  await lambda
+    .invoke({
+      FunctionName: "RoamJS_launch",
+      InvocationType: "Event",
+      Payload: JSON.stringify({
+        roamGraph: graph,
+        domain,
+        email,
+      }),
+    })
+    .promise();
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ graph, domain }),
+    headers,
+  };
 };

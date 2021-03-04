@@ -31,13 +31,11 @@ import Link from "next/link";
 import axios, { AxiosResponse } from "axios";
 import { FLOSS_API_URL, stripe } from "../../components/constants";
 import awsTlds from "../../components/aws_tlds";
-import { useUser, SignedIn } from "@clerk/clerk-react";
+import { useUser, SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
 
 const UserValue: React.FunctionComponent = ({ children }) => (
-  <span style={{ marginBottom: -24, paddingLeft: 64, display: "block" }}>
-    {children}
-  </span>
+  <span style={{ paddingLeft: 64, display: "block" }}>{children}</span>
 );
 
 const handleCheckout = (r: AxiosResponse) =>
@@ -291,6 +289,7 @@ const Website = () => {
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const [graph, setGraph] = useState<string>();
   const [status, setStatus] = useState<string>();
+  const [statusProps, setStatusProps] = useState<string>();
   const [deploys, setDeploys] = useState<
     { status: string; date: string; uuid: string }[]
   >([]);
@@ -300,19 +299,21 @@ const Website = () => {
   const getStatus = useCallback(
     (graph: string) =>
       authenticatedAxiosGet(`website-status?graph=${graph}`).then((r) => {
+        setStatusProps(r.data.statusProps);
         setStatus(r.data.status);
         setDeploys(r.data.deploys);
         if (!isWebsiteReady(r.data)) {
           timeoutRef.current = window.setTimeout(() => getStatus(graph), 5000);
         }
       }),
-    [setStatus, setDeploys, timeoutRef]
+    [setStatus, setDeploys, timeoutRef, setStatusProps]
   );
   const getWebsite = useCallback(
     () =>
       authenticatedAxiosGet("website-status").then((r) => {
         if (r.data) {
           setGraph(r.data.graph);
+          setStatusProps(r.data.statusProps);
           setStatus(r.data.status);
           setDeploys(r.data.deploys);
           if (!isWebsiteReady(r.data)) {
@@ -323,7 +324,7 @@ const Website = () => {
           }
         }
       }),
-    [setGraph, setStatus, setDeploys, timeoutRef, getStatus]
+    [setGraph, setStatus, setDeploys, timeoutRef, getStatus, setStatusProps]
   );
   const launchWebsite = useCallback(
     (body) =>
@@ -345,8 +346,8 @@ const Website = () => {
       authenticatedAxiosPost("shutdown-website", {
         graph,
         subscriptionId,
-      }),
-    [authenticatedAxiosPost, graph, subscriptionId]
+      }).then(() => setStatus("SHUTTING DOWN")),
+    [authenticatedAxiosPost, setStatus, graph, subscriptionId]
   );
   useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
   useEffect(() => {
@@ -375,7 +376,25 @@ const Website = () => {
                 avatar: <Subtitle>Graph</Subtitle>,
               },
               {
-                primary: <UserValue>{status}</UserValue>,
+                primary: (
+                  <UserValue>
+                    {status === "AWAITING VALIDATION" ? (
+                      <>
+                        {status}
+                        <br />
+                        To continue, add the following Name Servers to your
+                        Domain Management Settings:
+                        <ul>
+                          {JSON.parse(statusProps).nameServers.map((n) => (
+                            <li>{n}</li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : (
+                      status
+                    )}
+                  </UserValue>
+                ),
                 key: 1,
                 avatar: <Subtitle>Status</Subtitle>,
               },
@@ -601,28 +620,36 @@ const Profile = () => {
     }
     return 0;
   }, []);
+  const [isClerk, setIsClerk] = useState(false);
   return (
     <>
-      <VerticalTabs title={"User Info"} initialValue={initialValue}>
-        <Card title={"Details"}>
-          <Settings
-            name={user.fullName}
-            email={user.primaryEmailAddress.emailAddress}
-          />
-        </Card>
-        <Card title={"Billing"}>
-          <Billing />
-        </Card>
-        <Card title={"Sponsorships"}>
-          <Funding />
-        </Card>
-        <Card title={"Social"}>
-          <Social />
-        </Card>
-        <Card title={"Static Site"}>
-          <Website />
-        </Card>
-      </VerticalTabs>
+      {isClerk ? (
+        <UserProfile />
+      ) : (
+        <VerticalTabs title={"User Info"} initialValue={initialValue}>
+          <Card title={"Details"}>
+            <Settings
+              name={user.fullName}
+              email={user.primaryEmailAddress.emailAddress}
+            />
+          </Card>
+          <Card title={"Billing"}>
+            <Billing />
+          </Card>
+          <Card title={"Sponsorships"}>
+            <Funding />
+          </Card>
+          <Card title={"Social"}>
+            <Social />
+          </Card>
+          <Card title={"Static Site"}>
+            <Website />
+          </Card>
+        </VerticalTabs>
+      )}
+      <button onClick={() => setIsClerk(!isClerk)} style={{ display: "none" }}>
+        switch
+      </button>
     </>
   );
 };

@@ -1,3 +1,4 @@
+import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import AWS from "aws-sdk";
 import { getClerkUser, headers } from "../lambda-helpers";
@@ -15,13 +16,14 @@ export const handler = async (
       headers,
     };
   }
-  
+
   const graph =
     event.queryStringParameters?.graph ||
-    (await dynamo
-      .getItem({ TableName: "RoamJSClerkUsers", Key: { id: { S: user.id } } })
-      .promise()
-      .then((r) => r.Item?.website_graph?.S));
+    (await users
+      .getUser(user.id)
+      .then(
+        (r) => (r.privateMetadata as { websiteGraph: string }).websiteGraph
+      ));
 
   if (!graph) {
     return {
