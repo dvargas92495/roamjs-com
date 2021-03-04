@@ -128,6 +128,23 @@ type Subscription = {
   interval: "mo" | "yr";
 };
 
+const ApiButton: React.FunctionComponent<{ request: () => Promise<void> }> = ({
+  children,
+  request,
+}) => {
+  const [loading, setLoading] = useState(false);
+  const onClick = useCallback(() => {
+    setLoading(true);
+    request().catch(() => setLoading(false));
+  }, [setLoading, request]);
+  return (
+    <>
+      <Button onClick={onClick}>{children}</Button>
+      <Loading loading={loading} />
+    </>
+  );
+};
+
 const Billing = () => {
   const [payment, setPayment] = useState<PaymentMethod>();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
@@ -172,8 +189,8 @@ const Billing = () => {
                         action: (
                           <>
                             <Button>Make Default</Button>
-                            <Button
-                              onClick={() =>
+                            <ApiButton
+                              request={() =>
                                 axios
                                   .delete(
                                     `${FLOSS_API_URL}/stripe-payment-method?payment_method_id=${pm.id}`
@@ -188,7 +205,7 @@ const Billing = () => {
                               }
                             >
                               Delete
-                            </Button>
+                            </ApiButton>
                           </>
                         ),
                       }))}
