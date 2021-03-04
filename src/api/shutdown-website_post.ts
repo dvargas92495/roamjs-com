@@ -4,7 +4,7 @@ import { getClerkUser, headers } from "../lambda-helpers";
 import AWS from "aws-sdk";
 import { v4 } from "uuid";
 import { users } from "@clerk/clerk-sdk-node";
-import randomstring from 'randomstring';
+import randomstring from "randomstring";
 
 const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
@@ -39,8 +39,8 @@ export const handler = async (
       },
       opts
     )
-    .then((r) => r.data.success)
-    .catch((r) => ({ success: false, message: r.response.data }));
+    .then((r) => ({ success: r.data.success, message: '' }))
+    .catch((r) => ({ success: false, message: r.response.data || r.message }));
   if (!success) {
     return {
       statusCode: 500,

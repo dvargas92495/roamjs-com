@@ -17,13 +17,9 @@ export const handler = async (
     };
   }
 
-  const graph =
-    event.queryStringParameters?.graph ||
-    (await users
-      .getUser(user.id)
-      .then(
-        (r) => (r.privateMetadata as { websiteGraph: string }).websiteGraph
-      ));
+  const graph = await users
+    .getUser(user.id)
+    .then((r) => (r.privateMetadata as { websiteGraph: string }).websiteGraph);
 
   if (!graph) {
     return {

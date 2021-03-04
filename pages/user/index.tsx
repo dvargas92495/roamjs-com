@@ -296,18 +296,6 @@ const Website = () => {
   const [subscriptionId, setSubscriptionId] = useState("");
   const [priceId, setPriceId] = useState("");
   const timeoutRef = useRef(0);
-  const getStatus = useCallback(
-    (graph: string) =>
-      authenticatedAxiosGet(`website-status?graph=${graph}`).then((r) => {
-        setStatusProps(r.data.statusProps);
-        setStatus(r.data.status);
-        setDeploys(r.data.deploys);
-        if (!isWebsiteReady(r.data)) {
-          timeoutRef.current = window.setTimeout(() => getStatus(graph), 5000);
-        }
-      }),
-    [setStatus, setDeploys, timeoutRef, setStatusProps]
-  );
   const getWebsite = useCallback(
     () =>
       authenticatedAxiosGet("website-status").then((r) => {
@@ -317,14 +305,16 @@ const Website = () => {
           setStatus(r.data.status);
           setDeploys(r.data.deploys);
           if (!isWebsiteReady(r.data)) {
-            timeoutRef.current = window.setTimeout(
-              () => getStatus(r.data.graph),
-              5000
-            );
+            timeoutRef.current = window.setTimeout(getWebsite, 5000);
           }
+        } else {
+          setGraph("");
+          setStatusProps("{}");
+          setStatus("");
+          setDeploys([]);
         }
       }),
-    [setGraph, setStatus, setDeploys, timeoutRef, getStatus, setStatusProps]
+    [setGraph, setStatus, setDeploys, timeoutRef, setStatusProps]
   );
   const launchWebsite = useCallback(
     (body) =>
@@ -338,9 +328,9 @@ const Website = () => {
   const manualDeploy = useCallback(() => {
     setLoading(true);
     authenticatedAxiosPost("deploy", {})
-      .then(() => getStatus(graph))
+      .then(getWebsite)
       .finally(() => setLoading(false));
-  }, [authenticatedAxiosPost, getStatus, graph]);
+  }, [authenticatedAxiosPost, getWebsite, graph]);
   const shutdownWebsite = useCallback(
     () =>
       authenticatedAxiosPost("shutdown-website", {
