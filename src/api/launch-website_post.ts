@@ -99,7 +99,7 @@ export const handler = async (
     )
     .then((r) => r.data)
     .catch((e) => {
-      console.error(e.response?.data);
+      console.error(e.response?.data || e.message);
       return { active: false };
     });
   if (!active) {
