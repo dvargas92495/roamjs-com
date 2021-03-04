@@ -93,7 +93,7 @@ export const handler = async (
       {
         headers: {
           Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
-          Origin: event.headers.Origin,
+          Origin: event.headers.Origin || event.headers.origin,
         },
       }
     )

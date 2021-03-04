@@ -100,7 +100,7 @@ module "aws_static_site" {
 
 module "aws-serverless-backend" {
     source  = "dvargas92495/serverless-backend/aws"
-    version = "1.4.1"
+    version = "1.5.0"
 
     api_name = "roam-js-extensions"
     domain = "roamjs.com"
@@ -141,6 +141,9 @@ module "aws-serverless-backend" {
         "twitter-tweet/post",
         "twitter-upload/post",
         "website-status/get",
+    ]
+    cors = [
+      "launch-website"
     ]
     tags = {
         Application = "Roam JS Extensions"
