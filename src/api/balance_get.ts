@@ -12,11 +12,11 @@ export const handler = async (
             balance:
               (user.publicMetadata as { balance?: string })?.balance || 0,
           }),
-          headers,
+          headers: headers(event),
         }
       : {
           statusCode: 401,
           body: "No Active Session",
-          headers,
+          headers: headers(event),
         }
   );

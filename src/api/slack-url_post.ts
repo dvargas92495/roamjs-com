@@ -25,17 +25,17 @@ export const handler = async (
         ? {
             statusCode: 200,
             body: JSON.stringify({ token: r.data.access_token }),
-            headers,
+            headers: headers(event),
           }
         : {
             statusCode: 500,
             body: r.data.error,
-            headers,
+            headers: headers(event),
           }
     )
     .catch((e) => ({
       statusCode: e.response?.status || 500,
       body: e.response?.data ? JSON.stringify(e.response.data) : e.message,
-      headers,
+      headers: headers(event),
     }));
 };

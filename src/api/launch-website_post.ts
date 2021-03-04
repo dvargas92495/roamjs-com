@@ -13,7 +13,7 @@ export const handler = async (
     return {
       statusCode: 400,
       body: "Roam Graph is required",
-      headers,
+      headers: headers(event),
     };
   }
 
@@ -21,7 +21,7 @@ export const handler = async (
     return {
       statusCode: 400,
       body: "Target Domain is required",
-      headers,
+      headers: headers(event),
     };
   }
 
@@ -29,7 +29,7 @@ export const handler = async (
     return {
       statusCode: 400,
       body: "Missing Product to subscribe to.",
-      headers,
+      headers: headers(event),
     };
   }
 
@@ -38,7 +38,7 @@ export const handler = async (
     return {
       statusCode: 401,
       body: "No Active Session",
-      headers,
+      headers: headers(event),
     };
   }
 
@@ -115,13 +115,13 @@ export const handler = async (
       return {
         statusCode: 200,
         body: JSON.stringify({ sessionId: id }),
-        headers,
+        headers: headers(event),
       };
     } else {
       return {
         statusCode: 500,
         body: "Failed to subscribe to RoamJS Site service",
-        headers,
+        headers: headers(event),
       };
     }
   }
@@ -161,6 +161,6 @@ export const handler = async (
   return {
     statusCode: 200,
     body: JSON.stringify({ graph, domain }),
-    headers,
+    headers: headers(event),
   };
 };

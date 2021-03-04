@@ -7,13 +7,13 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   const { username, query } = event.queryStringParameters;
   if (!username) {
-    return userError("username is required");
+    return userError("username is required", event);
   }
   if (!query) {
-    return userError("query is required");
+    return userError("query is required", event);
   }
 
-  const opts = await getTwitterOpts();
+  const opts = await getTwitterOpts(event);
 
   return wrapAxios(
     axios.get(
@@ -21,6 +21,7 @@ export const handler = async (
         query
       )}%20AND%20-filter:retweets`,
       opts
-    )
+    ),
+    event
   );
 };

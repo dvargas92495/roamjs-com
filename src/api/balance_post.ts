@@ -9,7 +9,7 @@ export const handler = async (
   if (token !== process.env.FLOSS_TOKEN) {
     return {
       statusCode: 401,
-      headers,
+      headers: headers(event),
       body: "Unauthorized attempt to change user balance",
     };
   }
@@ -34,6 +34,6 @@ export const handler = async (
     .then(() => ({
       statusCode: 200,
       body: JSON.stringify({ success: true }),
-      headers,
+      headers: headers(event),
     }));
 };

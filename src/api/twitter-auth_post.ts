@@ -24,12 +24,12 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       return {
         statusCode: 200,
         body: JSON.stringify({ oauth_token, oauth_token_secret }),
-        headers,
+        headers: headers(event),
       };
     })
     .catch((e) => ({
       statusCode: 500,
       body: JSON.stringify(e.response?.data || { message: e.message }),
-      headers,
+      headers: headers(event),
     }));
 };

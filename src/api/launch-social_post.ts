@@ -13,7 +13,7 @@ export const handler = async (
     return {
       statusCode: 401,
       body: "No Active Session",
-      headers,
+      headers: headers(event),
     };
   }
 
@@ -73,14 +73,14 @@ export const handler = async (
       return {
         statusCode: 200,
         body: JSON.stringify({ sessionId: id }),
-        headers,
+        headers: headers(event),
       };
     } else {
       return {
         statusCode: 500,
         body:
           "Failed to subscribe to RoamJS Site service. Contact support@roamjs.com for help!",
-        headers,
+        headers: headers(event),
       };
     }
   }
@@ -97,6 +97,6 @@ export const handler = async (
   return {
     statusCode: 200,
     body: JSON.stringify({ success: true }),
-    headers,
+    headers: headers(event),
   };
 };

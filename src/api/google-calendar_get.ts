@@ -9,10 +9,10 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   const { calendarId, timeMin, timeMax } = event.queryStringParameters;
   if (!calendarId) {
-    return userError("calendarId is required");
+    return userError("calendarId is required", event);
   }
   if (!apiKey) {
-    return serverError("No API key stored");
+    return serverError("No API key stored", event);
   }
   return wrapAxios(
     axios.get(
@@ -23,6 +23,7 @@ export const handler = async (
       )}&timeMax=${encodeURIComponent(
         timeMax
       )}&orderBy=startTime&singleEvents=true`
-    )
+    ),
+    event
   );
 };

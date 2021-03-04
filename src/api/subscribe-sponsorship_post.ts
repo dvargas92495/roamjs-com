@@ -10,7 +10,7 @@ export const handler = async (
     return {
       statusCode: 400,
       body: "Missing sponsorship amount to subscribe to.",
-      headers,
+      headers: headers(event),
     };
   }
 
@@ -19,7 +19,7 @@ export const handler = async (
     return {
       statusCode: 401,
       body: "No Active Session",
-      headers,
+      headers: headers(event),
     };
   }
   const email = user.emailAddresses.find(
@@ -49,6 +49,6 @@ export const handler = async (
     .then((r) => ({
       statusCode: r.status,
       body: JSON.stringify(r.data),
-      headers,
+      headers: headers(event),
     }));
 };

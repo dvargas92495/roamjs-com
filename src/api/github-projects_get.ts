@@ -7,10 +7,11 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   const { repository } = event.queryStringParameters;
   if (!repository) {
-    return userError("repository is required");
+    return userError("repository is required", event);
   }
   const opts = getGithubOpts();
   return wrapAxios(
-    axios(`https://api.github.com/repos/${repository}/projects`, opts)
+    axios(`https://api.github.com/repos/${repository}/projects`, opts),
+    event
   );
 };

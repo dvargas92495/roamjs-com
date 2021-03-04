@@ -13,36 +13,69 @@ export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 export const mixpanel =
   process.env.MIXPANEL_TOKEN && Mixpanel.init(process.env.MIXPANEL_TOKEN);
 
-export const headers = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
+const ALLOWED_ORIGINS = ["https://roamjs.com", "https://roamresearch.com"];
+type Headers = {
+  [header: string]: boolean | number | string;
+};
+
+export const headers = (event: APIGatewayProxyEvent): Headers => {
+  const origin = event.headers.origin || event.headers.Origin;
+  return {
+    "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin)
+      ? origin
+      : "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
+  };
 };
 
 export const wrapAxios = (
-  req: AxiosPromise<Record<string, unknown>>
+  req: AxiosPromise<Record<string, unknown>>,
+  event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> =>
   req
     .then((r) => ({
       statusCode: 200,
       body: JSON.stringify(r.data),
-      headers,
+      headers: headers(event),
     }))
     .catch((e) => ({
       statusCode: e.response?.status || 500,
       body: e.response?.data ? JSON.stringify(e.response.data) : e.message,
-      headers,
+      headers: headers(event),
     }));
 
-export const userError = (body: string): APIGatewayProxyResult => ({
+export const userError = (
+  body: string,
+  event: APIGatewayProxyEvent
+): APIGatewayProxyResult => ({
   statusCode: 400,
   body,
-  headers,
+  headers: headers(event),
 });
 
-export const serverError = (body: string): APIGatewayProxyResult => ({
+export const serverError = (
+  body: string,
+  event: APIGatewayProxyEvent
+): APIGatewayProxyResult => ({
   statusCode: 500,
   body,
-  headers,
+  headers: headers(event),
+});
+
+export const emptyResponse = (
+  event: APIGatewayProxyEvent
+): APIGatewayProxyResult => ({
+  statusCode: 204,
+  body: JSON.stringify({}),
+  headers: headers(event),
+});
+
+export const bareSuccessResponse = (
+  event: APIGatewayProxyEvent
+): APIGatewayProxyResult => ({
+  statusCode: 200,
+  body: JSON.stringify({ success: true }),
+  headers: headers(event),
 });
 
 // Github Creds
@@ -61,7 +94,9 @@ export const getGithubOpts = (): AxiosRequestConfig => ({
 const twitterConsumerKey = process.env.TWITTER_CONSUMER_KEY || "";
 const twitterConsumerSecret = process.env.TWITTER_CONSUMER_SECRET || "";
 
-export const getTwitterOpts = async (): Promise<AxiosRequestConfig> => {
+export const getTwitterOpts = async (
+  event: APIGatewayProxyEvent
+): Promise<AxiosRequestConfig> => {
   const twitterBearerTokenResponse = await wrapAxios(
     axios.post(
       `https://api.twitter.com/oauth2/token`,
@@ -78,7 +113,8 @@ export const getTwitterOpts = async (): Promise<AxiosRequestConfig> => {
           "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
         },
       }
-    )
+    ),
+    event
   );
 
   const body = JSON.parse(twitterBearerTokenResponse.body);
@@ -158,11 +194,11 @@ export const flossGet = ({
           .then((r) => ({
             statusCode: 200,
             body: JSON.stringify(r.data),
-            headers,
+            headers: headers(event),
           }))
       : Promise.resolve({
           statusCode: 401,
           body: "No Active Session",
-          headers,
+          headers: headers(event),
         })
   );

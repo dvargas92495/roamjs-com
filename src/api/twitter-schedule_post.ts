@@ -1,7 +1,7 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { v4 } from "uuid";
-import { dynamo, headers } from "../lambda-helpers";
+import { bareSuccessResponse, dynamo, headers } from "../lambda-helpers";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -18,7 +18,7 @@ export const handler = async (
       return {
         statusCode: 401,
         body: "Invalid token",
-        headers,
+        headers: headers(event),
       };
     }
     const uuid = v4();
@@ -33,10 +33,6 @@ export const handler = async (
         },
       })
       .promise()
-      .then(() => ({
-        statusCode: 200,
-        body: JSON.stringify({ success: true }),
-        headers,
-      }));
+      .then(() => bareSuccessResponse(event));
   });
 };

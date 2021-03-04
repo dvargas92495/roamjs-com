@@ -2,7 +2,7 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import axios from "axios";
 import { headers, twitterOAuth } from "../lambda-helpers";
 
-export const handler: APIGatewayProxyHandler = async () => {
+export const handler: APIGatewayProxyHandler = async (event) => {
   const oauthHeaders = twitterOAuth.toHeader(
     twitterOAuth.authorize({
       data: {
@@ -29,19 +29,19 @@ export const handler: APIGatewayProxyHandler = async () => {
         return {
           statusCode: 200,
           body: JSON.stringify({ token: parsedData.oauth_token }),
-          headers,
+          headers: headers(event),
         };
       } else {
         return {
           statusCode: 500,
           body: "Oauth Callback was not Confirmed",
-          headers,
+          headers: headers(event),
         };
       }
     })
     .catch((e) => ({
       statusCode: 500,
       body: e.message,
-      headers,
+      headers: headers(event),
     }));
 };

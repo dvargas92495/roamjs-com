@@ -44,11 +44,11 @@ export const handler = (
     .then((success) => ({
       statusCode: 200,
       body: JSON.stringify({ success }),
-      headers,
+      headers: headers(event),
     }))
     .catch((e) => ({
       statusCode: e.response?.status || 500,
       body: e.response?.data ? JSON.stringify(e.response.data) : e.message,
-      headers,
+      headers: headers(event),
     }));
 };

@@ -12,11 +12,11 @@ export const handler = async (
             token:
               (user.privateMetadata as { socialToken?: string })?.socialToken,
           }),
-          headers,
+          headers: headers(event),
         }
       : {
           statusCode: 401,
           body: "No Active Session",
-          headers,
+          headers: headers(event),
         }
   );

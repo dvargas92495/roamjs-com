@@ -28,6 +28,6 @@ export const handler = async (
         4
       )}`,
     }),
-    headers,
+    headers: headers(event),
   };
 };

@@ -1,4 +1,4 @@
-import { APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyHandler } from "aws-lambda";
 import axios, { AxiosResponse } from "axios";
 import {
   Contracts,
@@ -10,7 +10,7 @@ import {
 const toUrl = (label: string) =>
   `https://api.github.com/repos/dvargas92495/roam-js-extensions/issues?labels=${label}&per_page=100`;
 
-export const handler = async (): Promise<APIGatewayProxyResult> => {
+export const handler: APIGatewayProxyHandler = async (event) => {
   const opts = getGithubOpts();
   const flossIssues = await getFlossActiveContracts()
     .then((r) =>
@@ -61,6 +61,6 @@ export const handler = async (): Promise<APIGatewayProxyResult> => {
   return {
     statusCode: 200,
     body: JSON.stringify(body),
-    headers,
+    headers: headers(event),
   };
 };

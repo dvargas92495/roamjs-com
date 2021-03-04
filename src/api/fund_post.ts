@@ -16,11 +16,11 @@ export const handler = async (
           .then((r) => ({
             statusCode: 200,
             body: JSON.stringify(r.data),
-            headers,
+            headers: headers(event),
           }))
       : Promise.resolve({
           statusCode: 401,
           body: "No Active Session",
-          headers,
+          headers: headers(event),
         })
   );

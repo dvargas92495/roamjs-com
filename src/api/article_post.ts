@@ -34,7 +34,7 @@ export const handler = async (
   const handleError = (e: Error & AxiosError) => ({
     statusCode: e.response?.status || 500,
     body: e.response?.data ? JSON.stringify(e.response.data) : e.message,
-    headers,
+    headers: headers(event),
   });
   return fetch({ "Content-type": "text/html", "user-agent": "Mozilla/5.0" })
     .catch((e) =>

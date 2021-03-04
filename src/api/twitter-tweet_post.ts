@@ -47,11 +47,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     .then((r) => ({
       statusCode: 200,
       body: JSON.stringify(r.data),
-      headers,
+      headers: headers(event),
     }))
     .catch((e) => ({
       statusCode: 500,
       body: JSON.stringify({ message: e.message, url, ...e.response?.data }),
-      headers,
+      headers: headers(event),
     }));
 };

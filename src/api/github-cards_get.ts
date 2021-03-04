@@ -7,13 +7,13 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   const { repository, project, column } = event.queryStringParameters;
   if (!repository) {
-    return userError("repository is required");
+    return userError("repository is required", event);
   }
   if (!project) {
-    return userError("project is required");
+    return userError("project is required", event);
   }
   if (!column) {
-    return userError("column is required");
+    return userError("column is required", event);
   }
   const opts = getGithubOpts();
   return axios(
@@ -26,7 +26,8 @@ export const handler = async (
     );
     if (!projectObj) {
       return userError(
-        `Could not find project ${project} in repository ${repository}`
+        `Could not find project ${project} in repository ${repository}`,
+        event
       );
     }
     return axios(projectObj.columns_url, opts).then((columns) => {
@@ -36,7 +37,8 @@ export const handler = async (
       );
       if (!columnObj) {
         return userError(
-          `Could not find column ${column} in project ${project} in repository ${repository}`
+          `Could not find column ${column} in project ${project} in repository ${repository}`,
+          event
         );
       }
       return wrapAxios(
@@ -46,7 +48,8 @@ export const handler = async (
             ...i,
             html_url: `${projectObj.html_url}#card-${i.id}`,
           })),
-        }))
+        })),
+        event
       );
     });
   });

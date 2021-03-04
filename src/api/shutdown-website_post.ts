@@ -19,7 +19,7 @@ export const handler = async (
     return {
       statusCode: 401,
       body: "No Active Session",
-      headers,
+      headers: headers(event),
     };
   }
 
@@ -45,7 +45,7 @@ export const handler = async (
     return {
       statusCode: 500,
       body: `Failed to cancel RoamJS Site subscription: ${message}`,
-      headers,
+      headers: headers(event),
     };
   }
 
@@ -97,6 +97,6 @@ export const handler = async (
   return {
     statusCode: 200,
     body: JSON.stringify({ success: true }),
-    headers,
+    headers: headers(event),
   };
 };

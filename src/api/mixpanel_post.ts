@@ -9,6 +9,6 @@ export const handler = async (
   return {
     statusCode: 204,
     body: JSON.stringify({}),
-    headers,
+    headers: headers(event),
   };
 };

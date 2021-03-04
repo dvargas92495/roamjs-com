@@ -12,7 +12,7 @@ export const handler = async (
     return {
       statusCode: 400,
       body: "UserId is required",
-      headers,
+      headers: headers(event),
     };
   }
 
@@ -23,14 +23,14 @@ export const handler = async (
     return {
       statusCode: 401,
       body: "User not awaiting a social launch.",
-      headers,
+      headers: headers(event),
     };
   }
   if (checkoutToken !== callbackToken) {
     return {
       statusCode: 401,
       body: "Unauthorized call to finish social launch.",
-      headers,
+      headers: headers(event),
     };
   }
 
@@ -46,6 +46,6 @@ export const handler = async (
   return {
     statusCode: 200,
     body: JSON.stringify({ success: true }),
-    headers,
+    headers: headers(event),
   };
 };
