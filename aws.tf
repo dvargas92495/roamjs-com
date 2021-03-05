@@ -138,6 +138,7 @@ module "aws-serverless-backend" {
         "twitter-login/post",
         "twitter-search/get",
         "twitter-schedule/post",
+        "twitter-schedule/get",
         "twitter-tweet/post",
         "twitter-upload/post",
         "website-status/get",
