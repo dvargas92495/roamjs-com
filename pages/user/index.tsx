@@ -619,7 +619,7 @@ const Profile = () => {
     const query = new URLSearchParams(window.location.search);
     const tab = query.get("tab");
     if (tab === "static_site") {
-      return 2;
+      return 4;
     }
     return 0;
   }, []);
