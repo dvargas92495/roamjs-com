@@ -129,7 +129,6 @@ runExtension("twitter", () => {
         render({
           parent: span,
           blockUid,
-          tweetUsername: tweetMatch?.[1],
           tweetId: tweetMatch?.[2],
         });
       }

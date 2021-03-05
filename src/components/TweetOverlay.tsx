@@ -141,10 +141,9 @@ const uploadAttachments = async ({
 const TwitterContent: React.FunctionComponent<{
   blockUid: string;
   tweetId?: string;
-  tweetUsername?: string;
   close: () => void;
   setDialogMessage: (m: string) => void;
-}> = ({ close, blockUid, tweetId, tweetUsername, setDialogMessage }) => {
+}> = ({ close, blockUid, tweetId, setDialogMessage }) => {
   const message = useMemo(() => getTreeByBlockUid(blockUid).children, [
     blockUid,
   ]);
@@ -287,7 +286,7 @@ const TwitterContent: React.FunctionComponent<{
     if (success) {
       close();
     }
-  }, [setTweetsSent, close, setError, tweetId, tweetUsername]);
+  }, [setTweetsSent, close, setError, tweetId]);
 
   const socialToken = useMemo(
     () =>
@@ -310,7 +309,7 @@ const TwitterContent: React.FunctionComponent<{
       .post(`${process.env.REST_API_URL}/tweet-schedule`, {
         scheduleDate: scheduleDate.toJSON(),
         token: socialToken,
-        payload: JSON.stringify(message),
+        payload: JSON.stringify({ blocks: message, tweetId }),
         oauth: getSettingValueFromTree({
           tree: getTreeByPageName("roam/js/twitter"),
           key: "oauth",
@@ -337,6 +336,7 @@ const TwitterContent: React.FunctionComponent<{
     socialToken,
     setDialogMessage,
     message,
+    tweetId
   ]);
   return (
     <div style={{ padding: 16, maxWidth: 400 }}>
@@ -387,10 +387,9 @@ const TwitterContent: React.FunctionComponent<{
 const TweetOverlay: React.FunctionComponent<{
   blockUid: string;
   tweetId?: string;
-  tweetUsername?: string;
   childrenRef?: HTMLDivElement;
   unmount: () => void;
-}> = ({ childrenRef, blockUid, unmount, tweetId, tweetUsername }) => {
+}> = ({ childrenRef, blockUid, unmount, tweetId }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const rootRef = useRef(null);
@@ -484,7 +483,6 @@ const TweetOverlay: React.FunctionComponent<{
             blockUid={blockUid}
             tweetId={tweetId}
             close={close}
-            tweetUsername={tweetUsername}
             setDialogMessage={setDialogMessage}
           />
         }
@@ -516,12 +514,10 @@ export const render = ({
   parent,
   blockUid,
   tweetId,
-  tweetUsername,
 }: {
   parent: HTMLSpanElement;
   blockUid: string;
   tweetId?: string;
-  tweetUsername?: string;
 }): void => {
   const childrenRef = parent.closest(".rm-block-main")
     ?.nextElementSibling as HTMLDivElement;
@@ -534,7 +530,6 @@ export const render = ({
     <TweetOverlay
       blockUid={blockUid}
       tweetId={tweetId}
-      tweetUsername={tweetUsername}
       childrenRef={childrenRef}
       unmount={() => ReactDOM.unmountComponentAtNode(parent)}
     />,
