@@ -25,21 +25,13 @@ const EditContainer: React.FunctionComponent<{
       onMouseLeave={disappear}
       style={{ position: "relative", ...containerStyleProps }}
     >
-      {blockId && showEditIcon && (
-        <Button
-          icon="edit"
-          minimal
-          style={{ position: "absolute", top: 8, right: 8, zIndex: 1000 }}
-          onClick={editCallback(blockId)}
-        />
-      )}
-      {refresh && (
-        <Button
-          icon={"refresh"}
-          onClick={refresh}
-          minimal
-          style={{ position: "absolute", top: 8, right: 48, zIndex: 1000 }}
-        />
+      {showEditIcon && (
+        <div style={{ position: "absolute", top: 8, right: 8, zIndex: 1000 }}>
+          {refresh && <Button icon={"refresh"} onClick={refresh} minimal />}
+          {blockId && (
+            <Button icon="edit" minimal onClick={editCallback(blockId)} />
+          )}
+        </div>
       )}
       {children}
     </div>

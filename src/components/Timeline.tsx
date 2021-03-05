@@ -8,7 +8,6 @@ import {
 import "react-vertical-timeline-component/style.min.css";
 import { Button, Checkbox, Icon, InputGroup, Label } from "@blueprintjs/core";
 import {
-  generateBlockUid,
   getTreeByBlockUid,
   getUidsFromId,
   parseRoamDate,
@@ -209,7 +208,7 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
         block: { uid: tagNode.children[0].uid, string: tagSetting },
       });
     } else if (!tagNode) {
-      const uid = generateBlockUid();
+      const uid = window.roamAlphaAPI.util.generateUID();
       window.roamAlphaAPI.createBlock({
         location: { "parent-uid": blockUid, order: 0 },
         block: { string: "tag", uid },
@@ -236,7 +235,7 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
           block: { uid: layoutNode.children[0].uid, string: key.toLowerCase() },
         });
       } else if (!layoutNode) {
-        const uid = generateBlockUid();
+        const uid = window.roamAlphaAPI.util.generateUID();
         window.roamAlphaAPI.createBlock({
           location: { "parent-uid": blockUid, order: 0 },
           block: { string: "layout", uid },

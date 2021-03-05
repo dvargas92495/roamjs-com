@@ -620,6 +620,8 @@ const Profile = () => {
     const tab = query.get("tab");
     if (tab === "static_site") {
       return 4;
+    } else if (tab === "social") {
+      return 3;
     }
     return 0;
   }, []);

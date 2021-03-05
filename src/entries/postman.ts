@@ -1,4 +1,4 @@
-import { generateBlockUid, getTreeByPageName, getUids } from "roam-client";
+import { getTreeByPageName, getUids } from "roam-client";
 import { render } from "../components/PostmanOverlay";
 import {
   createHashtagObserver,
@@ -23,7 +23,7 @@ const createBlock = ({
   parentUid: string;
   order: number;
 }) => {
-  const uid = generateBlockUid();
+  const uid = window.roamAlphaAPI.util.generateUID();
   window.roamAlphaAPI.createBlock({
     location: { "parent-uid": parentUid, order },
     block: { uid, string: node.text },
@@ -34,7 +34,7 @@ const createBlock = ({
 };
 
 const createPage = ({ title, tree }: { title: string; tree: TextNode[] }) => {
-  const uid = generateBlockUid();
+  const uid = window.roamAlphaAPI.util.generateUID();
   window.roamAlphaAPI.createPage({ page: { title, uid } });
   tree.forEach((node, order) => createBlock({ node, parentUid: uid, order }));
 };

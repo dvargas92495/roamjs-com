@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { TreeNode } from "roam-client";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getTreeByPageName, TreeNode } from "roam-client";
 
 export const useArrowKeyDown = <T>({
   results,
@@ -62,3 +62,10 @@ export const getSettingValueFromTree = ({
   const value = node ? node.children[0].text.trim() : defaultValue;
   return value;
 };
+
+export const useSocialToken = (): string => useMemo(
+  () =>
+    getTreeByPageName("roam/js/social").find((t) => /token/i.test(t.text))
+      ?.children?.[0]?.text,
+  []
+)

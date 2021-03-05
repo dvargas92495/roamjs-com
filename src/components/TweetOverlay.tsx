@@ -21,10 +21,9 @@ import {
   getEditTimeByBlockUid,
   getTreeByBlockUid,
   getTreeByPageName,
-  generateBlockUid,
   getUids,
 } from "roam-client";
-import { getSettingValueFromTree } from "./hooks";
+import { getSettingValueFromTree, useSocialToken } from "./hooks";
 import axios from "axios";
 import twitter from "twitter-text";
 import addYears from "date-fns/addYears";
@@ -181,7 +180,7 @@ const TwitterContent: React.FunctionComponent<{
     });
     const sentBlockIsValid =
       sentBlockUid && !!getEditTimeByBlockUid(sentBlockUid);
-    const sourceUid = generateBlockUid();
+    const sourceUid = window.roamAlphaAPI.util.generateUID();
     if (sentBlockIsValid) {
       window.roamAlphaAPI.createBlock({
         location: { "parent-uid": sentBlockUid, order: 0 },
@@ -288,12 +287,7 @@ const TwitterContent: React.FunctionComponent<{
     }
   }, [setTweetsSent, close, setError, tweetId]);
 
-  const socialToken = useMemo(
-    () =>
-      getTreeByPageName("roam/js/social").find((t) => /token/i.test(t.text))
-        ?.children?.[0]?.text,
-    []
-  );
+  const socialToken = useSocialToken();
   const [showSchedule, setShowSchedule] = useState(false);
   const [loading, setLoading] = useState(false);
   const [scheduleDate, setScheduleDate] = useState(new Date());

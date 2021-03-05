@@ -519,26 +519,16 @@ export const renderQueryBuilder = ({
     parent
   );
 
-const defaultWrite = () => true;
 export const DemoQueryBuilder = (): JSX.Element => {
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     window.roamAlphaAPI = {
       q: () => [
         [{ title: "David" }],
         [{ title: "Anthony" }],
         [{ title: "Vargas" }],
       ],
-      pull: () => ({
-        ":block/children": [],
-        ":block/string": "",
-      }),
-      createBlock: defaultWrite,
-      updateBlock: defaultWrite,
-      moveBlock: defaultWrite,
-      deleteBlock: defaultWrite,
-      createPage: defaultWrite,
-      updatePage: defaultWrite,
-      deletePage: defaultWrite,
     };
   }, []);
   return (

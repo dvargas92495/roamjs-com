@@ -18,6 +18,7 @@ import {
 import axios from "axios";
 import { render } from "../components/TweetOverlay";
 import { render as loginRender } from "../components/TwitterLogin";
+import { render as dashboardRender } from "../components/TwitterDashboard";
 
 addStyle(`.roamjs-twitter-count {
   position: relative;
@@ -122,7 +123,9 @@ runExtension("twitter", () => {
         d.setAttribute("data-roamjs-twitter-reply", "true");
         const block = d.closest(".roam-block") as HTMLDivElement;
         const sub = block.getElementsByTagName("sub")[0];
-        const tweetMatch = /\/([a-zA-Z0-9_]{1,15})\/status\/([0-9]*)\??/.exec(sub?.innerText);
+        const tweetMatch = /\/([a-zA-Z0-9_]{1,15})\/status\/([0-9]*)\??/.exec(
+          sub?.innerText
+        );
         const { blockUid } = getUids(block);
         const span = document.createElement("span");
         d.appendChild(span);
@@ -133,5 +136,11 @@ runExtension("twitter", () => {
         });
       }
     },
+  });
+
+  createButtonObserver({
+    shortcut: "twitter dashboard",
+    attribute: "scheduled-tweets",
+    render: dashboardRender,
   });
 });

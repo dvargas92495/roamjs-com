@@ -27,9 +27,12 @@ export const handler = async (
         TableName: "RoamJSSocial",
         Item: {
           uuid: { S: uuid },
+          created: { S: new Date().toJSON() },
           date: { S: scheduleDate },
           oauth: { S: oauth },
           payload: { S: payload },
+          status: { S: "PENDING" },
+          userId: { S: user.id },
         },
       })
       .promise()
