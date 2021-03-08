@@ -8,6 +8,13 @@ custom:
     httpPort: 3003
     lambdaPort: 3004
 functions:
+  article-post:
+    handler: out/article_post.handler
+    events:
+      - http:
+          path: article
+          method: post
+          cors: true
   balance-get:
     handler: out/balance_get.handler
     events:

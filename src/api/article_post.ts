@@ -26,7 +26,7 @@ export const handler = async (
           statusCode: 200,
           body: JSON.stringify(r.data),
           headers: {
-            ...headers,
+            ...headers(event),
             "Content-Type": `application/json;charset=${enc}`,
           },
         };

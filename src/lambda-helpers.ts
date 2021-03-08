@@ -10,8 +10,9 @@ import Mixpanel from "mixpanel";
 
 export const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
-export const mixpanel =
-  process.env.MIXPANEL_TOKEN && Mixpanel.init(process.env.MIXPANEL_TOKEN);
+export const mixpanel = process.env.MIXPANEL_TOKEN
+  ? Mixpanel.init(process.env.MIXPANEL_TOKEN)
+  : { track: () => console.log("track") };
 
 const ALLOWED_ORIGINS = ["https://roamjs.com", "https://roamresearch.com"];
 type Headers = {
