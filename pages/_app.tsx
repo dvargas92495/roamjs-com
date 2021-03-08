@@ -4,7 +4,8 @@ import React from "react";
 import { MDXProvider } from "@mdx-js/react";
 import { Prism } from "react-syntax-highlighter";
 import { ClerkProvider } from "@clerk/clerk-react";
-import '../components/global.css'
+import FeatureFlagProvider from "../components/FeatureFlagProvider";
+import "../components/global.css";
 import "normalize.css/normalize.css";
 import "@blueprintjs/icons/lib/css/blueprint-icons.css";
 import "@blueprintjs/core/lib/css/blueprint.css";
@@ -66,7 +67,9 @@ const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
             img: MdxImage,
           }}
         >
-          <Component {...pageProps} />
+          <FeatureFlagProvider>
+            <Component {...pageProps} />
+          </FeatureFlagProvider>
         </MDXProvider>
       </ThemeProvider>
     </ClerkProvider>

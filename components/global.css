@@ -34,3 +34,7 @@
 .roamjs-services-item {
   padding-left: 0;
 }
+
+.MuiButton-textSecondary:hover {
+  color: #FF842F;
+}

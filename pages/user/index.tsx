@@ -15,6 +15,7 @@ import {
   ExternalLink,
   FormDialog,
   H6,
+  IconButton,
   Items,
   Loading,
   NumberField,
@@ -248,6 +249,25 @@ const domainValidate = (domain: string) => {
   return "";
 };
 
+const CopySocialButton: React.FC<{ socialToken: string }> = ({
+  socialToken,
+}) => {
+  const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef(0);
+  const onClick = useCallback(() => {
+    navigator.clipboard.writeText(socialToken);
+    setCopied(true);
+    timeoutRef.current = window.setTimeout(() => setCopied(false), 5000);
+  }, [socialToken, setCopied, timeoutRef]);
+  useEffect(() => () => window.clearTimeout(timeoutRef.current));
+  return (
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <IconButton size={"small"} icon={"fileCopy"} onClick={onClick} />
+      {copied && <span>Copied!</span>}
+    </div>
+  );
+};
+
 const Social = () => {
   const authenticatedAxiosGet = useAuthenticatedAxiosGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
@@ -266,15 +286,22 @@ const Social = () => {
   return (
     <DataLoader loadAsync={getSocialToken}>
       {socialToken ? (
-        <>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "normal",
+            justifyContent: "space-between",
+          }}
+        >
           <StringField
             value={socialToken}
             disabled
             setValue={setSocialToken}
             label={"RoamJS Social Token"}
-            fullWidth
+            style={{ cursor: "text", flexGrow: 1, paddingRight: 24 }}
           />
-        </>
+          <CopySocialButton socialToken={socialToken} />
+        </div>
       ) : (
         <>
           <Body>
