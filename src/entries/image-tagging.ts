@@ -100,14 +100,17 @@ runExtension("image-tagging", () => {
               e.preventDefault();
             };
             button.style.opacity = "0";
-            img.addEventListener(
-              "mouseenter",
-              () => (button.style.opacity = "1")
-            );
-            img.addEventListener(
-              "mouseleave",
-              () => (button.style.opacity = "0")
-            );
+            const container = img.closest(".rm-inline-img__resize");
+            if (container) {
+              container.addEventListener(
+                "mouseenter",
+                () => (button.style.opacity = "1")
+              );
+              container.addEventListener(
+                "mouseleave",
+                () => (button.style.opacity = "0")
+              );
+            }
 
             const div = document.createElement("div");
             div.style.position = "absolute";

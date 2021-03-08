@@ -3,6 +3,7 @@ import axios from "axios";
 import format from "date-fns/format";
 import React, { useCallback, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import { openBlockInSidebar } from "../entry-helpers";
 import EditContainer from "./EditContainer";
 import { useSocialToken } from "./hooks";
 
@@ -76,19 +77,7 @@ const TwitterDashboard: React.FC<{ blockId: string }> = ({ blockId }) => {
                           <td>
                             <span
                               className="rm-block-ref"
-                              onClick={() =>
-                                window.roamAlphaAPI.ui.rightSidebar
-                                  .getWindows()
-                                  .some((w) => w["block-uid"] === blockUid)
-                                  ? window.roamAlphaAPI.ui.rightSidebar.open()
-                                  : window.roamAlphaAPI.ui.rightSidebar.addWindow(
-                                      {
-                                        window: {
-                                          type: "block",
-                                          "block-uid": blockUid,
-                                        },
-                                      }
-                                    )
+                              onClick={() => openBlockInSidebar(blockUid)
                               }
                             >
                               <span>(({blockUid}))</span>

@@ -20,8 +20,10 @@ import {
   createTagRegex,
   DAILY_NOTE_PAGE_REGEX,
   DAILY_NOTE_TAG_REGEX,
+  DAILY_NOTE_TAG_REGEX_GLOBAL,
   extractTag,
   getRoamUrl,
+  openBlockInSidebar,
   resolveRefs,
 } from "../entry-helpers";
 import MenuItemSelect from "./MenuItemSelect";
@@ -147,14 +149,17 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
             DAILY_NOTE_PAGE_REGEX.test(pageTitle) ||
             DAILY_NOTE_TAG_REGEX.test(text)
         )
-        .map(([text, pageTitle, uid, creationDate]) => {
+        .flatMap(([text, pageTitle, uid, creationDate]) => {
           const { children } = getTreeByBlockUid(uid);
-          return {
-            date: useCreationDate
-              ? toRoamDate(new Date(creationDate))
-              : DAILY_NOTE_PAGE_REGEX.test(pageTitle)
-              ? pageTitle
-              : text.match(DAILY_NOTE_TAG_REGEX)[1],
+          const dates = useCreationDate
+            ? [toRoamDate(new Date(creationDate))]
+            : DAILY_NOTE_PAGE_REGEX.test(pageTitle)
+            ? [pageTitle]
+            : text
+                .match(DAILY_NOTE_TAG_REGEX_GLOBAL)
+                .map((d) => d.match(DAILY_NOTE_TAG_REGEX)?.[1]);
+          return dates.map((date) => ({
+            date,
             uid,
             text: resolveRefs(
               parseInline(
@@ -166,7 +171,7 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
             body: resolveRefs(
               children.reduce((prev, cur) => reduceChildren(prev, cur, 0), "")
             ),
-          };
+          }));
         })
         .sort(({ date: a }, { date: b }) => {
           const bDate = parseRoamDate(b).valueOf();
@@ -344,7 +349,7 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
                   style={{ height: "100%", width: "100%" }}
                 />
               }
-              key={t.uid}
+              key={`${t.uid}-${t.date}`}
             >
               <h3
                 className="vertical-timeline-element-title"
@@ -353,7 +358,17 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
                 }}
               />
               <h4 className="vertical-timeline-element-subtitle">
-                <a href={getRoamUrl(t.uid)}>{t.uid}</a>
+                <a
+                  href={getRoamUrl(t.uid)}
+                  onClick={(e) => {
+                    if (e.shiftKey) {
+                      openBlockInSidebar(t.uid);
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  {t.uid}
+                </a>
               </h4>
               <p
                 className="vertical-timeline-element-body"

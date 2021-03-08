@@ -466,10 +466,11 @@ export const createSortIcon = (
 
   popoverButton.onclick = (e) => {
     if (!popoverOpen) {
-      const target = e.target as HTMLButtonElement;
       transitionContainer.style.transform = `translate3d(${
-        target.offsetLeft <= 240 ? target.offsetLeft : target.offsetLeft - 240
-      }px, ${target.offsetTop + 24}px, 0px)`;
+        popoverButton.offsetLeft <= 240
+          ? popoverButton.offsetLeft
+          : popoverButton.offsetLeft - 240
+      }px, ${popoverButton.offsetTop + 24}px, 0px)`;
       popoverOverlay.className =
         "bp3-overlay bp3-overlay-open bp3-overlay-inline";
       popoverOverlay.appendChild(transitionContainer);
@@ -872,6 +873,10 @@ export const DAILY_NOTE_PAGE_REGEX = /(January|February|March|April|May|June|Jul
 export const DAILY_NOTE_TAG_REGEX = new RegExp(
   `#?\\[\\[(${DAILY_NOTE_PAGE_REGEX.source})\\]\\]`
 );
+export const DAILY_NOTE_TAG_REGEX_GLOBAL = new RegExp(
+  DAILY_NOTE_TAG_REGEX,
+  "g"
+);
 export const TODO_REGEX = /{{\[\[TODO\]\]}}/g;
 export const DONE_REGEX = /{{\[\[DONE\]\]}} ?/g;
 export const createTagRegex = (tag: string): RegExp =>
@@ -885,3 +890,15 @@ export const extractTag = (tag: string): string =>
     : tag.startsWith("#")
     ? tag.substring(1)
     : tag;
+
+export const openBlockInSidebar = (blockUid: string): boolean | void =>
+  window.roamAlphaAPI.ui.rightSidebar
+    .getWindows()
+    .some((w) => w["block-uid"] === blockUid)
+    ? window.roamAlphaAPI.ui.rightSidebar.open()
+    : window.roamAlphaAPI.ui.rightSidebar.addWindow({
+        window: {
+          type: "block",
+          "block-uid": blockUid,
+        },
+      });
