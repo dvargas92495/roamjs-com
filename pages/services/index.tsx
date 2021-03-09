@@ -34,7 +34,7 @@ const ServicesPage: React.FC<PricesProp> = ({ prices }) => {
   const items = metadata
     .filter(({ importedPath }) => !importedPath.endsWith("index.mdx"))
     .map(({ importedPath }) => {
-      const id = /\\(.*)\.tsx$/.exec(importedPath)[1];
+      const id = /\\(.*)\.tsx$/.exec(importedPath)?.[1] || importedPath;
       const title = id
         .split("-")
         .map((s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
