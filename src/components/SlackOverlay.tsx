@@ -1,4 +1,12 @@
-import { Button, Icon, Popover, Spinner, Text } from "@blueprintjs/core";
+import {
+  Button,
+  Checkbox,
+  Icon,
+  Label,
+  Popover,
+  Spinner,
+  Text,
+} from "@blueprintjs/core";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import Slack from "../assets/Slack_Mark.svg";
@@ -81,6 +89,12 @@ const SlackContent: React.FunctionComponent<
   const message = getTextByBlockUid(blockUid);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [asUser, setAsUser] = useState(false);
+  const onAsUserChanged = useCallback(
+    (e: React.FormEvent<HTMLInputElement>) =>
+      setAsUser((e.target as HTMLInputElement).checked),
+    [setAsUser]
+  );
   const onClick = useCallback(() => {
     setLoading(true);
     setError("");
@@ -188,10 +202,14 @@ const SlackContent: React.FunctionComponent<
         setError(error || message);
         setLoading(false);
       });
-  }, [setLoading, close, tag, setError]);
+  }, [setLoading, close, tag, setError, asUser]);
   return (
     <div style={{ padding: 16 }}>
       <Button text={`Send to ${tag}`} onClick={onClick} />
+      <Label>
+        As User
+        <Checkbox checked={asUser} onChange={onAsUserChanged} />
+      </Label>
       {loading && <Spinner />}
       {error && (
         <div style={{ color: "red", whiteSpace: "pre-line" }}>
