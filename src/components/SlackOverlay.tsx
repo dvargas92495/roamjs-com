@@ -2,7 +2,6 @@ import {
   Button,
   Checkbox,
   Icon,
-  Label,
   Popover,
   Spinner,
   Text,
@@ -205,11 +204,12 @@ const SlackContent: React.FunctionComponent<
   }, [setLoading, close, tag, setError, asUser]);
   return (
     <div style={{ padding: 16 }}>
-      <Button text={`Send to ${tag}`} onClick={onClick} />
-      <Label>
-        As User
-        <Checkbox checked={asUser} onChange={onAsUserChanged} />
-      </Label>
+      <Button
+        text={`Send to ${tag}`}
+        onClick={onClick}
+        style={{ marginBottom: 16 }}
+      />
+      <Checkbox label={"As User"} checked={asUser} onChange={onAsUserChanged} />
       {loading && <Spinner />}
       {error && (
         <div style={{ color: "red", whiteSpace: "pre-line" }}>
