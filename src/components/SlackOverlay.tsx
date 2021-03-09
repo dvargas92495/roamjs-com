@@ -2,7 +2,6 @@ import {
   Button,
   Checkbox,
   Icon,
-  Label,
   Popover,
   Spinner,
   Text,
@@ -80,6 +79,15 @@ export const getChannelFormat = (tree: TreeNode[]): string =>
 export const getAliases = (tree: TreeNode[]): { [key: string]: string } =>
   getSettingMapFromTree({ key: "aliases", tree });
 
+const getCurrentUserEmail = () => {
+  const globalAppState = localStorage.getItem("globalAppState") || '["","",[]]';
+  const userArray = JSON.parse(globalAppState)[2] as string[];
+  const emailIndex = userArray.findIndex((s) => s === "~:email");
+  if (emailIndex > 0) {
+    return userArray[emailIndex + 1];
+  }
+  return "";
+};
 const web = new WebClient();
 delete web["axios"].defaults.headers["User-Agent"];
 
@@ -144,6 +152,7 @@ const SlackContent: React.FunctionComponent<
           (c) => c.name.toUpperCase() === aliasedName || channelFindFunction(c)
         )?.id;
         const channel = memberId || channelId;
+        const currentUserEmail = getCurrentUserEmail();
         if (channel) {
           return web.chat
             .postMessage({
@@ -187,6 +196,13 @@ const SlackContent: React.FunctionComponent<
                 )
                 .replace(aliasRegex, (_, alias, url) => `<${url}|${alias}>`),
               token,
+              ...(asUser
+                ? {
+                    username: members.find(
+                      (m) => m.profile.email === currentUserEmail
+                    )?.name,
+                  }
+                : {}),
             })
             .then(close);
         } else {
@@ -205,11 +221,12 @@ const SlackContent: React.FunctionComponent<
   }, [setLoading, close, tag, setError, asUser]);
   return (
     <div style={{ padding: 16 }}>
-      <Button text={`Send to ${tag}`} onClick={onClick} />
-      <Label>
-        As User
-        <Checkbox checked={asUser} onChange={onAsUserChanged} />
-      </Label>
+      <Button
+        text={`Send to ${tag}`}
+        onClick={onClick}
+        style={{ marginBottom: 16 }}
+      />
+      <Checkbox label={"As User"} checked={asUser} onChange={onAsUserChanged} />
       {loading && <Spinner />}
       {error && (
         <div style={{ color: "red", whiteSpace: "pre-line" }}>
