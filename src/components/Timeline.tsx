@@ -22,6 +22,7 @@ import {
   DAILY_NOTE_TAG_REGEX,
   DAILY_NOTE_TAG_REGEX_GLOBAL,
   extractTag,
+  getPageUidByPageTitle,
   getRoamUrl,
   openBlockInSidebar,
   resolveRefs,
@@ -30,9 +31,14 @@ import MenuItemSelect from "./MenuItemSelect";
 
 type TimelineProps = { blockId: string };
 
+const context = {
+  pagesToHrefs: (page: string) => getRoamUrl(getPageUidByPageTitle(page)),
+};
+
 const reduceChildren = (prev: string, cur: TreeNode, l: number): string =>
   `${prev}<span>${"".padEnd(l * 2, " ")}</span>${parseInline(
-    cur.text
+    cur.text,
+    context
   )}<br/>${cur.children.reduce((p, c) => reduceChildren(p, c, l + 1), "")}`;
 
 const getTag = (blockUid: string) => {
@@ -165,7 +171,8 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
               parseInline(
                 text
                   .replace(createTagRegex(tag), (a) => (useHideTags ? "" : a))
-                  .replace(DAILY_NOTE_TAG_REGEX, (a) => (useHideTags ? "" : a))
+                  .replace(DAILY_NOTE_TAG_REGEX, (a) => (useHideTags ? "" : a)),
+                context
               )
             ).trim(),
             body: resolveRefs(
