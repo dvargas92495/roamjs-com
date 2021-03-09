@@ -1,7 +1,14 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { flossGet } from "../lambda-helpers";
+import axios from "axios";
+import { headers } from "../lambda-helpers";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> =>
-  flossGet({ event, path: "stripe-products?project=RoamJS" });
+  axios
+    .get(`${process.env.FLOSS_API_URL}/stripe-products?project=RoamJS`)
+    .then((r) => ({
+      statusCode: 200,
+      body: JSON.stringify(r.data),
+      headers: headers(event),
+    }));

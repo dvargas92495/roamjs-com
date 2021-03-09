@@ -15,7 +15,6 @@ import {
   ExternalLink,
   FormDialog,
   H6,
-  IconButton,
   Items,
   Loading,
   NumberField,
@@ -247,80 +246,6 @@ const domainValidate = (domain: string) => {
     return "Invalid domain. Try a .com!";
   }
   return "";
-};
-
-const CopySocialButton: React.FC<{ socialToken: string }> = ({
-  socialToken,
-}) => {
-  const [copied, setCopied] = useState(false);
-  const timeoutRef = useRef(0);
-  const onClick = useCallback(() => {
-    navigator.clipboard.writeText(socialToken);
-    setCopied(true);
-    timeoutRef.current = window.setTimeout(() => setCopied(false), 5000);
-  }, [socialToken, setCopied, timeoutRef]);
-  useEffect(() => () => window.clearTimeout(timeoutRef.current));
-  return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <IconButton size={"small"} icon={"fileCopy"} onClick={onClick} />
-      {copied && <span>Copied!</span>}
-    </div>
-  );
-};
-
-const Social = () => {
-  const authenticatedAxiosGet = useAuthenticatedAxiosGet();
-  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const [socialToken, setSocialToken] = useState("");
-  const getSocialToken = useCallback(
-    () =>
-      authenticatedAxiosGet("social-token").then((r) =>
-        setSocialToken(r.data.token)
-      ),
-    [authenticatedAxiosGet]
-  );
-  const launchSocial = useCallback(
-    () => authenticatedAxiosPost("launch-social", {}).then(handleCheckout),
-    [authenticatedAxiosPost]
-  );
-  return (
-    <DataLoader loadAsync={getSocialToken}>
-      {socialToken ? (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "normal",
-            justifyContent: "space-between",
-          }}
-        >
-          <StringField
-            value={socialToken}
-            disabled
-            setValue={setSocialToken}
-            label={"RoamJS Social Token"}
-            style={{ cursor: "text", flexGrow: 1, paddingRight: 24 }}
-          />
-          <CopySocialButton socialToken={socialToken} />
-        </div>
-      ) : (
-        <>
-          <Body>
-            You are not subscribed to RoamJS Social. Click the button below to
-            gain access to RoamJS Social automations!
-          </Body>
-          <ConfirmationDialog
-            action={launchSocial}
-            buttonText={"Generate Token"}
-            content={
-              "Click submit below to generate a RoamJS Social token! This service costs $3/month."
-            }
-            onSuccess={getSocialToken}
-            title={"Subscribe to RoamJS Social"}
-          />
-        </>
-      )}
-    </DataLoader>
-  );
 };
 
 const Website = () => {
@@ -670,9 +595,6 @@ const Profile = () => {
           </Card>
           <Card title={"Sponsorships"}>
             <Funding />
-          </Card>
-          <Card title={"Social"}>
-            <Social />
           </Card>
           <Card title={"Static Site"}>
             <Website />

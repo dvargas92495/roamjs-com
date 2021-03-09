@@ -16,7 +16,7 @@ const FeatureFlagProvider: React.FC = ({ children }) => {
   const [flag, setFlag] = useState(false);
   const keypressListener = useCallback(
     (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.code === "Digit1") {
+      if (e.ctrlKey && e.code === "KeyQ") {
         setFlag(!e.shiftKey);
         localStorage.setItem(LOCAL_STORAGE_KEY, `${!e.shiftKey}`);
         e.preventDefault();

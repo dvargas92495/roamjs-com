@@ -49,3 +49,10 @@ declare module "*.ne" {
   const Rules: Nearley.CompiledRules;
   export default Rules;
 }
+
+declare module "../pages/services/*" {
+  const blob: {
+    _importMeta: { absolutePath: string; importedPath: string }[];
+  };
+  export default blob;
+}

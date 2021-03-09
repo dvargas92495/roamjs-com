@@ -1,90 +1,98 @@
-import { H1, H2, H4, H6, Items, Tooltip } from "@dvargas92495/ui";
-import React from "react";
-import Link from "next/link";
+import { Body, Breadcrumbs, Button, H1, H4, Subtitle } from "@dvargas92495/ui";
+import React, { useCallback, useState } from "react";
+import { useRouter } from "next/router";
 import StandardLayout from "./StandardLayout";
-import { frontMatter as frontMatters } from "../pages/services/*.mdx";
-import { FrontMatter } from "./ExtensionLayout";
+import { ServicePageProps } from "./ServicePageCommon";
+import { SignedIn, SignedOut } from "@clerk/clerk-react";
+import marked from "roam-marked";
 
-const INDEX_LABEL = "Overview";
-
-export const pathToId = (f: string): string =>
-  f.substring("services\\".length, f.length - ".mdx".length);
-
-export const pathToLabel = (f: string): string =>
-  f.endsWith("index.mdx") ? INDEX_LABEL : pathToId(f).replace(/-/g, " ");
-
-const Title = React.forwardRef<
-  HTMLHeadingElement,
-  { title: string; href: string }
->(({ title, href, ...props }, ref) => (
-  <Link href={href}>
-    <H6
-      style={{
-        margin: 0,
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-      }}
-      ref={ref}
-      {...props}
-    >
-      {title}
-    </H6>
-  </Link>
-));
-
-const ServiceLayout: React.FunctionComponent<{
-  frontMatter: FrontMatter;
-}> = ({ children, frontMatter }) => {
-  const items = frontMatters
-    .filter((f) => !f.__resourcePath.endsWith("index.mdx"))
-    .map((f) => {
-      const title = pathToLabel(f.__resourcePath)
-        .split(" ")
-        .map((s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
-        .join(" ");
-      const href = `/${f.__resourcePath.replace(/\.mdx$/, "")}`;
-      return {
-        primary: (
-          <Tooltip title={title}>
-            <span>
-              <Title title={title} href={href} />
-            </span>
-          </Tooltip>
-        ),
-        avatar: (
-          <>
-            <span
-              style={{
-                display: "inline-block",
-                verticalAlign: "middle",
-                height: "100%",
-              }}
-            />
-            <img
-              src={`/thumbnails/${pathToId(f.__resourcePath)}.png`}
-              width={32}
-              height={32}
-              style={{ verticalAlign: "middle" }}
-            />
-          </>
-        ),
-        action: <H6 color={"primary"}>${f.price}</H6>,
-        key: pathToId(f.__resourcePath),
-      };
-    });
-  console.log(frontMatters)
+const ServiceLayout: React.FunctionComponent<
+  {
+    development?: boolean;
+    overview: string;
+  } & ServicePageProps
+> = ({ children, development, description, price, image, overview }) => {
+  const router = useRouter();
+  const id = /^\/services\/(.*)$/.exec(router.pathname)[1].replace(/-/g, " ");
+  const [started, setStarted] = useState(false);
+  const start = useCallback(() => setStarted(true), [setStarted]);
   return (
     <StandardLayout>
-      {frontMatter.development && <H2>UNDER DEVELOPMENT</H2>}
-      <H1>{pathToLabel(frontMatter.__resourcePath).toUpperCase()}</H1>
-      {children}
-      <H4 style={{ textAlign: "center" }}>All Services</H4>
-      <Items
-        items={items}
-        listClassName={"roamjs-services-list"}
-        itemClassName={"roamjs-services-item"}
+      <Breadcrumbs
+        page={`${id.toUpperCase()}${development ? " (UNDER DEVELOPMENT)" : ""}`}
+        links={[
+          {
+            text: "SERVICES",
+            href: "/services",
+          },
+        ]}
       />
+      {started ? (
+        <SignedIn>
+          <div style={{ marginTop: 32 }}>{children}</div>
+        </SignedIn>
+      ) : (
+        <>
+          <div style={{ display: "flex" }}>
+            <div style={{ width: "50%" }}>
+              <H1>
+                {id
+                  .split(" ")
+                  .map(
+                    (s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`
+                  )
+                  .join(" ")}
+              </H1>
+              <Subtitle>{description}</Subtitle>
+              <div style={{ marginBottom: 16 }} />
+              <b>${price}/month</b>
+              <div>
+                <SignedIn>
+                  <Button
+                    color={"primary"}
+                    variant={"contained"}
+                    onClick={start}
+                  >
+                    Start Now
+                  </Button>
+                </SignedIn>
+                <SignedOut>
+                  <Button
+                    color={"primary"}
+                    variant={"contained"}
+                    href={"/login"}
+                  >
+                    Start Now
+                  </Button>
+                </SignedOut>
+              </div>
+            </div>
+            <div style={{ width: "50%", padding: "0 32px" }}>
+              <span
+                style={{
+                  display: "inline-block",
+                  verticalAlign: "middle",
+                  height: "100%",
+                }}
+              />
+              <img
+                src={image}
+                style={{
+                  verticalAlign: "middle",
+                  width: "100%",
+                  boxShadow: "0px 3px 14px #00000040",
+                  borderRadius: 8,
+                }}
+              />
+            </div>
+          </div>
+          <hr style={{ margin: "32px 0" }} />
+          <H4>Overview</H4>
+          <Body>
+            <div dangerouslySetInnerHTML={{ __html: marked(overview) }} />
+          </Body>
+        </>
+      )}
     </StandardLayout>
   );
 };
