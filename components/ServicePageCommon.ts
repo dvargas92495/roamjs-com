@@ -6,6 +6,7 @@ export type ServicePageProps = {
   description: string;
   price: number;
   image: string;
+  id: string;
 };
 
 export const findById = (id: string) => ({ name }: { name: string }): boolean =>
@@ -22,8 +23,14 @@ export const getStaticPropsForPage: (
         description: p.description,
         price: p.prices[0].price / 100,
         image: p.image || `/thumbnails/${id}.png`,
+        id,
       },
     }))
     .catch(() => ({
-      props: { description: "Failed to load description", price: 0, image: "" },
+      props: {
+        description: "Failed to load description",
+        price: 0,
+        image: "",
+        id,
+      },
     }));

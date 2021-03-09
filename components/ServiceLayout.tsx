@@ -1,6 +1,5 @@
 import { Body, Breadcrumbs, Button, H1, H4, Subtitle } from "@dvargas92495/ui";
 import React, { useCallback, useState } from "react";
-import { useRouter } from "next/router";
 import StandardLayout from "./StandardLayout";
 import { ServicePageProps } from "./ServicePageCommon";
 import { SignedIn, SignedOut } from "@clerk/clerk-react";
@@ -11,15 +10,16 @@ const ServiceLayout: React.FunctionComponent<
     development?: boolean;
     overview: string;
   } & ServicePageProps
-> = ({ children, development, description, price, image, overview }) => {
-  const router = useRouter();
-  const id = /^\/services\/(.*)$/.exec(router.pathname)[1].replace(/-/g, " ");
+> = ({ children, development, description, price, image, overview, id }) => {
+  const title = id.replace(/-/g, " ");
   const [started, setStarted] = useState(false);
   const start = useCallback(() => setStarted(true), [setStarted]);
   return (
     <StandardLayout>
       <Breadcrumbs
-        page={`${id.toUpperCase()}${development ? " (UNDER DEVELOPMENT)" : ""}`}
+        page={`${title.toUpperCase()}${
+          development ? " (UNDER DEVELOPMENT)" : ""
+        }`}
         links={[
           {
             text: "SERVICES",
@@ -36,7 +36,7 @@ const ServiceLayout: React.FunctionComponent<
           <div style={{ display: "flex" }}>
             <div style={{ width: "50%" }}>
               <H1>
-                {id
+                {title
                   .split(" ")
                   .map(
                     (s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`
