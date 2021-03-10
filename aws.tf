@@ -128,9 +128,9 @@ module "aws-serverless-backend" {
         "products/get",
         "queue-issues/get",
         "slack-url/post",
+        "shutdown-social",
         "shutdown-website/post",
         "social-schedules/get",
-        "social-token/get",
         "sponsorships/get",
         "subscriptions/get",
         "subscribe-sponsorship/post",
@@ -144,7 +144,9 @@ module "aws-serverless-backend" {
         "website-status/get",
     ]
     cors = [
+      "launch-social",
       "launch-website",
+      "shutdown-social",
       "shutdown-website"
     ]
     tags = {
