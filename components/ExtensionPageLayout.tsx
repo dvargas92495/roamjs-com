@@ -15,7 +15,12 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import DemoVideo from "./DemoVideo";
 import Loom from "./Loom";
-import { FrontMatter, pathToId, pathToLabel, prodItems } from "./ExtensionLayout";
+import {
+  FrontMatter,
+  pathToId,
+  pathToLabel,
+  prodItems,
+} from "./ExtensionLayout";
 import { getSingleCodeContent, useCopyCode } from "./hooks";
 import StandardLayout from "./StandardLayout";
 import GithubSponsor from "./GithubSponsor";
@@ -54,7 +59,7 @@ const ExtensionPageLayout: React.FunctionComponent<{
   const randomItems = useMemo(
     () =>
       prodItems
-        .filter(a => a.title !== label)
+        .filter((a) => a.title !== label)
         .map((a) => ({ sort: Math.random(), value: a }))
         .sort((a, b) => a.sort - b.sort)
         .map((a) => a.value),
@@ -74,10 +79,6 @@ const ExtensionPageLayout: React.FunctionComponent<{
       <Breadcrumbs
         page={label}
         links={[
-          {
-            text: "HOME",
-            href: "/docs",
-          },
           {
             text: "EXTENSIONS",
             href: "/docs",

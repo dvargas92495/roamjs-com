@@ -127,13 +127,6 @@ functions:
           path: social-schedules
           method: get
           cors: true
-  social-token-get:
-    handler: out/social-token_get.handler
-    events:
-      - http:
-          path: social-token
-          method: get
-          cors: true
   sponsorships-get:
     handler: out/sponsorships_get.handler
     events:

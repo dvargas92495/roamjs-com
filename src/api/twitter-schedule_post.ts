@@ -12,7 +12,8 @@ export const handler = async (
   return users.getUserList().then((users) => {
     const user = users.find(
       (user) =>
-        (user.privateMetadata as { socialToken: string }).socialToken === token
+        (user.privateMetadata as { social: { token: string } }).social.token ===
+        token
     );
     if (!user) {
       return {

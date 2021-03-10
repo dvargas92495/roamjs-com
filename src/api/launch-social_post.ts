@@ -31,15 +31,6 @@ export const handler = async (
     );
 
   const checkoutToken = v4();
-  const privateMetadata = JSON.stringify({
-    ...user.privateMetadata,
-    checkoutToken,
-  });
-  await users.updateUser(user.id, {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
-    privateMetadata,
-  });
 
   const email = user.emailAddresses.find(
     (e) => e.id === user.primaryEmailAddressId
@@ -70,11 +61,21 @@ export const handler = async (
     });
   if (!active) {
     if (id) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ sessionId: id }),
-        headers: headers(event),
-      };
+      const privateMetadata = JSON.stringify({
+        ...user.privateMetadata,
+        checkoutToken,
+      });
+      return users
+        .updateUser(user.id, {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
+          privateMetadata,
+        })
+        .then(() => ({
+          statusCode: 200,
+          body: JSON.stringify({ sessionId: id }),
+          headers: headers(event),
+        }));
     } else {
       return {
         statusCode: 500,
@@ -88,9 +89,11 @@ export const handler = async (
   await users.updateUser(user.id, {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
-    privateMetadata: JSON.stringify({
-      ...user.privateMetadata,
-      socialToken: randomstring.generate(),
+    publicMetadata: JSON.stringify({
+      ...user.publicMetadata,
+      social: {
+        token: randomstring.generate(),
+      },
     }),
   });
 

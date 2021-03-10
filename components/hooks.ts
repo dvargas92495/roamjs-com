@@ -80,7 +80,7 @@ export const useIsMobile = (): boolean => {
   return mobile;
 };
 
-export const useAuthenticatedAxiosGet = (): ((
+export const useAuthenticatedAxiosGet = <T = unknown>(): ((
   path: string
 ) => Promise<AxiosResponse>) => {
   const { session } = useClerk();
@@ -88,7 +88,7 @@ export const useAuthenticatedAxiosGet = (): ((
     (path: string) => {
       const url = new URL(`${API_URL}/${path}`);
       url.searchParams.set("_clerk_session_id", session.id);
-      return axios.get(url.toString(), {
+      return axios.get<T>(url.toString(), {
         withCredentials: true,
       });
     },

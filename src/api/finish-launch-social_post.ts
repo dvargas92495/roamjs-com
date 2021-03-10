@@ -1,7 +1,7 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { headers } from "../lambda-helpers";
-import randomstring from 'randomstring';
+import randomstring from "randomstring";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -37,9 +37,13 @@ export const handler = async (
   await users.updateUser(userId, {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
-    privateMetadata: JSON.stringify({
-      ...rest,
-      socialToken: randomstring.generate(),
+    privateMetadata: JSON.stringify(rest),
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
+    publicMetadata: JSON.stringify({
+      social: {
+        token: randomstring.generate(),
+      },
     }),
   });
 
