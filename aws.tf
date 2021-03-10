@@ -130,6 +130,7 @@ module "aws-serverless-backend" {
         "slack-url/post",
         "shutdown-website/post",
         "social-schedules/get",
+        "social-token/get",
         "sponsorships/get",
         "subscriptions/get",
         "subscribe-sponsorship/post",
@@ -143,6 +144,7 @@ module "aws-serverless-backend" {
         "website-status/get",
     ]
     cors = [
+      "launch-social",
       "launch-website",
       "shutdown-website"
     ]
