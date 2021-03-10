@@ -85,7 +85,9 @@ const ServiceLayout = ({
   const [started, setStarted] = useState(false);
   const router = useRouter();
   const start = useCallback(() => setStarted(true), [setStarted]);
-  const login = useCallback(() => router.push("/login"), [router]);
+  const login = useCallback(() => router.push(`/login?service=${id}`), [
+    router,
+  ]);
   const SplashLayout: React.FC<{ StartNowButton: React.ReactNode }> = ({
     StartNowButton,
   }) => (
@@ -141,7 +143,9 @@ const ServiceLayout = ({
             <div style={{ marginTop: 32 }}>{children}</div>
           ) : (
             <SplashLayout
-              StartNowButton={<LaunchButton start={start} id={id} price={price} />}
+              StartNowButton={
+                <LaunchButton start={start} id={id} price={price} />
+              }
             />
           )}
         </CheckSubscription>
