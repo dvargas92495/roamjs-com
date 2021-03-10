@@ -28,8 +28,7 @@ website configuration.`}
     >
       <H4>Setup</H4>
       <Body>
-        Make sure you have a RoamJS account by [signing up here](/signup). On
-        your Roam graph, you will need to give the `support@roamjs.com` account
+        On your Roam graph, you will need to give the `support@roamjs.com` account
         **read-only access** to your graph. RoamJS promises to not use this data
         outside of the purposes of deploying the configured content to your
         public website. To grant access, first click the `...` menu on the top
