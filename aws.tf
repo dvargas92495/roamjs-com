@@ -143,7 +143,6 @@ module "aws-serverless-backend" {
         "website-status/get",
     ]
     cors = [
-      "launch-social",
       "launch-website",
       "shutdown-website"
     ]
