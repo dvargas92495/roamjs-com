@@ -65,6 +65,8 @@ const getStage = (): StageValue => {
   const tree = getTreeByPageName("roam/js/static-site");
   if (!tree.find((t) => /token/i.test(t.text))?.children?.[0]?.text) {
     return "RequestToken";
+  } else if (!getSettingsByEmail("support@roamjs.com")) {
+    return "RequestUser";
   } else if (!tree.some((t) => /domain/i.test(t.text))) {
     return "RequestDomain";
   } else if (!tree.some((t) => /index/i.test(t.text))) {

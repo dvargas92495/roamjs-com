@@ -61,7 +61,6 @@ const StaticSitePage: React.FC<ServicePageProps> = (props) => {
         started, you can copy the configuration that generated
         https://roamjsdemo.com from my graph by clicking the button below.
       </Body>
-      <CopyStaticSiteConfig />
       <H4>Per Page Configuration</H4>
       <Body>
         You could ignore specific blocks in pages that are included. Nest
