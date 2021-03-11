@@ -9,11 +9,11 @@ export const cleanCode = (text: string): string =>
 
 export const getSingleCodeContent = (
   id: string
-): string => `var existing = document.getElementById("${id}");
+): string => `var existing = document.getElementById("roamjs-${id}");
 if (!existing) {
   var extension = document.createElement("script");
   extension.src = "https://roamjs.com/${id}.js";
-  extension.id = "${id}";
+  extension.id = "roamjs-${id}";
   extension.async = true;
   extension.type = "text/javascript";
   document.getElementsByTagName("head")[0].appendChild(extension);
@@ -66,6 +66,7 @@ export const useCopyCode = (
       document.execCommand("copy");
       document.removeEventListener("copy", copyCode(items));
       setCopied(true);
+      setTimeout(() => setCopied(false), 1000);
     },
     [setCopied]
   );

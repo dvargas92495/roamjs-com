@@ -16,6 +16,14 @@ export const handler = async (
       headers: headers(event),
     };
   }
+  const { service } = JSON.parse(event.body || "{}") as { service: string };
+  const productName = `roamjs ${service.split("-").slice(-1)}`;
+  const serviceCamelCase = service
+    .split("-")
+    .map((s, i) =>
+      i == 0 ? s : `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`
+    )
+    .join("");
 
   const priceId = await axios
     .get<{ products: { name: string; prices: { id: string }[] }[] }>(
@@ -23,7 +31,8 @@ export const handler = async (
     )
     .then(
       (r) =>
-        r.data.products.find((p) => p.name === "RoamJS Social")?.prices?.[0]?.id
+        r.data.products.find((p) => p.name.toLowerCase() === productName)
+          ?.prices?.[0]?.id
     );
 
   const checkoutToken = v4();
@@ -36,11 +45,12 @@ export const handler = async (
       `${process.env.FLOSS_API_URL}/stripe-subscribe`,
       {
         priceId,
-        successParams: { tab: "social" },
+        successPath: `services/${service}`,
         metadata: {
+          service: serviceCamelCase,
           userId: user.id,
           callbackToken: checkoutToken,
-          url: `${process.env.API_URL}/finish-launch-social`,
+          url: `${process.env.API_URL}/finish-start-service`,
         },
       },
       {
@@ -87,7 +97,7 @@ export const handler = async (
     // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
     publicMetadata: JSON.stringify({
       ...user.publicMetadata,
-      social: {
+      [serviceCamelCase]: {
         token: randomstring.generate(),
       },
     }),

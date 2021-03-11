@@ -9,32 +9,39 @@ import {
 
 const StaticSitePage: React.FC<ServicePageProps> = (props) => {
   return (
-    <ServiceLayout
-      development
-      {...props}
-      overview={`Roam is a powerful CMS (content management system), not just for
-personal knowledge management but for public information as well. There
-are a couple of problems though with using Roam itself as the
-public-facing display of that information:
-- Initial load time is brutally slow
-- Most of the data is rendered client side, so it performs poorly on search engines
-- The user interface is foreign to most consumers of the public information, particularly if they've never seen Roam.
-
-This RoamJS Service allows you to continue using a Roam graph with all
-of its wonderful networking features as the CMS of your own public
-website. Launching a RoamJS static site will download the content of
-your Roam graph and manage a website for you based on your unique
-website configuration.`}
-    >
-      <H4>Setup</H4>
+    <ServiceLayout development {...props}>
       <Body>
-        On your Roam graph, you will need to give the `support@roamjs.com` account
-        **read-only access** to your graph. RoamJS promises to not use this data
-        outside of the purposes of deploying the configured content to your
-        public website. To grant access, first click the `...` menu on the top
-        right of your graph: ![](/images/static-site-share.png) Then, when this
-        modal appears, add `support@roamjs.com` to the **Readers** text box on
-        the right: ![](/images/static-site-permission.png) Then, click enter.
+        Roam is a powerful CMS (content management system), not just for
+        personal knowledge management but for public information as well. There
+        are a couple of problems though with using Roam itself as the
+        public-facing display of that information:
+      </Body>
+      <ul>
+        <li>Initial load time is brutally slow</li>
+        <li>
+          Most of the data is rendered client side, so it performs poorly on
+          search engines
+        </li>
+        <li>
+          The user interface is foreign to most consumers of the public
+          information, particularly if they've never seen Roam.
+        </li>
+      </ul>
+      <Body>
+        This RoamJS Service allows you to continue using a Roam graph with all
+        of its wonderful networking features as the CMS of your own public
+        website. Launching a RoamJS static site will download the content of
+        your Roam graph and manage a website for you based on your unique
+        website configuration.
+      </Body>
+      <Body>
+        On your Roam graph, you will need to give the `support@roamjs.com`
+        account **read-only access** to your graph. RoamJS promises to not use
+        this data outside of the purposes of deploying the configured content to
+        your public website. To grant access, first click the `...` menu on the
+        top right of your graph: ![](/images/static-site-share.png) Then, when
+        this modal appears, add `support@roamjs.com` to the **Readers** text box
+        on the right: ![](/images/static-site-permission.png) Then, click enter.
         You will then see the email added to the list below the text box:
         ![](/images/static-site-granted.png) Next, set up the configuration page
         with the name `roam/js/static-site`. By default, the Service will query

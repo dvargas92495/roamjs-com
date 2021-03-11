@@ -1,19 +1,11 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
-} from "react";
+import React, { useCallback, useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
 import {
   Body,
   Button,
   Card,
-  ConfirmationDialog,
   DataLoader,
   ExternalLink,
-  FormDialog,
   H6,
   Items,
   Loading,
@@ -28,7 +20,7 @@ import {
   useAuthenticatedAxiosPost,
 } from "../../components/hooks";
 import Link from "next/link";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import { FLOSS_API_URL, stripe } from "../../components/constants";
 import { useUser, SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
@@ -36,14 +28,6 @@ import RedirectToLogin from "../../components/RedirectToLogin";
 const UserValue: React.FunctionComponent = ({ children }) => (
   <span style={{ paddingLeft: 64, display: "block" }}>{children}</span>
 );
-
-const handleCheckout = (r: AxiosResponse) =>
-  r.data.sessionId &&
-  stripe.then((s) =>
-    s.redirectToCheckout({
-      sessionId: r.data.sessionId,
-    })
-  );
 
 const useEditableSetting = ({
   name,
@@ -238,194 +222,6 @@ const Billing = () => {
   );
 };
 
-const isWebsiteReady = (w: { status: string; deploys: { status: string }[] }) =>
-  w.status === "LIVE" && w.deploys.length && w.deploys[0].status === "SUCCESS";
-
-const domainValidate = (domain: string) => {
-  if (!domain) {
-    return "Invalid domain. Try a .com!";
-  }
-  return "";
-};
-
-const Website = () => {
-  const user = useUser();
-  const authenticatedAxiosGet = useAuthenticatedAxiosGet();
-  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const [graph, setGraph] = useState<string>();
-  const [status, setStatus] = useState<string>();
-  const [statusProps, setStatusProps] = useState<string>();
-  const [deploys, setDeploys] = useState<
-    { status: string; date: string; uuid: string }[]
-  >([]);
-  const [subscriptionId, setSubscriptionId] = useState("");
-  const [priceId, setPriceId] = useState("");
-  const timeoutRef = useRef(0);
-  const getWebsite = useCallback(
-    () =>
-      authenticatedAxiosGet("website-status").then((r) => {
-        if (r.data) {
-          setGraph(r.data.graph);
-          setStatusProps(r.data.statusProps);
-          setStatus(r.data.status);
-          setDeploys(r.data.deploys);
-          if (!isWebsiteReady(r.data)) {
-            timeoutRef.current = window.setTimeout(getWebsite, 5000);
-          }
-        } else {
-          setGraph("");
-          setStatusProps("{}");
-          setStatus("");
-          setDeploys([]);
-        }
-      }),
-    [setGraph, setStatus, setDeploys, timeoutRef, setStatusProps]
-  );
-  const launchWebsite = useCallback(
-    (body) =>
-      authenticatedAxiosPost("launch-website", {
-        ...body,
-        priceId,
-      }).then(handleCheckout),
-    [authenticatedAxiosPost, priceId, user]
-  );
-  const [loading, setLoading] = useState(false);
-  const manualDeploy = useCallback(() => {
-    setLoading(true);
-    authenticatedAxiosPost("deploy", {})
-      .then(getWebsite)
-      .finally(() => setLoading(false));
-  }, [authenticatedAxiosPost, getWebsite, graph]);
-  const shutdownWebsite = useCallback(
-    () =>
-      authenticatedAxiosPost("shutdown-website", {
-        graph,
-        subscriptionId,
-      }).then(() => setStatus("SHUTTING DOWN")),
-    [authenticatedAxiosPost, setStatus, graph, subscriptionId]
-  );
-  useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
-  useEffect(() => {
-    authenticatedAxiosGet(
-      `is-subscribed?product=${encodeURI("RoamJS Site")}`
-    ).then((r) => setSubscriptionId(r.data.subscriptionId));
-  }, [authenticatedAxiosGet]);
-  useEffect(() => {
-    authenticatedAxiosGet("products")
-      .then((r) =>
-        r.data.products.find((p: { name: string }) => p.name === "RoamJS Site")
-      )
-      .then((p) => setPriceId(p.prices[0].id));
-  }, [authenticatedAxiosGet, setPriceId]);
-  const siteDeploying = loading || !isWebsiteReady({ status, deploys });
-
-  return (
-    <DataLoader loadAsync={getWebsite}>
-      {graph ? (
-        <>
-          <Items
-            items={[
-              {
-                primary: <UserValue>{graph}</UserValue>,
-                key: 0,
-                avatar: <Subtitle>Graph</Subtitle>,
-              },
-              {
-                primary: (
-                  <UserValue>
-                    {status === "AWAITING VALIDATION" ? (
-                      <>
-                        {status}
-                        <br />
-                        To continue, add the following Name Servers to your
-                        Domain Management Settings:
-                        <ul>
-                          {JSON.parse(statusProps).nameServers.map((n) => (
-                            <li>{n}</li>
-                          ))}
-                        </ul>
-                      </>
-                    ) : (
-                      status
-                    )}
-                  </UserValue>
-                ),
-                key: 1,
-                avatar: <Subtitle>Status</Subtitle>,
-              },
-            ]}
-          />
-          <Button
-            variant={"contained"}
-            color={"primary"}
-            style={{ margin: "0 16px" }}
-            disabled={siteDeploying}
-            onClick={manualDeploy}
-          >
-            Manual Deploy
-          </Button>
-          <ConfirmationDialog
-            color={"secondary"}
-            action={shutdownWebsite}
-            buttonText={"Shutdown"}
-            content={
-              "Are you sure you want to shut down this RoamJS site? This operation is irreversible. Your subscription to this Service will end."
-            }
-            onSuccess={getWebsite}
-            title={"Shutdown RoamJS Static Site Service"}
-          />
-          <Loading loading={siteDeploying} size={18} />
-          <hr style={{ margin: "16px 0" }} />
-          <H6>Deploys</H6>
-          <Items
-            items={deploys.map((d) => ({
-              primary: <UserValue>{d.status}</UserValue>,
-              key: d.uuid,
-              secondary: (
-                <UserValue>At {new Date(d.date).toLocaleString()}</UserValue>
-              ),
-            }))}
-          />
-        </>
-      ) : (
-        <>
-          <Body>
-            You don't currently have a live Roam site. Click the button below to
-            start!
-          </Body>
-          <FormDialog
-            onSave={launchWebsite}
-            onSuccess={getWebsite}
-            buttonText={"LAUNCH"}
-            title={"Launch Roam Website"}
-            contentText={
-              "Fill out the info below and your Roam graph will launch as a site in minutes! This service will cost $12/month"
-            }
-            formElements={[
-              {
-                name: "graph",
-                defaultValue: "",
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                component: StringField,
-                validate: () => "",
-              },
-              {
-                name: "domain",
-                defaultValue: "",
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                component: StringField,
-                validate: (v) => domainValidate(v as string),
-              },
-            ]}
-          />
-        </>
-      )}
-    </DataLoader>
-  );
-};
-
 const Funding = () => {
   const [balance, setBalance] = useState(0);
   const [subscriptionId, setSubscriptionId] = useState(0);
@@ -567,23 +363,13 @@ const Funding = () => {
 
 const Profile = () => {
   const user = useUser();
-  const initialValue = useMemo(() => {
-    const query = new URLSearchParams(window.location.search);
-    const tab = query.get("tab");
-    if (tab === "static_site") {
-      return 4;
-    } else if (tab === "social") {
-      return 3;
-    }
-    return 0;
-  }, []);
   const [isClerk, setIsClerk] = useState(false);
   return (
     <>
       {isClerk ? (
         <UserProfile />
       ) : (
-        <VerticalTabs title={"User Info"} initialValue={initialValue}>
+        <VerticalTabs title={"User Info"}>
           <Card title={"Details"}>
             <Settings
               name={user.fullName}
@@ -595,9 +381,6 @@ const Profile = () => {
           </Card>
           <Card title={"Sponsorships"}>
             <Funding />
-          </Card>
-          <Card title={"Static Site"}>
-            <Website />
           </Card>
         </VerticalTabs>
       )}

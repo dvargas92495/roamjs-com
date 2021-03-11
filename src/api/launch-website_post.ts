@@ -1,14 +1,9 @@
 import { users } from "@clerk/clerk-sdk-node";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import axios from "axios";
 import { v4 } from "uuid";
-import { dynamo, getClerkUser, headers, lambda } from "../lambda-helpers";
-import randomstring from "randomstring";
+import { authenticate, dynamo, headers, lambda } from "../lambda-helpers";
 
-export const handler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
-  const { graph, domain, priceId } = JSON.parse(event.body);
+export const handler = authenticate(async (event) => {
+  const { graph, domain } = JSON.parse(event.body);
   if (!graph) {
     return {
       statusCode: 400,
@@ -25,45 +20,8 @@ export const handler = async (
     };
   }
 
-  if (!priceId) {
-    return {
-      statusCode: 400,
-      body: "Missing Product to subscribe to.",
-      headers: headers(event),
-    };
-  }
-
-  const user = await getClerkUser(event);
-  if (!user) {
-    return {
-      statusCode: 401,
-      body: "No Active Session",
-      headers: headers(event),
-    };
-  }
-
-  await dynamo
-    .putItem({
-      TableName: "RoamJSWebsiteStatuses",
-      Item: {
-        uuid: {
-          S: v4(),
-        },
-        action_graph: {
-          S: `launch_${graph}`,
-        },
-        date: {
-          S: new Date().toJSON(),
-        },
-        status: {
-          S: "SUBSCRIBING",
-        },
-      },
-    })
-    .promise();
-
-  const callbackToken = randomstring.generate();
-  const updatedUser = await users.updateUser(user.id, {
+  const user = await users.getUser(event.headers.Authorization);
+  await users.updateUser(user.id, {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     privateMetadata: JSON.stringify({
@@ -76,55 +34,6 @@ export const handler = async (
   const email = user.emailAddresses.find(
     (e) => e.id === user.primaryEmailAddressId
   )?.emailAddress;
-  const { active, id } = await axios
-    .post(
-      `${process.env.FLOSS_API_URL}/stripe-subscribe`,
-      {
-        priceId,
-        successParams: { tab: "static_site" },
-        metadata: {
-          graph,
-          domain,
-          userId: user.id,
-          callbackToken,
-          url: `${process.env.API_URL}/finish-launch-website`,
-        },
-      },
-      {
-        headers: {
-          Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
-          Origin: event.headers.Origin || event.headers.origin,
-        },
-      }
-    )
-    .then((r) => r.data)
-    .catch((e) => {
-      console.error(e.response?.data || e.message);
-      return { active: false };
-    });
-  if (!active) {
-    if (id) {
-      await users.updateUser(user.id, {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        privateMetadata: JSON.stringify({
-          ...updatedUser.privateMetadata,
-          websiteToken: callbackToken,
-        }),
-      });
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ sessionId: id }),
-        headers: headers(event),
-      };
-    } else {
-      return {
-        statusCode: 500,
-        body: "Failed to subscribe to RoamJS Site service",
-        headers: headers(event),
-      };
-    }
-  }
 
   await dynamo
     .putItem({
@@ -163,4 +72,4 @@ export const handler = async (
     body: JSON.stringify({ graph, domain }),
     headers: headers(event),
   };
-};
+});

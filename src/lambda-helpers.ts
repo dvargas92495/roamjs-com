@@ -2,7 +2,11 @@ import { AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
 import Cookies from "universal-cookie";
 import { sessions, users, User } from "@clerk/clerk-sdk-node";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyHandler,
+  APIGatewayProxyResult,
+} from "aws-lambda";
 import OAuth from "oauth-1.0a";
 import crypto from "crypto";
 import AWS from "aws-sdk";
@@ -204,3 +208,31 @@ export const flossGet = ({
           headers: headers(event),
         })
   );
+
+export const authenticate = (
+  handler: APIGatewayProxyHandler
+): APIGatewayProxyHandler => (event, ctx, callback) => {
+  const Authorization = event.headers.Authorization;
+  const [service, token] = Authorization.split(":");
+
+  return users.getUserList().then((users) => {
+    const user = users.find(
+      (user) =>
+        (user.publicMetadata as { [s: string]: { token: string } })?.[service]
+          ?.token === token
+    );
+    if (!user) {
+      return {
+        statusCode: 401,
+        body: "Invalid token",
+        headers: headers(event),
+      };
+    }
+    event.headers.Authorization = user.id;
+    const result = handler(event, ctx, callback);
+    if (!result) {
+      return emptyResponse(event);
+    }
+    return result;
+  });
+};

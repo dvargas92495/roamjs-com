@@ -1,24 +1,13 @@
 import { users } from "@clerk/clerk-sdk-node";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import AWS from "aws-sdk";
-import { emptyResponse, getClerkUser, headers } from "../lambda-helpers";
+import { authenticate, emptyResponse, headers } from "../lambda-helpers";
 
 const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 
-export const handler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
-  const user = await getClerkUser(event);
-  if (!user) {
-    return {
-      statusCode: 401,
-      body: "No Active Session",
-      headers: headers(event),
-    };
-  }
-
+export const handler = authenticate(async (event) => {
+  const userId = event.headers.Authorization;
   const graph = await users
-    .getUser(user.id)
+    .getUser(userId)
     .then((r) => (r.privateMetadata as { websiteGraph: string }).websiteGraph);
 
   if (!graph) {
@@ -73,4 +62,4 @@ export const handler = async (
     }),
     headers: headers(event),
   };
-};
+});

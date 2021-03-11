@@ -1,4 +1,9 @@
-import { createIconButton, getAttrConfigFromQuery, getUids } from "roam-client";
+import {
+  createIconButton,
+  getAttrConfigFromQuery,
+  getTreeByBlockUid,
+  getUids,
+} from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import { Dict } from "mixpanel-browser";
 import { getTextByBlockUid, RoamBlock } from "roam-client";
@@ -329,6 +334,36 @@ export const createPageObserver = (
         .forEach(({ blockUid, added }) => callback(blockUid, added));
     }
   });
+
+export const createPageTitleObserver = ({
+  title,
+  callback,
+}: {
+  title: `roam/js/${string}`;
+  callback: (d: HTMLDivElement) => void;
+}): void => {
+  const listener = () => {
+    const d = document.getElementsByClassName(
+      "roam-article"
+    )[0] as HTMLDivElement;
+    if (d) {
+      const heading = d.getElementsByClassName(
+        "rm-title-display"
+      )[0] as HTMLHeadingElement;
+      const attribute = `data-roamjs-${title.replace("roam/js/", "")}`;
+      if (heading?.innerText === title) {
+        if (!d.hasAttribute(attribute)) {
+          d.setAttribute(attribute, "true");
+          callback(d);
+        }
+      } else {
+        d.removeAttribute(attribute);
+      }
+    }
+  };
+  window.addEventListener("hashchange", listener);
+  listener();
+};
 
 export const createButtonObserver = ({
   shortcut,
@@ -902,3 +937,38 @@ export const openBlockInSidebar = (blockUid: string): boolean | void =>
           "block-uid": blockUid,
         },
       });
+
+export const setInputSetting = ({
+  blockUid,
+  value,
+  key,
+  index = 0,
+}: {
+  blockUid: string;
+  value: string;
+  key: string;
+  index?: number;
+}): void => {
+  const tree = getTreeByBlockUid(blockUid);
+  const keyNode = tree.children.find((t) => new RegExp(key, "i").test(t.text));
+  if (keyNode && keyNode.children.length) {
+    window.roamAlphaAPI.updateBlock({
+      block: { uid: keyNode.children[0].uid, string: value },
+    });
+  } else if (!keyNode) {
+    const uid = window.roamAlphaAPI.util.generateUID();
+    window.roamAlphaAPI.createBlock({
+      location: { "parent-uid": blockUid, order: index },
+      block: { string: key, uid },
+    });
+    window.roamAlphaAPI.createBlock({
+      location: { "parent-uid": uid, order: 0 },
+      block: { string: value },
+    });
+  } else {
+    window.roamAlphaAPI.createBlock({
+      location: { "parent-uid": keyNode.uid, order: 0 },
+      block: { string: value },
+    });
+  }
+};

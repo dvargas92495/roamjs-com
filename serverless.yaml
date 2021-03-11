@@ -57,6 +57,13 @@ functions:
           path: finish-shutdown-website
           method: post
           cors: true
+  finish-start-service-post:
+    handler: out/finish-start-service_post.handler
+    events:
+      - http:
+          path: finish-start-service
+          method: post
+          cors: true
   fund-post:
     handler: out/fund_post.handler
     events:
@@ -133,6 +140,13 @@ functions:
       - http:
           path: sponsorships
           method: get
+          cors: true
+  start-service-post:
+    handler: out/start-service_post.handler
+    events:
+      - http:
+          path: start-service
+          method: post
           cors: true
   subscriptions-get:
     handler: out/subscriptions_get.handler

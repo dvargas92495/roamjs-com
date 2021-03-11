@@ -300,16 +300,19 @@ const TwitterContent: React.FunctionComponent<{
   const onScheduleClick = useCallback(() => {
     setLoading(true);
     axios
-      .post(`${process.env.REST_API_URL}/tweet-schedule`, {
-        scheduleDate: scheduleDate.toJSON(),
-        token: socialToken,
-        payload: JSON.stringify({ blocks: message, tweetId }),
-        oauth: getSettingValueFromTree({
-          tree: getTreeByPageName("roam/js/twitter"),
-          key: "oauth",
-          defaultValue: "{}",
-        }),
-      })
+      .post(
+        `${process.env.REST_API_URL}/tweet-schedule`,
+        {
+          scheduleDate: scheduleDate.toJSON(),
+          payload: JSON.stringify({ blocks: message, tweetId }),
+          oauth: getSettingValueFromTree({
+            tree: getTreeByPageName("roam/js/twitter"),
+            key: "oauth",
+            defaultValue: "{}",
+          }),
+        },
+        { headers: { Authorization: `social:${socialToken}` } }
+      )
       .then(() => {
         setLoading(false);
         setDialogMessage(
@@ -330,7 +333,7 @@ const TwitterContent: React.FunctionComponent<{
     socialToken,
     setDialogMessage,
     message,
-    tweetId
+    tweetId,
   ]);
   return (
     <div style={{ padding: 16, maxWidth: 400 }}>

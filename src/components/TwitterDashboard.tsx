@@ -32,7 +32,7 @@ const TwitterDashboard: React.FC<{ blockId: string }> = ({ blockId }) => {
     setLoading(true);
     axios
       .get(`${process.env.REST_API_URL}/twitter-schedule`, {
-        headers: { Authorization: socialToken },
+        headers: { Authorization: `social:${socialToken}` },
       })
       .then((r) => {
         setValid(true);
