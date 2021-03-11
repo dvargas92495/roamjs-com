@@ -7,6 +7,7 @@ import {
   Intent,
   Label,
   Spinner,
+  Switch,
   Tooltip,
 } from "@blueprintjs/core";
 import axios, { AxiosResponse } from "axios";
@@ -54,11 +55,6 @@ const getToken = () =>
   getTreeByPageName("roam/js/static-site").find((t) => /token/i.test(t.text))
     ?.children?.[0]?.text;
 
-const getSupportId = () =>
-  window.roamAlphaAPI.q(
-    `[:find ?e :where [?e :user/email "support@roamjs.com"]]`
-  )?.[0]?.[0];
-
 type StageValue =
   | "RequestToken"
   | "RequestUser"
@@ -71,9 +67,9 @@ const getStage = (): StageValue => {
   const tree = getTreeByPageName("roam/js/static-site");
   if (!tree.find((t) => /token/i.test(t.text))?.children?.[0]?.text) {
     return "RequestToken";
-  } /*else if (!getSupportId()) {
+  } else if (!tree.find((t) => /share/i.test(t.text))) {
     return "RequestUser";
-  }*/ else if (!tree.some((t) => /domain/i.test(t.text))) {
+  } else if (!tree.some((t) => /domain/i.test(t.text))) {
     return "RequestDomain";
   } else if (!tree.some((t) => /index/i.test(t.text))) {
     return "RequestIndex";
@@ -98,7 +94,7 @@ const RequestTokenContent: StageContent = ({ pageUid, setStage }) => {
   );
   const onSubmit = useCallback(() => {
     setInputSetting({ blockUid: pageUid, key: "token", value });
-    setTimeout(() => setStage("RequestUser"), 1);
+    setTimeout(() => setStage(getStage()), 1);
   }, [value, setStage, pageUid]);
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -130,8 +126,41 @@ const RequestTokenContent: StageContent = ({ pageUid, setStage }) => {
 
 const HIGHLIGHT = "3px dashed yellowgreen";
 
-const RequestUserContent: StageContent = ({ setStage }) => {
+const RequestUserContent: StageContent = ({ setStage, pageUid }) => {
   const [ready, setReady] = useState(false);
+  const [deploySwitch, setDeploySwitch] = useState(true);
+  const onSwitchChange = useCallback(
+    (e: React.FormEvent<HTMLInputElement>) =>
+      setDeploySwitch((e.target as HTMLInputElement).checked),
+    [setDeploySwitch]
+  );
+  const shareListener = useCallback((e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === "DIV" &&
+      target.parentElement.className.includes("bp3-menu-item") &&
+      target.innerText.toUpperCase() === "SHARE"
+    ) {
+      const shareItem = target.parentElement as HTMLAnchorElement;
+      shareItem.style.border = "unset";
+      setReady(true);
+      setTimeout(() => {
+        const grid = document.getElementsByClassName("sharing-grid")[0];
+        const textarea = Array.from(
+          grid.getElementsByTagName("textarea")
+        ).find((t) =>
+          t.parentElement.previousElementSibling.innerHTML.startsWith("Readers")
+        );
+        if (textarea) {
+          textarea.parentElement.parentElement.style.border = HIGHLIGHT;
+          const guide = document.createElement("span");
+          guide.style.fontSize = "8px";
+          guide.innerText = "(Press Enter after adding support@roamjs.com)";
+          textarea.parentElement.appendChild(guide);
+        }
+      }, 500);
+    }
+  }, []);
   useEffect(() => {
     const topbar = document.getElementsByClassName("rm-topbar")[0];
     if (topbar) {
@@ -139,77 +168,66 @@ const RequestUserContent: StageContent = ({ setStage }) => {
         "bp3-icon-more"
       )[0] as HTMLSpanElement;
       if (moreMenu) {
-        moreMenu.style.border = HIGHLIGHT;
-        const listener = () => {
-          moreMenu.style.border = "unset";
-          setTimeout(() => {
-            const menuItems = moreMenu.closest(
-              ".bp3-popover-target.bp3-popover-open"
-            )?.nextElementSibling;
-            if (menuItems) {
-              const shareItem = Array.from(
-                menuItems.getElementsByClassName("bp3-menu-item")
-              )
-                .map((e) => e as HTMLAnchorElement)
-                .find((e) => e.innerText === "Share");
-              if (shareItem) {
-                shareItem.style.border = HIGHLIGHT;
-                const shareListener = () => {
-                  shareItem.style.border = "unset";
-                  setReady(true);
-                  setTimeout(() => {
-                    const grid = document.getElementsByClassName(
-                      "sharing-grid"
-                    )[0];
-                    const textarea = Array.from(
-                      grid.getElementsByTagName("textarea")
-                    ).find((t) =>
-                      t.parentElement.previousElementSibling.innerHTML.startsWith(
-                        "Readers"
-                      )
-                    );
-                    if (textarea) {
-                      textarea.parentElement.parentElement.style.border = HIGHLIGHT;
-                      const guide = document.createElement("span");
-                      guide.style.fontSize = "8px";
-                      guide.innerText =
-                        "(Press Enter after adding support@roamjs.com)";
-                      textarea.parentElement.appendChild(guide);
-                    }
-                  }, 500);
-                  shareItem.removeEventListener("click", shareListener);
-                };
-                shareItem.addEventListener("click", shareListener);
-              }
+        moreMenu.click();
+        setTimeout(() => {
+          const menuItems = moreMenu.closest(
+            ".bp3-popover-target.bp3-popover-open"
+          )?.nextElementSibling;
+          if (menuItems) {
+            const shareItem = Array.from(
+              menuItems.getElementsByClassName("bp3-menu-item")
+            )
+              .map((e) => e as HTMLAnchorElement)
+              .find((e) => e.innerText === "Share");
+            if (shareItem) {
+              shareItem.style.border = HIGHLIGHT;
             }
-          }, 500);
-          moreMenu.removeEventListener("click", listener);
-        };
-        moreMenu.addEventListener("click", listener);
+          }
+        }, 500);
       }
     }
+    document.addEventListener("click", shareListener);
+    return () => document.removeEventListener("click", shareListener);
   }, [setReady]);
-  const onSubmit = useCallback(
-    () => setTimeout(() => setStage(getStage()), 1),
-    [setStage]
-  );
+  const onSubmit = useCallback(() => {
+    setInputSetting({
+      blockUid: pageUid,
+      key: "Share",
+      value: `${deploySwitch}`,
+    });
+    setTimeout(() => setStage(getStage()), 1);
+  }, [setStage, pageUid, deploySwitch, ready]);
   return (
     <>
       <p>
         Click the highlighted more menu above to share your graph with{" "}
         <code>support@roamjs.com</code> as a <b>Reader</b>.
       </p>
-      <p style={{ fontSize: "8px" }}>
+      <Switch
+        checked={deploySwitch}
+        onChange={onSwitchChange}
+        labelElement={"Daily Deploys"}
+      />
+      <p style={{ fontSize: "8px", margin: "16px 0" }}>
         Why do we need this?{" "}
         <Tooltip
           content={
-            "RoamJS needs to access your Roam data for automatic daily updates. Instead of trusting RoamJS with your password, we are asking for read only permission. We will only access data based on your soon to be configured filters for the purposes of deploying your site."
+            <span style={{ maxWidth: 400 }}>
+              RoamJS needs to access your Roam data for automatic daily updates.
+              Instead of trusting RoamJS with your password, we are asking for
+              read only permission. We will only access data based on your soon
+              to be configured filters for the purposes of deploying your site.
+            </span>
           }
         >
-          <Icon icon={"info-sign"} />
+          <Icon icon={"info-sign"} iconSize={8} intent={Intent.PRIMARY} />
         </Tooltip>
       </p>
-      <Button onClick={onSubmit} disabled={!ready} intent={Intent.PRIMARY}>
+      <Button
+        onClick={onSubmit}
+        disabled={!ready && deploySwitch}
+        intent={Intent.PRIMARY}
+      >
         NEXT
       </Button>
     </>
@@ -399,6 +417,17 @@ const RequestFiltersContent: StageContent = ({ pageUid, setStage }) => {
   );
 };
 
+const getLaunchBody = (graph: string) => {
+  const tree = getTreeByPageName("roam/js/static-site");
+  return {
+    graph,
+    domain: tree.find((t) => /domain/i.test(t.text))?.children?.[0]?.text,
+    autoDeploysEnabled: true /*/true/i.test(
+      tree.find((t) => /share/i.test(t.text))?.children?.[0]?.text
+    ),*/,
+  };
+};
+
 const isWebsiteReady = (w: { status: string; deploys: { status: string }[] }) =>
   w.status === "LIVE" &&
   w.deploys.length &&
@@ -461,12 +490,7 @@ const LiveContent: StageContent = ({ graph }) => {
     [setError, setLoading, getWebsite, authenticatedAxiosPost]
   );
   const launchWebsite = useCallback(
-    wrapPost("launch-website", {
-      graph,
-      domain: getTreeByPageName("roam/js/static-site").find((t) =>
-        /domain/i.test(t.text)
-      )?.children?.[0]?.text,
-    }),
+    wrapPost("launch-website", getLaunchBody(graph)),
     [graph, wrapPost]
   );
   const manualDeploy = useCallback(wrapPost("deploy"), [wrapPost]);
