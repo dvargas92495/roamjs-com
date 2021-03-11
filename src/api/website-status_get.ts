@@ -42,8 +42,8 @@ export const handler = authenticate(async (event) => {
       IndexName: "primary-index",
     })
     .promise();
-  const successDeployStatuses = deployStatuses.Items.filter(
-    (s) => s.status.S === "SUCCESS"
+  const successDeployStatuses = deployStatuses.Items.filter((s) =>
+    ["SUCCESS", "FAILURE"].includes(s.status.S)
   );
   const deploys =
     successDeployStatuses[0] === deployStatuses.Items[0]

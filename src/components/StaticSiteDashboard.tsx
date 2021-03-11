@@ -4,6 +4,7 @@ import {
   Card,
   Icon,
   InputGroup,
+  Intent,
   Label,
   Spinner,
   Tooltip,
@@ -115,7 +116,9 @@ const RequestTokenContent: StageContent = ({ pageUid, setStage }) => {
         RoamJS Static Site Token
         <InputGroup value={value} onChange={onChange} onKeyDown={onKeyDown} />
       </Label>
-      <Button onClick={onSubmit}>NEXT</Button>
+      <Button onClick={onSubmit} intent={Intent.PRIMARY}>
+        NEXT
+      </Button>
     </>
   );
 };
@@ -210,7 +213,7 @@ const RequestUserContent: StageContent = ({ setStage }) => {
           <Icon icon={"info-sign"} />
         </Tooltip>
       </p>
-      <Button onClick={onSubmit} disabled={!ready}>
+      <Button onClick={onSubmit} disabled={!ready} intent={Intent.PRIMARY}>
         NEXT
       </Button>
     </>
@@ -260,7 +263,7 @@ const RequestDomainContent: StageContent = ({ pageUid, setStage }) => {
         />
         <span style={{ color: "darkred" }}>{error}</span>
       </Label>
-      <Button onClick={onSubmit} disabled={!error}>
+      <Button onClick={onSubmit} disabled={!error} intent={Intent.PRIMARY}>
         NEXT
       </Button>
     </>
@@ -297,7 +300,9 @@ const RequestIndexContent: StageContent = ({ pageUid, setStage }) => {
         Website Index
         <InputGroup value={value} onChange={onChange} onKeyDown={onKeyDown} />
       </Label>
-      <Button onClick={onSubmit}>NEXT</Button>
+      <Button onClick={onSubmit} intent={Intent.PRIMARY}>
+        NEXT
+      </Button>
     </>
   );
 };
@@ -335,7 +340,9 @@ const RequestFiltersContent: StageContent = ({ pageUid, setStage }) => {
         <Button onClick={onAddFilter}>ADD FILTER</Button>
       </div>
       <div>
-        <Button onClick={onSubmit}>NEXT</Button>
+        <Button onClick={onSubmit} intent={Intent.PRIMARY}>
+          NEXT
+        </Button>
       </div>
     </>
   );
@@ -345,6 +352,13 @@ const isWebsiteReady = (w: { status: string; deploys: { status: string }[] }) =>
   w.status === "LIVE" &&
   w.deploys.length &&
   ["SUCCESS", "FAILURE"].includes(w.deploys[0].status);
+
+const getStatusColor = (status: string) =>
+  ["LIVE", "SUCCESS"].includes(status)
+    ? "darkgreen"
+    : status === "FAILURE"
+    ? "darkred"
+    : "goldenrod";
 
 const LiveContent: StageContent = ({ graph }) => {
   const authenticatedAxiosGet = useAuthenticatedAxiosGet();
@@ -430,8 +444,8 @@ const LiveContent: StageContent = ({ graph }) => {
               <div style={{ marginBottom: 16 }}>
                 <span>Status</span>
                 {status === "AWAITING VALIDATION" ? (
-                  <>
-                    {status}
+                  <div style={{ color: "darkblue" }}>
+                    <span>{status}</span>
                     <br />
                     To continue, add the following Name Servers to your Domain
                     Management Settings:
@@ -442,19 +456,26 @@ const LiveContent: StageContent = ({ graph }) => {
                         )
                       )}
                     </ul>
-                  </>
+                  </div>
                 ) : (
-                  status
+                  <span
+                    style={{ marginLeft: 16, color: getStatusColor(status) }}
+                  >
+                    {status}
+                  </span>
                 )}
               </div>
               <Button
                 style={{ marginRight: 32 }}
                 disabled={siteDeploying}
                 onClick={manualDeploy}
+                intent={Intent.PRIMARY}
               >
                 Manual Deploy
               </Button>
-              <Button onClick={openShutdown}>Shutdown</Button>
+              <Button onClick={openShutdown} intent={Intent.DANGER}>
+                Shutdown
+              </Button>
               <Alert
                 isOpen={isShutdownOpen}
                 onConfirm={shutdownWebsite}
@@ -474,7 +495,14 @@ const LiveContent: StageContent = ({ graph }) => {
                 {deploys.map((d) => (
                   <div key={d.uuid}>
                     <span>At {new Date(d.date).toLocaleString()}</span>
-                    <span style={{ marginLeft: 16 }}>{d.status}</span>
+                    <span
+                      style={{
+                        marginLeft: 16,
+                        color: getStatusColor(d.status),
+                      }}
+                    >
+                      {d.status}
+                    </span>
                   </div>
                 ))}
               </ul>
@@ -485,7 +513,11 @@ const LiveContent: StageContent = ({ graph }) => {
                 You're ready to launch your new site! Click the button below to
                 start.
               </p>
-              <Button disabled={loading} onClick={launchWebsite}>
+              <Button
+                disabled={loading}
+                onClick={launchWebsite}
+                intent={Intent.PRIMARY}
+              >
                 LAUNCH
               </Button>
             </>
