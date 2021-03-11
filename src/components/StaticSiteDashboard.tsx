@@ -496,6 +496,7 @@ const LiveContent: StageContent = ({ graph }) => {
 
 const components = {
   RequestToken: RequestTokenContent,
+  RequestUser: RequestUserContent,
   RequestDomain: RequestDomainContent,
   RequestIndex: RequestIndexContent,
   RequestFilters: RequestFiltersContent,
