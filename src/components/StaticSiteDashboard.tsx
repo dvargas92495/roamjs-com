@@ -23,7 +23,6 @@ import {
   getTreeByPageName,
   createBlock,
   TextNode,
-  getSettingsByEmail,
 } from "roam-client";
 import { getPageUidByPageTitle, setInputSetting } from "../entry-helpers";
 import MenuItemSelect from "./MenuItemSelect";
@@ -55,6 +54,11 @@ const getToken = () =>
   getTreeByPageName("roam/js/static-site").find((t) => /token/i.test(t.text))
     ?.children?.[0]?.text;
 
+const getSupportId = () =>
+  window.roamAlphaAPI.q(
+    `[:find ?e :where [?e :user/email "support@roamjs.com"]]`
+  )?.[0]?.[0];
+
 type StageValue =
   | "RequestToken"
   | "RequestUser"
@@ -67,7 +71,7 @@ const getStage = (): StageValue => {
   const tree = getTreeByPageName("roam/js/static-site");
   if (!tree.find((t) => /token/i.test(t.text))?.children?.[0]?.text) {
     return "RequestToken";
-  } else if (!getSettingsByEmail("support@roamjs.com")) {
+  } else if (!getSupportId()) {
     return "RequestUser";
   } else if (!tree.some((t) => /domain/i.test(t.text))) {
     return "RequestDomain";
@@ -131,8 +135,8 @@ const RequestUserContent: StageContent = ({ setStage }) => {
   const timeoutRef = useRef(0);
   const checkSettings = useCallback(() => {
     if (!ready) {
-      const settings = getSettingsByEmail("support@roamjs.com");
-      if (!settings) {
+      const id = getSupportId();
+      if (!id) {
         timeoutRef.current = window.setTimeout(checkSettings, 3000);
       } else {
         setReady(true);
