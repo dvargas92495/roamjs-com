@@ -128,7 +128,7 @@ const RequestTokenContent: StageContent = ({ pageUid, setStage }) => {
   );
 };
 
-const HIGHLIGHT = "border: 3px dashed yellowgreen";
+const HIGHLIGHT = "3px dashed yellowgreen";
 
 const RequestUserContent: StageContent = ({ setStage }) => {
   const [ready, setReady] = useState(false);
