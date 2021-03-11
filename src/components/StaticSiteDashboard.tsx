@@ -263,7 +263,7 @@ const RequestDomainContent: StageContent = ({ pageUid, setStage }) => {
         />
         <span style={{ color: "darkred" }}>{error}</span>
       </Label>
-      <Button onClick={onSubmit} disabled={!error} intent={Intent.PRIMARY}>
+      <Button onClick={onSubmit} disabled={!!error || !value} intent={Intent.PRIMARY}>
         NEXT
       </Button>
     </>
