@@ -13,6 +13,7 @@ export const handler = authenticate(async (event) => {
     websiteDomain: string;
   };
 
+  const date = new Date().toJSON();
   await dynamo
     .putItem({
       TableName: "RoamJSWebsiteStatuses",
@@ -24,7 +25,7 @@ export const handler = authenticate(async (event) => {
           S: `deploy_${websiteGraph}`,
         },
         date: {
-          S: new Date().toJSON(),
+          S: date,
         },
         status: {
           S: "STARTING DEPLOY",

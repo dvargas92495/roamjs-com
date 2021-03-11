@@ -342,20 +342,25 @@ export const createPageTitleObserver = ({
   title: `roam/js/${string}`;
   callback: (d: HTMLDivElement) => void;
 }): void => {
-  const listener = () => {
+  const listener = (e?: HashChangeEvent) => {
     const d = document.getElementsByClassName(
       "roam-article"
     )[0] as HTMLDivElement;
     if (d) {
-      const heading = d.getElementsByClassName(
-        "rm-title-display"
-      )[0] as HTMLHeadingElement;
       const attribute = `data-roamjs-${title.replace("roam/js/", "")}`;
-      if (heading?.innerText === title) {
-        if (!d.hasAttribute(attribute)) {
-          d.setAttribute(attribute, "true");
-          callback(d);
-        }
+      const url = e?.newURL || window.location.href;
+      if (url === getRoamUrl(getPageUidByPageTitle(title))) {
+        // React's rerender crushes the old article/heading
+        setTimeout(() => {
+          if (!d.hasAttribute(attribute)) {
+            d.setAttribute(attribute, "true");
+            callback(
+              document.getElementsByClassName(
+                "roam-article"
+              )[0] as HTMLDivElement
+            );
+          }
+        }, 1);
       } else {
         d.removeAttribute(attribute);
       }

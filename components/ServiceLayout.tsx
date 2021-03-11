@@ -108,7 +108,7 @@ const CopyButton: React.FC<{ token: string }> = ({ token }) => {
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <IconButton size={"small"} icon={"fileCopy"} onClick={onClick} />
-      {copied && <span>Copied!</span>}
+      <span>{copied && "Copied!"}</span>
     </div>
   );
 };
@@ -143,7 +143,9 @@ const Service = ({ id }: { id: string }) => {
         >
           COPY EXTENSION
         </Button>
-        {copied && <span style={{ marginLeft: 24 }}>COPIED!</span>}
+        <span style={{ marginLeft: 24, minHeight: 20 }}>
+          {copied && "COPIED!"}
+        </span>
       </div>
       <div
         style={{
@@ -164,19 +166,18 @@ const Service = ({ id }: { id: string }) => {
       <span style={{ color: "darkred" }}>
         Token is sensitive. <b>DO NOT SHARE WITH ANYONE</b>
       </span>
-      <ConfirmationDialog
-        buttonText={"End Service"}
-        color="secondary"
-        title={`Ending ${idToTitle(id)}`}
-        content={`Are you sure you want to unsubscribe from the RoamJS ${idToTitle(
-          id
-        )}`}
-        action={() => Promise.resolve(console.log("unsubscribe"))}
-        onSuccess={() => Promise.resolve(console.log("delete stuff"))}
-      />
-      <Button disabled variant="contained">
-        End Service
-      </Button>
+      <div style={{ marginTop: 128 }}>
+        <ConfirmationDialog
+          buttonText={"End Service"}
+          color="secondary"
+          title={`Ending ${idToTitle(id)}`}
+          content={`Are you sure you want to unsubscribe from the RoamJS ${idToTitle(
+            id
+          )}`}
+          action={() => Promise.resolve(console.log("unsubscribe"))}
+          onSuccess={() => Promise.resolve(console.log("delete stuff"))}
+        />
+      </div>
     </div>
   );
 };
