@@ -115,6 +115,7 @@ module "aws-serverless-backend" {
         "github-projects/get",
         "github-repositories/get",
         "google-calendar/get",
+        "end-service/post",
         "finish-launch-social/post",
         "finish-launch-website/post",
         "finish-shutdown-website/post",
@@ -149,6 +150,7 @@ module "aws-serverless-backend" {
     cors = [
       "launch-social",
       "start-service",
+      "end-service",
       "shutdown-social",
       "fund"
     ]
