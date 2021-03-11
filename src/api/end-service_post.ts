@@ -87,6 +87,8 @@ export const handler = async (
       // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
       publicMetadata: JSON.stringify(rest),
     });
+  } else {
+    console.warn('No metadata value to clear for field', serviceField);
   }
 
   return bareSuccessResponse(event);
