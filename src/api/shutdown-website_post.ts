@@ -87,7 +87,7 @@ export const handler = async (
         roamGraph: graph,
         shutdownCallback: {
           callbackToken,
-          url: `${process.env.API_URL}/finish-shutdown-website`,
+          url: `${process.env.API_URL}/finisPh-shutdown-website`,
           userId: user.id,
         },
       }),

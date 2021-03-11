@@ -164,6 +164,19 @@ const Service = ({ id }: { id: string }) => {
       <span style={{ color: "darkred" }}>
         Token is sensitive. <b>DO NOT SHARE WITH ANYONE</b>
       </span>
+      <ConfirmationDialog
+        buttonText={"End Service"}
+        color="secondary"
+        title={`Ending ${idToTitle(id)}`}
+        content={`Are you sure you want to unsubscribe from the RoamJS ${idToTitle(
+          id
+        )}`}
+        action={() => Promise.resolve(console.log("unsubscribe"))}
+        onSuccess={() => Promise.resolve(console.log("delete stuff"))}
+      />
+      <Button disabled variant="contained">
+        End Service
+      </Button>
     </div>
   );
 };
