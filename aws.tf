@@ -150,6 +150,7 @@ module "aws-serverless-backend" {
       "launch-social",
       "start-service",
       "shutdown-social",
+      "fund"
     ]
     tags = {
         Application = "Roam JS Extensions"
