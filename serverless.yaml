@@ -36,6 +36,13 @@ functions:
           path: deploy
           method: post
           cors: true
+  end-service-post:
+    handler: out/end-service_post.handler
+    events:
+      - http:
+          path: end-service
+          method: post
+          cors: true
   finish-launch-social-post:
     handler: out/finish-launch-social_post.handler
     events:

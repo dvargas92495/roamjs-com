@@ -1,6 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import axios from "axios";
-import { getClerkUser, headers } from "../lambda-helpers";
+import { authenticate, headers } from "../lambda-helpers";
 import AWS from "aws-sdk";
 import { v4 } from "uuid";
 import { users } from "@clerk/clerk-sdk-node";
@@ -9,45 +7,9 @@ import randomstring from "randomstring";
 const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 
-export const handler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
-  const { graph, subscriptionId } = JSON.parse(event.body || "{}");
-
-  const user = await getClerkUser(event);
-  if (!user) {
-    return {
-      statusCode: 401,
-      body: "No Active Session",
-      headers: headers(event),
-    };
-  }
-
-  const email = user.emailAddresses.find(
-    (e) => e.id === user.primaryEmailAddressId
-  )?.emailAddress;
-  const opts = {
-    headers: {
-      Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
-    },
-  };
-  const { success, message } = await axios
-    .post(
-      `${process.env.FLOSS_API_URL}/stripe-cancel`,
-      {
-        subscriptionId,
-      },
-      opts
-    )
-    .then((r) => ({ success: r.data.success, message: '' }))
-    .catch((r) => ({ success: false, message: r.response.data || r.message }));
-  if (!success) {
-    return {
-      statusCode: 500,
-      body: `Failed to cancel RoamJS Site subscription: ${message}`,
-      headers: headers(event),
-    };
-  }
+export const handler = authenticate(async (event) => {
+  const { graph } = JSON.parse(event.body || "{}");
+  const user = await users.getUser(event.headers.Authorization);
 
   await dynamo
     .putItem({
@@ -87,7 +49,7 @@ export const handler = async (
         roamGraph: graph,
         shutdownCallback: {
           callbackToken,
-          url: `${process.env.API_URL}/finisPh-shutdown-website`,
+          url: `${process.env.API_URL}/finish-shutdown-website`,
           userId: user.id,
         },
       }),
@@ -99,4 +61,4 @@ export const handler = async (
     body: JSON.stringify({ success: true }),
     headers: headers(event),
   };
-};
+});

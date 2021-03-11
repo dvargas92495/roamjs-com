@@ -26,6 +26,7 @@ import {
   getSettingsByEmail,
 } from "roam-client";
 import { getPageUidByPageTitle, setInputSetting } from "../entry-helpers";
+import MenuItemSelect from "./MenuItemSelect";
 
 const useAuthenticatedAxiosGet = (): ((
   path: string
@@ -93,7 +94,7 @@ const RequestTokenContent: StageContent = ({ pageUid, setStage }) => {
   );
   const onSubmit = useCallback(() => {
     setInputSetting({ blockUid: pageUid, key: "token", value });
-    setStage("RequestUser");
+    setTimeout(() => setStage(getStage()), 1);
   }, [value, setStage, pageUid]);
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -196,7 +197,10 @@ const RequestUserContent: StageContent = ({ setStage }) => {
     checkSettings();
     return () => window.clearTimeout(timeoutRef.current);
   }, [checkSettings]);
-  const onSubmit = useCallback(() => setStage("RequestDomain"), [setStage]);
+  const onSubmit = useCallback(
+    () => setTimeout(() => setStage(getStage()), 1),
+    [setStage]
+  );
   return (
     <>
       <p>
@@ -235,7 +239,7 @@ const RequestDomainContent: StageContent = ({ pageUid, setStage }) => {
   }, [value]);
   const onSubmit = useCallback(() => {
     setInputSetting({ blockUid: pageUid, key: "domain", value, index: 1 });
-    setStage("RequestIndex");
+    setTimeout(() => setStage(getStage()), 1);
   }, [value, setStage]);
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -263,7 +267,11 @@ const RequestDomainContent: StageContent = ({ pageUid, setStage }) => {
         />
         <span style={{ color: "darkred" }}>{error}</span>
       </Label>
-      <Button onClick={onSubmit} disabled={!!error || !value} intent={Intent.PRIMARY}>
+      <Button
+        onClick={onSubmit}
+        disabled={!!error || !value}
+        intent={Intent.PRIMARY}
+      >
         NEXT
       </Button>
     </>
@@ -278,7 +286,7 @@ const RequestIndexContent: StageContent = ({ pageUid, setStage }) => {
   );
   const onSubmit = useCallback(() => {
     setInputSetting({ blockUid: pageUid, key: "index", value, index: 1 });
-    setStage("RequestFilters");
+    setTimeout(() => setStage(getStage()), 1);
   }, [value, setStage]);
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -308,7 +316,8 @@ const RequestIndexContent: StageContent = ({ pageUid, setStage }) => {
 };
 
 const RequestFiltersContent: StageContent = ({ pageUid, setStage }) => {
-  const [filters, setFilters] = useState<TextNode[]>([]);
+  const [filters, setFilters] = useState<(TextNode & { key: number })[]>([]);
+  const [key, setKey] = useState(0);
   const onSubmit = useCallback(() => {
     const tree = getTreeByBlockUid(pageUid);
     const keyNode = tree.children.find((t) => /filter/i.test(t.text));
@@ -326,17 +335,67 @@ const RequestFiltersContent: StageContent = ({ pageUid, setStage }) => {
         parentUid: pageUid,
       });
     }
-    setStage("Live");
+    setTimeout(() => setStage(getStage()), 1);
   }, [filters]);
   const onAddFilter = useCallback(() => {
     setFilters([
       ...filters,
-      { text: "TAGGED WITH", children: [{ text: "Website", children: [] }] },
+      {
+        text: "TAGGED WITH",
+        children: [{ text: "Website", children: [] }],
+        key,
+      },
     ]);
-  }, [filters, setFilters]);
+    setKey(key + 1);
+  }, [filters, setFilters, key, setKey]);
   return (
     <>
-      <div>
+      <div style={{ margin: "16px 0" }}>
+        {filters.map((f) => (
+          <div
+            key={f.key}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              paddingRight: "25%",
+              marginBottom: 16,
+            }}
+          >
+            <MenuItemSelect
+              items={["STARTS WITH", "TAGGED WITH"]}
+              onItemSelect={(s) =>
+                setFilters(
+                  filters.map((filter) =>
+                    f.key === filter.key ? { ...filter, text: s } : filter
+                  )
+                )
+              }
+              activeItem={f.text}
+            />
+            <InputGroup
+              value={f.children[0].text}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setFilters(
+                  filters.map((filter) =>
+                    f.key === filter.key
+                      ? {
+                          ...filter,
+                          children: [{ text: e.target.value, children: [] }],
+                        }
+                      : filter
+                  )
+                )
+              }
+            />
+            <Button
+              icon={"trash"}
+              minimal
+              onClick={() =>
+                setFilters(filters.filter((filter) => filter.key !== f.key))
+              }
+            />
+          </div>
+        ))}
         <Button onClick={onAddFilter}>ADD FILTER</Button>
       </div>
       <div>
@@ -473,7 +532,11 @@ const LiveContent: StageContent = ({ graph }) => {
               >
                 Manual Deploy
               </Button>
-              <Button onClick={openShutdown} intent={Intent.DANGER}>
+              <Button
+                onClick={openShutdown}
+                disabled={siteDeploying}
+                intent={Intent.DANGER}
+              >
                 Shutdown
               </Button>
               <Alert
@@ -482,7 +545,7 @@ const LiveContent: StageContent = ({ graph }) => {
                 onClose={closeShutdown}
                 canOutsideClickCancel
                 canEscapeKeyCancel
-                cancelButtonText={"cancel"}
+                cancelButtonText={"Cancel"}
               >
                 <p>
                   Are you sure you want to shut down this RoamJS website? This
@@ -494,7 +557,9 @@ const LiveContent: StageContent = ({ graph }) => {
               <ul>
                 {deploys.map((d) => (
                   <div key={d.uuid}>
-                    <span>At {new Date(d.date).toLocaleString()}</span>
+                    <span style={{ display: "inline-block", minWidth: "30%" }}>
+                      At {new Date(d.date).toLocaleString()}
+                    </span>
                     <span
                       style={{
                         marginLeft: 16,

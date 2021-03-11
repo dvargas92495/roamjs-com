@@ -15,6 +15,7 @@ import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { useRouter } from "next/router";
 import { useAuthenticatedAxiosPost, useCopyCode } from "./hooks";
 import { stripe } from "./constants";
+import axios from "axios";
 
 const idToTitle = (id: string) =>
   id
@@ -72,7 +73,7 @@ const CheckSubscription = ({
   children: (button: React.ReactNode) => React.ReactNode;
 }) => {
   const user = useUser();
-  const { publicMetadata, update } = user;
+  const { publicMetadata } = user;
   useEffect(() => {
     if (publicMetadata[idToCamel(id)]) {
       start();
@@ -88,7 +89,7 @@ const CheckSubscription = ({
           refreshUser={() =>
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore refresh metadata state
-            update()
+            user.update()
           }
         />
       )}
@@ -113,13 +114,18 @@ const CopyButton: React.FC<{ token: string }> = ({ token }) => {
   );
 };
 
-const Service = ({ id }: { id: string }) => {
+const Service = ({ id, end }: { id: string; end: () => void }) => {
   const userData = useUser().publicMetadata as {
     [key: string]: { token: string };
   };
+  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const token = userData?.[idToCamel(id)]?.token || "NO TOKEN FOUND FOR USER";
   const [copied, setCopied] = useState(false);
   const onSave = useCopyCode(setCopied);
+  const onEnd = useCallback(
+    () => authenticatedAxiosPost("end-service", { service: id }),
+    [authenticatedAxiosPost]
+  );
   return (
     <div
       style={{
@@ -174,8 +180,8 @@ const Service = ({ id }: { id: string }) => {
           content={`Are you sure you want to unsubscribe from the RoamJS ${idToTitle(
             id
           )}`}
-          action={() => Promise.resolve(console.log("unsubscribe"))}
-          onSuccess={() => Promise.resolve(console.log("delete stuff"))}
+          action={onEnd}
+          onSuccess={end}
         />
       </div>
     </div>
@@ -196,6 +202,7 @@ const ServiceLayout = ({
   const [started, setStarted] = useState(false);
   const router = useRouter();
   const start = useCallback(() => setStarted(true), [setStarted]);
+  const end = useCallback(() => setStarted(false), [setStarted]);
   const login = useCallback(() => router.push(`/login?service=${id}`), [
     router,
   ]);
@@ -252,7 +259,7 @@ const ServiceLayout = ({
         <CheckSubscription id={id} start={start} price={price}>
           {(StartNowButton) =>
             started ? (
-              <Service id={id} />
+              <Service id={id} end={end}/>
             ) : (
               <SplashLayout StartNowButton={StartNowButton} />
             )
