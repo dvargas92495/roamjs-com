@@ -71,9 +71,9 @@ const getStage = (): StageValue => {
   const tree = getTreeByPageName("roam/js/static-site");
   if (!tree.find((t) => /token/i.test(t.text))?.children?.[0]?.text) {
     return "RequestToken";
-  } else if (!getSupportId()) {
+  } /*else if (!getSupportId()) {
     return "RequestUser";
-  } else if (!tree.some((t) => /domain/i.test(t.text))) {
+  }*/ else if (!tree.some((t) => /domain/i.test(t.text))) {
     return "RequestDomain";
   } else if (!tree.some((t) => /index/i.test(t.text))) {
     return "RequestIndex";
@@ -98,7 +98,7 @@ const RequestTokenContent: StageContent = ({ pageUid, setStage }) => {
   );
   const onSubmit = useCallback(() => {
     setInputSetting({ blockUid: pageUid, key: "token", value });
-    setTimeout(() => setStage(getStage()), 1);
+    setTimeout(() => setStage("RequestUser"), 1);
   }, [value, setStage, pageUid]);
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -132,17 +132,6 @@ const HIGHLIGHT = "3px dashed yellowgreen";
 
 const RequestUserContent: StageContent = ({ setStage }) => {
   const [ready, setReady] = useState(false);
-  const timeoutRef = useRef(0);
-  const checkSettings = useCallback(() => {
-    if (!ready) {
-      const id = getSupportId();
-      if (!id) {
-        timeoutRef.current = window.setTimeout(checkSettings, 3000);
-      } else {
-        setReady(true);
-      }
-    }
-  }, [timeoutRef, setReady, ready]);
   useEffect(() => {
     const topbar = document.getElementsByClassName("rm-topbar")[0];
     if (topbar) {
@@ -167,6 +156,7 @@ const RequestUserContent: StageContent = ({ setStage }) => {
                 shareItem.style.border = HIGHLIGHT;
                 const shareListener = () => {
                   shareItem.style.border = "unset";
+                  setReady(true);
                   setTimeout(() => {
                     const grid = document.getElementsByClassName(
                       "sharing-grid"
@@ -198,9 +188,7 @@ const RequestUserContent: StageContent = ({ setStage }) => {
         moreMenu.addEventListener("click", listener);
       }
     }
-    checkSettings();
-    return () => window.clearTimeout(timeoutRef.current);
-  }, [checkSettings]);
+  }, [setReady]);
   const onSubmit = useCallback(
     () => setTimeout(() => setStage(getStage()), 1),
     [setStage]
