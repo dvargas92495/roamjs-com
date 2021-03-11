@@ -126,7 +126,15 @@ const Service = ({ id }: { id: string }) => {
         marginTop: 32,
       }}
     >
-      <div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: 32,
+          flexDirection: "column",
+          width: "fit-content",
+        }}
+      >
         First, copy the extension into your Roam Graph
         <Button
           onClick={() => onSave([id])}

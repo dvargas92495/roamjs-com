@@ -2,9 +2,11 @@ import {
   Alert,
   Button,
   Card,
+  Icon,
   InputGroup,
   Label,
   Spinner,
+  Tooltip,
 } from "@blueprintjs/core";
 import axios, { AxiosResponse } from "axios";
 import React, {
@@ -20,6 +22,7 @@ import {
   getTreeByPageName,
   createBlock,
   TextNode,
+  getSettingsByEmail,
 } from "roam-client";
 import { getPageUidByPageTitle, setInputSetting } from "../entry-helpers";
 
@@ -52,6 +55,7 @@ const getToken = () =>
 
 type StageValue =
   | "RequestToken"
+  | "RequestUser"
   | "RequestDomain"
   | "RequestIndex"
   | "RequestFilters"
@@ -86,7 +90,7 @@ const RequestTokenContent: StageContent = ({ pageUid, setStage }) => {
   );
   const onSubmit = useCallback(() => {
     setInputSetting({ blockUid: pageUid, key: "token", value });
-    setStage("RequestDomain");
+    setStage("RequestUser");
   }, [value, setStage, pageUid]);
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -110,6 +114,103 @@ const RequestTokenContent: StageContent = ({ pageUid, setStage }) => {
         <InputGroup value={value} onChange={onChange} onKeyDown={onKeyDown} />
       </Label>
       <Button onClick={onSubmit}>NEXT</Button>
+    </>
+  );
+};
+
+const HIGHLIGHT = "border: 3px dashed yellowgreen";
+
+const RequestUserContent: StageContent = ({ setStage }) => {
+  const [ready, setReady] = useState(false);
+  const timeoutRef = useRef(0);
+  const checkSettings = useCallback(() => {
+    if (!ready) {
+      const settings = getSettingsByEmail("support@roamjs.com");
+      if (!settings) {
+        timeoutRef.current = window.setTimeout(checkSettings, 3000);
+      } else {
+        setReady(true);
+      }
+    }
+  }, [timeoutRef, setReady, ready]);
+  useEffect(() => {
+    const topbar = document.getElementsByClassName("rm-topbar")[0];
+    if (topbar) {
+      const moreMenu = topbar.getElementsByClassName(
+        "bp3-icon-more"
+      )[0] as HTMLSpanElement;
+      if (moreMenu) {
+        moreMenu.style.border = HIGHLIGHT;
+        const listener = () => {
+          moreMenu.style.border = "unset";
+          setTimeout(() => {
+            const menuItems = moreMenu.closest(
+              ".bp3-popover-target.bp3-popover-open"
+            )?.nextElementSibling;
+            if (menuItems) {
+              const shareItem = Array.from(
+                menuItems.getElementsByClassName("bp3-menu-item")
+              )
+                .map((e) => e as HTMLAnchorElement)
+                .find((e) => e.innerText === "Share");
+              if (shareItem) {
+                shareItem.style.border = HIGHLIGHT;
+                const shareListener = () => {
+                  shareItem.style.border = "unset";
+                  setTimeout(() => {
+                    const grid = document.getElementsByClassName(
+                      "sharing-grid"
+                    )[0];
+                    const textarea = Array.from(
+                      grid.getElementsByTagName("textarea")
+                    ).find((t) =>
+                      t.parentElement.previousElementSibling.innerHTML.startsWith(
+                        "Readers"
+                      )
+                    );
+                    if (textarea) {
+                      textarea.parentElement.parentElement.style.border = HIGHLIGHT;
+                      const guide = document.createElement("span");
+                      guide.style.fontSize = "8px";
+                      guide.innerText =
+                        "(Press Enter after adding support@roamjs.com)";
+                      textarea.parentElement.appendChild(guide);
+                    }
+                  }, 500);
+                  shareItem.removeEventListener("click", shareListener);
+                };
+                shareItem.addEventListener("click", shareListener);
+              }
+            }
+          }, 500);
+          moreMenu.removeEventListener("click", listener);
+        };
+        moreMenu.addEventListener("click", listener);
+      }
+    }
+    checkSettings();
+    return () => window.clearTimeout(timeoutRef.current);
+  }, [checkSettings]);
+  const onSubmit = useCallback(() => setStage("RequestDomain"), [setStage]);
+  return (
+    <>
+      <p>
+        Click the highlighted more menu above to share your graph with{" "}
+        <code>support@roamjs.com</code> as a <b>Reader</b>.
+      </p>
+      <p style={{ fontSize: "8px" }}>
+        Why do we need this?{" "}
+        <Tooltip
+          content={
+            "RoamJS needs to access your Roam data for automatic daily updates. Instead of trusting RoamJS with your password, we are asking for read only permission. We will only access data based on your soon to be configured filters for the purposes of deploying your site."
+          }
+        >
+          <Icon icon={"info-sign"} />
+        </Tooltip>
+      </p>
+      <Button onClick={onSubmit} disabled={!ready}>
+        NEXT
+      </Button>
     </>
   );
 };
@@ -324,7 +425,7 @@ const LiveContent: StageContent = ({ graph }) => {
         <>
           {status ? (
             <>
-              <div>
+              <div style={{ marginBottom: 16 }}>
                 <span>Status</span>
                 {status === "AWAITING VALIDATION" ? (
                   <>

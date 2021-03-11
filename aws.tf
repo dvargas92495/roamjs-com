@@ -148,8 +148,7 @@ module "aws-serverless-backend" {
     ]
     cors = [
       "launch-social",
-      "launch-website",
-      "shutdown-website",
+      "start-service",
       "shutdown-social",
     ]
     tags = {

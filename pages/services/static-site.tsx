@@ -1,6 +1,5 @@
-import { Body, H4 } from "@dvargas92495/ui";
+import { Body } from "@dvargas92495/ui";
 import React from "react";
-import CopyStaticSiteConfig from "../../components/CopyStaticSiteConfig";
 import ServiceLayout from "../../components/ServiceLayout";
 import {
   getStaticPropsForPage,
@@ -34,27 +33,7 @@ const StaticSitePage: React.FC<ServicePageProps> = (props) => {
         your Roam graph and manage a website for you based on your unique
         website configuration.
       </Body>
-      <Body>
-        On your Roam graph, you will need to give the `support@roamjs.com`
-        account **read-only access** to your graph. RoamJS promises to not use
-        this data outside of the purposes of deploying the configured content to
-        your public website. To grant access, first click the `...` menu on the
-        top right of your graph: ![](/images/static-site-share.png) Then, when
-        this modal appears, add `support@roamjs.com` to the **Readers** text box
-        on the right: ![](/images/static-site-permission.png) Then, click enter.
-        You will then see the email added to the list below the text box:
-        ![](/images/static-site-granted.png) Next, set up the configuration page
-        with the name `roam/js/static-site`. By default, the Service will query
-        your **full Roam graph** to generate the public website. To view the
-        filtering capabilities, see the Configuration section below. Once the
-        page is configured, head to your [user page](https://roamjs.com/user).
-        Click on the `Static Site` tab on the left, then click the `Launch`
-        button: ![](/images/static-site-launch.png) Fill out the name of the
-        Roam graph that will generate the public site and the domain that the
-        site will be hosted under. ![](/images/static-site-demo.png) RoamJS will
-        register the domain and start setting up the resources necessary to host
-        the site. The process takes about half hour.
-      </Body>{" "}
+      {/*
       <H4>Configuration</H4>
       <Body>
         Specify global site configuration by adding settings to the
@@ -105,6 +84,7 @@ const StaticSitePage: React.FC<ServicePageProps> = (props) => {
         could use the GitHub action found
         [here](https://github.com/dvargas92495/generate-roam-site-action).
       </Body>
+      */}
     </ServiceLayout>
   );
 };
