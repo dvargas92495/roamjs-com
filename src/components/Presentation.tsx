@@ -181,21 +181,27 @@ const setDocumentLis = ({
 };
 
 const LAYOUTS = ["Image Left", "Image Center", "Image Right"];
-const findImageResize = ({
+const findLinkResize = ({
   src,
   slides,
+  field,
 }: {
   slides: Slides;
   src: string;
-}): ImageResize => {
+  field: "imageResize" | "iframe";
+}): LinkResize => {
   if (slides.length === 0) {
     return {};
   }
   const slideWithImage = slides.find((s) => s.text.includes(src));
   if (slideWithImage) {
-    return slideWithImage.props.imageResize;
+    return slideWithImage.props[field];
   }
-  return findImageResize({ src, slides: slides.flatMap((s) => s.children) });
+  return findLinkResize({
+    src,
+    slides: slides.flatMap((s) => s.children),
+    field,
+  });
 };
 
 const ContentSlide = ({
@@ -259,10 +265,27 @@ const ContentSlide = ({
       Array.from(slideRoot.current.getElementsByTagName("img")).forEach(
         (img) => {
           const src = img.src;
-          const resizeProps = findImageResize({ src, slides: children });
+          const resizeProps = findLinkResize({
+            src,
+            slides: children,
+            field: "imageResize",
+          });
           const { width, height } = getResizeStyle(resizeProps[src]);
           img.style.width = width;
           img.style.height = height;
+        }
+      );
+      Array.from(slideRoot.current.getElementsByTagName("iframe")).forEach(
+        (iframe) => {
+          const src = iframe.src;
+          const resizeProps = findLinkResize({
+            src,
+            slides: children,
+            field: "iframe",
+          });
+          const { width, height } = resizeProps[src] || {};
+          iframe.width = `${width || 500}px`;
+          iframe.height = `${height || 500}px`;
         }
       );
       setHtmlEditsLoaded(true);
@@ -660,7 +683,7 @@ const Presentation: React.FunctionComponent<{
   );
 };
 
-type ImageResize = {
+type LinkResize = {
   [link: string]: {
     height: number;
     width: number;
@@ -675,7 +698,8 @@ type Slide = {
   open: boolean;
   viewType: ViewType;
   props: {
-    imageResize: ImageResize;
+    imageResize: LinkResize;
+    iframe: LinkResize;
   };
 };
 
