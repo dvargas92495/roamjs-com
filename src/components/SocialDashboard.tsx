@@ -196,7 +196,7 @@ const ScheduledContent: React.FC<{ socialToken: string }> = ({
             service with the following extensions:
           </div>
           {SUPPORTED_CHANNELS.map((c) => (
-            <Card style={{ width: "25%" }}>
+            <Card style={{ width: "50%" }}>
               <h5>{c.toUpperCase()}</h5>
               <ol>
                 <li>

@@ -28,6 +28,7 @@ import axios from "axios";
 import twitter from "twitter-text";
 import addYears from "date-fns/addYears";
 import endOfYear from "date-fns/endOfYear";
+import format from "date-fns/format";
 
 const ATTACHMENT_REGEX = /!\[[^\]]*\]\(([^\s)]*)\)/g;
 const UPLOAD_URL = `${process.env.REST_API_URL}/twitter-upload`;
@@ -316,7 +317,7 @@ const TwitterContent: React.FunctionComponent<{
       .then(() => {
         setLoading(false);
         setDialogMessage(
-          `Tweet Successfully Scheduled to post at ${scheduleDate.toJSON()}!`
+          `Tweet Successfully Scheduled to post at ${format(scheduleDate, 'yyyy/MM/dd hh:mm:ss a')}!`
         );
       })
       .catch((e) => {

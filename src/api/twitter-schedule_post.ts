@@ -15,6 +15,7 @@ export const handler = authenticate((event) => {
         payload: { S: payload },
         status: { S: "PENDING" },
         userId: { S: event.headers.Authorization },
+        channel: {S: 'twitter'}
       },
     })
     .promise()
