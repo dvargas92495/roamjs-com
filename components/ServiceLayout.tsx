@@ -15,7 +15,6 @@ import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { useRouter } from "next/router";
 import { useAuthenticatedAxiosPost, useCopyCode } from "./hooks";
 import { stripe } from "./constants";
-import axios from "axios";
 
 const idToTitle = (id: string) =>
   id
@@ -32,6 +31,9 @@ const LaunchButton: React.FC<{
   price: number;
   refreshUser: () => void;
 }> = ({ start, id, price, refreshUser }) => {
+  const {
+    query: { started },
+  } = useRouter();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const startService = useCallback(
     () =>
@@ -57,6 +59,7 @@ const LaunchButton: React.FC<{
       )} for $${price}/month.`}
       onSuccess={start}
       title={`RoamJS ${idToTitle(id)}`}
+      defaultIsOpen={started === 'true'}
     />
   );
 };
@@ -259,7 +262,7 @@ const ServiceLayout = ({
         <CheckSubscription id={id} start={start} price={price}>
           {(StartNowButton) =>
             started ? (
-              <Service id={id} end={end}/>
+              <Service id={id} end={end} />
             ) : (
               <SplashLayout StartNowButton={StartNowButton} />
             )

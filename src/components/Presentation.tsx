@@ -86,17 +86,26 @@ const Notes = ({ note }: { note?: Slide }) => (
   </>
 );
 
-type ImageFromTextProps = {
+type SrcFromTextProps = {
   text: string;
-  imageResizes?: {
+  resizes?: {
     [link: string]: {
       height: number;
       width: number;
     };
   };
+  type?: "image" | "iframe";
 };
 
-const IMG_REGEX = /!\[(.*)\]\((.*)\)/;
+const URL_REGEX = /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+const SRC_REGEXES = {
+  image: /!\[(.*)\]\((.*)\)/,
+  iframe: new RegExp(`{{(?:\\[\\[)?iframe(?:\\]\\])?:(${URL_REGEX.source})}}`),
+};
+const SRC_INDEX = {
+  image: 2,
+  iframe: 1,
+};
 const getResizeStyle = (imageResize?: { width: number; height: number }) => ({
   width: isNaN(imageResize?.width)
     ? "auto"
@@ -106,53 +115,68 @@ const getResizeStyle = (imageResize?: { width: number; height: number }) => ({
     : `${(100 * imageResize?.height) / IMG_MAX_HEIGHT}%`,
 });
 
-const ImageFromText: React.FunctionComponent<
-  ImageFromTextProps & {
-    Alt: React.FunctionComponent<ImageFromTextProps>;
+const SrcFromText: React.FunctionComponent<
+  SrcFromTextProps & {
+    Alt: React.FunctionComponent<SrcFromTextProps>;
   }
-> = ({ text, Alt, imageResizes }) => {
-  const imageMatch = text.match(IMG_REGEX);
+> = ({ text, Alt, resizes, type = "image" }) => {
+  const match = text.match(SRC_REGEXES[type]);
   const [style, setStyle] = useState({});
-  const imageRef = useRef(null);
-  const imageResize = imageMatch && imageResizes[imageMatch[2]];
-  const imageOnLoad = useCallback(() => {
-    const imageAspectRatio = imageRef.current.width / imageRef.current.height;
+  const srcRef = useRef(null);
+  const srcResize = match && resizes[match[SRC_INDEX[type]]];
+  const srcOnLoad = useCallback(() => {
+    const srcAspectRatio = srcRef.current.width / srcRef.current.height;
     const containerAspectRatio =
-      imageRef.current.parentElement.offsetWidth /
-      imageRef.current.parentElement.offsetHeight;
-    if (imageResize) {
-      setStyle(getResizeStyle(imageResize));
-    } else if (!isNaN(imageAspectRatio) && !isNaN(containerAspectRatio)) {
-      if (imageAspectRatio > containerAspectRatio) {
+      srcRef.current.parentElement.offsetWidth /
+      srcRef.current.parentElement.offsetHeight;
+    if (srcResize) {
+      setStyle(getResizeStyle(srcResize));
+    } else if (!isNaN(srcAspectRatio) && !isNaN(srcAspectRatio)) {
+      if (srcAspectRatio > containerAspectRatio) {
         setStyle({ width: "100%", height: "auto" });
       } else {
         setStyle({ height: "100%", width: "auto" });
       }
     }
-  }, [setStyle, imageRef, imageResize]);
+  }, [setStyle, srcRef, srcResize]);
   useEffect(() => {
-    if (imageRef.current) {
-      imageRef.current.onload = imageOnLoad;
+    if (srcRef.current) {
+      srcRef.current.onload = srcOnLoad;
     }
-  }, [imageOnLoad, imageRef]);
-  return imageMatch ? (
-    <img alt={imageMatch[1]} src={imageMatch[2]} ref={imageRef} style={style} />
+  }, [srcOnLoad, srcRef]);
+  return match ? (
+    <>
+      {type === "image" && (
+        <img alt={match[1]} src={match[2]} ref={srcRef} style={style} />
+      )}
+      {type === "iframe" && (
+        <iframe frameBorder={0} src={match[1]} ref={srcRef} style={style} />
+      )}
+    </>
   ) : (
     <Alt text={text} />
   );
 };
 
 const TitleSlide = ({ text, note }: { text: string; note: Slide }) => {
-  const style = IMG_REGEX.test(text) ? { bottom: 0 } : {};
+  const type = Object.keys(SRC_REGEXES).find((k: keyof typeof SRC_REGEXES) =>
+    SRC_REGEXES[k].test(text)
+  ) as keyof typeof SRC_REGEXES;
+  const style = type ? { bottom: 0 } : {};
   return (
     <section style={style}>
-      <ImageFromText text={text} Alt={({ text }) => <h1>{text}</h1>} />
+      <SrcFromText
+        text={text}
+        Alt={({ text }) => <h1>{text}</h1>}
+        type={type}
+      />
       <Notes note={note} />
     </section>
   );
 };
 
 const STARTS_WITH_IMAGE = new RegExp("^image ", "i");
+const STARTS_WITH_IFRAME = new RegExp("^iframe ", "i");
 const ENDS_WITH_LEFT = new RegExp(" left$", "i");
 const ENDS_WITH_CENTER = new RegExp(" center$", "i");
 
@@ -180,7 +204,14 @@ const setDocumentLis = ({
   });
 };
 
-const LAYOUTS = ["Image Left", "Image Center", "Image Right"];
+const LAYOUTS = [
+  "Image Left",
+  "Image Center",
+  "Image Right",
+  "Iframe Left",
+  "Iframe Center",
+  "Iframe Right",
+];
 const findLinkResize = ({
   src,
   slides,
@@ -217,9 +248,11 @@ const ContentSlide = ({
   viewType: ViewType;
 } & ContentSlideExtras) => {
   const isImageLayout = STARTS_WITH_IMAGE.test(layout);
+  const isIframeLayout = STARTS_WITH_IFRAME.test(layout);
+  const isSourceLayout = isImageLayout || isIframeLayout;
   const isLeftLayout = ENDS_WITH_LEFT.test(layout);
   const isCenterLayout = ENDS_WITH_CENTER.test(layout);
-  const bullets = isImageLayout ? children.slice(1) : children;
+  const bullets = isSourceLayout ? children.slice(1) : children;
   const slideRoot = useRef<HTMLDivElement>(null);
   const [htmlEditsLoaded, setHtmlEditsLoaded] = useState(false);
   const [imageDialogSrc, setImageDialogSrc] = useState("");
@@ -374,7 +407,7 @@ const ContentSlide = ({
           }}
           ref={slideRoot}
         />
-        {isImageLayout && (
+        {isSourceLayout && (
           <div
             style={{
               width: isCenterLayout ? "100%" : "50%",
@@ -390,10 +423,13 @@ const ContentSlide = ({
                 height: "100%",
               }}
             />
-            <ImageFromText
+            <SrcFromText
               text={children[0].text}
               Alt={() => <div />}
-              imageResizes={children[0].props.imageResize}
+              resizes={
+                children[0].props[isIframeLayout ? "iframe" : "imageResize"]
+              }
+              type={isIframeLayout ? "iframe" : "image"}
             />
           </div>
         )}

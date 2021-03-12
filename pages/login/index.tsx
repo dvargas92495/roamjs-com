@@ -8,7 +8,7 @@ const LoginPage = (): JSX.Element => {
   return (
     <Layout>
       {service ? (
-        <SignIn afterSignIn={`${window.location.origin}/services/${service}`} />
+        <SignIn afterSignIn={`${window.location.origin}/services/${service}?started=true`} />
       ) : (
         <SignIn />
       )}

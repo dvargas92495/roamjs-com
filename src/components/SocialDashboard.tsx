@@ -191,7 +191,7 @@ const ScheduledContent: React.FC<{ socialToken: string }> = ({
         </table>
       ) : (
         <>
-          <div style={{ color: "darkgoldenrod" }}>
+          <div style={{ color: "darkgoldenrod", margin: "16px 0" }}>
             You have not scheduled any content from Roam! You could use this
             service with the following extensions:
           </div>
@@ -200,7 +200,7 @@ const ScheduledContent: React.FC<{ socialToken: string }> = ({
               <h5>{c.toUpperCase()}</h5>
               <ol>
                 <li>
-                  Type <code>tweet</code> into a block
+                  Type <code>{`{{tweet}}`}</code> into a block
                 </li>
                 <li>Nest your content as a child block</li>
                 <li>Click the Twitter icon and click Schedule Tweet</li>
