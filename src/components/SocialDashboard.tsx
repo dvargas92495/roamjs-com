@@ -34,6 +34,8 @@ type ScheduledTweet = {
   scheduledDate: string;
 } & (AttemptedTweet | PendingTweet);
 
+const SUPPORTED_CHANNELS = ["twitter"];
+
 const RequestTokenContent = ({
   setToken,
 }: {
@@ -188,9 +190,24 @@ const ScheduledContent: React.FC<{ socialToken: string }> = ({
           </tbody>
         </table>
       ) : (
-        <div style={{ color: "darkgoldenrod" }}>
-          You have not scheduled any tweets from Roam!
-        </div>
+        <>
+          <div style={{ color: "darkgoldenrod" }}>
+            You have not scheduled any content from Roam! You could use this
+            service with the following extensions:
+          </div>
+          {SUPPORTED_CHANNELS.map((c) => (
+            <Card style={{ width: "25%" }}>
+              <h5>{c.toUpperCase()}</h5>
+              <ol>
+                <li>
+                  Type <code>tweet</code> into a block
+                </li>
+                <li>Nest your content as a child block</li>
+                <li>Click the Twitter icon and click Schedule Tweet</li>
+              </ol>
+            </Card>
+          ))}
+        </>
       )}
     </>
   ) : (

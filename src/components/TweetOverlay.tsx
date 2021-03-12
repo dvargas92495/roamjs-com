@@ -301,7 +301,7 @@ const TwitterContent: React.FunctionComponent<{
     setLoading(true);
     axios
       .post(
-        `${process.env.REST_API_URL}/tweet-schedule`,
+        `${process.env.REST_API_URL}/twitter-schedule`,
         {
           scheduleDate: scheduleDate.toJSON(),
           payload: JSON.stringify({ blocks: message, tweetId }),
