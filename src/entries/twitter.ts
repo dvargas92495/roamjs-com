@@ -18,7 +18,6 @@ import {
 import axios from "axios";
 import { render } from "../components/TweetOverlay";
 import { render as loginRender } from "../components/TwitterLogin";
-import { render as dashboardRender } from "../components/TwitterDashboard";
 
 addStyle(`.roamjs-twitter-count {
   position: relative;
@@ -136,11 +135,5 @@ runExtension("twitter", () => {
         });
       }
     },
-  });
-
-  createButtonObserver({
-    shortcut: "twitter dashboard",
-    attribute: "scheduled-tweets",
-    render: dashboardRender,
   });
 });

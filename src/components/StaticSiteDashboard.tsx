@@ -212,7 +212,7 @@ const RequestUserContent: StageContent = ({ setStage, pageUid }) => {
         Why do we need this?{" "}
         <Tooltip
           content={
-            <span style={{ maxWidth: 400 }}>
+            <span style={{ maxWidth: 400, display: "inline-block" }}>
               RoamJS needs to access your Roam data for automatic daily updates.
               Instead of trusting RoamJS with your password, we are asking for
               read only permission. We will only access data based on your soon
@@ -428,6 +428,15 @@ const getLaunchBody = (graph: string) => {
   };
 };
 
+const getNameServers = (statusProps: string): string[] => {
+  try{
+    const { nameServers } = JSON.parse(statusProps);
+    return nameServers || []
+  } catch {
+    return [];
+  }
+}
+
 const isWebsiteReady = (w: { status: string; deploys: { status: string }[] }) =>
   w.status === "LIVE" &&
   w.deploys.length &&
@@ -525,7 +534,7 @@ const LiveContent: StageContent = ({ graph }) => {
                     To continue, add the following Name Servers to your Domain
                     Management Settings:
                     <ul>
-                      {(JSON.parse(statusProps).nameServers as string[]).map(
+                      {getNameServers(statusProps).map(
                         (n) => (
                           <li>{n}</li>
                         )
