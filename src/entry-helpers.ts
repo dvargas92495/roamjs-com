@@ -671,6 +671,11 @@ export const getPageUidByPageTitle = (title: string): string => {
   return block.uid;
 };
 
+export const getChildrenLengthByPageTitle = (title: string): number =>
+  window.roamAlphaAPI.q(
+    `[:find ?c :where [?e :block/children ?c] [?e :node/title "${title}"]]`
+  ).length;
+
 export const getBlockDepthByBlockUid = (blockUid: string): number => {
   const result = window.roamAlphaAPI.q(
     `[:find (pull ?c [:node/title, :block/uid]) :where [?c :block/children ?e] [?e :block/uid "${blockUid}"]]`

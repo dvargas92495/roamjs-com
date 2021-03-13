@@ -1,6 +1,6 @@
 import {
+  Alert,
   Button,
-  Dialog,
   Icon,
   Popover,
   Portal,
@@ -317,7 +317,10 @@ const TwitterContent: React.FunctionComponent<{
       .then(() => {
         setLoading(false);
         setDialogMessage(
-          `Tweet Successfully Scheduled to post at ${format(scheduleDate, 'yyyy/MM/dd hh:mm:ss a')}!`
+          `Tweet Successfully Scheduled to post at ${format(
+            scheduleDate,
+            "yyyy/MM/dd hh:mm:ss a"
+          )}!`
         );
       })
       .catch((e) => {
@@ -501,9 +504,22 @@ const TweetOverlay: React.FunctionComponent<{
             </span>
           </Portal>
         ))}
-      <Dialog isOpen={!!dialogMessage} onClose={closeDialog}>
-        {dialogMessage}
-      </Dialog>
+      <Alert
+        isOpen={!!dialogMessage}
+        onClose={closeDialog}
+        canEscapeKeyCancel
+        canOutsideClickCancel
+      >
+        <p>{dialogMessage}</p>
+        <p>
+          Visit the <span className="rm-page-ref__brackets">[[</span>
+          <span tabIndex={-1} className="rm-page-ref rm-page-ref--link">
+            roam/js/social
+          </span>
+          <span className="rm-page-ref__brackets">]]</span> page to track the
+          tweet's status.
+        </p>
+      </Alert>
     </>
   );
 };

@@ -27,6 +27,7 @@ import {
 } from "roam-client";
 import { getPageUidByPageTitle, setInputSetting } from "../entry-helpers";
 import MenuItemSelect from "./MenuItemSelect";
+import { HIGHLIGHT } from "./ServiceCommonComponents";
 
 const useAuthenticatedAxiosGet = (): ((
   path: string
@@ -123,8 +124,6 @@ const RequestTokenContent: StageContent = ({ pageUid, setStage }) => {
     </>
   );
 };
-
-const HIGHLIGHT = "3px dashed yellowgreen";
 
 const RequestUserContent: StageContent = ({ setStage, pageUid }) => {
   const [ready, setReady] = useState(false);
