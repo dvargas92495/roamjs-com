@@ -14,15 +14,19 @@ import axios from "axios";
 import format from "date-fns/format";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
-import { createBlock, getTreeByPageName, PullBlock } from "roam-client";
+import { createBlock, getTreeByPageName, watchOnce } from "roam-client";
 import {
   getChildrenLengthByPageTitle,
   getPageUidByPageTitle,
   openBlockInSidebar,
   setInputSetting,
 } from "../entry-helpers";
-import { useSocialToken } from "./hooks";
-import { HIGHLIGHT } from "./ServiceCommonComponents";
+import {
+  HIGHLIGHT,
+  isTokenInTree,
+  ServiceDashboard,
+  StageContent,
+} from "./ServiceCommonComponents";
 import { render as loginRender } from "../components/TwitterLogin";
 
 type AttemptedTweet = {
@@ -53,19 +57,6 @@ if (!existing) {
   document.getElementsByTagName("head")[0].appendChild(extension);
 }
 \`\`\``;
-
-const watchOnce = (
-  pullPattern: string,
-  entityId: string,
-  callback: (before: PullBlock, after: PullBlock) => boolean
-) => {
-  const watcher = (before: PullBlock, after: PullBlock) => {
-    if (callback(before, after)) {
-      window.roamAlphaAPI.data.removePullWatch(pullPattern, entityId, watcher);
-    }
-  };
-  window.roamAlphaAPI.data.addPullWatch(pullPattern, entityId, watcher);
-};
 
 const renderTooltip = ({
   tooltipMessage,
@@ -116,13 +107,12 @@ const getBulletElement = (uid: string) => {
 const isTwitterOauthSet = () =>
   getTreeByPageName("roam/js/twitter").some((t) => /oauth/i.test(t.text));
 
-const TwitterTutorial = () => {
+const TwitterTutorial = ({ pageUid }: { pageUid: string }) => {
   const [alertMessage, setAlertMessage] = useState("");
   const onClose = useCallback(() => setAlertMessage(""), [setAlertMessage]);
   const alertCallback = useRef(() => console.log("No Alert Callback Set"));
   const stepThree = useCallback(() => {
     alertCallback.current = () => {
-      const pageUid = getPageUidByPageTitle("roam/js/social");
       const length = getChildrenLengthByPageTitle("roam/js/social");
       const uid = window.roamAlphaAPI.util.generateUID();
       window.roamAlphaAPI.createBlock({
@@ -355,21 +345,16 @@ const TwitterTutorial = () => {
   );
 };
 
-const RequestTokenContent = ({
-  setToken,
-}: {
-  setToken: (t: string) => void;
-}) => {
+const RequestTokenContent: StageContent = ({ nextStage, pageUid }) => {
   const [value, setValue] = useState("");
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
     [setValue]
   );
   const onSubmit = useCallback(() => {
-    const pageUid = getPageUidByPageTitle("roam/js/social");
     setInputSetting({ blockUid: pageUid, key: "token", value });
-    setToken(value);
-  }, [value]);
+    nextStage();
+  }, [value, nextStage]);
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (
@@ -398,9 +383,11 @@ const RequestTokenContent = ({
   );
 };
 
-const ScheduledContent: React.FC<{ socialToken: string }> = ({
-  socialToken,
-}) => {
+const getToken = () =>
+  getTreeByPageName("roam/js/social").find((t) => /token/i.test(t.text))
+    ?.children?.[0]?.text;
+
+const ScheduledContent: StageContent = ({ pageUid }) => {
   const [loading, setLoading] = useState(true);
   const [valid, setValid] = useState(false);
   const [scheduledTweets, setScheduledTweets] = useState<ScheduledTweet[]>([]);
@@ -408,14 +395,14 @@ const ScheduledContent: React.FC<{ socialToken: string }> = ({
     setLoading(true);
     axios
       .get(`${process.env.REST_API_URL}/twitter-schedule`, {
-        headers: { Authorization: `social:${socialToken}` },
+        headers: { Authorization: `social:${getToken()}` },
       })
       .then((r) => {
         setValid(true);
         setScheduledTweets(r.data.scheduledTweets);
       })
       .finally(() => setLoading(false));
-  }, [setLoading, setValid, socialToken]);
+  }, [setLoading, setValid]);
   useEffect(() => {
     if (loading) {
       refresh();
@@ -425,7 +412,6 @@ const ScheduledContent: React.FC<{ socialToken: string }> = ({
     <Spinner />
   ) : valid ? (
     <>
-      <h4>Scheduled Content</h4>
       {scheduledTweets.length ? (
         <table className="bp3-html-table bp3-html-table-bordered bp3-html-table-striped">
           <thead>
@@ -517,7 +503,7 @@ const ScheduledContent: React.FC<{ socialToken: string }> = ({
           {SUPPORTED_CHANNELS.map((c) => (
             <Card style={{ width: "25%", textAlign: "center" }} key={c}>
               <h5>{c.toUpperCase()}</h5>
-              <TwitterTutorial />
+              <TwitterTutorial pageUid={pageUid} />
             </Card>
           ))}
         </>
@@ -532,7 +518,7 @@ const ScheduledContent: React.FC<{ socialToken: string }> = ({
     </>
   ) : (
     <div style={{ color: "darkred" }}>
-      <h4>RoamJS Social Token {socialToken} is invalid.</h4>
+      <h4>RoamJS Social Token is invalid.</h4>
       <p>
         If you are subscribed to RoamJS Social, you can find your RoamJS token
         on the{" "}
@@ -564,21 +550,20 @@ const ScheduledContent: React.FC<{ socialToken: string }> = ({
   );
 };
 
-const SocialDashboard: React.FC = () => {
-  const socialToken = useSocialToken();
-  const [token, setToken] = useState(socialToken);
-  return (
-    <Card style={{ position: "relative" }}>
-      {token ? (
-        <ScheduledContent socialToken={token} />
-      ) : (
-        <RequestTokenContent setToken={setToken} />
-      )}
-    </Card>
-  );
-};
-
-export const render = (p: HTMLDivElement): void =>
-  ReactDOM.render(<SocialDashboard />, p);
+const SocialDashboard = (): React.ReactElement => (
+  <ServiceDashboard
+    service={"social"}
+    stages={[
+      {
+        check: isTokenInTree,
+        component: RequestTokenContent,
+      },
+      {
+        check: () => false,
+        component: ScheduledContent,
+      },
+    ]}
+  />
+);
 
 export default SocialDashboard;

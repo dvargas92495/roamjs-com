@@ -150,7 +150,7 @@
     "remark-slug": "^6.0.0",
     "remark-unwrap-images": "^2.0.0",
     "reveal.js": "^4.1.0",
-    "roam-client": "^1.41.5",
+    "roam-client": "^1.42.1",
     "roam-marked": "^0.7.0",
     "tesseract.js": "^2.1.3",
     "turndown": "^7.0.0",

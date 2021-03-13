@@ -1,7 +1,6 @@
 import {
   Alert,
   Button,
-  Card,
   Icon,
   InputGroup,
   Intent,
@@ -11,23 +10,22 @@ import {
   Tooltip,
 } from "@blueprintjs/core";
 import axios, { AxiosResponse } from "axios";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import ReactDOM from "react-dom";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   getTreeByBlockUid,
   getTreeByPageName,
   createBlock,
   TextNode,
 } from "roam-client";
-import { getPageUidByPageTitle, setInputSetting } from "../entry-helpers";
+import { setInputSetting } from "../entry-helpers";
 import MenuItemSelect from "./MenuItemSelect";
-import { HIGHLIGHT } from "./ServiceCommonComponents";
+import {
+  HIGHLIGHT,
+  isFieldInTree,
+  isTokenInTree,
+  ServiceDashboard,
+  StageContent,
+} from "./ServiceCommonComponents";
 
 const useAuthenticatedAxiosGet = (): ((
   path: string
@@ -56,38 +54,7 @@ const getToken = () =>
   getTreeByPageName("roam/js/static-site").find((t) => /token/i.test(t.text))
     ?.children?.[0]?.text;
 
-type StageValue =
-  | "RequestToken"
-  | "RequestUser"
-  | "RequestDomain"
-  | "RequestIndex"
-  | "RequestFilters"
-  | "Live";
-
-const getStage = (): StageValue => {
-  const tree = getTreeByPageName("roam/js/static-site");
-  if (!tree.find((t) => /token/i.test(t.text))?.children?.[0]?.text) {
-    return "RequestToken";
-  } else if (!tree.find((t) => /share/i.test(t.text))) {
-    return "RequestUser";
-  } else if (!tree.some((t) => /domain/i.test(t.text))) {
-    return "RequestDomain";
-  } else if (!tree.some((t) => /index/i.test(t.text))) {
-    return "RequestIndex";
-  } else if (!tree.some((t) => /filter/i.test(t.text))) {
-    return "RequestFilters";
-  } else {
-    return "Live";
-  }
-};
-
-type StageContent = (props: {
-  pageUid: string;
-  setStage: (v: StageValue) => void;
-  graph: string;
-}) => React.ReactElement;
-
-const RequestTokenContent: StageContent = ({ pageUid, setStage }) => {
+const RequestTokenContent: StageContent = ({ pageUid, nextStage }) => {
   const [value, setValue] = useState("");
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
@@ -95,8 +62,8 @@ const RequestTokenContent: StageContent = ({ pageUid, setStage }) => {
   );
   const onSubmit = useCallback(() => {
     setInputSetting({ blockUid: pageUid, key: "token", value });
-    setTimeout(() => setStage(getStage()), 1);
-  }, [value, setStage, pageUid]);
+    nextStage();
+  }, [value, nextStage, pageUid]);
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (
@@ -125,7 +92,7 @@ const RequestTokenContent: StageContent = ({ pageUid, setStage }) => {
   );
 };
 
-const RequestUserContent: StageContent = ({ setStage, pageUid }) => {
+const RequestUserContent: StageContent = ({ nextStage, pageUid }) => {
   const [ready, setReady] = useState(false);
   const [deploySwitch, setDeploySwitch] = useState(true);
   const onSwitchChange = useCallback(
@@ -194,8 +161,8 @@ const RequestUserContent: StageContent = ({ setStage, pageUid }) => {
       key: "Share",
       value: `${deploySwitch}`,
     });
-    setTimeout(() => setStage(getStage()), 1);
-  }, [setStage, pageUid, deploySwitch, ready]);
+    nextStage();
+  }, [nextStage, pageUid, deploySwitch, ready]);
   return (
     <>
       <p>
@@ -233,7 +200,7 @@ const RequestUserContent: StageContent = ({ setStage, pageUid }) => {
   );
 };
 
-const RequestDomainContent: StageContent = ({ pageUid, setStage }) => {
+const RequestDomainContent: StageContent = ({ pageUid, nextStage }) => {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const onChange = useCallback(
@@ -248,8 +215,8 @@ const RequestDomainContent: StageContent = ({ pageUid, setStage }) => {
   }, [value]);
   const onSubmit = useCallback(() => {
     setInputSetting({ blockUid: pageUid, key: "domain", value, index: 1 });
-    setTimeout(() => setStage(getStage()), 1);
-  }, [value, setStage]);
+    nextStage();
+  }, [value, nextStage]);
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (
@@ -287,7 +254,7 @@ const RequestDomainContent: StageContent = ({ pageUid, setStage }) => {
   );
 };
 
-const RequestIndexContent: StageContent = ({ pageUid, setStage }) => {
+const RequestIndexContent: StageContent = ({ pageUid, nextStage }) => {
   const [value, setValue] = useState("");
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
@@ -295,8 +262,8 @@ const RequestIndexContent: StageContent = ({ pageUid, setStage }) => {
   );
   const onSubmit = useCallback(() => {
     setInputSetting({ blockUid: pageUid, key: "index", value, index: 1 });
-    setTimeout(() => setStage(getStage()), 1);
-  }, [value, setStage]);
+    nextStage();
+  }, [value, nextStage]);
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (
@@ -324,7 +291,7 @@ const RequestIndexContent: StageContent = ({ pageUid, setStage }) => {
   );
 };
 
-const RequestFiltersContent: StageContent = ({ pageUid, setStage }) => {
+const RequestFiltersContent: StageContent = ({ pageUid, nextStage }) => {
   const [filters, setFilters] = useState<(TextNode & { key: number })[]>([]);
   const [key, setKey] = useState(0);
   const onSubmit = useCallback(() => {
@@ -344,8 +311,8 @@ const RequestFiltersContent: StageContent = ({ pageUid, setStage }) => {
         parentUid: pageUid,
       });
     }
-    setTimeout(() => setStage(getStage()), 1);
-  }, [filters]);
+    nextStage();
+  }, [filters, nextStage]);
   const onAddFilter = useCallback(() => {
     setFilters([
       ...filters,
@@ -416,10 +383,10 @@ const RequestFiltersContent: StageContent = ({ pageUid, setStage }) => {
   );
 };
 
-const getLaunchBody = (graph: string) => {
+const getLaunchBody = () => {
   const tree = getTreeByPageName("roam/js/static-site");
   return {
-    graph,
+    graph: new RegExp(`^#/app/(.*?)/page/`).exec(window.location.hash)[1],
     domain: tree.find((t) => /domain/i.test(t.text))?.children?.[0]?.text,
     autoDeploysEnabled: true /*/true/i.test(
       tree.find((t) => /share/i.test(t.text))?.children?.[0]?.text
@@ -428,13 +395,13 @@ const getLaunchBody = (graph: string) => {
 };
 
 const getNameServers = (statusProps: string): string[] => {
-  try{
+  try {
     const { nameServers } = JSON.parse(statusProps);
-    return nameServers || []
+    return nameServers || [];
   } catch {
     return [];
   }
-}
+};
 
 const isWebsiteReady = (w: { status: string; deploys: { status: string }[] }) =>
   w.status === "LIVE" &&
@@ -448,7 +415,7 @@ const getStatusColor = (status: string) =>
     ? "darkred"
     : "goldenrod";
 
-const LiveContent: StageContent = ({ graph }) => {
+const LiveContent: StageContent = () => {
   const authenticatedAxiosGet = useAuthenticatedAxiosGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const [error, setError] = useState("");
@@ -498,14 +465,16 @@ const LiveContent: StageContent = ({ graph }) => {
     [setError, setLoading, getWebsite, authenticatedAxiosPost]
   );
   const launchWebsite = useCallback(
-    wrapPost("launch-website", getLaunchBody(graph)),
-    [graph, wrapPost]
+    wrapPost("launch-website", getLaunchBody()),
+    [wrapPost]
   );
   const manualDeploy = useCallback(wrapPost("deploy"), [wrapPost]);
-  const shutdownWebsite = useCallback(wrapPost("shutdown-website", { graph }), [
-    wrapPost,
-    graph,
-  ]);
+  const shutdownWebsite = useCallback(
+    wrapPost("shutdown-website", {
+      graph: new RegExp(`^#/app/(.*?)/page/`).exec(window.location.hash)[1],
+    }),
+    [wrapPost]
+  );
 
   useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
   const siteDeploying = loading || !isWebsiteReady({ status, deploys });
@@ -533,11 +502,9 @@ const LiveContent: StageContent = ({ graph }) => {
                     To continue, add the following Name Servers to your Domain
                     Management Settings:
                     <ul>
-                      {getNameServers(statusProps).map(
-                        (n) => (
-                          <li>{n}</li>
-                        )
-                      )}
+                      {getNameServers(statusProps).map((n) => (
+                        <li>{n}</li>
+                      ))}
                     </ul>
                   </div>
                 ) : (
@@ -617,36 +584,36 @@ const LiveContent: StageContent = ({ graph }) => {
   );
 };
 
-const components = {
-  RequestToken: RequestTokenContent,
-  RequestUser: RequestUserContent,
-  RequestDomain: RequestDomainContent,
-  RequestIndex: RequestIndexContent,
-  RequestFilters: RequestFiltersContent,
-  Live: LiveContent,
-};
-
-const StaticSiteDashboard = (): React.ReactElement => {
-  const pageUid = useMemo(
-    () => getPageUidByPageTitle("roam/js/static-site"),
-    []
-  );
-  const graph = useMemo(
-    () =>
-      new RegExp(`^#/app/(.*?)/page/${pageUid}$`).exec(window.location.hash)[1],
-    [pageUid]
-  );
-  const [stage, setStage] = useState<StageValue>(getStage);
-  const CardContent = components[stage];
-  return (
-    <Card>
-      <h4>Static Site Dashboard</h4>
-      <CardContent setStage={setStage} pageUid={pageUid} graph={graph} />
-    </Card>
-  );
-};
-
-export const render = (p: HTMLDivElement): void =>
-  ReactDOM.render(<StaticSiteDashboard />, p);
+const StaticSiteDashboard = (): React.ReactElement => (
+  <ServiceDashboard
+    service={"static-site"}
+    stages={[
+      {
+        check: isTokenInTree,
+        component: RequestTokenContent,
+      },
+      {
+        check: isFieldInTree('share'),
+        component: RequestUserContent,
+      },
+      {
+        check: isFieldInTree('domain'),
+        component: RequestDomainContent,
+      },
+      {
+        check: isFieldInTree('index'),
+        component: RequestIndexContent,
+      },
+      {
+        check: isFieldInTree('filter'),
+        component: RequestFiltersContent,
+      },
+      {
+        check: () => false,
+        component: LiveContent,
+      },
+    ]}
+  />
+);
 
 export default StaticSiteDashboard;
