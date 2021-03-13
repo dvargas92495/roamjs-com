@@ -6,7 +6,6 @@ import {
   Intent,
   Label,
   Popover,
-  Portal,
   Position,
   Spinner,
   Tooltip,
@@ -68,13 +67,56 @@ const watchOnce = (
   window.roamAlphaAPI.data.addPullWatch(pullPattern, entityId, watcher);
 };
 
+const renderTooltip = ({
+  tooltipMessage,
+  portalContainer,
+}: {
+  tooltipMessage: string;
+  portalContainer: HTMLSpanElement;
+}) =>
+  ReactDOM.render(
+    <Tooltip
+      isOpen={true}
+      position={Position.LEFT}
+      content={
+        <span style={{ width: 128, display: "inline-block" }}>
+          {tooltipMessage}
+        </span>
+      }
+    >
+      <span
+        style={{
+          display: "inline-block",
+          height: "100%",
+          width: "100%",
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+        }}
+      />
+    </Tooltip>,
+    portalContainer
+  );
+
+const getBulletElement = (uid: string) => {
+  const block = Array.from(
+    document.getElementsByClassName("roam-block")
+  ).find((d) => d.id.endsWith(uid));
+  return {
+    block,
+    bullet: block.parentElement.getElementsByClassName(
+      "rm-bullet"
+    )[0] as HTMLSpanElement,
+  };
+};
+
 const isTwitterOauthSet = () =>
   getTreeByPageName("roam/js/twitter").some((t) => /oauth/i.test(t.text));
 
 const TwitterTutorial = () => {
   const [alertMessage, setAlertMessage] = useState("");
-  const [tooltipMessage, setTooltipMessage] = useState("");
-  const [portalContainer, setPortalContainer] = useState(document.body);
   const onClose = useCallback(() => setAlertMessage(""), [setAlertMessage]);
   const alertCallback = useRef(() => console.log("No Alert Callback Set"));
   const stepThree = useCallback(() => {
@@ -87,25 +129,56 @@ const TwitterTutorial = () => {
         block: { uid, string: "" },
       });
       setTimeout(() => {
-        watchOnce("[:block/string]", `[:block/uid "${uid}"]`, (_, after) => {
-          const text = after[":block/string"];
-          console.log(text, /{{(?:[[)?tweet(?:]])}}/i.test(text));
-          return /{{(?:[[)?tweet(?:]])}}/i.test(text);
+        const portalContainer = document.createElement("span");
+        portalContainer.id = "roamjs-social-guide";
+        const { block, bullet: parent } = getBulletElement(uid);
+        parent.appendChild(portalContainer);
+        renderTooltip({
+          portalContainer,
+          tooltipMessage: "First, type {{[[tweet]]}} into this block",
         });
-        setPortalContainer(
-          Array.from(document.getElementsByClassName("roam-block"))
-            .find((d) => d.id.endsWith(uid))
-            .parentElement.getElementsByClassName(
-              "rm-bullet"
-            )[0] as HTMLSpanElement
-        );
-        setTooltipMessage("First, type {{[[tweet]]}} into this block");
+        watchOnce("[:block/string]", `[:block/uid "${uid}"]`, (_, after) => {
+          if (/{{(?:\[\[)?tweet(?:\]\])}}/i.test(after[":block/string"])) {
+            const childUid = window.roamAlphaAPI.util.generateUID();
+            window.roamAlphaAPI.createBlock({
+              location: { "parent-uid": uid, order: 0 },
+              block: { string: "", uid: childUid },
+            });
+            setTimeout(() => {
+              const { bullet: child } = getBulletElement(childUid);
+              child.appendChild(portalContainer);
+              ReactDOM.unmountComponentAtNode(portalContainer);
+              renderTooltip({
+                portalContainer,
+                tooltipMessage: "Now, write out your tweet as a child block.",
+              });
+              setTimeout(() => {
+                ReactDOM.unmountComponentAtNode(portalContainer);
+                const twitterIconTarget = document
+                  .getElementById(block.id)
+                  .getElementsByClassName("roamjs-twitter-icon")[0]
+                  .closest(".bp3-popover-target") as HTMLSpanElement;
+                twitterIconTarget.insertBefore(
+                  portalContainer,
+                  twitterIconTarget.firstElementChild
+                );
+                renderTooltip({
+                  portalContainer,
+                  tooltipMessage:
+                    'Once your tweet is ready, click this icon and click "Schedule Tweet"',
+                });
+              }, 10000);
+            }, 500);
+            return true;
+          }
+          return false;
+        });
       }, 500);
     };
     setAlertMessage(
       "Your Twitter setup is ready for scheduling tweets! Let's try scheduling one."
     );
-  }, [setAlertMessage, setPortalContainer, setTooltipMessage]);
+  }, [setAlertMessage]);
   const stepTwo = useCallback(() => {
     const oauth = isTwitterOauthSet();
     if (!oauth) {
@@ -201,33 +274,6 @@ const TwitterTutorial = () => {
       >
         {alertMessage}
       </Alert>
-      <Tooltip
-        isOpen={!!tooltipMessage}
-        position={Position.LEFT}
-        content={
-          <span style={{ width: 128, display: "inline-block" }}>
-            {tooltipMessage}
-          </span>
-        }
-      >
-        {tooltipMessage && (
-          <Portal container={portalContainer}>
-            <span
-              style={{
-                display: "inline-block",
-                height: "100%",
-                width: "100%",
-                position: "absolute",
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0,
-              }}
-              id="query-me"
-            />
-          </Portal>
-        )}
-      </Tooltip>
     </>
   );
 };
@@ -392,7 +438,7 @@ const ScheduledContent: React.FC<{ socialToken: string }> = ({
             service with the following extensions:
           </div>
           {SUPPORTED_CHANNELS.map((c) => (
-            <Card style={{ width: "25%" }} key={c}>
+            <Card style={{ width: "25%", textAlign: "center" }} key={c}>
               <h5>{c.toUpperCase()}</h5>
               <TwitterTutorial />
             </Card>

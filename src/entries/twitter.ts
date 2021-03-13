@@ -94,7 +94,7 @@ runExtension("twitter", () => {
     className: "rm-title-display",
     callback: (title: HTMLHeadingElement) => {
       const d = title.closest(".roam-article");
-      if (title.innerText === "roam/js/twitter") {
+      if (title.innerText === "roam/js/twitter" && d) {
         if (!d.hasAttribute("data-roamjs-twitter-login")) {
           const tree = getTreeByPageName("roam/js/twitter");
           const oauthNode = tree.find((t) => /oauth/i.test(t.text.trim()));
