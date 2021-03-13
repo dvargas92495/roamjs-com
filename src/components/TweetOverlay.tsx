@@ -353,7 +353,11 @@ const TwitterContent: React.FunctionComponent<{
               highlightCurrentDay
               timePickerProps={{ useAmPm: true, showArrowButtons: true }}
             />
-            <Button text={"schedule"} onClick={onScheduleClick} />
+            <Button
+              text={"Schedule"}
+              onClick={onScheduleClick}
+              id={"roamjs-send-schedule-button"}
+            />
             {loading && <Spinner size={Spinner.SIZE_SMALL} />}
             <Error error={error} />
           </div>
@@ -376,6 +380,7 @@ const TwitterContent: React.FunctionComponent<{
               <Button
                 text={tweetId ? "Schedule Reply" : "Schedule Tweet"}
                 onClick={openSchedule}
+                id={"roamjs-schedule-tweet-button"}
               />
             </div>
           )}

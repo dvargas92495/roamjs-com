@@ -94,6 +94,7 @@ const renderTooltip = ({
           bottom: 0,
           left: 0,
           right: 0,
+          pointerEvents: "none",
         }}
       />
     </Tooltip>,
@@ -167,6 +168,82 @@ const TwitterTutorial = () => {
                   tooltipMessage:
                     'Once your tweet is ready, click this icon and click "Schedule Tweet"',
                 });
+                twitterIconTarget.addEventListener(
+                  "click",
+                  () => {
+                    ReactDOM.unmountComponentAtNode(portalContainer);
+                    setTimeout(() => {
+                      const scheduleTweetButton = document.getElementById(
+                        "roamjs-schedule-tweet-button"
+                      );
+                      scheduleTweetButton.style.border = HIGHLIGHT;
+                      scheduleTweetButton.addEventListener(
+                        "click",
+                        () =>
+                          setTimeout(() => {
+                            const timePicker = document.getElementsByClassName(
+                              "bp3-datepicker-timepicker-wrapper"
+                            )[0] as HTMLDivElement;
+                            timePicker.style.border = HIGHLIGHT;
+                            const sendButton = document.getElementById(
+                              "roamjs-send-schedule-button"
+                            );
+                            sendButton.addEventListener(
+                              "click",
+                              () => {
+                                setTimeout(() => {
+                                  const refreshButton = document.getElementById(
+                                    "roamjs-social-refresh-button"
+                                  );
+                                  refreshButton.insertBefore(
+                                    portalContainer,
+                                    refreshButton.firstChild
+                                  );
+                                  renderTooltip({
+                                    portalContainer,
+                                    tooltipMessage:
+                                      "Congratulations, you scheduled your first tweet! Click this refresh button to track the status of the tweet",
+                                  });
+                                  refreshButton.addEventListener(
+                                    "click",
+                                    () => {
+                                      ReactDOM.unmountComponentAtNode(
+                                        portalContainer
+                                      );
+                                      setTimeout(() => {
+                                        const statusTable = document.getElementsByClassName(
+                                          "bp3-html-table"
+                                        )[0] as HTMLTableElement;
+                                        statusTable.insertBefore(
+                                          portalContainer,
+                                          statusTable.firstChild
+                                        );
+                                        renderTooltip({
+                                          portalContainer,
+                                          tooltipMessage:
+                                            "You could schedule tweets from ANYWHERE in your graph. Then track all pending and successful tweets here!",
+                                        });
+                                        setTimeout(
+                                          () =>
+                                            ReactDOM.unmountComponentAtNode(
+                                              portalContainer
+                                            ),
+                                          10000
+                                        );
+                                      }, 3000);
+                                    }
+                                  );
+                                }, 3000);
+                              },
+                              { once: true }
+                            );
+                          }, 500),
+                        { once: true }
+                      );
+                    }, 500);
+                  },
+                  { once: true }
+                );
               }, 10000);
             }, 500);
             return true;
@@ -449,6 +526,7 @@ const ScheduledContent: React.FC<{ socialToken: string }> = ({
         minimal
         icon={"refresh"}
         onClick={refresh}
+        id={"roamjs-social-refresh-button"}
         style={{ position: "absolute", top: 8, right: 8 }}
       />
     </>
