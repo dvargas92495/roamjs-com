@@ -3,6 +3,7 @@ import {
   Button,
   ConfirmationDialog,
   H1,
+  H3,
   H4,
   IconButton,
   StringField,
@@ -135,6 +136,7 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
         marginTop: 32,
       }}
     >
+      <H3>Thanks for subscribing!</H3>
       <div
         style={{
           display: "flex",
