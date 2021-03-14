@@ -23,9 +23,11 @@ import {
 } from "../entry-helpers";
 import {
   HIGHLIGHT,
-  isTokenInTree,
   ServiceDashboard,
   StageContent,
+  TOKEN_STAGE,
+  useNextStage,
+  usePageUid,
 } from "./ServiceCommonComponents";
 import { render as loginRender } from "../components/TwitterLogin";
 
@@ -345,7 +347,9 @@ const TwitterTutorial = ({ pageUid }: { pageUid: string }) => {
   );
 };
 
-const RequestTokenContent: StageContent = ({ nextStage, pageUid }) => {
+const RequestTokenContent: StageContent = ({ openPanel }) => {
+  const nextStage = useNextStage(openPanel);
+  const pageUid = usePageUid();
   const [value, setValue] = useState("");
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
@@ -387,7 +391,8 @@ const getToken = () =>
   getTreeByPageName("roam/js/social").find((t) => /token/i.test(t.text))
     ?.children?.[0]?.text;
 
-const ScheduledContent: StageContent = ({ pageUid }) => {
+const ScheduledContent: StageContent = () => {
+  const pageUid = usePageUid();
   const [loading, setLoading] = useState(true);
   const [valid, setValid] = useState(false);
   const [scheduledTweets, setScheduledTweets] = useState<ScheduledTweet[]>([]);
@@ -554,10 +559,7 @@ const SocialDashboard = (): React.ReactElement => (
   <ServiceDashboard
     service={"social"}
     stages={[
-      {
-        check: isTokenInTree,
-        component: RequestTokenContent,
-      },
+      TOKEN_STAGE,
       {
         check: () => false,
         component: ScheduledContent,

@@ -22,9 +22,12 @@ import MenuItemSelect from "./MenuItemSelect";
 import {
   HIGHLIGHT,
   isFieldInTree,
-  isTokenInTree,
+  NextButton,
   ServiceDashboard,
   StageContent,
+  TOKEN_STAGE,
+  useNextStage,
+  usePageUid,
 } from "./ServiceCommonComponents";
 
 const useAuthenticatedAxiosGet = (): ((
@@ -54,45 +57,9 @@ const getToken = () =>
   getTreeByPageName("roam/js/static-site").find((t) => /token/i.test(t.text))
     ?.children?.[0]?.text;
 
-const RequestTokenContent: StageContent = ({ pageUid, nextStage }) => {
-  const [value, setValue] = useState("");
-  const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
-    [setValue]
-  );
-  const onSubmit = useCallback(() => {
-    setInputSetting({ blockUid: pageUid, key: "token", value });
-    nextStage();
-  }, [value, nextStage, pageUid]);
-  const onKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (
-        e.key === "Enter" &&
-        !e.shiftKey &&
-        !e.altKey &&
-        !e.metaKey &&
-        !e.ctrlKey
-      ) {
-        onSubmit();
-      }
-    },
-    [onSubmit]
-  );
-  return (
-    <>
-      <p>Paste in your token from RoamJS below</p>
-      <Label>
-        RoamJS Static Site Token
-        <InputGroup value={value} onChange={onChange} onKeyDown={onKeyDown} />
-      </Label>
-      <Button onClick={onSubmit} intent={Intent.PRIMARY}>
-        NEXT
-      </Button>
-    </>
-  );
-};
-
-const RequestUserContent: StageContent = ({ nextStage, pageUid }) => {
+const RequestUserContent: StageContent = ({ openPanel }) => {
+  const nextStage = useNextStage(openPanel);
+  const pageUid = usePageUid();
   const [ready, setReady] = useState(false);
   const [deploySwitch, setDeploySwitch] = useState(true);
   const onSwitchChange = useCallback(
@@ -166,8 +133,8 @@ const RequestUserContent: StageContent = ({ nextStage, pageUid }) => {
   return (
     <>
       <p>
-        Click the highlighted more menu above to share your graph with{" "}
-        <code>support@roamjs.com</code> as a <b>Reader</b>.
+        Share your graph with <code>support@roamjs.com</code> as a <b>Reader</b>
+        .
       </p>
       <Switch
         checked={deploySwitch}
@@ -189,18 +156,14 @@ const RequestUserContent: StageContent = ({ nextStage, pageUid }) => {
           <Icon icon={"info-sign"} iconSize={8} intent={Intent.PRIMARY} />
         </Tooltip>
       </p>
-      <Button
-        onClick={onSubmit}
-        disabled={!ready && deploySwitch}
-        intent={Intent.PRIMARY}
-      >
-        NEXT
-      </Button>
+      <NextButton onClick={onSubmit} disabled={!ready && deploySwitch} />
     </>
   );
 };
 
-const RequestDomainContent: StageContent = ({ pageUid, nextStage }) => {
+const RequestDomainContent: StageContent = ({ openPanel }) => {
+  const nextStage = useNextStage(openPanel);
+  const pageUid = usePageUid();
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const onChange = useCallback(
@@ -216,7 +179,7 @@ const RequestDomainContent: StageContent = ({ pageUid, nextStage }) => {
   const onSubmit = useCallback(() => {
     setInputSetting({ blockUid: pageUid, key: "domain", value, index: 1 });
     nextStage();
-  }, [value, nextStage]);
+  }, [value, nextStage, pageUid]);
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (
@@ -243,18 +206,14 @@ const RequestDomainContent: StageContent = ({ pageUid, nextStage }) => {
         />
         <span style={{ color: "darkred" }}>{error}</span>
       </Label>
-      <Button
-        onClick={onSubmit}
-        disabled={!!error || !value}
-        intent={Intent.PRIMARY}
-      >
-        NEXT
-      </Button>
+      <NextButton onClick={onSubmit} disabled={!!error || !value} />
     </>
   );
 };
 
-const RequestIndexContent: StageContent = ({ pageUid, nextStage }) => {
+const RequestIndexContent: StageContent = ({ openPanel }) => {
+  const nextStage = useNextStage(openPanel);
+  const pageUid = usePageUid();
   const [value, setValue] = useState("");
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
@@ -284,14 +243,14 @@ const RequestIndexContent: StageContent = ({ pageUid, nextStage }) => {
         Website Index
         <InputGroup value={value} onChange={onChange} onKeyDown={onKeyDown} />
       </Label>
-      <Button onClick={onSubmit} intent={Intent.PRIMARY}>
-        NEXT
-      </Button>
+      <NextButton onClick={onSubmit} disabled={!value} />
     </>
   );
 };
 
-const RequestFiltersContent: StageContent = ({ pageUid, nextStage }) => {
+const RequestFiltersContent: StageContent = ({ openPanel }) => {
+  const nextStage = useNextStage(openPanel);
+  const pageUid = usePageUid();
   const [filters, setFilters] = useState<(TextNode & { key: number })[]>([]);
   const [key, setKey] = useState(0);
   const onSubmit = useCallback(() => {
@@ -375,9 +334,7 @@ const RequestFiltersContent: StageContent = ({ pageUid, nextStage }) => {
         <Button onClick={onAddFilter}>ADD FILTER</Button>
       </div>
       <div>
-        <Button onClick={onSubmit} intent={Intent.PRIMARY}>
-          NEXT
-        </Button>
+        <NextButton onClick={onSubmit} />
       </div>
     </>
   );
@@ -588,24 +545,21 @@ const StaticSiteDashboard = (): React.ReactElement => (
   <ServiceDashboard
     service={"static-site"}
     stages={[
+      TOKEN_STAGE,
       {
-        check: isTokenInTree,
-        component: RequestTokenContent,
-      },
-      {
-        check: isFieldInTree('share'),
+        check: isFieldInTree("share"),
         component: RequestUserContent,
       },
       {
-        check: isFieldInTree('domain'),
+        check: isFieldInTree("domain"),
         component: RequestDomainContent,
       },
       {
-        check: isFieldInTree('index'),
+        check: isFieldInTree("index"),
         component: RequestIndexContent,
       },
       {
-        check: isFieldInTree('filter'),
+        check: isFieldInTree("filter"),
         component: RequestFiltersContent,
       },
       {
