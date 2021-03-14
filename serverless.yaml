@@ -183,6 +183,13 @@ functions:
           path: twitter-auth
           method: post
           cors: true
+  twitter-feed-get:
+    handler: out/twitter-feed_get.handler
+    events:
+      - http:
+          path: twitter-feed
+          method: get
+          cors: true
   twitter-tweet-post:
     handler: out/twitter-tweet_post.handler
     events:
