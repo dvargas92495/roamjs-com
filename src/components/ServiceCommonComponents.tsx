@@ -7,8 +7,16 @@ import {
   Panel,
   PanelProps,
   PanelStack2,
+  ProgressBar,
 } from "@blueprintjs/core";
-import React, { useCallback, useContext, useMemo, useState } from "react";
+import axios, { AxiosResponse } from "axios";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import ReactDOM from "react-dom";
 import {
   createPage,
@@ -31,6 +39,14 @@ const toTitle = (service: string) =>
     .map((s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
     .join(" ");
 
+const toCamel = (service: string) =>
+  service
+    .split("-")
+    .map((s, i) =>
+      i === 0 ? s : `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`
+    )
+    .join("");
+
 export const getTokenFromTree = (tree: TreeNode[]): string | undefined =>
   tree.find((t) => /token/i.test(t.text))?.children?.[0]?.text;
 
@@ -38,6 +54,36 @@ const isTokenInTree = (tree: TreeNode[]): boolean => !!getTokenFromTree(tree);
 
 export const isFieldInTree = (field: string) => (tree: TreeNode[]): boolean =>
   tree.some((t) => new RegExp(field, "i").test(t.text));
+
+export const useAuthenticatedAxiosGet = (): ((
+  path: string
+) => Promise<AxiosResponse>) => {
+  const service = useService();
+  return useCallback(
+    (path: string) =>
+      axios.get(`${process.env.REST_API_URL}/${path}`, {
+        headers: { Authorization: `${toCamel(service)}:${getToken(service)}` },
+      }),
+    []
+  );
+};
+
+export const useAuthenticatedAxiosPost = (): ((
+  path: string,
+  data?: Record<string, unknown>
+) => Promise<AxiosResponse>) => {
+  const service = useService();
+  return useCallback(
+    (path: string, data?: Record<string, unknown>) =>
+      axios.post(`${process.env.REST_API_URL}/${path}`, data || {}, {
+        headers: { Authorization: `${toCamel(service)}:${getToken(service)}` },
+      }),
+    []
+  );
+};
+
+const getToken = (service: string) =>
+  getTokenFromTree(getTreeByPageName(`roam/js/${service}`));
 
 export const runService = ({
   id,
@@ -189,12 +235,23 @@ export const ServiceDashboard: React.FC<{
 }> = ({ service, stages }) => {
   const title = `roam/js/${service}`;
   const pageUid = useMemo(() => getPageUidByPageTitle(title), [title]);
+  const [progress, setProgress] = useState(0);
+  const [showProgress, setShowProgress] = useState(false);
   const getStage = useCallback(() => {
     const tree = getTreeByPageName(title);
     const index = stages.findIndex((s) => !s.check(tree));
+    setProgress(index / (stages.length - 1));
+    if (index < stages.length - 1) {
+      setShowProgress(true);
+    }
     return stages.slice(index)[0].component;
-  }, [title, stages]);
-  const renderPanel = getStage();
+  }, [title, stages, setProgress, setShowProgress]);
+  const renderPanel = useMemo(getStage, [getStage]);
+  useEffect(() => {
+    if (progress === 1) {
+      setTimeout(() => setShowProgress(false), 3000);
+    }
+  }, [progress, setShowProgress]);
   return (
     <Card>
       <h4 style={{ padding: 4 }}>{toTitle(service)} Dashboard</h4>
@@ -202,13 +259,13 @@ export const ServiceDashboard: React.FC<{
         <style>
           {`.roamjs-service-panel {
   position: relative;
-  min-height: 256px;
 }
 
 .bp3-panel-stack-view {
   border: 0px;
   padding: 4px;
   overflow-y: visible;
+  position: static;
 }
 
 .bp3-panel-stack-header {
@@ -217,7 +274,7 @@ export const ServiceDashboard: React.FC<{
   top: -64px;
 }
 
-.bp3-panel-stack-header-back {
+button.bp3-button.bp3-panel-stack-header-back {
   margin-left: 0;
 }`}
         </style>
@@ -227,6 +284,13 @@ export const ServiceDashboard: React.FC<{
           }}
           className={"roamjs-service-panel"}
         />
+        {showProgress && (
+          <ProgressBar
+            value={progress}
+            animate={false}
+            intent={Intent.PRIMARY}
+          />
+        )}
       </ServiceContext.Provider>
     </Card>
   );

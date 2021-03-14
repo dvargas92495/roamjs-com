@@ -23,7 +23,7 @@ export const handler = authenticate(async (event) => {
           S: `launch_${graph}`,
         },
       },
-      Limit: 1,
+      Limit: 30,
       ScanIndexForward: false,
       IndexName: "primary-index",
     })
@@ -49,6 +49,11 @@ export const handler = authenticate(async (event) => {
     successDeployStatuses[0] === deployStatuses.Items[0]
       ? successDeployStatuses
       : [deployStatuses.Items[0], ...successDeployStatuses];
+  const progress = statuses.Items
+    ? statuses.Items.findIndex((s) =>
+        ["INITIALIZING", "SHUTTING DOWN"].includes(s.status.S)
+      ) + 1
+    : 0;
 
   return {
     statusCode: 200,
@@ -59,6 +64,7 @@ export const handler = authenticate(async (event) => {
       deploys: deploys
         .slice(0, 10)
         .map((d) => ({ date: d.date.S, status: d.status.S, uuid: d.uuid.S })),
+      progress: progress / 30,
     }),
     headers: headers(event),
   };

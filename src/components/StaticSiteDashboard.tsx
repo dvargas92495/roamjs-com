@@ -5,11 +5,11 @@ import {
   InputGroup,
   Intent,
   Label,
+  ProgressBar,
   Spinner,
   Switch,
   Tooltip,
 } from "@blueprintjs/core";
-import axios, { AxiosResponse } from "axios";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   getTreeByBlockUid,
@@ -26,36 +26,11 @@ import {
   ServiceDashboard,
   StageContent,
   TOKEN_STAGE,
+  useAuthenticatedAxiosGet,
+  useAuthenticatedAxiosPost,
   useNextStage,
   usePageUid,
 } from "./ServiceCommonComponents";
-
-const useAuthenticatedAxiosGet = (): ((
-  path: string
-) => Promise<AxiosResponse>) =>
-  useCallback(
-    (path: string) =>
-      axios.get(`${process.env.REST_API_URL}/${path}`, {
-        headers: { Authorization: `staticSite:${getToken()}` },
-      }),
-    []
-  );
-
-const useAuthenticatedAxiosPost = (): ((
-  path: string,
-  data?: Record<string, unknown>
-) => Promise<AxiosResponse>) =>
-  useCallback(
-    (path: string, data?: Record<string, unknown>) =>
-      axios.post(`${process.env.REST_API_URL}/${path}`, data || {}, {
-        headers: { Authorization: `staticSite:${getToken()}` },
-      }),
-    []
-  );
-
-const getToken = () =>
-  getTreeByPageName("roam/js/static-site").find((t) => /token/i.test(t.text))
-    ?.children?.[0]?.text;
 
 const RequestUserContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
@@ -67,33 +42,38 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
       setDeploySwitch((e.target as HTMLInputElement).checked),
     [setDeploySwitch]
   );
-  const shareListener = useCallback((e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (
-      target.tagName === "DIV" &&
-      target.parentElement.className.includes("bp3-menu-item") &&
-      target.innerText.toUpperCase() === "SHARE"
-    ) {
-      const shareItem = target.parentElement as HTMLAnchorElement;
-      shareItem.style.border = "unset";
-      setReady(true);
-      setTimeout(() => {
-        const grid = document.getElementsByClassName("sharing-grid")[0];
-        const textarea = Array.from(
-          grid.getElementsByTagName("textarea")
-        ).find((t) =>
-          t.parentElement.previousElementSibling.innerHTML.startsWith("Readers")
-        );
-        if (textarea) {
-          textarea.parentElement.parentElement.style.border = HIGHLIGHT;
-          const guide = document.createElement("span");
-          guide.style.fontSize = "8px";
-          guide.innerText = "(Press Enter after adding support@roamjs.com)";
-          textarea.parentElement.appendChild(guide);
-        }
-      }, 500);
-    }
-  }, []);
+  const shareListener = useCallback(
+    (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "DIV" &&
+        target.parentElement.className.includes("bp3-menu-item") &&
+        target.innerText.toUpperCase() === "SHARE"
+      ) {
+        const shareItem = target.parentElement as HTMLAnchorElement;
+        shareItem.style.border = "unset";
+        setReady(true);
+        setTimeout(() => {
+          const grid = document.getElementsByClassName("sharing-grid")[0];
+          const textarea = Array.from(
+            grid.getElementsByTagName("textarea")
+          ).find((t) =>
+            t.parentElement.previousElementSibling.innerHTML.startsWith(
+              "Readers"
+            )
+          );
+          if (textarea) {
+            textarea.parentElement.parentElement.style.border = HIGHLIGHT;
+            const guide = document.createElement("span");
+            guide.style.fontSize = "8px";
+            guide.innerText = "(Press Enter after adding support@roamjs.com)";
+            textarea.parentElement.appendChild(guide);
+          }
+        }, 500);
+      }
+    },
+    [setReady]
+  );
   useEffect(() => {
     const topbar = document.getElementsByClassName("rm-topbar")[0];
     if (topbar) {
@@ -121,7 +101,7 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
     }
     document.addEventListener("click", shareListener);
     return () => document.removeEventListener("click", shareListener);
-  }, [setReady]);
+  }, [setReady, shareListener]);
   const onSubmit = useCallback(() => {
     setInputSetting({
       blockUid: pageUid,
@@ -384,6 +364,8 @@ const LiveContent: StageContent = () => {
   const [deploys, setDeploys] = useState<
     { status: string; date: string; uuid: string }[]
   >([]);
+  const [progress, setProgress] = useState(0);
+  const [showProgress, setShowProgress] = useState(false);
   const timeoutRef = useRef(0);
 
   const openShutdown = useCallback(() => setIsShutdownOpen(true), [
@@ -399,16 +381,29 @@ const LiveContent: StageContent = () => {
           setStatusProps(r.data.statusProps);
           setStatus(r.data.status);
           setDeploys(r.data.deploys);
+          setProgress(r.data.progress);
           if (!isWebsiteReady(r.data)) {
+            setShowProgress(true);
             timeoutRef.current = window.setTimeout(getWebsite, 5000);
+          } else {
+            setShowProgress(false);
           }
         } else {
           setStatusProps("{}");
           setStatus("");
           setDeploys([]);
+          setProgress(0);
+          setShowProgress(false);
         }
       }),
-    [setStatus, setDeploys, timeoutRef, setStatusProps]
+    [
+      setStatus,
+      setDeploys,
+      timeoutRef,
+      setStatusProps,
+      setShowProgress,
+      setProgress,
+    ]
   );
   const wrapPost = useCallback(
     (path: string, data?: Record<string, unknown>) => () => {
@@ -450,7 +445,7 @@ const LiveContent: StageContent = () => {
         <>
           {status ? (
             <>
-              <div style={{ marginBottom: 16 }}>
+              <div style={{ marginBottom: 8 }}>
                 <span>Status</span>
                 {status === "AWAITING VALIDATION" ? (
                   <div style={{ color: "darkblue" }}>
@@ -460,7 +455,7 @@ const LiveContent: StageContent = () => {
                     Management Settings:
                     <ul>
                       {getNameServers(statusProps).map((n) => (
-                        <li>{n}</li>
+                        <li key={n}>{n}</li>
                       ))}
                     </ul>
                   </div>
@@ -472,21 +467,28 @@ const LiveContent: StageContent = () => {
                   </span>
                 )}
               </div>
-              <Button
-                style={{ marginRight: 32 }}
-                disabled={siteDeploying}
-                onClick={manualDeploy}
-                intent={Intent.PRIMARY}
-              >
-                Manual Deploy
-              </Button>
-              <Button
-                onClick={openShutdown}
-                disabled={siteDeploying}
-                intent={Intent.DANGER}
-              >
-                Shutdown
-              </Button>
+              {showProgress && (
+                <div style={{ margin: "8px 0" }}>
+                  <ProgressBar value={progress} intent={Intent.PRIMARY} />
+                </div>
+              )}
+              <div style={{ marginTop: 8 }}>
+                <Button
+                  style={{ marginRight: 32 }}
+                  disabled={siteDeploying}
+                  onClick={manualDeploy}
+                  intent={Intent.PRIMARY}
+                >
+                  Manual Deploy
+                </Button>
+                <Button
+                  onClick={openShutdown}
+                  disabled={siteDeploying}
+                  intent={Intent.DANGER}
+                >
+                  Shutdown
+                </Button>
+              </div>
               <Alert
                 isOpen={isShutdownOpen}
                 onConfirm={shutdownWebsite}
@@ -530,6 +532,7 @@ const LiveContent: StageContent = () => {
                 disabled={loading}
                 onClick={launchWebsite}
                 intent={Intent.PRIMARY}
+                style={{ maxWidth: 240 }}
               >
                 LAUNCH
               </Button>

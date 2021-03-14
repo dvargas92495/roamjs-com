@@ -29,6 +29,7 @@ import twitter from "twitter-text";
 import addYears from "date-fns/addYears";
 import endOfYear from "date-fns/endOfYear";
 import format from "date-fns/format";
+import { resolveRefs } from "../entry-helpers";
 
 const ATTACHMENT_REGEX = /!\[[^\]]*\]\(([^\s)]*)\)/g;
 const UPLOAD_URL = `${process.env.REST_API_URL}/twitter-upload`;
@@ -144,9 +145,14 @@ const TwitterContent: React.FunctionComponent<{
   close: () => void;
   setDialogMessage: (m: string) => void;
 }> = ({ close, blockUid, tweetId, setDialogMessage }) => {
-  const message = useMemo(() => getTreeByBlockUid(blockUid).children, [
-    blockUid,
-  ]);
+  const message = useMemo(
+    () =>
+      getTreeByBlockUid(blockUid).children.map((t) => ({
+        ...t,
+        text: resolveRefs(t.text),
+      })),
+    [blockUid]
+  );
   const [error, setError] = useState("");
   const [tweetsSent, setTweetsSent] = useState(0);
   const onClick = useCallback(async () => {
