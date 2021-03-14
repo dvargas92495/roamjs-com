@@ -409,7 +409,7 @@ const TweetOverlay: React.FunctionComponent<{
     () =>
       getTreeByBlockUid(blockUid).children.map((t) => {
         const { weightedLength, valid } = twitter.parseTweet(
-          t.text.replace(ATTACHMENT_REGEX, "")
+          resolveRefs(t.text.replace(ATTACHMENT_REGEX, ""))
         );
         return {
           count: weightedLength,
@@ -450,7 +450,7 @@ const TweetOverlay: React.FunctionComponent<{
           calcCounts().map((c) => {
             if (c.uid === currentUid) {
               const { weightedLength, valid } = twitter.parseTweet(
-                textarea.value.replace(ATTACHMENT_REGEX, "")
+                resolveRefs(textarea.value.replace(ATTACHMENT_REGEX, ""))
               );
               return { uid: currentUid, count: weightedLength, valid };
             } else {
