@@ -21,6 +21,8 @@ declare global {
       };
       dynamicElements: Set<HTMLElement>;
     };
+    // https://github.com/microsoft/TypeScript/pull/26797
+    [key: string]: string;
     roam42?: {
       smartBlocks?: {
         customCommands: {

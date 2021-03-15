@@ -12,18 +12,24 @@ export const getSingleCodeContent = (
 ): string => `var existing = document.getElementById("roamjs-${id}");
 if (!existing) {
   var extension = document.createElement("script");
-  extension.src = "https://roamjs.com/${id}.js";
+  extension.src = "${
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:8080/build"
+      : "https://roamjs.com"
+  }/${id}.js";
   extension.id = "roamjs-${id}";
   extension.async = true;
   extension.type = "text/javascript";
   document.getElementsByTagName("head")[0].appendChild(extension);
 }`;
 
-const copyCode = (items: string[]) => (e) => {
+const copyCode = (items: string[], initialLines: string) => (e) => {
   const codeContent =
     items.length === 1
       ? `\`\`\`javascript
-${getSingleCodeContent(items[0].replace(/ /g, "-").toLowerCase())}
+${initialLines}${getSingleCodeContent(
+          items[0].replace(/ /g, "-").toLowerCase()
+        )}
 \`\`\``
       : `\`\`\`javascript
 var installScript = name => {
@@ -58,13 +64,15 @@ ${items
 };
 
 export const useCopyCode = (
-  setCopied: (flag: boolean) => void
+  setCopied: (flag: boolean) => void,
+  initialLines?: string
 ): ((items: string[]) => void) =>
   useCallback(
     (items: string[]) => {
-      document.addEventListener("copy", copyCode(items));
+      document.addEventListener("copy", copyCode(items, initialLines || ""), {
+        once: true,
+      });
       document.execCommand("copy");
-      document.removeEventListener("copy", copyCode(items));
       setCopied(true);
       setTimeout(() => setCopied(false), 1000);
     },

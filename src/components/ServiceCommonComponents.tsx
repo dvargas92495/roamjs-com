@@ -133,15 +133,20 @@ export const runService = ({
       }
     );
 
+    const tokenField = `roamjs${toCamel(id)}Token`;
     createPage({
       title,
       tree: [
         {
           text: "token",
-          children: [],
+          children: [{
+            text: window[tokenField],
+            children: []
+          }],
         },
       ],
     });
+    delete window[tokenField];
   }
 };
 

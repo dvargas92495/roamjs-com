@@ -1,4 +1,9 @@
-import { authenticate, dynamo, emptyResponse } from "../lambda-helpers";
+import {
+  authenticate,
+  dynamo,
+  emptyResponse,
+  serverError,
+} from "../lambda-helpers";
 
 export const handler = authenticate((event) =>
   dynamo
@@ -8,4 +13,5 @@ export const handler = authenticate((event) =>
     })
     .promise()
     .then(() => emptyResponse(event))
+    .catch((e) => serverError(e.message, event))
 );

@@ -123,9 +123,10 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
     [key: string]: { token: string };
   };
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const token = userData?.[idToCamel(id)]?.token || "NO TOKEN FOUND FOR USER";
+  const camel = idToCamel(id);
+  const token = userData?.[camel]?.token || "NO TOKEN FOUND FOR USER";
   const [copied, setCopied] = useState(false);
-  const onSave = useCopyCode(setCopied);
+  const onSave = useCopyCode(setCopied, `window.roamjs${camel}Token = "${token}";\n`);
   const onEnd = useCallback(
     () => authenticatedAxiosPost("end-service", { service: id }),
     [authenticatedAxiosPost]

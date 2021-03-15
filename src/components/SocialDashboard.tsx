@@ -48,7 +48,11 @@ const codeBlockText = `\`\`\`javascript
 var existing = document.getElementById("roamjs-twitter");
 if (!existing) {
   var extension = document.createElement("script");
-  extension.src = "https://roamjs.com/twitter.js";
+  extension.src = "${
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:8080/build"
+      : "https://roamjs.com"
+  }/twitter.js";
   extension.id = "roamjs-twitter";
   extension.async = true;
   extension.type = "text/javascript";
