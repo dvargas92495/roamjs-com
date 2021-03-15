@@ -131,7 +131,7 @@ const TwitterTutorial = ({ pageUid }: { pageUid: string }) => {
           tooltipMessage: "First, type {{[[tweet]]}} into this block",
         });
         watchOnce("[:block/string]", `[:block/uid "${uid}"]`, (_, after) => {
-          if (/{{(?:\[\[)?tweet(?:\]\])}}/i.test(after[":block/string"])) {
+          if (/{{(?:\[\[)?tweet(?:\]\])?}}/i.test(after[":block/string"])) {
             const childUid = window.roamAlphaAPI.util.generateUID();
             window.roamAlphaAPI.createBlock({
               location: { "parent-uid": uid, order: 0 },

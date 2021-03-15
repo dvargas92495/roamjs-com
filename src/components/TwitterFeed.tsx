@@ -50,6 +50,22 @@ const TwitterFeed = (): React.ReactElement => {
       document.getElementById("roamjs-twitter-feed")
     );
   }, [tweets]);
+  const onCancel = useCallback(() => {
+    createBlock({
+      parentUid: toRoamDateUid(date),
+      order: 0,
+      node: {
+        text: "#[[Twitter Feed]]",
+        children: [
+          {
+            text: "Cancelled",
+            children: [],
+          },
+        ],
+      },
+    });
+    onClose();
+  }, [onClose, date]);
   useEffect(() => {
     const tree = getTreeByPageName("roam/js/twitter");
     const oauth = getSettingValueFromTree({
@@ -76,9 +92,7 @@ const TwitterFeed = (): React.ReactElement => {
         }
       )
       .then((r) => {
-        setTweets(
-          r.data.tweets.map((t) => ({ ...t, checked: true, loaded: false }))
-        );
+        setTweets(r.data.tweets.map((t) => ({ ...t, checked: true })));
       })
       .catch((r) => setError(r.response?.data || r.message))
       .finally(() => setLoading(false));
@@ -102,7 +116,7 @@ const TwitterFeed = (): React.ReactElement => {
   return (
     <Dialog
       isOpen={true}
-      onClose={onClose}
+      onClose={onCancel}
       canOutsideClickClose
       canEscapeKeyClose
       title={`Twitter Feed for ${roamDate}`}
@@ -115,7 +129,12 @@ const TwitterFeed = (): React.ReactElement => {
         ) : (
           <>
             <div
-              style={{ maxHeight: 760, overflowY: "scroll", paddingBottom: 16 }}
+              style={{
+                maxHeight: 760,
+                overflowY: "scroll",
+                paddingBottom: 16,
+                paddingLeft: 4,
+              }}
             >
               {tweets.map((tweet) => (
                 <Checkbox
@@ -126,8 +145,8 @@ const TwitterFeed = (): React.ReactElement => {
                       tweets.map((t) =>
                         t.id === tweet.id
                           ? {
-                              checked: (e.target as HTMLInputElement).checked,
                               ...t,
+                              checked: (e.target as HTMLInputElement).checked,
                             }
                           : t
                       )
