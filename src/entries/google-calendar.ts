@@ -24,11 +24,15 @@ type Event = {
   location: string;
   start: { dateTime: string };
   end: { dateTime: string };
+  visibility: "private" | "public";
 };
 
 const EMPTY_MESSAGE = "No Events Scheduled for Today!";
 const resolveDate = (d: { dateTime?: string }) =>
   d.dateTime ? new Date(d.dateTime).toLocaleTimeString() : "All Day";
+
+const resolveSummary = (e: Event) =>
+  e.visibility === "private" ? "busy" : e.summary || "No Summary";
 
 const fetchGoogleCalendar = async (): Promise<string[]> => {
   const config = getConfigFromPage("roam/js/google-calendar");
@@ -66,14 +70,14 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
         .map((e: Event) => {
           if (format) {
             return format
-              .replace("/Summary", e.summary || "No Summary")
+              .replace("/Summary", resolveSummary(e))
               .replace("/Link", e.htmlLink || "")
               .replace("/Hangout", e.hangoutLink || "")
               .replace("/Location", e.location || "")
               .replace("/Start Time", resolveDate(e.start))
               .replace("/End Time", resolveDate(e.end));
           } else {
-            const summaryText = e.summary ? e.summary : "No Summary";
+            const summaryText = resolveSummary(e);
             const summary =
               includeLink && e.htmlLink
                 ? `[${summaryText}](${e.htmlLink})`
@@ -118,7 +122,11 @@ createCustomSmartBlockCommand({
   processor: async () =>
     fetchGoogleCalendar().then(async (bullets) => {
       if (bullets.length) {
-        bullets.slice(1).forEach(s => window.roam42.smartBlocks.activeWorkflow.outputAdditionalBlock(s))
+        bullets
+          .slice(1)
+          .forEach((s) =>
+            window.roam42.smartBlocks.activeWorkflow.outputAdditionalBlock(s)
+          );
         return bullets[0];
       } else {
         return EMPTY_MESSAGE;
