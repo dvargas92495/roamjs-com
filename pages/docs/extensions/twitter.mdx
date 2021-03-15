@@ -5,6 +5,7 @@ contributors: Gene Kim 💵📓
 ---
 
 import TwitterAuth from "../../../components/TwitterAuth";
+import Loom from "../../../components/Loom";
 
 <TwitterAuth />
 
@@ -66,25 +67,7 @@ The child will be appended to the end of the tweeted block. `{link}` will be rep
 
 #### Demo
 
-<div
-  style={{
-    position: "relative",
-    paddingBottom: "66.66666666666666%",
-    height: 0,
-  }}
->
-  <iframe
-    src="https://www.loom.com/embed/59efa05227f042258dee87bc0d7387e2"
-    allowFullScreen
-    style={{
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-    }}
-  />
-</div>
+<Loom id={"59efa05227f042258dee87bc0d7387e2"} />
 
 ### Twitter Feed
 
@@ -95,6 +78,10 @@ On the `[[roam/js/twitter]]` page, add a block that says `feed` and then reload 
 ![](/images/twitter-feed.png)
 
 Clicking "Import" will add a `#[[Twitter Feed]]` tag to your Daily Notes page with links to all the tweets nested below it.
+
+#### Demo
+
+<Loom id={"b7486b89dbb54b758dd9c774ff43fdf4"} />
 
 ### Searching Tweets
 
