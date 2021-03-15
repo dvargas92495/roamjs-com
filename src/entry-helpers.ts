@@ -338,18 +338,21 @@ export const createPageObserver = (
 export const createPageTitleObserver = ({
   title,
   callback,
+  log = false,
 }: {
-  title: `roam/js/${string}`;
+  title: string;
   callback: (d: HTMLDivElement) => void;
+  log?: boolean;
 }): void => {
   const listener = (e?: HashChangeEvent) => {
     const d = document.getElementsByClassName(
       "roam-article"
     )[0] as HTMLDivElement;
     if (d) {
-      const attribute = `data-roamjs-${title.replace("roam/js/", "")}`;
+      const uid = getPageUidByPageTitle(title);
+      const attribute = `data-roamjs-${uid}`;
       const url = e?.newURL || window.location.href;
-      if (url === getRoamUrl(getPageUidByPageTitle(title))) {
+      if (url === getRoamUrl(uid) || (log && url === getRoamUrl())) {
         // React's rerender crushes the old article/heading
         setTimeout(() => {
           if (!d.hasAttribute(attribute)) {
@@ -642,6 +645,20 @@ export const getRefTitlesByBlockUid = (uid: string): string[] =>
     )
     .map((b: RoamBlock[]) => b[0]?.title || "");
 
+export const isTagOnPage = ({
+  tag,
+  title,
+}: {
+  tag: string;
+  title: string;
+}): boolean =>
+  !!window.roamAlphaAPI.q(
+    `[:find ?r :where [?r :node/title "${tag}"] [?b :block/refs ?r] [?b :block/page ?p] [?p :node/title "${title.replace(
+      /"/g,
+      '\\"'
+    )}"]]`
+  )?.[0]?.[0];
+
 export const getPageTitle = (e: Element): ChildNode => {
   const container =
     e.closest(".roam-log-page") ||
@@ -837,8 +854,10 @@ export const createCustomSmartBlockCommand = ({
   document.addEventListener("input", inputListener);
 };
 
-export const getRoamUrl = (blockUid: string): string =>
-  `${window.location.href.replace(/\/page\/.*$/, "")}/page/${blockUid}`;
+export const getRoamUrl = (blockUid?: string): string =>
+  `${window.location.href.replace(/\/page\/.*$/, "")}${
+    blockUid ? `/page/${blockUid}` : ""
+  }`;
 
 const blockRefRegex = new RegExp("\\(\\((..........?)\\)\\)", "g");
 const aliasRefRegex = new RegExp(

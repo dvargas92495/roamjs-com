@@ -2,7 +2,9 @@ import {
   addStyle,
   createButtonObserver,
   createHTMLObserver,
+  createPageTitleObserver,
   getPageTitle,
+  isTagOnPage,
   runExtension,
 } from "../entry-helpers";
 import {
@@ -14,13 +16,20 @@ import {
   getUidsFromButton,
   getTreeByPageName,
   getUids,
+  toRoamDate,
 } from "roam-client";
 import axios from "axios";
 import { render } from "../components/TweetOverlay";
 import { render as loginRender } from "../components/TwitterLogin";
+import { render as feedRender } from "../components/TwitterFeed";
 
 addStyle(`.roamjs-twitter-count {
   position: relative;
+}
+
+.roamjs-twitter-feed-embed {
+  display: inline-block;
+  vertical-align: middle;
 }`);
 
 const TWITTER_REFERENCES_COMMAND = "twitter references";
@@ -136,4 +145,26 @@ runExtension("twitter", () => {
       }
     },
   });
+
+  const feed = getTreeByPageName("roam/js/twitter").find((t) =>
+    /feed/i.test(t.text)
+  );
+  if (feed) {
+    const title = toRoamDate(new Date());
+    createPageTitleObserver({
+      title,
+      log: true,
+      callback: (d: HTMLDivElement) => {
+        if (!isTagOnPage({ tag: "Twitter Feed", title })) {
+          const parent = document.createElement("div");
+          parent.id = "roamjs-twitter-feed";
+          d.firstElementChild.insertBefore(
+            parent,
+            d.firstElementChild.firstElementChild.nextElementSibling
+          );
+          feedRender(parent);
+        }
+      },
+    });
+  }
 });
