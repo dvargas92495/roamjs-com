@@ -129,6 +129,7 @@ module "aws-serverless-backend" {
         "postman/post",
         "products/get",
         "queue-issues/get",
+        "schedule/delete",
         "slack-url/post",
         "shutdown-social/post",
         "shutdown-website/post",

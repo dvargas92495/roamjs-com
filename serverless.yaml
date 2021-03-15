@@ -134,12 +134,12 @@ functions:
           path: shutdown-website
           method: post
           cors: true
-  social-schedules-get:
-    handler: out/social-schedules_get.handler
+  social-schedule-delete:
+    handler: out/social-schedule_delete.handler
     events:
       - http:
-          path: social-schedules
-          method: get
+          path: social-schedule
+          method: delete
           cors: true
   sponsorships-get:
     handler: out/sponsorships_get.handler
