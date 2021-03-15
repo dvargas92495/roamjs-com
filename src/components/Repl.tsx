@@ -3,13 +3,24 @@ import ReactDOM from "react-dom";
 import { Controlled as CodeMirror } from "react-codemirror2";
 import { getFirstChildUidByBlockUid } from "../entry-helpers";
 import { Card } from "@blueprintjs/core";
+import { getTreeByBlockUid } from "roam-client";
 
 type ReplProps = {
   blockUid: string;
 };
 
+const evalRepl = (code: string) => {
+  try {
+    return JSON.stringify(eval(code));
+  } catch (e) {
+    return e.message;
+  }
+};
+
 const Repl: React.FC<ReplProps> = ({ blockUid }) => {
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(
+    () => getTreeByBlockUid(blockUid).children[0].text
+  );
   const onBeforeChange = useCallback((_, __, value) => setCode(value), [
     setCode,
   ]);
@@ -42,6 +53,10 @@ const Repl: React.FC<ReplProps> = ({ blockUid }) => {
         onBeforeChange={onBeforeChange}
         onChange={onChange}
       />
+      <Card>
+        <h4>Console</h4>
+        <code>{evalRepl(code)}</code>
+      </Card>
     </Card>
   );
 };

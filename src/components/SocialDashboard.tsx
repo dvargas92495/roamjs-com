@@ -2,15 +2,11 @@ import {
   Alert,
   Button,
   Card,
-  InputGroup,
-  Intent,
-  Label,
   Popover,
   Position,
   Spinner,
   Tooltip,
 } from "@blueprintjs/core";
-import axios from "axios";
 import format from "date-fns/format";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
@@ -19,14 +15,14 @@ import {
   getChildrenLengthByPageTitle,
   getPageUidByPageTitle,
   openBlockInSidebar,
-  setInputSetting,
 } from "../entry-helpers";
 import {
   HIGHLIGHT,
   ServiceDashboard,
   StageContent,
   TOKEN_STAGE,
-  useNextStage,
+  useAuthenticatedAxiosDelete,
+  useAuthenticatedAxiosGet,
   usePageUid,
 } from "./ServiceCommonComponents";
 import { render as loginRender } from "../components/TwitterLogin";
@@ -347,67 +343,43 @@ const TwitterTutorial = ({ pageUid }: { pageUid: string }) => {
   );
 };
 
-const RequestTokenContent: StageContent = ({ openPanel }) => {
-  const nextStage = useNextStage(openPanel);
-  const pageUid = usePageUid();
-  const [value, setValue] = useState("");
-  const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
-    [setValue]
-  );
-  const onSubmit = useCallback(() => {
-    setInputSetting({ blockUid: pageUid, key: "token", value });
-    nextStage();
-  }, [value, nextStage]);
-  const onKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (
-        e.key === "Enter" &&
-        !e.shiftKey &&
-        !e.altKey &&
-        !e.metaKey &&
-        !e.ctrlKey
-      ) {
-        onSubmit();
-      }
-    },
-    [onSubmit]
-  );
+const DeleteScheduledContent = ({ onConfirm }: { onConfirm: () => void }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
+  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   return (
     <>
-      <p>Paste in your token from RoamJS below</p>
-      <Label>
-        RoamJS Social Token
-        <InputGroup value={value} onChange={onChange} onKeyDown={onKeyDown} />
-      </Label>
-      <Button onClick={onSubmit} intent={Intent.PRIMARY}>
-        NEXT
-      </Button>
+      <Button icon={"trash"} onClick={open} minimal />
+      <Alert
+        isOpen={isOpen}
+        onClose={close}
+        canOutsideClickCancel
+        cancelButtonText={"Cancel"}
+        canEscapeKeyCancel
+        onConfirm={onConfirm}
+      >
+        Are you sure you want to remove this post?
+      </Alert>
     </>
   );
 };
 
-const getToken = () =>
-  getTreeByPageName("roam/js/social").find((t) => /token/i.test(t.text))
-    ?.children?.[0]?.text;
-
 const ScheduledContent: StageContent = () => {
+  const authenticatedAxiosGet = useAuthenticatedAxiosGet();
+  const authenticatedAxiosDelete = useAuthenticatedAxiosDelete();
   const pageUid = usePageUid();
   const [loading, setLoading] = useState(true);
   const [valid, setValid] = useState(false);
   const [scheduledTweets, setScheduledTweets] = useState<ScheduledTweet[]>([]);
   const refresh = useCallback(() => {
     setLoading(true);
-    axios
-      .get(`${process.env.REST_API_URL}/twitter-schedule`, {
-        headers: { Authorization: `social:${getToken()}` },
-      })
+    authenticatedAxiosGet("twitter-schedule")
       .then((r) => {
         setValid(true);
         setScheduledTweets(r.data.scheduledTweets);
       })
       .finally(() => setLoading(false));
-  }, [setLoading, setValid]);
+  }, [setLoading, setValid, authenticatedAxiosGet]);
   useEffect(() => {
     if (loading) {
       refresh();
@@ -421,6 +393,7 @@ const ScheduledContent: StageContent = () => {
         <table className="bp3-html-table bp3-html-table-bordered bp3-html-table-striped">
           <thead>
             <tr>
+              <th></th>
               <th>Channel</th>
               <th>Block</th>
               <th>Created Date</th>
@@ -439,6 +412,19 @@ const ScheduledContent: StageContent = () => {
               }) => {
                 return (
                   <tr key={uuid}>
+                    <td>
+                      <DeleteScheduledContent
+                        onConfirm={() =>
+                          authenticatedAxiosDelete(
+                            `social-schedule?uuid=${uuid}`
+                          ).then(() =>
+                            setScheduledTweets(
+                              scheduledTweets.filter((t) => t.uuid !== uuid)
+                            )
+                          )
+                        }
+                      />
+                    </td>
                     <td>Twitter</td>
                     <td>
                       <span

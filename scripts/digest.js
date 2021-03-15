@@ -16,7 +16,7 @@ const run = async () => {
   [...enhancements.data, ...extensions.data]
   .filter((i) => isBefore(since, new Date(i.created_at)))
   .forEach((i) =>
-    console.log(i.labels[0].name, "-", i.title)
+    console.log(`\t<li><a href="https://roamjs.com/queue/${i.number}">${i.labels[0].name}</a> - ${i.title}</li>`)
   );
 };
 run();

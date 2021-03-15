@@ -82,6 +82,19 @@ export const useAuthenticatedAxiosPost = (): ((
   );
 };
 
+export const useAuthenticatedAxiosDelete = (): ((
+  path: string
+) => Promise<AxiosResponse>) => {
+  const service = useService();
+  return useCallback(
+    (path: string) =>
+      axios.delete(`${process.env.REST_API_URL}/${path}`, {
+        headers: { Authorization: `${toCamel(service)}:${getToken(service)}` },
+      }),
+    []
+  );
+};
+
 const getToken = (service: string) =>
   getTokenFromTree(getTreeByPageName(`roam/js/${service}`));
 
