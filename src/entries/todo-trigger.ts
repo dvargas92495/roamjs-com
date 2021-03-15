@@ -9,21 +9,44 @@ import {
   createHTMLObserver,
   createTagRegex,
   DAILY_NOTE_PAGE_REGEX,
+  getNthChildUidByBlockUid,
   getReferenceBlockUid,
   isControl,
   runExtension,
 } from "../entry-helpers";
 
+const CLASSNAMES_TO_CHECK = [
+  "rm-block-ref",
+  "kanban-title",
+  "kanban-card",
+  "roam-block",
+];
+
 const getBlockUidFromTarget = (target: HTMLElement) => {
-  const ref = target.closest('.rm-block-ref') as HTMLSpanElement;
+  const ref = target.closest(".rm-block-ref") as HTMLSpanElement;
   if (ref) {
     return getReferenceBlockUid(ref);
   }
-  const { blockUid } = getUids(
-    target.closest(".roam-block") as HTMLDivElement
-  );
-  return blockUid; 
-}
+  const { blockUid } = getUids(target.closest(".roam-block") as HTMLDivElement);
+  const kanbanTitle = target.closest(".kanban-title");
+  if (kanbanTitle) {
+    const container = kanbanTitle.closest(".kanban-column-container");
+    const column = kanbanTitle.closest(".kanban-column");
+    const order = Array.from(container.children).findIndex((d) => d === column);
+    return getNthChildUidByBlockUid({ blockUid, order });
+  }
+  const kanbanCard = target.closest(".kanban-card");
+  if (kanbanCard) {
+    const container = kanbanCard.closest(".kanban-column-container");
+    const column = kanbanCard.closest(".kanban-column");
+    const order = Array.from(container.children).findIndex((d) => d === column);
+    const titleUid = getNthChildUidByBlockUid({ blockUid, order });
+    const nestedOrder =
+      Array.from(column.children).findIndex((d) => d === kanbanCard) - 1;
+    return getNthChildUidByBlockUid({ blockUid: titleUid, order: nestedOrder });
+  }
+  return blockUid;
+};
 
 const onTodo = (blockUid: string, oldValue: string) => {
   const config = getConfigFromPage("roam/js/todo-trigger");
@@ -151,11 +174,6 @@ runExtension("todo-trigger", () => {
       callback: (l: HTMLLabelElement) => {
         const input = l.getElementsByTagName("input")[0];
         if (input.checked && !input.disabled) {
-          const ref = l.closest(".rm-block-ref") as HTMLSpanElement;
-          if (ref) {
-            ref.style.textDecoration = "line-through";
-            return;
-          }
           const zoom = l.closest(".rm-zoom-item-content") as HTMLSpanElement;
           if (zoom) {
             (zoom.firstElementChild
@@ -163,16 +181,13 @@ runExtension("todo-trigger", () => {
               "line-through";
             return;
           }
-          const block = l.closest(".roam-block") as HTMLDivElement;
+          const block = CLASSNAMES_TO_CHECK.map(
+            (c) => l.closest(`.${c}`) as HTMLElement
+          ).find((d) => !!d);
           if (block) {
             block.style.textDecoration = "line-through";
           }
         } else {
-          const ref = l.closest(".rm-block-ref") as HTMLSpanElement;
-          if (ref) {
-            ref.style.textDecoration = "none";
-            return;
-          }
           const zoom = l.closest(".rm-zoom-item-content") as HTMLSpanElement;
           if (zoom) {
             (zoom.firstElementChild
@@ -180,7 +195,9 @@ runExtension("todo-trigger", () => {
               "none";
             return;
           }
-          const block = l.closest(".roam-block") as HTMLDivElement;
+          const block = CLASSNAMES_TO_CHECK.map(
+            (c) => l.closest(`.${c}`) as HTMLElement
+          ).find((d) => !!d);
           if (block) {
             block.style.textDecoration = "none";
           }

@@ -8,6 +8,7 @@ runExtension("repl", () => {
     attribute: "repl-editor",
     render: (b: HTMLButtonElement) => {
       const { blockUid } = getUidsFromButton(b);
+      b.parentElement.onmousedown = (e: MouseEvent) => e.stopPropagation();
       render({ blockUid, p: b.parentElement });
     },
   });
