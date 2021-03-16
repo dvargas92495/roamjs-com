@@ -64,7 +64,7 @@ export const useAuthenticatedAxiosGet = (): ((
       axios.get(`${process.env.REST_API_URL}/${path}`, {
         headers: { Authorization: `${toCamel(service)}:${getToken(service)}` },
       }),
-    []
+    [service]
   );
 };
 
@@ -139,10 +139,12 @@ export const runService = ({
       tree: [
         {
           text: "token",
-          children: [{
-            text: window[tokenField],
-            children: []
-          }],
+          children: [
+            {
+              text: window[tokenField],
+              children: [],
+            },
+          ],
         },
       ],
     });

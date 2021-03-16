@@ -45,7 +45,7 @@ export const track = (
   eventName: string,
   properties?: Dict
 ): Promise<AxiosResponse> =>
-  axios.post("https://api.roamjs.com/mixpanel", { eventName, properties });
+  axios.post(`${process.env.REST_API_URL}/mixpanel`, { eventName, properties });
 
 export const runExtension = async (
   extensionId: string,

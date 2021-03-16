@@ -378,7 +378,12 @@ const ScheduledContent: StageContent = () => {
     authenticatedAxiosGet("twitter-schedule")
       .then((r) => {
         setValid(true);
-        setScheduledTweets(r.data.scheduledTweets);
+        setScheduledTweets(
+          (r.data.scheduledTweets as ScheduledTweet[]).sort(
+            ({ createdDate: a }, { createdDate: b }) =>
+              new Date(b).valueOf() - new Date(a).valueOf()
+          )
+        );
       })
       .finally(() => setLoading(false));
   }, [setLoading, setValid, authenticatedAxiosGet]);
@@ -465,7 +470,9 @@ const ScheduledContent: StageContent = () => {
                                 cursor: "pointer",
                               }}
                             >
-                              {statusProps.message}
+                              <div style={{ padding: 16 }}>
+                                {statusProps.message}
+                              </div>
                             </span>
                           }
                           target={

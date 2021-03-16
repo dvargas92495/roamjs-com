@@ -106,6 +106,13 @@ functions:
           path: launch-website
           method: post
           cors: true
+  mixpanel-post:
+    handler: out/mixpanel_post.handler
+    events:
+      - http:
+          path: mixpanel
+          method: post
+          cors: true
   payment-methods-get:
     handler: out/payment-methods_get.handler
     events:
