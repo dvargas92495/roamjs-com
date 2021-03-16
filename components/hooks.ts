@@ -2,7 +2,7 @@ import { useClerk } from "@clerk/clerk-react";
 import axios, { AxiosResponse } from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
-import { API_URL, FLOSS_API_URL } from "./constants";
+import { API_URL } from "./constants";
 
 export const cleanCode = (text: string): string =>
   text.replace(/\n/g, "\\n").replace(/"/g, '\\"');
@@ -124,14 +124,14 @@ export const useAuthenticatedAxiosPost = (): ((
 
 export const useAuthenticatedAxiosPut = (): ((
   path: string,
-  data: Record<string, unknown>
+  data?: Record<string, unknown>
 ) => Promise<AxiosResponse>) => {
   const { session } = useClerk();
   return useCallback(
-    (path: string, data: Record<string, unknown>) => {
-      const url = new URL(path, FLOSS_API_URL);
+    (path: string, data?: Record<string, unknown>) => {
+      const url = new URL(`${API_URL}/${path}`);
       url.searchParams.set("_clerk_session_id", session.id);
-      return axios.put(url.toString(), data, {
+      return axios.put(url.toString(), data || {}, {
         withCredentials: true,
       });
     },

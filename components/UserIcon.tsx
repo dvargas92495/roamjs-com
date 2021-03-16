@@ -1,7 +1,8 @@
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { AddUser, Body, Button } from "@dvargas92495/ui";
 import dynamic from "next/dynamic";
-import React from "react";
+import React, { useEffect } from "react";
+import { useAuthenticatedAxiosPut } from "./hooks";
 
 const ConvertKitComponent = () => {
   const Component = dynamic(() => import("../components/ConvertKit"), {
@@ -10,11 +11,21 @@ const ConvertKitComponent = () => {
   return <Component />;
 };
 
+const UserButtonSignedIn = () => {
+  const authenticatedAxiosPut = useAuthenticatedAxiosPut();
+  useEffect(() => {
+    authenticatedAxiosPut("customer").catch((e) =>
+      console.error(e.response?.data || e.message)
+    );
+  }, [authenticatedAxiosPut]);
+  return <UserButton />;
+};
+
 const UserIcon: React.FC<{ flag: boolean }> = ({ flag }) => {
   return (
     <>
       <SignedIn>
-        <UserButton />
+        <UserButtonSignedIn />
       </SignedIn>
       <SignedOut>
         {flag ? (
