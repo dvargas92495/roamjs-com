@@ -29,6 +29,13 @@ functions:
           path: balance
           method: post
           cors: true
+  customer-put:
+    handler: out/customer_put.handler
+    events:
+      - http:
+          path: customer
+          method: put
+          cors: true
   deploy-post:
     handler: out/deploy_post.handler
     events:
