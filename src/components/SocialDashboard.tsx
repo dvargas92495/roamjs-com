@@ -70,26 +70,14 @@ const renderTooltip = ({
   ReactDOM.render(
     <Tooltip
       isOpen={true}
-      position={Position.LEFT}
+      position={Position.LEFT_TOP}
       content={
         <span style={{ width: 128, display: "inline-block" }}>
           {tooltipMessage}
         </span>
       }
     >
-      <span
-        style={{
-          display: "inline-block",
-          height: "100%",
-          width: "100%",
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          pointerEvents: "none",
-        }}
-      />
+      <span />
     </Tooltip>,
     portalContainer
   );
@@ -124,6 +112,15 @@ const TwitterTutorial = ({ pageUid }: { pageUid: string }) => {
       setTimeout(() => {
         const portalContainer = document.createElement("span");
         portalContainer.id = "roamjs-social-guide";
+        portalContainer.style.display = "inline-block";
+        portalContainer.style.height = "100%";
+        portalContainer.style.width = "100%";
+        portalContainer.style.position = "absolute";
+        portalContainer.style.top = "0";
+        portalContainer.style.bottom = "0";
+        portalContainer.style.left = "0";
+        portalContainer.style.right = "0";
+        portalContainer.style.pointerEvents = "none";
         const { block, bullet: parent } = getBulletElement(uid);
         parent.appendChild(portalContainer);
         renderTooltip({
@@ -147,14 +144,12 @@ const TwitterTutorial = ({ pageUid }: { pageUid: string }) => {
               });
               setTimeout(() => {
                 ReactDOM.unmountComponentAtNode(portalContainer);
+                const { bullet: parentAgain } = getBulletElement(uid);
                 const twitterIconTarget = document
                   .getElementById(block.id)
                   .getElementsByClassName("roamjs-twitter-icon")[0]
                   .closest(".bp3-popover-target") as HTMLSpanElement;
-                twitterIconTarget.insertBefore(
-                  portalContainer,
-                  twitterIconTarget.firstElementChild
-                );
+                parentAgain.appendChild(portalContainer);
                 renderTooltip({
                   portalContainer,
                   tooltipMessage:
@@ -215,12 +210,15 @@ const TwitterTutorial = ({ pageUid }: { pageUid: string }) => {
                                           tooltipMessage:
                                             "You could schedule tweets from ANYWHERE in your graph. Then track all pending and successful tweets here!",
                                         });
-                                        setTimeout(
-                                          () =>
-                                            ReactDOM.unmountComponentAtNode(
-                                              portalContainer
-                                            ),
-                                          10000
+                                        const unmount = () =>
+                                          ReactDOM.unmountComponentAtNode(
+                                            portalContainer
+                                          );
+                                        setTimeout(unmount, 10000);
+                                        document.addEventListener(
+                                          "click",
+                                          unmount,
+                                          { once: true }
                                         );
                                       }, 3000);
                                     }

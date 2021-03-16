@@ -30,6 +30,8 @@ import addYears from "date-fns/addYears";
 import endOfYear from "date-fns/endOfYear";
 import format from "date-fns/format";
 import { resolveRefs } from "../entry-helpers";
+import addMinutes from "date-fns/addMinutes";
+import startOfMinute from "date-fns/startOfMinute";
 
 const ATTACHMENT_REGEX = /!\[[^\]]*\]\(([^\s)]*)\)/g;
 const UPLOAD_URL = `${process.env.REST_API_URL}/twitter-upload`;
@@ -294,6 +296,10 @@ const TwitterContent: React.FunctionComponent<{
     }
   }, [setTweetsSent, close, setError, tweetId]);
 
+  const initialDate = useMemo(
+    () => addMinutes(startOfMinute(new Date()), 1),
+    []
+  );
   const socialToken = useSocialToken();
   const [showSchedule, setShowSchedule] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -354,6 +360,7 @@ const TwitterContent: React.FunctionComponent<{
             <DatePicker
               value={scheduleDate}
               onChange={setScheduleDate}
+              minDate={initialDate}
               maxDate={addYears(endOfYear(new Date()), 5)}
               timePrecision={"minute"}
               highlightCurrentDay
@@ -436,9 +443,10 @@ const TweetOverlay: React.FunctionComponent<{
   const valid = useMemo(() => counts.every(({ valid }) => valid), [counts]);
   const open = useCallback(() => setIsOpen(true), [setIsOpen]);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
-  const closeDialog = useCallback(() => setDialogMessage(""), [
-    setDialogMessage,
-  ]);
+  const closeDialog = useCallback(() => {
+    setDialogMessage("");
+    close();
+  }, [setDialogMessage]);
   const inputCallback = useCallback(
     (e: InputEvent) => {
       const target = e.target as HTMLElement;
