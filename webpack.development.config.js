@@ -9,11 +9,19 @@ module.exports = (env) => {
   });
   return {
     ...commonConfig,
+    entry: {
+      ...commonConfig.entry,
+      "webpack-dev-server/client?http://localhost:8080/":
+        "webpack-dev-server/client?http://localhost:8080/",
+    },
     mode: "development",
     performance: {
       hints: "error",
       maxEntrypointSize: 13946000,
       maxAssetSize: 13946000,
+    },
+    devServer: {
+      contentBase: "./build",
     },
   };
 };

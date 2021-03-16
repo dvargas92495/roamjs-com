@@ -35,11 +35,16 @@ const context = {
   pagesToHrefs: (page: string) => getRoamUrl(getPageUidByPageTitle(page)),
 };
 
+const getText = (cur: string) => {
+  try {
+    return parseInline(cur, context);
+  } catch {
+    return cur;
+  }
+}
+
 const reduceChildren = (prev: string, cur: TreeNode, l: number): string =>
-  `${prev}<span>${"".padEnd(l * 2, " ")}</span>${parseInline(
-    cur.text,
-    context
-  )}<br/>${cur.children.reduce((p, c) => reduceChildren(p, c, l + 1), "")}`;
+  `${prev}<span>${"".padEnd(l * 2, " ")}</span>${getText(cur.text)}<br/>${cur.children.reduce((p, c) => reduceChildren(p, c, l + 1), "")}`;
 
 const getTag = (blockUid: string) => {
   const tree = getTreeByBlockUid(blockUid);
@@ -168,11 +173,10 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
             date,
             uid,
             text: resolveRefs(
-              parseInline(
+              getText(
                 text
                   .replace(createTagRegex(tag), (a) => (useHideTags ? "" : a))
-                  .replace(DAILY_NOTE_TAG_REGEX, (a) => (useHideTags ? "" : a)),
-                context
+                  .replace(DAILY_NOTE_TAG_REGEX, (a) => (useHideTags ? "" : a))
               )
             ).trim(),
             body: resolveRefs(
