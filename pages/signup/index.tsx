@@ -10,7 +10,7 @@ const LoginPage = (): JSX.Element => {
       {service ? (
         <SignUp
           afterSignUp={`${window.location.origin}/services/${service}?started=true`}
-          signInURL={`${window.location.origin}/login?sservice=${service}`}
+          signInURL={`${window.location.origin}/login?service=${service}`}
         />
       ) : (
         <SignUp />

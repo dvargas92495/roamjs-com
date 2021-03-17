@@ -1,30 +1,24 @@
 const common = require("./webpack.config");
 const webpack = require("webpack");
 
-module.exports = (env) => {
+module.exports = (env, a, b, c) => {
+  console.log(env, a, b, c);
   const commonConfig = common(env);
   commonConfig.module.rules.push({
     test: /\.js$/,
     enforce: "pre",
     use: ["source-map-loader"],
   });
-  const entry = Object.fromEntries(
-    Object.entries(commonConfig.entry).map(([k, v]) => [
-      k,
-      //  [
-      //   "webpack-dev-server/client?http://127.0.0.1:8080/",
-      // "webpack/hot/only-dev-server",
-      v,
-      //],
-    ])
+  const typescriptRule = commonConfig.module.rules.find((r) =>
+    r.test.test(".ts")
   );
+  typescriptRule.use.unshift({ loader: "react-hot-loader/webpack" });
   return {
     ...commonConfig,
-    entry,
     mode: "development",
     output: {
       ...commonConfig.output,
-      publicPath: 'http://localhost:8080/',
+      publicPath: "http://localhost:8080/",
     },
     performance: {
       hints: "error",
@@ -36,9 +30,9 @@ module.exports = (env) => {
       host: "127.0.0.1",
       disableHostCheck: true,
       hot: true,
-      publicPath: 'http://localhost:8080/',
+      publicPath: "http://localhost:8080/",
       headers: {
-        'Access-Control-Allow-Origin': 'https://roamresearch.com',
+        "Access-Control-Allow-Origin": "https://roamresearch.com",
       },
     },
     plugins: [

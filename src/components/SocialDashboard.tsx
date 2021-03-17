@@ -332,7 +332,7 @@ const TwitterTutorial = ({ pageUid }: { pageUid: string }) => {
   }, [setAlertMessage, alertCallback, stepTwo]);
   return (
     <>
-      <Button onClick={onClick}>Setup</Button>
+      <Button onClick={onClick}>Start</Button>
       <Alert
         isOpen={!!alertMessage}
         onConfirm={() => alertCallback.current()}
@@ -397,7 +397,10 @@ const ScheduledContent: StageContent = () => {
   ) : valid ? (
     <>
       {scheduledTweets.length ? (
-        <table className="bp3-html-table bp3-html-table-bordered bp3-html-table-striped">
+        <table
+          className="bp3-html-table bp3-html-table-bordered bp3-html-table-striped"
+          style={{ border: "1px solid rgba(16,22,26,0.15)" }}
+        >
           <thead>
             <tr>
               <th></th>

@@ -18,11 +18,17 @@ const EvalRepl = ({ code }: { code: string }) => {
     window.clearTimeout(evalRef.current);
     evalRef.current = window.setTimeout(() => {
       try {
-        const lines = code.split("\n");
+        const lines = (code || "").split("\n");
         const mappedLines = lines.map((l, i) =>
           i === lines.length - 1 && !l.startsWith("return ") ? `return ${l}` : l
         );
-        setOutput(`${Function(`"use strict";${mappedLines.join("\n")}`)()}`);
+        setOutput(
+          JSON.stringify(
+            Function(`"use strict";${mappedLines.join("\n")}`)(),
+            null,
+            2
+          )
+        );
       } catch (e) {
         setOutput(e.message);
       }
@@ -71,7 +77,7 @@ const Repl: React.FC<ReplProps> = ({ blockUid }) => {
       </Card>
       <Card style={{ width: "40%", padding: "0 1px" }}>
         <h4 style={{ textAlign: "center" }}>Console</h4>
-        <EvalRepl code={code}/>
+        <EvalRepl code={code} />
       </Card>
     </div>
   );
