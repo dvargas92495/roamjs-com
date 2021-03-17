@@ -148,6 +148,7 @@
     "react-syntax-highlighter": "^15.2.1",
     "react-tweet-embed": "^1.2.2",
     "react-vertical-timeline-component": "^3.3.3",
+    "react-youtube": "^7.13.1",
     "remark-autolink-headings": "^6.0.1",
     "remark-code-titles": "^0.1.1",
     "remark-slug": "^6.0.0",

@@ -1,4 +1,6 @@
 import axios from "axios";
+import { getUids } from "roam-client";
+import { render } from "../components/YoutubePlayer";
 import { createHTMLObserver, runExtension } from "../entry-helpers";
 
 runExtension("video", () => {
@@ -22,5 +24,25 @@ runExtension("video", () => {
     },
     tag: "DIV",
     className: "rm-inline-img__resize",
+  });
+
+  createHTMLObserver({
+    tag: "IFRAME",
+    className: "rm-video-player",
+    callback: (iframe: HTMLIFrameElement) => {
+      const youtubeId = /youtube\.com\/embed\/(.*?)(\?|$)/.exec(
+        iframe.src
+      )?.[1];
+      if (youtubeId) {
+        const { blockUid } = getUids(
+          iframe.closest(".roam-block") as HTMLDivElement
+        );
+        render({
+          p: iframe.parentElement as HTMLDivElement,
+          blockUid,
+          youtubeId,
+        });
+      }
+    },
   });
 });
