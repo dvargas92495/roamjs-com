@@ -1,10 +1,9 @@
 import { Body } from "@dvargas92495/ui";
 import React from "react";
-import ServiceLayout from "../../components/ServiceLayout";
-import {
+import ServiceLayout, {
   getStaticPropsForPage,
   ServicePageProps,
-} from "../../components/ServicePageCommon";
+} from "../../components/ServiceLayout";
 
 const StaticSitePage: React.FC<ServicePageProps> = (props) => {
   return (

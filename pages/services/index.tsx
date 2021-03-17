@@ -6,7 +6,7 @@ import axios from "axios";
 import { API_URL } from "../../components/constants";
 import Link from "next/link";
 import { GetStaticProps } from "next";
-import { findById } from "../../components/ServicePageCommon";
+import { findById } from "../../components/ServiceLayout";
 
 type PricesProp = { prices: { name: string; price: number }[] };
 

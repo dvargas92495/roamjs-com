@@ -5,6 +5,7 @@ import ReactDOM from "react-dom";
 import {
   createBlock,
   getTreeByPageName,
+  parseRoamDate,
   toRoamDate,
   toRoamDateUid,
 } from "roam-client";
@@ -38,8 +39,8 @@ const TweetLabel = ({ id }: { id: string }) => {
   );
 };
 
-const TwitterFeed = (): React.ReactElement => {
-  const date = useMemo(() => new Date(), []);
+const TwitterFeed = ({ title }: { title: string }): React.ReactElement => {
+  const date = useMemo(() => parseRoamDate(title), [title]);
   const yesterday = useMemo(() => subDays(date, 1), [date]);
   const roamDate = useMemo(() => toRoamDate(yesterday), [yesterday]);
   const [tweets, setTweets] = useState<Tweet[]>([]);
@@ -156,7 +157,7 @@ const TwitterFeed = (): React.ReactElement => {
                   <TweetLabel id={tweet.id} />
                 </Checkbox>
               ))}
-              {!tweets.length && <span>No tweets liked yesterday</span>}
+              {!tweets.length && <span>No tweets liked.</span>}
             </div>
             <Button
               onClick={onClick}
@@ -172,7 +173,7 @@ const TwitterFeed = (): React.ReactElement => {
   );
 };
 
-export const render = (parent: HTMLDivElement): void =>
-  ReactDOM.render(<TwitterFeed />, parent);
+export const render = (parent: HTMLDivElement, title: string): void =>
+  ReactDOM.render(<TwitterFeed title={title} />, parent);
 
 export default TwitterFeed;

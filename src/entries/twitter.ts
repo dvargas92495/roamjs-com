@@ -17,6 +17,8 @@ import {
   getTreeByPageName,
   getUids,
   toRoamDate,
+  getPageTitleByPageUid,
+  parseRoamDateUid,
 } from "roam-client";
 import axios from "axios";
 import { render } from "../components/TweetOverlay";
@@ -150,21 +152,53 @@ runExtension("twitter", () => {
     /feed/i.test(t.text)
   );
   if (feed) {
-    const title = toRoamDate(new Date());
-    createPageTitleObserver({
-      title,
-      log: true,
-      callback: (d: HTMLDivElement) => {
-        if (!isTagOnPage({ tag: "Twitter Feed", title })) {
-          const parent = document.createElement("div");
-          parent.id = "roamjs-twitter-feed";
-          d.firstElementChild.insertBefore(
-            parent,
-            d.firstElementChild.firstElementChild.nextElementSibling
-          );
-          feedRender(parent);
+    const isAnyDay = feed.children.some((t) => /any day/i.test(t.text));
+    const callback = ({ title, d }: { d: HTMLDivElement; title: string }) => {
+      if (!isTagOnPage({ tag: "Twitter Feed", title })) {
+        const parent = document.createElement("div");
+        parent.id = "roamjs-twitter-feed";
+        d.firstElementChild.insertBefore(
+          parent,
+          d.firstElementChild.firstElementChild.nextElementSibling
+        );
+        feedRender(parent, title);
+      }
+    };
+    if (isAnyDay) {
+      const listener = (e?: HashChangeEvent) => {
+        const d = document.getElementsByClassName(
+          "roam-article"
+        )[0] as HTMLDivElement;
+        if (d) {
+          const url = e?.newURL || window.location.href;
+          const uid = url.match(/\/page\/(.*)$/)?.[1] || "";
+          const attribute = `data-roamjs-${uid}`;
+          if (!isNaN(parseRoamDateUid(uid).valueOf())) {
+            // React's rerender crushes the old article/heading
+            setTimeout(() => {
+              if (!d.hasAttribute(attribute)) {
+                d.setAttribute(attribute, "true");
+                callback({
+                  d: document.getElementsByClassName(
+                    "roam-article"
+                  )[0] as HTMLDivElement,
+                  title: getPageTitleByPageUid(uid),
+                });
+              }
+            }, 1);
+          } else {
+            d.removeAttribute(attribute);
+          }
         }
-      },
-    });
+      };
+      window.addEventListener("hashchange", listener);
+    } else {
+      const title = toRoamDate(new Date());
+      createPageTitleObserver({
+        title,
+        log: true,
+        callback: (d: HTMLDivElement) => callback({ d, title }),
+      });
+    }
   }
 });

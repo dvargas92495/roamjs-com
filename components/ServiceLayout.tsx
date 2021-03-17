@@ -11,11 +11,45 @@ import {
 } from "@dvargas92495/ui";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import StandardLayout from "./StandardLayout";
-import { ServicePageProps } from "./ServicePageCommon";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { useRouter } from "next/router";
 import { useAuthenticatedAxiosPost, useCopyCode } from "./hooks";
-import { stripe } from "./constants";
+import { API_URL, stripe } from "./constants";
+import axios from "axios";
+import { GetStaticProps } from "next";
+
+export type ServicePageProps = {
+  description: string;
+  price: number;
+  image: string;
+  id: string;
+};
+
+export const findById = (id: string) => ({ name }: { name: string }): boolean =>
+  name.toLowerCase() === `roamjs ${id.split("-").slice(-1)}`;
+
+export const getStaticPropsForPage: (
+  id: string
+) => GetStaticProps<ServicePageProps> = (id: string) => () =>
+  axios
+    .get(`${API_URL}/products`)
+    .then((r) => r.data.products.find(findById(id)))
+    .then((p) => ({
+      props: {
+        description: p.description,
+        price: p.prices[0].price / 100,
+        image: p.image || `/thumbnails/${id}.png`,
+        id,
+      },
+    }))
+    .catch(() => ({
+      props: {
+        description: "Failed to load description",
+        price: 0,
+        image: "",
+        id,
+      },
+    }));
 
 const idToTitle = (id: string) =>
   id
