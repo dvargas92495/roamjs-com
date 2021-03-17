@@ -20,8 +20,11 @@ import {
 import { setInputSetting } from "../entry-helpers";
 import MenuItemSelect from "./MenuItemSelect";
 import {
+  getField,
   HIGHLIGHT,
   isFieldInTree,
+  isFieldSet,
+  MainStage,
   NextButton,
   ServiceDashboard,
   StageContent,
@@ -35,7 +38,7 @@ import {
 const RequestUserContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(isFieldSet("share"));
   const [deploySwitch, setDeploySwitch] = useState(true);
   const onSwitchChange = useCallback(
     (e: React.FormEvent<HTMLInputElement>) =>
@@ -75,33 +78,35 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
     [setReady]
   );
   useEffect(() => {
-    const topbar = document.getElementsByClassName("rm-topbar")[0];
-    if (topbar) {
-      const moreMenu = topbar.getElementsByClassName(
-        "bp3-icon-more"
-      )[0] as HTMLSpanElement;
-      if (moreMenu) {
-        moreMenu.click();
-        setTimeout(() => {
-          const menuItems = moreMenu.closest(
-            ".bp3-popover-target.bp3-popover-open"
-          )?.nextElementSibling;
-          if (menuItems) {
-            const shareItem = Array.from(
-              menuItems.getElementsByClassName("bp3-menu-item")
-            )
-              .map((e) => e as HTMLAnchorElement)
-              .find((e) => e.innerText === "Share");
-            if (shareItem) {
-              shareItem.style.border = HIGHLIGHT;
+    if (!ready) {
+      const topbar = document.getElementsByClassName("rm-topbar")[0];
+      if (topbar) {
+        const moreMenu = topbar.getElementsByClassName(
+          "bp3-icon-more"
+        )[0] as HTMLSpanElement;
+        if (moreMenu) {
+          moreMenu.click();
+          setTimeout(() => {
+            const menuItems = moreMenu.closest(
+              ".bp3-popover-target.bp3-popover-open"
+            )?.nextElementSibling;
+            if (menuItems) {
+              const shareItem = Array.from(
+                menuItems.getElementsByClassName("bp3-menu-item")
+              )
+                .map((e) => e as HTMLAnchorElement)
+                .find((e) => e.innerText === "Share");
+              if (shareItem) {
+                shareItem.style.border = HIGHLIGHT;
+              }
             }
-          }
-        }, 500);
+          }, 500);
+        }
       }
+      document.addEventListener("click", shareListener);
+      return () => document.removeEventListener("click", shareListener);
     }
-    document.addEventListener("click", shareListener);
-    return () => document.removeEventListener("click", shareListener);
-  }, [setReady, shareListener]);
+  }, [ready, shareListener]);
   const onSubmit = useCallback(() => {
     setInputSetting({
       blockUid: pageUid,
@@ -144,7 +149,7 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
 const RequestDomainContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(getField("domain"));
   const [error, setError] = useState("");
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
@@ -194,7 +199,7 @@ const RequestDomainContent: StageContent = ({ openPanel }) => {
 const RequestIndexContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(getField("index"));
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
     [setValue]
@@ -231,8 +236,14 @@ const RequestIndexContent: StageContent = ({ openPanel }) => {
 const RequestFiltersContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
-  const [filters, setFilters] = useState<(TextNode & { key: number })[]>([]);
-  const [key, setKey] = useState(0);
+  const [filters, setFilters] = useState<(TextNode & { key: number })[]>(
+    (
+      getTreeByPageName("roam/js/static-site").find((t) =>
+        /filter/i.test(t.text)
+      ).children || []
+    ).map((t, key) => ({ ...t, key }))
+  );
+  const [key, setKey] = useState(filters.length);
   const onSubmit = useCallback(() => {
     const tree = getTreeByBlockUid(pageUid);
     const keyNode = tree.children.find((t) => /filter/i.test(t.text));
@@ -552,23 +563,24 @@ const StaticSiteDashboard = (): React.ReactElement => (
       {
         check: isFieldInTree("share"),
         component: RequestUserContent,
+        setting: "Share",
       },
       {
         check: isFieldInTree("domain"),
         component: RequestDomainContent,
+        setting: "Domain",
       },
       {
         check: isFieldInTree("index"),
         component: RequestIndexContent,
+        setting: "Index",
       },
       {
         check: isFieldInTree("filter"),
         component: RequestFiltersContent,
+        setting: "Filters",
       },
-      {
-        check: () => false,
-        component: LiveContent,
-      },
+      MainStage(LiveContent),
     ]}
   />
 );

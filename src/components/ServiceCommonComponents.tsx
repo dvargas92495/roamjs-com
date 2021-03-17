@@ -55,6 +55,18 @@ const isTokenInTree = (tree: TreeNode[]): boolean => !!getTokenFromTree(tree);
 export const isFieldInTree = (field: string) => (tree: TreeNode[]): boolean =>
   tree.some((t) => new RegExp(field, "i").test(t.text));
 
+export const isFieldSet = (field: string): boolean => {
+  const service = useService();
+  return isFieldInTree(field)(getTreeByPageName(`roam/js/${service}`));
+};
+
+export const getField = (field: string): string => {
+  const service = useService();
+  return getTreeByPageName(`roam/js/${service}`).find((t) =>
+    new RegExp(field, "i").test(t.text)
+  )?.children?.[0]?.text;
+};
+
 export const useAuthenticatedAxiosGet = (): ((
   path: string
 ) => Promise<AxiosResponse>) => {
@@ -155,16 +167,23 @@ export const runService = ({
 // eslint-disable-next-line @typescript-eslint/ban-types
 type StageProps = PanelProps<object>;
 export type StageContent = (props: StageProps) => React.ReactElement;
-type GetStage = () => StageContent;
+type GetStage = (setting?: string) => StageContent;
+type StageConfig = {
+  component: StageContent;
+  check: (tree: TreeNode[]) => boolean;
+  setting?: string;
+};
 
 const ServiceContext = React.createContext<{
   pageUid: string;
   getStage: GetStage;
   service: string;
+  settings: string[];
 }>({
   pageUid: "UNSET-UID",
   getStage: () => () => <div />,
   service: "service",
+  settings: [],
 });
 
 const useService = (): string => useContext(ServiceContext).service;
@@ -209,7 +228,7 @@ const RequestTokenContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
   const service = useService();
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(getToken(service));
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
     [setValue]
@@ -244,28 +263,85 @@ const RequestTokenContent: StageContent = ({ openPanel }) => {
   );
 };
 
+const SettingsContent: StageContent = ({ openPanel }) => {
+  const { settings, getStage } = useContext(ServiceContext);
+  return (
+    <div>
+      {settings.map((s) => (
+        <div style={{ margin: 8 }} key={s}>
+          <Button
+            text={s}
+            rightIcon={"arrow-right"}
+            onClick={() =>
+              openPanel({
+                renderPanel: getStage(s),
+              })
+            }
+            style={{
+              minWidth: 128,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export const TOKEN_STAGE = {
   check: isTokenInTree,
   component: RequestTokenContent,
+  setting: "Token",
 };
+
+export const MainStage = (Content: StageContent): StageConfig => ({
+  check: () => false,
+  component: ((props) => (
+    <>
+      <Content {...props} />
+      <Button
+        minimal
+        icon={"wrench"}
+        onClick={() =>
+          props.openPanel({
+            renderPanel: SettingsContent,
+          })
+        }
+        id={"roamjs-social-refresh-button"}
+        style={{ position: "absolute", top: -40, right: 8 }}
+      />
+    </>
+  )) as StageContent,
+});
 
 export const ServiceDashboard: React.FC<{
   service: string;
-  stages: { component: StageContent; check: (tree: TreeNode[]) => boolean }[];
+  stages: StageConfig[];
 }> = ({ service, stages }) => {
   const title = `roam/js/${service}`;
   const pageUid = useMemo(() => getPageUidByPageTitle(title), [title]);
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
-  const getStage = useCallback(() => {
-    const tree = getTreeByPageName(title);
-    const index = stages.findIndex((s) => !s.check(tree));
-    setProgress(index / (stages.length - 1));
-    if (index < stages.length - 1) {
-      setShowProgress(true);
-    }
-    return stages.slice(index)[0].component;
-  }, [title, stages, setProgress, setShowProgress]);
+  const getStage = useCallback(
+    (setting?: string) => {
+      if (setting) {
+        return stages.find((s) => s.setting === setting).component;
+      }
+      const tree = getTreeByPageName(title);
+      const index = stages.findIndex((s) => !s.check(tree));
+      setProgress(index / (stages.length - 1));
+      if (index < stages.length - 1) {
+        setShowProgress(true);
+      }
+      return stages.slice(index)[0].component;
+    },
+    [title, stages, setProgress, setShowProgress]
+  );
+  const settings = useMemo(
+    () => stages.map((s) => s.setting).filter((s) => !!s),
+    [stages]
+  );
   const renderPanel = useMemo(getStage, [getStage]);
   useEffect(() => {
     if (progress === 1) {
@@ -275,7 +351,7 @@ export const ServiceDashboard: React.FC<{
   return (
     <Card>
       <h4 style={{ padding: 4 }}>{toTitle(service)} Dashboard</h4>
-      <ServiceContext.Provider value={{ getStage, pageUid, service }}>
+      <ServiceContext.Provider value={{ getStage, pageUid, service, settings }}>
         <style>
           {`.roamjs-service-panel {
   position: relative;

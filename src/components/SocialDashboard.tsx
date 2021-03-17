@@ -18,6 +18,7 @@ import {
 } from "../entry-helpers";
 import {
   HIGHLIGHT,
+  MainStage,
   ServiceDashboard,
   StageContent,
   TOKEN_STAGE,
@@ -558,10 +559,7 @@ const SocialDashboard = (): React.ReactElement => (
     service={"social"}
     stages={[
       TOKEN_STAGE,
-      {
-        check: () => false,
-        component: ScheduledContent,
-      },
+      MainStage(ScheduledContent),
     ]}
   />
 );
