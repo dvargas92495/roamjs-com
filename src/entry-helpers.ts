@@ -861,6 +861,11 @@ export const getRoamUrl = (blockUid?: string): string =>
     blockUid ? `/page/${blockUid}` : ""
   }`;
 
+export const getRoamUrlByPage = (page: string): string => {
+  const uid = getPageUidByPageTitle(page);
+  return uid && getRoamUrl(uid);
+};
+
 const blockRefRegex = new RegExp("\\(\\((..........?)\\)\\)", "g");
 const aliasRefRegex = new RegExp(
   `\\[[^\\]]*\\]\\((${blockRefRegex.source})\\)`,

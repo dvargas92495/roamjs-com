@@ -134,7 +134,7 @@ module "aws-serverless-backend" {
         "shutdown-social/post",
         "shutdown-website/post",
         "social-schedule/delete",
-        "social-schedules/get",
+        "social-schedule/put",
         "social-token/get",
         "sponsorships/get",
         "start-service/post",

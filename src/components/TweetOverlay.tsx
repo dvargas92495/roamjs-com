@@ -29,7 +29,7 @@ import twitter from "twitter-text";
 import addYears from "date-fns/addYears";
 import endOfYear from "date-fns/endOfYear";
 import format from "date-fns/format";
-import { resolveRefs } from "../entry-helpers";
+import { getRoamUrlByPage, resolveRefs } from "../entry-helpers";
 import addMinutes from "date-fns/addMinutes";
 import startOfMinute from "date-fns/startOfMinute";
 
@@ -481,6 +481,10 @@ const TweetOverlay: React.FunctionComponent<{
       unmount();
     }
   });
+  const aOnClick = useCallback(() => {
+    window.location.assign(getRoamUrlByPage("roam/js/social"));
+    closeDialog();
+  }, [closeDialog]);
   return (
     <>
       <Popover
@@ -531,12 +535,15 @@ const TweetOverlay: React.FunctionComponent<{
       >
         <p>{dialogMessage}</p>
         <p>
-          Visit the <span className="rm-page-ref__brackets">[[</span>
-          <span tabIndex={-1} className="rm-page-ref rm-page-ref--link">
-            roam/js/social
-          </span>
-          <span className="rm-page-ref__brackets">]]</span> page to track the
-          tweet's status.
+          Visit the{" "}
+          <a onClick={aOnClick}>
+            <span className="rm-page-ref__brackets">[[</span>
+            <span tabIndex={-1} className="rm-page-ref rm-page-ref--link">
+              roam/js/social
+            </span>
+            <span className="rm-page-ref__brackets">]]</span>
+          </a>{" "}
+          page to track the tweet's status.
         </p>
       </Alert>
     </>
