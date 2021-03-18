@@ -171,10 +171,10 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: '100%',
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        height: "100%",
       }}
     >
       <div
@@ -186,7 +186,7 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
         }}
       >
         <H3>Thanks for subscribing!</H3>
-        <span style={{ fontSize: 18 }}>
+        <span style={{ fontSize: 18, marginBottom: 32 }}>
           Click the button below to copy the extension and paste it anywhere in
           your graph to get started!
         </span>
@@ -194,11 +194,10 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
           onClick={() => onSave([id])}
           color="primary"
           variant="contained"
-          style={{margin: '32px 0'}}
         >
           COPY EXTENSION
         </Button>
-        <span style={{ marginLeft: 24, minHeight: 20 }}>
+        <span style={{ minHeight: 20, marginBottom: 32 }}>
           {copied && "COPIED!"}
         </span>
         <div

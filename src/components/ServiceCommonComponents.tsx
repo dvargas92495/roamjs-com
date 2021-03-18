@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Card,
   InputGroup,
@@ -31,6 +32,7 @@ import {
   getRoamUrl,
   setInputSetting,
 } from "../entry-helpers";
+import { getRenderRoot } from "./hooks";
 
 export const HIGHLIGHT = "3px dashed yellowgreen";
 const toTitle = (service: string) =>
@@ -144,23 +146,39 @@ export const runService = ({
         return false;
       }
     );
-
-    const tokenField = `roamjs${toCamel(id)}Token`;
-    createPage({
-      title,
-      tree: [
-        {
-          text: "token",
-          children: [
-            {
-              text: window[tokenField],
-              children: [],
-            },
-          ],
-        },
-      ],
-    });
-    delete window[tokenField];
+    const root = getRenderRoot(id);
+    ReactDOM.render(
+      <Alert
+        isOpen={true}
+        onConfirm={() => {
+          const tokenField = `roamjs${toCamel(id)}Token`;
+          createPage({
+            title,
+            tree: [
+              {
+                text: "token",
+                children: [
+                  {
+                    text: window[tokenField],
+                    children: [],
+                  },
+                ],
+              },
+            ],
+          });
+          delete window[tokenField];
+          ReactDOM.unmountComponentAtNode(root);
+          root.remove();
+        }}
+      >
+        <h4>Welcome to RoamJS {toTitle(id)}!</h4>
+        <p>
+          Click OK to create a <code>{title}</code> page and start using the
+          service.
+        </p>
+      </Alert>,
+      root
+    );
   }
 };
 

@@ -354,7 +354,7 @@ export const createPageTitleObserver = ({
       const uid = getPageUidByPageTitle(title);
       const attribute = `data-roamjs-${uid}`;
       const url = e?.newURL || window.location.href;
-      if (url === getRoamUrl(uid) || (log && url === getRoamUrl())) {
+      if ((uid && url === getRoamUrl(uid)) || (log && url === getRoamUrl())) {
         // React's rerender crushes the old article/heading
         setTimeout(() => {
           if (!d.hasAttribute(attribute)) {
