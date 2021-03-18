@@ -154,11 +154,14 @@ const CopyButton: React.FC<{ token: string }> = ({ token }) => {
 
 const Service = ({ id, end }: { id: string; end: () => void }) => {
   const userData = useUser().publicMetadata as {
-    [key: string]: { token: string };
+    [key: string]: { token: string; authenticated?: boolean };
   };
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const camel = idToCamel(id);
-  const token = userData?.[camel]?.token || "NO TOKEN FOUND FOR USER";
+  const {
+    token = "NO TOKEN FOUND FOR USER",
+    authenticated = false,
+  } = userData?.[camel];
   const [copied, setCopied] = useState(false);
   const onSave = useCopyCode(
     setCopied,
@@ -185,26 +188,29 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
           width: "50%",
         }}
       >
-        <H3>Thanks for subscribing!</H3>
-        <span style={{ fontSize: 18, marginBottom: 32 }}>
-          Click the button below to copy the extension and paste it anywhere in
-          your graph to get started!
-        </span>
-        <Button
-          onClick={() => onSave([id])}
-          color="primary"
-          variant="contained"
-        >
-          COPY EXTENSION
-        </Button>
-        <span style={{ minHeight: 20, marginBottom: 32 }}>
-          {copied && "COPIED!"}
-        </span>
+        {!authenticated && (
+          <>
+            <H3>Thanks for subscribing!</H3>
+            <span style={{ fontSize: 18, marginBottom: 32 }}>
+              Click the button below to copy the extension and paste it anywhere
+              in your graph to get started!
+            </span>
+            <Button
+              onClick={() => onSave([id])}
+              color="primary"
+              variant="contained"
+            >
+              COPY EXTENSION
+            </Button>
+            <span style={{ minHeight: 20 }}>{copied && "COPIED!"}</span>
+          </>
+        )}
         <div
           style={{
             display: "flex",
             alignItems: "normal",
             justifyContent: "space-between",
+            marginTop: 32,
           }}
         >
           <StringField

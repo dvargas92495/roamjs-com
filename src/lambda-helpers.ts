@@ -215,8 +215,8 @@ export const authenticate = (
   const Authorization = event.headers.Authorization;
   const [service, token] = Authorization.split(":");
 
-  return users.getUserList().then((users) => {
-    const user = users.find(
+  return users.getUserList().then((us) => {
+    const user = us.find(
       (user) =>
         (user.publicMetadata as { [s: string]: { token: string } })?.[service]
           ?.token === token
@@ -227,6 +227,23 @@ export const authenticate = (
         body: "Invalid token",
         headers: headers(event),
       };
+    }
+    const publicMetadata = user.publicMetadata;
+    const serviceData = (publicMetadata as {
+      [s: string]: { authenticated: boolean };
+    })[service];
+    if (!serviceData.authenticated) {
+      users.updateUser(user.id, {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
+        publicMetadata: JSON.stringify({
+          ...publicMetadata,
+          [service]: {
+            ...serviceData,
+            authenticated: true,
+          },
+        }),
+      });
     }
     event.headers.Authorization = user.id;
     const result = handler(event, ctx, callback);
