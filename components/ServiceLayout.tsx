@@ -94,7 +94,7 @@ const LaunchButton: React.FC<{
       )} for $${price}/month.`}
       onSuccess={start}
       title={`RoamJS ${idToTitle(id)}`}
-      defaultIsOpen={started === 'true'}
+      defaultIsOpen={started === "true"}
     />
   );
 };
@@ -160,7 +160,10 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
   const camel = idToCamel(id);
   const token = userData?.[camel]?.token || "NO TOKEN FOUND FOR USER";
   const [copied, setCopied] = useState(false);
-  const onSave = useCopyCode(setCopied, `window.roamjs${camel}Token = "${token}";\n`);
+  const onSave = useCopyCode(
+    setCopied,
+    `window.roamjs${camel}Token = "${token}";\n`
+  );
   const onEnd = useCallback(
     () => authenticatedAxiosPost("end-service", { service: id }),
     [authenticatedAxiosPost]
@@ -168,51 +171,57 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
   return (
     <div
       style={{
-        marginTop: 32,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        height: '100%',
       }}
     >
-      <H3>Thanks for subscribing!</H3>
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          marginBottom: 32,
           flexDirection: "column",
-          width: "fit-content",
+          width: "50%",
         }}
       >
-        First, copy the extension into your Roam Graph
+        <H3>Thanks for subscribing!</H3>
+        <span style={{ fontSize: 18 }}>
+          Click the button below to copy the extension and paste it anywhere in
+          your graph to get started!
+        </span>
         <Button
           onClick={() => onSave([id])}
           color="primary"
           variant="contained"
+          style={{margin: '32px 0'}}
         >
           COPY EXTENSION
         </Button>
         <span style={{ marginLeft: 24, minHeight: 20 }}>
           {copied && "COPIED!"}
         </span>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "normal",
+            justifyContent: "space-between",
+          }}
+        >
+          <StringField
+            value={token}
+            disabled
+            setValue={() => token}
+            label={`RoamJS ${idToTitle(id)} Token`}
+            style={{ cursor: "text", flexGrow: 1, paddingRight: 24 }}
+          />
+          <CopyButton token={token} />
+        </div>
+        <span style={{ color: "darkred" }}>
+          Token is sensitive. <b>DO NOT SHARE WITH ANYONE</b>
+        </span>
       </div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "normal",
-          justifyContent: "space-between",
-        }}
-      >
-        <StringField
-          value={token}
-          disabled
-          setValue={() => token}
-          label={`RoamJS ${idToTitle(id)} Token`}
-          style={{ cursor: "text", flexGrow: 1, paddingRight: 24 }}
-        />
-        <CopyButton token={token} />
-      </div>
-      <span style={{ color: "darkred" }}>
-        Token is sensitive. <b>DO NOT SHARE WITH ANYONE</b>
-      </span>
-      <div style={{ marginTop: 128 }}>
+      <div>
         <ConfirmationDialog
           buttonText={"End Service"}
           color="secondary"
