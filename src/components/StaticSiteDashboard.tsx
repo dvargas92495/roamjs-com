@@ -151,20 +151,41 @@ const RequestDomainContent: StageContent = ({ openPanel }) => {
   const pageUid = usePageUid();
   const [value, setValue] = useState(getField("domain"));
   const [error, setError] = useState("");
+  const [domainSwitch, setDomainSwitch] = useState(
+    !value.endsWith(".roamjs.com")
+  );
+  const onSwitchChange = useCallback(
+    (e: React.FormEvent<HTMLInputElement>) => {
+      const { checked } = e.target as HTMLInputElement;
+      setDomainSwitch(checked);
+      setValue(
+        checked ? value.replace(".roamjs.com", "") : `${value}.roamjs.com`
+      );
+    },
+    [setDomainSwitch, value]
+  );
   const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
-    [setValue]
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setValue(`${e.target.value}${domainSwitch ? "" : ".roamjs.com"}`),
+    [setValue, domainSwitch]
   );
   const onBlur = useCallback(() => {
     if (!/\.[a-z]{2,8}$/.test(value)) {
       return setError("Invalid domain. Try a .com!");
+    } else if (
+      !domainSwitch &&
+      value.replace(".roamjs.com", "").includes(".")
+    ) {
+      return setError("Invalid subdomain. Remove the period");
     }
     return setError("");
-  }, [value]);
+  }, [value, domainSwitch]);
+  const onFocus = useCallback(() => setError(""), [setError]);
   const onSubmit = useCallback(() => {
     setInputSetting({ blockUid: pageUid, key: "domain", value, index: 1 });
     nextStage();
   }, [value, nextStage, pageUid]);
+  const disabled = !!error || !value;
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (
@@ -172,7 +193,8 @@ const RequestDomainContent: StageContent = ({ openPanel }) => {
         !e.shiftKey &&
         !e.altKey &&
         !e.metaKey &&
-        !e.ctrlKey
+        !e.ctrlKey &&
+        !disabled
       ) {
         onSubmit();
       }
@@ -181,17 +203,32 @@ const RequestDomainContent: StageContent = ({ openPanel }) => {
   );
   return (
     <>
+      <Switch
+        checked={domainSwitch}
+        onChange={onSwitchChange}
+        labelElement={"Use Custom Domain"}
+      />
       <Label>
-        Custom Domain
+        {domainSwitch ? "Custom Domain" : "RoamJS Subdomain"}
         <InputGroup
-          value={value}
+          value={domainSwitch ? value : value.replace(".roamjs.com", "")}
           onChange={onChange}
+          onFocus={onFocus}
           onKeyDown={onKeyDown}
           onBlur={onBlur}
+          rightElement={
+            !domainSwitch && (
+              <span
+                style={{ opacity: 0.5, margin: 4, display: "inline-block" }}
+              >
+                .roamjs.com
+              </span>
+            )
+          }
         />
         <span style={{ color: "darkred" }}>{error}</span>
       </Label>
-      <NextButton onClick={onSubmit} disabled={!!error || !value} />
+      <NextButton onClick={onSubmit} disabled={disabled} />
     </>
   );
 };
@@ -363,6 +400,18 @@ const getStatusColor = (status: string) =>
     ? "darkred"
     : "goldenrod";
 
+const progressTypeToIntent = (type: string) => {
+  if (type === "LAUNCHING") {
+    return Intent.PRIMARY;
+  } else if (type === "SHUTTING DOWN") {
+    return Intent.DANGER;
+  } else if (type === "DEPLOYING") {
+    return Intent.SUCCESS;
+  } else {
+    return Intent.NONE;
+  }
+};
+
 const LiveContent: StageContent = () => {
   const authenticatedAxiosGet = useAuthenticatedAxiosGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
@@ -376,7 +425,7 @@ const LiveContent: StageContent = () => {
     { status: string; date: string; uuid: string }[]
   >([]);
   const [progress, setProgress] = useState(0);
-  const [showProgress, setShowProgress] = useState(false);
+  const [progressType, setProgressType] = useState("");
   const timeoutRef = useRef(0);
 
   const openShutdown = useCallback(() => setIsShutdownOpen(true), [
@@ -394,17 +443,17 @@ const LiveContent: StageContent = () => {
           setDeploys(r.data.deploys);
           setProgress(r.data.progress);
           if (!isWebsiteReady(r.data)) {
-            setShowProgress(true);
+            setProgressType(r.data.progressType);
             timeoutRef.current = window.setTimeout(getWebsite, 5000);
           } else {
-            setShowProgress(false);
+            setProgressType("");
           }
         } else {
           setStatusProps("{}");
           setStatus("");
           setDeploys([]);
           setProgress(0);
-          setShowProgress(false);
+          setProgressType("");
         }
       }),
     [
@@ -412,7 +461,7 @@ const LiveContent: StageContent = () => {
       setDeploys,
       timeoutRef,
       setStatusProps,
-      setShowProgress,
+      setProgressType,
       setProgress,
     ]
   );
@@ -458,7 +507,7 @@ const LiveContent: StageContent = () => {
             <>
               <div style={{ marginBottom: 8 }}>
                 <span>Status</span>
-                {status === "AWAITING VALIDATION" ? (
+                {status === "AWAITING VALIDATION" && statusProps !== "{}" ? (
                   <div style={{ color: "darkblue" }}>
                     <span>{status}</span>
                     <br />
@@ -478,9 +527,12 @@ const LiveContent: StageContent = () => {
                   </span>
                 )}
               </div>
-              {showProgress && (
+              {progressType && (
                 <div style={{ margin: "8px 0" }}>
-                  <ProgressBar value={progress} intent={Intent.PRIMARY} />
+                  <ProgressBar
+                    value={progress}
+                    intent={progressTypeToIntent(progressType)}
+                  />
                 </div>
               )}
               <div style={{ marginTop: 8 }}>

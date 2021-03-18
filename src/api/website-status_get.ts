@@ -4,6 +4,29 @@ import { authenticate, emptyResponse, headers } from "../lambda-helpers";
 
 const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 
+const getProgressProps = (
+  items?: AWS.DynamoDB.ItemList,
+  deployItems?: AWS.DynamoDB.ItemList
+) => {
+  if (!items) {
+    return { progress: 0, progressType: "LAUNCHING" };
+  }
+  const launchIndex = items.findIndex((s) => s.status.S === "INITIALIZING") + 1;
+  const shutdownIndex =
+    items.findIndex((s) => s.status.S === "SHUTTING DOWN") + 1;
+  if (!shutdownIndex || launchIndex < shutdownIndex) {
+    const deployIndex = deployItems.findIndex((s) =>
+      ["SUCCESS", "FAILURE"].includes(s.status.S)
+    );
+    if (deployIndex) {
+      return { progress: deployIndex / 5, progressType: "DEPLOYING" };
+    }
+    return { progress: launchIndex / 26, progressType: "LAUNCHING" };
+  } else {
+    return { progress: shutdownIndex / 18, progressType: "SHUTTING DOWN" };
+  }
+};
+
 export const handler = authenticate(async (event) => {
   const userId = event.headers.Authorization;
   const graph = await users
@@ -23,7 +46,7 @@ export const handler = authenticate(async (event) => {
           S: `launch_${graph}`,
         },
       },
-      Limit: 30,
+      Limit: 100,
       ScanIndexForward: false,
       IndexName: "primary-index",
     })
@@ -49,11 +72,6 @@ export const handler = authenticate(async (event) => {
     successDeployStatuses[0] === deployStatuses.Items[0]
       ? successDeployStatuses
       : [deployStatuses.Items[0], ...successDeployStatuses];
-  const progress = statuses.Items
-    ? statuses.Items.findIndex((s) =>
-        ["INITIALIZING", "SHUTTING DOWN"].includes(s.status.S)
-      ) + 1
-    : 0;
 
   return {
     statusCode: 200,
@@ -64,7 +82,7 @@ export const handler = authenticate(async (event) => {
       deploys: deploys
         .slice(0, 10)
         .map((d) => ({ date: d.date.S, status: d.status.S, uuid: d.uuid.S })),
-      progress: progress / 30,
+      ...getProgressProps(statuses.Items, deployStatuses.Items),
     }),
     headers: headers(event),
   };
