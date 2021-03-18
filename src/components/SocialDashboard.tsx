@@ -2,19 +2,34 @@ import {
   Alert,
   Button,
   Card,
+  Dialog,
+  Intent,
   Popover,
   Position,
   Spinner,
   Tooltip,
 } from "@blueprintjs/core";
 import format from "date-fns/format";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import ReactDOM from "react-dom";
-import { createBlock, getTreeByPageName, watchOnce } from "roam-client";
+import {
+  createBlock,
+  getParentUidByBlockUid,
+  getTreeByBlockUid,
+  getTreeByPageName,
+  watchOnce,
+} from "roam-client";
 import {
   getChildrenLengthByPageTitle,
   getPageUidByPageTitle,
   openBlockInSidebar,
+  resolveRefs,
 } from "../entry-helpers";
 import {
   HIGHLIGHT,
@@ -24,9 +39,15 @@ import {
   TOKEN_STAGE,
   useAuthenticatedAxiosDelete,
   useAuthenticatedAxiosGet,
+  useAuthenticatedAxiosPut,
   usePageUid,
 } from "./ServiceCommonComponents";
 import { render as loginRender } from "../components/TwitterLogin";
+import startOfMinute from "date-fns/startOfMinute";
+import addMinutes from "date-fns/addMinutes";
+import endOfYear from "date-fns/endOfYear";
+import addYears from "date-fns/addYears";
+import { DatePicker } from "@blueprintjs/datetime";
 
 type AttemptedTweet = {
   status: "FAILED" | "SUCCESS";
@@ -352,7 +373,12 @@ const DeleteScheduledContent = ({ onConfirm }: { onConfirm: () => void }) => {
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   return (
     <>
-      <Button icon={"trash"} onClick={open} minimal />
+      <Button
+        style={{ minHeight: 20, height: 20, minWidth: 20 }}
+        icon={"trash"}
+        onClick={open}
+        minimal
+      />
       <Alert
         isOpen={isOpen}
         onClose={close}
@@ -363,6 +389,99 @@ const DeleteScheduledContent = ({ onConfirm }: { onConfirm: () => void }) => {
       >
         Are you sure you want to remove this post?
       </Alert>
+    </>
+  );
+};
+
+const EditScheduledContent = ({
+  onConfirm,
+  uuid,
+  date,
+  blockUid,
+}: {
+  onConfirm: (body: { date: string }) => void;
+  uuid: string;
+  date: Date;
+  blockUid: string;
+}) => {
+  const authenticatedAxiosPut = useAuthenticatedAxiosPut();
+  const initialDate = useMemo(
+    () => addMinutes(startOfMinute(new Date()), 1),
+    []
+  );
+  const [scheduleDate, setScheduleDate] = useState(date);
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
+  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
+  const payload = useMemo(() => {
+    const parentUid = getParentUidByBlockUid(blockUid);
+    const { text, children } = getTreeByBlockUid(parentUid);
+    const blocks = children.map((t) => ({
+      ...t,
+      text: resolveRefs(t.text),
+    }));
+    const tweetId = /\/([a-zA-Z0-9_]{1,15})\/status\/([0-9]*)\??/.exec(
+      text
+    )?.[2];
+    return JSON.stringify({ blocks, tweetId });
+  }, [blockUid]);
+  const onClick = useCallback(() => {
+    setLoading(true);
+    const date = scheduleDate.toJSON();
+    authenticatedAxiosPut("social-schedule", {
+      uuid,
+      scheduleDate: date,
+      payload,
+    })
+      .then(() => {
+        onConfirm({ date });
+        close();
+      })
+      .catch(() => setLoading(false));
+  }, [uuid, scheduleDate, payload, authenticatedAxiosPut, onConfirm, close]);
+  return (
+    <>
+      <Button
+        style={{ minHeight: 20, height: 20, minWidth: 20 }}
+        icon={"edit"}
+        onClick={open}
+        minimal
+      />
+      <Dialog
+        title={"Edit Post"}
+        isOpen={isOpen}
+        onClose={close}
+        canEscapeKeyClose
+        canOutsideClickClose
+        style={{ width: 256 }}
+      >
+        <DatePicker
+          value={scheduleDate}
+          onChange={setScheduleDate}
+          minDate={initialDate}
+          maxDate={addYears(endOfYear(initialDate), 5)}
+          timePrecision={"minute"}
+          highlightCurrentDay
+          className={"roamjs-datepicker"}
+          timePickerProps={{ useAmPm: true, showArrowButtons: true }}
+        />
+        <span style={{ margin: 16 }}>
+          Are you sure you want to edit the time and content of this post?
+        </span>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginRight: 16,
+          }}
+        >
+          {loading && <Spinner size={Spinner.SIZE_SMALL}/>}
+          <Button onClick={onClick} intent={Intent.PRIMARY} style={{marginLeft: 8}}>
+            Submit
+          </Button>
+        </div>
+      </Dialog>
     </>
   );
 };
@@ -424,6 +543,20 @@ const ScheduledContent: StageContent = () => {
                 return (
                   <tr key={uuid}>
                     <td>
+                      <EditScheduledContent
+                        uuid={uuid}
+                        date={new Date(scheduledDate)}
+                        blockUid={blockUid}
+                        onConfirm={({ date }) =>
+                          setScheduledTweets(
+                            scheduledTweets.map((t) =>
+                              t.uuid === uuid
+                                ? { ...t, scheduledDate: date }
+                                : t
+                            )
+                          )
+                        }
+                      />
                       <DeleteScheduledContent
                         onConfirm={() =>
                           authenticatedAxiosDelete(
@@ -557,10 +690,7 @@ const ScheduledContent: StageContent = () => {
 const SocialDashboard = (): React.ReactElement => (
   <ServiceDashboard
     service={"social"}
-    stages={[
-      TOKEN_STAGE,
-      MainStage(ScheduledContent),
-    ]}
+    stages={[TOKEN_STAGE, MainStage(ScheduledContent)]}
   />
 );
 

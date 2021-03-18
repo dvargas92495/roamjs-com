@@ -364,6 +364,7 @@ const TwitterContent: React.FunctionComponent<{
               maxDate={addYears(endOfYear(new Date()), 5)}
               timePrecision={"minute"}
               highlightCurrentDay
+              className={"roamjs-datepicker"}
               timePickerProps={{ useAmPm: true, showArrowButtons: true }}
             />
             <Button

@@ -21,7 +21,7 @@ export const handler = authenticate((event) =>
       body: JSON.stringify({
         scheduledTweets: (Items || []).map((item) => ({
           uuid: item.uuid.S,
-          blockUid: JSON.parse(item.payload.S).blocks[0].uid,
+          blockUid: JSON.parse(item.payload.S).blocks?.[0]?.uid,
           createdDate: item.created.S,
           scheduledDate: item.date.S,
           status: item.status.S,

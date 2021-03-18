@@ -96,6 +96,20 @@ export const useAuthenticatedAxiosPost = (): ((
   );
 };
 
+export const useAuthenticatedAxiosPut = (): ((
+  path: string,
+  data?: Record<string, unknown>
+) => Promise<AxiosResponse>) => {
+  const service = useService();
+  return useCallback(
+    (path: string, data?: Record<string, unknown>) =>
+      axios.put(`${process.env.REST_API_URL}/${path}`, data || {}, {
+        headers: { Authorization: `${toCamel(service)}:${getToken(service)}` },
+      }),
+    []
+  );
+};
+
 export const useAuthenticatedAxiosDelete = (): ((
   path: string
 ) => Promise<AxiosResponse>) => {

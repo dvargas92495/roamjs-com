@@ -155,6 +155,13 @@ functions:
           path: social-schedule
           method: delete
           cors: true
+  social-schedule-put:
+    handler: out/social-schedule_put.handler
+    events:
+      - http:
+          path: social-schedule
+          method: put
+          cors: true
   sponsorships-get:
     handler: out/sponsorships_get.handler
     events:
