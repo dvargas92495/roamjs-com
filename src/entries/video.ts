@@ -37,8 +37,10 @@ runExtension("video", () => {
         const { blockUid } = getUids(
           iframe.closest(".roam-block") as HTMLDivElement
         );
+        const p = iframe.closest('.rm-video-player__spacing-wrapper') as HTMLDivElement;
+        p.onmousedown = e => e.stopPropagation();
         render({
-          p: iframe.parentElement as HTMLDivElement,
+          p,
           blockUid,
           youtubeId,
         });

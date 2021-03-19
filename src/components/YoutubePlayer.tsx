@@ -1,7 +1,8 @@
-import React, { useCallback, useRef, useState } from "react";
+import { Button } from "@blueprintjs/core";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import YouTube from "react-youtube";
-import { getTreeByBlockUid } from "roam-client";
+import { createBlock, getTreeByBlockUid } from "roam-client";
 
 type YoutubePlayerProps = {
   blockUid: string;
@@ -12,40 +13,78 @@ const YoutubePlayer = ({
   blockUid,
   youtubeId,
 }: YoutubePlayerProps): React.ReactElement => {
+  const initialLoopNode = useMemo(
+    () =>
+      getTreeByBlockUid(blockUid).children.find((t) => /loop/i.test(t.text)),
+    [blockUid]
+  );
   const playerRef = useRef(null);
-  const [start, setStart] = useState(0);
-  const [end, setEnd] = useState(10);
+  const [start, setStart] = useState(
+    parseFloat(initialLoopNode?.children?.[0]?.text || "0")
+  );
+  const [end, setEnd] = useState(
+    parseFloat(initialLoopNode?.children?.[1]?.text || "0")
+  );
   const onReady = useCallback(
     (e) => {
       playerRef.current = e.target;
-      const config = getTreeByBlockUid(blockUid).children;
-      const configStart = config.find((t) => /loop start/i.test(t.text))
-        ?.children?.[0]?.text;
-      if (configStart) {
-        setStart(parseFloat(configStart));
-      } else {
-        setStart(0);
-      }
-      const configEnd = config.find((t) => /loop end/i.test(t.text))
-        ?.children?.[0]?.text;
+      const configEnd = getTreeByBlockUid(blockUid).children.find((t) =>
+        /loop/i.test(t.text)
+      )?.children?.[1]?.text;
       if (configEnd) {
         setEnd(parseFloat(configEnd));
       } else {
         setEnd(e.target.getDuration());
       }
+      e.target.seekTo(start);
     },
-    [blockUid, setStart, setEnd, playerRef]
+    [blockUid, start, setEnd, playerRef]
   );
   const onEnd = useCallback(() => {
     playerRef.current.seekTo(start);
   }, [playerRef, start]);
+  const onMarkerClick = useCallback(() => {
+    const time = playerRef.current.getCurrentTime() as number;
+    const text = time.toString();
+    const config = getTreeByBlockUid(blockUid).children;
+    const loopNode = config.find((t) => /loop/i.test(t.text));
+    if (loopNode) {
+      createBlock({
+        node: { text },
+        parentUid: loopNode.uid,
+        order: loopNode.children.length,
+      });
+      if (loopNode.children.length % 2 === 1) {
+        playerRef.current.seekTo(start);
+        setEnd(time);
+      } else {
+        setStart(time);
+      }
+    } else {
+      createBlock({
+        node: { text: "loop", children: [{ text }] },
+        parentUid: blockUid,
+        order: 0,
+      });
+      setStart(time);
+    }
+  }, [playerRef, blockUid, setStart, setEnd]);
   return (
-    <YouTube
-      videoId={youtubeId}
-      opts={{ width: "512px", height: "312px", playerVars: { start, end } }}
-      onReady={onReady}
-      onEnd={onEnd}
-    />
+    <div style={{ display: "flex" }}>
+      <YouTube
+        videoId={youtubeId}
+        opts={{
+          width: "512px",
+          height: "312px",
+          playerVars: { start, end, origin: window.location.origin },
+        }}
+        onReady={onReady}
+        onEnd={onEnd}
+      />
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <Button icon={"map-marker"} minimal onClick={onMarkerClick} />
+      </div>
+    </div>
   );
 };
 
