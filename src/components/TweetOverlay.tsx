@@ -311,6 +311,17 @@ const TwitterContent: React.FunctionComponent<{
     setShowSchedule,
   ]);
   const onScheduleClick = useCallback(() => {
+    const oauth = getSettingValueFromTree({
+      tree: getTreeByPageName("roam/js/twitter"),
+      key: "oauth",
+      defaultValue: "{}",
+    });
+    if (oauth === "{}") {
+      setError(
+        "Need to log in with Twitter to schedule Tweets! Head to roam/js/twitter page to log in."
+      );
+      return;
+    }
     setLoading(true);
     axios
       .post(
@@ -318,11 +329,7 @@ const TwitterContent: React.FunctionComponent<{
         {
           scheduleDate: scheduleDate.toJSON(),
           payload: JSON.stringify({ blocks: message, tweetId }),
-          oauth: getSettingValueFromTree({
-            tree: getTreeByPageName("roam/js/twitter"),
-            key: "oauth",
-            defaultValue: "{}",
-          }),
+          oauth,
         },
         { headers: { Authorization: `social:${socialToken}` } }
       )

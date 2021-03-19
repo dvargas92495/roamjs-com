@@ -12,12 +12,16 @@ import {
 } from "@blueprintjs/core";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  getAllPageNames,
   getTreeByBlockUid,
   getTreeByPageName,
   createBlock,
   TextNode,
+  TreeNode,
+  getLinkedPageReferences,
+  getPageViewType,
 } from "roam-client";
-import { setInputSetting } from "../entry-helpers";
+import { extractTag, setInputSetting } from "../entry-helpers";
 import MenuItemSelect from "./MenuItemSelect";
 import {
   getField,
@@ -373,10 +377,156 @@ const getLaunchBody = () => {
   return {
     graph: new RegExp(`^#/app/(.*?)/page/`).exec(window.location.hash)[1],
     domain: tree.find((t) => /domain/i.test(t.text))?.children?.[0]?.text,
-    autoDeploysEnabled: true /*/true/i.test(
+    autoDeploysEnabled: /true/i.test(
       tree.find((t) => /share/i.test(t.text))?.children?.[0]?.text
-    ),*/,
+    ),
   };
+};
+
+type Filter = { rule: string; values: string[] };
+const TITLE_REGEX = new RegExp(`roam/js/static-site/title::(.*)`);
+const HEAD_REGEX = new RegExp(`roam/js/static-stite/head::`);
+const HTML_REGEX = new RegExp("```html\n(.*)```", "s");
+const getTitleRuleFromNode = ({ rule: text, values: children }: Filter) => {
+  if (text.trim().toUpperCase() === "STARTS WITH" && children.length) {
+    const tag = extractTag(children[0]);
+    return (title: string) => {
+      return title.startsWith(tag);
+    };
+  }
+  return undefined;
+};
+
+const getContentRuleFromNode = ({ rule: text, values: children }: Filter) => {
+  if (text.trim().toUpperCase() === "TAGGED WITH" && children.length) {
+    const tag = extractTag(children[0]);
+    const findTag = (content: TreeNode) =>
+      content.text.includes(`#${tag}`) ||
+      content.text.includes(`[[${tag}]]`) ||
+      content.text.includes(`${tag}::`) ||
+      content.children.some(findTag);
+    return (content: TreeNode[]) => content.some(findTag);
+  }
+  return undefined;
+};
+
+const allBlockMapper = (t: TreeNode): TreeNode[] => [
+  t,
+  ...t.children.flatMap(allBlockMapper),
+];
+
+const getDeployBody = () => {
+  const autoDeploysEnabled = /true/i.test(
+    getTreeByPageName("roam/js/static-site").find((t) => /share/i.test(t.text))
+      ?.children?.[0]?.text
+  );
+  if (autoDeploysEnabled) {
+    return {};
+  }
+  const allPageNames = getAllPageNames();
+  const configPageTree = getTreeByPageName("roam/js/static-site");
+  const getConfigNode = (key: string) =>
+    configPageTree.find(
+      (n) => n.text.trim().toUpperCase() === key.toUpperCase()
+    );
+  const indexNode = getConfigNode("index");
+  const filterNode = getConfigNode("filter");
+  const templateNode = getConfigNode("template");
+  const referenceTemplateNode = getConfigNode("reference template");
+  const getCode = (node?: TreeNode) =>
+    (node?.children || [])
+      .map((s) => s.text.match(HTML_REGEX))
+      .find((s) => !!s)?.[1];
+  const template = getCode(templateNode);
+  const referenceTemplate = getCode(referenceTemplateNode);
+  const withIndex = indexNode?.children?.length
+    ? { index: extractTag(indexNode.children[0].text.trim()) }
+    : {};
+  const withFilter = filterNode?.children?.length
+    ? {
+        filter: filterNode.children.map((t) => ({
+          rule: t.text,
+          values: t.children.map((c) => c.text),
+        })),
+      }
+    : {};
+  const withTemplate = template
+    ? {
+        template,
+      }
+    : {};
+  const withReferenceTemplate = referenceTemplate ? { referenceTemplate } : {};
+
+  const config = {
+    index: "Website Index",
+    filter: [] as Filter[],
+    ...withIndex,
+    ...withFilter,
+    ...withTemplate,
+    ...withReferenceTemplate,
+  };
+
+  const titleFilters = config.filter.length
+    ? config.filter.map(getTitleRuleFromNode).filter((f) => !!f)
+    : [() => false];
+  const contentFilters = config.filter
+    .map(getContentRuleFromNode)
+    .filter((f) => !!f);
+
+  const titleFilter = (t: string) =>
+    !titleFilters.length || titleFilters.some((r) => r && r(t));
+  const contentFilter = (c: TreeNode[]) =>
+    !contentFilters.length || contentFilters.some((r) => r && r(c));
+
+  const pageNamesWithContent = allPageNames
+    .filter((pageName) => pageName === config.index || titleFilter(pageName))
+    .filter((pageName) => "roam/js/static-site" !== pageName)
+    .map((pageName) => ({
+      pageName,
+      content: getTreeByPageName(pageName),
+    }));
+  const entries = pageNamesWithContent
+    .filter(
+      ({ pageName, content }) =>
+        pageName === config.index || contentFilter(content)
+    )
+    .map(({ pageName, content }) => {
+      const blocks = getLinkedPageReferences(pageName);
+      const references = Array.from(
+        new Set(blocks.map((b) => b.title || "").filter((t) => !!t))
+      );
+      const viewType = getPageViewType(pageName);
+      return {
+        references,
+        pageName,
+        content,
+        viewType,
+      };
+    });
+  const pages = Object.fromEntries(
+    entries.map(({ content, pageName, references, viewType }) => {
+      const allBlocks = content.flatMap(allBlockMapper);
+      const titleMatch = allBlocks
+        .find((s) => TITLE_REGEX.test(s.text))
+        ?.text?.match?.(TITLE_REGEX);
+      const headMatch = allBlocks
+        .find((s) => HEAD_REGEX.test(s.text))
+        ?.children?.[0]?.text?.match?.(HTML_REGEX);
+      const title = titleMatch ? titleMatch[1].trim() : pageName;
+      const head = headMatch ? headMatch[1] : "";
+      return [
+        pageName,
+        {
+          content,
+          references,
+          title,
+          head,
+          viewType,
+        },
+      ];
+    })
+  );
+  return { data: JSON.stringify({ pages, config }) };
 };
 
 const getNameServers = (statusProps: string): string[] => {
@@ -466,25 +616,31 @@ const LiveContent: StageContent = () => {
     ]
   );
   const wrapPost = useCallback(
-    (path: string, data?: Record<string, unknown>) => () => {
+    (path: string, getData: () => Record<string, unknown>) => {
       setError("");
       setLoading(true);
-      authenticatedAxiosPost(path, data)
+      return authenticatedAxiosPost(path, getData())
         .then(getWebsite)
         .catch((e) => setError(e.response?.data || e.message))
         .finally(() => setLoading(false));
     },
     [setError, setLoading, getWebsite, authenticatedAxiosPost]
   );
+  const manualDeploy = useCallback(() => wrapPost("deploy", getDeployBody), [
+    wrapPost,
+  ]);
   const launchWebsite = useCallback(
-    wrapPost("launch-website", getLaunchBody()),
+    () =>
+      wrapPost("launch-website", getLaunchBody).then(() =>
+        authenticatedAxiosPost("deploy", getDeployBody())
+      ),
     [wrapPost]
   );
-  const manualDeploy = useCallback(wrapPost("deploy"), [wrapPost]);
   const shutdownWebsite = useCallback(
-    wrapPost("shutdown-website", {
-      graph: new RegExp(`^#/app/(.*?)/page/`).exec(window.location.hash)[1],
-    }),
+    () =>
+      wrapPost("shutdown-website", () => ({
+        graph: new RegExp(`^#/app/(.*?)/page/`).exec(window.location.hash)[1],
+      })),
     [wrapPost]
   );
 

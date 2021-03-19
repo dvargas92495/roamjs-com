@@ -23,6 +23,7 @@ import {
   getParentUidByBlockUid,
   getTreeByBlockUid,
   getTreeByPageName,
+  TreeNode,
   watchOnce,
 } from "roam-client";
 import {
@@ -393,6 +394,18 @@ const DeleteScheduledContent = ({ onConfirm }: { onConfirm: () => void }) => {
   );
 };
 
+type Payload = {
+  text: string;
+  uid: string;
+  children: Payload[];
+};
+
+const trimPayload = (node: TreeNode): Payload => ({
+  text: node.text,
+  uid: node.uid,
+  children: node.children.map(trimPayload),
+});
+
 const EditScheduledContent = ({
   onConfirm,
   uuid,
@@ -417,10 +430,12 @@ const EditScheduledContent = ({
   const payload = useMemo(() => {
     const parentUid = getParentUidByBlockUid(blockUid);
     const { text, children } = getTreeByBlockUid(parentUid);
-    const blocks = children.map((t) => ({
-      ...t,
-      text: resolveRefs(t.text),
-    }));
+    const blocks = children
+      .map((t) => ({
+        ...t,
+        text: resolveRefs(t.text),
+      }))
+      .map(trimPayload);
     const tweetId = /\/([a-zA-Z0-9_]{1,15})\/status\/([0-9]*)\??/.exec(
       text
     )?.[2];
@@ -476,8 +491,12 @@ const EditScheduledContent = ({
             marginRight: 16,
           }}
         >
-          {loading && <Spinner size={Spinner.SIZE_SMALL}/>}
-          <Button onClick={onClick} intent={Intent.PRIMARY} style={{marginLeft: 8}}>
+          {loading && <Spinner size={Spinner.SIZE_SMALL} />}
+          <Button
+            onClick={onClick}
+            intent={Intent.PRIMARY}
+            style={{ marginLeft: 8 }}
+          >
             Submit
           </Button>
         </div>
@@ -543,20 +562,22 @@ const ScheduledContent: StageContent = () => {
                 return (
                   <tr key={uuid}>
                     <td>
-                      <EditScheduledContent
-                        uuid={uuid}
-                        date={new Date(scheduledDate)}
-                        blockUid={blockUid}
-                        onConfirm={({ date }) =>
-                          setScheduledTweets(
-                            scheduledTweets.map((t) =>
-                              t.uuid === uuid
-                                ? { ...t, scheduledDate: date }
-                                : t
+                      {statusProps.status === "PENDING" && (
+                        <EditScheduledContent
+                          uuid={uuid}
+                          date={new Date(scheduledDate)}
+                          blockUid={blockUid}
+                          onConfirm={({ date }) =>
+                            setScheduledTweets(
+                              scheduledTweets.map((t) =>
+                                t.uuid === uuid
+                                  ? { ...t, scheduledDate: date }
+                                  : t
+                              )
                             )
-                          )
-                        }
-                      />
+                          }
+                        />
+                      )}
                       <DeleteScheduledContent
                         onConfirm={() =>
                           authenticatedAxiosDelete(

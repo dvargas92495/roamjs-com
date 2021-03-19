@@ -2,18 +2,21 @@ import { authenticate, headers } from "../lambda-helpers";
 import AWS from "aws-sdk";
 import { v4 } from "uuid";
 import { users } from "@clerk/clerk-sdk-node";
+import format from "date-fns/format";
 
 const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
+const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
 
 export const handler = authenticate(async (event) => {
+  const { data } = JSON.parse(event.body);
   const user = await users.getUser(event.headers.Authorization);
   const { websiteGraph, websiteDomain } = user.privateMetadata as {
     websiteGraph: string;
     websiteDomain: string;
   };
+  const date = new Date();
 
-  const date = new Date().toJSON();
   await dynamo
     .putItem({
       TableName: "RoamJSWebsiteStatuses",
@@ -25,7 +28,7 @@ export const handler = authenticate(async (event) => {
           S: `deploy_${websiteGraph}`,
         },
         date: {
-          S: date,
+          S: date.toJSON(),
         },
         status: {
           S: "STARTING DEPLOY",
@@ -34,6 +37,17 @@ export const handler = authenticate(async (event) => {
     })
     .promise();
 
+  const Key = data && `${websiteGraph}/${format(date, "yyyyMMddhhmmss")}`;
+  if (Key) {
+    await s3
+      .upload({
+        Bucket: "roamjs-static-site-data",
+        Key,
+        Body: data,
+      })
+      .promise();
+  }
+  
   await lambda
     .invoke({
       FunctionName: "RoamJS_deploy",
@@ -41,6 +55,7 @@ export const handler = authenticate(async (event) => {
       Payload: JSON.stringify({
         roamGraph: websiteGraph,
         domain: websiteDomain,
+        key: Key,
       }),
     })
     .promise();

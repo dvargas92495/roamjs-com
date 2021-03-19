@@ -2,11 +2,14 @@ import parse from "date-fns/parse";
 import {
   createObserver,
   createSortIcons,
-  getLinkedPageReferences,
   getPageTitle,
   runExtension,
 } from "../entry-helpers";
-import { getConfigFromPage, RoamBlock } from "roam-client";
+import {
+  getConfigFromPage,
+  RoamBlock,
+  getLinkedPageReferences,
+} from "roam-client";
 
 const menuItemCallback = (
   sortContainer: Element,
