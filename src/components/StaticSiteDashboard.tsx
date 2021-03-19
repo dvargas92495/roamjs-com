@@ -23,6 +23,7 @@ import {
 } from "roam-client";
 import { extractTag, setInputSetting } from "../entry-helpers";
 import MenuItemSelect from "./MenuItemSelect";
+import PageInput from "./PageInput";
 import {
   getField,
   HIGHLIGHT,
@@ -241,10 +242,6 @@ const RequestIndexContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
   const [value, setValue] = useState(getField("index"));
-  const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
-    [setValue]
-  );
   const onSubmit = useCallback(() => {
     setInputSetting({ blockUid: pageUid, key: "index", value, index: 1 });
     nextStage();
@@ -264,13 +261,13 @@ const RequestIndexContent: StageContent = ({ openPanel }) => {
     [onSubmit]
   );
   return (
-    <>
+    <div onKeyDown={onKeyDown}>
       <Label>
         Website Index
-        <InputGroup value={value} onChange={onChange} onKeyDown={onKeyDown} />
+        <PageInput value={value} setValue={setValue} />
       </Label>
       <NextButton onClick={onSubmit} disabled={!value} />
-    </>
+    </div>
   );
 };
 
@@ -339,21 +336,39 @@ const RequestFiltersContent: StageContent = ({ openPanel }) => {
               }
               activeItem={f.text}
             />
-            <InputGroup
-              value={f.children[0].text}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setFilters(
-                  filters.map((filter) =>
-                    f.key === filter.key
-                      ? {
-                          ...filter,
-                          children: [{ text: e.target.value, children: [] }],
-                        }
-                      : filter
+            {f.text === "TAGGED WITH" ? (
+              <PageInput
+                value={f.children[0].text}
+                setValue={(text) =>
+                  setFilters(
+                    filters.map((filter) =>
+                      f.key === filter.key
+                        ? {
+                            ...filter,
+                            children: [{ text, children: [] }],
+                          }
+                        : filter
+                    )
                   )
-                )
-              }
-            />
+                }
+              />
+            ) : (
+              <InputGroup
+                value={f.children[0].text}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFilters(
+                    filters.map((filter) =>
+                      f.key === filter.key
+                        ? {
+                            ...filter,
+                            children: [{ text: e.target.value, children: [] }],
+                          }
+                        : filter
+                    )
+                  )
+                }
+              />
+            )}
             <Button
               icon={"trash"}
               minimal

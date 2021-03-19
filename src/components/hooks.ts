@@ -17,12 +17,15 @@ export const useArrowKeyDown = <T>({
       if (e.key === "ArrowDown") {
         setActiveIndex((activeIndex + 1) % results.length);
         e.preventDefault();
+        e.stopPropagation();
       } else if (e.key === "ArrowUp") {
         setActiveIndex((activeIndex + results.length - 1) % results.length);
         e.preventDefault();
+        e.stopPropagation();
       } else if (e.key === "Enter" && results.length > 0) {
         onEnter(results[activeIndex]);
         e.preventDefault();
+        e.stopPropagation();
       }
     },
     [activeIndex, setActiveIndex, results, onEnter]

@@ -1,7 +1,6 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -9,17 +8,17 @@ import {
   Button,
   MenuItem,
   Popover,
-  InputGroup,
-  Menu,
-  PopoverPosition,
 } from "@blueprintjs/core";
 import { Select } from "@blueprintjs/select";
-import { getUidsFromId, getTextByBlockUid, RoamBlock } from "roam-client";
+import {
+  getUidsFromId,
+  getTextByBlockUid,
+} from "roam-client";
 import { Icon } from "@blueprintjs/core";
 import { isControl } from "../entry-helpers";
 import ReactDOM from "react-dom";
 import DemoPopoverWrapper from "./DemoPopoverWrapper";
-import { useArrowKeyDown } from "./hooks";
+import PageInput from "./PageInput";
 
 enum NODES {
   OR = "OR",
@@ -64,94 +63,6 @@ const areEqual = (a: QueryState, b: QueryState): boolean => {
 };
 
 const colors = ["red", "green", "blue"];
-
-const searchPagesByString = (q: string) =>
-  window.roamAlphaAPI
-    .q("[:find (pull ?e [:node/title]) :in $ :where [?e :node/title]]")
-    .map((a: RoamBlock[]) => a[0]["title"])
-    .filter((a) => a.toLowerCase().includes(q.toLowerCase()))
-    .slice(0, 9);
-
-const PageInput = ({
-  queryState,
-  setQueryState,
-}: {
-  queryState: QueryState;
-  setQueryState: (q: QueryState) => void;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
-  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
-  const items = useMemo(
-    () => (queryState.value ? searchPagesByString(queryState.value) : []),
-    [queryState.value]
-  );
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { activeIndex, onKeyDown } = useArrowKeyDown({
-    onEnter: (value) => {
-      setQueryState({
-        type: queryState.type,
-        value,
-        key: queryState.key,
-      });
-      close();
-    },
-    results: items,
-  });
-  return (
-    <Popover
-      captureDismiss={true}
-      isOpen={isOpen}
-      onOpened={open}
-      minimal={true}
-      position={PopoverPosition.BOTTOM}
-      content={
-        <Menu style={{ maxWidth: 400 }}>
-          {items.map((t, i) => (
-            <MenuItem
-              text={t}
-              active={activeIndex === i}
-              key={i}
-              multiline
-              onClick={() => {
-                setQueryState({
-                  type: queryState.type,
-                  value: items[i],
-                  key: queryState.key,
-                });
-                close();
-                inputRef.current.focus();
-              }}
-            />
-          ))}
-        </Menu>
-      }
-      target={
-        <InputGroup
-          value={queryState.value || ""}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setQueryState({
-              type: queryState.type,
-              value: e.target.value,
-              key: queryState.key,
-            });
-            setIsOpen(!!e.target.value);
-          }}
-          placeholder={"Search for a page"}
-          style={{ marginLeft: 8 }}
-          autoFocus={true}
-          onKeyDown={onKeyDown}
-          onBlur={(e) => {
-            if (e.relatedTarget) {
-              close();
-            }
-          }}
-          inputRef={inputRef}
-        />
-      }
-    />
-  );
-};
 
 const SubqueryContent = ({
   value,
@@ -254,7 +165,18 @@ const SubqueryContent = ({
           />
         </NodeSelect>
         {queryState.type === NODES.TAG && (
-          <PageInput queryState={queryState} setQueryState={setQueryState} />
+          <span style={{ marginLeft: 8 }}>
+            <PageInput
+              value={queryState.value}
+              setValue={(value) =>
+                setQueryState({
+                  type: queryState.type,
+                  value,
+                  key: queryState.key,
+                })
+              }
+            />
+          </span>
         )}
         {!!onDelete && (
           <Icon
