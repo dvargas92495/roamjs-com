@@ -37,6 +37,14 @@ export const handler = authenticate(async (event) => {
     return emptyResponse(event);
   }
 
+  if (graph !== event.queryStringParameters.graph) {
+    return {
+      statusCode: 401,
+      body: "There's already a live static site with this token",
+      headers: headers(event),
+    };
+  }
+
   const statuses = await dynamo
     .query({
       TableName: "RoamJSWebsiteStatuses",

@@ -49,8 +49,8 @@ const toCamel = (service: string) =>
     )
     .join("");
 
-export const getTokenFromTree = (tree: TreeNode[]): string | undefined =>
-  tree.find((t) => /token/i.test(t.text))?.children?.[0]?.text;
+export const getTokenFromTree = (tree: TreeNode[]): string =>
+  tree.find((t) => /token/i.test(t.text))?.children?.[0]?.text || "";
 
 const isTokenInTree = (tree: TreeNode[]): boolean => !!getTokenFromTree(tree);
 
@@ -66,7 +66,7 @@ export const getField = (field: string): string => {
   const service = useService();
   return getTreeByPageName(`roam/js/${service}`).find((t) =>
     new RegExp(field, "i").test(t.text)
-  )?.children?.[0]?.text;
+  )?.children?.[0]?.text || '';
 };
 
 export const useAuthenticatedAxiosGet = (): ((

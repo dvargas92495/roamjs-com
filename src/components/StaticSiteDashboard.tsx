@@ -278,7 +278,7 @@ const RequestFiltersContent: StageContent = ({ openPanel }) => {
     (
       getTreeByPageName("roam/js/static-site").find((t) =>
         /filter/i.test(t.text)
-      ).children || []
+      )?.children || []
     ).map((t, key) => ({ ...t, key }))
   );
   const [key, setKey] = useState(filters.length);
@@ -387,10 +387,12 @@ const RequestFiltersContent: StageContent = ({ openPanel }) => {
   );
 };
 
+const getGraph = () => new RegExp(`^#/app/(.*?)/page/`).exec(window.location.hash)[1];
+
 const getLaunchBody = () => {
   const tree = getTreeByPageName("roam/js/static-site");
   return {
-    graph: new RegExp(`^#/app/(.*?)/page/`).exec(window.location.hash)[1],
+    graph: getGraph(),
     domain: tree.find((t) => /domain/i.test(t.text))?.children?.[0]?.text,
     autoDeploysEnabled: /true/i.test(
       tree.find((t) => /share/i.test(t.text))?.children?.[0]?.text
@@ -601,7 +603,7 @@ const LiveContent: StageContent = () => {
   ]);
   const getWebsite = useCallback(
     () =>
-      authenticatedAxiosGet("website-status").then((r) => {
+      authenticatedAxiosGet(`website-status?graph=${getGraph()}`).then((r) => {
         if (r.data) {
           setStatusProps(r.data.statusProps);
           setStatus(r.data.status);
@@ -654,7 +656,7 @@ const LiveContent: StageContent = () => {
   const shutdownWebsite = useCallback(
     () =>
       wrapPost("shutdown-website", () => ({
-        graph: new RegExp(`^#/app/(.*?)/page/`).exec(window.location.hash)[1],
+        graph: getGraph(),
       })),
     [wrapPost]
   );

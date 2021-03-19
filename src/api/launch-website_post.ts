@@ -21,6 +21,15 @@ export const handler = authenticate(async (event) => {
   }
 
   const user = await users.getUser(event.headers.Authorization);
+  const { websiteGraph } = user.privateMetadata as { websiteGraph: string };
+  if (websiteGraph) {
+    return {
+      statusCode: 400,
+      body: "There's already a live static site with this token",
+      headers: headers(event),
+    };
+  }
+
   await users.updateUser(user.id, {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
