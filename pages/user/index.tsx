@@ -18,10 +18,10 @@ import {
   useAuthenticatedAxiosGet,
   useAuthenticatedAxiosPut,
   useAuthenticatedAxiosPost,
+  useAuthenticatedAxiosDelete,
 } from "../../components/hooks";
 import Link from "next/link";
-import axios from "axios";
-import { FLOSS_API_URL, stripe } from "../../components/constants";
+import { stripe } from "../../components/constants";
 import { useUser, SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
 
@@ -132,6 +132,8 @@ const Billing = () => {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const authenticatedAxios = useAuthenticatedAxiosGet();
+  const authenticatedAxiosPut = useAuthenticatedAxiosPut();
+  const authenticatedAxiosDel = useAuthenticatedAxiosDelete();
   const getPayment = useCallback(
     () =>
       authenticatedAxios("payment-methods").then((r) => {
@@ -170,20 +172,28 @@ const Billing = () => {
                         key: pm.id,
                         action: (
                           <>
-                            <Button>Make Default</Button>
                             <ApiButton
                               request={() =>
-                                axios
-                                  .delete(
-                                    `${FLOSS_API_URL}/stripe-payment-method?payment_method_id=${pm.id}`
+                                authenticatedAxiosPut("payment-methods", {
+                                  id: pm.id,
+                                }).then(() =>
+                                  setPayment(
+                                    paymentMethods.find((p) => p.id === pm.id)
                                   )
-                                  .then(() =>
-                                    setPaymentMethods(
-                                      paymentMethods.filter(
-                                        (p) => p.id !== pm.id
-                                      )
-                                    )
+                                )
+                              }
+                            >
+                              Make Default
+                            </ApiButton>
+                            <ApiButton
+                              request={() =>
+                                authenticatedAxiosDel(
+                                  `payment-methods?payment_method_id=${pm.id}`
+                                ).then(() =>
+                                  setPaymentMethods(
+                                    paymentMethods.filter((p) => p.id !== pm.id)
                                   )
+                                )
                               }
                             >
                               Delete

@@ -127,7 +127,7 @@ functions:
           path: payment-methods
           method: get
           cors: true
-  payment-methods-get:
+  payment-methods-put:
     handler: out/payment-methods_put.handler
     events:
       - http:
