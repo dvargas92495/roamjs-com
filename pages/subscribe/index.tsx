@@ -13,13 +13,15 @@ const ConvertKitComponent = dynamic(
 const SubscribePage = (): React.ReactElement => {
   return (
     <StandardLayout>
-      <div style={{ width: "fit-content", display: "inline-block" }}>
-        <H4>ROAMJS DIGEST</H4>
-        <Body>
-          Add your email below to stay up to date on all RoamJS features, fixes,
-          and news!
-        </Body>
-        <ConvertKitComponent />
+      <div style={{ width: "100%", textAlign: "center" }}>
+        <div style={{ width: "fit-content", display: "inline-block" }}>
+          <H4>ROAMJS DIGEST</H4>
+          <Body>
+            Add your email below to stay up to date on all RoamJS features,
+            fixes, and news!
+          </Body>
+          <ConvertKitComponent />
+        </div>
       </div>
     </StandardLayout>
   );

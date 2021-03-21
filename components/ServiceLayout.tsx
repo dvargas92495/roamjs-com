@@ -5,11 +5,11 @@ import {
   H1,
   H3,
   H4,
-  IconButton,
+  Loading,
   StringField,
   Subtitle,
 } from "@dvargas92495/ui";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import StandardLayout from "./StandardLayout";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { useRouter } from "next/router";
@@ -135,19 +135,31 @@ const CheckSubscription = ({
   );
 };
 
-const CopyButton: React.FC<{ token: string }> = ({ token }) => {
-  const [copied, setCopied] = useState(false);
-  const timeoutRef = useRef(0);
+const GenerateButton: React.FC<{ id: string }> = ({ id }) => {
+  const user = useUser();
+  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
+  const [loading, setLoading] = useState(false);
   const onClick = useCallback(() => {
-    navigator.clipboard.writeText(token);
-    setCopied(true);
-    timeoutRef.current = window.setTimeout(() => setCopied(false), 5000);
-  }, [token, setCopied, timeoutRef]);
-  useEffect(() => () => window.clearTimeout(timeoutRef.current));
+    setLoading(true);
+    authenticatedAxiosPost("token", { service: id })
+      .then(() =>
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore refresh metadata state
+        user.update()
+      )
+      .finally(() => setLoading(false));
+  }, [authenticatedAxiosPost, user, id, setLoading]);
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <IconButton size={"small"} icon={"fileCopy"} onClick={onClick} />
-      <span>{copied && "Copied!"}</span>
+    <div>
+      <Button
+        onClick={onClick}
+        color={"secondary"}
+        variant={"outlined"}
+        style={{ marginRight: 8 }}
+      >
+        Generate New Token
+      </Button>
+      <Loading loading={loading} size={16} />
     </div>
   );
 };
@@ -219,12 +231,15 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
             setValue={() => token}
             label={`RoamJS ${idToTitle(id)} Token`}
             style={{ cursor: "text", flexGrow: 1, paddingRight: 24 }}
+            toggleable
           />
-          <CopyButton token={token} />
         </div>
         <span style={{ color: "darkred" }}>
           Token is sensitive. <b>DO NOT SHARE WITH ANYONE</b>
         </span>
+        <div style={{ marginTop: 32 }}>
+          <GenerateButton id={id} />
+        </div>
       </div>
       <div>
         <ConfirmationDialog

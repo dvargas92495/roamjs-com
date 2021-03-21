@@ -192,6 +192,7 @@ functions:
           cors: true
   token-post:
     handler: out/token_post.handler
+    events:
       - http:
           path: token
           method: post
