@@ -122,7 +122,7 @@ const ApiButton: React.FunctionComponent<{ request: () => Promise<void> }> = ({
   return (
     <>
       <Button onClick={onClick}>{children}</Button>
-      <Loading loading={loading} />
+      <Loading loading={loading} size={16} />
     </>
   );
 };

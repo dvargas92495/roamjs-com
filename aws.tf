@@ -126,7 +126,9 @@ module "aws-serverless-backend" {
         "launch-social/post",
         "launch-website/post",
         "mixpanel/post",
+        "payment-methods/delete",
         "payment-methods/get",
+        "payment-methods/put",
         "postman/post",
         "products/get",
         "queue-issues/get",
@@ -158,6 +160,7 @@ module "aws-serverless-backend" {
       "shutdown-social",
       "fund",
       "customer",
+      "payment-methods",
     ]
     tags = {
         Application = "Roam JS Extensions"

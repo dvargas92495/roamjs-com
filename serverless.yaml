@@ -113,12 +113,26 @@ functions:
           path: mixpanel
           method: post
           cors: true
+  payment-methods-delete:
+    handler: out/payment-methods_delete.handler
+    events:
+      - http:
+          path: payment-methods
+          method: delete
+          cors: true
   payment-methods-get:
     handler: out/payment-methods_get.handler
     events:
       - http:
           path: payment-methods
           method: get
+          cors: true
+  payment-methods-get:
+    handler: out/payment-methods_put.handler
+    events:
+      - http:
+          path: payment-methods
+          method: put
           cors: true
   postman-post:
     handler: out/postman_post.handler
