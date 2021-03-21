@@ -140,6 +140,7 @@ module "aws-serverless-backend" {
         "start-service/post",
         "subscriptions/get",
         "subscribe-sponsorship/post",
+        "token/post",
         "twitter-auth/post",
         "twitter-feed/get",
         "twitter-login/post",

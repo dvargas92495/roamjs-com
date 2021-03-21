@@ -190,6 +190,12 @@ functions:
           path: subscribe-sponsorship
           method: post
           cors: true
+  token-post:
+    handler: out/token_post.handler
+      - http:
+          path: token
+          method: post
+          cors: true
   twitter-login-post:
     handler: out/twitter-login_post.handler
     events:
