@@ -36,5 +36,13 @@
 }
 
 .MuiButton-textSecondary:hover {
-  color: #FF842F;
+  color: #ff842f;
+}
+
+.service-link:hover {
+  text-decoration: none;
+}
+
+.service-link {
+  color: black;
 }

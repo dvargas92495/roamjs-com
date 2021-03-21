@@ -12,21 +12,23 @@ type PricesProp = { prices: { name: string; price: number }[] };
 
 const Title = React.forwardRef<
   HTMLHeadingElement,
-  { title: string; href: string }
->(({ title, href, ...props }, ref) => (
+  { content: string; href: string }
+>(({ content, href, ...props }, ref) => (
   <Link href={href}>
-    <H6
-      style={{
-        margin: 0,
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-      }}
-      innerRef={ref}
-      {...props}
-    >
-      {title}
-    </H6>
+    <a className={'service-link'}>
+      <H6
+        style={{
+          margin: 0,
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+        }}
+        ref={ref}
+        {...props}
+      >
+        {content}
+      </H6>
+    </a>
   </Link>
 ));
 
@@ -44,9 +46,7 @@ const ServicesPage: React.FC<PricesProp> = ({ prices }) => {
       return {
         primary: (
           <Tooltip title={title}>
-            <span>
-              <Title title={title} href={href} />
-            </span>
+            <Title href={href} content={title} />
           </Tooltip>
         ),
         avatar: (
