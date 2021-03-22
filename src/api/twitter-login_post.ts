@@ -6,7 +6,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   const oauthHeaders = twitterOAuth.toHeader(
     twitterOAuth.authorize({
       data: {
-        oauth_callback: "https://roamjs.com/docs/extensions/twitter?auth=true",
+        oauth_callback: "https://roamjs.com/oauth?auth=true",
       },
       url: "https://api.twitter.com/oauth/request_token",
       method: "POST",
@@ -17,7 +17,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     .post(
       "https://api.twitter.com/oauth/request_token",
       {
-        oauth_callback: `https://roamjs.com/docs/extensions/twitter?auth=true`,
+        oauth_callback: `https://roamjs.com/oauth?auth=true`,
       },
       { headers: oauthHeaders }
     )
