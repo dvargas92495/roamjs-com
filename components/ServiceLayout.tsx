@@ -60,6 +60,16 @@ const idToTitle = (id: string) =>
 const idToCamel = (id: string) =>
   `${id.substring(0, 1)}${idToTitle(id).replace(/ /g, "").substring(1)}`;
 
+const StartButtonText = ({ price }: { price: number }) => (
+  <>
+    <span style={{ fontSize: 14 }}>Start for</span>
+    <span style={{ fontWeight: 600, fontSize: 18, marginLeft: 4 }}>
+      ${price}
+    </span>
+    <span style={{ textTransform: "none" }}>/mo</span>
+  </>
+);
+
 const LaunchButton: React.FC<{
   start: () => void;
   id: string;
@@ -88,7 +98,7 @@ const LaunchButton: React.FC<{
   return (
     <ConfirmationDialog
       action={startService}
-      buttonText={"Start Now"}
+      buttonText={<StartButtonText price={price} />}
       content={`By clicking submit below, you will subscribe to the RoamJS Service: ${idToTitle(
         id
       )} for $${price}/month.`}
@@ -284,7 +294,6 @@ const ServiceLayout = ({
           <H1>{idToTitle(id)}</H1>
           <Subtitle>{description}</Subtitle>
           <div style={{ marginBottom: 16 }} />
-          <b>${price}/month</b>
           <div>{StartNowButton}</div>
         </div>
         <div style={{ width: "50%", padding: "0 32px" }}>
@@ -339,7 +348,7 @@ const ServiceLayout = ({
         <SplashLayout
           StartNowButton={
             <Button color={"primary"} variant={"contained"} onClick={login}>
-              Start Now
+              <StartButtonText price={price} />
             </Button>
           }
         />

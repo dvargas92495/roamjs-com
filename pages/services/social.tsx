@@ -4,10 +4,11 @@ import ServiceLayout, {
   getStaticPropsForPage,
   ServicePageProps,
 } from "../../components/ServiceLayout";
+import Loom from "../../components/Loom";
 
 const SocialPage: React.FC<ServicePageProps> = (props) => {
   return (
-    <ServiceLayout development {...props}>
+    <ServiceLayout {...props}>
       <Body>
         RoamJS already supports various extensions to post to sites like Twitter
         directly from Roam. But each of these posts are immediate. It's often
@@ -18,6 +19,7 @@ const SocialPage: React.FC<ServicePageProps> = (props) => {
         publishable content. You can draft, schedule, and view pending requests
         all from within Roam!
       </Body>
+      <Loom id={"bd36ac0626734a948a57c338b32e942e"} />
       {/*
       <H4>Setup</H4>
       <Body>

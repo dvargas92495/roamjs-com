@@ -86,7 +86,7 @@ const HomePage = (): JSX.Element => (
           "Install RoamJS plugins to your Roam DB to fully customize and empower your Roam Experience"
         }
         primaryHref={"docs"}
-        secondaryHref={"queue"}
+        secondaryHref={"services"}
       />
       <ShowcaseLanding
         header={"RoamJS adds the features you need natively to Roam"}
@@ -126,7 +126,7 @@ const HomePage = (): JSX.Element => (
             label: "Daily Downloads",
           },
           {
-            value: "220+",
+            value: "240+",
             label: "Subscribers",
           },
         ]}

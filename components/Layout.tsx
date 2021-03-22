@@ -21,11 +21,7 @@ const Layout: React.FunctionComponent = ({ children }) => {
       <AppBar
         homeIcon={<RoamJSLogo />}
         userIcon={<UserIconDynamic flag={flag} />}
-        pages={
-          flag
-            ? ["docs", "services", "queue", "contribute"]
-            : ["docs", "queue", "freelancing", "contribute"]
-        }
+        pages={["docs", "services", "queue", "contribute"]}
       />
       <Main>{children}</Main>
       <Footer

@@ -24,6 +24,7 @@ import {
 import { getSingleCodeContent, useCopyCode } from "./hooks";
 import StandardLayout from "./StandardLayout";
 import GithubSponsor from "./GithubSponsor";
+import RoamJSDigest from "./RoamJSDigest";
 
 const total = prodItems.length;
 const rowLength = 4;
@@ -158,7 +159,10 @@ const ExtensionPageLayout: React.FunctionComponent<{
           </ExternalLink>
         </>
       )}
-      <div style={{ margin: "16px 0" }}>
+      <div style={{ margin: "128px 0" }}>
+        <div style={{ width: "100%", textAlign: "center" }}>
+          <RoamJSDigest />
+        </div>
         <GithubSponsor />
       </div>
       <H3>Other Extensions</H3>

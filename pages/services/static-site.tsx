@@ -4,10 +4,11 @@ import ServiceLayout, {
   getStaticPropsForPage,
   ServicePageProps,
 } from "../../components/ServiceLayout";
+import Loom from '../../components/Loom';
 
 const StaticSitePage: React.FC<ServicePageProps> = (props) => {
   return (
-    <ServiceLayout development {...props}>
+    <ServiceLayout {...props}>
       <Body>
         Roam is a powerful CMS (content management system), not just for
         personal knowledge management but for public information as well. There
@@ -32,6 +33,7 @@ const StaticSitePage: React.FC<ServicePageProps> = (props) => {
         your Roam graph and manage a website for you based on your unique
         website configuration.
       </Body>
+      <Loom id={'3f62636bb584456d8e31e725c445b8b4'} />
       {/*
       <H4>Configuration</H4>
       <Body>

@@ -15,7 +15,7 @@ const Title = React.forwardRef<
   { content: string; href: string }
 >(({ content, href, ...props }, ref) => (
   <Link href={href}>
-    <a className={'service-link'}>
+    <a className={"service-link"}>
       <H6
         style={{
           margin: 0,
@@ -44,32 +44,39 @@ const ServicesPage: React.FC<PricesProp> = ({ prices }) => {
       const href = `/services/${id}`;
       const { price } = prices.find(findById(id)) || { price: 0 };
       return {
-        primary: (
-          <Tooltip title={title}>
-            <Title href={href} content={title} />
-          </Tooltip>
-        ),
-        avatar: (
-          <>
-            <span
-              style={{
-                display: "inline-block",
-                verticalAlign: "middle",
-                height: "100%",
-              }}
-            />
-            <img
-              src={`/thumbnails/${id}.png`}
-              width={32}
-              height={32}
-              style={{ verticalAlign: "middle" }}
-            />
-          </>
-        ),
-        action: <H6 color={"primary"}>${price}</H6>,
-        key: id,
+        id,
+        title,
+        href,
+        price,
       };
-    });
+    })
+    .filter(({ price }) => price > 0)
+    .map(({ id, title, href, price }) => ({
+      primary: (
+        <Tooltip title={title}>
+          <Title href={href} content={title} />
+        </Tooltip>
+      ),
+      avatar: (
+        <>
+          <span
+            style={{
+              display: "inline-block",
+              verticalAlign: "middle",
+              height: "100%",
+            }}
+          />
+          <img
+            src={`/thumbnails/${id}.png`}
+            width={32}
+            height={32}
+            style={{ verticalAlign: "middle" }}
+          />
+        </>
+      ),
+      action: <H6 color={"primary"}>${price}</H6>,
+      key: id,
+    }));
   return (
     <StandardLayout>
       <H4 style={{ textAlign: "center" }}>All Services</H4>
