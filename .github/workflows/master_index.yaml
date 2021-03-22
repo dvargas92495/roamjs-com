@@ -7,6 +7,7 @@ on:
       - "public/**"
       - "pages/**"
       - "package.json"
+      - ".github/workflows/master_index.yaml"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY }}

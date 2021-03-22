@@ -8,6 +8,7 @@ on:
       - "src/entry-helpers.ts"
       - "webpack.production.config.js"
       - ".github/workflows/master.yaml"
+      - "package.json"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY }}
