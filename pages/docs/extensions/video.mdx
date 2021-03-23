@@ -1,7 +1,17 @@
 ---
 layout: "ExtensionPageLayout"
 description: "Inline Video Uploads!"
-loom: c3c2d96949c14f23903ead1fcb86e4a3
+skipDemo: true
 ---
 
+import Loom from '../../../components/Loom'
+
 Simply drag an `.mp4` file into Roam. Natively, Roam tries to render this as an image and it appears blank. With this extension installed, the video is rendered correctly!
+
+<Loom id={"c3c2d96949c14f23903ead1fcb86e4a3"} />
+
+#### Looping With Youtube
+
+Roam natively supports embedding youtube videos with the `{{[[video]]: link}}` block. When you embed a youtube link with the video extension installed, a small marker will appear on the top right corner. Clicking this marker will set start and end points that the video will use to loop through.
+
+![](/images/video-loop.png)

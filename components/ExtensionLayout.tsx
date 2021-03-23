@@ -13,6 +13,7 @@ export interface FrontMatter {
   acknowledgements?: string;
   loom?: string;
   contributors?: string;
+  skipDemo?: boolean;
 }
 
 export const pathToId = (f: string): string =>

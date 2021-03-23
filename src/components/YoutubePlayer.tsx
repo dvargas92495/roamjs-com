@@ -20,10 +20,10 @@ const YoutubePlayer = ({
   );
   const playerRef = useRef(null);
   const [start, setStart] = useState(
-    parseFloat(initialLoopNode?.children?.[0]?.text || "0")
+    parseInt(initialLoopNode?.children?.[0]?.text || "0")
   );
   const [end, setEnd] = useState(
-    parseFloat(initialLoopNode?.children?.[1]?.text || "0")
+    parseInt(initialLoopNode?.children?.[1]?.text || "0")
   );
   const onReady = useCallback(
     (e) => {
@@ -32,7 +32,7 @@ const YoutubePlayer = ({
         /loop/i.test(t.text)
       )?.children?.[1]?.text;
       if (configEnd) {
-        setEnd(parseFloat(configEnd));
+        setEnd(parseInt(configEnd));
       } else {
         setEnd(e.target.getDuration());
       }
@@ -44,7 +44,7 @@ const YoutubePlayer = ({
     playerRef.current.seekTo(start);
   }, [playerRef, start]);
   const onMarkerClick = useCallback(() => {
-    const time = playerRef.current.getCurrentTime() as number;
+    const time = Math.round(playerRef.current.getCurrentTime());
     const text = time.toString();
     const config = getTreeByBlockUid(blockUid).children;
     const loopNode = config.find((t) => /loop/i.test(t.text));
@@ -76,7 +76,11 @@ const YoutubePlayer = ({
         opts={{
           width: "512px",
           height: "312px",
-          playerVars: { start, end, origin: window.location.origin },
+          playerVars: {
+            start,
+            end,
+            origin: window.location.origin,
+          },
         }}
         onReady={onReady}
         onEnd={onEnd}
