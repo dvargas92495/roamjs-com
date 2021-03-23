@@ -21,6 +21,7 @@ runExtension("wysiwyg-mode", () => {
         const textarea = target as HTMLTextAreaElement;
         toggleWysiwyg(textarea);
         e.stopImmediatePropagation();
+        e.preventDefault();
       }
     }
   });
