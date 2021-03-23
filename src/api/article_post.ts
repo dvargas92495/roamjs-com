@@ -1,15 +1,11 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios, { AxiosError } from "axios";
-import { headers, mixpanel } from "../lambda-helpers";
+import { headers } from "../lambda-helpers";
 import charset from "charset";
 
 export const handler = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
-  mixpanel.track("Use Extension", {
-    extensionId: "article",
-    action: "Import",
-  });
   const { url } = JSON.parse(event.body);
   const fetch = (requestHeaders: { [key: string]: string }) =>
     axios

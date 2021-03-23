@@ -6,7 +6,7 @@ import {
   VerticalTimelineElement,
 } from "react-vertical-timeline-component";
 import "react-vertical-timeline-component/style.min.css";
-import { Button, Checkbox, Icon, InputGroup, Label } from "@blueprintjs/core";
+import { Checkbox, Icon, InputGroup, Label } from "@blueprintjs/core";
 import {
   getTreeByBlockUid,
   getUidsFromId,
@@ -41,10 +41,12 @@ const getText = (cur: string) => {
   } catch {
     return cur;
   }
-}
+};
 
 const reduceChildren = (prev: string, cur: TreeNode, l: number): string =>
-  `${prev}<span>${"".padEnd(l * 2, " ")}</span>${getText(cur.text)}<br/>${cur.children.reduce((p, c) => reduceChildren(p, c, l + 1), "")}`;
+  `${prev}<span>${"".padEnd(l * 2, " ")}</span>${getText(
+    cur.text
+  )}<br/>${cur.children.reduce((p, c) => reduceChildren(p, c, l + 1), "")}`;
 
 const getTag = (blockUid: string) => {
   const tree = getTreeByBlockUid(blockUid);
@@ -203,17 +205,10 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
     setTimelineElements,
     getTimelineElements,
     setColors,
-    getColors,
     setLayout,
-    getLayout,
     blockUid,
   ]);
 
-  const [showSettings, setShowSettings] = useState(false);
-  const toggleSettings = useCallback(() => setShowSettings(!showSettings), [
-    setShowSettings,
-    showSettings,
-  ]);
   const [tagSetting, setTagSetting] = useState(() => getTag(blockUid));
   const onTagBlur = useCallback(() => {
     const { blockUid } = getUidsFromId(blockId);
@@ -272,53 +267,6 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
   );
   return (
     <>
-      {showSettings && (
-        <div
-          style={{
-            backgroundColor: "white",
-            borderRadius: 3,
-            padding: 20,
-            border: "1px solid #333333",
-          }}
-        >
-          <h4>Settings:</h4>
-          <Label>
-            Tag
-            <InputGroup
-              value={tagSetting}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setTagSetting(e.target.value)
-              }
-              onBlur={onTagBlur}
-            />
-          </Label>
-          <BooleanSetting
-            blockUid={blockUid}
-            refresh={refresh}
-            name={"Reverse"}
-          />
-          <BooleanSetting
-            blockUid={blockUid}
-            refresh={refresh}
-            name={"Creation Date"}
-          />
-          <BooleanSetting
-            blockUid={blockUid}
-            refresh={refresh}
-            name={"Clean"}
-          />
-          <Label>
-            Layout
-            <MenuItemSelect
-              items={Object.keys(LAYOUTS)}
-              activeItem={Object.keys(LAYOUTS).find(
-                (k) => LAYOUTS[k as keyof typeof LAYOUTS] === layout
-              )}
-              onItemSelect={onLayoutSelect}
-            />
-          </Label>
-        </div>
-      )}
       <EditContainer
         refresh={refresh}
         blockId={blockId}
@@ -327,6 +275,45 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
           width: "100%",
           minWidth: 840,
         }}
+        Settings={
+          <>
+            <Label>
+              Tag
+              <InputGroup
+                value={tagSetting}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setTagSetting(e.target.value)
+                }
+                onBlur={onTagBlur}
+              />
+            </Label>
+            <BooleanSetting
+              blockUid={blockUid}
+              refresh={refresh}
+              name={"Reverse"}
+            />
+            <BooleanSetting
+              blockUid={blockUid}
+              refresh={refresh}
+              name={"Creation Date"}
+            />
+            <BooleanSetting
+              blockUid={blockUid}
+              refresh={refresh}
+              name={"Clean"}
+            />
+            <Label>
+              Layout
+              <MenuItemSelect
+                items={Object.keys(LAYOUTS)}
+                activeItem={Object.keys(LAYOUTS).find(
+                  (k) => LAYOUTS[k as keyof typeof LAYOUTS] === layout
+                )}
+                onItemSelect={onLayoutSelect}
+              />
+            </Label>
+          </>
+        }
       >
         <VerticalTimeline
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -390,19 +377,6 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
             </VerticalTimelineElement>
           ))}
         </VerticalTimeline>
-        <Button
-          icon={"wrench"}
-          onClick={toggleSettings}
-          style={{
-            position: "absolute",
-            top: 8,
-            right: 88,
-            backgroundColor: showSettings
-              ? "rgba(115,134,148,0.3)"
-              : "transparent",
-          }}
-          minimal
-        />
       </EditContainer>
     </>
   );

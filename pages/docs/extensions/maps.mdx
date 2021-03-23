@@ -4,8 +4,6 @@ description: "The Maps extension will render interactive maps directly in your g
 contributors: Russell Schutte 💵
 ---
 
-import DemoMaps from "../../../components/DemoMaps";
-
 This script is not configurable
 
 Type `{{maps}}` in a block. When the block renders, an interactive map will render in its place!
@@ -27,8 +25,6 @@ For example, the following configuration will have to be set as the child of the
     - RoamJS
         - 32.72, -117.1
 
-If you set the Marker text as a tag, clicking on the marker pin will take you to that page.
+If the Marker text is already a tag in your graph, clicking on the marker pin will take you to that page.
 
-### Playground
-
-<DemoMaps />
+You could also filter the markers that are displayed on your map. Clicking the wrench icon on the top right will open the settings overlay, where you could specify a tag to filter by. All markers that are pages that have a block with the entered tag will remain on the map while the rest get filtered out.

@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getTreeByPageName, TreeNode } from "roam-client";
+import {
+  getTreeByBlockUid,
+  getTreeByPageName,
+  getUidsFromId,
+  TreeNode,
+} from "roam-client";
 
 export const useArrowKeyDown = <T>({
   results,
@@ -14,18 +19,21 @@ export const useArrowKeyDown = <T>({
   const [activeIndex, setActiveIndex] = useState(0);
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "ArrowDown") {
-        setActiveIndex((activeIndex + 1) % results.length);
-        e.preventDefault();
-        e.stopPropagation();
-      } else if (e.key === "ArrowUp") {
-        setActiveIndex((activeIndex + results.length - 1) % results.length);
-        e.preventDefault();
-        e.stopPropagation();
-      } else if (e.key === "Enter" && results.length > 0) {
-        onEnter(results[activeIndex]);
-        e.preventDefault();
-        e.stopPropagation();
+      if (results.length > 0) {
+        if (e.key === "ArrowDown") {
+          setActiveIndex((activeIndex + 1) % results.length);
+          e.preventDefault();
+          e.stopPropagation();
+        } else if (e.key === "ArrowUp") {
+          setActiveIndex((activeIndex + results.length - 1) % results.length);
+          e.preventDefault();
+          e.stopPropagation();
+        } else if (e.key === "Enter") {
+          onEnter(results[activeIndex]);
+          setActiveIndex(0);
+          e.preventDefault();
+          e.stopPropagation();
+        }
       }
     },
     [activeIndex, setActiveIndex, results, onEnter]
@@ -66,9 +74,20 @@ export const getSettingValueFromTree = ({
   return value;
 };
 
-export const useSocialToken = (): string => useMemo(
-  () =>
-    getTreeByPageName("roam/js/social").find((t) => /token/i.test(t.text))
-      ?.children?.[0]?.text,
-  []
-)
+export const useSocialToken = (): string =>
+  useMemo(
+    () =>
+      getTreeByPageName("roam/js/social").find((t) => /token/i.test(t.text))
+        ?.children?.[0]?.text,
+    []
+  );
+
+export const getTreeByHtmlId = (
+  blockId: string
+): { children: TreeNode[]; text: string } =>
+  getTreeByBlockUid(getUidsFromId(blockId).blockUid);
+
+export const useTree = (
+  blockId: string
+): { children: TreeNode[]; text: string } =>
+  useMemo(() => getTreeByHtmlId(blockId), [blockId]);

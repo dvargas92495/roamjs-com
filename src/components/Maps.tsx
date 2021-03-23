@@ -1,17 +1,27 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import ReactDOM from "react-dom";
-import { getUids, getTreeByBlockUid } from "roam-client";
+import { getUidsFromId, TreeNode } from "roam-client";
 import {
   addStyle,
   getPageUidByPageTitle,
-  track,
   extractTag,
+  setInputSetting,
+  isTagOnPage,
 } from "../entry-helpers";
 import { MapContainer, Marker, TileLayer, Popup } from "react-leaflet";
-import { LatLngExpression, Icon } from "leaflet";
+import { LatLngExpression, Icon, Map } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import EditContainer from "./EditContainer";
 import axios from "axios";
+import { Label } from "@blueprintjs/core";
+import PageInput from "./PageInput";
+import { getTreeByHtmlId, useTree } from "./hooks";
 
 addStyle(`.leaflet-pane {
   z-index: 10 !important;
@@ -30,18 +40,78 @@ const MarkerIcon = new Icon({
   shadowSize: [41, 41],
 });
 
-const Maps = ({
-  blockId,
-  zoom = 13,
-  center = [51.505, -0.09],
-  markers = [],
-}: {
-  blockId: string;
-  zoom?: number;
-  center?: LatLngExpression;
-  markers?: { x: number; y: number; tag: string }[];
-}): JSX.Element => {
+const DEFAULT_ZOOM = 13;
+const DEFAULT_CENTER = [51.505, -0.09] as LatLngExpression;
+
+const getZoom = ({ children }: { children: TreeNode[] }) => {
+  const zoomNode = children.find((c) => c.text.trim().toUpperCase() === "ZOOM");
+  const newZoom =
+    zoomNode && zoomNode.children[0] && parseInt(zoomNode.children[0].text);
+  return isNaN(newZoom) ? DEFAULT_ZOOM : newZoom;
+};
+
+const getCenter = ({ children }: { children: TreeNode[] }) => {
+  const centerNode = children.find(
+    (c) => c.text.trim().toUpperCase() === "CENTER"
+  );
+  const newCenter =
+    centerNode &&
+    centerNode.children[0] &&
+    centerNode.children[0].text.split(",").map((s) => parseFloat(s.trim()));
+  return !newCenter || newCenter.length !== 2 || newCenter.some((c) => isNaN(c))
+    ? DEFAULT_CENTER
+    : (newCenter as LatLngExpression);
+};
+
+const getFilter = ({ children }: { children: TreeNode[] }) => {
+  return children.find((c) => /filter/i.test(c.text))?.children?.[0]?.text;
+};
+
+type RoamMarker = { x: number; y: number; tag: string };
+
+const getMarkers = ({ children }: { children: TreeNode[] }) => {
+  const markerNode = children.find(
+    (c) => c.text.trim().toUpperCase() === "MARKERS"
+  );
+  return markerNode
+    ? Promise.all(
+        markerNode.children.map((m) => {
+          const tag = m.text.trim();
+          const coords = m.children.length
+            ? Promise.resolve(
+                m.children[0].text.split(",").map((s) => parseFloat(s.trim()))
+              )
+            : getCoords(tag);
+          return coords.then(([x, y]) => ({
+            tag,
+            x,
+            y,
+          }));
+        })
+      ).then((markers) => markers.filter(({ x, y }) => !isNaN(x) && !isNaN(y)))
+    : Promise.resolve([] as RoamMarker[]);
+};
+
+const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
   const id = useMemo(() => `roamjs-maps-container-id-${blockId}`, [blockId]);
+  const mapInstance = useRef<Map>(null);
+  const initialTree = useTree(blockId);
+  const initialZoom = useMemo(() => getZoom(initialTree), [initialTree]);
+  const initialCenter = useMemo(() => getCenter(initialTree), [initialTree]);
+  const [markers, setMarkers] = useState<RoamMarker[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [filter, setFilter] = useState(getFilter(initialTree));
+  const load = useCallback(() => setLoaded(true), [setLoaded]);
+  const refresh = useCallback(() => {
+    const tree = getTreeByHtmlId(blockId);
+    mapInstance.current.setZoom(getZoom(tree));
+    mapInstance.current.panTo(getCenter(tree));
+    setFilter(getFilter(tree));
+    getMarkers(tree).then((newMarkers) => {
+      setMarkers(newMarkers);
+    });
+  }, [mapInstance, setMarkers, blockId]);
+
   const [href, setHref] = useState("https://roamresearch.com");
   useEffect(() => {
     const windowHref = window.location.href;
@@ -51,28 +121,78 @@ const Maps = ({
         : windowHref
     );
   }, [setHref]);
+  useEffect(() => {
+    if (!loaded) {
+      load();
+      getMarkers(initialTree).then((newMarkers) => {
+        setMarkers(newMarkers);
+      });
+    }
+  }, [load, loaded, initialTree, setMarkers]);
   const popupCallback = useCallback(
     (tag: string) => () => {
       const extractedTag = extractTag(tag);
-      if (extractedTag !== tag) {
-        const pageUid = getPageUidByPageTitle(extractedTag);
-        if (pageUid) {
-          window.location.assign(`${href}/page/${pageUid}`);
-        }
+      const pageUid = getPageUidByPageTitle(extractedTag);
+      if (pageUid) {
+        window.location.assign(`${href}/page/${pageUid}`);
       }
     },
     [href]
   );
+  const filterOnBlur = useCallback(
+    (value: string) => {
+      setInputSetting({
+        blockUid: getUidsFromId(blockId).blockUid,
+        value,
+        key: "filter",
+      });
+      setFilter(value);
+    },
+    [blockId]
+  );
+  const filteredMarkers = useMemo(
+    () =>
+      filter
+        ? markers.filter((m) =>
+            isTagOnPage({ tag: filter, title: extractTag(m.tag) })
+          )
+        : markers,
+    [markers, filter]
+  );
+  const whenCreated = useCallback((m) => (mapInstance.current = m), [
+    mapInstance,
+  ]);
   return (
-    <EditContainer blockId={blockId}>
-      <MapContainer center={center} zoom={zoom} id={id} style={{ height: 400 }}>
+    <EditContainer
+      blockId={blockId}
+      refresh={refresh}
+      Settings={
+        <>
+          <Label>
+            Filter
+            <PageInput
+              value={filter}
+              setValue={setFilter}
+              onBlur={filterOnBlur}
+            />
+          </Label>
+        </>
+      }
+    >
+      <MapContainer
+        center={initialCenter}
+        zoom={initialZoom}
+        id={id}
+        style={{ height: 400 }}
+        whenCreated={whenCreated}
+      >
         <TileLayer
           attribution='Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
           url="https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}"
           accessToken={process.env.MAPBOX_TOKEN}
           id="mapbox/streets-v11"
         />
-        {markers.map((m, i) => (
+        {filteredMarkers.map((m, i) => (
           <Marker position={[m.x, m.y]} key={i} icon={MarkerIcon} title={m.tag}>
             <Popup onOpen={popupCallback(m.tag)}>{m.tag}</Popup>
           </Marker>
@@ -100,62 +220,8 @@ export const render = (b: HTMLButtonElement): void => {
   if (!block) {
     return;
   }
-  const blockId = block.id;
-  const { blockUid } = getUids(
-    document.getElementById(blockId) as HTMLDivElement
-  );
-  const tree = getTreeByBlockUid(blockUid);
-  const markerNode = tree.children.find(
-    (c) => c.text.trim().toUpperCase() === "MARKERS"
-  );
-  const centerNode = tree.children.find(
-    (c) => c.text.trim().toUpperCase() === "CENTER"
-  );
-  const zoomNode = tree.children.find(
-    (c) => c.text.trim().toUpperCase() === "ZOOM"
-  );
-  const zoom =
-    zoomNode && zoomNode.children[0] && parseInt(zoomNode.children[0].text);
-  const center =
-    centerNode &&
-    centerNode.children[0] &&
-    centerNode.children[0].text.split(",").map((s) => parseFloat(s.trim()));
-  const getMarkers = markerNode
-    ? Promise.all(
-        markerNode.children.map((m) => {
-          const tag = m.text.trim();
-          const coords = m.children.length
-            ? Promise.resolve(
-                m.children[0].text.split(",").map((s) => parseFloat(s.trim()))
-              )
-            : getCoords(tag);
-          return coords.then(([x, y]) => ({
-            tag,
-            x,
-            y,
-          }));
-        })
-      ).then((markers) => markers.filter(({ x, y }) => !isNaN(x) && !isNaN(y)))
-    : Promise.resolve([]);
-  getMarkers.then((markers) => {
-    track("Use Extension", {
-      extensionId: "maps",
-      action: "Render",
-    });
-    ReactDOM.render(
-      <Maps
-        blockId={blockId}
-        zoom={isNaN(zoom) ? undefined : zoom}
-        center={
-          !center || center.length !== 2 || center.some((c) => isNaN(c))
-            ? undefined
-            : (center as LatLngExpression)
-        }
-        markers={markers}
-      />,
-      b.parentElement
-    );
-  });
+  b.parentElement.onmousedown = (e: MouseEvent) => e.stopPropagation();
+  ReactDOM.render(<Maps blockId={block.id} />, b.parentElement);
 };
 
 export default Maps;

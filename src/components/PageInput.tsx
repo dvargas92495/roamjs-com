@@ -17,9 +17,11 @@ const searchPagesByString = (q: string) =>
 const PageInput = ({
   value,
   setValue,
+  onBlur,
 }: {
   value: string;
   setValue: (q: string) => void;
+  onBlur?: (v: string) => void,
 }): React.ReactElement => {
   const [isOpen, setIsOpen] = useState(false);
   const open = useCallback(() => setIsOpen(true), [setIsOpen]);
@@ -72,6 +74,9 @@ const PageInput = ({
           onBlur={(e) => {
             if (e.relatedTarget) {
               close();
+            }
+            if (onBlur) {
+              onBlur(e.target.value);
             }
           }}
           inputRef={inputRef}
