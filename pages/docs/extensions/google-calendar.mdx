@@ -9,11 +9,18 @@ The script supports the following configuration attributes, to be added in the `
 - `Include Event Link` - (Optional) Set to `true` if you would like to hyperlink the event summary with a link to the google calendar event. Note, because there are more characters to be typed it's a slower operation.
 - `Skip Free` - (Optional) Set to `true` if you would like to filter out the events from your calendar that you've set to 'Free'
 - `Format` - (Optional) The text to add for each calendar event. Could use the following placeholders to be replaced with the event's data:
-    - `/Summary` - the name of the event 
-    - `/Link` - the link for the event
-    - `/Hangout` - the hangout link for the event
-    - `/Location` - the location for the event
-    - `/Start Time` - the start time of the event - `/End Time` - the end time of the event
+    - `/Summary` - **DEPRECATED** use `{summary}` below instead 
+    - `/Link` - **DEPRECATED** use `{link}` below instead
+    - `/Hangout` - **DEPRECATED** use `{hangout}` below instead
+    - `/Location` - **DEPRECATED** use `{location}` below instead
+    - `/Start Time` - **DEPRECATED** use `{start}` below instead 
+    - `/End Time` - **DEPRECATED** use `{end}` below instead
+    - `{summary}` - the name of the event 
+    - `{link}` - the link for the event
+    - `{hangout}` - the hangout link for the event
+    - `{location}` - the location for the event
+    - `{start}` - the start time of the event. Add a colon and format to customize the start time format. For example, `{start:hh:mm}` will resolve to `12:00`
+    - `{end}` - the end time of the event. Add a colon and format to customize the end time format. For example, `{end:hh:mm}` will resolve to `12:00`
 
 Here's an example configuration page:
 

@@ -12,7 +12,10 @@ import {
   getParentUidByBlockUid,
 } from "roam-client";
 import axios from "axios";
-import { formatRFC3339, startOfDay, endOfDay } from "date-fns";
+import formatRFC3339 from "date-fns/formatRFC3339";
+import startOfDay from "date-fns/startOfDay";
+import endOfDay from "date-fns/endOfDay";
+import format from "date-fns/format";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
@@ -28,8 +31,17 @@ type Event = {
 };
 
 const EMPTY_MESSAGE = "No Events Scheduled for Today!";
-const resolveDate = (d: { dateTime?: string }) =>
-  d.dateTime ? new Date(d.dateTime).toLocaleTimeString() : "All Day";
+const resolveDate = (d: { dateTime?: string; format?: string }) => {
+  if (!d.dateTime) {
+    return "All Day";
+  }
+  const date = new Date(d.dateTime);
+  if (d.format) {
+    return format(date, d.format);
+  } else {
+    return date.toLocaleTimeString();
+  }
+};
 
 const resolveSummary = (e: Event) =>
   e.visibility === "private" ? "busy" : e.summary || "No Summary";
@@ -69,13 +81,23 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
         .filter((e: Event) => !skipFree || e.transparency !== "transparent")
         .map((e: Event) => {
           if (format) {
-            return format
+            return (format as string)
               .replace("/Summary", resolveSummary(e))
               .replace("/Link", e.htmlLink || "")
               .replace("/Hangout", e.hangoutLink || "")
               .replace("/Location", e.location || "")
               .replace("/Start Time", resolveDate(e.start))
-              .replace("/End Time", resolveDate(e.end));
+              .replace("/End Time", resolveDate(e.end))
+              .replace("{summary}", resolveSummary(e))
+              .replace("{link}", e.htmlLink || "")
+              .replace("{hangout}", e.hangoutLink || "")
+              .replace("{location}", e.location || "")
+              .replace(/{start:?(.*?)}/, (_, format) =>
+                resolveDate({ ...e.start, format })
+              )
+              .replace(/{end:?(.*?)}/, (_, format) =>
+                resolveDate({ ...e.end, format })
+              );
           } else {
             const summaryText = resolveSummary(e);
             const summary =
