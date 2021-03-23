@@ -228,9 +228,10 @@ const WYSIWYGMode = ({
 
   const eventListener = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "w" && e.altKey) {
+      if (e.code === "KeyW" && e.altKey) {
         outputOnUnmount();
         e.stopImmediatePropagation();
+        e.preventDefault();
       }
     },
     [outputOnUnmount]
@@ -349,9 +350,10 @@ const DemoTextArea = React.forwardRef<
 >(({ wysiwyg, value, setValue }, ref) => {
   const eventListener = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "w" && e.altKey) {
+      if (e.code === "KeyW" && e.altKey) {
         wysiwyg();
         e.stopImmediatePropagation();
+        e.preventDefault();
       }
     },
     [wysiwyg]
