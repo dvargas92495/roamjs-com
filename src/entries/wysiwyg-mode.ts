@@ -15,7 +15,7 @@ const toggleWysiwyg = (textarea: HTMLTextAreaElement) => {
 
 runExtension("wysiwyg-mode", () => {
   document.addEventListener("keydown", (e) => {
-    if (e.key === "w" && e.altKey) {
+    if (e.code === "KeyW" && e.altKey) {
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA") {
         const textarea = target as HTMLTextAreaElement;
