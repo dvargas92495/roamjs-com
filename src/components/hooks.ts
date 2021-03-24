@@ -87,7 +87,12 @@ export const getTreeByHtmlId = (
 ): { children: TreeNode[]; text: string } =>
   getTreeByBlockUid(getUidsFromId(blockId).blockUid);
 
-export const useTree = (
+export const useTreeByHtmlId = (
   blockId: string
 ): { children: TreeNode[]; text: string } =>
   useMemo(() => getTreeByHtmlId(blockId), [blockId]);
+
+export const useTree = (
+  blockUid: string
+): { children: TreeNode[]; text: string } =>
+  useMemo(() => getTreeByBlockUid(blockUid), [blockUid]);

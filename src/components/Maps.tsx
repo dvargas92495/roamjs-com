@@ -21,7 +21,7 @@ import EditContainer from "./EditContainer";
 import axios from "axios";
 import { Label } from "@blueprintjs/core";
 import PageInput from "./PageInput";
-import { getTreeByHtmlId, useTree } from "./hooks";
+import { getTreeByHtmlId, useTreeByHtmlId } from "./hooks";
 
 addStyle(`.leaflet-pane {
   z-index: 10 !important;
@@ -95,7 +95,7 @@ const getMarkers = ({ children }: { children: TreeNode[] }) => {
 const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
   const id = useMemo(() => `roamjs-maps-container-id-${blockId}`, [blockId]);
   const mapInstance = useRef<Map>(null);
-  const initialTree = useTree(blockId);
+  const initialTree = useTreeByHtmlId(blockId);
   const initialZoom = useMemo(() => getZoom(initialTree), [initialTree]);
   const initialCenter = useMemo(() => getCenter(initialTree), [initialTree]);
   const [markers, setMarkers] = useState<RoamMarker[]>([]);

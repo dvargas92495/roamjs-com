@@ -35,18 +35,19 @@ runExtension("slack", () => {
             (!channelFormatIsDefault && channelFormatRegex.test(r))
           : userFormatRegex.test(r) || channelFormatRegex.test(r)
       ) {
-        const { blockUid } = getUids(
-          s.closest(".roam-block") as HTMLDivElement
-        );
-        const newSpan = document.createElement("span");
-        newSpan.style.verticalAlign = "middle";
-        newSpan.onmousedown = (e: MouseEvent) => e.stopPropagation();
-        s.appendChild(newSpan);
-        render({
-          parent: newSpan,
-          tag: r,
-          blockUid,
-        });
+        const container = s.closest(".roam-block") as HTMLDivElement;
+        if (container) {
+          const { blockUid } = getUids(container);
+          const newSpan = document.createElement("span");
+          newSpan.style.verticalAlign = "middle";
+          newSpan.onmousedown = (e: MouseEvent) => e.stopPropagation();
+          s.appendChild(newSpan);
+          render({
+            parent: newSpan,
+            tag: r,
+            blockUid,
+          });
+        }
       }
     },
   });

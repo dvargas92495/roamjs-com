@@ -131,6 +131,7 @@ module "aws-serverless-backend" {
         "payment-methods/put",
         "postman/post",
         "products/get",
+        "publish/post",
         "queue-issues/get",
         "slack-url/post",
         "shutdown-social/post",
