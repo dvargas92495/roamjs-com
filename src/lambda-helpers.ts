@@ -14,6 +14,8 @@ import Mixpanel from "mixpanel";
 
 export const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
+export const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
+
 export const mixpanel = process.env.MIXPANEL_TOKEN
   ? Mixpanel.init(process.env.MIXPANEL_TOKEN)
   : { track: () => console.log("track") };
@@ -23,7 +25,7 @@ type Headers = {
   [header: string]: boolean | number | string;
 };
 
-export const headers = (event: APIGatewayProxyEvent): Headers => {
+export const headers = (event: Pick<APIGatewayProxyEvent, 'headers'>): Headers => {
   const origin = event.headers.origin || event.headers.Origin;
   return {
     "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin)
@@ -61,7 +63,7 @@ export const userError = (
 
 export const serverError = (
   body: string,
-  event: APIGatewayProxyEvent
+  event: Pick<APIGatewayProxyEvent, 'headers'>
 ): APIGatewayProxyResult => ({
   statusCode: 500,
   body,
@@ -77,7 +79,7 @@ export const emptyResponse = (
 });
 
 export const bareSuccessResponse = (
-  event: APIGatewayProxyEvent
+  event: Pick<APIGatewayProxyEvent, 'headers'>
 ): APIGatewayProxyResult => ({
   statusCode: 200,
   body: JSON.stringify({ success: true }),
