@@ -24,6 +24,7 @@ import Link from "next/link";
 import { stripe } from "../../components/constants";
 import { useUser, SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
+import ServiceToken from "../../components/ServiceToken";
 
 const UserValue: React.FunctionComponent = ({ children }) => (
   <span style={{ paddingLeft: 64, display: "block" }}>{children}</span>
@@ -371,6 +372,14 @@ const Funding = () => {
   );
 };
 
+const Developer = () => {
+  return (
+    <div>
+      <ServiceToken id={'developer'} />
+    </div>
+  );
+}
+
 const Profile = () => {
   const user = useUser();
   const [isClerk, setIsClerk] = useState(false);
@@ -391,6 +400,9 @@ const Profile = () => {
           </Card>
           <Card title={"Sponsorships"}>
             <Funding />
+          </Card>
+          <Card title={"Developer"}>
+            <Developer />
           </Card>
         </VerticalTabs>
       )}

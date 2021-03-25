@@ -5,18 +5,22 @@ import {
   H1,
   H3,
   H4,
-  Loading,
-  StringField,
   Subtitle,
 } from "@dvargas92495/ui";
 import React, { useCallback, useEffect, useState } from "react";
 import StandardLayout from "./StandardLayout";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { useRouter } from "next/router";
-import { useAuthenticatedAxiosPost, useCopyCode } from "./hooks";
+import {
+  idToCamel,
+  idToTitle,
+  useAuthenticatedAxiosPost,
+  useCopyCode,
+} from "./hooks";
 import { API_URL, stripe } from "./constants";
 import axios from "axios";
 import { GetStaticProps } from "next";
+import ServiceToken from "./ServiceToken";
 
 export type ServicePageProps = {
   description: string;
@@ -50,15 +54,6 @@ export const getStaticPropsForPage: (
         id,
       },
     }));
-
-const idToTitle = (id: string) =>
-  id
-    .split("-")
-    .map((s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
-    .join(" ");
-
-const idToCamel = (id: string) =>
-  `${id.substring(0, 1)}${idToTitle(id).replace(/ /g, "").substring(1)}`;
 
 const StartButtonText = ({ price }: { price: number }) => (
   <>
@@ -145,35 +140,6 @@ const CheckSubscription = ({
   );
 };
 
-const GenerateButton: React.FC<{ id: string }> = ({ id }) => {
-  const user = useUser();
-  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const [loading, setLoading] = useState(false);
-  const onClick = useCallback(() => {
-    setLoading(true);
-    authenticatedAxiosPost("token", { service: id })
-      .then(() =>
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore refresh metadata state
-        user.update()
-      )
-      .finally(() => setLoading(false));
-  }, [authenticatedAxiosPost, user, id, setLoading]);
-  return (
-    <div>
-      <Button
-        onClick={onClick}
-        color={"secondary"}
-        variant={"outlined"}
-        style={{ marginRight: 8 }}
-      >
-        Generate New Token
-      </Button>
-      <Loading loading={loading} size={16} />
-    </div>
-  );
-};
-
 const Service = ({ id, end }: { id: string; end: () => void }) => {
   const userData = useUser().publicMetadata as {
     [key: string]: { token: string; authenticated?: boolean };
@@ -227,29 +193,8 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
             <span style={{ minHeight: 20 }}>{copied && "COPIED!"}</span>
           </>
         )}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "normal",
-            justifyContent: "space-between",
-            marginTop: 32,
-          }}
-        >
-          <StringField
-            value={token}
-            disabled
-            setValue={() => token}
-            label={`RoamJS ${idToTitle(id)} Token`}
-            style={{ cursor: "text", flexGrow: 1, paddingRight: 24 }}
-            toggleable
-          />
-        </div>
-        <span style={{ color: "darkred" }}>
-          Token is sensitive. <b>DO NOT SHARE WITH ANYONE</b>
-        </span>
-        <div style={{ marginTop: 32 }}>
-          <GenerateButton id={id} />
-        </div>
+        <div style={{ marginTop: 32 }}></div>
+        <ServiceToken id={id} />
       </div>
       <div>
         <ConfirmationDialog

@@ -25,7 +25,9 @@ type Headers = {
   [header: string]: boolean | number | string;
 };
 
-export const headers = (event: Pick<APIGatewayProxyEvent, 'headers'>): Headers => {
+export const headers = (
+  event: Pick<APIGatewayProxyEvent, "headers">
+): Headers => {
   const origin = event.headers.origin || event.headers.Origin;
   return {
     "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin)
@@ -63,7 +65,7 @@ export const userError = (
 
 export const serverError = (
   body: string,
-  event: Pick<APIGatewayProxyEvent, 'headers'>
+  event: Pick<APIGatewayProxyEvent, "headers">
 ): APIGatewayProxyResult => ({
   statusCode: 500,
   body,
@@ -79,7 +81,7 @@ export const emptyResponse = (
 });
 
 export const bareSuccessResponse = (
-  event: Pick<APIGatewayProxyEvent, 'headers'>
+  event: Pick<APIGatewayProxyEvent, "headers">
 ): APIGatewayProxyResult => ({
   statusCode: 200,
   body: JSON.stringify({ success: true }),
@@ -213,9 +215,9 @@ export const flossGet = ({
 
 export const authenticate = (
   handler: APIGatewayProxyHandler,
-  service: 'staticSite' | 'social' | 'developer',
+  service: "staticSite" | "social" | "developer"
 ): APIGatewayProxyHandler => (event, ctx, callback) => {
-  const Authorization = event.headers.Authorization;
+  const Authorization = event.headers.Authorization || "";
   const token = Authorization.split(":").slice(-1)[0];
 
   return users.getUserList().then((us) => {
