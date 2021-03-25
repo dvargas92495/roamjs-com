@@ -133,6 +133,7 @@ module "aws-serverless-backend" {
         "products/get",
         "publish/post",
         "queue-issues/get",
+        "request-path/post",
         "slack-url/post",
         "shutdown-social/post",
         "shutdown-website/post",
@@ -163,6 +164,7 @@ module "aws-serverless-backend" {
       "customer",
       "payment-methods",
       "token",
+      "request-path",
     ]
     tags = {
         Application = "Roam JS Extensions"

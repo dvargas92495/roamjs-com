@@ -373,12 +373,37 @@ const Funding = () => {
 };
 
 const Developer = () => {
+  const [paths, setPaths] = useState<string[]>([]);
+  const [newPath, setNewPath] = useState("");
+  const [loading, setLoading] = useState(false);
+  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   return (
     <div>
-      <ServiceToken id={'developer'} />
+      <ServiceToken id={"developer"} />
+      <Items
+        items={paths.map((p) => ({
+          primary: <UserValue>{p}</UserValue>,
+          key: p,
+        }))}
+      />
+      <StringField value={newPath} setValue={setNewPath} />
+      <Button
+        onClick={() => {
+          setLoading(true);
+          authenticatedAxiosPost("request-path", { path: newPath })
+            .then(() => {
+              setNewPath("");
+              setPaths([...paths, newPath]);
+            })
+            .finally(() => setLoading(false));
+        }}
+      >
+        Request Path
+      </Button>
+      <Loading loading={loading} size={16} />
     </div>
   );
-}
+};
 
 const Profile = () => {
   const user = useUser();

@@ -155,6 +155,13 @@ functions:
           path: queue-issues
           method: get
           cors: true
+  request-path-post:
+    handler: out/request-path_post.handler
+    events:
+      - http:
+          path: request-path_post
+          method: post
+          cors: true
   shutdown-website-post:
     handler: out/shutdown-website_post.handler
     events:
