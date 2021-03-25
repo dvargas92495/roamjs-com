@@ -212,10 +212,11 @@ export const flossGet = ({
   );
 
 export const authenticate = (
-  handler: APIGatewayProxyHandler
+  handler: APIGatewayProxyHandler,
+  service: 'staticSite' | 'social' | 'developer',
 ): APIGatewayProxyHandler => (event, ctx, callback) => {
   const Authorization = event.headers.Authorization;
-  const [service, token] = Authorization.split(":");
+  const token = Authorization.split(":").slice(-1)[0];
 
   return users.getUserList().then((us) => {
     const user = us.find(

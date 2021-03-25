@@ -61,4 +61,4 @@ export const handler = authenticate(async (event) => {
     body: JSON.stringify({ success: true }),
     headers: headers(event),
   };
-});
+}, 'staticSite');

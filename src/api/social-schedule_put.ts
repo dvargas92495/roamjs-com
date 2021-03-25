@@ -20,4 +20,4 @@ export const handler = authenticate((event) => {
     })
     .promise()
     .then(() => bareSuccessResponse(event));
-});
+}, "social");

@@ -94,4 +94,4 @@ export const handler = authenticate(async (event) => {
     }),
     headers: headers(event),
   };
-});
+}, "staticSite");

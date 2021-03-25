@@ -82,4 +82,4 @@ export const handler = authenticate(async (event) => {
     body: JSON.stringify({ graph, domain }),
     headers: headers(event),
   };
-});
+}, 'staticSite');
