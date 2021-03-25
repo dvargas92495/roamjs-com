@@ -194,6 +194,10 @@ module "aws_email" {
   } 
 }
 
+data "aws_iam_role" "lambda_role" {
+  name = "roam-js-extensions-lambda-execution"
+}
+
 resource "aws_route53_record" "clerk-accounts" {
   zone_id = module.aws_static_site.route53_zone_id
   name    = "accounts"
@@ -364,4 +368,10 @@ resource "github_actions_secret" "floss_token" {
   repository       = "roam-js-extensions"
   secret_name      = "FLOSS_TOKEN"
   plaintext_value  = var.floss_token
+}
+
+resource "github_actions_secret" "lambda_role" {
+  repository       = "roam-js-extensions"
+  secret_name      = "LAMBDA_ROLE"
+  plaintext_value  = data.aws_iam_role.lambda_role.arn
 }
