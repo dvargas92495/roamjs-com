@@ -162,6 +162,7 @@ module "aws-serverless-backend" {
       "fund",
       "customer",
       "payment-methods",
+      "token",
     ]
     tags = {
         Application = "Roam JS Extensions"
