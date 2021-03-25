@@ -2,8 +2,8 @@ import { Button, Icon, Spinner, Text } from "@blueprintjs/core";
 import axios from "axios";
 import React, { useCallback, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
+import { getPageUidByPageTitle } from "roam-client";
 import Twitter from "../assets/Twitter.svg";
-import { getPageUidByPageTitle } from "../entry-helpers";
 
 const TwitterLogin: React.FunctionComponent<{ onSuccess: () => void }> = ({
   onSuccess,

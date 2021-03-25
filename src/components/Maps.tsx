@@ -6,10 +6,9 @@ import React, {
   useState,
 } from "react";
 import ReactDOM from "react-dom";
-import { getUidsFromId, TreeNode } from "roam-client";
+import { getUidsFromId, getPageUidByPageTitle, TreeNode } from "roam-client";
 import {
   addStyle,
-  getPageUidByPageTitle,
   extractTag,
   setInputSetting,
   isTagOnPage,

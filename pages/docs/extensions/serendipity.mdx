@@ -1,0 +1,21 @@
+---
+layout: "ExtensionPageLayout"
+description: "Various methods of introducing randomness into your Roam Graph!"
+development: true
+---
+
+Installing the Serendipity extension will create a `[[roam/js/serendipity]]` page if one does not exist already. On that page, you could configure various Serendipity related features.
+
+#### Daily
+
+The Daily feature will add random block references from your graph on to your daily notes page each day each timeyou log in to Roam. It supports the following settings:
+
+- `includes` - The set of tags used to mark block references to pull randomly from. All blocks marked with one of these tags, or is a child of a block marked with one of these tags will be included. Can specify more than one. Default is empty.
+
+- `excludes` - The set of tags used to mark block references to exclude from the set to pull randomly from. All blocks marked with one of these tags, or is a child of a block marked with one of these tags will be excluded. Can specify more than one.
+
+- `label` - The label that gets added to your daily note page that's used to nest the randomly chosen block reference. Default value is `[[roam/js/serendipity]]`.
+
+- `timeout` - The number of days that must pass before a block reference can be included in the randomness pool. Default value is 0.
+
+- `count` - The number of block references to randomly pull from. Default value is 3.

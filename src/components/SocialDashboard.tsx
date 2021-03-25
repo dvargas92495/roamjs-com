@@ -20,6 +20,7 @@ import React, {
 import ReactDOM from "react-dom";
 import {
   createBlock,
+  getPageUidByPageTitle,
   getParentUidByBlockUid,
   getTreeByBlockUid,
   getTreeByPageName,
@@ -28,7 +29,6 @@ import {
 } from "roam-client";
 import {
   getChildrenLengthByPageTitle,
-  getPageUidByPageTitle,
   openBlockInSidebar,
   resolveRefs,
 } from "../entry-helpers";

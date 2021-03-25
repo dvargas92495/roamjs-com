@@ -1,9 +1,8 @@
-import { getTreeByPageName, getUids } from "roam-client";
+import { getPageUidByPageTitle, getTreeByPageName, getUids } from "roam-client";
 import { render } from "../components/PostmanOverlay";
 import {
   createHashtagObserver,
   extractTag,
-  getPageUidByPageTitle,
   runExtension,
 } from "../entry-helpers";
 

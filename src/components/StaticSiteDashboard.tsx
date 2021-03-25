@@ -22,6 +22,7 @@ import {
   getPageViewType,
 } from "roam-client";
 import { extractTag, setInputSetting } from "../entry-helpers";
+import { allBlockMapper } from "./hooks";
 import MenuItemSelect from "./MenuItemSelect";
 import PageInput from "./PageInput";
 import {
@@ -426,11 +427,6 @@ const getContentRuleFromNode = ({ rule: text, values: children }: Filter) => {
   }
   return undefined;
 };
-
-const allBlockMapper = (t: TreeNode): TreeNode[] => [
-  t,
-  ...t.children.flatMap(allBlockMapper),
-];
 
 const getDeployBody = () => {
   const autoDeploysEnabled = /true/i.test(

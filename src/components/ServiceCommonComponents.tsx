@@ -21,6 +21,7 @@ import React, {
 import ReactDOM from "react-dom";
 import {
   createPage,
+  getPageUidByPageTitle,
   getTreeByPageName,
   PullBlock,
   TreeNode,
@@ -28,7 +29,6 @@ import {
 } from "roam-client";
 import {
   createPageTitleObserver,
-  getPageUidByPageTitle,
   getRoamUrl,
   setInputSetting,
 } from "../entry-helpers";

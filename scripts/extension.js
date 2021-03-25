@@ -13,7 +13,9 @@ fs.writeFileSync(
   `src/entries/${id}.ts`,
   `import { runExtension } from "../entry-helpers";
 
-runExtension("${id}", () => {
+const ID = "${id}";
+
+runExtension(ID, () => {
 
 });
 `

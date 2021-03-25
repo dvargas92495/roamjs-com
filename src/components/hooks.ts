@@ -74,6 +74,25 @@ export const getSettingValueFromTree = ({
   return value;
 };
 
+export const getSettingValuesFromTree = ({
+  tree,
+  key,
+  defaultValue = [],
+}: {
+  tree: TreeNode[];
+  key: string;
+  defaultValue?: string[];
+}): string[] => {
+  const node = tree.find((s) => new RegExp(key, "i").test(s.text.trim()));
+  const value = node ? node.children.map((t) => t.text.trim()) : defaultValue;
+  return value;
+};
+
+export const allBlockMapper = (t: TreeNode): TreeNode[] => [
+  t,
+  ...t.children.flatMap(allBlockMapper),
+];
+
 export const useSocialToken = (): string =>
   useMemo(
     () =>

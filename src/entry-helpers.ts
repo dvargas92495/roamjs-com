@@ -1,6 +1,7 @@
 import {
   createIconButton,
   getAttrConfigFromQuery,
+  getPageUidByPageTitle,
   getTreeByBlockUid,
   getUids,
 } from "roam-client";
@@ -677,17 +678,6 @@ export const getPageTitle = (e: Element): ChildNode => {
   return Array.from(heading.childNodes).find(
     (n) => n.nodeName === "#text" || n.nodeName === "SPAN"
   );
-};
-
-export const getPageUidByPageTitle = (title: string): string => {
-  const result = window.roamAlphaAPI.q(
-    `[:find (pull ?e [:block/uid]) :where [?e :node/title "${title}"]]`
-  );
-  if (!result.length) {
-    return "";
-  }
-  const block = result[0][0] as RoamBlock;
-  return block.uid;
 };
 
 export const getChildrenLengthByPageTitle = (title: string): number =>
