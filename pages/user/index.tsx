@@ -391,12 +391,13 @@ const Developer = () => {
         onClick={() => {
           setLoading(true);
           authenticatedAxiosPost("request-path", { path: newPath })
-            .then(() => {
+            .then(r => {
               setNewPath("");
-              setPaths([...paths, newPath]);
+              setPaths(r.data.paths);
             })
             .finally(() => setLoading(false));
         }}
+        variant={'outlined'}
       >
         Request Path
       </Button>
