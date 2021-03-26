@@ -32,14 +32,9 @@ import {
   getRoamUrl,
   setInputSetting,
 } from "../entry-helpers";
-import { getRenderRoot } from "./hooks";
+import { getRenderRoot, toTitle } from "./hooks";
 
 export const HIGHLIGHT = "3px dashed yellowgreen";
-const toTitle = (service: string) =>
-  service
-    .split("-")
-    .map((s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
-    .join(" ");
 
 const toCamel = (service: string) =>
   service

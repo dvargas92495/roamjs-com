@@ -115,3 +115,9 @@ export const useTree = (
   blockUid: string
 ): { children: TreeNode[]; text: string } =>
   useMemo(() => getTreeByBlockUid(blockUid), [blockUid]);
+
+export const toTitle = (id: string):string =>
+  id
+    .split("-")
+    .map((s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
+    .join(" ");
