@@ -14,6 +14,11 @@ const CheckoutPage = (): JSX.Element => {
     if (query.get("cancel")) {
       setMessage("Funding Cancelled");
     }
+    if (query.get("thankyou")) {
+      setMessage(
+        "Thank you for supporting RoamJS! You will be added to our Thank You section shortly."
+      );
+    }
   }, [setMessage]);
   return (
     <StandardLayout>

@@ -26,15 +26,20 @@ export const handler = async (
     (e) => e.id === user.primaryEmailAddressId
   )?.emailAddress;
   return axios
-    .get(
+    .get<{
+      products: {
+        name: string;
+        prices: { isMonthly: boolean; id: string }[];
+      }[];
+    }>(
       `${process.env.FLOSS_API_URL}/stripe-products?project=RoamJS`,
       getClerkOpts(email)
     )
     .then(
       (r) =>
-        r.data.products.find(
-          (p: { name: string }) => p.name === "RoamJS Sponsor"
-        ).prices[0].id
+        r.data.products
+          .find((p: { name: string }) => p.name === "RoamJS Sponsor")
+          .prices.find(({ isMonthly }) => isMonthly).id
     )
     .then((priceId) =>
       axios.post(
