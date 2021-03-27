@@ -390,7 +390,7 @@ const Developer = () => {
         }))}
         noItemMessage={null}
       />
-      <div style={{ marginTop: 16, verticalAlign: "middle" }}>
+      <div style={{ marginTop: 16 }}>
         <StringField value={newPath} setValue={setNewPath} label={"Path"} />
         <Button
           onClick={() => {
@@ -408,8 +408,8 @@ const Developer = () => {
         >
           Request Path
         </Button>
+        <Loading loading={loading} size={16} />
       </div>
-      <Loading loading={loading} size={16} />
     </div>
   );
 };
