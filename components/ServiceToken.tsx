@@ -1,7 +1,7 @@
 import { useUser } from "@clerk/clerk-react";
 import { Button, Loading, StringField } from "@dvargas92495/ui";
 import React, { useCallback, useState } from "react";
-import { idToCamel, idToTitle, useAuthenticatedAxiosPost } from "./hooks";
+import { idToTitle, useAuthenticatedAxiosPost } from "./hooks";
 
 const GenerateToken: React.FC<{ id: string }> = ({ id }) => {
   const user = useUser();
@@ -32,10 +32,7 @@ const GenerateToken: React.FC<{ id: string }> = ({ id }) => {
   );
 };
 
-const ServiceToken = ({ id }: { id: string }): React.ReactElement => {
-  const token = (useUser().publicMetadata as {
-    [key: string]: { token: string; authenticated?: boolean };
-  })[idToCamel(id)]?.token;
+const ServiceToken = ({ id, token }: { id: string, token: string }): React.ReactElement => {
   return (
     <>
       {token ? (

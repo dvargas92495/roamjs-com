@@ -377,27 +377,33 @@ const Developer = () => {
   const [newPath, setNewPath] = useState("");
   const [loading, setLoading] = useState(false);
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
+  const token = (useUser().publicMetadata as {
+    developer?: { token: string };
+  })?.["developer"]?.token;
   return (
     <div>
-      <ServiceToken id={"developer"} />
+      <ServiceToken id={"developer"} token={token} />
       <Items
         items={paths.map((p) => ({
           primary: <UserValue>{p}</UserValue>,
           key: p,
         }))}
+        noItemMessage={null}
       />
-      <StringField value={newPath} setValue={setNewPath} />
+      <StringField value={newPath} setValue={setNewPath} label={"Path"} />
       <Button
         onClick={() => {
           setLoading(true);
           authenticatedAxiosPost("request-path", { path: newPath })
-            .then(r => {
+            .then((r) => {
               setNewPath("");
               setPaths(r.data.paths);
             })
             .finally(() => setLoading(false));
         }}
-        variant={'outlined'}
+        variant={"outlined"}
+        style={{ marginLeft: 16 }}
+        color={"primary"}
       >
         Request Path
       </Button>

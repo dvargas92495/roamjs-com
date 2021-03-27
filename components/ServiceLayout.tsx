@@ -194,7 +194,7 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
           </>
         )}
         <div style={{ marginTop: 32 }}></div>
-        <ServiceToken id={id} />
+        <ServiceToken id={id} token={token} />
       </div>
       <div>
         <ConfirmationDialog
