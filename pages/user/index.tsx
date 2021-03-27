@@ -373,16 +373,16 @@ const Funding = () => {
 };
 
 const Developer = () => {
-  const [paths, setPaths] = useState<string[]>([]);
+  const data = (useUser().publicMetadata as {
+    developer?: { token: string, paths: string[] };
+  })?.["developer"];
+  const [paths, setPaths] = useState<string[]>(data?.paths || []);
   const [newPath, setNewPath] = useState("");
   const [loading, setLoading] = useState(false);
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const token = (useUser().publicMetadata as {
-    developer?: { token: string };
-  })?.["developer"]?.token;
   return (
     <div>
-      <ServiceToken id={"developer"} token={token} />
+      <ServiceToken id={"developer"} token={data?.token} />
       <Items
         items={paths.map((p) => ({
           primary: <UserValue>{p}</UserValue>,

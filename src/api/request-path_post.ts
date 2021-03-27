@@ -5,7 +5,7 @@ import { getClerkUser, headers, s3, userError } from "../lambda-helpers";
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> =>
-  getClerkUser(event).then((user) => {
+  getClerkUser(event).then(async (user) => {
     if (!user) {
       return {
         statusCode: 401,
@@ -14,7 +14,7 @@ export const handler = async (
       };
     }
 
-    const { path } = JSON.parse(event.body);
+    const { path } = JSON.parse(event.body || "{}") as { path?: string };
     if (!path) {
       return userError("Path is required", event);
     }
@@ -29,6 +29,22 @@ export const handler = async (
       .then((r) => !r.Contents.length);
     if (!available) {
       return userError("Requested path is not available", event);
+    }
+
+    if (path.endsWith("/")) {
+      await s3
+        .putObject({
+          Bucket: "roamjs.com",
+          Key: `${path}/index`,
+          Body: "lock",
+        })
+        .promise();
+    } else if (path.endsWith(".js")) {
+      await s3.putObject({
+        Bucket: "roamjs.com",
+        Key: path,
+        Body: "// lock",
+      });
     }
 
     const id = user.id;
