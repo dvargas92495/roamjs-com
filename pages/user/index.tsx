@@ -7,6 +7,7 @@ import {
   DataLoader,
   ExternalLink,
   H6,
+  IconButton,
   Items,
   Loading,
   NumberField,
@@ -374,12 +375,13 @@ const Funding = () => {
 
 const Developer = () => {
   const data = (useUser().publicMetadata as {
-    developer?: { token: string, paths: string[] };
+    developer?: { token: string; paths: string[] };
   })?.["developer"];
   const [paths, setPaths] = useState<string[]>(data?.paths || []);
   const [newPath, setNewPath] = useState("");
   const [loading, setLoading] = useState(false);
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
+  const authenticatedAxiosDelete = useAuthenticatedAxiosDelete();
   return (
     <div>
       <ServiceToken id={"developer"} token={data?.token} />
@@ -387,6 +389,18 @@ const Developer = () => {
         items={paths.map((p) => ({
           primary: <UserValue>{p}</UserValue>,
           key: p,
+          action: (
+            <IconButton
+              icon={"delete"}
+              onClick={() => {
+                setLoading(true);
+                authenticatedAxiosDelete(`request-path?path=${p}`).then((r) =>
+                  setPaths(r.data.paths)
+                )
+                .finally(() => setLoading(false));;
+              }}
+            />
+          ),
         }))}
         noItemMessage={null}
       />
