@@ -101,7 +101,9 @@ const TwitterFeed = ({ title }: { title: string }): React.ReactElement => {
   }, [setTweets, yesterday]);
   const onClick = useCallback(() => {
     const tree = getTreeByPageName("roam/js/twitter");
-    const isBottom = tree.some((t) => /bottom/i.test(t.text));
+    const isBottom = tree
+      .find((t) => /feed/i.test(t.text))
+      ?.children?.some?.((t) => /bottom/i.test(t.text));
     createBlock({
       parentUid: toRoamDateUid(date),
       order: isBottom ? getChildrenLengthByPageTitle(title) : 0,

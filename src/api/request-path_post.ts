@@ -24,7 +24,7 @@ export const handler = async (
     }
 
     const available = s3
-      .listObjects({ Bucket: "roamjs.com", Prefix: path })
+      .listObjectsV2({ Bucket: "roamjs.com", Prefix: path })
       .promise()
       .then((r) => !r.Contents.length);
     if (!available) {

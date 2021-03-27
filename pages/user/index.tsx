@@ -390,23 +390,25 @@ const Developer = () => {
         }))}
         noItemMessage={null}
       />
-      <StringField value={newPath} setValue={setNewPath} label={"Path"} />
-      <Button
-        onClick={() => {
-          setLoading(true);
-          authenticatedAxiosPost("request-path", { path: newPath })
-            .then((r) => {
-              setNewPath("");
-              setPaths(r.data.paths);
-            })
-            .finally(() => setLoading(false));
-        }}
-        variant={"outlined"}
-        style={{ marginLeft: 16 }}
-        color={"primary"}
-      >
-        Request Path
-      </Button>
+      <div style={{ marginTop: 16, verticalAlign: "middle" }}>
+        <StringField value={newPath} setValue={setNewPath} label={"Path"} />
+        <Button
+          onClick={() => {
+            setLoading(true);
+            authenticatedAxiosPost("request-path", { path: newPath })
+              .then((r) => {
+                setNewPath("");
+                setPaths(r.data.paths);
+              })
+              .finally(() => setLoading(false));
+          }}
+          variant={"outlined"}
+          style={{ marginLeft: 16 }}
+          color={"primary"}
+        >
+          Request Path
+        </Button>
+      </div>
       <Loading loading={loading} size={16} />
     </div>
   );

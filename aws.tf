@@ -100,7 +100,7 @@ module "aws_static_site" {
 
 module "aws-serverless-backend" {
     source  = "dvargas92495/serverless-backend/aws"
-    version = "1.5.4"
+    version = "1.5.5"
 
     api_name = "roam-js-extensions"
     domain = "roamjs.com"
