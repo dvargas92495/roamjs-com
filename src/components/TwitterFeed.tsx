@@ -14,6 +14,7 @@ import subDays from "date-fns/subDays";
 import startOfDay from "date-fns/startOfDay";
 import endOfDay from "date-fns/endOfDay";
 import TweetEmbed from "react-tweet-embed";
+import { getChildrenLengthByPageTitle } from "../entry-helpers";
 
 type Tweet = {
   id: string;
@@ -99,9 +100,11 @@ const TwitterFeed = ({ title }: { title: string }): React.ReactElement => {
       .finally(() => setLoading(false));
   }, [setTweets, yesterday]);
   const onClick = useCallback(() => {
+    const tree = getTreeByPageName("roam/js/twitter");
+    const isBottom = tree.some((t) => /bottom/i.test(t.text));
     createBlock({
       parentUid: toRoamDateUid(date),
-      order: 0,
+      order: isBottom ? getChildrenLengthByPageTitle(title) : 0,
       node: {
         text: "#[[Twitter Feed]]",
         children: tweets
@@ -113,7 +116,7 @@ const TwitterFeed = ({ title }: { title: string }): React.ReactElement => {
       },
     });
     onClose();
-  }, [tweets, onClose]);
+  }, [tweets, onClose, title, date]);
   return (
     <Dialog
       isOpen={true}
