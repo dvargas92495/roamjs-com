@@ -21,6 +21,14 @@ type Tweet = {
   checked: boolean;
 };
 
+const getOrder = (title: string) => {
+  const tree = getTreeByPageName("roam/js/twitter");
+  const isBottom = tree
+    .find((t) => /feed/i.test(t.text))
+    ?.children?.some?.((t) => /bottom/i.test(t.text));
+  return isBottom ? getChildrenLengthByPageTitle(title) : 0
+}
+
 const TweetLabel = ({ id }: { id: string }) => {
   const [loaded, setLoaded] = useState(false);
   return (
@@ -55,7 +63,7 @@ const TwitterFeed = ({ title }: { title: string }): React.ReactElement => {
   const onCancel = useCallback(() => {
     createBlock({
       parentUid: toRoamDateUid(date),
-      order: 0,
+      order: getOrder(title),
       node: {
         text: "#[[Twitter Feed]]",
         children: [
@@ -67,7 +75,7 @@ const TwitterFeed = ({ title }: { title: string }): React.ReactElement => {
       },
     });
     onClose();
-  }, [onClose, date]);
+  }, [onClose, date, title]);
   useEffect(() => {
     const tree = getTreeByPageName("roam/js/twitter");
     const oauth = getSettingValueFromTree({
@@ -100,13 +108,9 @@ const TwitterFeed = ({ title }: { title: string }): React.ReactElement => {
       .finally(() => setLoading(false));
   }, [setTweets, yesterday]);
   const onClick = useCallback(() => {
-    const tree = getTreeByPageName("roam/js/twitter");
-    const isBottom = tree
-      .find((t) => /feed/i.test(t.text))
-      ?.children?.some?.((t) => /bottom/i.test(t.text));
     createBlock({
       parentUid: toRoamDateUid(date),
-      order: isBottom ? getChildrenLengthByPageTitle(title) : 0,
+      order: getOrder(title),
       node: {
         text: "#[[Twitter Feed]]",
         children: tweets
