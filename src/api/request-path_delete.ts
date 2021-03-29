@@ -1,6 +1,6 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { getClerkUser, headers, userError } from "../lambda-helpers";
+import { getClerkUser, headers, s3, userError } from "../lambda-helpers";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -18,15 +18,18 @@ export const handler = async (
     if (!path) {
       return userError("Path is required", event);
     }
-    /*
-    const available = s3
+    const Objects = await s3
       .listObjectsV2({ Bucket: "roamjs.com", Prefix: path })
       .promise()
-      .then((r) => !r.Contents.length);
-    if (!available) {
-      return userError("Requested path is not available", event);
+      .then((r) => r.Contents.map((c) => ({ Key: c.Key })));
+    if (Objects.length === 0) {
+      return userError("Requested path is not being used", event);
     }
-*/
+
+    await s3
+      .deleteObjects({ Bucket: "roamjs.com", Delete: { Objects } })
+      .promise();
+
     const id = user.id;
     const publicMetadata = user.publicMetadata as {
       developer: { paths?: string[] };
