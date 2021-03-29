@@ -74,6 +74,20 @@ export const getSettingValueFromTree = ({
   return value;
 };
 
+export const getSettingIntFromTree = ({
+  tree,
+  key,
+  defaultValue = 0,
+}: {
+  tree: TreeNode[];
+  key: string;
+  defaultValue?: number;
+}): number => {
+  const node = tree.find((s) => new RegExp(key, "i").test(s.text.trim()));
+  const value = node?.children?.[0]?.text?.trim?.();
+  return isNaN(Number(value)) ? defaultValue : parseInt(value);
+};
+
 export const getSettingValuesFromTree = ({
   tree,
   key,
@@ -116,7 +130,7 @@ export const useTree = (
 ): { children: TreeNode[]; text: string } =>
   useMemo(() => getTreeByBlockUid(blockUid), [blockUid]);
 
-export const toTitle = (id: string):string =>
+export const toTitle = (id: string): string =>
   id
     .split("-")
     .map((s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)

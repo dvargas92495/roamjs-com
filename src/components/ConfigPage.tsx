@@ -1,4 +1,5 @@
 import {
+  Button,
   Card,
   InputGroup,
   Label,
@@ -11,6 +12,7 @@ import ReactDOM from "react-dom";
 import {
   getPageUidByPageTitle,
   getTextByBlockUid,
+  getTreeByBlockUid,
   getTreeByPageName,
 } from "roam-client";
 import {
@@ -18,6 +20,7 @@ import {
   getFirstChildUidByBlockUid,
 } from "../entry-helpers";
 import { toTitle } from "./hooks";
+import PageInput from "./PageInput";
 
 type Field = {
   type: keyof typeof Panels;
@@ -47,7 +50,7 @@ const TextPanel: FieldPanel = ({ title, uid, parentUid, order }) => {
         value={value}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           setValue(e.target.value);
-          if (uid) {
+          if (valueUid) {
             window.roamAlphaAPI.updateBlock({
               block: { string: e.target.value, uid: valueUid },
             });
@@ -60,7 +63,7 @@ const TextPanel: FieldPanel = ({ title, uid, parentUid, order }) => {
             const newValueUid = window.roamAlphaAPI.util.generateUID();
             window.roamAlphaAPI.createBlock({
               block: { string: e.target.value, uid: newValueUid },
-              location: { order, "parent-uid": fieldUid },
+              location: { order: 0, "parent-uid": fieldUid },
             });
             setValueUid(newValueUid);
           }
@@ -80,11 +83,11 @@ const NumberPanel: FieldPanel = ({ title, uid, parentUid, order }) => {
       {title}
       <NumericInput
         value={value}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(e.target.value);
-          if (uid) {
+        onValueChange={(e, asStr) => {
+          setValue(e);
+          if (valueUid) {
             window.roamAlphaAPI.updateBlock({
-              block: { string: e.target.value, uid: valueUid },
+              block: { string: asStr, uid: valueUid },
             });
           } else {
             const fieldUid = window.roamAlphaAPI.util.generateUID();
@@ -94,8 +97,8 @@ const NumberPanel: FieldPanel = ({ title, uid, parentUid, order }) => {
             });
             const newValueUid = window.roamAlphaAPI.util.generateUID();
             window.roamAlphaAPI.createBlock({
-              block: { string: e.target.value, uid: newValueUid },
-              location: { order, "parent-uid": fieldUid },
+              block: { string: asStr, uid: newValueUid },
+              location: { order: 0, "parent-uid": fieldUid },
             });
             setValueUid(newValueUid);
           }
@@ -105,8 +108,66 @@ const NumberPanel: FieldPanel = ({ title, uid, parentUid, order }) => {
   );
 };
 
-const PagesPanel: FieldPanel = () => {
-  return <div>UI not yet supported. Please edit the blocks directly below</div>;
+const PagesPanel: FieldPanel = ({ uid, title, parentUid, order }) => {
+  const [pages, setPages] = useState(
+    getTreeByBlockUid(uid).children.map((v) => ({ text: v.text, uid: v.uid }))
+  );
+  const [value, setValue] = useState("");
+  return (
+    <>
+      <Label>
+        {title}
+        <div style={{ display: "flex" }}>
+          <PageInput value={value} setValue={setValue} extra={["{all}"]} />
+          <Button
+            icon={"plus"}
+            minimal
+            onClick={() => {
+              const valueUid = window.roamAlphaAPI.util.generateUID();
+              if (uid) {
+                window.roamAlphaAPI.createBlock({
+                  location: { "parent-uid": uid, order: pages.length },
+                  block: { string: value, uid: valueUid },
+                });
+              } else {
+                const fieldUid = window.roamAlphaAPI.util.generateUID();
+                window.roamAlphaAPI.createBlock({
+                  block: { string: title, uid: fieldUid },
+                  location: { order, "parent-uid": parentUid },
+                });
+                window.roamAlphaAPI.createBlock({
+                  block: { string: value, uid: valueUid },
+                  location: { order: 0, "parent-uid": fieldUid },
+                });
+              }
+              setPages([...pages, { text: value, uid: valueUid }]);
+              setValue("");
+            }}
+          />
+        </div>
+      </Label>
+      {pages.map((p) => (
+        <div
+          key={p.uid}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          {p.text}
+          <Button
+            icon={"trash"}
+            minimal
+            onClick={() => {
+              window.roamAlphaAPI.deleteBlock({ block: { uid: p.uid } });
+              setPages(pages.filter((f) => f.uid !== p.uid));
+            }}
+          />
+        </div>
+      ))}
+    </>
+  );
 };
 
 const Panels = {

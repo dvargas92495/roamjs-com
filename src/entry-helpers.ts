@@ -600,7 +600,7 @@ export const getConfigFromBlock = (
   );
 };
 
-const getWordCount = (str = "") => str.trim().split(/\s+/).length;
+export const getWordCount = (str = ""): number => str.trim().split(/\s+/).length;
 
 const getWordCountByBlockId = (blockId: number): number => {
   const block = window.roamAlphaAPI.pull(
