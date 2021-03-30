@@ -397,7 +397,7 @@ const Developer = () => {
                 authenticatedAxiosDelete(`request-path?path=${p}`).then((r) =>
                   setPaths(r.data.paths)
                 )
-                .finally(() => setLoading(false));;
+                .finally(() => setLoading(false));
               }}
             />
           ),

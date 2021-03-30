@@ -1,7 +1,11 @@
 import axios from "axios";
-import { getUids } from "roam-client";
+import { getUidsFromId } from "roam-client";
 import { render } from "../components/YoutubePlayer";
-import { createHTMLObserver, runExtension } from "../entry-helpers";
+import { addStyle, createHTMLObserver, runExtension } from "../entry-helpers";
+
+addStyle(`.roam-block-container {
+  position: relative
+}`)
 
 runExtension("video", () => {
   createHTMLObserver({
@@ -34,13 +38,15 @@ runExtension("video", () => {
         iframe.src
       )?.[1];
       if (youtubeId) {
-        const { blockUid } = getUids(
-          iframe.closest(".roam-block") as HTMLDivElement
-        );
-        const p = iframe.closest('.rm-video-player__spacing-wrapper') as HTMLDivElement;
-        p.onmousedown = e => e.stopPropagation();
+        const blockId = (iframe.closest(".roam-block") as HTMLDivElement)?.id;
+        const { blockUid } = getUidsFromId(blockId);
+        const p = iframe.closest(
+          ".rm-video-player__spacing-wrapper"
+        ) as HTMLDivElement;
+        p.onmousedown = (e) => e.stopPropagation();
         render({
           p,
+          blockId,
           blockUid,
           youtubeId,
         });
