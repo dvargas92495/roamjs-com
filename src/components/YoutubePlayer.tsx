@@ -157,7 +157,7 @@ const YoutubePlayer = ({
         style={{
           display: "flex",
           flexDirection: "column",
-          minWidth: 100,
+          minWidth: 40,
           alignItems: "start",
           paddingLeft: 4,
         }}
