@@ -26,9 +26,6 @@ export const handler: APIGatewayProxyHandler = authenticate((event) => {
               {
                 Sid: "PutPaths",
                 Effect: "Allow",
-                Principal: {
-                  AWS: "*",
-                },
                 Action: "s3:PutObject",
                 Resource: paths.map(
                   (p) => `arn:aws:s3:::roamjs.com/${p.replace(/\/$/, "/*")}`
