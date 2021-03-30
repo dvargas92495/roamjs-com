@@ -331,7 +331,7 @@ const TwitterContent: React.FunctionComponent<{
           payload: JSON.stringify({ blocks: message, tweetId }),
           oauth,
         },
-        { headers: { Authorization: `social:${socialToken}` } }
+        { headers: { Authorization: socialToken } }
       )
       .then(() => {
         setLoading(false);

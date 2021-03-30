@@ -11,6 +11,7 @@ import OAuth from "oauth-1.0a";
 import crypto from "crypto";
 import AWS from "aws-sdk";
 import Mixpanel from "mixpanel";
+import randomstring from "randomstring";
 
 export const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
@@ -213,19 +214,45 @@ export const flossGet = ({
         })
   );
 
+export const generateToken = (userId: string): string =>
+  Buffer.from(
+    `${userId.replace(/^user_/, "")}:${randomstring.generate({ length: 16 })}`
+  ).toString("base64");
+
+const findUser = async (predicate: (u: User) => boolean): Promise<User> => {
+  let offset = 0;
+  while (offset < 10000) {
+    const us = await users.getUserList({ limit: 100, offset });
+    const user = us.find(predicate);
+    if (user) {
+      return user;
+    }
+    if (us.length < 100) {
+      return;
+    }
+    offset += us.length;
+  }
+};
+
 export const authenticate = (
   handler: APIGatewayProxyHandler,
   service: "staticSite" | "social" | "developer"
 ): APIGatewayProxyHandler => (event, ctx, callback) => {
   const Authorization = event.headers.Authorization || "";
-  const token = Authorization.split(":").slice(-1)[0];
+  const [userId, token] =
+    Authorization.length === 32 || Authorization.includes(":")
+      ? // the old ways of generating tokens did not have user id encoded, so we query all users
+        [null, Authorization.split(":").slice(-1)[0]]
+      : Buffer.from(Authorization, "base64").toString().split(":");
 
-  return users.getUserList().then((us) => {
-    const user = us.find(
-      (user) =>
-        (user.publicMetadata as { [s: string]: { token: string } })?.[service]
-          ?.token === token
-    );
+  return (userId
+    ? users.getUser(`user_${userId}`).catch(() => undefined)
+    : findUser(
+        (user) =>
+          (user.publicMetadata as { [s: string]: { token: string } })?.[service]
+            ?.token === token
+      )
+  ).then((user) => {
     if (!user) {
       return {
         statusCode: 401,

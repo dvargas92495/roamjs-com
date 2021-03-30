@@ -2,8 +2,7 @@ import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
 import { v4 } from "uuid";
-import { getClerkUser, headers } from "../lambda-helpers";
-import randomstring from "randomstring";
+import { generateToken, getClerkUser, headers } from "../lambda-helpers";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -98,7 +97,7 @@ export const handler = async (
     publicMetadata: JSON.stringify({
       ...user.publicMetadata,
       [serviceCamelCase]: {
-        token: randomstring.generate(),
+        token: generateToken(user.id),
       },
     }),
   });

@@ -1,7 +1,6 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import randomstring from "randomstring";
-import { getClerkUser, headers } from "../lambda-helpers";
+import { generateToken, getClerkUser, headers } from "../lambda-helpers";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -20,7 +19,7 @@ export const handler = async (
     const publicMetadata = user.publicMetadata as {
       [key: string]: Record<string, unknown>;
     };
-    const token = randomstring.generate();
+    const token = generateToken(id);
     return users
       .updateUser(id, {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

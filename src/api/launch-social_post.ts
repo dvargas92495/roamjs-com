@@ -2,7 +2,7 @@ import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
 import { v4 } from "uuid";
-import { getClerkUser, headers } from "../lambda-helpers";
+import { generateToken, getClerkUser, headers } from "../lambda-helpers";
 import randomstring from "randomstring";
 
 export const handler = async (
@@ -88,7 +88,7 @@ export const handler = async (
     publicMetadata: JSON.stringify({
       ...user.publicMetadata,
       social: {
-        token: randomstring.generate(),
+        token: generateToken(user.id),
       },
     }),
   });

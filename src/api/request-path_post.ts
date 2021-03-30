@@ -35,7 +35,7 @@ export const handler = async (
       await s3
         .putObject({
           Bucket: "roamjs.com",
-          Key: `${path}/index`,
+          Key: `${path}index`,
           Body: "lock",
         })
         .promise();

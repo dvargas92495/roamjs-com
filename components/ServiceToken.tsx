@@ -32,7 +32,13 @@ const GenerateToken: React.FC<{ id: string }> = ({ id }) => {
   );
 };
 
-const ServiceToken = ({ id, token }: { id: string, token: string }): React.ReactElement => {
+const ServiceToken = ({
+  id,
+  token,
+}: {
+  id: string;
+  token: string;
+}): React.ReactElement => {
   return (
     <>
       {token ? (
@@ -43,6 +49,11 @@ const ServiceToken = ({ id, token }: { id: string, token: string }): React.React
               disabled
               setValue={() => token}
               label={`RoamJS ${idToTitle(id)} Token`}
+              inputProps={{
+                style: {
+                  fontFamily: "monospace",
+                },
+              }}
               style={{
                 cursor: "text",
                 flexGrow: 1,

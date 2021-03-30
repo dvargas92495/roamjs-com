@@ -71,7 +71,7 @@ export const useAuthenticatedAxiosGet = (): ((
   return useCallback(
     (path: string) =>
       axios.get(`${process.env.REST_API_URL}/${path}`, {
-        headers: { Authorization: `${toCamel(service)}:${getToken(service)}` },
+        headers: { Authorization: getToken(service) },
       }),
     [service]
   );
@@ -85,7 +85,7 @@ export const useAuthenticatedAxiosPost = (): ((
   return useCallback(
     (path: string, data?: Record<string, unknown>) =>
       axios.post(`${process.env.REST_API_URL}/${path}`, data || {}, {
-        headers: { Authorization: `${toCamel(service)}:${getToken(service)}` },
+        headers: { Authorization: getToken(service) },
       }),
     []
   );
@@ -99,7 +99,7 @@ export const useAuthenticatedAxiosPut = (): ((
   return useCallback(
     (path: string, data?: Record<string, unknown>) =>
       axios.put(`${process.env.REST_API_URL}/${path}`, data || {}, {
-        headers: { Authorization: `${toCamel(service)}:${getToken(service)}` },
+        headers: { Authorization: getToken(service) },
       }),
     []
   );
@@ -112,7 +112,7 @@ export const useAuthenticatedAxiosDelete = (): ((
   return useCallback(
     (path: string) =>
       axios.delete(`${process.env.REST_API_URL}/${path}`, {
-        headers: { Authorization: `${toCamel(service)}:${getToken(service)}` },
+        headers: { Authorization: getToken(service) },
       }),
     []
   );

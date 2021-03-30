@@ -1,6 +1,6 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { headers } from "../lambda-helpers";
+import { generateToken, headers } from "../lambda-helpers";
 import randomstring from "randomstring";
 
 export const handler = async (
@@ -46,7 +46,7 @@ export const handler = async (
     // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
     publicMetadata: JSON.stringify({
       [service]: {
-        token: randomstring.generate(),
+        token: generateToken(userId),
       },
     }),
   });
