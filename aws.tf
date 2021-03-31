@@ -384,7 +384,7 @@ resource "github_actions_secret" "lambda_role" {
   plaintext_value  = data.aws_iam_role.lambda_role.arn
 }
 
-resource "github_actions_secret" "lambda_role" {
+resource "github_actions_secret" "cloudfront_arn" {
   repository       = "roam-js-extensions"
   secret_name      = "CLOUDFRONT_ARN"
   plaintext_value  = module.aws_static_site.cloudfront_arn
