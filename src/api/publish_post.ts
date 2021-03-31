@@ -44,7 +44,10 @@ export const handler: APIGatewayProxyHandler = authenticate((event) => {
     )
     .then((creds) => ({
       statusCode: 200,
-      body: JSON.stringify({ credentials: creds.Credentials }),
+      body: JSON.stringify({
+        credentials: creds.Credentials,
+        distributionId: /\/(.*)$/.exec(process.env.CLOUDFRONT_ARN)?.[1],
+      }),
       headers: headers(event),
     }));
 }, "developer");
