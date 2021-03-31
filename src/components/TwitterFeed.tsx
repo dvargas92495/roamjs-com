@@ -18,6 +18,9 @@ import { getChildrenLengthByPageTitle } from "../entry-helpers";
 
 type Tweet = {
   id: string;
+  text: string;
+  handle: string;
+  author: string;
   checked: boolean;
 };
 
@@ -26,8 +29,8 @@ const getOrder = (title: string) => {
   const isBottom = tree
     .find((t) => /feed/i.test(t.text))
     ?.children?.some?.((t) => /bottom/i.test(t.text));
-  return isBottom ? getChildrenLengthByPageTitle(title) : 0
-}
+  return isBottom ? getChildrenLengthByPageTitle(title) : 0;
+};
 
 const TweetLabel = ({ id }: { id: string }) => {
   const [loaded, setLoaded] = useState(false);
@@ -48,7 +51,13 @@ const TweetLabel = ({ id }: { id: string }) => {
   );
 };
 
-const TwitterFeed = ({ title }: { title: string }): React.ReactElement => {
+const TwitterFeed = ({
+  title,
+  format,
+}: {
+  title: string;
+  format: string;
+}): React.ReactElement => {
   const date = useMemo(() => parseRoamDate(title), [title]);
   const yesterday = useMemo(() => subDays(date, 1), [date]);
   const roamDate = useMemo(() => toRoamDate(yesterday), [yesterday]);
@@ -91,7 +100,7 @@ const TwitterFeed = ({ title }: { title: string }): React.ReactElement => {
     }
     const { oauth_token: key, oauth_token_secret: secret } = JSON.parse(oauth);
     axios
-      .get<{ tweets: { id: string }[] }>(
+      .get<{ tweets: Omit<Tweet, "checked">[] }>(
         `${process.env.REST_API_URL}/twitter-feed?from=${startOfDay(
           yesterday
         ).toJSON()}&to=${endOfDay(yesterday).toJSON()}`,
@@ -116,8 +125,11 @@ const TwitterFeed = ({ title }: { title: string }): React.ReactElement => {
         children: tweets
           .filter(({ checked }) => checked)
           .map((t) => ({
-            text: `https://twitter.com/i/web/status/${t.id}`,
-            children: [],
+            text: format
+              .replace(/{link}/g, `https://twitter.com/i/web/status/${t.id}`)
+              .replace(/{text}/g, t.text)
+              .replace(/{handle}/g, t.handle)
+              .replace(/{author}/g, t.author),
           })),
       },
     });
@@ -182,7 +194,9 @@ const TwitterFeed = ({ title }: { title: string }): React.ReactElement => {
   );
 };
 
-export const render = (parent: HTMLDivElement, title: string): void =>
-  ReactDOM.render(<TwitterFeed title={title} />, parent);
+export const render = (
+  parent: HTMLDivElement,
+  props: { title: string; format: string }
+): void => ReactDOM.render(<TwitterFeed {...props} />, parent);
 
 export default TwitterFeed;

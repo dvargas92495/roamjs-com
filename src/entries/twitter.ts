@@ -153,6 +153,9 @@ runExtension("twitter", () => {
   );
   if (feed) {
     const isAnyDay = feed.children.some((t) => /any day/i.test(t.text));
+    const format =
+      feed.children.find((t) => /format/i.test(t.text))?.children?.[0]?.text ||
+      "{link}";
     const callback = ({ title, d }: { d: HTMLDivElement; title: string }) => {
       if (!isTagOnPage({ tag: "Twitter Feed", title })) {
         const parent = document.createElement("div");
@@ -161,7 +164,7 @@ runExtension("twitter", () => {
           parent,
           d.firstElementChild.firstElementChild.nextElementSibling
         );
-        feedRender(parent, title);
+        feedRender(parent, {title, format});
       }
     };
     if (isAnyDay) {

@@ -27,7 +27,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       )
     );
     return axios
-      .get<{ id_str: string; created_at: string }[]>(url, {
+      .get<
+        {
+          id_str: string;
+          created_at: string;
+          text: string;
+          user: { name: string; screen_name: string };
+        }[]
+      >(url, {
         headers: oauthHeaders,
       })
       .then(async (r) => {
@@ -39,6 +46,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
           )
           .map((t) => ({
             id: t.id_str,
+            text: t.text,
+            handle: t.user?.screen_name,
+            author: t.user?.name,
           }));
         const oldestTweet = r.data.slice(-1)[0];
         if (

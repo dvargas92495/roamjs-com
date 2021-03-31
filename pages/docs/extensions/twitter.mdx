@@ -82,6 +82,12 @@ By default, the Twitter feed only appears on the current daily notes page and lo
 
 By default, the tweets are imported at the top of the page. Add a block that says `bottom` under the `feed` block to import the tweets to the bottom of the page.
 
+By default, the Twitter feed just outputs links to the tweets into the daily note page. To customize the format, add a block under the `feed` block that says `format`. You could then specify the format as a child of the `format` block. There are certain placeholders that will get replaced in the format:
+- `{text}` - The text of the tweet
+- `{link}` - The link to the tweet
+- `{handle}` - The twitter handle of the user
+- `{author}` - The name of the user on Twitter
+
 #### Demo
 
 <Loom id={"b7486b89dbb54b758dd9c774ff43fdf4"} />
