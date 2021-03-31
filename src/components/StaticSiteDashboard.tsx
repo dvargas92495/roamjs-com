@@ -18,7 +18,7 @@ import {
   createBlock,
   TextNode,
   TreeNode,
-  getLinkedPageReferences,
+  getPageTitlesAndBlockUidsReferencingPage,
   getPageViewType,
 } from "roam-client";
 import { extractTag, setInputSetting } from "../entry-helpers";
@@ -45,7 +45,9 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
   const [ready, setReady] = useState(isFieldSet("share"));
-  const [deploySwitch, setDeploySwitch] = useState(getField('share') === 'true');
+  const [deploySwitch, setDeploySwitch] = useState(
+    getField("share") === "true"
+  );
   const onSwitchChange = useCallback(
     (e: React.FormEvent<HTMLInputElement>) =>
       setDeploySwitch((e.target as HTMLInputElement).checked),
@@ -388,7 +390,8 @@ const RequestFiltersContent: StageContent = ({ openPanel }) => {
   );
 };
 
-const getGraph = () => new RegExp(`^#/app/(.*?)/page/`).exec(window.location.hash)[1];
+const getGraph = () =>
+  new RegExp(`^#/app/(.*?)/page/`).exec(window.location.hash)[1];
 
 const getLaunchBody = () => {
   const tree = getTreeByPageName("roam/js/static-site");
@@ -504,10 +507,9 @@ const getDeployBody = () => {
         pageName === config.index || contentFilter(content)
     )
     .map(({ pageName, content }) => {
-      const blocks = getLinkedPageReferences(pageName);
-      const references = Array.from(
-        new Set(blocks.map((b) => b.title || "").filter((t) => !!t))
-      );
+      const references = getPageTitlesAndBlockUidsReferencingPage(
+        pageName
+      ).map(({ title, uid }) => ({ title, node: getTreeByBlockUid(uid) }));
       const viewType = getPageViewType(pageName);
       return {
         references,
