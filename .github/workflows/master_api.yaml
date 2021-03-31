@@ -12,6 +12,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.LAMBDA_AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: us-east-1
   CLERK_API_KEY: ${{ secrets.CLERK_API_KEY }}
+  CLOUDFRONT_ARN: ${{ secrets.CLOUDFRONT_ARN }}
   API_URL: https://api.roamjs.com
   FLOSS_API_URL: https://api.davidvargas.me
   FLOSS_TOKEN: ${{ secrets.FLOSS_TOKEN }}

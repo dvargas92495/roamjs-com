@@ -382,9 +382,11 @@ const Developer = () => {
   const [loading, setLoading] = useState(false);
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const authenticatedAxiosDelete = useAuthenticatedAxiosDelete();
+  const [error, setError] = useState("");
   return (
     <div>
       <ServiceToken id={"developer"} token={data?.token} />
+      <H6 style={{ marginTop: 80 }}>Paths</H6>
       <Items
         items={paths.map((p) => ({
           primary: <UserValue>{p}</UserValue>,
@@ -394,10 +396,10 @@ const Developer = () => {
               icon={"delete"}
               onClick={() => {
                 setLoading(true);
-                authenticatedAxiosDelete(`request-path?path=${p}`).then((r) =>
-                  setPaths(r.data.paths)
-                )
-                .finally(() => setLoading(false));
+                authenticatedAxiosDelete(`request-path?path=${p}`)
+                  .then((r) => setPaths(r.data.paths))
+                  .catch((e) => setError(e.response?.data || e.message))
+                  .finally(() => setLoading(false));
               }}
             />
           ),
@@ -405,7 +407,16 @@ const Developer = () => {
         noItemMessage={null}
       />
       <div style={{ marginTop: 16 }}>
-        <StringField value={newPath} setValue={setNewPath} label={"Path"} />
+        <StringField
+          value={newPath}
+          setValue={(v) => {
+            setNewPath(v);
+            setError("");
+          }}
+          label={"Path"}
+          error={!!error}
+          helperText={error}
+        />
         <Button
           onClick={() => {
             setLoading(true);
@@ -414,11 +425,13 @@ const Developer = () => {
                 setNewPath("");
                 setPaths(r.data.paths);
               })
+              .catch((e) => setError(e.response?.data || e.message))
               .finally(() => setLoading(false));
           }}
           variant={"outlined"}
-          style={{ marginLeft: 16 }}
+          style={{ margin: "0 16px" }}
           color={"primary"}
+          disabled={!!error}
         >
           Request Path
         </Button>

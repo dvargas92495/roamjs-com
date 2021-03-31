@@ -31,6 +31,12 @@ export const handler: APIGatewayProxyHandler = authenticate((event) => {
                   (p) => `arn:aws:s3:::roamjs.com/${p.replace(/\/$/, "/*")}`
                 ),
               },
+              {
+                Sid: "InvalidateCache",
+                Effect: "Allow",
+                Action: "cloudfront:CreateInvalidation",
+                Resource: process.env.CLOUDFRONT_ARN,
+              },
             ],
           }),
         })
