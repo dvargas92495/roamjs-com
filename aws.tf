@@ -88,7 +88,7 @@ module "aws-static-site" {
 
 module "aws_static_site" {
   source  = "dvargas92495/static-site/aws"
-  version = "1.3.0"
+  version = "2.1.0"
 
   domain = "roamjs.com"
   secret = var.secret
@@ -96,11 +96,15 @@ module "aws_static_site" {
   tags = {
       Application = "Roam JS Extensions"
   }
+
+  providers = {
+    aws.us-east-1 = aws
+  }
 }
 
 module "aws-serverless-backend" {
     source  = "dvargas92495/serverless-backend/aws"
-    version = "1.5.6"
+    version = "1.5.7"
 
     api_name = "roam-js-extensions"
     domain = "roamjs.com"
@@ -378,4 +382,10 @@ resource "github_actions_secret" "lambda_role" {
   repository       = "roam-js-extensions"
   secret_name      = "LAMBDA_ROLE"
   plaintext_value  = data.aws_iam_role.lambda_role.arn
+}
+
+resource "github_actions_secret" "lambda_role" {
+  repository       = "roam-js-extensions"
+  secret_name      = "CLOUDFRONT_ARN"
+  plaintext_value  = module.aws_static_site.cloudfront_arn
 }
