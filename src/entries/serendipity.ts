@@ -2,6 +2,7 @@ import differenceInDays from "date-fns/differenceInDays";
 import dateMax from "date-fns/max";
 import {
   createBlock,
+  createIconButton,
   createPage,
   getAllBlockUids,
   getBlockUidByTextOnPage,
@@ -12,6 +13,7 @@ import {
   getTextByBlockUid,
   getTreeByBlockUid,
   getTreeByPageName,
+  getUids,
   getUidsFromButton,
   parseRoamDate,
   toRoamDate,
@@ -24,10 +26,12 @@ import {
   getSettingValuesFromTree,
 } from "../components/hooks";
 import {
+  createBlockObserver,
   createButtonObserver,
   DAILY_NOTE_PAGE_REGEX,
   extractTag,
   getWordCount,
+  openBlockInSidebar,
   runExtension,
 } from "../entry-helpers";
 
@@ -111,7 +115,10 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
           .filter((u) => !excludeBlockUids.has(u))
           .filter((u) => {
             const text = getTextByBlockUid(u);
-            return text.length >= characterMinimum && getWordCount(text) >= wordMinimum;
+            return (
+              text.length >= characterMinimum &&
+              getWordCount(text) >= wordMinimum
+            );
           })
           .filter(
             (u) =>
@@ -210,16 +217,80 @@ runExtension(ID, () => {
         {
           id: "daily",
           fields: [
-            { title: "includes", type: "pages" },
-            { title: "excludes", type: "pages" },
-            { title: "timeout", type: "number" },
-            { title: "label", type: "text" },
-            { title: "count", type: "number" },
-            { title: "character minimum", type: "number" },
-            { title: "word minimum", type: "number" },
+            {
+              title: "includes",
+              type: "pages",
+              description:
+                "Blocks and children tagged with one of these pages will be included for random selection.",
+            },
+            {
+              title: "excludes",
+              type: "pages",
+              description:
+                "Blocks and children tagged with one of these pages will be excluded from random selection.",
+            },
+            {
+              title: "timeout",
+              type: "number",
+              description:
+                "Number of days that must pass for a block to be reconsidere for randoom selection",
+            },
+            {
+              title: "label",
+              type: "text",
+              description:
+                "The block text used that all chosen block refrences will be nested under.",
+            },
+            {
+              title: "count",
+              type: "number",
+              description: "The number of randomly chosen block references",
+            },
+            {
+              title: "character minimum",
+              type: "number",
+              description:
+                "Blocks must have at least this many characters to be considered for random selection.",
+            },
+            {
+              title: "word minimum",
+              type: "number",
+              description:
+                "Block must have at least this many words to be considered for random selection.",
+            },
           ],
         },
       ],
     },
+  });
+
+  createBlockObserver((b) => {
+    const { blockUid } = getUids(b);
+    const title = getPageTitleByBlockUid(blockUid);
+    if (DAILY_NOTE_PAGE_REGEX.test(title)) {
+      const tree =
+        getTreeByPageName("roam/js/serendipity").find((t) =>
+          /daily/i.test(t.text)
+        )?.children || [];
+      const label = getSettingValueFromTree({
+        tree,
+        key: "label",
+        defaultValue: DEFAULT_DAILY_LABEL,
+      });
+      const text = getTextByBlockUid(blockUid);
+      if (text === label) {
+        const container = b.closest(".rm-block-main");
+        const icon = createIconButton("arrow-top-right");
+        icon.style.position = "absolute";
+        icon.style.top = "0";
+        icon.style.right = "0";
+        icon.addEventListener("click", () => {
+          getTreeByBlockUid(blockUid).children.forEach((t) =>
+            openBlockInSidebar(/\(\((.*?)\)\)/.exec(t.text)?.[1])
+          );
+        });
+        container.append(icon);
+      }
+    }
   });
 });

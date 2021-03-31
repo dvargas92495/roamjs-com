@@ -45,7 +45,7 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
   const [ready, setReady] = useState(isFieldSet("share"));
-  const [deploySwitch, setDeploySwitch] = useState(true);
+  const [deploySwitch, setDeploySwitch] = useState(getField('share') === 'true');
   const onSwitchChange = useCallback(
     (e: React.FormEvent<HTMLInputElement>) =>
       setDeploySwitch((e.target as HTMLInputElement).checked),

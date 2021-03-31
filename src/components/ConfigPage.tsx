@@ -1,11 +1,13 @@
 import {
   Button,
   Card,
+  Icon,
   InputGroup,
   Label,
   NumericInput,
   Tab,
   Tabs,
+  Tooltip,
 } from "@blueprintjs/core";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
@@ -16,7 +18,7 @@ import {
   getTreeByPageName,
 } from "roam-client";
 import {
-  createPageTitleObserver,
+  createHTMLObserver,
   getFirstChildUidByBlockUid,
 } from "../entry-helpers";
 import { toTitle } from "./hooks";
@@ -25,6 +27,7 @@ import PageInput from "./PageInput";
 type Field = {
   type: keyof typeof Panels;
   title: string;
+  description: string;
 };
 
 type FieldPanel = <T extends Field>({
@@ -38,7 +41,36 @@ type FieldPanel = <T extends Field>({
   parentUid: string;
 } & Omit<T, "type">) => React.ReactElement;
 
-const TextPanel: FieldPanel = ({ title, uid, parentUid, order }) => {
+const Description = ({ description }: { description: string }) => {
+  return (
+    <span
+      style={{
+        marginLeft: 12,
+        display: "inline-block",
+        opacity: 0.8,
+        verticalAlign: "text-bottom",
+      }}
+    >
+      <Tooltip
+        content={
+          <span style={{ maxWidth: 400, display: "inline-block" }}>
+            {description}
+          </span>
+        }
+      >
+        <Icon icon={"info-sign"} iconSize={12} />
+      </Tooltip>
+    </span>
+  );
+};
+
+const TextPanel: FieldPanel = ({
+  title,
+  uid,
+  parentUid,
+  order,
+  description,
+}) => {
   const [valueUid, setValueUid] = useState(getFirstChildUidByBlockUid(uid));
   const [value, setValue] = useState(
     uid ? getTextByBlockUid(getFirstChildUidByBlockUid(uid)) : ""
@@ -46,6 +78,7 @@ const TextPanel: FieldPanel = ({ title, uid, parentUid, order }) => {
   return (
     <Label>
       {title}
+      <Description description={description} />
       <InputGroup
         value={value}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,7 +106,13 @@ const TextPanel: FieldPanel = ({ title, uid, parentUid, order }) => {
   );
 };
 
-const NumberPanel: FieldPanel = ({ title, uid, parentUid, order }) => {
+const NumberPanel: FieldPanel = ({
+  title,
+  uid,
+  parentUid,
+  order,
+  description,
+}) => {
   const [valueUid, setValueUid] = useState(getFirstChildUidByBlockUid(uid));
   const [value, setValue] = useState(
     uid ? getTextByBlockUid(getFirstChildUidByBlockUid(uid)) : 0
@@ -81,6 +120,7 @@ const NumberPanel: FieldPanel = ({ title, uid, parentUid, order }) => {
   return (
     <Label>
       {title}
+      <Description description={description} />
       <NumericInput
         value={value}
         onValueChange={(e, asStr) => {
@@ -108,7 +148,13 @@ const NumberPanel: FieldPanel = ({ title, uid, parentUid, order }) => {
   );
 };
 
-const PagesPanel: FieldPanel = ({ uid, title, parentUid, order }) => {
+const PagesPanel: FieldPanel = ({
+  uid,
+  title,
+  parentUid,
+  order,
+  description,
+}) => {
   const [pages, setPages] = useState(
     getTreeByBlockUid(uid).children.map((v) => ({ text: v.text, uid: v.uid }))
   );
@@ -117,6 +163,7 @@ const PagesPanel: FieldPanel = ({ uid, title, parentUid, order }) => {
     <>
       <Label>
         {title}
+        <Description description={description} />
         <div style={{ display: "flex" }}>
           <PageInput value={value} setValue={setValue} extra={["{all}"]} />
           <Button
@@ -210,7 +257,8 @@ const FieldTabs = ({
       selectedTabId={selectedTabId}
       renderActiveTabPanelOnly
     >
-      {fields.map(({ type, title }, i) => {
+      {fields.map((field, i) => {
+        const { type, title } = field;
         const Panel = Panels[type];
         return (
           <Tab
@@ -219,7 +267,7 @@ const FieldTabs = ({
             title={title}
             panel={
               <Panel
-                title={title}
+                {...field}
                 order={i}
                 parentUid={parentUid}
                 uid={
@@ -283,19 +331,27 @@ export const createConfigObserver = ({
   title: string;
   config: Config;
 }): void =>
-  createPageTitleObserver({
-    title,
-    callback: (d: HTMLDivElement) => {
-      const parent = document.createElement("div");
-      parent.id = `${title.replace("roam/js/", "roamjs-")}-config`;
-      d.firstElementChild.insertBefore(
-        parent,
-        d.firstElementChild.firstElementChild.nextElementSibling
-      );
-      ReactDOM.render(
-        <ConfigPage id={title.replace("roam/js/", "")} config={config} />,
-        parent
-      );
+  createHTMLObserver({
+    className: "rm-title-display",
+    tag: "H1",
+    callback: (d: HTMLHeadingElement) => {
+      if (d.innerText === title) {
+        const uid = getPageUidByPageTitle(title);
+        const attribute = `data-roamjs-${uid}`;
+        if (!d.hasAttribute(attribute)) {
+          d.setAttribute(attribute, "true");
+          const parent = document.createElement("div");
+          parent.id = `${title.replace("roam/js/", "roamjs-")}-config`;
+          d.parentElement.parentElement.insertBefore(
+            parent,
+            d.parentElement.nextElementSibling
+          );
+          ReactDOM.render(
+            <ConfigPage id={title.replace("roam/js/", "")} config={config} />,
+            parent
+          );
+        }
+      }
     },
   });
 
