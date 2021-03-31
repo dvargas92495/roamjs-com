@@ -12,14 +12,6 @@ import {
   TreeNode,
 } from 'roam-client';
 
-declare global {
-  interface Window {
-    observerCount: number;
-  }
-}
-
-window.observerCount = 0;
-
 runExtension("tag-cycle", () => {
   const config: { [blockUid: string]: (e: KeyboardEvent) => void } = {};
   const blockUidsByKeystroke: { [keystroke: string]: Set<string> } = {};

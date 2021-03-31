@@ -47,7 +47,8 @@ const contributors = {
   "Tony Ennis": "https://tonyennis.com",
   "Sharon Dale": "http://www.sharondale.co.uk/",
   "Eric Anderson": "http://ecanderson.com/",
-  "Zach Phillips": "https://zachphillips.blog/"
+  "Zach Phillips": "https://zachphillips.blog/",
+  "Isabela Granic": "http://isabelagranic.com/",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{
@@ -90,7 +91,7 @@ const ExtensionPageLayout: React.FunctionComponent<{
       {frontMatter.development && <H2>UNDER DEVELOPMENT</H2>}
       <H1>{label}</H1>
       <Subtitle>
-        {frontMatter.description} The name of the script is <code>{id}</code>.
+        {frontMatter.description}
       </Subtitle>
       <H3>Installation</H3>
       <Body>
