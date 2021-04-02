@@ -12,6 +12,7 @@ import {
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import {
+  createPage,
   getPageUidByPageTitle,
   getTextByBlockUid,
   getTreeByBlockUid,
@@ -24,22 +25,35 @@ import {
 import { toTitle } from "./hooks";
 import PageInput from "./PageInput";
 
-type Field = {
-  type: keyof typeof Panels;
+type TextField = {
+  type: "text";
+  defaultValue?: string;
+};
+
+type NumberField = {
+  type: "number";
+  defaultValue?: number;
+};
+
+type PagesField = {
+  type: "pages";
+  defaultValue?: string[];
+};
+
+type UnionField = PagesField | TextField | NumberField;
+
+type Field<T extends UnionField> = T & {
   title: string;
   description: string;
 };
 
-type FieldPanel = <T extends Field>({
-  title,
-  order,
-  uid,
-  parentUid,
-}: {
-  order: number;
-  uid?: string;
-  parentUid: string;
-} & Omit<T, "type">) => React.ReactElement;
+type FieldPanel<T extends UnionField> = (
+  props: {
+    order: number;
+    uid?: string;
+    parentUid: string;
+  } & Omit<Field<T>, "type">
+) => React.ReactElement;
 
 const Description = ({ description }: { description: string }) => {
   return (
@@ -64,16 +78,17 @@ const Description = ({ description }: { description: string }) => {
   );
 };
 
-const TextPanel: FieldPanel = ({
+const TextPanel: FieldPanel<TextField> = ({
   title,
   uid,
   parentUid,
   order,
   description,
+  defaultValue = "",
 }) => {
   const [valueUid, setValueUid] = useState(getFirstChildUidByBlockUid(uid));
   const [value, setValue] = useState(
-    uid ? getTextByBlockUid(getFirstChildUidByBlockUid(uid)) : ""
+    (uid && getTextByBlockUid(getFirstChildUidByBlockUid(uid))) || defaultValue
   );
   return (
     <Label>
@@ -106,16 +121,17 @@ const TextPanel: FieldPanel = ({
   );
 };
 
-const NumberPanel: FieldPanel = ({
+const NumberPanel: FieldPanel<NumberField> = ({
   title,
   uid,
   parentUid,
   order,
   description,
+  defaultValue,
 }) => {
   const [valueUid, setValueUid] = useState(getFirstChildUidByBlockUid(uid));
   const [value, setValue] = useState(
-    uid ? getTextByBlockUid(getFirstChildUidByBlockUid(uid)) : 0
+    (uid && getTextByBlockUid(getFirstChildUidByBlockUid(uid))) || defaultValue
   );
   return (
     <Label>
@@ -148,7 +164,7 @@ const NumberPanel: FieldPanel = ({
   );
 };
 
-const PagesPanel: FieldPanel = ({
+const PagesPanel: FieldPanel<PagesField> = ({
   uid,
   title,
   parentUid,
@@ -156,7 +172,12 @@ const PagesPanel: FieldPanel = ({
   description,
 }) => {
   const [pages, setPages] = useState(
-    getTreeByBlockUid(uid).children.map((v) => ({ text: v.text, uid: v.uid }))
+    uid
+      ? getTreeByBlockUid(uid).children.map((v) => ({
+          text: v.text,
+          uid: v.uid,
+        }))
+      : []
   );
   const [value, setValue] = useState("");
   return (
@@ -221,11 +242,11 @@ const Panels = {
   text: TextPanel,
   number: NumberPanel,
   pages: PagesPanel,
-};
+} as { [UField in UnionField as UField["type"]]: FieldPanel<UField> };
 
 type ConfigTab = {
   id: string;
-  fields: Field[];
+  fields: Field<UnionField>[];
 };
 
 type Config = {
@@ -258,7 +279,7 @@ const FieldTabs = ({
       renderActiveTabPanelOnly
     >
       {fields.map((field, i) => {
-        const { type, title } = field;
+        const { type, title, defaultValue } = field;
         const Panel = Panels[type];
         return (
           <Tab
@@ -268,11 +289,14 @@ const FieldTabs = ({
             panel={
               <Panel
                 {...field}
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore 4.3.0
+                defaultValue={defaultValue}
                 order={i}
                 parentUid={parentUid}
                 uid={
                   parentTree.find((t) => new RegExp(title, "i").test(t.text))
-                    ?.uid
+                    ?.uid || ""
                 }
               />
             }
@@ -330,7 +354,23 @@ export const createConfigObserver = ({
 }: {
   title: string;
   config: Config;
-}): void =>
+}): void => {
+  if (!getPageUidByPageTitle(title)) {
+    createPage({
+      title,
+      tree: config.tabs.map((t) => ({
+        text: t.id,
+        children: t.fields.map((f) => ({
+          text: f.title,
+          children: !f.defaultValue
+            ? []
+            : f.type === "pages"
+            ? f.defaultValue.map((v) => ({ text: v }))
+            : [{ text: `${f.defaultValue}` }],
+        })),
+      })),
+    });
+  }
   createHTMLObserver({
     className: "rm-title-display",
     tag: "H1",
@@ -338,11 +378,12 @@ export const createConfigObserver = ({
       if (d.innerText === title) {
         const uid = getPageUidByPageTitle(title);
         const attribute = `data-roamjs-${uid}`;
-        if (!d.hasAttribute(attribute)) {
-          d.setAttribute(attribute, "true");
+        const containerParent = d.parentElement.parentElement;
+        if (!containerParent.hasAttribute(attribute)) {
+          containerParent.setAttribute(attribute, "true");
           const parent = document.createElement("div");
           parent.id = `${title.replace("roam/js/", "roamjs-")}-config`;
-          d.parentElement.parentElement.insertBefore(
+          containerParent.insertBefore(
             parent,
             d.parentElement.nextElementSibling
           );
@@ -354,5 +395,6 @@ export const createConfigObserver = ({
       }
     },
   });
+};
 
 export default ConfigPage;
