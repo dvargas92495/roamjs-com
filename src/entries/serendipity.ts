@@ -3,13 +3,11 @@ import dateMax from "date-fns/max";
 import {
   createBlock,
   createIconButton,
-  createPage,
   getAllBlockUids,
   getBlockUidByTextOnPage,
   getBlockUidsReferencingPage,
   getPageTitleByBlockUid,
   getPageTitlesReferencingBlockUid,
-  getPageUidByPageTitle,
   getTextByBlockUid,
   getTreeByBlockUid,
   getTreeByPageName,
@@ -59,6 +57,10 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
     defaultValue: DEFAULT_DAILY_LABEL,
   });
   if (!getBlockUidByTextOnPage({ text: label, title: todayPage })) {
+    const labelUid = createBlock({
+      node: { text: label, children: [{ text: "Loading..." }] },
+      parentUid: todayPageUid,
+    });
     const count = getSettingIntFromTree({
       tree,
       key: "count",
@@ -98,118 +100,80 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
         .flatMap(allBlockMapper),
     ];
 
-    const includeBlockUidCandidates = includes.some((i) => i === "{all}")
-      ? getAllBlockUids()
-      : includes
-          .map(extractTag)
-          .flatMap((tag) => getBlockUidsReferencingPage(tag));
+    const isAll = includes.some((i) => i === "{all}");
+    setTimeout(() => {
+      const includeBlockUidCandidates = isAll
+        ? getAllBlockUids()
+        : includes
+            .map(extractTag)
+            .flatMap((tag) => getBlockUidsReferencingPage(tag));
 
-    const includeBlockUids = includeBlockUidCandidates.flatMap((uid) => [
-      ...(excludeBlockUids.has(uid) ? [] : [uid]),
-      ...allBlockMapper({ ...getTreeByBlockUid(uid), uid }).map((b) => b.uid),
-    ]);
+      const includeBlockUids = includeBlockUidCandidates.flatMap((uid) => [
+        ...(excludeBlockUids.has(uid) ? [] : [uid]),
+        ...(isAll
+          ? []
+          : allBlockMapper({ ...getTreeByBlockUid(uid), uid }).map(
+              (b) => b.uid
+            )),
+      ]);
 
-    const blockUids = Array.from(
-      new Set(
-        includeBlockUids
-          .filter((u) => !excludeBlockUids.has(u))
-          .filter((u) => {
-            const text = getTextByBlockUid(u);
-            return (
-              text.length >= characterMinimum &&
-              getWordCount(text) >= wordMinimum
-            );
-          })
-          .filter(
-            (u) =>
-              differenceInDays(
-                date,
-                getPageTitlesReferencingBlockUid(u)
-                  .filter((t) => DAILY_NOTE_PAGE_REGEX.test(t))
-                  .reduce(
-                    (prev, cur) => dateMax([parseRoamDate(cur), prev]),
-                    new Date(0)
-                  )
-              ) >= timeout
-          )
-      )
-    );
-    const children = [];
-    for (let c = 0; c < count; c++) {
-      if (blockUids.length) {
-        const i = Math.floor(Math.random() * blockUids.length);
-        children.push({
-          text: `((${blockUids.splice(i, 1)[0]}))`,
-        });
+      const blockUids = Array.from(
+        new Set(
+          includeBlockUids
+            .filter((u) => !excludeBlockUids.has(u))
+            .filter((u) => {
+              if (wordMinimum === 0 && characterMinimum === 0) {
+                return true;
+              }
+              const text = getTextByBlockUid(u);
+              return (
+                text.length >= characterMinimum &&
+                getWordCount(text) >= wordMinimum
+              );
+            })
+            .filter((u) => {
+              if (timeout === 0) {
+                return true;
+              }
+              return (
+                differenceInDays(
+                  date,
+                  getPageTitlesReferencingBlockUid(u)
+                    .filter((t) => DAILY_NOTE_PAGE_REGEX.test(t))
+                    .reduce(
+                      (prev, cur) => dateMax([parseRoamDate(cur), prev]),
+                      new Date(0)
+                    )
+                ) >= timeout
+              );
+            })
+        )
+      );
+      const children: { text: string }[] = [];
+      for (let c = 0; c < count; c++) {
+        if (blockUids.length) {
+          const i = Math.floor(Math.random() * blockUids.length);
+          children.push({
+            text: `((${blockUids.splice(i, 1)[0]}))`,
+          });
+        } else {
+          break;
+        }
       }
-    }
-    createBlock({
-      node: { text: label, children },
-      parentUid: todayPageUid,
-    });
+      getTreeByBlockUid(labelUid).children.forEach(({ uid }) =>
+        window.roamAlphaAPI.deleteBlock({ block: { uid } })
+      );
+      children.forEach((node) =>
+        createBlock({
+          node,
+          parentUid: labelUid,
+        })
+      );
+    }, 1);
   }
 };
 
 runExtension(ID, () => {
-  if (!getPageUidByPageTitle(CONFIG)) {
-    createPage({
-      title: CONFIG,
-      tree: [
-        {
-          text: "daily",
-          children: [
-            {
-              text: "includes",
-            },
-            {
-              text: "excludes",
-            },
-            {
-              text: "timeout",
-              children: [
-                {
-                  text: `${DEFAULT_TIMEOUT_COUNT}`,
-                },
-              ],
-            },
-            {
-              text: "label",
-              children: [
-                {
-                  text: DEFAULT_DAILY_LABEL,
-                },
-              ],
-            },
-            {
-              text: "count",
-              children: [
-                {
-                  text: `${DEFAULT_DAILY_COUNT}`,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-  }
-
-  const date = new Date();
-  const todayPage = toRoamDate(date);
-  pullDaily({ todayPage });
-
-  createButtonObserver({
-    shortcut: "serendipity",
-    attribute: "serendipity-daily",
-    render: (b: HTMLButtonElement) => {
-      const { blockUid } = getUidsFromButton(b);
-      const todayPage = getPageTitleByBlockUid(blockUid);
-      if (DAILY_NOTE_PAGE_REGEX.test(todayPage)) {
-        b.onclick = () => pullDaily({ todayPage });
-      }
-    },
-  });
-
   createConfigObserver({
     title: CONFIG,
     config: {
@@ -234,17 +198,20 @@ runExtension(ID, () => {
               type: "number",
               description:
                 "Number of days that must pass for a block to be reconsidere for randoom selection",
+              defaultValue: DEFAULT_TIMEOUT_COUNT,
             },
             {
               title: "label",
               type: "text",
               description:
                 "The block text used that all chosen block refrences will be nested under.",
+              defaultValue: DEFAULT_DAILY_LABEL,
             },
             {
               title: "count",
               type: "number",
               description: "The number of randomly chosen block references",
+              defaultValue: DEFAULT_DAILY_COUNT,
             },
             {
               title: "character minimum",
@@ -261,6 +228,22 @@ runExtension(ID, () => {
           ],
         },
       ],
+    },
+  });
+
+  const date = new Date();
+  const todayPage = toRoamDate(date);
+  pullDaily({ todayPage });
+
+  createButtonObserver({
+    shortcut: "serendipity",
+    attribute: "serendipity-daily",
+    render: (b: HTMLButtonElement) => {
+      const { blockUid } = getUidsFromButton(b);
+      const todayPage = getPageTitleByBlockUid(blockUid);
+      if (DAILY_NOTE_PAGE_REGEX.test(todayPage)) {
+        b.onclick = () => pullDaily({ todayPage });
+      }
     },
   });
 
