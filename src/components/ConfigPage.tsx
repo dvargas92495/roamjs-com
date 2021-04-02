@@ -12,6 +12,7 @@ import {
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import {
+ // createPage,
   getPageUidByPageTitle,
   getTextByBlockUid,
   getTreeByBlockUid,
@@ -330,7 +331,50 @@ export const createConfigObserver = ({
 }: {
   title: string;
   config: Config;
-}): void =>
+}): void => {
+  /*
+  if (!getPageUidByPageTitle(title)) {
+    createPage({
+      title,
+      tree: [
+        {
+          text: "daily",
+          children: [
+            {
+              text: "includes",
+            },
+            {
+              text: "excludes",
+            },
+            {
+              text: "timeout",
+              children: [
+                {
+                  text: `${DEFAULT_TIMEOUT_COUNT}`,
+                },
+              ],
+            },
+            {
+              text: "label",
+              children: [
+                {
+                  text: DEFAULT_DAILY_LABEL,
+                },
+              ],
+            },
+            {
+              text: "count",
+              children: [
+                {
+                  text: `${DEFAULT_DAILY_COUNT}`,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+  }*/
   createHTMLObserver({
     className: "rm-title-display",
     tag: "H1",
@@ -354,5 +398,6 @@ export const createConfigObserver = ({
       }
     },
   });
+};
 
 export default ConfigPage;
