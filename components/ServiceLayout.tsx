@@ -203,7 +203,7 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
           title={`Ending ${idToTitle(id)}`}
           content={`Are you sure you want to unsubscribe from the RoamJS ${idToTitle(
             id
-          )}`}
+          )}?`}
           action={onEnd}
           onSuccess={end}
         />

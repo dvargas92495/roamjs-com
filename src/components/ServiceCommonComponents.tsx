@@ -10,6 +10,7 @@ import {
   PanelStack2,
   ProgressBar,
 } from "@blueprintjs/core";
+import "@blueprintjs/core/lib/css/blueprint.css";
 import axios, { AxiosResponse } from "axios";
 import React, {
   useCallback,
@@ -59,9 +60,11 @@ export const isFieldSet = (field: string): boolean => {
 
 export const getField = (field: string): string => {
   const service = useService();
-  return getTreeByPageName(`roam/js/${service}`).find((t) =>
-    new RegExp(field, "i").test(t.text)
-  )?.children?.[0]?.text || '';
+  return (
+    getTreeByPageName(`roam/js/${service}`).find((t) =>
+      new RegExp(field, "i").test(t.text)
+    )?.children?.[0]?.text || ""
+  );
 };
 
 export const useAuthenticatedAxiosGet = (): ((
@@ -335,7 +338,6 @@ export const MainStage = (Content: StageContent): StageConfig => ({
             renderPanel: SettingsContent,
           })
         }
-        id={"roamjs-social-refresh-button"}
         style={{ position: "absolute", top: -40, right: 8 }}
       />
     </>
@@ -382,6 +384,8 @@ export const ServiceDashboard: React.FC<{
         <style>
           {`.roamjs-service-panel {
   position: relative;
+  overflow-y: visible;
+  min-height: 320px;
 }
 
 .bp3-panel-stack-view {
