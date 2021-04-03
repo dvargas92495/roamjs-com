@@ -377,14 +377,20 @@ export const ServiceDashboard: React.FC<{
       setTimeout(() => setShowProgress(false), 3000);
     }
   }, [progress, setShowProgress]);
+  const [hideBlocks, setHideBlocks] = useState(true);
+  const showBlocks = useCallback(() => setHideBlocks(false), [setHideBlocks]);
   return (
-    <Card>
-      <h4 style={{ padding: 4 }}>{toTitle(service)} Dashboard</h4>
-      <ServiceContext.Provider value={{ getStage, pageUid, service, settings }}>
-        <style>
-          {`.roamjs-service-panel {
+    <>
+      <Card>
+        <h4 style={{ padding: 4 }}>{toTitle(service)} Dashboard</h4>
+        <ServiceContext.Provider
+          value={{ getStage, pageUid, service, settings }}
+        >
+          <style>
+            {`.roamjs-service-panel {
   position: relative;
-  overflow-y: visible;
+  overflow-x: hidden;
+  overflow: visible;
   min-height: 320px;
 }
 
@@ -404,21 +410,35 @@ export const ServiceDashboard: React.FC<{
 button.bp3-button.bp3-panel-stack-header-back {
   margin-left: 0;
 }`}
-        </style>
-        <PanelStack2
-          initialPanel={{
-            renderPanel,
-          }}
-          className={"roamjs-service-panel"}
-        />
-        {showProgress && (
-          <ProgressBar
-            value={progress}
-            animate={false}
-            intent={Intent.PRIMARY}
+          </style>
+          <PanelStack2
+            initialPanel={{
+              renderPanel,
+            }}
+            className={"roamjs-service-panel"}
           />
-        )}
-      </ServiceContext.Provider>
-    </Card>
+          {showProgress && (
+            <ProgressBar
+              value={progress}
+              animate={false}
+              intent={Intent.PRIMARY}
+            />
+          )}
+        </ServiceContext.Provider>
+      </Card>
+      {hideBlocks && (
+        <Card>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <h6>Roam outline with config data is hidden by default.</h6>
+            <Button minimal icon={"small-cross"} onClick={showBlocks} />
+          </div>
+          <style>
+            {`.rm-block-children {
+  visibility: hidden;
+}`}
+          </style>
+        </Card>
+      )}
+    </>
   );
 };
