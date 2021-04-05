@@ -12,6 +12,7 @@ import {
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import {
+  createBlock,
   createPage,
   getPageUidByPageTitle,
   getTextByBlockUid,
@@ -78,6 +79,62 @@ const Description = ({ description }: { description: string }) => {
   );
 };
 
+const useSingleChildValue = <T extends string | number>({
+  defaultValue,
+  uid: initialUid,
+  title,
+  parentUid,
+  order,
+  transform,
+}: {
+  title: string;
+  parentUid: string;
+  order: number;
+  uid: string;
+  defaultValue: T;
+  transform: (s: string) => T;
+}): { value: T; onChange: (v: T) => void } => {
+  const [uid, setUid] = useState(initialUid);
+  const [valueUid, setValueUid] = useState(
+    uid && getFirstChildUidByBlockUid(uid)
+  );
+  const [value, setValue] = useState(
+    (uid && transform(getTextByBlockUid(valueUid))) || defaultValue
+  );
+  const onChange = useCallback(
+    (v: T) => {
+      setValue(v);
+      if (valueUid) {
+        window.roamAlphaAPI.updateBlock({
+          block: { string: `${v}`, uid: valueUid },
+        });
+      } else if (uid) {
+        const newValueUid = window.roamAlphaAPI.util.generateUID();
+        window.roamAlphaAPI.createBlock({
+          block: { string: `${v}`, uid: newValueUid },
+          location: { order: 0, "parent-uid": uid },
+        });
+        setValueUid(newValueUid);
+      } else {
+        const fieldUid = window.roamAlphaAPI.util.generateUID();
+        window.roamAlphaAPI.createBlock({
+          block: { string: title, uid: fieldUid },
+          location: { order, "parent-uid": parentUid },
+        });
+        setUid(fieldUid);
+        const newValueUid = window.roamAlphaAPI.util.generateUID();
+        window.roamAlphaAPI.createBlock({
+          block: { string: `${v}`, uid: newValueUid },
+          location: { order: 0, "parent-uid": fieldUid },
+        });
+        setValueUid(newValueUid);
+      }
+    },
+    [setValue, setValueUid, title, parentUid, order, uid, setUid]
+  );
+  return { value, onChange };
+};
+
 const TextPanel: FieldPanel<TextField> = ({
   title,
   uid,
@@ -86,36 +143,23 @@ const TextPanel: FieldPanel<TextField> = ({
   description,
   defaultValue = "",
 }) => {
-  const [valueUid, setValueUid] = useState(getFirstChildUidByBlockUid(uid));
-  const [value, setValue] = useState(
-    (uid && getTextByBlockUid(getFirstChildUidByBlockUid(uid))) || defaultValue
-  );
+  const { value, onChange } = useSingleChildValue({
+    defaultValue,
+    title,
+    uid,
+    parentUid,
+    order,
+    transform: (s) => s,
+  });
   return (
     <Label>
       {title}
       <Description description={description} />
       <InputGroup
         value={value}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(e.target.value);
-          if (valueUid) {
-            window.roamAlphaAPI.updateBlock({
-              block: { string: e.target.value, uid: valueUid },
-            });
-          } else {
-            const fieldUid = window.roamAlphaAPI.util.generateUID();
-            window.roamAlphaAPI.createBlock({
-              block: { string: title, uid: fieldUid },
-              location: { order, "parent-uid": parentUid },
-            });
-            const newValueUid = window.roamAlphaAPI.util.generateUID();
-            window.roamAlphaAPI.createBlock({
-              block: { string: e.target.value, uid: newValueUid },
-              location: { order: 0, "parent-uid": fieldUid },
-            });
-            setValueUid(newValueUid);
-          }
-        }}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          onChange(e.target.value)
+        }
       />
     </Label>
   );
@@ -127,52 +171,35 @@ const NumberPanel: FieldPanel<NumberField> = ({
   parentUid,
   order,
   description,
-  defaultValue,
+  defaultValue = 0,
 }) => {
-  const [valueUid, setValueUid] = useState(getFirstChildUidByBlockUid(uid));
-  const [value, setValue] = useState(
-    (uid && getTextByBlockUid(getFirstChildUidByBlockUid(uid))) || defaultValue
-  );
+  const { value, onChange } = useSingleChildValue({
+    defaultValue,
+    title,
+    uid,
+    parentUid,
+    order,
+    transform: parseInt,
+  });
   return (
     <Label>
       {title}
       <Description description={description} />
-      <NumericInput
-        value={value}
-        onValueChange={(e, asStr) => {
-          setValue(e);
-          if (valueUid) {
-            window.roamAlphaAPI.updateBlock({
-              block: { string: asStr, uid: valueUid },
-            });
-          } else {
-            const fieldUid = window.roamAlphaAPI.util.generateUID();
-            window.roamAlphaAPI.createBlock({
-              block: { string: title, uid: fieldUid },
-              location: { order, "parent-uid": parentUid },
-            });
-            const newValueUid = window.roamAlphaAPI.util.generateUID();
-            window.roamAlphaAPI.createBlock({
-              block: { string: asStr, uid: newValueUid },
-              location: { order: 0, "parent-uid": fieldUid },
-            });
-            setValueUid(newValueUid);
-          }
-        }}
-      />
+      <NumericInput value={value} onValueChange={onChange} />
     </Label>
   );
 };
 
 const PagesPanel: FieldPanel<PagesField> = ({
-  uid,
+  uid: initialUid,
   title,
   parentUid,
   order,
   description,
 }) => {
+  const [uid, setUid] = useState(initialUid);
   const [pages, setPages] = useState(
-    uid
+    () => uid
       ? getTreeByBlockUid(uid).children.map((v) => ({
           text: v.text,
           uid: v.uid,
@@ -190,6 +217,7 @@ const PagesPanel: FieldPanel<PagesField> = ({
           <Button
             icon={"plus"}
             minimal
+            disabled={!value}
             onClick={() => {
               const valueUid = window.roamAlphaAPI.util.generateUID();
               if (uid) {
@@ -203,6 +231,7 @@ const PagesPanel: FieldPanel<PagesField> = ({
                   block: { string: title, uid: fieldUid },
                   location: { order, "parent-uid": parentUid },
                 });
+                setUid(fieldUid);
                 window.roamAlphaAPI.createBlock({
                   block: { string: value, uid: valueUid },
                   location: { order: 0, "parent-uid": fieldUid },
@@ -258,9 +287,11 @@ const FieldTabs = ({
   fields,
   extensionId,
   pageUid,
+  order,
 }: {
   extensionId: string;
   pageUid: string;
+  order: number;
 } & ConfigTab) => {
   const [selectedTabId, setSelectedTabId] = useState(fields[0].title);
   const onTabsChange = useCallback((tabId: string) => setSelectedTabId(tabId), [
@@ -268,8 +299,13 @@ const FieldTabs = ({
   ]);
   const tree = getTreeByPageName(`roam/js/${extensionId}`);
   const subTree = tree.find((t) => new RegExp(id, "i").test(t.text));
-  const [parentUid, parentTree] =
-    id === "Home" ? [pageUid, tree] : [subTree?.uid, subTree?.children || []];
+  const [parentUid, parentTree] = /home/i.test(id)
+    ? [pageUid, tree]
+    : [
+        subTree?.uid ||
+          createBlock({ parentUid: pageUid, order, node: { text: id } }),
+        subTree?.children || [],
+      ];
   return (
     <Tabs
       vertical
@@ -328,7 +364,7 @@ const ConfigPage = ({
         onChange={onTabsChange}
         selectedTabId={selectedTabId}
       >
-        {config.tabs.map(({ id: tabId, fields }) => (
+        {config.tabs.map(({ id: tabId, fields }, i) => (
           <Tab
             id={tabId}
             key={tabId}
@@ -339,6 +375,7 @@ const ConfigPage = ({
                 fields={fields}
                 extensionId={id}
                 pageUid={pageUid}
+                order={i}
               />
             }
           />

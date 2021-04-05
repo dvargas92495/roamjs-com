@@ -117,15 +117,8 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
         new Set(
           includeBlocks
             .filter(({ uid }) => !excludeBlockUids.has(uid))
-            .filter(({ text }) => {
-              if (wordMinimum === 0 && characterMinimum === 0) {
-                return true;
-              }
-              return (
-                text.length >= characterMinimum &&
-                getWordCount(text) >= wordMinimum
-              );
-            })
+            .filter(({ text }) => text.length >= characterMinimum)
+            .filter(({ text }) => getWordCount(text) >= wordMinimum)
             .filter(({ uid }) => {
               if (timeout === 0) {
                 return true;
