@@ -3,7 +3,7 @@ import dateMax from "date-fns/max";
 import {
   createBlock,
   createIconButton,
-  getAllBlockUids,
+  getAllBlockUidsAndTexts,
   getBlockUidByTextOnPage,
   getBlockUidsReferencingPage,
   getPageTitleByBlockUid,
@@ -100,45 +100,40 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
         .flatMap(allBlockMapper),
     ];
 
-    const isAll = includes.some((i) => i === "{all}");
     setTimeout(() => {
-      const includeBlockUidCandidates = isAll
-        ? getAllBlockUids()
+      const includeBlocks = includes.some((i) => i === "{all}")
+        ? getAllBlockUidsAndTexts()
         : includes
             .map(extractTag)
-            .flatMap((tag) => getBlockUidsReferencingPage(tag));
-
-      const includeBlockUids = includeBlockUidCandidates.flatMap((uid) => [
-        ...(excludeBlockUids.has(uid) ? [] : [uid]),
-        ...(isAll
-          ? []
-          : allBlockMapper({ ...getTreeByBlockUid(uid), uid }).map(
-              (b) => b.uid
-            )),
-      ]);
+            .flatMap((tag) => getBlockUidsReferencingPage(tag))
+            .flatMap((uid) =>
+              allBlockMapper(getTreeByBlockUid(uid)).map((b) => ({
+                uid: b.uid,
+                text: b.text,
+              }))
+            );
 
       const blockUids = Array.from(
         new Set(
-          includeBlockUids
-            .filter((u) => !excludeBlockUids.has(u))
-            .filter((u) => {
+          includeBlocks
+            .filter(({ uid }) => !excludeBlockUids.has(uid))
+            .filter(({ text }) => {
               if (wordMinimum === 0 && characterMinimum === 0) {
                 return true;
               }
-              const text = getTextByBlockUid(u);
               return (
                 text.length >= characterMinimum &&
                 getWordCount(text) >= wordMinimum
               );
             })
-            .filter((u) => {
+            .filter(({ uid }) => {
               if (timeout === 0) {
                 return true;
               }
               return (
                 differenceInDays(
                   date,
-                  getPageTitlesReferencingBlockUid(u)
+                  getPageTitlesReferencingBlockUid(uid)
                     .filter((t) => DAILY_NOTE_PAGE_REGEX.test(t))
                     .reduce(
                       (prev, cur) => dateMax([parseRoamDate(cur), prev]),
@@ -154,7 +149,7 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
         if (blockUids.length) {
           const i = Math.floor(Math.random() * blockUids.length);
           children.push({
-            text: `((${blockUids.splice(i, 1)[0]}))`,
+            text: `((${blockUids.splice(i, 1)[0].uid}))`,
           });
         } else {
           break;
