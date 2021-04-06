@@ -22,8 +22,9 @@ import {
 } from "roam-client";
 import axios from "axios";
 import { render } from "../components/TweetOverlay";
-import { render as loginRender } from "../components/TwitterLogin";
 import { render as feedRender } from "../components/TwitterFeed";
+import { createConfigObserver } from "../components/ConfigPage";
+import Twitter from "../assets/Twitter.svg";
 
 addStyle(`.roamjs-twitter-count {
   position: relative;
@@ -35,6 +36,7 @@ addStyle(`.roamjs-twitter-count {
 }`);
 
 const TWITTER_REFERENCES_COMMAND = "twitter references";
+const CONFIG = "roam/js/twitter";
 
 const twitterReferencesListener = async (
   _: {
@@ -43,7 +45,7 @@ const twitterReferencesListener = async (
   blockUid: string
 ) => {
   const parentUid = getParentUidByBlockUid(blockUid);
-  const config = getConfigFromPage("roam/js/twitter");
+  const config = getConfigFromPage(CONFIG);
   const username = config["Username"];
   if (!username) {
     window.roamAlphaAPI.updateBlock({
@@ -86,6 +88,70 @@ const twitterReferencesListener = async (
 };
 
 runExtension("twitter", () => {
+  createConfigObserver({
+    title: CONFIG,
+    config: {
+      tabs: [
+        {
+          id: "home",
+          fields: [
+            {
+              title: "oauth",
+              type: "oauth",
+              description: "Click the button to login to Twitter",
+              options: {
+                service: "twitter",
+                popoutUrl: (token: string) =>
+                  `https://api.twitter.com/oauth/authenticate?oauth_token=${token}`,
+                ServiceIcon: Twitter,
+              },
+            },
+            {
+              title: "sent",
+              type: "text",
+              description: "Block reference to move sent tweets under.",
+            },
+            {
+              title: "label",
+              type: "text",
+              description:
+                "The label of the block that will be the parent of sent tweets",
+            },
+            {
+              title: "append text",
+              type: "text",
+              description: "Text to append at the end of a sent tweet block",
+            },
+          ],
+        },
+        {
+          id: "feed",
+          toggleable: true,
+          fields: [
+            {
+              type: "flag",
+              title: "any day",
+              description:
+                "Whether or not the twitter feed should appear any time you appear on a daily note page",
+            },
+            {
+              type: "flag",
+              title: "bottom",
+              description:
+                "Whether to import today's tweets to the top or bottom of the daily note page",
+            },
+            {
+              type: "text",
+              title: "format",
+              description:
+                "The format each tweet will use when imported to the daily note page.",
+            },
+          ],
+        },
+      ],
+    },
+  });
+
   addButtonListener(TWITTER_REFERENCES_COMMAND, twitterReferencesListener);
 
   createButtonObserver({
@@ -97,31 +163,6 @@ runExtension("twitter", () => {
         parent: b.parentElement,
         blockUid,
       });
-    },
-  });
-
-  createHTMLObserver({
-    tag: "H1",
-    className: "rm-title-display",
-    callback: (title: HTMLHeadingElement) => {
-      const d = title.closest(".roam-article");
-      if (title.innerText === "roam/js/twitter" && d) {
-        if (!d.hasAttribute("data-roamjs-twitter-login")) {
-          const tree = getTreeByPageName("roam/js/twitter");
-          const oauthNode = tree.find((t) => /oauth/i.test(t.text.trim()));
-          if (!oauthNode) {
-            const span = document.createElement("span");
-            span.id = "roamjs-twitter-login";
-            d.insertBefore(span, d.firstElementChild);
-            loginRender(span);
-          }
-        } else {
-          const span = document.getElementById("roamjs-twitter-login");
-          if (span) {
-            span.remove();
-          }
-        }
-      }
     },
   });
 
@@ -148,9 +189,7 @@ runExtension("twitter", () => {
     },
   });
 
-  const feed = getTreeByPageName("roam/js/twitter").find((t) =>
-    /feed/i.test(t.text)
-  );
+  const feed = getTreeByPageName(CONFIG).find((t) => /feed/i.test(t.text));
   if (feed) {
     const isAnyDay = feed.children.some((t) => /any day/i.test(t.text));
     const format =
@@ -164,7 +203,7 @@ runExtension("twitter", () => {
           parent,
           d.firstElementChild.firstElementChild.nextElementSibling
         );
-        feedRender(parent, {title, format});
+        feedRender(parent, { title, format });
       }
     };
     if (isAnyDay) {

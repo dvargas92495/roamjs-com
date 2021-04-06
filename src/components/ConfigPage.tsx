@@ -1,15 +1,17 @@
 import {
   Button,
   Card,
+  Checkbox,
   Icon,
   InputGroup,
   Label,
   NumericInput,
+  Switch,
   Tab,
   Tabs,
   Tooltip,
 } from "@blueprintjs/core";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import {
   createBlock,
@@ -23,6 +25,7 @@ import {
   createHTMLObserver,
   getFirstChildUidByBlockUid,
 } from "../entry-helpers";
+import ExternalLogin from "./ExternalLogin";
 import { toTitle } from "./hooks";
 import PageInput from "./PageInput";
 
@@ -36,12 +39,27 @@ type NumberField = {
   defaultValue?: number;
 };
 
+type FlagField = {
+  type: "flag";
+  defaultValue?: boolean;
+};
+
 type PagesField = {
   type: "pages";
   defaultValue?: string[];
 };
 
-type UnionField = PagesField | TextField | NumberField;
+type OauthField = {
+  type: "oauth";
+  defaultValue?: [];
+  options: {
+    service: string;
+    popoutUrl: (s: string) => string;
+    ServiceIcon: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
+  };
+};
+
+type UnionField = PagesField | TextField | NumberField | OauthField | FlagField;
 
 type Field<T extends UnionField> = T & {
   title: string;
@@ -116,16 +134,16 @@ const useSingleChildValue = <T extends string | number>({
         });
         setValueUid(newValueUid);
       } else {
-        const fieldUid = window.roamAlphaAPI.util.generateUID();
+        const newUid = window.roamAlphaAPI.util.generateUID();
         window.roamAlphaAPI.createBlock({
-          block: { string: title, uid: fieldUid },
+          block: { string: title, uid: newUid },
           location: { order, "parent-uid": parentUid },
         });
-        setUid(fieldUid);
+        setTimeout(() => setUid(newUid));
         const newValueUid = window.roamAlphaAPI.util.generateUID();
         window.roamAlphaAPI.createBlock({
           block: { string: `${v}`, uid: newValueUid },
-          location: { order: 0, "parent-uid": fieldUid },
+          location: { order: 0, "parent-uid": newUid },
         });
         setValueUid(newValueUid);
       }
@@ -190,6 +208,40 @@ const NumberPanel: FieldPanel<NumberField> = ({
   );
 };
 
+const FlagPanel: FieldPanel<FlagField> = ({
+  title,
+  uid: initialUid,
+  parentUid,
+  order,
+  description,
+}) => {
+  const [uid, setUid] = useState(initialUid);
+  return (
+    <Checkbox
+      checked={!!uid}
+      onChange={(e) => {
+        if ((e.target as HTMLInputElement).checked) {
+          const newUid = window.roamAlphaAPI.util.generateUID();
+          window.roamAlphaAPI.createBlock({
+            block: { string: title, uid: newUid },
+            location: { order, "parent-uid": parentUid },
+          });
+          setTimeout(() => setUid(newUid), 1);
+        } else {
+          window.roamAlphaAPI.deleteBlock({ block: { uid } });
+          setUid("");
+        }
+      }}
+      labelElement={
+        <>
+          {title}
+          <Description description={description} />{" "}
+        </>
+      }
+    />
+  );
+};
+
 const PagesPanel: FieldPanel<PagesField> = ({
   uid: initialUid,
   title,
@@ -198,8 +250,8 @@ const PagesPanel: FieldPanel<PagesField> = ({
   description,
 }) => {
   const [uid, setUid] = useState(initialUid);
-  const [pages, setPages] = useState(
-    () => uid
+  const [pages, setPages] = useState(() =>
+    uid
       ? getTreeByBlockUid(uid).children.map((v) => ({
           text: v.text,
           uid: v.uid,
@@ -226,15 +278,15 @@ const PagesPanel: FieldPanel<PagesField> = ({
                   block: { string: value, uid: valueUid },
                 });
               } else {
-                const fieldUid = window.roamAlphaAPI.util.generateUID();
+                const newUid = window.roamAlphaAPI.util.generateUID();
                 window.roamAlphaAPI.createBlock({
-                  block: { string: title, uid: fieldUid },
+                  block: { string: title, uid: newUid },
                   location: { order, "parent-uid": parentUid },
                 });
-                setUid(fieldUid);
+                setTimeout(() => setUid(newUid));
                 window.roamAlphaAPI.createBlock({
                   block: { string: value, uid: valueUid },
-                  location: { order: 0, "parent-uid": fieldUid },
+                  location: { order: 0, "parent-uid": newUid },
                 });
               }
               setPages([...pages, { text: value, uid: valueUid }]);
@@ -267,14 +319,51 @@ const PagesPanel: FieldPanel<PagesField> = ({
   );
 };
 
+const OauthPanel: FieldPanel<OauthField> = ({
+  uid,
+  parentUid,
+  description,
+  options,
+}) => {
+  const [accounts, setAccounts] = useState(() =>
+    uid
+      ? getTreeByBlockUid(uid).children.map((v) => ({
+          text: v.text,
+          uid: v.uid,
+        }))
+      : []
+  );
+  return (
+    <>
+      {!accounts.length && (
+        <>
+          <Label>
+            Log In
+            <Description description={description} />
+          </Label>
+          <ExternalLogin
+            onSuccess={(acc) => setAccounts([...accounts, acc])}
+            parentUid={parentUid}
+            {...options}
+          />
+        </>
+      )}
+      {!!accounts.length && <span>Successfully logged in</span>}
+    </>
+  );
+};
+
 const Panels = {
   text: TextPanel,
   number: NumberPanel,
+  flag: FlagPanel,
   pages: PagesPanel,
+  oauth: OauthPanel,
 } as { [UField in UnionField as UField["type"]]: FieldPanel<UField> };
 
 type ConfigTab = {
   id: string;
+  toggleable?: boolean;
   fields: Field<UnionField>[];
 };
 
@@ -285,27 +374,41 @@ type Config = {
 const FieldTabs = ({
   id,
   fields,
-  extensionId,
+  uid: initialUid,
   pageUid,
   order,
+  toggleable,
 }: {
-  extensionId: string;
+  uid: string;
   pageUid: string;
   order: number;
 } & ConfigTab) => {
-  const [selectedTabId, setSelectedTabId] = useState(fields[0].title);
+  const [uid, setUid] = useState(initialUid);
+  const subTree = useMemo(() => (uid ? getTreeByBlockUid(uid) : undefined), [
+    uid,
+  ]);
+  const [parentUid, parentTree] = useMemo(
+    () =>
+      /home/i.test(id)
+        ? [pageUid, getTreeByBlockUid(pageUid).children]
+        : [
+            subTree?.uid ||
+              (toggleable
+                ? ""
+                : createBlock({
+                    parentUid: pageUid,
+                    order,
+                    node: { text: id },
+                  })),
+            subTree?.children || [],
+          ],
+    [uid, subTree, id, toggleable]
+  );
+  const [enabled, setEnabled] = useState(!toggleable || !!parentUid);
+  const [selectedTabId, setSelectedTabId] = useState(enabled ? fields[0].title : 'enabled');
   const onTabsChange = useCallback((tabId: string) => setSelectedTabId(tabId), [
     setSelectedTabId,
   ]);
-  const tree = getTreeByPageName(`roam/js/${extensionId}`);
-  const subTree = tree.find((t) => new RegExp(id, "i").test(t.text));
-  const [parentUid, parentTree] = /home/i.test(id)
-    ? [pageUid, tree]
-    : [
-        subTree?.uid ||
-          createBlock({ parentUid: pageUid, order, node: { text: id } }),
-        subTree?.children || [],
-      ];
   return (
     <Tabs
       vertical
@@ -314,6 +417,33 @@ const FieldTabs = ({
       selectedTabId={selectedTabId}
       renderActiveTabPanelOnly
     >
+      {toggleable && (
+        <Tab
+          id={"enabled"}
+          title={"enabled"}
+          panel={
+            <Switch
+              labelElement={"Enabled"}
+              checked={enabled}
+              onChange={(e) => {
+                const checked = (e.target as HTMLInputElement).checked;
+                setEnabled(checked);
+                if (checked) {
+                  const newUid = window.roamAlphaAPI.util.generateUID();
+                  window.roamAlphaAPI.createBlock({
+                    location: { "parent-uid": pageUid, order },
+                    block: { string: id, uid: newUid },
+                  });
+                  setTimeout(() => setUid(newUid));
+                } else {
+                  window.roamAlphaAPI.deleteBlock({ block: { uid } });
+                  setUid("");
+                }
+              }}
+            />
+          }
+        />
+      )}
       {fields.map((field, i) => {
         const { type, title, defaultValue } = field;
         const Panel = Panels[type];
@@ -322,6 +452,7 @@ const FieldTabs = ({
             id={title}
             key={title}
             title={title}
+            disabled={!enabled}
             panel={
               <Panel
                 {...field}
@@ -355,6 +486,7 @@ const ConfigPage = ({
     setSelectedTabId,
   ]);
   const pageUid = getPageUidByPageTitle(`roam/js/${id}`);
+  const tree = getTreeByPageName(`roam/js/${id}`);
   return (
     <Card>
       <h4 style={{ padding: 4 }}>{toTitle(id)} Configuration</h4>
@@ -364,7 +496,7 @@ const ConfigPage = ({
         onChange={onTabsChange}
         selectedTabId={selectedTabId}
       >
-        {config.tabs.map(({ id: tabId, fields }, i) => (
+        {config.tabs.map(({ id: tabId, fields, toggleable }, i) => (
           <Tab
             id={tabId}
             key={tabId}
@@ -373,9 +505,10 @@ const ConfigPage = ({
               <FieldTabs
                 id={tabId}
                 fields={fields}
-                extensionId={id}
+                uid={tree.find((t) => new RegExp(tabId, "i").test(t.text))?.uid}
                 pageUid={pageUid}
                 order={i}
+                toggleable={!!toggleable}
               />
             }
           />
@@ -384,6 +517,18 @@ const ConfigPage = ({
     </Card>
   );
 };
+
+const fieldsToChildren = (t: ConfigTab) =>
+  t.fields
+    .filter((f) => !!f.defaultValue)
+    .map((f) => ({
+      text: f.title,
+      children: !f.defaultValue
+        ? []
+        : f.type === "pages"
+        ? f.defaultValue.map((v) => ({ text: v }))
+        : [{ text: `${f.defaultValue}` }],
+    }));
 
 export const createConfigObserver = ({
   title,
@@ -395,17 +540,17 @@ export const createConfigObserver = ({
   if (!getPageUidByPageTitle(title)) {
     createPage({
       title,
-      tree: config.tabs.map((t) => ({
-        text: t.id,
-        children: t.fields.map((f) => ({
-          text: f.title,
-          children: !f.defaultValue
-            ? []
-            : f.type === "pages"
-            ? f.defaultValue.map((v) => ({ text: v }))
-            : [{ text: `${f.defaultValue}` }],
-        })),
-      })),
+      tree: [
+        ...(config.tabs.some((t) => /home/i.test(t.id))
+          ? fieldsToChildren(config.tabs.find((t) => /home/i.test(t.id)))
+          : []),
+        ...config.tabs
+          .filter((t) => !/home/i.test(t.id) && !t.toggleable)
+          .map((t) => ({
+            text: t.id,
+            children: fieldsToChildren(t),
+          })),
+      ],
     });
   }
   createHTMLObserver({

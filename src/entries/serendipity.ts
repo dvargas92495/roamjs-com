@@ -174,6 +174,7 @@ runExtension(ID, () => {
               type: "pages",
               description:
                 "Blocks and children tagged with one of these pages will be included for random selection.",
+              defaultValue: ["books"],
             },
             {
               title: "excludes",
