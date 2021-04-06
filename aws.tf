@@ -71,6 +71,14 @@ variable "floss_token" {
     type = string
 }
 
+variable "google_client_id" {
+    type = string  
+}
+
+variable "google_client_secret" {
+    type = string  
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -125,6 +133,8 @@ module "aws-serverless-backend" {
         "finish-launch-website/post",
         "finish-shutdown-website/post",
         "finish-start-service/post",
+        "google-auth/post",
+        "google-login/post",
         "install/put",
         "is-subscribed/get",
         "launch-social/post",
@@ -388,4 +398,16 @@ resource "github_actions_secret" "cloudfront_arn" {
   repository       = "roam-js-extensions"
   secret_name      = "CLOUDFRONT_ARN"
   plaintext_value  = module.aws_static_site.cloudfront_arn
+}
+
+resource "github_actions_secret" "google_client_id" {
+  repository       = "roam-js-extensions"
+  secret_name      = "GOOGLE_CLIENT_ID"
+  plaintext_value  = var.google_client_id
+}
+
+resource "github_actions_secret" "google_client_secret" {
+  repository       = "roam-js-extensions"
+  secret_name      = "GOOGLE_CLIENT_SECRET"
+  plaintext_value  = var.google_client_secret
 }
