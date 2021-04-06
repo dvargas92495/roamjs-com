@@ -8,7 +8,11 @@ const OauthPage = (): React.ReactElement => {
       const isAuth = query.get("auth");
       if (isAuth) {
         const params = {};
+        const hashParams = new URLSearchParams(
+          window.location.hash.replace("#", "?")
+        );
         Array.from(query.entries())
+          .concat(Array.from(hashParams.entries()))
           .filter(([k]) => k !== "auth")
           .forEach(([k, v]) => (params[k] = v));
         window.opener.postMessage(
