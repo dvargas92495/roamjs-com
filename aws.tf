@@ -133,8 +133,6 @@ module "aws-serverless-backend" {
         "finish-launch-website/post",
         "finish-shutdown-website/post",
         "finish-start-service/post",
-        "google-auth/post",
-        "google-login/post",
         "install/put",
         "is-subscribed/get",
         "launch-social/post",

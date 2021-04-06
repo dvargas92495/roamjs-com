@@ -243,7 +243,10 @@ export const authenticate = (
     Authorization.length === 32 || Authorization.includes(":")
       ? // the old ways of generating tokens did not have user id encoded, so we query all users
         [null, Authorization.split(":").slice(-1)[0]]
-      : Buffer.from(Authorization, "base64").toString().split(":");
+      : [
+          Buffer.from(Authorization, "base64").toString().split(":")[0],
+          Authorization,
+        ];
 
   return (userId
     ? users.getUser(`user_${userId}`).catch(() => undefined)

@@ -25,7 +25,7 @@ import {
   createHTMLObserver,
   getFirstChildUidByBlockUid,
 } from "../entry-helpers";
-import ExternalLogin from "./ExternalLogin";
+import ExternalLogin, { ExternalLoginOptions } from "./ExternalLogin";
 import { toTitle } from "./hooks";
 import PageInput from "./PageInput";
 
@@ -52,11 +52,7 @@ type PagesField = {
 type OauthField = {
   type: "oauth";
   defaultValue?: [];
-  options: {
-    service: string;
-    popoutUrl: (s: string) => string;
-    ServiceIcon: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
-  };
+  options: ExternalLoginOptions;
 };
 
 type UnionField = PagesField | TextField | NumberField | OauthField | FlagField;
@@ -304,7 +300,7 @@ const PagesPanel: FieldPanel<PagesField> = ({
             justifyContent: "space-between",
           }}
         >
-          {p.text}
+          <span>{p.text}</span>
           <Button
             icon={"trash"}
             minimal
@@ -405,7 +401,9 @@ const FieldTabs = ({
     [uid, subTree, id, toggleable]
   );
   const [enabled, setEnabled] = useState(!toggleable || !!parentUid);
-  const [selectedTabId, setSelectedTabId] = useState(enabled ? fields[0].title : 'enabled');
+  const [selectedTabId, setSelectedTabId] = useState(
+    enabled ? fields[0].title : "enabled"
+  );
   const onTabsChange = useCallback((tabId: string) => setSelectedTabId(tabId), [
     setSelectedTabId,
   ]);

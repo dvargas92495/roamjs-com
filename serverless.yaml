@@ -85,19 +85,19 @@ functions:
           path: fund
           method: post
           cors: true
-  google-login-post:
-    handler: out/google-login_post.handler
-    events:
-      - http:
-          path: google-login
-          method: post
-          cors: true
   google-auth-post:
     handler: out/google-auth_post.handler
     events:
       - http:
           path: google-auth
           method: post
+          cors: true
+  google-calendar-get:
+    handler: out/google-calendar_get.handler
+    events:
+      - http:
+          path: google-calendar
+          method: get
           cors: true
   is-subscribed-get:
     handler: out/is-subscribed_get.handler

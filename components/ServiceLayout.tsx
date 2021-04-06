@@ -173,7 +173,7 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
           display: "flex",
           justifyContent: "space-between",
           flexDirection: "column",
-          width: "50%",
+          width: "70%",
         }}
       >
         {!authenticated && (

@@ -101,8 +101,20 @@ runExtension("twitter", () => {
               description: "Click the button to login to Twitter",
               options: {
                 service: "twitter",
-                popoutUrl: (token: string) =>
-                  `https://api.twitter.com/oauth/authenticate?oauth_token=${token}`,
+                getPopoutUrl: () =>
+                  axios
+                    .post(`${process.env.REST_API_URL}/twitter-login`)
+                    .then(
+                      (r) =>
+                        `https://api.twitter.com/oauth/authenticate?oauth_token=${r.data.token}`
+                    ),
+                getAuthData: (data) =>
+                  axios
+                    .post(
+                      `${process.env.REST_API_URL}/twitter-auth`,
+                      JSON.parse(data)
+                    )
+                    .then((r) => r.data),
                 ServiceIcon: Twitter,
               },
             },

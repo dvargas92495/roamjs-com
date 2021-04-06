@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
-import { wrapAxios, userError, serverError } from "../lambda-helpers";
+import { userError, headers } from "../lambda-helpers";
 
 const apiKey = process.env.GOOGLE_CALENDAR_API_KEY;
 
@@ -11,19 +11,32 @@ export const handler = async (
   if (!calendarId) {
     return userError("calendarId is required", event);
   }
-  if (!apiKey) {
-    return serverError("No API key stored", event);
-  }
-  return wrapAxios(
-    axios.get(
-      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
-        calendarId
-      )}/events?key=${apiKey}&timeMin=${encodeURIComponent(
-        timeMin
-      )}&timeMax=${encodeURIComponent(
-        timeMax
-      )}&orderBy=startTime&singleEvents=true`
-    ),
-    event
-  );
+  const token =
+    `access_token=${event.headers.Authorization}` || `key=${apiKey}`;
+  return Promise.all(
+    calendarId
+      .split(",")
+      .map((c) =>
+        axios.get(
+          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
+            c
+          )}/events?${token}&timeMin=${encodeURIComponent(
+            timeMin
+          )}&timeMax=${encodeURIComponent(
+            timeMax
+          )}&orderBy=startTime&singleEvents=true`
+        )
+      )
+  )
+    .then((rs) => rs.flatMap((r) => r.data.items))
+    .then((items) => ({
+      statusCode: 200,
+      body: JSON.stringify({ items }),
+      headers: headers(event),
+    }))
+    .catch((e) => ({
+      statusCode: e.response?.status || 500,
+      body: e.response?.data ? JSON.stringify(e.response.data) : e.message,
+      headers: headers(event),
+    }));
 };

@@ -4,6 +4,7 @@ import {
   getPageUidByPageTitle,
   getTreeByBlockUid,
   getUids,
+  toRoamDate,
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import { Dict } from "mixpanel-browser";
@@ -600,7 +601,8 @@ export const getConfigFromBlock = (
   );
 };
 
-export const getWordCount = (str = ""): number => str.trim().split(/\s+/).length;
+export const getWordCount = (str = ""): number =>
+  str.trim().split(/\s+/).length;
 
 const getWordCountByBlockId = (blockId: number): number => {
   const block = window.roamAlphaAPI.pull(
@@ -828,6 +830,10 @@ export const getRoamUrl = (blockUid?: string): string =>
   `${window.location.href.replace(/\/page\/.*$/, "")}${
     blockUid ? `/page/${blockUid}` : ""
   }`;
+
+export const getCurrentPageUid = (): string =>
+  window.location.hash.match(/\/page\/(.*)$/)?.[1] ||
+  getPageUidByPageTitle(toRoamDate(new Date()));
 
 export const getRoamUrlByPage = (page: string): string => {
   const uid = getPageUidByPageTitle(page);
