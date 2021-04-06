@@ -9,7 +9,12 @@ import {
   getConfigFromPage,
   RoamBlock,
   getLinkedPageReferences,
+  getPageTitleReferencesByPageTitle,
 } from "roam-client";
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+window.debugSortRefs = (s: string) => getPageTitleReferencesByPageTitle(s)
 
 const menuItemCallback = (
   sortContainer: Element,
