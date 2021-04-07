@@ -322,8 +322,8 @@ const ContributePage = (): React.ReactElement => {
           },
           {
             title: "Daniel D Ostlund",
-            imgSrc: "sponsors/sai.jpg",
-            url: "https://twitter.com/saisatik",
+            imgSrc: "sponsors/dostlund.jfif",
+            url: "https://twitter.com/dostlund",
           },
         ]}
       />
