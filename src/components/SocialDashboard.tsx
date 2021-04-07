@@ -132,6 +132,10 @@ const TwitterTutorial = ({ pageUid }: { pageUid: string }) => {
         location: { "parent-uid": pageUid, order: length },
         block: { uid, string: "" },
       });
+      const showBlocks = document.getElementById("roamjs-service-hide-blocks");
+      if (showBlocks) {
+        showBlocks.click();
+      }
       setTimeout(() => {
         const portalContainer = document.createElement("span");
         portalContainer.id = "roamjs-social-guide";
@@ -288,19 +292,26 @@ const TwitterTutorial = ({ pageUid }: { pageUid: string }) => {
         `[:node/title "roam/js/twitter"]`,
         pullWatchListener
       );
-      alertCallback.current = () => {
-        if (!document.getElementById("roamjs-twitter-login")) {
-          const d = document.getElementsByClassName(
-            "roam-article"
-          )[0] as HTMLDivElement;
-          const span = document.createElement("span");
-          span.id = "roamjs-twitter-login";
-          d.insertBefore(span, d.firstElementChild);
-          loginRender(span);
-        }
-      };
+      setTimeout(() => {
+        const d = document.getElementById(
+          "roamjs-alert-guide"
+        ) as HTMLDivElement;
+        const span = document.createElement("span");
+        span.id = "roamjs-twitter-login";
+        span.style.display = "inline-block";
+        span.style.width = "100%";
+        span.style.textAlign = "center";
+        span.style.marginTop = "16px";
+        d.appendChild(span);
+        loginRender(span);
+        const styleEl = document.createElement("style");
+        styleEl.innerText = `.bp3-alert-footer {
+  display: none;
+}`;
+        span.appendChild(styleEl);
+      }, 1);
       setAlertMessage(
-        "We need to now connect your Twitter account to Roam. Click the login with Twitter button that will appear at the top of the screen."
+        "We need to now connect your Twitter account to Roam. Click the login with Twitter button below"
       );
     } else {
       stepThree();
@@ -361,8 +372,10 @@ const TwitterTutorial = ({ pageUid }: { pageUid: string }) => {
         onConfirm={() => alertCallback.current()}
         onClose={onClose}
         cancelButtonText={"Cancel"}
+        canOutsideClickCancel
+        canEscapeKeyCancel
       >
-        {alertMessage}
+        <div id={"roamjs-alert-guide"}>{alertMessage}</div>
       </Alert>
     </>
   );

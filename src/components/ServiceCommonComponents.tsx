@@ -430,7 +430,7 @@ button.bp3-button.bp3-panel-stack-header-back {
         <Card>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <h6>Roam outline with config data is hidden by default.</h6>
-            <Button minimal icon={"small-cross"} onClick={showBlocks} />
+            <Button minimal icon={"small-cross"} onClick={showBlocks} id={'roamjs-service-hide-blocks'} />
           </div>
           <style>
             {`.rm-block-children {

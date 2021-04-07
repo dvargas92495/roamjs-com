@@ -25,6 +25,7 @@ import { render } from "../components/TweetOverlay";
 import { render as feedRender } from "../components/TwitterFeed";
 import { createConfigObserver } from "../components/ConfigPage";
 import Twitter from "../assets/Twitter.svg";
+import { twitterLoginOptions } from "../components/TwitterLogin";
 
 addStyle(`.roamjs-twitter-count {
   position: relative;
@@ -99,24 +100,7 @@ runExtension("twitter", () => {
               title: "oauth",
               type: "oauth",
               description: "Click the button to login to Twitter",
-              options: {
-                service: "twitter",
-                getPopoutUrl: () =>
-                  axios
-                    .post(`${process.env.REST_API_URL}/twitter-login`)
-                    .then(
-                      (r) =>
-                        `https://api.twitter.com/oauth/authenticate?oauth_token=${r.data.token}`
-                    ),
-                getAuthData: (data) =>
-                  axios
-                    .post(
-                      `${process.env.REST_API_URL}/twitter-auth`,
-                      JSON.parse(data)
-                    )
-                    .then((r) => r.data),
-                ServiceIcon: Twitter,
-              },
+              options: twitterLoginOptions,
             },
             {
               title: "sent",
