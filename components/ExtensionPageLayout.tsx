@@ -49,6 +49,7 @@ const contributors = {
   "Eric Anderson": "http://ecanderson.com/",
   "Zach Phillips": "https://zachphillips.blog/",
   "Isabela Granic": "http://isabelagranic.com/",
+  "Joe Ocampo": "https://twitter.com/joe_ocampo",
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{
