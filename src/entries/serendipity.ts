@@ -57,6 +57,24 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
     defaultValue: DEFAULT_DAILY_LABEL,
   });
   if (!getBlockUidByTextOnPage({ text: label, title: todayPage })) {
+    const includes = getSettingValuesFromTree({
+      tree,
+      key: "includes",
+    });
+    if (includes.length === 0) {
+      createBlock({
+        node: {
+          text: label,
+          children: [
+            {
+              text: `The set of block references to randomly choose from is empty. Add some tags in the \`includes\` field on #[[${CONFIG}]]!`,
+            },
+          ],
+        },
+        parentUid: todayPageUid,
+      });
+      return;
+    }
     const labelUid = createBlock({
       node: { text: label, children: [{ text: "Loading..." }] },
       parentUid: todayPageUid,
@@ -78,10 +96,6 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
     const wordMinimum = getSettingIntFromTree({
       tree,
       key: "word minimum",
-    });
-    const includes = getSettingValuesFromTree({
-      tree,
-      key: "includes",
     });
     const excludes = getSettingValuesFromTree({
       tree,
@@ -151,10 +165,11 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
       getTreeByBlockUid(labelUid).children.forEach(({ uid }) =>
         window.roamAlphaAPI.deleteBlock({ block: { uid } })
       );
-      children.forEach((node) =>
+      children.forEach((node, order) =>
         createBlock({
           node,
           parentUid: labelUid,
+          order,
         })
       );
     }, 1);
