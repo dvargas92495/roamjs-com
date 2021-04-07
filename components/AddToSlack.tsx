@@ -40,7 +40,7 @@ const AddToSlack: React.FunctionComponent = () => {
         Slack workspace's token.
       </Body>
       <a
-        href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.NEXT_PUBLIC_SLACK_CLIENT_ID}&scope=channels:read,chat:write,users:read,users:read.email&user_scope=`}
+        href={`https://slack.com/oauth/v2/authorize?client_id=${process.env.NEXT_PUBLIC_SLACK_CLIENT_ID}&scope=channels:read,chat:write,users:read,users:read.email&user_scope=chat:write`}
       >
         <img
           alt="Add to Slack"
