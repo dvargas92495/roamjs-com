@@ -6,12 +6,49 @@ import {
   getUserFormat,
   render,
 } from "../components/SlackOverlay";
+import { createConfigObserver } from "../components/ConfigPage";
+import Slack from "../assets/Slack_Mark.svg";
+import axios from "axios";
+
+const CONFIG = "roam/js/slack";
 
 runExtension("slack", () => {
+  createConfigObserver({
+    title: CONFIG,
+    config: {
+      tabs: [
+        {
+          id: "home",
+          fields: [
+            {
+              title: "oauth",
+              type: "oauth",
+              description: "Click the button below to login with slack",
+              options: {
+                ServiceIcon: Slack,
+                service: "slack",
+                getPopoutUrl: () =>
+                  Promise.resolve(
+                    `https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_CLIENT_ID}&scope=channels:read,chat:write,users:read,users:read.email&user_scope=chat:write&redirect_uri=https://roamjs.com/oauth?auth=true`
+                  ),
+                getAuthData: (d) =>
+                  axios
+                    .post(`${process.env.REST_API_URL}/slack-url`, {
+                      ...JSON.parse(d),
+                      redirect_uri: "https://roamjs.com/oauth?auth=true",
+                    })
+                    .then((r) => r.data),
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
   createHashtagObserver({
     attribute: "data-roamjs-slack-overlay",
     callback: (s: HTMLSpanElement) => {
-      const tree = getTreeByPageName("roam/js/slack");
+      const tree = getTreeByPageName(CONFIG);
       const userFormatIsDefault = tree.every(
         (t) => !/user format/i.test(t.text.trim())
       );

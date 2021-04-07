@@ -183,6 +183,13 @@ functions:
           path: shutdown-website
           method: post
           cors: true
+  slack-url-post:
+    handler: out/slack-url_post.handler
+    events:
+      - http:
+          path: slack-url
+          method: post
+          cors: true
   social-schedule-delete:
     handler: out/social-schedule_delete.handler
     events:

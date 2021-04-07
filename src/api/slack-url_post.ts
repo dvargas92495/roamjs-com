@@ -6,7 +6,7 @@ import querystring from "querystring";
 export const handler = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
-  const { code } = JSON.parse(event.body);
+  const { code, redirect_uri } = JSON.parse(event.body);
   return axios
     .post(
       "https://slack.com/api/oauth.v2.access",
@@ -14,7 +14,7 @@ export const handler = async (
         code,
         client_id: process.env.SLACK_CLIENT_ID,
         client_secret: process.env.SLACK_CLIENT_SECRET,
-        redirect_uri: "https://roamjs.com/docs/extensions/slack",
+        redirect_uri,
       }),
       {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -24,7 +24,10 @@ export const handler = async (
       r.data.ok
         ? {
             statusCode: 200,
-            body: JSON.stringify({ token: r.data.access_token }),
+            body: JSON.stringify({
+              token: r.data.access_token,
+              user_token: r.data.authed_user.access_token,
+            }),
             headers: headers(event),
           }
         : {

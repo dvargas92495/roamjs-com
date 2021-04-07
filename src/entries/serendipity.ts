@@ -115,63 +115,77 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
     ];
 
     setTimeout(() => {
-      const includeBlocks = includes.some((i) => i === "{all}")
-        ? getAllBlockUidsAndTexts()
-        : includes
-            .map(extractTag)
-            .flatMap((tag) => getBlockUidsReferencingPage(tag))
-            .flatMap((uid) =>
-              allBlockMapper(getTreeByBlockUid(uid)).map((b) => ({
-                uid: b.uid,
-                text: b.text,
-              }))
-            );
-
-      const blockUids = Array.from(
-        new Set(
-          includeBlocks
-            .filter(({ uid }) => !excludeBlockUids.has(uid))
-            .filter(({ text }) => text.length >= characterMinimum)
-            .filter(({ text }) => getWordCount(text) >= wordMinimum)
-            .filter(({ uid }) => {
-              if (timeout === 0) {
-                return true;
-              }
-              return (
-                differenceInDays(
-                  date,
-                  getPageTitlesReferencingBlockUid(uid)
-                    .filter((t) => DAILY_NOTE_PAGE_REGEX.test(t))
-                    .reduce(
-                      (prev, cur) => dateMax([parseRoamDate(cur), prev]),
-                      new Date(0)
-                    )
-                ) >= timeout
+      try {
+        const includeBlocks = includes.some((i) => i === "{all}")
+          ? getAllBlockUidsAndTexts()
+          : includes
+              .map(extractTag)
+              .flatMap((tag) => getBlockUidsReferencingPage(tag))
+              .flatMap((uid) =>
+                allBlockMapper(getTreeByBlockUid(uid)).map((b) => ({
+                  uid: b.uid,
+                  text: b.text,
+                }))
               );
-            })
-        )
-      );
-      const children: { text: string }[] = [];
-      for (let c = 0; c < count; c++) {
-        if (blockUids.length) {
-          const i = Math.floor(Math.random() * blockUids.length);
-          children.push({
-            text: `((${blockUids.splice(i, 1)[0].uid}))`,
-          });
-        } else {
-          break;
+
+        const blockUids = Array.from(
+          new Set(
+            includeBlocks
+              .filter(({ uid }) => !excludeBlockUids.has(uid))
+              .filter(({ text }) => text.length >= characterMinimum)
+              .filter(({ text }) => getWordCount(text) >= wordMinimum)
+              .filter(({ uid }) => {
+                if (timeout === 0) {
+                  return true;
+                }
+                return (
+                  differenceInDays(
+                    date,
+                    getPageTitlesReferencingBlockUid(uid)
+                      .filter((t) => DAILY_NOTE_PAGE_REGEX.test(t))
+                      .reduce(
+                        (prev, cur) => dateMax([parseRoamDate(cur), prev]),
+                        new Date(0)
+                      )
+                  ) >= timeout
+                );
+              })
+          )
+        );
+        const children: { text: string }[] = [];
+        for (let c = 0; c < count; c++) {
+          if (blockUids.length) {
+            const i = Math.floor(Math.random() * blockUids.length);
+            children.push({
+              text: `((${blockUids.splice(i, 1)[0].uid}))`,
+            });
+          } else {
+            break;
+          }
         }
-      }
-      getTreeByBlockUid(labelUid).children.forEach(({ uid }) =>
-        window.roamAlphaAPI.deleteBlock({ block: { uid } })
-      );
-      children.forEach((node, order) =>
+        getTreeByBlockUid(labelUid).children.forEach(({ uid }) =>
+          window.roamAlphaAPI.deleteBlock({ block: { uid } })
+        );
+        children.forEach((node, order) =>
+          createBlock({
+            node,
+            parentUid: labelUid,
+            order,
+          })
+        );
+      } catch (e) {
+        getTreeByBlockUid(labelUid).children.forEach(({ uid }) =>
+          window.roamAlphaAPI.deleteBlock({ block: { uid } })
+        );
         createBlock({
-          node,
+          node: {
+            text:
+              "An error occured while pulling block references. Email support@roamjs.com with this error:",
+            children: [{ text: e.message }],
+          },
           parentUid: labelUid,
-          order,
-        })
-      );
+        });
+      }
     }, 1);
   }
 };

@@ -15,7 +15,6 @@ import {
   Grid,
   Button,
   NumberField,
-  ExternalLink,
   Loading,
 } from "@dvargas92495/ui";
 import axios from "axios";
@@ -318,6 +317,11 @@ const ContributePage = (): React.ReactElement => {
           },
           {
             title: "Sai Satish Kandukuri",
+            imgSrc: "sponsors/sai.jpg",
+            url: "https://twitter.com/saisatik",
+          },
+          {
+            title: "Daniel D Ostlund",
             imgSrc: "sponsors/sai.jpg",
             url: "https://twitter.com/saisatik",
           },

@@ -107,7 +107,13 @@ const SlackContent: React.FunctionComponent<
     setLoading(true);
     setError("");
     const tree = getTreeByPageName("roam/js/slack");
-    const token = getSettingValueFromTree({ tree, key: "token" });
+    const legacyToken = getSettingValueFromTree({ tree, key: "token" });
+    const oauth = getSettingValueFromTree({
+      tree,
+      key: "oauth",
+      defaultValue: "{}",
+    });
+    const { token = legacyToken, user_token } = JSON.parse(oauth);
     const userFormat = getUserFormat(tree);
     const channelFormat = getChannelFormat(tree);
     const aliases = getAliases(tree);
@@ -195,14 +201,14 @@ const SlackContent: React.FunctionComponent<
                   )}/page/${blockUid}`
                 )
                 .replace(aliasRegex, (_, alias, url) => `<${url}|${alias}>`),
-              token,
               ...(asUser
                 ? {
                     username: members.find(
                       (m) => m.profile.email === currentUserEmail
                     )?.name,
+                    token: user_token,
                   }
-                : {}),
+                : { token }),
             })
             .then(close);
         } else {

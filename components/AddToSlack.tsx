@@ -9,7 +9,10 @@ const AddToSlack: React.FunctionComponent = () => {
     const query = new URLSearchParams(window.location.search);
     if (query.get("code")) {
       axios
-        .post(`${API_URL}/slack-url`, { code: query.get("code") })
+        .post(`${API_URL}/slack-url`, {
+          code: query.get("code"),
+          redirect_uri: "https://roamjs.com/docs/extensions/slack",
+        })
         .then((r) => setToken(r.data.token));
     }
   }, [setToken]);
