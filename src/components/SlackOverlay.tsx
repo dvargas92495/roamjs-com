@@ -1,4 +1,11 @@
-import { Button, Icon, Popover, Spinner, Text } from "@blueprintjs/core";
+import {
+  Button,
+  Checkbox,
+  Icon,
+  Popover,
+  Spinner,
+  Text,
+} from "@blueprintjs/core";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import Slack from "../assets/Slack_Mark.svg";
@@ -72,6 +79,15 @@ export const getChannelFormat = (tree: TreeNode[]): string =>
 export const getAliases = (tree: TreeNode[]): { [key: string]: string } =>
   getSettingMapFromTree({ key: "aliases", tree });
 
+const getCurrentUserEmail = () => {
+  const globalAppState = localStorage.getItem("globalAppState") || '["","",[]]';
+  const userArray = JSON.parse(globalAppState)[2] as string[];
+  const emailIndex = userArray.findIndex((s) => s === "~:email");
+  if (emailIndex > 0) {
+    return userArray[emailIndex + 1];
+  }
+  return "";
+};
 const web = new WebClient();
 delete web["axios"].defaults.headers["User-Agent"];
 
@@ -81,6 +97,12 @@ const SlackContent: React.FunctionComponent<
   const message = getTextByBlockUid(blockUid);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [asUser, setAsUser] = useState(false);
+  const onAsUserChanged = useCallback(
+    (e: React.FormEvent<HTMLInputElement>) =>
+      setAsUser((e.target as HTMLInputElement).checked),
+    [setAsUser]
+  );
   const onClick = useCallback(() => {
     setLoading(true);
     setError("");
@@ -130,6 +152,7 @@ const SlackContent: React.FunctionComponent<
           (c) => c.name.toUpperCase() === aliasedName || channelFindFunction(c)
         )?.id;
         const channel = memberId || channelId;
+        const currentUserEmail = getCurrentUserEmail();
         if (channel) {
           return web.chat
             .postMessage({
@@ -173,6 +196,13 @@ const SlackContent: React.FunctionComponent<
                 )
                 .replace(aliasRegex, (_, alias, url) => `<${url}|${alias}>`),
               token,
+              ...(asUser
+                ? {
+                    username: members.find(
+                      (m) => m.profile.email === currentUserEmail
+                    )?.name,
+                  }
+                : {}),
             })
             .then(close);
         } else {
@@ -188,10 +218,15 @@ const SlackContent: React.FunctionComponent<
         setError(error || message);
         setLoading(false);
       });
-  }, [setLoading, close, tag, setError]);
+  }, [setLoading, close, tag, setError, asUser]);
   return (
     <div style={{ padding: 16 }}>
-      <Button text={`Send to ${tag}`} onClick={onClick} />
+      <Button
+        text={`Send to ${tag}`}
+        onClick={onClick}
+        style={{ marginBottom: 16 }}
+      />
+      <Checkbox label={"As User"} checked={asUser} onChange={onAsUserChanged} />
       {loading && <Spinner />}
       {error && (
         <div style={{ color: "red", whiteSpace: "pre-line" }}>
