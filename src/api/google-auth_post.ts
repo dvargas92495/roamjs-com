@@ -4,7 +4,6 @@ import { headers } from "../lambda-helpers";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   const data = JSON.parse(event.body || "{}");
-
   return axios
     .post("https://oauth2.googleapis.com/token", {
       ...data,
