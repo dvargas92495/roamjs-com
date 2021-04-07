@@ -5,24 +5,39 @@ import {
   getPageTitle,
   runExtension,
 } from "../entry-helpers";
-import {
-  getConfigFromPage,
-  RoamBlock,
-  getLinkedPageReferences,
-} from "roam-client";
+import { getConfigFromPage, getLinkedPageReferences } from "roam-client";
 
 const menuItemCallback = (
   sortContainer: Element,
-  sortBy: (a: RoamBlock, b: RoamBlock) => number
+  sortBy: (
+    a: { title: string; time: number },
+    b: { title: string; time: number }
+  ) => number
 ) => {
   const pageTitle = getPageTitle(sortContainer);
   if (!pageTitle) {
     return;
   }
-  const linkedReferences = getLinkedPageReferences(pageTitle.textContent);
+  const linkedReferences = getLinkedPageReferences(
+    pageTitle.textContent
+  ).concat(
+    window.roamAlphaAPI
+      .q(
+        `[:find ?t ?ct :where [?c :create/time ?ct] [?c :node/title ?t] [?c :block/refs ?r] [?r :node/title "${pageTitle.textContent}"]]`
+      )
+      .map((p) => ({ title: p[0] as string, time: p[1] as number }))
+  );
   linkedReferences.sort(sortBy);
   const refIndexByTitle: { [key: string]: number } = {};
   linkedReferences.forEach((v, i) => (refIndexByTitle[v.title] = i));
+  const getRefIndexByTitle = (title: string) => {
+    if (!isNaN(refIndexByTitle[title])) {
+      return refIndexByTitle[title];
+    }
+    const len = Object.keys(refIndexByTitle).length;
+    refIndexByTitle[title] = len;
+    return len;
+  };
 
   const refContainer = sortContainer.parentElement
     .closest(".rm-reference-container")
@@ -37,7 +52,8 @@ const menuItemCallback = (
       "rm-ref-page-view-title"
     )[0] as HTMLDivElement;
     return (
-      refIndexByTitle[aTitle.textContent] - refIndexByTitle[bTitle.textContent]
+      getRefIndexByTitle(aTitle.textContent) -
+      getRefIndexByTitle(bTitle.textContent)
     );
   });
   refsInView.forEach((r) => refContainer.appendChild(r));
