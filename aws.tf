@@ -263,6 +263,14 @@ resource "aws_route53_record" "clerk-mail" {
   records = ["mail.q5lvvno2col9.clerk.services"]
 }
 
+resource "aws_route53_record" "google-verifu" {
+  zone_id = module.aws_static_site.route53_zone_id
+  name    = "roamjs.com"
+  type    = "TXT"
+  ttl     = "300"
+  records = ["google-site-verification=A9q11tN2qoTRaIdwMmlNqvbjgX4UQOj1okRat6CHtyE"]
+}
+
 provider "github" {
     owner = "dvargas92495"
 }

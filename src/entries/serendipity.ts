@@ -22,6 +22,7 @@ import {
   getSettingIntFromTree,
   getSettingValueFromTree,
   getSettingValuesFromTree,
+  monitor,
 } from "../components/hooks";
 import {
   createBlockObserver,
@@ -266,9 +267,8 @@ runExtension(ID, () => {
   });
 
   createBlockObserver((b) => {
-    const { blockUid } = getUids(b);
-    const title = getPageTitleByBlockUid(blockUid);
-    if (DAILY_NOTE_PAGE_REGEX.test(title)) {
+    const { blockUid, parentUid } = getUids(b);
+    if (parentUid.length === 10) {
       const tree =
         getTreeByPageName("roam/js/serendipity").find((t) =>
           /daily/i.test(t.text)

@@ -44,6 +44,11 @@ type FlagField = {
   defaultValue?: boolean;
 };
 
+type MultiTextField = {
+  type: "multitext";
+  defaultValue?: string[];
+};
+
 type PagesField = {
   type: "pages";
   defaultValue?: string[];
@@ -55,19 +60,21 @@ type OauthField = {
   options: ExternalLoginOptions;
 };
 
-type UnionField = PagesField | TextField | NumberField | OauthField | FlagField;
+type ArrayField = PagesField | MultiTextField;
+type UnionField = ArrayField | TextField | NumberField | OauthField | FlagField;
 
 type Field<T extends UnionField> = T & {
   title: string;
   description: string;
 };
 
-type FieldPanel<T extends UnionField> = (
+type FieldPanel<T extends UnionField, U = Record<string, unknown>> = (
   props: {
     order: number;
     uid?: string;
     parentUid: string;
-  } & Omit<Field<T>, "type">
+  } & Omit<Field<T>, "type"> &
+    U
 ) => React.ReactElement;
 
 const Description = ({ description }: { description: string }) => {
@@ -147,6 +154,100 @@ const useSingleChildValue = <T extends string | number>({
     [setValue, setValueUid, title, parentUid, order, uid, setUid]
   );
   return { value, onChange };
+};
+
+const MultiChildPanel: FieldPanel<
+  ArrayField,
+  {
+    InputComponent: (props: {
+      value: string;
+      setValue: (s: string) => void;
+    }) => React.ReactElement;
+  }
+> = ({
+  uid: initialUid,
+  title,
+  description,
+  order,
+  parentUid,
+  InputComponent,
+}) => {
+  const [uid, setUid] = useState(initialUid);
+  const [texts, setTexts] = useState(() =>
+    uid
+      ? getTreeByBlockUid(uid).children.map((v) => ({
+          text: v.text,
+          uid: v.uid,
+        }))
+      : []
+  );
+  const [value, setValue] = useState("");
+  return (
+    <>
+      <Label>
+        {title}
+        <Description description={description} />
+        <div style={{ display: "flex" }}>
+          <InputComponent value={value} setValue={setValue} />
+          <Button
+            icon={"plus"}
+            minimal
+            disabled={!value}
+            onClick={() => {
+              const valueUid = window.roamAlphaAPI.util.generateUID();
+              if (uid) {
+                window.roamAlphaAPI.createBlock({
+                  location: { "parent-uid": uid, order: texts.length },
+                  block: { string: value, uid: valueUid },
+                });
+              } else {
+                const newUid = window.roamAlphaAPI.util.generateUID();
+                window.roamAlphaAPI.createBlock({
+                  block: { string: title, uid: newUid },
+                  location: { order, "parent-uid": parentUid },
+                });
+                setTimeout(() => setUid(newUid));
+                window.roamAlphaAPI.createBlock({
+                  block: { string: value, uid: valueUid },
+                  location: { order: 0, "parent-uid": newUid },
+                });
+              }
+              setTexts([...texts, { text: value, uid: valueUid }]);
+              setValue("");
+            }}
+          />
+        </div>
+      </Label>
+      {texts.map((p) => (
+        <div
+          key={p.uid}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <span
+            style={{
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+            }}
+          >
+            {p.text}
+          </span>
+          <Button
+            icon={"trash"}
+            minimal
+            onClick={() => {
+              window.roamAlphaAPI.deleteBlock({ block: { uid: p.uid } });
+              setTexts(texts.filter((f) => f.uid !== p.uid));
+            }}
+          />
+        </div>
+      ))}
+    </>
+  );
 };
 
 const TextPanel: FieldPanel<TextField> = ({
@@ -238,80 +339,25 @@ const FlagPanel: FieldPanel<FlagField> = ({
   );
 };
 
-const PagesPanel: FieldPanel<PagesField> = ({
-  uid: initialUid,
-  title,
-  parentUid,
-  order,
-  description,
-}) => {
-  const [uid, setUid] = useState(initialUid);
-  const [pages, setPages] = useState(() =>
-    uid
-      ? getTreeByBlockUid(uid).children.map((v) => ({
-          text: v.text,
-          uid: v.uid,
-        }))
-      : []
-  );
-  const [value, setValue] = useState("");
+const MultiTextPanel: FieldPanel<MultiTextField> = (props) => {
   return (
-    <>
-      <Label>
-        {title}
-        <Description description={description} />
-        <div style={{ display: "flex" }}>
-          <PageInput value={value} setValue={setValue} extra={["{all}"]} />
-          <Button
-            icon={"plus"}
-            minimal
-            disabled={!value}
-            onClick={() => {
-              const valueUid = window.roamAlphaAPI.util.generateUID();
-              if (uid) {
-                window.roamAlphaAPI.createBlock({
-                  location: { "parent-uid": uid, order: pages.length },
-                  block: { string: value, uid: valueUid },
-                });
-              } else {
-                const newUid = window.roamAlphaAPI.util.generateUID();
-                window.roamAlphaAPI.createBlock({
-                  block: { string: title, uid: newUid },
-                  location: { order, "parent-uid": parentUid },
-                });
-                setTimeout(() => setUid(newUid));
-                window.roamAlphaAPI.createBlock({
-                  block: { string: value, uid: valueUid },
-                  location: { order: 0, "parent-uid": newUid },
-                });
-              }
-              setPages([...pages, { text: value, uid: valueUid }]);
-              setValue("");
-            }}
-          />
-        </div>
-      </Label>
-      {pages.map((p) => (
-        <div
-          key={p.uid}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <span>{p.text}</span>
-          <Button
-            icon={"trash"}
-            minimal
-            onClick={() => {
-              window.roamAlphaAPI.deleteBlock({ block: { uid: p.uid } });
-              setPages(pages.filter((f) => f.uid !== p.uid));
-            }}
-          />
-        </div>
-      ))}
-    </>
+    <MultiChildPanel
+      {...props}
+      InputComponent={({ value, setValue }) => (
+        <InputGroup value={value} onChange={(e) => setValue(e.target.value)} />
+      )}
+    />
+  );
+};
+
+const PagesPanel: FieldPanel<PagesField> = (props) => {
+  return (
+    <MultiChildPanel
+      {...props}
+      InputComponent={(inputProps) => (
+        <PageInput extra={["{all}"]} {...inputProps} />
+      )}
+    />
   );
 };
 
@@ -355,6 +401,7 @@ const Panels = {
   flag: FlagPanel,
   pages: PagesPanel,
   oauth: OauthPanel,
+  multitext: MultiTextPanel,
 } as { [UField in UnionField as UField["type"]]: FieldPanel<UField> };
 
 type ConfigTab = {

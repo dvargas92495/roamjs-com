@@ -1,6 +1,9 @@
 import {
   createCustomSmartBlockCommand,
+  createHTMLObserver,
+  getChildrenLengthByPageUid,
   getCurrentPageUid,
+  getNthChildUidByBlockUid,
   getPageTitle,
   runExtension,
 } from "../entry-helpers";
@@ -13,6 +16,10 @@ import {
   getParentUidByBlockUid,
   getTreeByPageName,
   createBlock,
+  getUids,
+  getOrderByBlockUid,
+  updateBlock,
+  getTextByBlockUid,
 } from "roam-client";
 import axios from "axios";
 import formatRFC3339 from "date-fns/formatRFC3339";
@@ -22,6 +29,8 @@ import format from "date-fns/format";
 import { createConfigObserver } from "../components/ConfigPage";
 import GoogleLogo from "../assets/Google.svg";
 import differenceInSeconds from "date-fns/differenceInSeconds";
+import { getRenderRoot } from "../components/hooks";
+import { render } from "../components/DeprecationWarning";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
@@ -38,6 +47,10 @@ type Event = {
 
 const EMPTY_MESSAGE = "No Events Scheduled for Today!";
 const CONFIG = "roam/js/google-calendar";
+const textareaRef: { current: HTMLTextAreaElement } = {
+  current: null,
+};
+
 const resolveDate = (d: { dateTime?: string; format?: string }) => {
   if (!d?.dateTime) {
     return "All Day";
@@ -186,14 +199,55 @@ const importGoogleCalendar = async (
   },
   blockUid?: string
 ) => {
-  const parentUid = getParentUidByBlockUid(blockUid);
-  const bullets = await fetchGoogleCalendar();
-  await pushBullets(bullets, blockUid, parentUid);
+  const parent = getRenderRoot("roamjs-google-calendar");
+  render({
+    parent,
+    message:
+      "The import google calendar button will be removed in a future version. Please start using the Import Google Calendar command from the command palette instead.",
+    callback: () => {
+      updateBlock({ text: "Loading...", uid: blockUid });
+      const parentUid = getParentUidByBlockUid(blockUid);
+      fetchGoogleCalendar().then((bullets) =>
+        pushBullets(bullets, blockUid, parentUid)
+      );
+    },
+    type: "Google Calendar Button",
+  });
+};
+
+const loadBlockUid = (parentUid: string) => {
+  if (textareaRef.current) {
+    const originalUid = getUids(textareaRef.current).blockUid;
+    const originalOrder = getOrderByBlockUid(originalUid);
+    // Roam Bug: https://www.loom.com/share/4fdf1a6c6b0347de946b751e3f421611
+    const uid =
+      getNthChildUidByBlockUid({
+        blockUid: parentUid,
+        order: originalOrder + 1,
+      }) || originalUid;
+    const text = getTextByBlockUid(uid);
+    if (text.length) {
+      return createBlock({
+        node: { text: "Loading..." },
+        parentUid,
+        order: getOrderByBlockUid(uid) + 1,
+      });
+    }
+    return updateBlock({
+      uid,
+      text: "Loading...",
+    });
+  }
+  return createBlock({
+    node: { text: "Loading..." },
+    parentUid,
+    order: getChildrenLengthByPageUid(parentUid),
+  });
 };
 
 const importGoogleCalendarCommand = () => {
   const parentUid = getCurrentPageUid();
-  const blockUid = createBlock({ node: { text: "Loading" }, parentUid });
+  const blockUid = loadBlockUid(parentUid);
   return fetchGoogleCalendar().then((bullets) => {
     pushBullets(bullets, blockUid, parentUid);
   });
@@ -233,7 +287,7 @@ runExtension("google-calendar", () => {
           id: "import",
           fields: [
             {
-              type: "pages",
+              type: "multitext",
               title: "calendars",
               description: "The calendar ids to import events from.",
               defaultValue: ["dvargas92495@gmail.com"],
@@ -266,6 +320,12 @@ runExtension("google-calendar", () => {
   window.roamAlphaAPI.ui.commandPalette.addCommand({
     label: "Import Google Calendar",
     callback: importGoogleCalendarCommand,
+  });
+
+  createHTMLObserver({
+    tag: "TEXTAREA",
+    className: "rm-block-input",
+    callback: (t: HTMLTextAreaElement) => (textareaRef.current = t),
   });
 });
 
