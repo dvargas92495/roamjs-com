@@ -3,6 +3,9 @@ import {
   Breadcrumbs,
   Button,
   CardGrid,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   ExternalLink,
   H1,
   H2,
@@ -10,23 +13,49 @@ import {
   H4,
   IconButton,
   Subtitle,
+  Tooltip,
 } from "@dvargas92495/ui";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import DemoVideo from "./DemoVideo";
 import Loom from "./Loom";
-import {
-  FrontMatter,
-  pathToId,
-  pathToLabel,
-  prodItems,
-} from "./ExtensionLayout";
+import { frontMatter as frontMatters } from "../pages/docs/extensions/*.mdx";
 import { getSingleCodeContent, useCopyCode } from "./hooks";
 import StandardLayout from "./StandardLayout";
-import GithubSponsor from "./GithubSponsor";
 import RoamJSDigest from "./RoamJSDigest";
+import SponsorCard from "./SponsorCard";
 
-const total = prodItems.length;
+export interface FrontMatter {
+  __resourcePath: string;
+  description: string;
+  development?: boolean;
+  acknowledgements?: string;
+  loom?: string;
+  contributors?: string;
+  skipDemo?: boolean;
+}
+
+export const pathToId = (f: string): string =>
+  f.substring("docs\\extensions\\".length, f.length - ".mdx".length);
+
+export const pathToLabel = (f: string): string =>
+  f.endsWith("index.mdx") ? INDEX_LABEL : pathToId(f).replace(/-/g, " ");
+
+  const INDEX_LABEL = "Getting Started";
+
+  export const items = (frontMatters as FrontMatter[]).map((f) => ({
+    title: pathToLabel(f.__resourcePath)
+      .split(" ")
+      .map((s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
+      .join(" "),
+    description: f.description,
+    image: `/thumbnails/${pathToId(f.__resourcePath)}.png`,
+    href: `/${f.__resourcePath.replace(/\.mdx$/, "")}`,
+    development: !!f.development,
+  }));
+  const prodItems = items.filter((f) => !f.development);
+
+const total = prodItems.length - 1;
 const rowLength = 4;
 
 const contributors = {
@@ -52,6 +81,42 @@ const contributors = {
   "Joe Ocampo": "https://twitter.com/joe_ocampo",
 };
 
+const emojisToTooltip = {
+  "💵": "Financial",
+  "📓": "Testing",
+  "🤔": "Idea",
+};
+
+const SponsorDialog = ({ id }: { id: string }) => {
+  const [open, setOpen] = useState(false);
+  const handleOpen = useCallback(() => setOpen(true), [setOpen]);
+  const handleClose = useCallback(() => setOpen(false), [setOpen]);
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    setOpen(query.get("sponsor") === "true");
+  }, [setOpen]);
+  return (
+    <>
+      <Button color={"primary"} variant="contained" onClick={handleOpen}>
+        Sponsor
+      </Button>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Sponsor RoamJS</DialogTitle>
+        <DialogContent>
+          <SponsorCard source={`RoamJS Docs ${id}`} />
+          <Button
+            onClick={handleClose}
+            color="secondary"
+            style={{ marginBottom: -16, right: -320, bottom: 36 }}
+          >
+            Cancel
+          </Button>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+
 const ExtensionPageLayout: React.FunctionComponent<{
   frontMatter: FrontMatter;
 }> = ({ children, frontMatter }) => {
@@ -63,8 +128,14 @@ const ExtensionPageLayout: React.FunctionComponent<{
   const randomItems = useMemo(
     () =>
       prodItems
-        .filter((a) => a.title !== label)
-        .map((a) => ({ sort: Math.random(), value: a }))
+        .filter((a) => a.title.toUpperCase() !== label)
+        .map((a, i) => ({
+          sort:
+            a.title.toUpperCase().localeCompare(label) < 0
+              ? i + prodItems.length - 1
+              : i,
+          value: a,
+        }))
         .sort((a, b) => a.sort - b.sort)
         .map((a) => a.value),
     [label]
@@ -91,9 +162,7 @@ const ExtensionPageLayout: React.FunctionComponent<{
       />
       {frontMatter.development && <H2>UNDER DEVELOPMENT</H2>}
       <H1>{label}</H1>
-      <Subtitle>
-        {frontMatter.description}
-      </Subtitle>
+      <Subtitle>{frontMatter.description}</Subtitle>
       <H3>Installation</H3>
       <Body>
         You could use the Copy Extension button below to individually install
@@ -134,7 +203,7 @@ const ExtensionPageLayout: React.FunctionComponent<{
           <H3>Contributors</H3>
           <Body>
             A special thanks to those who's contributions helped make this
-            extension possible:
+            extension possible
           </Body>
           <ul>
             {frontMatter.contributors.split(",").map((s) => {
@@ -148,25 +217,34 @@ const ExtensionPageLayout: React.FunctionComponent<{
                       <ExternalLink href={contributors[name]}>
                         {name}
                       </ExternalLink>
-                      {` ${emojis}`}
                     </>
                   ) : (
-                    s
-                  )}
+                    name
+                  )}{" "}
+                  {emojis
+                    .split("")
+                    .map((s, i) => `${s}${emojis.charAt(i + 1)}`)
+                    .filter((_, i) => i % 2 === 0)
+                    .map((s) => (
+                      <Tooltip title={emojisToTooltip[s]} key={s}>
+                        <span style={{ cursor: "help" }}>{s}</span>
+                      </Tooltip>
+                    ))}
                 </li>
               );
             })}
           </ul>
-          <ExternalLink href={"https://allcontributors.org/docs/en/emoji-key"}>
-            Emoji Key
-          </ExternalLink>
+          <Body>
+            If you get value from using this extension, please consider
+            sponsoring below!
+          </Body>
+          <SponsorDialog id={id} />
         </>
       )}
       <div style={{ margin: "128px 0" }}>
         <div style={{ width: "100%", textAlign: "center" }}>
           <RoamJSDigest />
         </div>
-        <GithubSponsor />
       </div>
       <H3>Other Extensions</H3>
       <div

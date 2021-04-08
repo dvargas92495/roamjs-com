@@ -2,7 +2,7 @@ import { CheckboxForm } from "@dvargas92495/ui";
 import { useCallback, useState } from "react";
 import { useUser } from "react-manage-users";
 import { frontMatter as frontMatters } from "../pages/docs/extensions/*.mdx";
-import { pathToId } from "./ExtensionLayout";
+import { pathToId } from "./ExtensionPageLayout";
 import { useCopyCode } from "./hooks";
 import axios from "axios";
 import { API_URL } from "./constants";
