@@ -120,11 +120,13 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
       }/google-calendar?calendarId=${encodeURIComponent(
         calendarId
       )}&timeMin=${timeMinParam}&timeMax=${timeMaxParam}`,
-      {
-        headers: {
-          Authorization,
-        },
-      }
+      Authorization
+        ? {
+            headers: {
+              Authorization,
+            },
+          }
+        : {}
     )
     .then(async (r) => {
       const events = r.data.items;
