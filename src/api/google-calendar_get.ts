@@ -11,8 +11,9 @@ export const handler = async (
   if (!calendarId) {
     return userError("calendarId is required", event);
   }
-  const token =
-    `access_token=${event.headers.Authorization}` || `key=${apiKey}`;
+  const token = event.headers.Authorization
+    ? `access_token=${event.headers.Authorization}`
+    : `key=${apiKey}`;
   return Promise.all(
     calendarId
       .split(",")
