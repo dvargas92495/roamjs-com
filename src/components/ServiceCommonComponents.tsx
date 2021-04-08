@@ -200,7 +200,7 @@ export type StageContent = (props: StageProps) => React.ReactElement;
 type GetStage = (setting?: string) => StageContent;
 type StageConfig = {
   component: StageContent;
-  check: (tree: TreeNode[]) => boolean;
+  check?: (tree: TreeNode[]) => boolean;
   setting?: string;
 };
 
@@ -357,8 +357,8 @@ export const ServiceDashboard: React.FC<{
       if (setting) {
         return stages.find((s) => s.setting === setting).component;
       }
-      const tree = getTreeByPageName(title);
-      const index = stages.findIndex((s) => !s.check(tree));
+      const tree = getTreeByPageName(title); 
+      const index = stages.findIndex((s) => s.check ? !s.check(tree) : isFieldInTree(s.setting)(tree));
       setProgress(index / (stages.length - 1));
       if (index < stages.length - 1) {
         setShowProgress(true);

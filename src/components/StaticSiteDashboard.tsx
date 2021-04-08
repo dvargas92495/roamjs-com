@@ -784,26 +784,27 @@ const StaticSiteDashboard = (): React.ReactElement => (
     stages={[
       TOKEN_STAGE,
       {
-        check: isFieldInTree("share"),
         component: RequestUserContent,
         setting: "Share",
       },
       {
-        check: isFieldInTree("domain"),
         component: RequestDomainContent,
         setting: "Domain",
       },
       {
-        check: isFieldInTree("index"),
         component: RequestIndexContent,
         setting: "Index",
       },
       {
-        check: isFieldInTree("filter"),
         component: RequestFiltersContent,
-        setting: "Filters",
+        setting: "Filter",
       },
       MainStage(LiveContent),
+      /*{
+        check: isFieldInTree('template'),
+        component: RequestTemplateContent,
+        setting: "Template"
+      }*/
     ]}
   />
 );

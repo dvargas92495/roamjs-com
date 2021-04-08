@@ -1,7 +1,7 @@
 import { Alert } from "@blueprintjs/core";
-import { track } from "mixpanel";
 import React from "react";
 import ReactDOM from "react-dom";
+import { track } from "../entry-helpers";
 
 const DeprecationWarning = ({
   message,
