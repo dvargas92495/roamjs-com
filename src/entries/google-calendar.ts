@@ -5,6 +5,7 @@ import {
   getCurrentPageUid,
   getNthChildUidByBlockUid,
   getPageTitle,
+  isApple,
   runExtension,
 } from "../entry-helpers";
 import {
@@ -203,7 +204,7 @@ const importGoogleCalendar = async (
   render({
     parent,
     message:
-      "The import google calendar button will be removed in a future version. Please start using the Import Google Calendar command from the command palette instead.",
+      `The import google calendar button will be removed in a future version. Please start using the Import Google Calendar command from the command palette instead. To use the Roam command palette, hit ${isApple ? 'CMD' : 'CTRL'}+P.`,
     callback: () => {
       updateBlock({ text: "Loading...", uid: blockUid });
       const parentUid = getParentUidByBlockUid(blockUid);
@@ -289,7 +290,7 @@ runExtension("google-calendar", () => {
             {
               type: "multitext",
               title: "calendars",
-              description: "The calendar ids to import events from.",
+              description: "The calendar ids to import events from. To find your calendar id, go to your calendar settings and scroll down to \"Integrate Calendar\".",
               defaultValue: ["dvargas92495@gmail.com"],
             },
             {
