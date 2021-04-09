@@ -32,6 +32,7 @@ import {
   createPageTitleObserver,
   getRoamUrl,
   setInputSetting,
+  toFlexRegex,
 } from "../entry-helpers";
 import { getRenderRoot, toTitle } from "./hooks";
 
@@ -62,7 +63,7 @@ export const getField = (field: string): string => {
   const service = useService();
   return (
     getTreeByPageName(`roam/js/${service}`).find((t) =>
-      new RegExp(field, "i").test(t.text)
+      toFlexRegex(field).test(t.text)
     )?.children?.[0]?.text || ""
   );
 };
@@ -195,13 +196,14 @@ export const runService = ({
 };
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-type StageProps = PanelProps<object>;
+export type StageProps = PanelProps<object>;
 export type StageContent = (props: StageProps) => React.ReactElement;
 type GetStage = (setting?: string) => StageContent;
 type StageConfig = {
   component: StageContent;
   check?: (tree: TreeNode[]) => boolean;
   setting?: string;
+  isMain?: boolean;
 };
 
 const ServiceContext = React.createContext<{
@@ -326,7 +328,7 @@ export const TOKEN_STAGE = {
 };
 
 export const MainStage = (Content: StageContent): StageConfig => ({
-  check: () => false,
+  isMain: true,
   component: ((props) => (
     <>
       <Content {...props} />
@@ -350,6 +352,7 @@ export const ServiceDashboard: React.FC<{
 }> = ({ service, stages }) => {
   const title = `roam/js/${service}`;
   const pageUid = useMemo(() => getPageUidByPageTitle(title), [title]);
+  const mainIndex = useMemo(() => stages.findIndex((s) => s.isMain), [stages]);
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
   const getStage = useCallback(
@@ -357,10 +360,12 @@ export const ServiceDashboard: React.FC<{
       if (setting) {
         return stages.find((s) => s.setting === setting).component;
       }
-      const tree = getTreeByPageName(title); 
-      const index = stages.findIndex((s) => s.check ? !s.check(tree) : isFieldInTree(s.setting)(tree));
-      setProgress(index / (stages.length - 1));
-      if (index < stages.length - 1) {
+      const tree = getTreeByPageName(title);
+      const index = stages.findIndex((s) =>
+        s.check ? !s.check(tree) : s.isMain || !isFieldInTree(s.setting)(tree)
+      );
+      setProgress(index / mainIndex);
+      if (index < mainIndex) {
         setShowProgress(true);
       }
       return stages.slice(index)[0].component;
@@ -430,7 +435,12 @@ button.bp3-button.bp3-panel-stack-header-back {
         <Card>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <h6>Roam outline with config data is hidden by default.</h6>
-            <Button minimal icon={"small-cross"} onClick={showBlocks} id={'roamjs-service-hide-blocks'} />
+            <Button
+              minimal
+              icon={"small-cross"}
+              onClick={showBlocks}
+              id={"roamjs-service-hide-blocks"}
+            />
           </div>
           <style>
             {`.rm-block-children {

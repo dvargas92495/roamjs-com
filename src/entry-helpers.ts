@@ -953,6 +953,9 @@ export const openBlockInSidebar = (blockUid: string): boolean | void =>
         },
       });
 
+export const toFlexRegex = (key: string): RegExp =>
+  new RegExp(`^\\s*${key}\\s*$`, "i");
+
 export const setInputSetting = ({
   blockUid,
   value,
@@ -965,7 +968,7 @@ export const setInputSetting = ({
   index?: number;
 }): void => {
   const tree = getTreeByBlockUid(blockUid);
-  const keyNode = tree.children.find((t) => new RegExp(key, "i").test(t.text));
+  const keyNode = tree.children.find((t) => toFlexRegex(key).test(t.text));
   if (keyNode && keyNode.children.length) {
     window.roamAlphaAPI.updateBlock({
       block: { uid: keyNode.children[0].uid, string: value },

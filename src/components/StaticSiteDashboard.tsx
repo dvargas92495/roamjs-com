@@ -10,6 +10,8 @@ import {
   Switch,
   Tooltip,
 } from "@blueprintjs/core";
+import { Controlled as CodeMirror } from "react-codemirror2";
+import "codemirror/mode/xml/xml";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   getAllPageNames,
@@ -28,18 +30,19 @@ import PageInput from "./PageInput";
 import {
   getField,
   HIGHLIGHT,
-  isFieldInTree,
   isFieldSet,
   MainStage,
   NextButton,
   ServiceDashboard,
   StageContent,
+  StageProps,
   TOKEN_STAGE,
   useAuthenticatedAxiosGet,
   useAuthenticatedAxiosPost,
   useNextStage,
   usePageUid,
 } from "./ServiceCommonComponents";
+import Description from "./Description";
 
 const RequestUserContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
@@ -407,6 +410,7 @@ const getLaunchBody = () => {
 type Filter = { rule: string; values: string[] };
 const TITLE_REGEX = new RegExp(`roam/js/static-site/title::(.*)`);
 const HEAD_REGEX = new RegExp(`roam/js/static-stite/head::`);
+const DESCRIPTION_REGEX = new RegExp(`roam/js/static-site/title::(.*)`);
 const HTML_REGEX = new RegExp("```html\n(.*)```", "s");
 const getTitleRuleFromNode = ({ rule: text, values: children }: Filter) => {
   if (text.trim().toUpperCase() === "STARTS WITH" && children.length) {
@@ -527,14 +531,19 @@ const getDeployBody = () => {
       const headMatch = allBlocks
         .find((s) => HEAD_REGEX.test(s.text))
         ?.children?.[0]?.text?.match?.(HTML_REGEX);
+      const descriptionMatch = allBlocks
+        .find((s) => DESCRIPTION_REGEX.test(s.text))
+        ?.text?.match?.(DESCRIPTION_REGEX);
       const title = titleMatch ? titleMatch[1].trim() : pageName;
       const head = headMatch ? headMatch[1] : "";
+      const description = descriptionMatch ? descriptionMatch[1].trim() : "";
       return [
         pageName,
         {
           content,
           references,
           title,
+          description,
           head,
           viewType,
         },
@@ -778,6 +787,106 @@ const LiveContent: StageContent = () => {
   );
 };
 
+const RequestHtmlContent = ({
+  openPanel,
+  field,
+  defaultValue,
+  description,
+}: Pick<StageProps, "openPanel"> & {
+  field: string;
+  defaultValue: string;
+  description: string;
+}) => {
+  const nextStage = useNextStage(openPanel);
+  const pageUid = usePageUid();
+  const [value, setValue] = useState(
+    getField(field).match(HTML_REGEX)?.[1] || defaultValue
+  );
+  const onBeforeChange = useCallback((_, __, value) => setValue(value), [
+    setValue,
+  ]);
+  const onSubmit = useCallback(() => {
+    setInputSetting({
+      blockUid: pageUid,
+      key: field,
+      value: `\`\`\`html\n${value}\`\`\``,
+      index: 1,
+    });
+    nextStage();
+  }, [value, nextStage, field, pageUid]);
+  return (
+    <div>
+      <Label>
+        {field.substring(0, 1).toUpperCase()}
+        {field.substring(1)}
+        <Description description={description} />
+        <div style={{ border: "1px solid lightgray" }}>
+          <CodeMirror
+            value={value}
+            options={{
+              mode: { name: "xml", htmlMode: true },
+              lineNumbers: true,
+              lineWrapping: true,
+            }}
+            onBeforeChange={onBeforeChange}
+          />
+        </div>
+      </Label>
+      <NextButton onClick={onSubmit} disabled={!value} />
+    </div>
+  );
+};
+
+const DEFAULT_TEMPLATE = `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="description" content="$\{PAGE_DESCRIPTION}"/>
+    <meta property="og:description" content="$\{PAGE_DESCRIPTION}">
+    <title>$\{PAGE_NAME}</title>
+    <meta property="og:title" content="$\{PAGE_NAME}">
+    <meta property="og:type" content="website">
+  </head>
+  <body>
+    <div id="content">
+      $\{PAGE_CONTENT}
+    </div>
+    <div id="references">
+      <ul>
+        $\{REFERENCES}
+      </ul>
+    </div>
+  </body>
+</html>`;
+
+const RequestTemplateContent: StageContent = ({ openPanel }) => {
+  return (
+    <RequestHtmlContent
+      openPanel={openPanel}
+      field={"template"}
+      defaultValue={DEFAULT_TEMPLATE}
+      description={"The template used for each webpage"}
+    />
+  );
+};
+
+const DEFAULT_REFERENCE_TEMPLATE = `<li>
+  <a href="\${LINK}">
+    \${REFERENCE}  
+  </a>
+</li>`;
+
+const RequestReferenceTemplateContent: StageContent = ({ openPanel }) => {
+  return (
+    <RequestHtmlContent
+      openPanel={openPanel}
+      field={"reference template"}
+      defaultValue={DEFAULT_REFERENCE_TEMPLATE}
+      description={"The template used for each linked reference on a page."}
+    />
+  );
+};
+
 const StaticSiteDashboard = (): React.ReactElement => (
   <ServiceDashboard
     service={"static-site"}
@@ -800,11 +909,14 @@ const StaticSiteDashboard = (): React.ReactElement => (
         setting: "Filter",
       },
       MainStage(LiveContent),
-      /*{
-        check: isFieldInTree('template'),
+      {
         component: RequestTemplateContent,
-        setting: "Template"
-      }*/
+        setting: "Template",
+      },
+      {
+        component: RequestReferenceTemplateContent,
+        setting: "Reference Template",
+      },
     ]}
   />
 );

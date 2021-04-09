@@ -37,18 +37,7 @@ const StaticSitePage: React.FC<ServicePageProps> = (props) => {
       {/*
       <H4>Configuration</H4>
       <Body>
-        Specify global site configuration by adding settings to the
-        `roam/js/static-site` on your graph. Configure a setting by entering the
-        setting name in a block and the setting value as a child of that block.
-        These are the settings supported: - Index - The page name that will
-        serve as the entry point of the site. Could be raw text or a page link.
-        - Filter - A set of rules that specifies which pages to build. If a page
-        matches any child rule, it will be built into the site. The following
-        rules are supported: - Starts With - If a page starts with the given
-        text, it will be included in the site. Useful for namespacing, e.g.
-        `Article/Article`. - Tagged With - If a page contains a tag with the
-        given text, it will be included in the site. Includes pages with any
-        form of tags or attributes. Could be raw text or a page link. - Template
+        - Template
         - An HTML Code block that will be used as the template for every
         generated HTML file. - It supports a few variables that can be
         interpolated: - `PAGE_NAME` - The name of the page - `PAGE_CONTENT` -
@@ -62,6 +51,7 @@ const StaticSitePage: React.FC<ServicePageProps> = (props) => {
         started, you can copy the configuration that generated
         https://roamjsdemo.com from my graph by clicking the button below.
       </Body>
+      
       <H4>Per Page Configuration</H4>
       <Body>
         You could ignore specific blocks in pages that are included. Nest

@@ -2,14 +2,12 @@ import {
   Button,
   Card,
   Checkbox,
-  Icon,
   InputGroup,
   Label,
   NumericInput,
   Switch,
   Tab,
   Tabs,
-  Tooltip,
 } from "@blueprintjs/core";
 import React, { useCallback, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
@@ -25,6 +23,7 @@ import {
   createHTMLObserver,
   getFirstChildUidByBlockUid,
 } from "../entry-helpers";
+import Description from "./Description";
 import ExternalLogin, { ExternalLoginOptions } from "./ExternalLogin";
 import { toTitle } from "./hooks";
 import PageInput from "./PageInput";
@@ -76,29 +75,6 @@ type FieldPanel<T extends UnionField, U = Record<string, unknown>> = (
   } & Omit<Field<T>, "type"> &
     U
 ) => React.ReactElement;
-
-const Description = ({ description }: { description: string }) => {
-  return (
-    <span
-      style={{
-        marginLeft: 12,
-        display: "inline-block",
-        opacity: 0.8,
-        verticalAlign: "text-bottom",
-      }}
-    >
-      <Tooltip
-        content={
-          <span style={{ maxWidth: 400, display: "inline-block" }}>
-            {description}
-          </span>
-        }
-      >
-        <Icon icon={"info-sign"} iconSize={12} />
-      </Tooltip>
-    </span>
-  );
-};
 
 const useSingleChildValue = <T extends string | number>({
   defaultValue,
@@ -332,7 +308,7 @@ const FlagPanel: FieldPanel<FlagField> = ({
       labelElement={
         <>
           {title}
-          <Description description={description} />{" "}
+          <Description description={description} />
         </>
       }
     />
