@@ -58,6 +58,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
             : a.createdAt.localeCompare(b.createdAt)
         )
   );
+
   return {
     statusCode: 200,
     body: JSON.stringify(body),
