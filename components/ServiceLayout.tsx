@@ -2,6 +2,7 @@ import {
   Breadcrumbs,
   Button,
   ConfirmationDialog,
+  ExternalLink,
   H1,
   H3,
   H4,
@@ -240,6 +241,14 @@ const ServiceLayout = ({
           <Subtitle>{description}</Subtitle>
           <div style={{ marginBottom: 16 }} />
           <div>{StartNowButton}</div>
+          <div style={{ marginTop: 16 }}>
+            Interested? Set up a call with RoamJS and get the{" "}
+            <b>FIRST THREE MONTHS FREE!</b> Book a time{" "}
+            <ExternalLink href={"https://calendly.com/dvargas92495/roamjs"}>
+              here
+            </ExternalLink>{" "}
+            or reach out to support@roamjs.com for more details!
+          </div>
         </div>
         <div style={{ width: "50%", padding: "0 32px" }}>
           <span
