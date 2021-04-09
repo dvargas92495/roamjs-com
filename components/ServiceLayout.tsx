@@ -247,7 +247,7 @@ const ServiceLayout = ({
             <ExternalLink href={"https://calendly.com/dvargas92495/roamjs"}>
               here
             </ExternalLink>{" "}
-            or reach out to support@roamjs.com for more details!
+            or reach out to support@roamjs.com to ask for more details!
           </div>
         </div>
         <div style={{ width: "50%", padding: "0 32px" }}>
