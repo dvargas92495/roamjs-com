@@ -200,7 +200,7 @@ const importGoogleCalendar = async (
   },
   blockUid?: string
 ) => {
-  const parent = getRenderRoot("roamjs-google-calendar");
+  const parent = getRenderRoot("google-calendar-deprecation");
   render({
     parent,
     message:

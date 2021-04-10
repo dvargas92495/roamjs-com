@@ -6,20 +6,35 @@ import { track } from "../entry-helpers";
 const DeprecationWarning = ({
   message,
   onConfirm,
+  onClose,
 }: {
   message: string;
   onConfirm: () => void;
+  onClose: () => void;
 }): React.ReactElement => {
   return (
-    <Alert isOpen={true} onConfirm={onConfirm}>
-      {message}
-      <br />
-      <br />
-      <span>
-        If removing this functionality would be an issue, please reach out to
-        support@roamjs.com.
-      </span>
-    </Alert>
+    <>
+      <style>{`.roamjs-deprecation-warning button.bp3-button {
+  display: flex !important;
+}`}</style>
+      <Alert
+        isOpen={true}
+        onConfirm={onConfirm}
+        onClose={onClose}
+        canEscapeKeyCancel
+        canOutsideClickCancel
+        cancelButtonText={"cancel"}
+        className={"roamjs-deprecation-warning"}
+      >
+        {message}
+        <br />
+        <br />
+        <span>
+          If removing this functionality would be an issue, please reach out to
+          support@roamjs.com.
+        </span>
+      </Alert>
+    </>
   );
 };
 
@@ -38,9 +53,10 @@ export const render = ({
   ReactDOM.render(
     <DeprecationWarning
       message={message}
-      onConfirm={() => {
-        callback();
+      onConfirm={callback}
+      onClose={() => {
         ReactDOM.unmountComponentAtNode(parent);
+        parent.remove();
       }}
     />,
     parent
