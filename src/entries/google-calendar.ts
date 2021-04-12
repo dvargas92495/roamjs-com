@@ -1,16 +1,16 @@
 import {
   createCustomSmartBlockCommand,
-  createHTMLObserver,
   getChildrenLengthByPageUid,
   getCurrentPageUid,
-  getNthChildUidByBlockUid,
   getPageTitle,
   isApple,
   runExtension,
 } from "../entry-helpers";
 import {
   addButtonListener,
+  createHTMLObserver,
   genericError,
+  getNthChildUidByBlockUid,
   pushBullets,
   getConfigFromPage,
   parseRoamDate,
@@ -27,7 +27,7 @@ import formatRFC3339 from "date-fns/formatRFC3339";
 import startOfDay from "date-fns/startOfDay";
 import endOfDay from "date-fns/endOfDay";
 import format from "date-fns/format";
-import { createConfigObserver } from "../components/ConfigPage";
+import { createConfigObserver } from "roamjs-components";
 import GoogleLogo from "../assets/Google.svg";
 import differenceInSeconds from "date-fns/differenceInSeconds";
 import { getRenderRoot } from "../components/hooks";

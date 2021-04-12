@@ -4,12 +4,13 @@ import ReactDOM from "react-dom";
 import YouTube from "react-youtube";
 import {
   createBlock,
+  getFirstChildUidByBlockUid,
   getTextByBlockUid,
   getTreeByBlockUid,
   getUids,
   TreeNode,
 } from "roam-client";
-import { getFirstChildUidByBlockUid, setInputSetting } from "../entry-helpers";
+import { setInputSetting } from "../entry-helpers";
 import EditContainer from "./EditContainer";
 import { useTree } from "./hooks";
 import ToggleIconButton from "./ToggleIconButton";

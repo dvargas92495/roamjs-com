@@ -1,4 +1,4 @@
-import { createButtonObserver, runExtension } from "../entry-helpers";
+import { runExtension } from "../entry-helpers";
 import {
   AlertContent,
   LOCAL_STORAGE_KEY,
@@ -6,6 +6,7 @@ import {
   renderWindowAlert,
   schedule,
 } from "../components/AlertButton";
+import { createButtonObserver } from 'roam-client';
 import differenceInMilliseconds from "date-fns/differenceInMilliseconds";
 
 runExtension("alert", () => {

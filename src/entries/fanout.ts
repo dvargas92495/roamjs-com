@@ -1,6 +1,9 @@
-import { getPageTitleByBlockUid, getUidsFromButton } from "roam-client";
+import {
+  createButtonObserver,
+  getPageTitleByBlockUid,
+  getUidsFromButton,
+} from "roam-client";
 import { render } from "../components/Fanout";
-import { createButtonObserver } from "../entry-helpers";
 
 createButtonObserver({
   attribute: "fanout-game",

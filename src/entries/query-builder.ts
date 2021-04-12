@@ -1,10 +1,11 @@
-import { getTextByBlockUid, getUidsFromId } from "roam-client";
-import { renderQueryBuilder } from "../components/QueryBuilder";
 import {
   createButtonObserver,
   createHTMLObserver,
-  runExtension,
-} from "../entry-helpers";
+  getTextByBlockUid,
+  getUidsFromId,
+} from "roam-client";
+import { renderQueryBuilder } from "../components/QueryBuilder";
+import { runExtension } from "../entry-helpers";
 
 runExtension("query-builder", () => {
   const css = document.createElement("style");

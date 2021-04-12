@@ -1,7 +1,5 @@
 import {
   addStyle,
-  createButtonObserver,
-  createHTMLObserver,
   createPageTitleObserver,
   getPageTitle,
   isTagOnPage,
@@ -9,6 +7,8 @@ import {
 } from "../entry-helpers";
 import {
   addButtonListener,
+  createButtonObserver,
+  createHTMLObserver,
   pushBullets,
   getConfigFromPage,
   genericError,
@@ -23,8 +23,7 @@ import {
 import axios from "axios";
 import { render } from "../components/TweetOverlay";
 import { render as feedRender } from "../components/TwitterFeed";
-import { createConfigObserver } from "../components/ConfigPage";
-import Twitter from "../assets/Twitter.svg";
+import { createConfigObserver } from "roamjs-components";
 import { twitterLoginOptions } from "../components/TwitterLogin";
 
 addStyle(`.roamjs-twitter-count {

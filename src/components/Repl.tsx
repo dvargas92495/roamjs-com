@@ -2,9 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { Controlled as CodeMirror } from "react-codemirror2";
 import "codemirror/mode/javascript/javascript";
-import { getFirstChildUidByBlockUid } from "../entry-helpers";
 import { Card } from "@blueprintjs/core";
-import { getTreeByBlockUid } from "roam-client";
+import { getFirstChildUidByBlockUid, getTreeByBlockUid } from "roam-client";
 
 type ReplProps = {
   blockUid: string;

@@ -1,12 +1,12 @@
-import { getTreeByPageName, getUids } from "roam-client";
-import { createHashtagObserver, runExtension } from "../entry-helpers";
+import { createHashtagObserver, getTreeByPageName, getUids } from "roam-client";
+import { runExtension } from "../entry-helpers";
 import {
   getAliases,
   getChannelFormat,
   getUserFormat,
   render,
 } from "../components/SlackOverlay";
-import { createConfigObserver } from "../components/ConfigPage";
+import { createConfigObserver } from "roamjs-components";
 import Slack from "../assets/Slack_Mark.svg";
 import axios from "axios";
 

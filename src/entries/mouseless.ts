@@ -1,6 +1,6 @@
-import { getUids } from "roam-client";
+import { createHTMLObserver, getUids } from "roam-client";
 import { renderMouselessDialog } from "../components/MouselessDialog";
-import { createHTMLObserver, isControl, runExtension } from "../entry-helpers";
+import { isControl, runExtension } from "../entry-helpers";
 
 runExtension("mouseless", () => {
   const container = document.createElement("div");

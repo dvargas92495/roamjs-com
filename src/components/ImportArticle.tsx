@@ -12,6 +12,7 @@ import {
 } from "@blueprintjs/core";
 import {
   clearBlockByUid,
+  getNthChildUidByBlockUid,
   getOrderByBlockUid,
   getTreeByPageName,
   getUidsFromId,
@@ -22,9 +23,6 @@ import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 import iconv from "iconv-lite";
 import charset from "charset";
-import {
-  getNthChildUidByBlockUid,
-} from "../entry-helpers";
 
 export const ERROR_MESSAGE =
   "Error Importing Article. Email link to support@roamjs.com for help!";

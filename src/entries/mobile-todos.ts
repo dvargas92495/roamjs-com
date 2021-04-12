@@ -1,7 +1,6 @@
-import { getUids } from "roam-client";
+import { createObserver, getUids } from "roam-client";
 import {
   createMobileIcon,
-  createObserver,
   DONE_REGEX,
   fixCursorById,
   runExtension,
@@ -56,7 +55,7 @@ runExtension("mobile-todos", () => {
         : DONE_REGEX.test(oldValue)
         ? oldValue.replace(DONE_REGEX, "")
         : `{{[[TODO]]}} ${oldValue}`;
-    const diff = newValue.length - oldValue.length;
+      const diff = newValue.length - oldValue.length;
       const { blockUid } = getUids(textArea);
       window.roamAlphaAPI.updateBlock({
         block: { uid: blockUid, string: newValue },

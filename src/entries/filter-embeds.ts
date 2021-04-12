@@ -1,9 +1,9 @@
-import { getUids, getPageTitleByBlockUid } from "roam-client";
 import {
   createHTMLObserver,
-  getPageTitle,
-  runExtension,
-} from "../entry-helpers";
+  getUids,
+  getPageTitleByBlockUid,
+} from "roam-client";
+import { getPageTitle, runExtension } from "../entry-helpers";
 
 const KEY = "roamjsPageFilters";
 type Filter = {

@@ -1,15 +1,15 @@
 import format from "date-fns/format";
 import {
+  createHTMLObserver,
   getConfigFromPage,
+  getNthChildUidByBlockUid,
   getTextByBlockUid,
   getUids,
   toRoamDate,
 } from "roam-client";
 import {
-  createHTMLObserver,
   createTagRegex,
   DAILY_NOTE_PAGE_REGEX,
-  getNthChildUidByBlockUid,
   getReferenceBlockUid,
   isControl,
   runExtension,
@@ -159,7 +159,11 @@ runExtension("todo-trigger", () => {
         } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
           onTodo(blockUid, textArea.value);
         }
+        return;
       }
+      // Array.from(document.getElementsByClassName("block-highlight-blue")).map(
+      //   (d) => d.getElementsByClassName("roam-block")[0] as HTMLDivElement
+      // ).map((d) => getUids(d).blockUid);
     }
   };
 

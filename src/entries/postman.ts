@@ -1,10 +1,11 @@
-import { getPageUidByPageTitle, getTreeByPageName, getUids } from "roam-client";
-import { render } from "../components/PostmanOverlay";
 import {
   createHashtagObserver,
-  extractTag,
-  runExtension,
-} from "../entry-helpers";
+  getPageUidByPageTitle,
+  getTreeByPageName,
+  getUids,
+} from "roam-client";
+import { render } from "../components/PostmanOverlay";
+import { extractTag, runExtension } from "../entry-helpers";
 
 const APIS_REGEX = /apis/i;
 

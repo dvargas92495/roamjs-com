@@ -1,11 +1,11 @@
 import axios from "axios";
-import { getUidsFromId } from "roam-client";
+import { createHTMLObserver, getUidsFromId } from "roam-client";
 import { render } from "../components/YoutubePlayer";
-import { addStyle, createHTMLObserver, runExtension } from "../entry-helpers";
+import { addStyle, runExtension } from "../entry-helpers";
 
 addStyle(`.roam-block-container {
   position: relative
-}`)
+}`);
 
 runExtension("video", () => {
   createHTMLObserver({

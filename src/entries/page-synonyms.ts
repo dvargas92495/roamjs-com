@@ -1,5 +1,6 @@
-import { createOverlayObserver, isApple, runExtension } from "../entry-helpers";
+import { isApple, runExtension } from "../entry-helpers";
 import {
+  createOverlayObserver,
   getConfigFromPage,
   getTextByBlockUid,
   getTreeByPageName,
@@ -56,7 +57,10 @@ const getReplacer = () => {
     Object.keys(linkByAlias)
       .sort((a, b) => b.length - a.length)
       .reduce((prevText: string, alias: string) => {
-        const regex = new RegExp(`(^|[^a-zA-Z0-9_\\[\\]])${alias}([^a-zA-Z0-9_\\[\\]]|$)`, "g");
+        const regex = new RegExp(
+          `(^|[^a-zA-Z0-9_\\[\\]])${alias}([^a-zA-Z0-9_\\[\\]]|$)`,
+          "g"
+        );
         return prevText.replace(regex, (match) =>
           match.replace(alias, `[${alias}](${linkByAlias[alias]})`)
         );

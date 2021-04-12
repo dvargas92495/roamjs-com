@@ -1,5 +1,6 @@
 import { render } from "../components/Marketplace";
-import { createHTMLObserver, runExtension } from "../entry-helpers";
+import { runExtension } from "../entry-helpers";
+import { createHTMLObserver } from "roam-client";
 
 runExtension("marketplace", () => {
   createHTMLObserver({

@@ -1,5 +1,6 @@
 import { renderWikiData } from "../components/WikiData";
-import { createButtonObserver, runExtension } from "../entry-helpers";
+import { runExtension } from "../entry-helpers";
+import { createButtonObserver } from "roam-client";
 
 runExtension("wiki-data", () => {
   createButtonObserver({

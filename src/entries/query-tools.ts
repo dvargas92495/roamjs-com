@@ -1,5 +1,4 @@
 import {
-  createObserver,
   createSortIcons,
   getConfigFromBlock,
   getCreatedTimeByTitle,
@@ -9,6 +8,7 @@ import {
   runExtension,
 } from "../entry-helpers";
 import {
+  createObserver,
   getCreateTimeByBlockUid,
   getConfigFromPage,
   getEditTimeByBlockUid,

@@ -1,4 +1,10 @@
-import { getActiveUids, getUidsFromId, updateActiveBlock } from "roam-client";
+import {
+  createButtonObserver,
+  getActiveUids,
+  getFirstChildUidByBlockUid,
+  getUidsFromId,
+  updateActiveBlock,
+} from "roam-client";
 import urlRegex from "url-regex-safe";
 import {
   ERROR_MESSAGE,
@@ -6,12 +12,7 @@ import {
   importArticle,
   renderImportArticle,
 } from "../components/ImportArticle";
-import {
-  createButtonObserver,
-  createCustomSmartBlockCommand,
-  getFirstChildUidByBlockUid,
-  runExtension,
-} from "../entry-helpers";
+import { createCustomSmartBlockCommand, runExtension } from "../entry-helpers";
 
 const inlineImportArticle = async ({
   value,

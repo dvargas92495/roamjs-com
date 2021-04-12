@@ -1,4 +1,4 @@
-import { createConfigObserver } from "../components/ConfigPage";
+import { createConfigObserver } from "roamjs-components";
 import { runExtension } from "../entry-helpers";
 import FacebookLogo from "../assets/Facebook.svg";
 

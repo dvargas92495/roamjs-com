@@ -3,7 +3,8 @@ import {
   renderLineChart,
   styleContent,
 } from "../components/Charts";
-import { addStyle, createButtonObserver, runExtension } from "../entry-helpers";
+import { addStyle, runExtension } from "../entry-helpers";
+import { createButtonObserver } from "roam-client";
 
 runExtension("charts", () => {
   addStyle(styleContent);

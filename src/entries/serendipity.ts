@@ -2,6 +2,8 @@ import differenceInDays from "date-fns/differenceInDays";
 import dateMax from "date-fns/max";
 import {
   createBlock,
+  createBlockObserver,
+  createButtonObserver,
   createIconButton,
   getAllBlockUidsAndTexts,
   getBlockUidByTextOnPage,
@@ -17,16 +19,13 @@ import {
   toRoamDate,
   toRoamDateUid,
 } from "roam-client";
-import { createConfigObserver } from "../components/ConfigPage";
+import { createConfigObserver } from "roamjs-components";
 import {
   getSettingIntFromTree,
   getSettingValueFromTree,
   getSettingValuesFromTree,
-  monitor,
 } from "../components/hooks";
 import {
-  createBlockObserver,
-  createButtonObserver,
   DAILY_NOTE_PAGE_REGEX,
   extractTag,
   getWordCount,

@@ -1,10 +1,8 @@
 import { createWorker } from "tesseract.js";
+import { runExtension } from "../entry-helpers";
 import {
   createObserver,
   getFirstChildUidByBlockUid,
-  runExtension,
-} from "../entry-helpers";
-import {
   getConfigFromPage,
   pushBullets,
   createIconButton,

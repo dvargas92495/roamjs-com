@@ -1,5 +1,6 @@
-import { createButtonObserver, runExtension } from "../entry-helpers";
+import { runExtension } from "../entry-helpers";
 import { render } from "../components/Maps";
+import { createButtonObserver } from "roam-client";
 
 runExtension("maps", () => {
   createButtonObserver({

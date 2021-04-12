@@ -190,94 +190,6 @@ export const replaceTagText = ({
   }
 };
 
-export const createObserver = (
-  mutationCallback: (mutationList?: MutationRecord[]) => void
-): void =>
-  createDivObserver(
-    mutationCallback,
-    document.getElementsByClassName("roam-body")[0]
-  );
-
-const getMutatedNodes = ({
-  ms,
-  tag,
-  className,
-  nodeList,
-}: {
-  ms: MutationRecord[];
-  tag: string;
-  className: string;
-  nodeList: "addedNodes" | "removedNodes";
-}) => {
-  const blocks = ms.flatMap((m) =>
-    Array.from(m[nodeList]).filter(
-      (d: Node) =>
-        d.nodeName === tag &&
-        Array.from((d as HTMLElement).classList).includes(className)
-    )
-  );
-  const childBlocks = ms.flatMap((m) =>
-    Array.from(m[nodeList])
-      .filter((n) => n.hasChildNodes())
-      .flatMap((d) =>
-        Array.from((d as HTMLElement).getElementsByClassName(className))
-      )
-  );
-  return [...blocks, ...childBlocks];
-};
-
-export const createHTMLObserver = ({
-  callback,
-  tag,
-  className,
-  removeCallback,
-}: {
-  callback: (b: HTMLElement) => void;
-  tag: string;
-  className: string;
-  removeCallback?: (b: HTMLElement) => void;
-}): void => {
-  const blocks = document.getElementsByClassName(className);
-  Array.from(blocks).forEach(callback);
-
-  createObserver((ms) => {
-    const addedNodes = getMutatedNodes({
-      ms,
-      nodeList: "addedNodes",
-      tag,
-      className,
-    });
-    addedNodes.forEach(callback);
-    if (removeCallback) {
-      const removedNodes = getMutatedNodes({
-        ms,
-        nodeList: "removedNodes",
-        tag,
-        className,
-      });
-      removedNodes.forEach(removeCallback);
-    }
-  });
-};
-
-export const createHashtagObserver = ({
-  callback,
-  attribute,
-}: {
-  callback: (s: HTMLSpanElement) => void;
-  attribute: string;
-}): void =>
-  createHTMLObserver({
-    tag: "SPAN",
-    className: "rm-page-ref--tag",
-    callback: (s: HTMLSpanElement) => {
-      if (!s.getAttribute(attribute)) {
-        s.setAttribute(attribute, "true");
-        callback(s);
-      }
-    },
-  });
-
 export const getReferenceBlockUid = (e: HTMLElement): string => {
   const parent = e.closest(".roam-block") as HTMLDivElement;
   const { blockUid } = getUids(parent);
@@ -287,57 +199,6 @@ export const getReferenceBlockUid = (e: HTMLElement): string => {
   ).indexOf(e);
   return refs[index];
 };
-
-export const createBlockObserver = (
-  blockCallback: (b: HTMLDivElement) => void,
-  blockRefCallback?: (b: HTMLSpanElement) => void
-): void => {
-  createHTMLObserver({
-    callback: blockCallback,
-    tag: "DIV",
-    className: "roam-block",
-  });
-  if (blockRefCallback) {
-    createHTMLObserver({
-      callback: blockRefCallback,
-      tag: "SPAN",
-      className: "rm-block-ref",
-    });
-  }
-};
-
-export const createPageObserver = (
-  name: string,
-  callback: (blockUid: string, added: boolean) => void
-): void =>
-  createObserver((ms) => {
-    const addedNodes = getMutatedNodes({
-      ms,
-      nodeList: "addedNodes",
-      tag: "DIV",
-      className: "roam-block",
-    }).map((blockNode) => ({
-      blockUid: getUids(blockNode as HTMLDivElement).blockUid,
-      added: true,
-    }));
-
-    const removedNodes = getMutatedNodes({
-      ms,
-      nodeList: "removedNodes",
-      tag: "DIV",
-      className: "roam-block",
-    }).map((blockNode) => ({
-      blockUid: getUids(blockNode as HTMLDivElement).blockUid,
-      added: false,
-    }));
-
-    if (addedNodes.length || removedNodes.length) {
-      const blockUids = getBlockUidsByPageTitle(name);
-      [...removedNodes, ...addedNodes]
-        .filter(({ blockUid }) => blockUids.has(blockUid))
-        .forEach(({ blockUid, added }) => callback(blockUid, added));
-    }
-  });
 
 export const createPageTitleObserver = ({
   title,
@@ -375,45 +236,6 @@ export const createPageTitleObserver = ({
   };
   window.addEventListener("hashchange", listener);
   listener();
-};
-
-export const createButtonObserver = ({
-  shortcut,
-  attribute,
-  render,
-}: {
-  shortcut: string;
-  attribute: string;
-  render: (b: HTMLButtonElement) => void;
-}): void =>
-  createHTMLObserver({
-    callback: (b) => {
-      if (
-        b.innerText.toUpperCase() ===
-          attribute.toUpperCase().replace("-", " ") ||
-        b.innerText.toUpperCase() === shortcut.toUpperCase()
-      ) {
-        const dataAttribute = `data-roamjs-${attribute}`;
-        if (!b.getAttribute(dataAttribute)) {
-          b.setAttribute(dataAttribute, "true");
-          render(b as HTMLButtonElement);
-        }
-      }
-    },
-    tag: "BUTTON",
-    className: "bp3-button",
-  });
-
-export const createOverlayObserver = (
-  mutationCallback: (mutationList?: MutationRecord[]) => void
-): void => createDivObserver(mutationCallback, document.body);
-
-const createDivObserver = (
-  mutationCallback: (mutationList?: MutationRecord[]) => void,
-  mutationTarget: Element
-) => {
-  const observer = new MutationObserver(mutationCallback);
-  observer.observe(mutationTarget, { childList: true, subtree: true });
 };
 
 const POPOVER_WRAPPER_CLASS = "sort-popover-wrapper";
@@ -703,30 +525,6 @@ export const getBlockDepthByBlockUid = (blockUid: string): number => {
   return block.title ? 1 : getBlockDepthByBlockUid(block.uid) + 1;
 };
 
-const getBlockUidsByBlockId = (blockId: number): string[] => {
-  const block = window.roamAlphaAPI.pull(
-    "[:block/children, :block/uid]",
-    blockId
-  );
-  const children = block[":block/children"] || [];
-  return [
-    block[":block/uid"],
-    ...children.flatMap((c) => getBlockUidsByBlockId(c[":db/id"])),
-  ];
-};
-
-const getBlockUidsByPageTitle = (title: string) => {
-  const result = window.roamAlphaAPI.q(
-    `[:find (pull ?e [:block/children]) :where [?e :node/title "${title}"]]`
-  );
-  if (!result.length) {
-    return new Set();
-  }
-  const page = result[0][0] as RoamBlock;
-  const children = page.children || [];
-  return new Set(children.flatMap((c) => getBlockUidsByBlockId(c.id)));
-};
-
 export const getChildRefStringsByBlockUid = (b: string): string[] =>
   window.roamAlphaAPI
     .q(
@@ -741,20 +539,6 @@ export const getChildRefUidsByBlockUid = (b: string): string[] =>
       `[:find (pull ?r [:block/uid]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
     )
     .map((r: RoamBlock[]) => r[0].uid);
-
-export const getNthChildUidByBlockUid = ({
-  blockUid,
-  order,
-}: {
-  blockUid: string;
-  order: number;
-}): string =>
-  window.roamAlphaAPI.q(
-    `[:find ?u :where [?c :block/uid ?u] [?c :block/order ${order}] [?p :block/children ?c] [?p :block/uid "${blockUid}"]]`
-  )?.[0]?.[0] as string;
-
-export const getFirstChildUidByBlockUid = (blockUid: string): string =>
-  getNthChildUidByBlockUid({ blockUid, order: 0 });
 
 export const getLinkedReferences = (t: string): RoamBlock[] => {
   const parentBlocks = window.roamAlphaAPI

@@ -1,10 +1,10 @@
 import {
   createMobileIcon,
-  createObserver,
   isControl,
   replaceText,
   runExtension,
 } from "../entry-helpers";
+import { createObserver } from "roam-client";
 
 runExtension("todont", () => {
   const TODONT_CLASSNAME = "roamjs-todont";

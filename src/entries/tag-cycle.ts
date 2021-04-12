@@ -1,11 +1,11 @@
 import {
-  createPageObserver,
   getBlockDepthByBlockUid,
   replaceTagText,
   replaceText,
   runExtension,
 } from "../entry-helpers";
 import {
+  createPageObserver,
   getParentUidByBlockUid,
   getTreeByBlockUid,
   getTreeByPageName,

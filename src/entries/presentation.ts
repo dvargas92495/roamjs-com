@@ -1,4 +1,4 @@
-import { addStyle, createButtonObserver, runExtension } from "../entry-helpers";
+import { addStyle, runExtension } from "../entry-helpers";
 import "reveal.js/dist/reveal.css";
 import "reveal.js/dist/theme/black.css";
 import "reveal.js/dist/theme/white.css";
@@ -17,6 +17,7 @@ import {
   VALID_THEMES,
 } from "../components/Presentation";
 import {
+  createButtonObserver,
   getUidsFromButton,
   getTextByBlockUid,
   getTreeByBlockUid,

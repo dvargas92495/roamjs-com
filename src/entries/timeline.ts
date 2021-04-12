@@ -1,5 +1,6 @@
 import { render } from "../components/Timeline";
-import { addStyle, createButtonObserver, runExtension } from "../entry-helpers";
+import { addStyle, runExtension } from "../entry-helpers";
+import { createButtonObserver } from "roam-client";
 
 addStyle(`.roamjs-timeline-date > a, 
 .roamjs-timeline-date > a:hover,

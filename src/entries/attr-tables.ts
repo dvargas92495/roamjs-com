@@ -1,9 +1,9 @@
 import {
-  createObserver,
   getConfigFromBlock,
   runExtension,
 } from "../entry-helpers";
 import {
+  createObserver,
   getConfigFromPage,
   parseRoamDate,
   createIconButton,

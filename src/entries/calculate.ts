@@ -1,4 +1,5 @@
 import {
+  createButtonObserver,
   getConfigFromPage,
   getTextByBlockUid,
   getUidsFromButton,
@@ -6,7 +7,6 @@ import {
   toRoamDate,
 } from "roam-client";
 import {
-  createButtonObserver,
   DAILY_NOTE_PAGE_REGEX,
   getAttributeValueFromPage,
   getTitlesReferencingPagesInSameBlockTree,

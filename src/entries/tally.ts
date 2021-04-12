@@ -1,6 +1,6 @@
-import { getUidsFromButton, getTreeByBlockUid } from "roam-client";
+import { createButtonObserver, getUidsFromButton, getTreeByBlockUid } from "roam-client";
 import { renderTallyCounter } from "../components/TallyCounter";
-import { createButtonObserver, runExtension } from "../entry-helpers";
+import { runExtension } from "../entry-helpers";
 
 runExtension("tally", () => {
   createButtonObserver({
