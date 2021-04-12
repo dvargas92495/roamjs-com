@@ -67,34 +67,58 @@ const sortCallbacks = {
     menuItemCallback(refContainer, (a, b) => a.time - b.time),
   "Created Date Descending": (refContainer: Element) => () =>
     menuItemCallback(refContainer, (a, b) => b.time - a.time),
-  "Daily Note": (refContainer: Element) => () =>
-    menuItemCallback(refContainer, (a, b) => {
-      const aDate = parse(a.title, "MMMM do, yyyy", new Date()).valueOf();
-      const bDate = parse(b.title, "MMMM do, yyyy", new Date()).valueOf();
-      if (isNaN(aDate) && isNaN(bDate)) {
-        return a.time - b.time;
-      } else if (isNaN(aDate)) {
-        return 1;
-      } else if (isNaN(bDate)) {
-        return -1;
-      } else {
-        return aDate - bDate;
-      }
-    }),
-  "Daily Note Descending": (refContainer: Element) => () =>
-    menuItemCallback(refContainer, (a, b) => {
-      const aDate = parse(a.title, "MMMM do, yyyy", new Date()).valueOf();
-      const bDate = parse(b.title, "MMMM do, yyyy", new Date()).valueOf();
-      if (isNaN(aDate) && isNaN(bDate)) {
-        return b.time - a.time;
-      } else if (isNaN(aDate)) {
-        return 1;
-      } else if (isNaN(bDate)) {
-        return -1;
-      } else {
-        return bDate - aDate;
-      }
-    }),
+  "Daily Note": (refContainer: Element) => {
+    const dailyNoteSecondary =
+      getConfigFromPage()["Daily Note Secondary"] ||
+      getConfigFromPage("roam/js/sort-references")["Daily Note Secondary"] ||
+      "time";
+    return () =>
+      menuItemCallback(refContainer, (a, b) => {
+        const aDate = parse(a.title, "MMMM do, yyyy", new Date()).valueOf();
+        const bDate = parse(b.title, "MMMM do, yyyy", new Date()).valueOf();
+        if (isNaN(aDate) && isNaN(bDate)) {
+          if (/^page title$/i.test(dailyNoteSecondary)) {
+            return a.title.localeCompare(b.title);
+          } else if (/^page title descending$/i.test(dailyNoteSecondary)) {
+            return b.title.localeCompare(a.title);
+          } else {
+            return a.time - b.time;
+          }
+        } else if (isNaN(aDate)) {
+          return 1;
+        } else if (isNaN(bDate)) {
+          return -1;
+        } else {
+          return aDate - bDate;
+        }
+      });
+  },
+  "Daily Note Descending": (refContainer: Element) => {
+    const dailyNoteSecondary =
+      getConfigFromPage()["Daily Note Secondary"] ||
+      getConfigFromPage("roam/js/sort-references")["Daily Note Secondary"] ||
+      "time";
+    return () =>
+      menuItemCallback(refContainer, (a, b) => {
+        const aDate = parse(a.title, "MMMM do, yyyy", new Date()).valueOf();
+        const bDate = parse(b.title, "MMMM do, yyyy", new Date()).valueOf();
+        if (isNaN(aDate) && isNaN(bDate)) {
+          if (/^page title$/i.test(dailyNoteSecondary)) {
+            return a.title.localeCompare(b.title);
+          } else if (/^page title descending$/i.test(dailyNoteSecondary)) {
+            return b.title.localeCompare(a.title);
+          } else {
+            return b.time - a.time;
+          }
+        } else if (isNaN(aDate)) {
+          return 1;
+        } else if (isNaN(bDate)) {
+          return -1;
+        } else {
+          return bDate - aDate;
+        }
+      });
+  },
 };
 
 const createSortIconCallback = (container: HTMLDivElement) => {

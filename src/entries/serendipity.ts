@@ -1,3 +1,4 @@
+import { addDays, differenceInMilliseconds, startOfDay } from "date-fns";
 import differenceInDays from "date-fns/differenceInDays";
 import dateMax from "date-fns/max";
 import {
@@ -249,9 +250,15 @@ runExtension(ID, () => {
     },
   });
 
-  const date = new Date();
-  const todayPage = toRoamDate(date);
-  pullDaily({ todayPage });
+  const timeoutFunction = () => {
+    const date = new Date();
+    const todayPage = toRoamDate(date);
+    pullDaily({ todayPage });
+    const tomorrow = addDays(startOfDay(date), 1);
+    console.log(differenceInMilliseconds(tomorrow, date));
+    setTimeout(timeoutFunction, differenceInMilliseconds(tomorrow, date));
+  };
+  timeoutFunction();
 
   createButtonObserver({
     shortcut: "serendipity",

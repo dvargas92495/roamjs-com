@@ -161,9 +161,17 @@ runExtension("todo-trigger", () => {
         }
         return;
       }
-      // Array.from(document.getElementsByClassName("block-highlight-blue")).map(
-      //   (d) => d.getElementsByClassName("roam-block")[0] as HTMLDivElement
-      // ).map((d) => getUids(d).blockUid);
+      Array.from(document.getElementsByClassName("block-highlight-blue"))
+        .map((d) => d.getElementsByClassName("roam-block")[0] as HTMLDivElement)
+        .map((d) => getUids(d).blockUid)
+        .map((blockUid) => ({ blockUid, text: getTextByBlockUid(blockUid) }))
+        .forEach(({ blockUid, text }) => {
+          if (text.startsWith("{{[[DONE]]}}")) {
+            onTodo(blockUid, text);
+          } else if (text.startsWith("{{[[TODO]]}}")) {
+            onDone(blockUid, text);
+          }
+        });
     }
   };
 
