@@ -12,6 +12,7 @@ import {
   extractTag,
   setInputSetting,
   isTagOnPage,
+  openBlockInSidebar,
 } from "../entry-helpers";
 import { MapContainer, Marker, TileLayer, Popup } from "react-leaflet";
 import { LatLngExpression, Icon, Map } from "leaflet";
@@ -100,6 +101,7 @@ const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
   const [markers, setMarkers] = useState<RoamMarker[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [filter, setFilter] = useState(getFilter(initialTree));
+  const isShift = useRef(false);
   const load = useCallback(() => setLoaded(true), [setLoaded]);
   const refresh = useCallback(() => {
     const tree = getTreeByHtmlId(blockId);
@@ -120,23 +122,33 @@ const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
         : windowHref
     );
   }, [setHref]);
+  const shiftKeyCallback = useCallback(
+    (e: KeyboardEvent) => (isShift.current = e.shiftKey),
+    [isShift]
+  );
   useEffect(() => {
     if (!loaded) {
       load();
       getMarkers(initialTree).then((newMarkers) => {
         setMarkers(newMarkers);
       });
+      document.addEventListener("keydown", shiftKeyCallback);
+      document.addEventListener("keyup", shiftKeyCallback);
     }
-  }, [load, loaded, initialTree, setMarkers]);
+  }, [load, loaded, initialTree, setMarkers, shiftKeyCallback]);
   const popupCallback = useCallback(
     (tag: string) => () => {
       const extractedTag = extractTag(tag);
       const pageUid = getPageUidByPageTitle(extractedTag);
       if (pageUid) {
-        window.location.assign(`${href}/page/${pageUid}`);
+        if (isShift.current) {
+          openBlockInSidebar(pageUid);
+        } else {
+          window.location.assign(`${href}/page/${pageUid}`);
+        }
       }
     },
-    [href]
+    [href, isShift]
   );
   const filterOnBlur = useCallback(
     (value: string) => {
@@ -192,7 +204,7 @@ const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
           id="mapbox/streets-v11"
         />
         {filteredMarkers.map((m, i) => (
-          <Marker position={[m.x, m.y]} key={i} icon={MarkerIcon} title={m.tag}>
+          <Marker position={[m.x, m.y]} icon={MarkerIcon} key={i} title={m.tag}>
             <Popup onOpen={popupCallback(m.tag)}>{m.tag}</Popup>
           </Marker>
         ))}
