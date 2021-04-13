@@ -21,6 +21,7 @@ env:
   REST_API_URL: https://api.roamjs.com
   GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
   SLACK_CLIENT_ID: ${{ secrets.SLACK_CLIENT_ID }}
+  FACEBOOK_CLIENT_ID: ${{ secrets.FACEBOOK_CLIENT_ID }}
 
 jobs:
   deploy:

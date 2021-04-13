@@ -50,6 +50,13 @@ functions:
           path: end-service
           method: post
           cors: true
+  facebook-auth-post:
+    handler: out/facebook-auth_post.handler
+    events:
+      - http:
+          path: facebook-auth
+          method: post
+          cors: true
   finish-launch-social-post:
     handler: out/finish-launch-social_post.handler
     events:

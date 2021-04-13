@@ -79,6 +79,14 @@ variable "google_client_secret" {
     type = string  
 }
 
+variable "facebook_client_id" {
+    type = string
+}
+
+variable "facebook_client_secret" {
+    type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -130,6 +138,7 @@ module "aws-serverless-backend" {
         "google-auth/post",
         "google-calendar/get",
         "end-service/post",
+        "facebook-auth/post",
         "finish-launch-social/post",
         "finish-launch-website/post",
         "finish-shutdown-website/post",
@@ -417,4 +426,16 @@ resource "github_actions_secret" "google_client_secret" {
   repository       = "roam-js-extensions"
   secret_name      = "GOOGLE_CLIENT_SECRET"
   plaintext_value  = var.google_client_secret
+}
+
+resource "github_actions_secret" "facebook_client_id" {
+  repository       = "roam-js-extensions"
+  secret_name      = "FACEBOOK_CLIENT_ID"
+  plaintext_value  = var.facebook_client_id
+}
+
+resource "github_actions_secret" "facebook_client_secret" {
+  repository       = "roam-js-extensions"
+  secret_name      = "FACEBOOK_CLIENT_SECRET"
+  plaintext_value  = var.facebook_client_secret
 }
