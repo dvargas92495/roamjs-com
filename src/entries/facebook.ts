@@ -1,6 +1,7 @@
 import { createConfigObserver } from "roamjs-components";
 import { runExtension } from "../entry-helpers";
 import FacebookLogo from "../assets/Facebook.svg";
+import axios from "axios";
 
 const ID = "facebook";
 const CONFIG = `roam/js/${ID}`;
@@ -19,8 +20,17 @@ runExtension(ID, () => {
               options: {
                 ServiceIcon: FacebookLogo,
                 service: "service",
-                getPopoutUrl: () => Promise.resolve("https://facebook.com"),
-                getAuthData: (d) => Promise.resolve(JSON.parse(d)),
+                getPopoutUrl: () =>
+                  Promise.resolve(
+                    `https://www.facebook.com/v10.0/dialog/oauth?client_id=${process.env.FACEBOOK_CLIENT_ID}&scope=publish_to_groups&response_type=code&redirect_uri=https://roamjs.com/oauth?auth=true`
+                  ),
+                getAuthData: (d) =>
+                  axios
+                    .post(
+                      `${process.env.REST_API_URL}/facebook-auth`,
+                      JSON.parse(d)
+                    )
+                    .then((r) => r.data),
               },
               description: "Log in with Facebook by clicking the button below",
             },
