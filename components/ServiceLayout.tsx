@@ -275,7 +275,7 @@ const ServiceLayout = ({
     </>
   );
   return (
-    <StandardLayout>
+    <StandardLayout title={idToTitle(id)} description={description} img={image}>
       <Breadcrumbs
         page={`${id.replace(/-/g, " ").toUpperCase()}${
           development ? " (UNDER DEVELOPMENT)" : ""

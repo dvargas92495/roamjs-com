@@ -5,6 +5,7 @@ import StandardLayout from "../../components/StandardLayout";
 import axios from "axios";
 import { API_URL, QueueItemResponse } from "../../components/constants";
 import FundButton from "../../components/FundButton";
+import { defaultLayoutProps } from "../../components/Layout";
 
 const QueueItems = ({
   title,
@@ -69,7 +70,13 @@ const QueueItems = ({
 const QueuePage = (): JSX.Element => {
   const [search, setSearch] = useState("");
   return (
-    <StandardLayout>
+    <StandardLayout
+      title={"Queue | RoamJS"}
+      description={
+        "Check out what's coming to RoamJS and sponsor what you're most excited about!"
+      }
+      img={defaultLayoutProps.img}
+    >
       <div style={{ marginBottom: 16, padding: "0 16px" }}>
         <StringField
           value={search}

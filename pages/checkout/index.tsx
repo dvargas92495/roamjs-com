@@ -1,6 +1,7 @@
 import StandardLayout from "../../components/StandardLayout";
 import React, { useEffect, useState } from "react";
 import { H4 } from "@dvargas92495/ui";
+import { defaultLayoutProps } from "../../components/Layout";
 
 const CheckoutPage = (): JSX.Element => {
   const [message, setMessage] = useState("");
@@ -21,7 +22,7 @@ const CheckoutPage = (): JSX.Element => {
     }
   }, [setMessage]);
   return (
-    <StandardLayout>
+    <StandardLayout {...defaultLayoutProps}>
       <H4>{message}</H4>
     </StandardLayout>
   );

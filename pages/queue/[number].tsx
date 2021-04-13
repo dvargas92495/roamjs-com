@@ -17,6 +17,7 @@ import {
   Subtitle,
 } from "@dvargas92495/ui";
 import FundButton from "../../components/FundButton";
+import { defaultLayoutProps } from "../../components/Layout";
 
 const QueueItemPage = ({ number }: { number: string }): JSX.Element => {
   const [issue, setIssue] = useState<{
@@ -53,7 +54,7 @@ const QueueItemPage = ({ number }: { number: string }): JSX.Element => {
     (c) => c.lifecycle === "active"
   );
   return (
-    <StandardLayout>
+    <StandardLayout title={issue.title} description={`Queue item for ${issue.link}`} img={defaultLayoutProps.img}>
       <DataLoader loadAsync={loadAsync}>
         <H2>{issue.title}</H2>
         <Subtitle>

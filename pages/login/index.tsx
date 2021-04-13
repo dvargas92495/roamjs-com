@@ -1,12 +1,16 @@
 import { SignIn } from "@clerk/clerk-react";
 import { useRouter } from "next/router";
 import React from "react";
-import Layout from "../../components/Layout";
+import Layout, { defaultLayoutProps } from "../../components/Layout";
 
 const LoginPage = (): JSX.Element => {
   const { service } = useRouter().query;
   return (
-    <Layout>
+    <Layout
+      title={"Login | RoamJS"}
+      description={"Login to RoamJS to get access to subscribed services"}
+      img={defaultLayoutProps.img}
+    >
       {service ? (
         <SignIn
           afterSignIn={`${window.location.origin}/services/${service}?started=true`}

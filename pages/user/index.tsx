@@ -26,6 +26,7 @@ import { stripe } from "../../components/constants";
 import { useUser, SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
 import ServiceToken from "../../components/ServiceToken";
+import { defaultLayoutProps } from "../../components/Layout";
 
 const UserValue: React.FunctionComponent = ({ children }) => (
   <span style={{ paddingLeft: 64, display: "block" }}>{children}</span>
@@ -476,7 +477,11 @@ const Profile = () => {
 
 const UserPage = (): JSX.Element => {
   return (
-    <StandardLayout>
+    <StandardLayout
+      title={"User | RoamJS"}
+      description={"Manage your user settings for RoamJS"}
+      img={defaultLayoutProps.img}
+    >
       <SignedIn>
         <Profile />
       </SignedIn>

@@ -1,7 +1,7 @@
 import { SignUp } from "@clerk/clerk-react";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef } from "react";
-import Layout from "../../components/Layout";
+import Layout, { defaultLayoutProps } from "../../components/Layout";
 
 const SignupPage = (): JSX.Element => {
   const { service } = useRouter().query;
@@ -41,7 +41,13 @@ const SignupPage = (): JSX.Element => {
     }
   }, [mainCallback]);
   return (
-    <Layout>
+    <Layout
+      title={"Sign Up | RoamJS"}
+      description={
+        "Sign up on RoamJS to gain access to powerful services for Roam!"
+      }
+      img={defaultLayoutProps.img}
+    >
       {service ? (
         <SignUp
           afterSignUp={`${window.location.origin}/services/${service}?started=true`}

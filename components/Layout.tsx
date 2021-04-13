@@ -5,18 +5,45 @@ import RoamJSLogo from "./RoamJSLogo";
 import dynamic from "next/dynamic";
 import { useFlag } from "./FeatureFlagProvider";
 
+export type LayoutProps = {
+  title: string;
+  description: string;
+  img: string;
+};
+
+export const defaultLayoutProps = {
+  title: "RoamJS",
+  description: "Become a Roam Power User",
+  img: "/images/logo-high-res.jpg",
+};
+
 const UserIconDynamic = dynamic(() => import("../components/UserIcon"), {
   ssr: false,
 });
 
-const Layout: React.FunctionComponent = ({ children }) => {
+const Layout: React.FunctionComponent<LayoutProps> = ({
+  children,
+  title,
+  description,
+  img,
+}) => {
   const flag = useFlag();
   return (
     <Root>
       <Head>
-        <title>RoamJS</title>
+        <title>{title}</title>
         <meta charSet="utf-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+        <meta name="description" content={description} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content={"summary"} />
+        <meta name="twitter:creator" content="@dvargas92495" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="og:image" content={img} />
+        <meta name="twitter:image" content={img} />
       </Head>
       <AppBar
         homeIcon={<RoamJSLogo />}

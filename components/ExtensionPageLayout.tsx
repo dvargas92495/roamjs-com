@@ -20,7 +20,7 @@ import { Prism } from "react-syntax-highlighter";
 import DemoVideo from "./DemoVideo";
 import Loom from "./Loom";
 import { frontMatter as frontMatters } from "../pages/docs/extensions/*.mdx";
-import { getSingleCodeContent, useCopyCode } from "./hooks";
+import { getSingleCodeContent, idToTitle, useCopyCode } from "./hooks";
 import StandardLayout from "./StandardLayout";
 import RoamJSDigest from "./RoamJSDigest";
 import SponsorCard from "./SponsorCard";
@@ -41,19 +41,19 @@ export const pathToId = (f: string): string =>
 export const pathToLabel = (f: string): string =>
   f.endsWith("index.mdx") ? INDEX_LABEL : pathToId(f).replace(/-/g, " ");
 
-  const INDEX_LABEL = "Getting Started";
+const INDEX_LABEL = "Getting Started";
 
-  export const items = (frontMatters as FrontMatter[]).map((f) => ({
-    title: pathToLabel(f.__resourcePath)
-      .split(" ")
-      .map((s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
-      .join(" "),
-    description: f.description,
-    image: `/thumbnails/${pathToId(f.__resourcePath)}.png`,
-    href: `/${f.__resourcePath.replace(/\.mdx$/, "")}`,
-    development: !!f.development,
-  }));
-  const prodItems = items.filter((f) => !f.development);
+export const items = (frontMatters as FrontMatter[]).map((f) => ({
+  title: pathToLabel(f.__resourcePath)
+    .split(" ")
+    .map((s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
+    .join(" "),
+  description: f.description,
+  image: `/thumbnails/${pathToId(f.__resourcePath)}.png`,
+  href: `/${f.__resourcePath.replace(/\.mdx$/, "")}`,
+  development: !!f.development,
+}));
+const prodItems = items.filter((f) => !f.development);
 
 const total = prodItems.length - 1;
 const rowLength = 4;
@@ -150,7 +150,11 @@ const ExtensionPageLayout: React.FunctionComponent<{
     [pagination, setPagination]
   );
   return (
-    <StandardLayout>
+    <StandardLayout
+      title={idToTitle(id)}
+      description={frontMatter.description}
+      img={`/thumbnails/${id}.png`}
+    >
       <Breadcrumbs
         page={label}
         links={[

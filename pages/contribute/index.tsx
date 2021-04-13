@@ -2,10 +2,15 @@ import React from "react";
 import StandardLayout from "../../components/StandardLayout";
 import { Body, H1, H2, H6, Outlined, ThankYou } from "@dvargas92495/ui";
 import SponsorCard from "../../components/SponsorCard";
+import { defaultLayoutProps } from "../../components/Layout";
 
 const ContributePage = (): React.ReactElement => {
   return (
-    <StandardLayout>
+    <StandardLayout
+      title={"Sponsor RoamJS"}
+      description={"Become a RoamJS contributor and be highlighted below!"}
+      img={defaultLayoutProps.img}
+    >
       <H1>Sponsor</H1>
       <Body>
         Sponsorships support the development and maintenance of free to use

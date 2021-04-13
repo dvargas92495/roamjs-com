@@ -7,6 +7,7 @@ import { API_URL } from "../../components/constants";
 import Link from "next/link";
 import { GetStaticProps } from "next";
 import { findById } from "../../components/ServiceLayout";
+import { defaultLayoutProps } from "../../components/Layout";
 
 type PricesProp = { prices: { name: string; price: number }[] };
 
@@ -78,7 +79,13 @@ const ServicesPage: React.FC<PricesProp> = ({ prices }) => {
       key: id,
     }));
   return (
-    <StandardLayout>
+    <StandardLayout
+      title={"Services | RoamJS"}
+      description={
+        "Tap into the power of your Roam graph by subscribing to a RoamJS Service!"
+      }
+      img={defaultLayoutProps.img}
+    >
       <H4 style={{ textAlign: "center" }}>All Services</H4>
       <Body>
         All RoamJS Services below are listed with their <b>per month</b>{" "}
