@@ -14,9 +14,17 @@ import {
   isTagOnPage,
   openBlockInSidebar,
 } from "../entry-helpers";
-import { MapContainer, Marker, TileLayer, Popup } from "react-leaflet";
-import { LatLngExpression, Icon, Map } from "leaflet";
+import {
+  MapContainer,
+  Marker,
+  TileLayer,
+  Popup,
+  LayersControl,
+  useMap,
+} from "react-leaflet";
+import { LatLngExpression, Icon, Map, Marker as LMarker } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet/dist/images/layers.png";
 import EditContainer from "./EditContainer";
 import axios from "axios";
 import { Label } from "@blueprintjs/core";
@@ -25,7 +33,16 @@ import { getTreeByHtmlId, useTreeByHtmlId } from "./hooks";
 
 addStyle(`.leaflet-pane {
   z-index: 10 !important;
-}`);
+}
+
+.leaflet-retina a.leaflet-control-layers-toggle {
+  background-image: url(https://unpkg.com/leaflet@1.7.1/dist/images/layers.png)
+}
+
+a.leaflet-popup-close-button {
+  display:none;
+}
+`);
 
 // https://github.com/Leaflet/Leaflet/blob/c0bf09ba32e71fdf29f91808c8b31bbb5946cc74/src/layer/marker/Icon.Default.js
 const MarkerIcon = new Icon({
@@ -92,6 +109,54 @@ const getMarkers = ({ children }: { children: TreeNode[] }) => {
     : Promise.resolve([] as RoamMarker[]);
 };
 
+const Markers = ({
+  href,
+  markers,
+}: {
+  href: string;
+  markers: RoamMarker[];
+}) => {
+  const map = useMap();
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore until there's a better way to grab markers
+    const leafletMarkers = map._layers as { [key: string]: LMarker };
+    Object.keys(leafletMarkers).forEach((k) => {
+      const m = leafletMarkers[k];
+      m.on({
+        mouseover: () => m.openPopup(),
+        mouseout: () => m.closePopup(),
+        click: (e) => {
+          const extractedTag = extractTag(m.options.title);
+          const pageUid = getPageUidByPageTitle(extractedTag);
+          if (pageUid) {
+            if (e.originalEvent.shiftKey) {
+              openBlockInSidebar(pageUid);
+            } else {
+              window.location.assign(`${href}/page/${pageUid}`);
+            }
+          }
+        },
+      });
+    });
+  });
+  return (
+    <>
+      {markers.map((m, i) => (
+        <Marker
+          position={[m.x, m.y]}
+          icon={MarkerIcon}
+          key={i}
+          title={m.tag}
+          riseOnHover
+        >
+          <Popup>{m.tag}</Popup>
+        </Marker>
+      ))}
+    </>
+  );
+};
+
 const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
   const id = useMemo(() => `roamjs-maps-container-id-${blockId}`, [blockId]);
   const mapInstance = useRef<Map>(null);
@@ -136,19 +201,14 @@ const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
       document.addEventListener("keyup", shiftKeyCallback);
     }
   }, [load, loaded, initialTree, setMarkers, shiftKeyCallback]);
-  const popupCallback = useCallback(
-    (tag: string) => () => {
-      const extractedTag = extractTag(tag);
-      const pageUid = getPageUidByPageTitle(extractedTag);
-      if (pageUid) {
-        if (isShift.current) {
-          openBlockInSidebar(pageUid);
-        } else {
-          window.location.assign(`${href}/page/${pageUid}`);
-        }
-      }
-    },
-    [href, isShift]
+  const filteredMarkers = useMemo(
+    () =>
+      filter
+        ? markers.filter((m) =>
+            isTagOnPage({ tag: filter, title: extractTag(m.tag) })
+          )
+        : markers,
+    [markers, filter]
   );
   const filterOnBlur = useCallback(
     (value: string) => {
@@ -160,15 +220,6 @@ const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
       setFilter(value);
     },
     [blockId]
-  );
-  const filteredMarkers = useMemo(
-    () =>
-      filter
-        ? markers.filter((m) =>
-            isTagOnPage({ tag: filter, title: extractTag(m.tag) })
-          )
-        : markers,
-    [markers, filter]
   );
   const whenCreated = useCallback((m) => (mapInstance.current = m), [
     mapInstance,
@@ -197,17 +248,49 @@ const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
         style={{ height: 400 }}
         whenCreated={whenCreated}
       >
-        <TileLayer
-          attribution='Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
-          url="https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}"
-          accessToken={process.env.MAPBOX_TOKEN}
-          id="mapbox/streets-v11"
-        />
-        {filteredMarkers.map((m, i) => (
-          <Marker position={[m.x, m.y]} icon={MarkerIcon} key={i} title={m.tag}>
-            <Popup onOpen={popupCallback(m.tag)}>{m.tag}</Popup>
-          </Marker>
-        ))}
+        <LayersControl position="bottomleft">
+          <LayersControl.BaseLayer checked name="Streets">
+            <TileLayer
+              attribution='Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
+              url="https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}"
+              accessToken={process.env.MAPBOX_TOKEN}
+              id="mapbox/streets-v11"
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="Outdoors">
+            <TileLayer
+              attribution='Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
+              url="https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}"
+              accessToken={process.env.MAPBOX_TOKEN}
+              id="mapbox/outdoors-v11"
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="Light">
+            <TileLayer
+              attribution='Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
+              url="https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}"
+              accessToken={process.env.MAPBOX_TOKEN}
+              id="mapbox/light-v10"
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="Dark">
+            <TileLayer
+              attribution='Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
+              url="https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}"
+              accessToken={process.env.MAPBOX_TOKEN}
+              id="mapbox/dark-v10"
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="Satellite">
+            <TileLayer
+              attribution='Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
+              url="https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}"
+              accessToken={process.env.MAPBOX_TOKEN}
+              id="mapbox/satellite-v9"
+            />
+          </LayersControl.BaseLayer>
+        </LayersControl>
+        <Markers href={href} markers={filteredMarkers} />
       </MapContainer>
     </EditContainer>
   );
