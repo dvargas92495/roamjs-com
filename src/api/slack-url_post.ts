@@ -27,6 +27,7 @@ export const handler = async (
             body: JSON.stringify({
               token: r.data.access_token,
               user_token: r.data.authed_user.access_token,
+              data: r.data,
             }),
             headers: headers(event),
           }

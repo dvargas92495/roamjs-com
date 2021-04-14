@@ -91,6 +91,32 @@ const getCurrentUserEmail = () => {
 const web = new WebClient();
 delete web["axios"].defaults.headers["User-Agent"];
 
+const getUsers = async (token: string) => {
+  const userSet = new Set<SlackMember>();
+  let done = false;
+  let cursor: string = undefined;
+  while (!done) {
+    const response = await web.users.list({ token, cursor });
+    (response.members as SlackMember[]).forEach((m) => userSet.add(m));
+    cursor = response.response_metadata?.next_cursor;
+    done = !cursor;
+  }
+  return Array.from(userSet);
+};
+
+const getChannels = async (token: string) => {
+  const channelSet = new Set<SlackChannel>();
+  let done = false;
+  let cursor: string = undefined;
+  while (!done) {
+    const response = await web.conversations.list({ token, cursor });
+    (response.channels as SlackChannel[]).forEach((c) => channelSet.add(c));
+    cursor = response.response_metadata?.next_cursor;
+    done = !cursor;
+  }
+  return Array.from(channelSet);
+};
+
 const SlackContent: React.FunctionComponent<
   ContentProps & { close: () => void }
 > = ({ tag, close, blockUid }) => {
@@ -147,10 +173,8 @@ const SlackContent: React.FunctionComponent<
       key: "content format",
       defaultValue: "{block}",
     });
-    Promise.all([web.users.list({ token }), web.conversations.list({ token })])
-      .then(([userResponse, channelResponse]) => {
-        const members = userResponse.members as SlackMember[];
-        const channels = channelResponse.channels as SlackChannel[];
+    Promise.all([getUsers(token), getChannels(token)])
+      .then(([members, channels]) => {
         const memberId = members.find(
           (m) => toName(m).toUpperCase() === aliasedName || findFunction(m)
         )?.id;
@@ -216,12 +240,16 @@ const SlackContent: React.FunctionComponent<
           setError(
             `Couldn't find Slack user for tag: ${tag}.${
               aliasedName ? `\nTried to use alias: ${aliases[tag]}` : ""
-            }\nFound: ${members.map(toName).join(", ")}`
+            }`
           );
         }
       })
       .catch(({ error, message }) => {
-        setError(error || message);
+        if (message?.endsWith?.("not_authed")) {
+          setError("Not logged in. Head to the roam/js/slack page to log in!");
+        } else {
+          setError(error || message);
+        }
         setLoading(false);
       });
   }, [setLoading, close, tag, setError, asUser]);
