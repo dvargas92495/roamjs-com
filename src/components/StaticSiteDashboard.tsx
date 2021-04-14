@@ -157,6 +157,8 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
   );
 };
 
+const SUBDOMAIN_REGEX = /^((?!-)[A-Za-z0-9-]{0,62}[A-Za-z0-9])$/;
+const DOMAIN_REGEX = /^(\*\.)?(((?!-)[A-Za-z0-9-]{0,62}[A-Za-z0-9])\.)+((?!-)[A-Za-z0-9-]{1,62}[A-Za-z0-9])$/;
 const RequestDomainContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
@@ -181,11 +183,11 @@ const RequestDomainContent: StageContent = ({ openPanel }) => {
     [setValue, domainSwitch]
   );
   const onBlur = useCallback(() => {
-    if (!/\.[a-z]{2,8}$/.test(value)) {
+    if (domainSwitch && !DOMAIN_REGEX.test(value)) {
       return setError("Invalid domain. Try a .com!");
     } else if (
       !domainSwitch &&
-      value.replace(".roamjs.com", "").includes(".")
+      !SUBDOMAIN_REGEX.test(value.replace(".roamjs.com", ""))
     ) {
       return setError("Invalid subdomain. Remove the period");
     }

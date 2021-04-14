@@ -68,12 +68,6 @@ const StaticSitePage: React.FC<ServicePageProps> = (props) => {
         want to have these attributes nested within the ignore block, though
         it's not a strict requirement.
       </Body>
-      <H4>Self-Hosted</H4>
-      <Body>
-        If you prefer to host the site instead of RoamJS hosting it for you, you
-        could use the GitHub action found
-        [here](https://github.com/dvargas92495/generate-roam-site-action).
-      </Body>
       */}
     </ServiceLayout>
   );

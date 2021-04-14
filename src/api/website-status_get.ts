@@ -58,7 +58,11 @@ export const handler = authenticate(async (event) => {
       ScanIndexForward: false,
       IndexName: "primary-index",
     })
-    .promise();
+    .promise()
+    .catch(() => ({ Items: [] }));
+  if (!statuses.Items.length) {
+    return emptyResponse(event);
+  }
 
   const deployStatuses = await dynamo
     .query({
@@ -73,6 +77,7 @@ export const handler = authenticate(async (event) => {
       IndexName: "primary-index",
     })
     .promise();
+
   const successDeployStatuses = deployStatuses.Items.filter((s) =>
     ["SUCCESS", "FAILURE"].includes(s.status.S)
   );
