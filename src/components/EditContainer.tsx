@@ -99,4 +99,12 @@ export const render = (d: HTMLElement): void => {
   );
 };
 
+export const editContainerRender = (
+  Fc: React.FunctionComponent<{ blockId: string }>
+) => (b: HTMLButtonElement): void =>
+  ReactDOM.render(
+    <Fc blockId={b.closest(".roam-block")?.id} />,
+    b.parentElement
+  );
+
 export default EditContainer;
