@@ -87,6 +87,10 @@ variable "facebook_client_secret" {
     type = string
 }
 
+variable "iframely_api_key" {
+  type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -143,6 +147,7 @@ module "aws-serverless-backend" {
         "finish-launch-website/post",
         "finish-shutdown-website/post",
         "finish-start-service/post",
+        "iframely/post",
         "install/put",
         "is-subscribed/get",
         "launch-social/post",
@@ -438,4 +443,10 @@ resource "github_actions_secret" "facebook_client_secret" {
   repository       = "roam-js-extensions"
   secret_name      = "FACEBOOK_CLIENT_SECRET"
   plaintext_value  = var.facebook_client_secret
+}
+
+resource "github_actions_secret" "iframely_api_key" {
+  repository       = "roam-js-extensions"
+  secret_name      = "IFRAMELY_API_KEY"
+  plaintext_value  = var.iframely_api_key
 }

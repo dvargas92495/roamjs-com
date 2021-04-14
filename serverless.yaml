@@ -106,6 +106,13 @@ functions:
           path: google-calendar
           method: get
           cors: true
+  iframely-post:
+    handler: out/iframely_post.handler
+    events:
+      - http:
+          path: iframely
+          method: post
+          cors: true
   is-subscribed-get:
     handler: out/is-subscribed_get.handler
     events:
