@@ -1,16 +1,69 @@
+import { replaceTagText, replaceText, runExtension } from "../entry-helpers";
 import {
-  getBlockDepthByBlockUid,
-  replaceTagText,
-  replaceText,
-  runExtension,
-} from "../entry-helpers";
-import {
-  createPageObserver,
-  getParentUidByBlockUid,
   getTreeByBlockUid,
   getTreeByPageName,
+  PullBlock,
   TreeNode,
-} from 'roam-client';
+} from "roam-client";
+
+type IdsCallback = (ids: number[]) => void;
+type DiffOptions = {
+  addedCallback?: IdsCallback;
+  removedCallback?: IdsCallback;
+  callback?: (before: PullBlock, after: PullBlock) => void;
+};
+
+const diffChildren = (
+  before: PullBlock,
+  after: PullBlock,
+  { addedCallback, removedCallback, callback }: DiffOptions
+) => {
+  const beforeChildren = new Set(
+    (before?.[":block/children"] || []).map((d) => d[":db/id"])
+  );
+  const afterChildren = new Set(
+    (after?.[":block/children"] || []).map((d) => d[":db/id"])
+  );
+  if (afterChildren.size > beforeChildren.size && addedCallback) {
+    addedCallback(
+      Array.from(afterChildren).filter((b) => !beforeChildren.has(b))
+    );
+  } else if (beforeChildren.size > afterChildren.size && removedCallback) {
+    removedCallback(
+      Array.from(beforeChildren).filter((b) => !afterChildren.has(b))
+    );
+  }
+  if (callback) {
+    callback(before, after);
+  }
+};
+
+const watchBlock = ({
+  blockUid,
+  ...options
+}: { blockUid: string } & DiffOptions) => {
+  window.roamAlphaAPI.data.addPullWatch(
+    "[:block/children :block/string]",
+    `[:block/uid "${blockUid}"]`,
+    (before, after) => diffChildren(before, after, options)
+  );
+};
+
+const watchPage = ({
+  title,
+  addedCallback,
+  removedCallback,
+}: {
+  title: string;
+} & Pick<DiffOptions, "addedCallback" | "removedCallback">) => {
+  window.roamAlphaAPI.data.addPullWatch(
+    "[:block/children]",
+    `[:node/title "${title}"]`,
+    (before, after) => {
+      diffChildren(before, after, { addedCallback, removedCallback });
+    }
+  );
+};
 
 runExtension("tag-cycle", () => {
   const config: { [blockUid: string]: (e: KeyboardEvent) => void } = {};
@@ -125,23 +178,61 @@ runExtension("tag-cycle", () => {
     t.text.toUpperCase().startsWith("OPT+") ||
     t.text.toUpperCase().startsWith("WIN+");
 
+  const watchTagCycleBlockUid = (blockUid: string) => {
+    const shortcutCallback = () => {
+      const shortcut = getTreeByBlockUid(blockUid);
+      if (isValidShortcut(shortcut)) {
+        configureShortcut({ ...shortcut, uid: blockUid });
+      }
+    };
+    watchBlock({
+      blockUid,
+      addedCallback: (addedIds) => {
+        addedIds
+          .map(
+            (id) => window.roamAlphaAPI.pull("[:block/uid]", id)[":block/uid"]
+          )
+          .forEach((uid) =>
+            watchBlock({
+              blockUid: uid,
+              callback: shortcutCallback,
+            })
+          );
+        shortcutCallback();
+      },
+      removedCallback: shortcutCallback,
+      callback: shortcutCallback,
+    });
+  };
+
   getTreeByPageName("roam/js/tag-cycle")
+    .map((t) => {
+      watchTagCycleBlockUid(t.uid);
+      t.children.forEach((v) =>
+        watchBlock({
+          blockUid: v.uid,
+          callback: () => {
+            const c = getTreeByBlockUid(t.uid);
+            return isValidShortcut(c) && configureShortcut(c);
+          },
+        })
+      );
+      return t;
+    })
     .filter(isValidShortcut)
     .forEach(configureShortcut);
 
-  createPageObserver("roam/js/tag-cycle", (blockUid, added) => {
-    if (!added) {
-      cleanConfig(blockUid);
-      return;
-    }
-    const depth = getBlockDepthByBlockUid(blockUid);
-    if (depth > 2 || depth < 0) {
-      return;
-    }
-    const uid = depth === 2 ? getParentUidByBlockUid(blockUid) : blockUid;
-    const shortcut = getTreeByBlockUid(uid);
-    if (isValidShortcut(shortcut)) {
-      configureShortcut({ ...shortcut, uid });
-    }
+  watchPage({
+    title: "roam/js/tag-cycle",
+    addedCallback: (ids) => {
+      ids
+        .map((id) => window.roamAlphaAPI.pull("[:block/uid]", id)[":block/uid"])
+        .forEach(watchTagCycleBlockUid);
+    },
+    removedCallback: (ids) => {
+      ids
+        .map((id) => window.roamAlphaAPI.pull("[:block/uid]", id)[":block/uid"])
+        .map(cleanConfig);
+    },
   });
 });

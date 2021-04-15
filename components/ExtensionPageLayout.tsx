@@ -202,12 +202,23 @@ const ExtensionPageLayout: React.FunctionComponent<{
           )}
         </>
       )}
+      <H3>Contributors</H3>
+      <Body>
+        This extension is brought to you by RoamJS! If you are facing any issues
+        reach out to{" "}
+        <ExternalLink href={"mailto:support@roamjs.com"}>
+          support@roamjs.com
+        </ExternalLink>{" "}
+        or click on the chat button on the bottom right. If you get value from
+        using this extension, consider sponsoring RoamJS by clicking on the
+        button below!
+      </Body>
+      <SponsorDialog id={id} />
       {frontMatter.contributors && (
         <>
-          <H3>Contributors</H3>
           <Body>
-            A special thanks to those who's contributions helped make this
-            extension possible
+            A special thanks to those who's contributions also helped make this
+            extension possible:
           </Body>
           <ul>
             {frontMatter.contributors.split(",").map((s) => {
@@ -238,11 +249,6 @@ const ExtensionPageLayout: React.FunctionComponent<{
               );
             })}
           </ul>
-          <Body>
-            If you get value from using this extension, please consider
-            sponsoring below!
-          </Body>
-          <SponsorDialog id={id} />
         </>
       )}
       <div style={{ margin: "128px 0" }}>
