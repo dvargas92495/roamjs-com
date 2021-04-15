@@ -13,7 +13,7 @@ const UserButtonSignedIn = () => {
   return <UserButton />;
 };
 
-const UserIcon: React.FC<{ flag: boolean }> = ({ flag }) => {
+const UserIcon: React.FC<{ flag: boolean }> = () => {
   return (
     <>
       <SignedIn>
