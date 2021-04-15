@@ -132,6 +132,7 @@ module "aws-serverless-backend" {
         "article/post",
         "balance/get",
         "balance/post",
+        "customer/post",
         "customer/put",
         "deploy/post",
         "fund/post",
