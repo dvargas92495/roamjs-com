@@ -7,6 +7,7 @@ import {
   pushBullets,
 } from "roam-client";
 import {
+  createCustomSmartBlockCommand,
   createTagRegex,
   getLinkedReferences,
   getPageTitle,
@@ -16,13 +17,7 @@ import {
 const PULL_REFERENCES_COMMAND = "Pull References";
 const REPLACE = "${ref}";
 
-const pullReferences = async (
-  _: {
-    [key: string]: string;
-  },
-  blockUid: string
-) => {
-  const parentUid = getParentUidByBlockUid(blockUid);
+const pullReferences = async () => {
   const config = getConfigFromPage("roam/js/pull-references");
   const format = config["Format"] || REPLACE;
   const pageTitle = getPageTitle(document.activeElement);
@@ -32,12 +27,8 @@ const pullReferences = async (
     format.replace(REPLACE, `((${l.uid}))`)
   );
   if (bullets.length === 0) {
-    window.roamAlphaAPI.updateBlock({
-      block: { string: "No linked references for this page!", uid: blockUid },
-    });
-    return;
+    return ["No linked references for this page!"];
   }
-  await pushBullets(bullets, blockUid, parentUid);
 
   const removeTags = !!config["Remove Tags"];
   if (removeTags && !document.activeElement.closest(".rm-sidebar-outline")) {
@@ -60,8 +51,24 @@ const pullReferences = async (
       });
     }
   }
+  return bullets;
 };
 
 runExtension("pull-references", () => {
-  addButtonListener(PULL_REFERENCES_COMMAND, pullReferences);
+  addButtonListener(PULL_REFERENCES_COMMAND, (_, blockUid) =>
+    pullReferences().then((bts) =>
+      pushBullets(bts, blockUid, getParentUidByBlockUid(blockUid))
+    )
+  );
+});
+
+createCustomSmartBlockCommand({
+  command: "PULLREFERENCES",
+  processor: async () =>
+    pullReferences().then(async (bullets) => {
+      bullets.forEach((s) =>
+        window.roam42.smartBlocks.activeWorkflow.outputAdditionalBlock(s)
+      );
+      return "";
+    }),
 });

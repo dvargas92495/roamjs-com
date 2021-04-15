@@ -117,13 +117,16 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
                   }
                 }
               }, 500);
+              document.addEventListener("click", shareListener);
             },
             { once: true }
           );
+          return () => {
+            moreMenu.style.border = "unset";
+            document.removeEventListener("click", shareListener);
+          };
         }
       }
-      document.addEventListener("click", shareListener);
-      return () => document.removeEventListener("click", shareListener);
     }
   }, [ready, shareListener]);
   const onSubmit = useCallback(() => {
@@ -702,7 +705,9 @@ const LiveContent: StageContent = () => {
             <>
               <div style={{ marginBottom: 8 }}>
                 <span>Status</span>
-                {status === "AWAITING VALIDATION" && statusProps && statusProps !== "{}" ? (
+                {status === "AWAITING VALIDATION" &&
+                statusProps &&
+                statusProps !== "{}" ? (
                   <div style={{ color: "darkblue" }}>
                     <span>{status}</span>
                     <br />

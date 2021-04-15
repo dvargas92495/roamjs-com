@@ -144,6 +144,11 @@ export const runService = ({
         d.firstElementChild.firstElementChild.nextElementSibling
       );
       ReactDOM.render(<Dashboard />, parent);
+      window.addEventListener(
+        "hashchange",
+        () => ReactDOM.unmountComponentAtNode(parent),
+        { once: true }
+      );
     },
   });
 
