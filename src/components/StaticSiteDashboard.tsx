@@ -49,7 +49,7 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
   const pageUid = usePageUid();
   const [ready, setReady] = useState(isFieldSet("share"));
   const [deploySwitch, setDeploySwitch] = useState(
-    getField("share") === "true"
+    !ready || getField("share") === "true"
   );
   const onSwitchChange = useCallback(
     (e: React.FormEvent<HTMLInputElement>) =>
@@ -64,6 +64,7 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
         target.parentElement.className.includes("bp3-menu-item") &&
         target.innerText.toUpperCase() === "SHARE"
       ) {
+        document.removeEventListener("click", shareListener);
         const shareItem = target.parentElement as HTMLAnchorElement;
         shareItem.style.border = "unset";
         setReady(true);
@@ -96,22 +97,29 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
           "bp3-icon-more"
         )[0] as HTMLSpanElement;
         if (moreMenu) {
-          moreMenu.click();
-          setTimeout(() => {
-            const menuItems = moreMenu.closest(
-              ".bp3-popover-target.bp3-popover-open"
-            )?.nextElementSibling;
-            if (menuItems) {
-              const shareItem = Array.from(
-                menuItems.getElementsByClassName("bp3-menu-item")
-              )
-                .map((e) => e as HTMLAnchorElement)
-                .find((e) => e.innerText === "Share");
-              if (shareItem) {
-                shareItem.style.border = HIGHLIGHT;
-              }
-            }
-          }, 500);
+          moreMenu.style.border = HIGHLIGHT;
+          moreMenu.addEventListener(
+            "click",
+            () => {
+              moreMenu.style.border = "unset";
+              setTimeout(() => {
+                const menuItems = moreMenu.closest(
+                  ".bp3-popover-target.bp3-popover-open"
+                )?.nextElementSibling;
+                if (menuItems) {
+                  const shareItem = Array.from(
+                    menuItems.getElementsByClassName("bp3-menu-item")
+                  )
+                    .map((e) => e as HTMLAnchorElement)
+                    .find((e) => e.innerText === "Share");
+                  if (shareItem) {
+                    shareItem.style.border = HIGHLIGHT;
+                  }
+                }
+              }, 500);
+            },
+            { once: true }
+          );
         }
       }
       document.addEventListener("click", shareListener);
@@ -129,29 +137,34 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
   return (
     <>
       <p>
-        Share your graph with <code>support@roamjs.com</code> as a <b>Reader</b>
-        .
+        In order to have automatic daily deploys, share your graph with{" "}
+        <code>support@roamjs.com</code> as a <b>Reader</b>.{" "}
+        <span style={{ fontSize: 8 }}>
+          Why do we need this?{" "}
+          <Tooltip
+            content={
+              <span style={{ maxWidth: 400, display: "inline-block" }}>
+                RoamJS needs to access your Roam data for automatic daily
+                updates. Instead of trusting RoamJS with your password, we are
+                asking for read only permission. We will only access data based
+                on your soon to be configured filters for the purposes of
+                deploying your site.
+              </span>
+            }
+          >
+            <Icon icon={"info-sign"} iconSize={8} intent={Intent.PRIMARY} />
+          </Tooltip>
+        </span>
+      </p>
+      <p>
+        If you're not comfortable with giving the RoamJS user read access to
+        your graph, you will need to toggle off daily deploys below.
       </p>
       <Switch
         checked={deploySwitch}
         onChange={onSwitchChange}
         labelElement={"Daily Deploys"}
       />
-      <p style={{ fontSize: "8px", margin: "16px 0" }}>
-        Why do we need this?{" "}
-        <Tooltip
-          content={
-            <span style={{ maxWidth: 400, display: "inline-block" }}>
-              RoamJS needs to access your Roam data for automatic daily updates.
-              Instead of trusting RoamJS with your password, we are asking for
-              read only permission. We will only access data based on your soon
-              to be configured filters for the purposes of deploying your site.
-            </span>
-          }
-        >
-          <Icon icon={"info-sign"} iconSize={8} intent={Intent.PRIMARY} />
-        </Tooltip>
-      </p>
       <NextButton onClick={onSubmit} disabled={!ready && deploySwitch} />
     </>
   );
@@ -689,7 +702,7 @@ const LiveContent: StageContent = () => {
             <>
               <div style={{ marginBottom: 8 }}>
                 <span>Status</span>
-                {status === "AWAITING VALIDATION" && statusProps !== "{}" ? (
+                {status === "AWAITING VALIDATION" && statusProps && statusProps !== "{}" ? (
                   <div style={{ color: "darkblue" }}>
                     <span>{status}</span>
                     <br />
