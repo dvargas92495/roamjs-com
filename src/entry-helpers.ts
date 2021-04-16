@@ -575,7 +575,7 @@ export const createMobileIcon = (
 
 export const isApple = isIOS || isMacOs;
 
-export const isControl = (e: KeyboardEvent): boolean =>
+export const isControl = (e: KeyboardEvent | MouseEvent): boolean =>
   (e.ctrlKey && !isApple) || (e.metaKey && isApple);
 
 export const addStyle = (content: string): HTMLStyleElement => {
