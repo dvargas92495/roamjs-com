@@ -169,6 +169,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/dostlund.jfif",
             url: "https://twitter.com/dostlund",
           },
+          {
+            title: "Parham Shafti",
+            imgSrc: "sponsors/parham.jfif",
+            url: "https://www.forthisworld.org",
+          },
         ]}
       />
     </StandardLayout>

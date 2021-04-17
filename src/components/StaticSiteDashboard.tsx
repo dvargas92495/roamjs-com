@@ -69,20 +69,32 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
         shareItem.style.border = "unset";
         setReady(true);
         setTimeout(() => {
-          const grid = document.getElementsByClassName("sharing-grid")[0];
-          const textarea = Array.from(
-            grid.getElementsByTagName("textarea")
-          ).find((t) =>
-            t.parentElement.previousElementSibling.innerHTML.startsWith(
-              "Readers"
-            )
+          const input = Array.from(document.getElementsByTagName("input")).find(
+            (i) => i.placeholder === "Emails"
           );
-          if (textarea) {
-            textarea.parentElement.parentElement.style.border = HIGHLIGHT;
+          if (input) {
+            input.parentElement.parentElement.style.border = HIGHLIGHT;
             const guide = document.createElement("span");
             guide.style.fontSize = "8px";
             guide.innerText = "(Press Enter after adding support@roamjs.com)";
-            textarea.parentElement.appendChild(guide);
+            input.parentElement.appendChild(guide);
+            const container = input.parentElement?.parentElement;
+            if (container) {
+              const perm = input.parentElement.parentElement.getElementsByClassName(
+                "rm-settings__permissions-button"
+              )?.[0] as HTMLButtonElement;
+              perm?.click?.();
+              setTimeout(() => {
+                const access = Array.from(
+                  document.getElementsByClassName("bp3-menu-item")
+                )
+                  .map((i) => i as HTMLAnchorElement)
+                  .find(
+                    (i) => (i as HTMLAnchorElement).innerText === "read access"
+                  );
+                access?.click?.();
+              }, 1);
+            }
           }
         }, 500);
       }
