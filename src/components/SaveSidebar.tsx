@@ -13,6 +13,7 @@ import {
   getPageUidByPageTitle,
   getTreeByPageName,
 } from "roam-client";
+import { getWindowUid } from "../entry-helpers";
 
 const SaveSidebar = (): React.ReactElement => {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,8 +28,10 @@ const SaveSidebar = (): React.ReactElement => {
         canEscapeKeyClose
         canOutsideClickClose
         onClose={close}
+        title={'Save Sidebar Content'}
       >
         <div className={Classes.DIALOG_BODY}>
+          <h6>Enter the label to save the content of this sidebar under:</h6>
           <Label>
             Label
             <InputGroup
@@ -53,7 +56,7 @@ const SaveSidebar = (): React.ReactElement => {
                   text: value,
                   children: windows.map((w) => ({
                     text: w.type,
-                    children: [{ text: w["block-uid"] }],
+                    children: [{ text: getWindowUid(w) }],
                   })),
                 };
                 createBlock({
@@ -61,8 +64,9 @@ const SaveSidebar = (): React.ReactElement => {
                     ? configToSave
                     : { text: "saved", children: [configToSave] },
                   parentUid: uid || parentUid,
-                  order: children.length,
+                  order: children?.length,
                 });
+                close();
               }}
               intent={Intent.PRIMARY}
             />

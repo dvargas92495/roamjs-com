@@ -10,6 +10,7 @@ import { isIOS, isMacOs } from "mobile-device-detect";
 import { Dict } from "mixpanel-browser";
 import { getTextByBlockUid, RoamBlock } from "roam-client";
 import axios, { AxiosResponse } from "axios";
+import { SidebarWindow } from "roam-client/lib/types";
 
 declare global {
   interface Window {
@@ -728,7 +729,7 @@ export const extractTag = (tag: string): string =>
 export const openBlockInSidebar = (blockUid: string): boolean | void =>
   window.roamAlphaAPI.ui.rightSidebar
     .getWindows()
-    .some((w) => w["block-uid"] === blockUid)
+    .some((w) => w.type === 'block' && w["block-uid"] === blockUid)
     ? window.roamAlphaAPI.ui.rightSidebar.open()
     : window.roamAlphaAPI.ui.rightSidebar.addWindow({
         window: {
@@ -793,3 +794,10 @@ export const isPopoverThePageFilter = (popover?: HTMLElement): boolean => {
   }
   return false;
 };
+
+export const getWindowUid = (w: SidebarWindow): string =>
+  w.type === "outline"
+    ? w["page-uid"]
+    : w.type === "mentions"
+    ? w["mentions-uid"]
+    : w["block-uid"];

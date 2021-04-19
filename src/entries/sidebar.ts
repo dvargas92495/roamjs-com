@@ -10,6 +10,7 @@ import {
 import {
   getCurrentPageUid,
   getRoamUrlByPage,
+  getWindowUid,
   isPopoverThePageFilter,
   runExtension,
 } from "../entry-helpers";
@@ -45,7 +46,7 @@ runExtension(ID, () => {
               window.roamAlphaAPI.ui.rightSidebar.collapseWindow({
                 window: {
                   type: w.type,
-                  "block-uid": "",
+                  "block-uid": getWindowUid(w),
                 },
               });
             });
@@ -55,7 +56,7 @@ runExtension(ID, () => {
               window.roamAlphaAPI.ui.rightSidebar.expandWindow({
                 window: {
                   type: w.type,
-                  "block-uid": "",
+                  "block-uid": getWindowUid(w),
                 },
               });
             });
@@ -70,18 +71,116 @@ runExtension(ID, () => {
       observer.disconnect();
 
       const sidebarStyleObserver = new MutationObserver(() => {
-        const parentUid = getPageUidByPageTitle(CONFIG);
-        const uid = getTreeByPageName(CONFIG).find((i) => /open/i.test(i.text))
-          ?.uid;
-        const isOpen = !!uid;
-        const isCloseIconPresent = !!document.getElementsByClassName(
-          "bp3-icon-menu-closed"
-        ).length;
-        if (isOpen && !isCloseIconPresent) {
-          deleteBlock(uid);
-        } else if (!isOpen && isCloseIconPresent) {
-          createBlock({ node: { text: "open" }, parentUid });
-        }
+        setTimeout(() => {
+          const parentUid = getPageUidByPageTitle(CONFIG);
+          const tree = getTreeByPageName(CONFIG);
+          const uid = tree.find((i) => /open/i.test(i.text))?.uid;
+          const isOpen = !!uid;
+          const isCloseIconPresent = !!document.getElementsByClassName(
+            "bp3-icon-menu-closed"
+          ).length;
+          if (isOpen && isCloseIconPresent) {
+            deleteBlock(uid);
+          } else if (!isOpen && !isCloseIconPresent) {
+            createBlock({ node: { text: "open" }, parentUid });
+            const firstBlock = rightSidebar.getElementsByClassName(
+              "roam-block"
+            )[0];
+            if (firstBlock) {
+              const firstBlockId = firstBlock.id;
+              firstBlock.dispatchEvent(
+                new MouseEvent("mousedown", { bubbles: true })
+              );
+              setTimeout(() => {
+                const textArea = document.getElementById(
+                  firstBlockId
+                ) as HTMLTextAreaElement;
+                textArea.dispatchEvent(
+                  new MouseEvent("mouseup", { bubbles: true })
+                );
+                textArea.setSelectionRange(
+                  textArea.value.length,
+                  textArea.value.length
+                );
+              }, 1);
+            }
+            const filters =
+              tree.find((t) => /filters/i.test(t.text))?.children || [];
+            if (filters.length) {
+              const parsedFilters = Object.fromEntries(
+                filters.map((f) => [
+                  f.text,
+                  Object.fromEntries(
+                    f.children
+                      .filter(
+                        (fc) =>
+                          /includes/i.test(fc.text) || /removes/i.test(fc.text)
+                      )
+                      .map((fc) => [
+                        fc.text,
+                        fc.children.map((fcc) => fcc.text),
+                      ])
+                  ),
+                ])
+              );
+              Array.from(
+                rightSidebar.getElementsByClassName("rm-sidebar-window")
+              )
+                .filter((d) =>
+                  /^Outline of:/.test(
+                    (d.firstElementChild as HTMLDivElement).innerText
+                  )
+                )
+                .map((d) => d.lastElementChild as HTMLDivElement)
+                .map((d) => ({
+                  filter:
+                    parsedFilters[
+                      d.getElementsByClassName("rm-title-display")[0]
+                        ?.firstElementChild.innerHTML
+                    ],
+                  d,
+                }))
+                .filter(({ filter }) => !!filter)
+                .map(({ d, filter }) => {
+                  const filterIcon = d.getElementsByClassName(
+                    "bp3-icon-filter"
+                  )[0] as HTMLSpanElement;
+                  if (filterIcon) {
+                    filterIcon.click();
+                    setTimeout(() => {
+                      const buttons = Object.fromEntries(
+                        Array.from(
+                          document.querySelectorAll(
+                            ".bp3-popover-content .bp3-button"
+                          )
+                        ).map((b) => [b.innerHTML, b as HTMLButtonElement])
+                      );
+                      (filter["removes"] || []).forEach((b) => {
+                        if (buttons[b]) {
+                          buttons[b].dispatchEvent(
+                            new MouseEvent("click", {
+                              shiftKey: true,
+                              bubbles: true,
+                            })
+                          );
+                        }
+                      });
+                      (filter["includes"] || []).forEach((b) => {
+                        if (buttons[b]) {
+                          buttons[b].dispatchEvent(
+                            new MouseEvent("click", { bubbles: true })
+                          );
+                        }
+                      });
+                      (d.getElementsByClassName(
+                        "bp3-icon-filter"
+                      )[0] as HTMLSpanElement)?.click?.();
+                    }, 1);
+                  }
+                });
+            }
+          }
+        }, 50);
       });
       sidebarStyleObserver.observe(rightSidebar, { attributes: true });
 
@@ -95,8 +194,13 @@ runExtension(ID, () => {
     tag: "DIV",
     className: "rm-sidebar-outline",
     callback: (d: HTMLDivElement) =>
-      Array.from(d.getElementsByClassName("rm-title-display")).forEach((h) => {
+      Array.from(d.getElementsByClassName("rm-title-display")).forEach((h: HTMLHeadingElement) => {
         const linkIconContainer = document.createElement("span");
+        h.addEventListener('mousedown', (e) => {
+          if (linkIconContainer.contains(e.target as HTMLElement)) {
+            e.stopPropagation();
+          }
+        })
         iconRender({
           p: linkIconContainer,
           onClick: () =>
@@ -105,6 +209,7 @@ runExtension(ID, () => {
             ),
           icon: "link",
         });
+        h.appendChild(linkIconContainer);
       }),
   });
 
@@ -136,7 +241,9 @@ runExtension(ID, () => {
               (titleBlock?.children || []).find((t) => /removes/i.test(t.text))
                 ?.children || []
             ).find((t) => t.text === targetTag)?.uid;
-            deleteBlock(removesTagUid);
+            if (removesTagUid) {
+              deleteBlock(removesTagUid);
+            }
           } else if (
             includeRemoveContainer.firstElementChild.contains(button)
           ) {
@@ -144,7 +251,9 @@ runExtension(ID, () => {
               (titleBlock?.children || []).find((t) => /includes/i.test(t.text))
                 ?.children || []
             ).find((t) => t.text === targetTag)?.uid;
-            deleteBlock(includesTagUid);
+            if (includesTagUid) {
+              deleteBlock(includesTagUid);
+            }
           }
         } else {
           const titleUid =

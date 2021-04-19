@@ -30,6 +30,7 @@ import axios from "axios";
 import { Label } from "@blueprintjs/core";
 import PageInput from "./PageInput";
 import { getTreeByHtmlId, useTreeByHtmlId } from "./hooks";
+import { parseInline } from "roam-marked";
 
 addStyle(`.leaflet-pane {
   z-index: 10 !important;
@@ -86,6 +87,7 @@ const getFilter = ({ children }: { children: TreeNode[] }) => {
 
 type RoamMarker = { x: number; y: number; tag: string };
 
+const COORDS_REGEX = /((?:-?)(?:0|(?:[1-9][0-9]*))(?:\.[0-9]+)?),(?:\s)?((?:-?)(?:0|(?:[1-9][0-9]*))(?:\.[0-9]+)?)/;
 const getMarkers = ({ children }: { children: TreeNode[] }) => {
   const markerNode = children.find(
     (c) => c.text.trim().toUpperCase() === "MARKERS"
@@ -94,11 +96,13 @@ const getMarkers = ({ children }: { children: TreeNode[] }) => {
     ? Promise.all(
         markerNode.children.map((m) => {
           const tag = m.text.trim();
-          const coords = m.children.length
+          const coords = COORDS_REGEX.test(m.children?.[0]?.text)
             ? Promise.resolve(
-                m.children[0].text.split(",").map((s) => parseFloat(s.trim()))
+                COORDS_REGEX.exec(m.children[0].text)
+                  .slice(1, 3)
+                  .map((s) => parseFloat(s.trim()))
               )
-            : getCoords(tag);
+            : getCoords(m.children?.[0]?.text || tag);
           return coords.then(([x, y]) => ({
             tag,
             x,
@@ -150,7 +154,12 @@ const Markers = ({
           title={m.tag}
           riseOnHover
         >
-          <Popup>{m.tag}</Popup>
+          <Popup>
+            <div
+              style={{ display: "flex" }}
+              dangerouslySetInnerHTML={{ __html: parseInline(m.tag) }}
+            />
+          </Popup>
         </Marker>
       ))}
     </>
@@ -307,7 +316,8 @@ const getCoords = (tag: string) =>
       r.data.features?.length
         ? (r.data.features[0].center as number[]).reverse()
         : [NaN, NaN]
-    );
+    )
+    .catch(() => [NaN, NaN]);
 
 export const render = (b: HTMLButtonElement): void => {
   const block = b.closest(".roam-block");
