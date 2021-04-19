@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useRef } from "react";
-import { getTextByBlockUid, getUidsFromId } from "roam-client";
+import { getTextByBlockUid, getTreeByBlockUid, getUidsFromId } from "roam-client";
 import EditContainer, { editContainerRender } from "./EditContainer";
 
 const REGEX = /^https?:\/\//i;
@@ -43,6 +43,9 @@ const IframelyEmbed = ({
           if (e.response?.data?.status === 422) {
             containerRef.current.innerText =
               "Iframely failed to handle the input URL";
+          } else if (e.response?.data?.status === 404) {
+            containerRef.current.innerText =
+              "Iframely could not find content at the input URL";
           } else {
             console.error(e);
             containerRef.current.innerText =

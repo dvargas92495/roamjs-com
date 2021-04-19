@@ -30,7 +30,7 @@ runExtension(ID, () => {
   document.addEventListener("mousedown", (e) => {
     const target = e.target as HTMLElement;
     if (
-      target.className.includes("rm-bullet__inner") &&
+      target.className?.includes?.("rm-bullet__inner") &&
       target
         .closest(".roam-block-container")
         ?.className?.includes?.(HIGHLIGHT_CLASS)

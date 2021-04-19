@@ -774,3 +774,22 @@ export const setInputSetting = ({
     });
   }
 };
+
+export const isPopoverThePageFilter = (popover?: HTMLElement): boolean => {
+  if (popover) {
+    const strongs = Array.from(popover.getElementsByTagName("strong")).map(
+      (e) => e.innerText
+    );
+    if (strongs.includes("Includes") && strongs.includes("Removes")) {
+      const transform = popover.style.transform;
+      // this is the only way I know how to differentiate between the two filters
+      if (
+        transform.startsWith("translate3d(") &&
+        transform.endsWith("px, 50px, 0px)")
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+};

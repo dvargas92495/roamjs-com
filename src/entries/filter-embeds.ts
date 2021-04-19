@@ -3,7 +3,7 @@ import {
   getUids,
   getPageTitleByBlockUid,
 } from "roam-client";
-import { getPageTitle, runExtension } from "../entry-helpers";
+import { getPageTitle, isPopoverThePageFilter, runExtension } from "../entry-helpers";
 
 const KEY = "roamjsPageFilters";
 type Filter = {
@@ -13,25 +13,6 @@ type Filter = {
 if (!localStorage.getItem(KEY)) {
   localStorage.setItem(KEY, JSON.stringify({}));
 }
-
-const isPopoverThePageFilter = (popover?: HTMLElement) => {
-  if (popover) {
-    const strongs = Array.from(popover.getElementsByTagName("strong")).map(
-      (e) => e.innerText
-    );
-    if (strongs.includes("Includes") && strongs.includes("Removes")) {
-      const transform = popover.style.transform;
-      // this is the only way I know how to differentiate between the two filters
-      if (
-        transform.startsWith("translate3d(") &&
-        transform.endsWith("px, 50px, 0px)")
-      ) {
-        return true;
-      }
-    }
-  }
-  return false;
-};
 
 const getRemoveTags = (includeRemoveContainer: Element) =>
   Array.from(
