@@ -90,7 +90,7 @@ export const handler = async (
                 Charset: "UTF-8",
                 Data: `${first_name} ${last_name} just signed up on RoamJS!
 
-Make sure they are linked to a stripe customer here: https://dashboard.clerk.dev/instances/ins_1oXZdmHyu1Lej3hCAgZjG8yJVV4/users/${user.id}`,
+Make sure they are linked to a stripe customer here: https://dashboard.clerk.dev/instances/${process.env.CLERK_INSTANCE_ID}/users/${user.id}`,
               },
             },
             Subject: {

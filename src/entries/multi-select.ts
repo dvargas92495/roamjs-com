@@ -1,4 +1,10 @@
-import { createBlockObserver, createHTMLObserver, getUids } from "roam-client";
+import {
+  createBlockObserver,
+  createHTMLObserver,
+  deleteBlock,
+  getTextByBlockUid,
+  getUids,
+} from "roam-client";
 import { isControl, runExtension } from "../entry-helpers";
 
 const ID = "multi-select";
@@ -7,6 +13,12 @@ const DRAG_CLASS = "block-highlight-grey";
 const globalRefs = {
   blocksToMove: [] as string[],
 };
+
+const getUidByContainer = (d: Element) =>
+  getUids(
+    (d.getElementsByClassName("roam-block")?.[0] as HTMLDivElement) ||
+      (d.getElementsByClassName("rm-block-input")?.[0] as HTMLTextAreaElement)
+  ).blockUid;
 
 runExtension(ID, () => {
   createBlockObserver((d) => {
@@ -40,12 +52,7 @@ runExtension(ID, () => {
       ).map((d) => {
         d.classList.remove(HIGHLIGHT_CLASS);
         d.classList.add(DRAG_CLASS);
-        return getUids(
-          (d.getElementsByClassName("roam-block")?.[0] as HTMLDivElement) ||
-            (d.getElementsByClassName(
-              "rm-block-input"
-            )?.[0] as HTMLTextAreaElement)
-        ).blockUid;
+        return getUidByContainer(d);
       });
     } else if (
       !isControl(e) ||
@@ -57,6 +64,7 @@ runExtension(ID, () => {
       ).forEach((d) => d.classList.remove(HIGHLIGHT_CLASS));
     }
   });
+
   createHTMLObserver({
     tag: "DIV",
     className: "dnd-drop-area",
@@ -92,5 +100,38 @@ runExtension(ID, () => {
         globalRefs.blocksToMove = [];
       });
     },
+  });
+
+  document.addEventListener("dragend", (e) => {
+    const target = e.target as HTMLElement;
+    if (
+      target.nodeName === "SPAN" &&
+      target.classList.contains("rm-bullet__inner")
+    ) {
+      Array.from(document.getElementsByClassName(DRAG_CLASS)).forEach((c) =>
+        c.classList.remove(DRAG_CLASS)
+      );
+    }
+  });
+
+  document.addEventListener("copy", (e) => {
+    const data = Array.from(document.getElementsByClassName(HIGHLIGHT_CLASS))
+      .map(getUidByContainer)
+      .map(getTextByBlockUid)
+      .map((b) => `- ${b}`)
+      .join("\n");
+    e.clipboardData.setData(data, "text/plain");
+  });
+
+  document.addEventListener("cut", (e) => {
+    const data = Array.from(document.getElementsByClassName(HIGHLIGHT_CLASS))
+      .map(getUidByContainer)
+      .map((uid) => {
+        deleteBlock(uid);
+        return getTextByBlockUid(uid);
+      })
+      .map((b) => `- ${b}`)
+      .join("\n");
+    e.clipboardData.setData(data, "text/plain");
   });
 });
