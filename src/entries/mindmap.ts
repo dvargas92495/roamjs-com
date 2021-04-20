@@ -7,11 +7,7 @@ import {
   TreeNode,
 } from "roam-client";
 import { NODE_CLASSNAME, render } from "../components/MarkmapPanel";
-import {
-  addStyle,
-  resolveRefs,
-  runExtension,
-} from "../entry-helpers";
+import { addStyle, resolveRefs, runExtension } from "../entry-helpers";
 
 addStyle(`span.roamjs-mindmap-node {
   width: 300px;
@@ -70,7 +66,7 @@ runExtension("markmap", () => {
         u.getElementsByTagName("li")
       ).map((l: HTMLLIElement) => l.innerText.trim());
       if (
-        (lis.includes("Open right sidebar") || lis.includes("User settings")) &&
+        lis.includes("Settings") &&
         !u.getAttribute("data-roamjs-has-markmap")
       ) {
         u.setAttribute("data-roamjs-has-markmap", "true");

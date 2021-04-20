@@ -91,6 +91,10 @@ variable "iframely_api_key" {
   type = string
 }
 
+variable "diahook_secret" {
+  type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -450,4 +454,10 @@ resource "github_actions_secret" "iframely_api_key" {
   repository       = "roam-js-extensions"
   secret_name      = "IFRAMELY_API_KEY"
   plaintext_value  = var.iframely_api_key
+}
+
+resource "github_actions_secret" "diahook_secret" {
+  repository       = "roam-js-extensions"
+  secret_name      = "DIAHOOK_SECRET"
+  plaintext_value  = var.diahook_secret
 }
