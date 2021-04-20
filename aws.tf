@@ -95,6 +95,14 @@ variable "diahook_secret" {
   type = string
 }
 
+variable "dropbox_client_id" {
+  type = string
+}
+
+variable "dropbox_client_secret" {
+  type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -460,4 +468,16 @@ resource "github_actions_secret" "diahook_secret" {
   repository       = "roam-js-extensions"
   secret_name      = "DIAHOOK_SECRET"
   plaintext_value  = var.diahook_secret
+}
+
+resource "github_actions_secret" "dropbox_client_id" {
+  repository       = "roam-js-extensions"
+  secret_name      = "DROPBOX_CLIENT_ID"
+  plaintext_value  = var.dropbox_client_id
+}
+
+resource "github_actions_secret" "dropbox_client_secret" {
+  repository       = "roam-js-extensions"
+  secret_name      = "DROPBOX_CLIENT_SECRET"
+  plaintext_value  = var.dropbox_client_secret
 }
