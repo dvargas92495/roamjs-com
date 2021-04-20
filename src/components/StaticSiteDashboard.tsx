@@ -23,12 +23,17 @@ import {
   getPageTitlesAndBlockUidsReferencingPage,
   getPageViewType,
 } from "roam-client";
-import { extractTag, setInputSetting } from "../entry-helpers";
-import { allBlockMapper } from "./hooks";
+import {
+  extractTag,
+  setInputSetting,
+  setInputSettings,
+} from "../entry-helpers";
+import { allBlockMapper, toTitle } from "./hooks";
 import MenuItemSelect from "./MenuItemSelect";
 import PageInput from "./PageInput";
 import {
   getField,
+  getFieldVals,
   HIGHLIGHT,
   isFieldSet,
   MainStage,
@@ -483,6 +488,7 @@ const getDeployBody = () => {
   const filterNode = getConfigNode("filter");
   const templateNode = getConfigNode("template");
   const referenceTemplateNode = getConfigNode("reference template");
+  const pluginsNode = getConfigNode("plugins");
   const getCode = (node?: TreeNode) =>
     (node?.children || [])
       .map((s) => s.text.match(HTML_REGEX))
@@ -506,6 +512,9 @@ const getDeployBody = () => {
       }
     : {};
   const withReferenceTemplate = referenceTemplate ? { referenceTemplate } : {};
+  const withPlugins = pluginsNode?.children?.length
+    ? { plugins: pluginsNode.children.map((p) => p.text) }
+    : {};
 
   const config = {
     index: "Website Index",
@@ -514,6 +523,7 @@ const getDeployBody = () => {
     ...withFilter,
     ...withTemplate,
     ...withReferenceTemplate,
+    ...withPlugins,
   };
 
   const titleFilters = config.filter.length
@@ -919,6 +929,50 @@ const RequestReferenceTemplateContent: StageContent = ({ openPanel }) => {
   );
 };
 
+const supportedPlugins = ["inline-block-references"];
+const RequestPluginsContent: StageContent = ({ openPanel }) => {
+  const nextStage = useNextStage(openPanel);
+  const pageUid = usePageUid();
+  const [values, setValues] = useState(getFieldVals("plugins"));
+  const onSubmit = useCallback(() => {
+    setInputSettings({
+      blockUid: pageUid,
+      key: "plugins",
+      values,
+      index: 1,
+    });
+    nextStage();
+  }, [values, nextStage, pageUid]);
+  return (
+    <div>
+      <Label>
+        Plugins
+        <Description
+          description={
+            "Enable any of the following plugins to include extra features on your static site!"
+          }
+        />
+        {supportedPlugins.map((p) => (
+          <Switch
+            key={p}
+            label={toTitle(p)}
+            checked={values.includes(p)}
+            onChange={(e) => {
+              const checked = (e.target as HTMLInputElement).checked;
+              if (checked) {
+                setValues([...values, p]);
+              } else {
+                setValues(values.filter((v) => v !== p));
+              }
+            }}
+          />
+        ))}
+      </Label>
+      <NextButton onClick={onSubmit} />
+    </div>
+  );
+};
+
 const StaticSiteDashboard = (): React.ReactElement => (
   <ServiceDashboard
     service={"static-site"}
@@ -948,6 +1002,10 @@ const StaticSiteDashboard = (): React.ReactElement => (
       {
         component: RequestReferenceTemplateContent,
         setting: "Reference Template",
+      },
+      {
+        component: RequestPluginsContent,
+        setting: "Plugins",
       },
     ]}
   />

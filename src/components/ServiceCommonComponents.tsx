@@ -68,6 +68,15 @@ export const getField = (field: string): string => {
   );
 };
 
+export const getFieldVals = (field: string): string[] => {
+  const service = useService();
+  return (
+    getTreeByPageName(`roam/js/${service}`).find((t) =>
+      toFlexRegex(field).test(t.text)
+    )?.children || []
+  ).map((t) => t.text);
+};
+
 export const useAuthenticatedAxiosGet = (): ((
   path: string
 ) => Promise<AxiosResponse>) => {
