@@ -1,17 +1,7 @@
 import { Button } from "@blueprintjs/core";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
-
-const editCallback = (blockId?: string) => () => {
-  document
-    .getElementById(blockId)
-    .dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-  setTimeout(() => {
-    const textArea = document.getElementById(blockId) as HTMLTextAreaElement;
-    textArea.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-    textArea.setSelectionRange(textArea.value.length, textArea.value.length);
-  }, 50);
-};
+import { openBlock, openBlockElement } from "../entry-helpers";
 
 const EditContainer: React.FunctionComponent<{
   blockId?: string;
@@ -59,7 +49,7 @@ const EditContainer: React.FunctionComponent<{
           )}
           {refresh && <Button icon={"refresh"} onClick={refresh} minimal />}
           {blockId && (
-            <Button icon="edit" minimal onClick={editCallback(blockId)} />
+            <Button icon="edit" minimal onClick={() => openBlock(blockId)} />
           )}
         </div>
       )}
@@ -93,7 +83,7 @@ export const render = (d: HTMLElement): void => {
     <Button
       icon="edit"
       minimal
-      onClick={editCallback(d.closest(".roam-block").id)}
+      onClick={() => openBlockElement(d.closest(".roam-block") as HTMLElement)}
     />,
     div
   );

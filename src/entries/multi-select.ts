@@ -12,6 +12,7 @@ const HIGHLIGHT_CLASS = "block-highlight-blue";
 const DRAG_CLASS = "block-highlight-grey";
 const globalRefs = {
   blocksToMove: [] as string[],
+  shiftKey: false,
 };
 
 const getUidByContainer = (d: Element) =>
@@ -104,10 +105,7 @@ runExtension(ID, () => {
 
   document.addEventListener("dragend", (e) => {
     const target = e.target as HTMLElement;
-    if (
-      target.nodeName === "SPAN" &&
-      target.classList.contains("rm-bullet__inner")
-    ) {
+    if (target.nodeName === "SPAN" && target.classList.contains("rm-bullet")) {
       Array.from(document.getElementsByClassName(DRAG_CLASS)).forEach((c) =>
         c.classList.remove(DRAG_CLASS)
       );
@@ -117,10 +115,16 @@ runExtension(ID, () => {
   document.addEventListener("copy", (e) => {
     const data = Array.from(document.getElementsByClassName(HIGHLIGHT_CLASS))
       .map(getUidByContainer)
-      .map(getTextByBlockUid)
+      .map((uid) =>
+        globalRefs.shiftKey ? `((${uid}))` : getTextByBlockUid(uid)
+      )
       .map((b) => `- ${b}`)
       .join("\n");
-    e.clipboardData.setData(data, "text/plain");
+    globalRefs.shiftKey = false;
+    if (data) {
+      e.clipboardData.setData("text/plain", data);
+      e.preventDefault();
+    }
   });
 
   document.addEventListener("cut", (e) => {
@@ -128,10 +132,20 @@ runExtension(ID, () => {
       .map(getUidByContainer)
       .map((uid) => {
         deleteBlock(uid);
-        return getTextByBlockUid(uid);
+        return globalRefs.shiftKey ? `((${uid}))` : getTextByBlockUid(uid);
       })
       .map((b) => `- ${b}`)
       .join("\n");
-    e.clipboardData.setData(data, "text/plain");
+    if (data) {
+      e.clipboardData.setData("text/plain", data);
+      e.preventDefault();
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.shiftKey && isControl(e) && e.code === "KeyC") {
+      globalRefs.shiftKey = true;
+      document.execCommand("copy");
+    }
   });
 });

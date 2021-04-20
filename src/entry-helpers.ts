@@ -829,8 +829,22 @@ export const isPopoverThePageFilter = (popover?: HTMLElement): boolean => {
 };
 
 export const getWindowUid = (w: SidebarWindow): string =>
-  w.type === "outline"
-    ? w["page-uid"]
+  w.type === "block"
+    ? w["block-uid"]
     : w.type === "mentions"
     ? w["mentions-uid"]
-    : w["block-uid"];
+    : w["page-uid"];
+
+export const openBlock = (blockId?: string): void =>
+  openBlockElement(document.getElementById(blockId));
+
+export const openBlockElement = (block: HTMLElement): void => {
+  block.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+  setTimeout(() => {
+    const textArea = document.getElementById(block.id) as HTMLTextAreaElement;
+    if (textArea.tagName === "TEXTAREA") {
+      textArea.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+      textArea.setSelectionRange(textArea.value.length, textArea.value.length);
+    }
+  }, 50);
+};

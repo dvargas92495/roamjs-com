@@ -12,14 +12,32 @@ import {
   getRoamUrlByPage,
   getWindowUid,
   isPopoverThePageFilter,
+  openBlockElement,
   runExtension,
 } from "../entry-helpers";
 import { render as iconRender } from "../components/MinimalIcon";
-import { render as saveRender } from "../components/SaveSidebar";
+import { loadRender, render as saveRender } from "../components/SaveSidebar";
 import { createConfigObserver } from "roamjs-components";
 
 const ID = "sidebar";
 const CONFIG = `roam/js/${ID}`;
+
+const clickButton = (text: string, shiftKey: boolean) =>
+  new Promise<void>((resolve) =>
+    setTimeout(() => {
+      const button = Array.from(
+        document.querySelectorAll<HTMLButtonElement>(
+          ".bp3-popover-content .bp3-button"
+        )
+      ).find((b) => b.firstChild.nodeValue === text);
+      if (button) {
+        button.dispatchEvent(
+          new MouseEvent("click", { bubbles: true, shiftKey })
+        );
+      }
+      resolve();
+    }, 1)
+  );
 
 runExtension(ID, () => {
   createConfigObserver({
@@ -40,6 +58,7 @@ runExtension(ID, () => {
         iconRender({
           p: expandCollapseContainer,
           icon: "collapse-all",
+          tooltipContent: "Expand/Collapse all windows in sidebar",
           toggleIcon: "expand-all",
           onClick: () => {
             window.roamAlphaAPI.ui.rightSidebar.getWindows().forEach((w) => {
@@ -67,6 +86,10 @@ runExtension(ID, () => {
         const saveSidebarContainer = document.createElement("span");
         saveRender(saveSidebarContainer);
         rightSidebarTopbar.appendChild(saveSidebarContainer);
+        window.roamAlphaAPI.ui.commandPalette.addCommand({
+          label: "Load Saved Sidebar",
+          callback: loadRender,
+        });
       }
       observer.disconnect();
 
@@ -85,99 +108,9 @@ runExtension(ID, () => {
             createBlock({ node: { text: "open" }, parentUid });
             const firstBlock = rightSidebar.getElementsByClassName(
               "roam-block"
-            )[0];
+            )[0] as HTMLElement;
             if (firstBlock) {
-              const firstBlockId = firstBlock.id;
-              firstBlock.dispatchEvent(
-                new MouseEvent("mousedown", { bubbles: true })
-              );
-              setTimeout(() => {
-                const textArea = document.getElementById(
-                  firstBlockId
-                ) as HTMLTextAreaElement;
-                textArea.dispatchEvent(
-                  new MouseEvent("mouseup", { bubbles: true })
-                );
-                textArea.setSelectionRange(
-                  textArea.value.length,
-                  textArea.value.length
-                );
-              }, 1);
-            }
-            const filters =
-              tree.find((t) => /filters/i.test(t.text))?.children || [];
-            if (filters.length) {
-              const parsedFilters = Object.fromEntries(
-                filters.map((f) => [
-                  f.text,
-                  Object.fromEntries(
-                    f.children
-                      .filter(
-                        (fc) =>
-                          /includes/i.test(fc.text) || /removes/i.test(fc.text)
-                      )
-                      .map((fc) => [
-                        fc.text,
-                        fc.children.map((fcc) => fcc.text),
-                      ])
-                  ),
-                ])
-              );
-              Array.from(
-                rightSidebar.getElementsByClassName("rm-sidebar-window")
-              )
-                .filter((d) =>
-                  /^Outline of:/.test(
-                    (d.firstElementChild as HTMLDivElement).innerText
-                  )
-                )
-                .map((d) => d.lastElementChild as HTMLDivElement)
-                .map((d) => ({
-                  filter:
-                    parsedFilters[
-                      d.getElementsByClassName("rm-title-display")[0]
-                        ?.firstElementChild.innerHTML
-                    ],
-                  d,
-                }))
-                .filter(({ filter }) => !!filter)
-                .map(({ d, filter }) => {
-                  const filterIcon = d.getElementsByClassName(
-                    "bp3-icon-filter"
-                  )[0] as HTMLSpanElement;
-                  if (filterIcon) {
-                    filterIcon.click();
-                    setTimeout(() => {
-                      const buttons = Object.fromEntries(
-                        Array.from(
-                          document.querySelectorAll(
-                            ".bp3-popover-content .bp3-button"
-                          )
-                        ).map((b) => [b.innerHTML, b as HTMLButtonElement])
-                      );
-                      (filter["removes"] || []).forEach((b) => {
-                        if (buttons[b]) {
-                          buttons[b].dispatchEvent(
-                            new MouseEvent("click", {
-                              shiftKey: true,
-                              bubbles: true,
-                            })
-                          );
-                        }
-                      });
-                      (filter["includes"] || []).forEach((b) => {
-                        if (buttons[b]) {
-                          buttons[b].dispatchEvent(
-                            new MouseEvent("click", { bubbles: true })
-                          );
-                        }
-                      });
-                      (d.getElementsByClassName(
-                        "bp3-icon-filter"
-                      )[0] as HTMLSpanElement)?.click?.();
-                    }, 1);
-                  }
-                });
+              openBlockElement(firstBlock);
             }
           }
         }, 50);
@@ -194,23 +127,86 @@ runExtension(ID, () => {
     tag: "DIV",
     className: "rm-sidebar-outline",
     callback: (d: HTMLDivElement) =>
-      Array.from(d.getElementsByClassName("rm-title-display")).forEach((h: HTMLHeadingElement) => {
-        const linkIconContainer = document.createElement("span");
-        h.addEventListener('mousedown', (e) => {
-          if (linkIconContainer.contains(e.target as HTMLElement)) {
-            e.stopPropagation();
+      Array.from(d.getElementsByClassName("rm-title-display")).forEach(
+        (h: HTMLHeadingElement) => {
+          const linkIconContainer = document.createElement("span");
+          h.addEventListener("mousedown", (e) => {
+            if (linkIconContainer.contains(e.target as HTMLElement)) {
+              e.stopPropagation();
+            }
+          });
+          iconRender({
+            p: linkIconContainer,
+            tooltipContent: "Go to page",
+            onClick: () =>
+              window.location.assign(
+                getRoamUrlByPage(h.firstElementChild.innerHTML)
+              ),
+            icon: "link",
+          });
+          h.appendChild(linkIconContainer);
+        }
+      ),
+  });
+
+  createHTMLObserver({
+    tag: "DIV",
+    className: "rm-sidebar-window",
+    callback: (d: HTMLDivElement) => {
+      if (
+        /^Outline of:/.test((d.firstElementChild as HTMLDivElement).innerText)
+      ) {
+        const filters =
+          getTreeByPageName(CONFIG).find((t) => /filters/i.test(t.text))
+            ?.children || [];
+        if (filters.length) {
+          const parsedFilters = Object.fromEntries(
+            filters.map((f) => [
+              f.text,
+              Object.fromEntries(
+                f.children
+                  .filter(
+                    (fc) =>
+                      /includes/i.test(fc.text) || /removes/i.test(fc.text)
+                  )
+                  .map((fc) => [fc.text, fc.children.map((fcc) => fcc.text)])
+              ),
+            ])
+          );
+          const windowContent = d.lastElementChild as HTMLDivElement;
+          const filterKey = windowContent.getElementsByClassName(
+            "rm-title-display"
+          )[0]?.firstElementChild.innerHTML;
+          if (parsedFilters[filterKey]) {
+            const filterIcon = windowContent.getElementsByClassName(
+              "bp3-icon-filter"
+            )[0] as HTMLSpanElement;
+            if (filterIcon) {
+              filterIcon.click();
+              const removePromise = (
+                parsedFilters[filterKey]["removes"] || []
+              ).reduce(
+                (prev, cur) => prev.then(() => clickButton(cur, true)),
+                Promise.resolve()
+              );
+              const includePromise = (
+                parsedFilters[filterKey]["includes"] || []
+              ).reduce(
+                (prev, cur) => prev.then(() => clickButton(cur, false)),
+                removePromise
+              );
+              includePromise.then(() =>
+                setTimeout(() => {
+                  (d.getElementsByClassName(
+                    "bp3-icon-filter"
+                  )[0] as HTMLSpanElement)?.click?.();
+                }, 1)
+              );
+            }
           }
-        })
-        iconRender({
-          p: linkIconContainer,
-          onClick: () =>
-            window.location.assign(
-              getRoamUrlByPage(h.firstElementChild.innerHTML)
-            ),
-          icon: "link",
-        });
-        h.appendChild(linkIconContainer);
-      }),
+        }
+      }
+    },
   });
 
   document.addEventListener("click", (e) => {
