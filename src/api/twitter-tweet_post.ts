@@ -14,7 +14,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   } = JSON.parse(event.body || "{}");
   const data = {
     status: content,
-    ...(media_ids.length ? { media_ids } : {}),
+    ...(media_ids.length ? { media_ids: media_ids.join(",") } : {}),
     ...(auto_populate_reply_metadata
       ? { in_reply_to_status_id, auto_populate_reply_metadata }
       : {}),
