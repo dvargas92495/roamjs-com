@@ -1,23 +1,12 @@
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Button } from "@dvargas92495/ui";
-import React, { useEffect } from "react";
-import { useAuthenticatedAxiosPut } from "./hooks";
-
-const UserButtonSignedIn = () => {
-  const authenticatedAxiosPut = useAuthenticatedAxiosPut();
-  useEffect(() => {
-    authenticatedAxiosPut("customer").catch((e) =>
-      console.error(e.response?.data || e.message)
-    );
-  }, [authenticatedAxiosPut]);
-  return <UserButton />;
-};
+import React from "react";
 
 const UserIcon: React.FC<{ flag: boolean }> = () => {
   return (
     <>
       <SignedIn>
-        <UserButtonSignedIn />
+        <UserButton />
       </SignedIn>
       <SignedOut>
         <Button

@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
-import { getClerkUser, headers } from "../lambda-helpers";
+import { emptyResponse, getClerkUser, headers } from "../lambda-helpers";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -14,11 +14,7 @@ export const handler = async (
               (e) => e.id === user.primaryEmailAddressId
             ).emailAddress,
           })
-          .then((r) => ({
-            statusCode: 200,
-            body: JSON.stringify(r.data),
-            headers: headers(event),
-          }))
+          .then(() => emptyResponse(event))
       : Promise.resolve({
           statusCode: 401,
           body: "No Active Session",
