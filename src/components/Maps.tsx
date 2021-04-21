@@ -13,6 +13,7 @@ import {
   setInputSetting,
   isTagOnPage,
   openBlockInSidebar,
+  parseRoamMarked,
 } from "../entry-helpers";
 import {
   MapContainer,
@@ -30,7 +31,6 @@ import axios from "axios";
 import { Label } from "@blueprintjs/core";
 import PageInput from "./PageInput";
 import { getTreeByHtmlId, useTreeByHtmlId } from "./hooks";
-import { parseInline } from "roam-marked";
 
 addStyle(`.leaflet-pane {
   z-index: 10 !important;
@@ -85,7 +85,7 @@ const getFilter = ({ children }: { children: TreeNode[] }) => {
   return children.find((c) => /filter/i.test(c.text))?.children?.[0]?.text;
 };
 
-type RoamMarker = { x: number; y: number; tag: string };
+type RoamMarker = { x: number; y: number; tag: string; uid: string };
 
 const COORDS_REGEX = /((?:-?)(?:0|(?:[1-9][0-9]*))(?:\.[0-9]+)?),(?:\s)?((?:-?)(?:0|(?:[1-9][0-9]*))(?:\.[0-9]+)?)/;
 const getMarkers = ({ children }: { children: TreeNode[] }) => {
@@ -107,6 +107,7 @@ const getMarkers = ({ children }: { children: TreeNode[] }) => {
             tag,
             x,
             y,
+            uid: m.uid,
           }));
         })
       ).then((markers) => markers.filter(({ x, y }) => !isNaN(x) && !isNaN(y)))
@@ -114,13 +115,28 @@ const getMarkers = ({ children }: { children: TreeNode[] }) => {
 };
 
 const Markers = ({
+  id,
   href,
   markers,
 }: {
+  id: string;
   href: string;
   markers: RoamMarker[];
 }) => {
   const map = useMap();
+  const mouseRef = useRef(null);
+  const openMarker = (marker: LMarker) => () => {
+    mouseRef.current = marker;
+    marker.openPopup();
+  };
+  const closeMarker = (marker: LMarker) => () => {
+    mouseRef.current = null;
+    setTimeout(() => {
+      if (mouseRef.current !== marker) {
+        marker.closePopup();
+      }
+    }, 100);
+  };
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore until there's a better way to grab markers
@@ -128,8 +144,8 @@ const Markers = ({
     Object.keys(leafletMarkers).forEach((k) => {
       const m = leafletMarkers[k];
       m.on({
-        mouseover: () => m.openPopup(),
-        mouseout: () => m.closePopup(),
+        mouseover: openMarker(m),
+        mouseout: closeMarker(m),
         click: (e) => {
           const extractedTag = extractTag(m.options.title);
           const pageUid = getPageUidByPageTitle(extractedTag);
@@ -143,6 +159,33 @@ const Markers = ({
         },
       });
     });
+    const observer = new MutationObserver((mrs) => {
+      mrs
+        .flatMap((mr) => Array.from(mr.addedNodes))
+        .filter((n) => n.nodeName === "DIV")
+        .map((n) => n as HTMLDivElement)
+        .map((n) =>
+          n.classList.contains("leaflet-popup")
+            ? n
+            : n.getElementsByClassName("leaflet-popup")[0]
+        )
+        .filter((n) => !!n)
+        .forEach((n) => {
+          const marker = Object.values(leafletMarkers).find(
+            (m) =>
+              n
+                .querySelector(".roamjs-marker-data")
+                .getAttribute("data-uid") === m.options.title
+          );
+          n.addEventListener("mouseenter", openMarker(marker));
+          n.addEventListener("mouseleave", closeMarker(marker));
+        });
+    });
+    observer.observe(document.getElementById(id), {
+      childList: true,
+      subtree: true,
+    });
+    return () => observer.disconnect();
   });
   return (
     <>
@@ -151,13 +194,18 @@ const Markers = ({
           position={[m.x, m.y]}
           icon={MarkerIcon}
           key={i}
-          title={m.tag}
+          title={m.uid}
           riseOnHover
         >
           <Popup>
             <div
+              className={"roamjs-marker-data roamjs-block-view"}
+              id={`roamjs-map-marker-${m.uid}`}
+              data-uid={m.uid}
               style={{ display: "flex" }}
-              dangerouslySetInnerHTML={{ __html: parseInline(m.tag) }}
+              dangerouslySetInnerHTML={{
+                __html: parseRoamMarked(m.tag),
+              }}
             />
           </Popup>
         </Marker>
@@ -166,10 +214,23 @@ const Markers = ({
   );
 };
 
+const DEFAULT_HEIGHT = 400;
 const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
   const id = useMemo(() => `roamjs-maps-container-id-${blockId}`, [blockId]);
   const mapInstance = useRef<Map>(null);
   const initialTree = useTreeByHtmlId(blockId);
+  const [height, setHeight] = useState(DEFAULT_HEIGHT);
+  const fixHeight = useCallback(
+    () =>
+      setHeight(
+        parseInt(
+          getComputedStyle(document.getElementById(id)).width.match(
+            /^(.*)px$/
+          )?.[1] || `${Math.round((DEFAULT_HEIGHT * 4) / 3)}`
+        ) * 0.75
+      ),
+    [setHeight]
+  );
   const initialZoom = useMemo(() => getZoom(initialTree), [initialTree]);
   const initialCenter = useMemo(() => getCenter(initialTree), [initialTree]);
   const [markers, setMarkers] = useState<RoamMarker[]>([]);
@@ -185,7 +246,8 @@ const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
     getMarkers(tree).then((newMarkers) => {
       setMarkers(newMarkers);
     });
-  }, [mapInstance, setMarkers, blockId]);
+    fixHeight();
+  }, [mapInstance, setMarkers, blockId, fixHeight]);
 
   const [href, setHref] = useState("https://roamresearch.com");
   useEffect(() => {
@@ -208,8 +270,9 @@ const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
       });
       document.addEventListener("keydown", shiftKeyCallback);
       document.addEventListener("keyup", shiftKeyCallback);
+      fixHeight();
     }
-  }, [load, loaded, initialTree, setMarkers, shiftKeyCallback]);
+  }, [load, loaded, initialTree, setMarkers, shiftKeyCallback, id, fixHeight]);
   const filteredMarkers = useMemo(
     () =>
       filter
@@ -254,7 +317,7 @@ const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
         center={initialCenter}
         zoom={initialZoom}
         id={id}
-        style={{ height: 400 }}
+        style={{ height }}
         whenCreated={whenCreated}
       >
         <LayersControl position="bottomleft">
@@ -299,7 +362,7 @@ const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
             />
           </LayersControl.BaseLayer>
         </LayersControl>
-        <Markers href={href} markers={filteredMarkers} />
+        <Markers href={href} markers={filteredMarkers} id={id} />
       </MapContainer>
     </EditContainer>
   );

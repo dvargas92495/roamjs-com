@@ -3,6 +3,7 @@ import {
   createIconButton,
   deleteBlock,
   getAttrConfigFromQuery,
+  getPageTitleByBlockUid,
   getPageUidByPageTitle,
   getTreeByBlockUid,
   getUids,
@@ -13,6 +14,7 @@ import { Dict } from "mixpanel-browser";
 import { getTextByBlockUid, RoamBlock } from "roam-client";
 import axios, { AxiosResponse } from "axios";
 import { SidebarWindow } from "roam-client/lib/types";
+import { parseInline } from "roam-marked";
 
 declare global {
   interface Window {
@@ -195,11 +197,14 @@ export const replaceTagText = ({
 
 export const getReferenceBlockUid = (e: HTMLElement): string => {
   const parent = e.closest(".roam-block") as HTMLDivElement;
+  if (!parent) {
+    return "";
+  }
   const { blockUid } = getUids(parent);
   const refs = getChildRefUidsByBlockUid(blockUid);
   const index = Array.from(
     parent.getElementsByClassName("rm-block-ref")
-  ).indexOf(e);
+  ).findIndex((el) => el === e || el.contains(e));
   return refs[index];
 };
 
@@ -875,3 +880,14 @@ export const getDropUidOffset = (
     offset,
   };
 };
+
+const context = {
+  pagesToHrefs: (page: string, ref?: string) =>
+    ref ? getRoamUrl(ref) : getRoamUrl(getPageUidByPageTitle(page)),
+  blockReferences: (ref: string) => ({
+    text: getTextByBlockUid(ref),
+    page: getPageTitleByBlockUid(ref),
+  }),
+};
+export const parseRoamMarked = (text: string): string =>
+  parseInline(text, context);

@@ -25,19 +25,16 @@ import {
   extractTag,
   getRoamUrl,
   openBlockInSidebar,
+  parseRoamMarked,
   resolveRefs,
 } from "../entry-helpers";
 import MenuItemSelect from "./MenuItemSelect";
 
 type TimelineProps = { blockId: string };
 
-const context = {
-  pagesToHrefs: (page: string) => getRoamUrl(getPageUidByPageTitle(page)),
-};
-
 const getText = (cur: string) => {
   try {
-    return parseInline(cur, context);
+    return parseRoamMarked(cur);
   } catch {
     return cur;
   }

@@ -1,22 +1,27 @@
 import axios from "axios";
-import React, { useEffect, useRef } from "react";
-import { getTextByBlockUid, getTreeByBlockUid, getUidsFromId } from "roam-client";
+import React, { useEffect, useRef, useState } from "react";
+import { getTextByBlockUid } from "roam-client";
+import { resolveRefs } from "../entry-helpers";
 import EditContainer, { editContainerRender } from "./EditContainer";
 
 const REGEX = /^https?:\/\//i;
 
 const IframelyEmbed = ({
-  blockId,
+  blockUid,
 }: {
-  blockId: string;
+  blockUid: string;
 }): React.ReactElement => {
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [blockId, setBlockId] = useState("");
   useEffect(() => {
-    const { blockUid } = getUidsFromId(blockId);
+    const possibleBlockId = containerRef.current.closest(".roam-block")?.id;
+    if (possibleBlockId.endsWith(blockUid)) {
+      setBlockId(possibleBlockId);
+    }
     const text = getTextByBlockUid(blockUid);
-    const inputUrl = /{{(?:\[\[)?iframely(?:\]\])?:(.*?)}}/
-      .exec(text)?.[1]
-      ?.trim?.();
+    const inputUrl = resolveRefs(
+      /{{(?:\[\[)?iframely(?:\]\])?:(.*?)}}/.exec(text)?.[1]?.trim?.() || ""
+    );
     if (inputUrl) {
       const url = REGEX.test(inputUrl) ? inputUrl : `https://${inputUrl}`;
       axios
@@ -53,9 +58,9 @@ const IframelyEmbed = ({
           }
         });
     }
-  }, [containerRef, blockId]);
+  }, [containerRef, blockUid, setBlockId]);
   return (
-    <EditContainer blockId={blockId}>
+    <EditContainer blockId={blockId} containerStyleProps={{ minWidth: 300 }}>
       <div ref={containerRef} />
     </EditContainer>
   );
