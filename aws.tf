@@ -147,6 +147,7 @@ module "aws-serverless-backend" {
         "customer/post",
         "customer/put",
         "deploy/post",
+        "dropbox-auth/post",
         "fund/post",
         "github-cards/get",
         "github-issues/get",

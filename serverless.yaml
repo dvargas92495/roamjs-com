@@ -50,6 +50,13 @@ functions:
           path: deploy
           method: post
           cors: true
+  dropbox-auth-post:
+    handler: out/dropbox-auth_post.handler
+    events:
+      - http:
+          path: dropbox-auth
+          method: post
+          cors: true
   end-service-post:
     handler: out/end-service_post.handler
     events:
