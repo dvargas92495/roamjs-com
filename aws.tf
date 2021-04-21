@@ -166,6 +166,7 @@ module "aws-serverless-backend" {
         "is-subscribed/get",
         "launch-social/post",
         "launch-website/post",
+        "metadata/get",
         "mixpanel/post",
         "payment-methods/delete",
         "payment-methods/get",

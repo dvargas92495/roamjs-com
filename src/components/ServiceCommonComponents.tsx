@@ -179,21 +179,23 @@ export const runService = ({
         isOpen={true}
         onConfirm={() => {
           const tokenField = `roamjs${toCamel(id)}Token`;
-          createPage({
-            title,
-            tree: [
-              {
-                text: "token",
-                children: [
-                  {
-                    text: window[tokenField],
-                    children: [],
-                  },
-                ],
-              },
-            ],
-          });
-          delete window[tokenField];
+          if (window[tokenField]) {
+            createPage({
+              title,
+              tree: [
+                {
+                  text: "token",
+                  children: [
+                    {
+                      text: window[tokenField],
+                      children: [],
+                    },
+                  ],
+                },
+              ],
+            });
+            delete window[tokenField];
+          }
           ReactDOM.unmountComponentAtNode(root);
           root.remove();
         }}
