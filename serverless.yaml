@@ -148,6 +148,13 @@ functions:
           path: launch-website
           method: post
           cors: true
+  metadata-get:
+    handler: out/metadata_get.handler
+    events:
+      - http:
+          path: metadata
+          method: get
+          cors: true
   mixpanel-post:
     handler: out/mixpanel_post.handler
     events:

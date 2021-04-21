@@ -22,6 +22,7 @@ const DeveloperContent: StageContent = () => {
   useEffect(() => {
     if (initialLoading) {
       authenticatedAxiosGet("metadata?service=developer&key=paths")
+        .then((r) => setPaths(r.data.value || []))
         .catch(() => setPaths([]))
         .finally(() => setInitialLoading(false));
     }
@@ -49,8 +50,8 @@ const DeveloperContent: StageContent = () => {
           </li>
         ))}
       </ul>
-      <div style={{ marginTop: 16 }}>
-        <Label>
+      <div style={{ marginTop: 16, display: 'flex', alignItems: 'center' }}>
+        <Label style={{flexGrow: 1}}>
           Path
           <InputGroup
             value={newPath}
@@ -73,7 +74,7 @@ const DeveloperContent: StageContent = () => {
               .catch((e) => setError(e.response?.data || e.message))
               .finally(() => setLoading(false));
           }}
-          style={{ margin: "0 16px" }}
+          style={{ margin: "8px 16px 0 16px" }}
           disabled={!!error}
         >
           Request Path

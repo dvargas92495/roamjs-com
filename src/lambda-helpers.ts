@@ -236,8 +236,9 @@ const findUser = async (predicate: (u: User) => boolean): Promise<User> => {
 
 export const authenticate = (
   handler: APIGatewayProxyHandler,
-  service: "staticSite" | "social" | "developer"
+  inputService?: "staticSite" | "social" | "developer"
 ): APIGatewayProxyHandler => (event, ctx, callback) => {
+  const service = inputService || event.queryStringParameters.service;
   const Authorization = event.headers.Authorization || "";
   const [userId, token] =
     Authorization.length === 32 || Authorization.includes(":")
