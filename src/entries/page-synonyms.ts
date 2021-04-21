@@ -6,7 +6,6 @@ import {
   getTreeByPageName,
   getUids,
   getUidsFromId,
-  RoamBlock,
 } from "roam-client";
 
 let blockElementSelected: Element;
@@ -37,9 +36,9 @@ const getReplacer = () => {
   const useTags = tree.some((t) => t.text.toUpperCase() === "USE TAGS");
   const pagesWithAliases = window.roamAlphaAPI
     .q(
-      `[:find (pull ?parentPage [*]) :where [?parentPage :block/children ?referencingBlock] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "Aliases"]]`
+      `[:find ?u ?t :where [?parentPage :block/uid ?u] [?parentPage :node/title ?t] [?referencingBlock :block/page ?parentPage] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "Aliases"]]`
     )
-    .map((p) => p[0] as RoamBlock);
+    .map(([uid, title]: string[]) => ({uid, title}));
   const uidWithAliases = pagesWithAliases.map((p) => ({
     title: p.title,
     uid: p.uid,

@@ -162,7 +162,7 @@
     "remark-slug": "^6.0.0",
     "remark-unwrap-images": "^2.0.0",
     "reveal.js": "^4.1.0",
-    "roam-client": "^1.49.3",
+    "roam-client": "^1.50.0",
     "roam-marked": "^0.7.2",
     "roamjs-components": "^0.1.11",
     "tesseract.js": "^2.1.3",
