@@ -83,6 +83,16 @@ const onTodo = (blockUid: string, oldValue: string) => {
       }
     });
   }
+
+  const onTodo = config["On Todo"];
+  if (onTodo) {
+    const today = new Date();
+    const formattedText = ` ${onTodo
+      .replace("/Current Time", format(today, "HH:mm"))
+      .replace("/Today", `[[${toRoamDate(today)}]]`)}`;
+    value = `${value}${formattedText}`;
+  }
+
   if (value !== oldValue) {
     window.roamAlphaAPI.updateBlock({
       block: { uid: blockUid, string: value },
@@ -156,7 +166,7 @@ runExtension("todo-trigger", () => {
         const { blockUid } = getUids(textArea);
         if (textArea.value.startsWith("{{[[DONE]]}}")) {
           onDone(blockUid, textArea.value);
-        } else if (!textArea.value.startsWith("{{[[TODO]]}}")) {
+        } else if (textArea.value.startsWith("{{[[TODO]]}}")) {
           onTodo(blockUid, textArea.value);
         }
         return;
