@@ -126,6 +126,7 @@
     "diahook": "^0.10.7",
     "downloadjs": "^1.4.7",
     "draft-js": "^0.11.7",
+    "dropbox": "^9.6.0",
     "form-data": "^4.0.0",
     "iconv-lite": "^0.6.2",
     "iframe-resizer": "^4.2.11",

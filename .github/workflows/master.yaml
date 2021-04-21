@@ -22,6 +22,7 @@ env:
   GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
   SLACK_CLIENT_ID: ${{ secrets.SLACK_CLIENT_ID }}
   FACEBOOK_CLIENT_ID: ${{ secrets.FACEBOOK_CLIENT_ID }}
+  DROPBOX_CLIENT_ID: ${{ secrets.DROPBOX_CLIENT_ID }}
 
 jobs:
   deploy:

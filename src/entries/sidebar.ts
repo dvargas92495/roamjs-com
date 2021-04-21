@@ -173,12 +173,18 @@ runExtension(ID, () => {
               ),
             ])
           );
-          const windowContent = d.lastElementChild as HTMLDivElement;
-          const filterKey = windowContent.getElementsByClassName(
-            "rm-title-display"
-          )[0]?.firstElementChild.innerHTML;
+          const order = Array.from(
+            d.parentElement.parentElement.children
+          ).findIndex((c) => c === d.parentElement);
+          const filterKey = getPageTitleByPageUid(
+            getWindowUid(
+              window.roamAlphaAPI.ui.rightSidebar
+                .getWindows()
+                .find((w) => w.order === order)
+            )
+          );
           if (parsedFilters[filterKey]) {
-            const filterIcon = windowContent.getElementsByClassName(
+            const filterIcon = d.lastElementChild.getElementsByClassName(
               "bp3-icon-filter"
             )[0] as HTMLSpanElement;
             if (filterIcon) {

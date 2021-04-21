@@ -10,7 +10,6 @@ import {
   addButtonListener,
   createHTMLObserver,
   genericError,
-  getNthChildUidByBlockUid,
   pushBullets,
   getConfigFromPage,
   parseRoamDate,
@@ -216,16 +215,11 @@ const importGoogleCalendar = async (
   });
 };
 
-const loadBlockUid = (parentUid: string) => {
+const loadBlockUid = (pageUid: string) => {
   if (textareaRef.current) {
-    const originalUid = getUids(textareaRef.current).blockUid;
-    const originalOrder = getOrderByBlockUid(originalUid);
-    // Roam Bug: https://www.loom.com/share/4fdf1a6c6b0347de946b751e3f421611
-    const uid =
-      getNthChildUidByBlockUid({
-        blockUid: parentUid,
-        order: originalOrder + 1,
-      }) || originalUid;
+    const uid = getUids(textareaRef.current).blockUid;
+    const parentUid = getParentUidByBlockUid(uid);
+
     const text = getTextByBlockUid(uid);
     if (text.length) {
       return createBlock({
@@ -241,8 +235,8 @@ const loadBlockUid = (parentUid: string) => {
   }
   return createBlock({
     node: { text: "Loading..." },
-    parentUid,
-    order: getChildrenLengthByPageUid(parentUid),
+    parentUid: pageUid,
+    order: getChildrenLengthByPageUid(pageUid),
   });
 };
 
@@ -250,7 +244,7 @@ const importGoogleCalendarCommand = () => {
   const parentUid = getCurrentPageUid();
   const blockUid = loadBlockUid(parentUid);
   return fetchGoogleCalendar().then((bullets) => {
-    pushBullets(bullets, blockUid, parentUid);
+    pushBullets(bullets, blockUid, getParentUidByBlockUid(blockUid));
   });
 };
 

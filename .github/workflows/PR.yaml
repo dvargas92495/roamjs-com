@@ -10,6 +10,10 @@ env:
   MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
   GIPHY_KEY: ${{ secrets.GIPHY_KEY }}
   REST_API_URL: http://localhost:3003/dev
+  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+  SLACK_CLIENT_ID: ${{ secrets.SLACK_CLIENT_ID }}
+  FACEBOOK_CLIENT_ID: ${{ secrets.FACEBOOK_CLIENT_ID }}
+  DROPBOX_CLIENT_ID: ${{ secrets.DROPBOX_CLIENT_ID }}
 
 jobs:
   deploy:

@@ -457,7 +457,7 @@ button.bp3-button.bp3-panel-stack-header-back {
             />
           </div>
           <style>
-            {`.rm-block-children {
+            {`.roam-article .rm-block-children {
   visibility: hidden;
 }`}
           </style>

@@ -5,7 +5,7 @@ import {
   getTextByBlockUid,
   getUids,
 } from "roam-client";
-import { isControl, runExtension } from "../entry-helpers";
+import { getDropUidOffset, isControl, runExtension } from "../entry-helpers";
 
 const ID = "multi-select";
 const HIGHLIGHT_CLASS = "block-highlight-blue";
@@ -69,24 +69,9 @@ runExtension(ID, () => {
   createHTMLObserver({
     tag: "DIV",
     className: "dnd-drop-area",
-    callback: (d) => {
+    callback: (d: HTMLDivElement) => {
       d.addEventListener("drop", () => {
-        const separator = d.parentElement;
-        const childrenContainer = separator.parentElement;
-        const index = Array.from(childrenContainer.children).findIndex(
-          (c) => c === separator
-        );
-        const offset = Array.from(childrenContainer.children).reduce(
-          (prev, cur, ind) =>
-            cur.classList.contains("roam-block-container") && ind < index
-              ? prev + 1
-              : prev,
-          0
-        );
-        const parentBlock = childrenContainer.previousElementSibling.getElementsByClassName(
-          "roam-block"
-        )?.[0] as HTMLDivElement;
-        const parentUid = getUids(parentBlock).blockUid;
+        const { parentUid, offset } = getDropUidOffset(d);
         globalRefs.blocksToMove.forEach((uid, order) =>
           window.roamAlphaAPI.moveBlock({
             location: {
