@@ -174,6 +174,21 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/parham.jfif",
             url: "https://www.forthisworld.org",
           },
+          {
+            title: "Kathryn E. Foy",
+            imgSrc: "sponsors/katefoy.jpg",
+            url: "https://about.me/Dramagirl",
+          },
+          {
+            title: "Simon Nazer",
+            imgSrc: "sponsors/nazer.jpg",
+            url: "https://www.wordimagedesign.com/",
+          },
+          {
+            title: "Elizabeth Beese",
+            imgSrc: "sponsors/beese.jpg",
+            url: "https://elizabethbeese.com",
+          },
         ]}
       />
     </StandardLayout>
