@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { getTextByBlockUid, PullBlock } from "roam-client";
-import { BLOCK_REF_REGEX, resolveRefs } from "../entry-helpers";
+import { BLOCK_REF_REGEX } from "../entry-helpers";
 import EditContainer, { editContainerRender } from "./EditContainer";
 
 const REGEX = /^https?:\/\//i;
