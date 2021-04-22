@@ -61,6 +61,12 @@ runExtension(ID, () => {
           tooltipContent: "Expand/Collapse all windows in sidebar",
           toggleIcon: "expand-all",
           onClick: () => {
+            rightSidebar
+              .querySelectorAll<HTMLSpanElement>(
+                ".rm-sidebar-window .window-headers .rm-caret-open"
+              )
+              .forEach((e) => e.click());
+            /* Roam has a bug for non block windows
             window.roamAlphaAPI.ui.rightSidebar.getWindows().forEach((w) => {
               window.roamAlphaAPI.ui.rightSidebar.collapseWindow({
                 window: {
@@ -69,8 +75,15 @@ runExtension(ID, () => {
                 },
               });
             });
+            */
           },
           onToggleClick: () => {
+            rightSidebar
+              .querySelectorAll<HTMLSpanElement>(
+                ".rm-sidebar-window .window-headers .rm-caret-closed"
+              )
+              .forEach((e) => e.click());
+              /* Roam has a bug for non block windows
             window.roamAlphaAPI.ui.rightSidebar.getWindows().forEach((w) => {
               window.roamAlphaAPI.ui.rightSidebar.expandWindow({
                 window: {
@@ -79,6 +92,7 @@ runExtension(ID, () => {
                 },
               });
             });
+            */
           },
         });
         rightSidebarTopbar.appendChild(expandCollapseContainer);

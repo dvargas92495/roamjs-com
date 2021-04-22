@@ -83,13 +83,23 @@ runExtension(ID, () => {
                   autorename: true,
                 })
                 .then((r) =>
-                  dbx.sharingCreateSharedLinkWithSettings({
-                    path: r.result.path_display,
-                    settings: { requested_visibility: { ".tag": "public" } },
-                  })
+                  dbx
+                    .sharingListSharedLinks({ path: r.result.path_display })
+                    .then((l) =>
+                      l.result.links.length
+                        ? l.result.links[0].url
+                        : dbx
+                            .sharingCreateSharedLinkWithSettings({
+                              path: r.result.path_display,
+                              settings: {
+                                requested_visibility: { ".tag": "public" },
+                              },
+                            })
+                            .then((c) => c.result.url)
+                    )
                 )
                 .then((r) => {
-                  const url = r.result.url.replace(/dl=0$/, "raw=1");
+                  const url = r.replace(/dl=0$/, "raw=1");
                   updateBlock({
                     uid,
                     text: `![](${url})`,
@@ -107,9 +117,9 @@ runExtension(ID, () => {
                   });
                 })
                 .finally(() => {
-                  Array.from(
-                    document.getElementsByClassName("dnd-separator")
-                  ).forEach((c) => c.remove());
+                  Array.from(document.getElementsByClassName("dnd-drop-bar"))
+                    .map((c) => c as HTMLDivElement)
+                    .forEach((c) => (c.style.display = "none"));
                 });
             e.stopPropagation();
             e.preventDefault();

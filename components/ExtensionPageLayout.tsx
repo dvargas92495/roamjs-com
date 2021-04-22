@@ -79,6 +79,7 @@ const contributors = {
   "Zach Phillips": "https://zachphillips.blog/",
   "Isabela Granic": "http://isabelagranic.com/",
   "Joe Ocampo": "https://twitter.com/joe_ocampo",
+  "Jon Surrat": "https://twitter.com/surrjon",
 };
 
 const emojisToTooltip = {
