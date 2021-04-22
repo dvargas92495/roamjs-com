@@ -81,6 +81,7 @@ const contributors = {
   "Joe Ocampo": "https://twitter.com/joe_ocampo",
   "Jon Surrat": "https://twitter.com/surrjon",
   "Owen Cyrulnik": "https://twitter.com/cyrulnik",
+  "Elizabeth Brott Beese": "https://elizabethbeese.com",
 };
 
 const emojisToTooltip = {

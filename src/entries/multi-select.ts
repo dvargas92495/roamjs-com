@@ -2,8 +2,9 @@ import {
   createBlockObserver,
   createHTMLObserver,
   deleteBlock,
-  getTextByBlockUid,
+  getTreeByBlockUid,
   getUids,
+  TreeNode,
 } from "roam-client";
 import { getDropUidOffset, isControl, runExtension } from "../entry-helpers";
 
@@ -97,14 +98,24 @@ runExtension(ID, () => {
     }
   });
 
+  const treeNodeToString = (n: TreeNode, i: number): string =>
+    `${"".padStart(i * 4, " ")}- ${n.text}\n${n.children
+      .map((c) => treeNodeToString(c, i + 1))
+      .join("")}`;
+
+  const getUidsToCopy = () =>
+    Array.from(document.getElementsByClassName(HIGHLIGHT_CLASS)).map(
+      getUidByContainer
+    );
+
   document.addEventListener("copy", (e) => {
-    const data = Array.from(document.getElementsByClassName(HIGHLIGHT_CLASS))
-      .map(getUidByContainer)
+    const data = getUidsToCopy()
       .map((uid) =>
-        globalRefs.shiftKey ? `((${uid}))` : getTextByBlockUid(uid)
+        globalRefs.shiftKey
+          ? `- ((${uid}))`
+          : treeNodeToString(getTreeByBlockUid(uid), 0)
       )
-      .map((b) => `- ${b}`)
-      .join("\n");
+      .join("");
     globalRefs.shiftKey = false;
     if (data) {
       e.clipboardData.setData("text/plain", data);
@@ -113,14 +124,13 @@ runExtension(ID, () => {
   });
 
   document.addEventListener("cut", (e) => {
-    const data = Array.from(document.getElementsByClassName(HIGHLIGHT_CLASS))
-      .map(getUidByContainer)
+    const data = getUidsToCopy()
       .map((uid) => {
+        const text = treeNodeToString(getTreeByBlockUid(uid), 0);
         deleteBlock(uid);
-        return globalRefs.shiftKey ? `((${uid}))` : getTextByBlockUid(uid);
+        return text;
       })
-      .map((b) => `- ${b}`)
-      .join("\n");
+      .join("");
     if (data) {
       e.clipboardData.setData("text/plain", data);
       e.preventDefault();
@@ -129,6 +139,7 @@ runExtension(ID, () => {
 
   document.addEventListener("keydown", (e) => {
     if (e.shiftKey && isControl(e) && e.code === "KeyC") {
+      e.preventDefault();
       globalRefs.shiftKey = true;
       document.execCommand("copy");
     }

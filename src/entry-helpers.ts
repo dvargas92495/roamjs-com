@@ -523,14 +523,9 @@ export const getChildrenLengthByPageUid = (uid: string): number =>
   ).length;
 
 export const getBlockDepthByBlockUid = (blockUid: string): number => {
-  const result = window.roamAlphaAPI.q(
-    `[:find (pull ?c [:node/title, :block/uid]) :where [?c :block/children ?e] [?e :block/uid "${blockUid}"]]`
-  );
-  if (!result.length) {
-    return -1;
-  }
-  const block = result[0][0] as RoamBlock;
-  return block.title ? 1 : getBlockDepthByBlockUid(block.uid) + 1;
+  return window.roamAlphaAPI.q(
+    `[:find ?p :where [?e :block/parents ?p] [?e :block/uid "${blockUid}"]]`
+  ).length;
 };
 
 export const getChildRefStringsByBlockUid = (b: string): string[] =>
