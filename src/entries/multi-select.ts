@@ -112,7 +112,7 @@ runExtension(ID, () => {
     const data = getUidsToCopy()
       .map((uid) =>
         globalRefs.shiftKey
-          ? `- ((${uid}))`
+          ? `- ((${uid}))\n`
           : treeNodeToString(getTreeByBlockUid(uid), 0)
       )
       .join("");
