@@ -193,7 +193,7 @@ const ExtensionPageLayout: React.FunctionComponent<{
       <Prism language="javascript">{getSingleCodeContent(id)}</Prism>
       <H3>Usage</H3>
       {children}
-      {!frontMatter.development && !frontMatter.skipDemo && (
+      {(!frontMatter.development || frontMatter.loom) && !frontMatter.skipDemo && (
         <>
           <H3>Demo</H3>
           {frontMatter.loom ? (
