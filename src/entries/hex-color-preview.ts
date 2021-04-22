@@ -68,7 +68,7 @@ runExtension("hex-color-preview", () => {
   createBlockObserver(
     (b) => renderColorPreviews(b, getUids(b).blockUid),
     (s) => {
-      const blockUid = getReferenceBlockUid(s);
+      const blockUid = getReferenceBlockUid(s, "rm-block-ref");
       renderColorPreviews(s, blockUid);
     }
   );

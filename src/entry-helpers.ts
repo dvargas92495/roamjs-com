@@ -3,6 +3,7 @@ import {
   createIconButton,
   deleteBlock,
   getAttrConfigFromQuery,
+  getNthChildUidByBlockUid,
   getPageTitleByBlockUid,
   getPageUidByPageTitle,
   getTreeByBlockUid,
@@ -195,7 +196,7 @@ export const replaceTagText = ({
   }
 };
 
-export const getReferenceBlockUid = (e: HTMLElement): string => {
+export const getReferenceBlockUid = (e: HTMLElement, className: 'rm-block-ref' | 'rm-alias--block'): string => {
   const parent = e.closest(".roam-block") as HTMLDivElement;
   if (!parent) {
     return "";
@@ -203,7 +204,7 @@ export const getReferenceBlockUid = (e: HTMLElement): string => {
   const { blockUid } = getUids(parent);
   const refs = getChildRefUidsByBlockUid(blockUid);
   const index = Array.from(
-    parent.getElementsByClassName("rm-block-ref")
+    parent.getElementsByClassName(className)
   ).findIndex((el) => el === e || el.contains(e));
   return refs[index];
 };
@@ -632,9 +633,9 @@ export const getRoamUrlByPage = (page: string): string => {
   return uid && getRoamUrl(uid);
 };
 
-const blockRefRegex = new RegExp("\\(\\((..........?)\\)\\)", "g");
+export const BLOCK_REF_REGEX = new RegExp("\\(\\((..........?)\\)\\)", "g");
 const aliasRefRegex = new RegExp(
-  `\\[[^\\]]*\\]\\((${blockRefRegex.source})\\)`,
+  `\\[[^\\]]*\\]\\((${BLOCK_REF_REGEX.source})\\)`,
   "g"
 );
 const aliasTagRegex = new RegExp(
@@ -650,7 +651,7 @@ export const resolveRefs = (text: string): string => {
     .replace(aliasRefRegex, (alias, del, blockUid) => {
       return alias.replace(del, `${getRoamUrl(blockUid)}`);
     })
-    .replace(blockRefRegex, (_, blockUid) => {
+    .replace(BLOCK_REF_REGEX, (_, blockUid) => {
       const reference = getTextByBlockUid(blockUid);
       return reference || blockUid;
     });
@@ -886,3 +887,41 @@ const context = {
 };
 export const parseRoamMarked = (text: string): string =>
   parseInline(text, context);
+
+export const getBlockUidFromTarget = (target: HTMLElement): string => {
+  const ref = target.closest(".rm-block-ref") as HTMLSpanElement;
+  if (ref) {
+    return getReferenceBlockUid(ref, "rm-block-ref");
+  }
+
+  const customView = target.closest(".roamjs-block-view") as HTMLDivElement;
+  if (customView) {
+    return getUids(customView).blockUid;
+  }
+
+  const aliasTooltip = target.closest('.rm-alias-tooltip__content')
+  if (aliasTooltip) {
+    const aliasRef = document.querySelector('.bp3-popover-open .rm-alias--block') as HTMLAnchorElement;
+    return getReferenceBlockUid(aliasRef, 'rm-alias--block');
+  }
+  
+  const { blockUid } = getUids(target.closest(".roam-block") as HTMLDivElement);
+  const kanbanTitle = target.closest(".kanban-title");
+  if (kanbanTitle) {
+    const container = kanbanTitle.closest(".kanban-column-container");
+    const column = kanbanTitle.closest(".kanban-column");
+    const order = Array.from(container.children).findIndex((d) => d === column);
+    return getNthChildUidByBlockUid({ blockUid, order });
+  }
+  const kanbanCard = target.closest(".kanban-card");
+  if (kanbanCard) {
+    const container = kanbanCard.closest(".kanban-column-container");
+    const column = kanbanCard.closest(".kanban-column");
+    const order = Array.from(container.children).findIndex((d) => d === column);
+    const titleUid = getNthChildUidByBlockUid({ blockUid, order });
+    const nestedOrder =
+      Array.from(column.children).findIndex((d) => d === kanbanCard) - 1;
+    return getNthChildUidByBlockUid({ blockUid: titleUid, order: nestedOrder });
+  }
+  return blockUid;
+};

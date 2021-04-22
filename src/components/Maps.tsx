@@ -220,17 +220,16 @@ const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
   const mapInstance = useRef<Map>(null);
   const initialTree = useTreeByHtmlId(blockId);
   const [height, setHeight] = useState(DEFAULT_HEIGHT);
-  const fixHeight = useCallback(
-    () =>
-      setHeight(
-        parseInt(
-          getComputedStyle(document.getElementById(id)).width.match(
-            /^(.*)px$/
-          )?.[1] || `${Math.round((DEFAULT_HEIGHT * 4) / 3)}`
-        ) * 0.75
-      ),
-    [setHeight]
-  );
+  const fixHeight = useCallback(() => {
+    setHeight(
+      parseInt(
+        getComputedStyle(document.getElementById(id)).width.match(
+          /^(.*)px$/
+        )?.[1] || `${Math.round((DEFAULT_HEIGHT * 4) / 3)}`
+      ) * 0.75
+    );
+    mapInstance.current?.invalidateSize?.();
+  }, [setHeight]);
   const initialZoom = useMemo(() => getZoom(initialTree), [initialTree]);
   const initialCenter = useMemo(() => getCenter(initialTree), [initialTree]);
   const [markers, setMarkers] = useState<RoamMarker[]>([]);
@@ -293,9 +292,13 @@ const Maps = ({ blockId }: { blockId: string }): JSX.Element => {
     },
     [blockId]
   );
-  const whenCreated = useCallback((m) => (mapInstance.current = m), [
-    mapInstance,
-  ]);
+  const whenCreated = useCallback(
+    (m) => {
+      mapInstance.current = m;
+      mapInstance.current.invalidateSize();
+    },
+    [mapInstance]
+  );
   return (
     <EditContainer
       blockId={blockId}

@@ -1,12 +1,12 @@
 import { Button } from "@blueprintjs/core";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
-import { getUids } from "roam-client";
 import {
-  getReferenceBlockUid,
+  getBlockUidFromTarget,
   openBlock,
   openBlockElement,
 } from "../entry-helpers";
+import { renderWithUnmount } from "./hooks";
 
 const EditContainer: React.FunctionComponent<{
   blockId?: string;
@@ -97,14 +97,8 @@ export const render = (d: HTMLElement): void => {
 export const editContainerRender = (
   Fc: React.FunctionComponent<{ blockUid: string }>
 ) => (b: HTMLButtonElement): void =>
-  ReactDOM.render(
-    <Fc
-      blockUid={
-        getReferenceBlockUid(b) ||
-        getUids(b.closest(".roamjs-block-view") as HTMLDivElement).blockUid ||
-        getUids(b.closest(".roam-block") as HTMLDivElement).blockUid
-      }
-    />,
+  renderWithUnmount(
+    <Fc blockUid={getBlockUidFromTarget(b)} />,
     b.parentElement
   );
 

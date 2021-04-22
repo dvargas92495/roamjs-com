@@ -1,7 +1,7 @@
 import axios from "axios";
-import React, { useEffect, useRef, useState } from "react";
-import { getTextByBlockUid } from "roam-client";
-import { resolveRefs } from "../entry-helpers";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { getTextByBlockUid, PullBlock } from "roam-client";
+import { BLOCK_REF_REGEX, resolveRefs } from "../entry-helpers";
 import EditContainer, { editContainerRender } from "./EditContainer";
 
 const REGEX = /^https?:\/\//i;
@@ -13,16 +13,8 @@ const IframelyEmbed = ({
 }): React.ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [blockId, setBlockId] = useState("");
-  useEffect(() => {
-    const possibleBlockId = containerRef.current.closest(".roam-block")?.id;
-    if (possibleBlockId.endsWith(blockUid)) {
-      setBlockId(possibleBlockId);
-    }
-    const text = getTextByBlockUid(blockUid);
-    const inputUrl = resolveRefs(
-      /{{(?:\[\[)?iframely(?:\]\])?:(.*?)}}/.exec(text)?.[1]?.trim?.() || ""
-    );
-    if (inputUrl) {
+  const processUrl = useCallback(
+    (inputUrl: string) => {
       const url = REGEX.test(inputUrl) ? inputUrl : `https://${inputUrl}`;
       axios
         .post(`${process.env.REST_API_URL}/iframely`, { url })
@@ -30,6 +22,9 @@ const IframelyEmbed = ({
           const { html } = r.data;
           const children = new DOMParser().parseFromString(html, "text/html")
             .body.children;
+          Array.from(containerRef.current.children).forEach((c) =>
+            containerRef.current.removeChild(c)
+          );
           Array.from(children).forEach((c) => {
             if (c.tagName === "SCRIPT") {
               const oldScript = c as HTMLScriptElement;
@@ -57,8 +52,42 @@ const IframelyEmbed = ({
               "An unknown error occurred. Please reach out to support@roamjs.com for help!";
           }
         });
+    },
+    [containerRef]
+  );
+  useEffect(() => {
+    const possibleBlockId = containerRef.current.closest(".roam-block")?.id;
+    if (possibleBlockId?.endsWith?.(blockUid)) {
+      setBlockId(possibleBlockId);
     }
-  }, [containerRef, blockUid, setBlockId]);
+    const text = getTextByBlockUid(blockUid);
+    const arg =
+      /{{(?:\[\[)?iframely(?:\]\])?:(.*?)}}/.exec(text)?.[1]?.trim?.() || "";
+    if (arg) {
+      if (BLOCK_REF_REGEX.test(arg)) {
+        const uid = new RegExp(BLOCK_REF_REGEX.source).exec(arg)[1];
+        const watcher = (_: PullBlock, after: PullBlock) => {
+          const url = after?.[":block/string"] || "";
+          if (url) {
+            processUrl(url);
+          }
+        };
+        window.roamAlphaAPI.data.addPullWatch(
+          "[:block/string]",
+          `[:block/uid "${uid}"]`,
+          watcher
+        );
+        processUrl(getTextByBlockUid(uid));
+        return () =>
+          window.roamAlphaAPI.data.removePullWatch(
+            "[:block/string]",
+            `[:block/uid "${uid}"]`,
+            watcher
+          );
+      }
+      processUrl(arg);
+    }
+  }, [processUrl, containerRef, blockUid, setBlockId]);
   return (
     <EditContainer blockId={blockId} containerStyleProps={{ minWidth: 300 }}>
       <div ref={containerRef} />

@@ -2,7 +2,6 @@ import format from "date-fns/format";
 import {
   createHTMLObserver,
   getConfigFromPage,
-  getNthChildUidByBlockUid,
   getTextByBlockUid,
   getUids,
   toRoamDate,
@@ -10,7 +9,7 @@ import {
 import {
   createTagRegex,
   DAILY_NOTE_PAGE_REGEX,
-  getReferenceBlockUid,
+  getBlockUidFromTarget,
   isControl,
   runExtension,
 } from "../entry-helpers";
@@ -21,32 +20,6 @@ const CLASSNAMES_TO_CHECK = [
   "kanban-card",
   "roam-block",
 ];
-
-const getBlockUidFromTarget = (target: HTMLElement) => {
-  const ref = target.closest(".rm-block-ref") as HTMLSpanElement;
-  if (ref) {
-    return getReferenceBlockUid(ref);
-  }
-  const { blockUid } = getUids(target.closest(".roam-block") as HTMLDivElement);
-  const kanbanTitle = target.closest(".kanban-title");
-  if (kanbanTitle) {
-    const container = kanbanTitle.closest(".kanban-column-container");
-    const column = kanbanTitle.closest(".kanban-column");
-    const order = Array.from(container.children).findIndex((d) => d === column);
-    return getNthChildUidByBlockUid({ blockUid, order });
-  }
-  const kanbanCard = target.closest(".kanban-card");
-  if (kanbanCard) {
-    const container = kanbanCard.closest(".kanban-column-container");
-    const column = kanbanCard.closest(".kanban-column");
-    const order = Array.from(container.children).findIndex((d) => d === column);
-    const titleUid = getNthChildUidByBlockUid({ blockUid, order });
-    const nestedOrder =
-      Array.from(column.children).findIndex((d) => d === kanbanCard) - 1;
-    return getNthChildUidByBlockUid({ blockUid: titleUid, order: nestedOrder });
-  }
-  return blockUid;
-};
 
 const onTodo = (blockUid: string, oldValue: string) => {
   const config = getConfigFromPage("roam/js/todo-trigger");

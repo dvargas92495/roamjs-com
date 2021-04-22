@@ -1,6 +1,5 @@
 import { Button, Portal } from "@blueprintjs/core";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import ReactDOM from "react-dom";
 import YouTube from "react-youtube";
 import {
   createBlock,
@@ -12,7 +11,7 @@ import {
 } from "roam-client";
 import { setInputSetting } from "../entry-helpers";
 import EditContainer from "./EditContainer";
-import { useTree } from "./hooks";
+import { renderWithUnmount, useTree } from "./hooks";
 import ToggleIconButton from "./ToggleIconButton";
 
 type YoutubePlayerProps = {
@@ -240,18 +239,7 @@ const YoutubePlayer = ({
 export const render = ({
   p,
   ...props
-}: { p: HTMLDivElement } & YoutubePlayerProps): void => {
-  ReactDOM.render(<YoutubePlayer {...props} />, p);
-  const unmountObserver = new MutationObserver((ms) => {
-    const parentRemoved = ms
-      .flatMap((m) => Array.from(m.removedNodes))
-      .some((n) => n.contains(p));
-    if (parentRemoved) {
-      unmountObserver.disconnect();
-      ReactDOM.unmountComponentAtNode(p);
-    }
-  });
-  unmountObserver.observe(document.body, { childList: true, subtree: true });
-};
+}: { p: HTMLDivElement } & YoutubePlayerProps): void =>
+  renderWithUnmount(<YoutubePlayer {...props} />, p);
 
 export default YoutubePlayer;

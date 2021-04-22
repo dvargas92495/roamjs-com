@@ -1,5 +1,6 @@
 import { differenceInMilliseconds } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import ReactDOM from "react-dom";
 import {
   getTreeByBlockUid,
   getTreeByPageName,
@@ -137,15 +138,30 @@ export const toTitle = (id: string): string =>
     .map((s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
     .join(" ");
 
-const monitorCache: {[label: string]: number} = {};
-export const monitor = <T>(label: string, callback: (props: T) => void) => (props: T): void => {
+const monitorCache: { [label: string]: number } = {};
+export const monitor = <T>(label: string, callback: (props: T) => void) => (
+  props: T
+): void => {
   monitorCache[label] = (monitorCache[label] || 0) + 1;
   const start = new Date();
   console.log(label, "start", monitorCache[label]);
   callback(props);
-  console.log(
-    label,
-    "end",
-    differenceInMilliseconds(new Date(), start)
-  );
+  console.log(label, "end", differenceInMilliseconds(new Date(), start));
+};
+
+export const renderWithUnmount = (
+  el: React.ReactElement,
+  p: HTMLElement
+): void => {
+  ReactDOM.render(el, p);
+  const unmountObserver = new MutationObserver((ms) => {
+    const parentRemoved = ms
+      .flatMap((m) => Array.from(m.removedNodes))
+      .some((n) => n === p || n.contains(p));
+    if (parentRemoved) {
+      unmountObserver.disconnect();
+      ReactDOM.unmountComponentAtNode(p);
+    }
+  });
+  unmountObserver.observe(document.body, { childList: true, subtree: true });
 };
