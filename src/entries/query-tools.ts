@@ -233,32 +233,36 @@ const observerCallback = () => {
   });
 
   // Context
-  const pageConfig = getConfigFromPage("roam/js/query-tools");
   const unContextedQueries = Array.from(
     document.getElementsByClassName("rm-query-content")
   ).filter(
     (e) => !e.getAttribute("data-is-contexted-results")
   ) as HTMLDivElement[];
-  unContextedQueries.forEach((q) => {
-    const config = getConfigFromBlock(q);
-    const configContext = config["Context"] || pageConfig["Context"];
-    if (configContext) {
-      q.setAttribute("data-is-contexted-results", "true");
-      const context = isNaN(configContext)
-        ? configContext
-        : parseInt(configContext);
-      const contexts = Array.from(
-        q.getElementsByClassName("zoom-mentions-view")
-      ).filter((c) => c.childElementCount);
-      contexts.forEach((ctx) => {
-        const children = Array.from(ctx.children).reverse() as HTMLDivElement[];
-        const index = !isNaN(context)
-          ? Math.min(context, children.length)
-          : children.length;
-        children[index - 1].click();
-      });
-    }
-  });
+  if (unContextedQueries.length) {
+    const pageConfig = getConfigFromPage("roam/js/query-tools");
+    unContextedQueries.forEach((q) => {
+      const config = getConfigFromBlock(q);
+      const configContext = config["Context"] || pageConfig["Context"];
+      if (configContext) {
+        q.setAttribute("data-is-contexted-results", "true");
+        const context = isNaN(configContext)
+          ? configContext
+          : parseInt(configContext);
+        const contexts = Array.from(
+          q.getElementsByClassName("zoom-mentions-view")
+        ).filter((c) => c.childElementCount);
+        contexts.forEach((ctx) => {
+          const children = Array.from(
+            ctx.children
+          ).reverse() as HTMLDivElement[];
+          const index = !isNaN(context)
+            ? Math.min(context, children.length)
+            : children.length;
+          children[index - 1].click();
+        });
+      }
+    });
+  }
 };
 
 runExtension("query-tools", () => {
