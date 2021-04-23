@@ -210,7 +210,7 @@ module "aws-serverless-backend" {
       "payment-methods",
       "token",
       "request-path",
-      "subscribe-sponsorsip",
+      "subscribe-sponsorship",
       "sponsorships",
     ]
     tags = {
