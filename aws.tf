@@ -210,6 +210,8 @@ module "aws-serverless-backend" {
       "payment-methods",
       "token",
       "request-path",
+      "subscribe-sponsorsip",
+      "sponsorships",
     ]
     tags = {
         Application = "Roam JS Extensions"
