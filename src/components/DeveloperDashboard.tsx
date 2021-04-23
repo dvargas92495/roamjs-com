@@ -1,5 +1,23 @@
-import { Button, InputGroup, Intent, Label, Spinner } from "@blueprintjs/core";
+import {
+  Button,
+  InputGroup,
+  Intent,
+  Label,
+  Spinner,
+  Tooltip,
+} from "@blueprintjs/core";
 import React, { useEffect, useState } from "react";
+import {
+  createPage,
+  getPageUidByPageTitle,
+  getTreeByPageName,
+  TreeNode,
+} from "roam-client";
+import {
+  getRoamUrl,
+  openBlockInSidebar,
+  setInputSetting,
+} from "../entry-helpers";
 import {
   TOKEN_STAGE,
   MainStage,
@@ -8,6 +26,7 @@ import {
   useAuthenticatedAxiosDelete,
   useAuthenticatedAxiosPost,
   useAuthenticatedAxiosGet,
+  useAuthenticatedAxiosPut,
 } from "./ServiceCommonComponents";
 
 const DeveloperContent: StageContent = () => {
@@ -17,6 +36,7 @@ const DeveloperContent: StageContent = () => {
   const [newPath, setNewPath] = useState("");
   const authenticatedAxiosGet = useAuthenticatedAxiosGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
+  const authenticatedAxiosPut = useAuthenticatedAxiosPut();
   const authenticatedAxiosDelete = useAuthenticatedAxiosDelete();
   const [error, setError] = useState("");
   useEffect(() => {
@@ -34,24 +54,92 @@ const DeveloperContent: StageContent = () => {
       <h4>Paths</h4>
       <ul>
         {paths.map((p) => (
-          <li key={p} style={{ display: "flex" }}>
-            <span>{p}</span>
-            <Button
-              icon={"delete"}
-              minimal
-              onClick={() => {
-                setLoading(true);
-                authenticatedAxiosDelete(`request-path?path=${p}`)
-                  .then((r) => setPaths(r.data.paths))
-                  .catch((e) => setError(e.response?.data || e.message))
-                  .finally(() => setLoading(false));
+          <li
+            key={p}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <span
+              style={{
+                cursor: "pointer",
               }}
-            />
+              onClick={(e) => {
+                const uid = getPageUidByPageTitle(p);
+                if (e.shiftKey) {
+                  openBlockInSidebar(uid);
+                } else {
+                  window.location.assign(getRoamUrl(uid));
+                }
+              }}
+            >
+              {p}
+            </span>
+            <span style={{ marginRight: 16 }}>
+              <Tooltip content={"Update Documentation"}>
+                <Button
+                  icon={"upload"}
+                  minimal
+                  style={{ margin: "0 8px" }}
+                  onClick={() => {
+                    setLoading(true);
+                    const { children, viewType } = getTreeByPageName(
+                      p
+                    ).find((t) => /documentation/i.test(t.text)) || {
+                      children: [] as TreeNode[],
+                      viewType: "document",
+                    };
+                    authenticatedAxiosPut("publish", {
+                      path: p,
+                      blocks: children,
+                      viewType,
+                    })
+                      .then((r) =>
+                        setInputSetting({
+                          blockUid: getPageUidByPageTitle(p),
+                          value: r.data.etag,
+                          key: "ETag",
+                          index: 1,
+                        })
+                      )
+                      .catch((e) =>
+                        setError(
+                          e.response?.data?.error ||
+                            e.response?.data ||
+                            e.message
+                        )
+                      )
+                      .finally(() => setLoading(false));
+                  }}
+                />
+              </Tooltip>
+              <Tooltip content={"Delete Path"}>
+                <Button
+                  icon={"delete"}
+                  minimal
+                  onClick={() => {
+                    setLoading(true);
+                    authenticatedAxiosDelete(`request-path?path=${p}`)
+                      .then((r) => setPaths(r.data.paths))
+                      .catch((e) =>
+                        setError(
+                          e.response?.data?.error ||
+                            e.response?.data ||
+                            e.message
+                        )
+                      )
+                      .finally(() => setLoading(false));
+                  }}
+                />
+              </Tooltip>
+            </span>
           </li>
         ))}
       </ul>
-      <div style={{ marginTop: 16, display: 'flex', alignItems: 'center' }}>
-        <Label style={{flexGrow: 1}}>
+      <div style={{ marginTop: 16, display: "flex", alignItems: "center" }}>
+        <Label style={{ flexGrow: 1 }}>
           Path
           <InputGroup
             value={newPath}
@@ -68,6 +156,10 @@ const DeveloperContent: StageContent = () => {
             setLoading(true);
             authenticatedAxiosPost("request-path", { path: newPath })
               .then((r) => {
+                createPage({
+                  title: newPath,
+                  tree: [{ text: "Documentation" }],
+                });
                 setNewPath("");
                 setPaths(r.data.paths);
               })
@@ -79,8 +171,8 @@ const DeveloperContent: StageContent = () => {
         >
           Request Path
         </Button>
-        {loading && <Spinner size={16} />}
       </div>
+      <div>{loading && <Spinner size={16} />}</div>
     </div>
   );
 };

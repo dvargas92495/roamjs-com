@@ -174,6 +174,7 @@ module "aws-serverless-backend" {
         "postman/post",
         "products/get",
         "publish/post",
+        "publish/put",
         "queue-issues/get",
         "request-path/post",
         "request-path/delete",

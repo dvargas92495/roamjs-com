@@ -197,6 +197,13 @@ functions:
           path: products
           method: get
           cors: true
+  publish-put:
+    handler: out/publish_put.handler
+    events:
+      - http:
+          path: publish
+          method: put
+          cors: true
   queue-issues-get:
     handler: out/queue-issues_get.handler
     events:
@@ -208,7 +215,7 @@ functions:
     handler: out/request-path_post.handler
     events:
       - http:
-          path: request-path_post
+          path: request-path
           method: post
           cors: true
   shutdown-website-post:
