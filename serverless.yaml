@@ -337,10 +337,24 @@ functions:
           path: twitter-upload
           method: post
           cors: true
+  update-website-post:
+    handler: out/update-website_post.handler
+    events:
+      - http:
+          path: update-website
+          method: post
+          cors: true
   website-status-get:
     handler: out/website-status_get.handler
     events:
       - http:
           path: website-status
+          method: get
+          cors: true
+  website-variables-get:
+    handler: out/website-variables_get.handler
+    events:
+      - http:
+          path: website-variables
           method: get
           cors: true

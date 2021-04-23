@@ -198,7 +198,9 @@ module "aws-serverless-backend" {
         "twitter-schedule/get",
         "twitter-tweet/post",
         "twitter-upload/post",
+        "update-website/post",
         "website-status/get",
+        "website-variables/get",
     ]
     cors = [
       "launch-social",
