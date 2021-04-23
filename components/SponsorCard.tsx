@@ -1,3 +1,4 @@
+import { SignedIn, SignedOut } from "@clerk/clerk-react";
 import {
   Grid,
   Radio,
@@ -11,8 +12,10 @@ import {
   Loading,
 } from "@dvargas92495/ui";
 import axios from "axios";
+import { useRouter } from "next/router";
 import React, { useCallback, useMemo, useState } from "react";
 import { FLOSS_API_URL, stripe } from "./constants";
+import { useAuthenticatedAxiosPost } from "./hooks";
 
 const Amount = ({ amount }: { amount: number }) => {
   return (
@@ -43,6 +46,54 @@ const Amount = ({ amount }: { amount: number }) => {
         style={{ width: "100%", borderRadius: "5%" }}
       />
     </Grid>
+  );
+};
+
+const LoggedInButton = ({
+  setLoading,
+  value,
+  isMonthly,
+  source,
+}: {
+  setLoading: (b: boolean) => void;
+  value: number;
+  isMonthly: boolean;
+  source: string;
+}) => {
+  const post = useAuthenticatedAxiosPost();
+  const router = useRouter();
+  const onClick = useCallback(() => {
+    setLoading(true);
+    return post("sponsorships", {
+      value,
+      isMonthly,
+      source,
+    })
+      .then((r) =>
+        r.data.active
+          ? router.push("/checkout?thankyou=true")
+          : stripe.then((s) =>
+              s
+                .redirectToCheckout({
+                  sessionId: r.data.id,
+                })
+                .then(() => true)
+            )
+      )
+      .catch(() => {
+        setLoading(false);
+      });
+  }, [value, isMonthly, setLoading]);
+  return (
+    <Button
+      onClick={onClick}
+      variant={"contained"}
+      color={"primary"}
+      disabled={value <= 0}
+      style={{ marginLeft: 16 }}
+    >
+      Sponsor
+    </Button>
   );
 };
 
@@ -145,15 +196,25 @@ const SponsorCard = ({ source }: { source: string }): React.ReactElement => {
         }}
       >
         <Loading loading={loading} size={16} />
-        <Button
-          onClick={onClick}
-          variant={"contained"}
-          color={"primary"}
-          disabled={value <= 0}
-          style={{ marginLeft: 16 }}
-        >
-          Sponsor
-        </Button>
+        <SignedIn>
+          <LoggedInButton
+            value={value}
+            setLoading={setLoading}
+            isMonthly={isMonthly}
+            source={source}
+          />
+        </SignedIn>
+        <SignedOut>
+          <Button
+            onClick={onClick}
+            variant={"contained"}
+            color={"primary"}
+            disabled={value <= 0}
+            style={{ marginLeft: 16 }}
+          >
+            Sponsor
+          </Button>
+        </SignedOut>
       </div>
     </div>
   );
