@@ -3,7 +3,9 @@ import { ISelectProps, Select } from "@blueprintjs/select";
 import React, { ReactText } from "react";
 
 const MenuItemSelect = <T extends ReactText>(
-  props: Omit<ISelectProps<T>, "itemRenderer"> & { ButtonProps?: IButtonProps }
+  props: Omit<ISelectProps<T>, "itemRenderer"> & {
+    ButtonProps?: IButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>;
+  }
 ): JSX.Element => {
   const TypeSelect = Select.ofType<T>();
   return (

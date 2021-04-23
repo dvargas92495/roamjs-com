@@ -8,7 +8,6 @@ import {
 import "react-vertical-timeline-component/style.min.css";
 import { Checkbox, Icon, InputGroup, Label } from "@blueprintjs/core";
 import {
-  getPageUidByPageTitle,
   getTreeByBlockUid,
   getUidsFromId,
   parseRoamDate,
@@ -16,7 +15,6 @@ import {
   toRoamDateUid,
   TreeNode,
 } from "roam-client";
-import { parseInline } from "roam-marked";
 import {
   createTagRegex,
   DAILY_NOTE_PAGE_REGEX,

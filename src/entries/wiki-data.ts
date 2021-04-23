@@ -1,4 +1,4 @@
-import { renderWikiData } from "../components/WikiData";
+import { renderWikiData, renderWikipedia } from "../components/WikiData";
 import { runExtension } from "../entry-helpers";
 import { createButtonObserver } from "roam-client";
 
@@ -7,6 +7,11 @@ runExtension("wiki-data", () => {
     shortcut: "wiki",
     attribute: "wiki-data",
     render: (b: HTMLButtonElement) =>
-      renderWikiData(b.closest(".roam-block").id, b.parentElement),
+      renderWikipedia(b.closest(".roam-block").id, b.parentElement),
+  });
+
+  window.roamAlphaAPI.ui.commandPalette.addCommand({
+    label: "Import Wiki Data",
+    callback: renderWikiData,
   });
 });

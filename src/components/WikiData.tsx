@@ -1,19 +1,25 @@
 import {
   Button,
+  Classes,
+  Dialog,
   Icon,
   InputGroup,
+  Label,
   Menu,
   MenuItem,
   Popover,
   Spinner,
   Text,
 } from "@blueprintjs/core";
+import { Controlled as CodeMirror } from "react-codemirror2";
+import "codemirror/mode/sparql/sparql";
 import React, { useCallback, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
-import { getUidsFromId, getTextByBlockUid } from "roam-client";
-import DemoPopoverWrapper from "./DemoPopoverWrapper";
-import { useArrowKeyDown } from "./hooks";
+import { getUidsFromId, getTextByBlockUid, createBlock } from "roam-client";
+import { getRenderRoot, useArrowKeyDown } from "./hooks";
+import MenuItemSelect from "./MenuItemSelect";
+import { getCurrentPageUid } from "../entry-helpers";
 
 const MENUITEM_CLASSNAME = "roamjs-wiki-data-result";
 
@@ -150,7 +156,7 @@ const WikiContent = ({
   );
 };
 
-const WikiData = ({
+const Wikipedia = ({
   blockId,
   defaultIsOpen,
 }: {
@@ -182,14 +188,109 @@ const WikiData = ({
   );
 };
 
-export const renderWikiData = (blockId: string, p: HTMLElement): void =>
-  ReactDOM.render(<WikiData blockId={blockId} defaultIsOpen={true} />, p);
+const WIKIDATA_ITEMS = ["Current Page", "Block on Page", "Custom Query"];
+const WikiData = ({ onClose }: { onClose: () => void }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [activeItem, setActiveItem] = useState(WIKIDATA_ITEMS[0]);
+  const [value, setValue] = useState("");
+  return (
+    <Dialog
+      isOpen={true}
+      onClose={onClose}
+      title={"Import Wiki Data"}
+      canEscapeKeyClose
+      canOutsideClickClose
+    >
+      <div className={Classes.DIALOG_BODY}>
+        <Label>
+          Query Type
+          <MenuItemSelect
+            items={WIKIDATA_ITEMS}
+            onItemSelect={(s) => setActiveItem(s)}
+            activeItem={activeItem}
+            ButtonProps={{ autoFocus: true }}
+          />
+        </Label>
+        {activeItem === "Custom Query" && (
+          <div style={{ marginTop: 16 }}>
+            <CodeMirror
+              value={value}
+              options={{
+                mode: { name: "sparql" },
+                lineNumbers: true,
+                lineWrapping: true,
+              }}
+              onBeforeChange={(_, __, v) => setValue(v)}
+            />
+          </div>
+        )}
+      </div>
+      <div className={Classes.DIALOG_FOOTER}>
+        <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+          <span style={{ color: "darkred" }}>{error}</span>
+          {loading && <Spinner size={Spinner.SIZE_SMALL} />}
+          <Button
+            text={"Import"}
+            onClick={() => {
+              setLoading(true);
+              axios
+                .get(
+                  `https://query.wikidata.org/sparql?format=json&query=${encodeURIComponent(
+                    value
+                  )}`
+                )
+                .then((r) => {
+                  const data = r.data.results.bindings as {
+                    [k: string]: { value: string };
+                  }[];
+                  const head = r.data.head.vars as string[];
+                  createBlock({
+                    node: {
+                      text: "Wikidata Import",
+                      children: data.slice(0, 10).map((p) => ({
+                        text: p[head[0]].value,
+                        children: head.slice(1).map((v) => ({
+                          text: v,
+                          children: [{ text: p[v].value }],
+                        })),
+                      })),
+                    },
+                    parentUid: getCurrentPageUid(),
+                    order: 0,
+                  });
 
-export const DemoWikiData = (): JSX.Element => (
-  <DemoPopoverWrapper
-    WrappedComponent={WikiData}
-    placeholder={"Imported Wiki Data outputted here!"}
-  />
-);
+                  onClose();
+                })
+                .catch((e) => {
+                  console.error(e);
+                  setError(
+                    "Unknown error occured when querying wiki data. Contact support@roamjs.com for help!"
+                  );
+                  setLoading(false);
+                });
+            }}
+          />
+        </div>
+      </div>
+    </Dialog>
+  );
+};
 
-export default WikiData;
+export const renderWikipedia = (blockId: string, p: HTMLElement): void =>
+  ReactDOM.render(<Wikipedia blockId={blockId} defaultIsOpen={true} />, p);
+
+export const renderWikiData = (): void => {
+  const parent = getRenderRoot("wiki-data");
+  ReactDOM.render(
+    <WikiData
+      onClose={() => {
+        ReactDOM.unmountComponentAtNode(parent);
+        parent.remove();
+      }}
+    />,
+    parent
+  );
+};
+
+export default Wikipedia;
