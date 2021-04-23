@@ -189,6 +189,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/beese.jpg",
             url: "https://elizabethbeese.com",
           },
+          {
+            title: "Halem Jan Kirgil",
+            imgSrc: "sponsors/halem.jpg",
+            url: "https://twitter.com/tj_allemaal",
+          },
         ]}
       />
     </StandardLayout>

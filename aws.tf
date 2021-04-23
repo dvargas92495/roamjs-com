@@ -185,6 +185,7 @@ module "aws-serverless-backend" {
         "social-schedule/put",
         "social-token/get",
         "sponsorships/get",
+        "sponsorships/post",
         "start-service/post",
         "subscriptions/get",
         "subscribe-sponsorship/post",

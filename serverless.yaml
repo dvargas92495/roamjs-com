@@ -253,6 +253,13 @@ functions:
           path: sponsorships
           method: get
           cors: true
+  sponsorships-post:
+    handler: out/sponsorships_post.handler
+    events:
+      - http:
+          path: sponsorships
+          method: post
+          cors: true
   start-service-post:
     handler: out/start-service_post.handler
     events:
