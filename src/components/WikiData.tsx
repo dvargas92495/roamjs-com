@@ -8,15 +8,22 @@ import {
   Menu,
   MenuItem,
   Popover,
+  Radio,
+  RadioGroup,
   Spinner,
   Text,
 } from "@blueprintjs/core";
 import { Controlled as CodeMirror } from "react-codemirror2";
 import "codemirror/mode/sparql/sparql";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
-import { getUidsFromId, getTextByBlockUid, createBlock } from "roam-client";
+import {
+  getUidsFromId,
+  getTextByBlockUid,
+  createBlock,
+  getPageTitleByPageUid,
+} from "roam-client";
 import { getRenderRoot, useArrowKeyDown } from "./hooks";
 import MenuItemSelect from "./MenuItemSelect";
 import { getCurrentPageUid } from "../entry-helpers";
@@ -188,12 +195,45 @@ const Wikipedia = ({
   );
 };
 
+type PageResult = { description: string; id: string; label: string };
+const PAGE_QUERY = `SELECT ?wdLabel ?ps_Label {
+  VALUES (?id) {(wd:{ID})}
+  
+  ?id ?p ?statement .
+  ?statement ?ps ?ps_ .
+  
+  ?wd wikibase:claim ?p.
+  ?wd wikibase:statementProperty ?ps.
+  
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
+} ORDER BY ?wd ?statement ?ps_`;
+
 const WIKIDATA_ITEMS = ["Current Page", "Block on Page", "Custom Query"];
 const WikiData = ({ onClose }: { onClose: () => void }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeItem, setActiveItem] = useState(WIKIDATA_ITEMS[0]);
   const [value, setValue] = useState("");
+  const [pageResults, setPageResults] = useState<PageResult[]>([]);
+  const dropdownRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    dropdownRef.current?.focus?.();
+    axios
+      .get(
+        `https://www.wikidata.org/w/api.php?origin=*&action=wbsearchentities&format=json&limit=5&continue=0&language=en&uselang=en&search=${getPageTitleByPageUid(
+          getCurrentPageUid()
+        )}&type=item`
+      )
+      .then((r) =>
+        setPageResults(
+          r.data.search.map((i: PageResult) => ({
+            description: i.description,
+            id: i.id,
+            label: i.label,
+          }))
+        )
+      );
+  }, [dropdownRef, setPageResults]);
   return (
     <Dialog
       isOpen={true}
@@ -209,9 +249,32 @@ const WikiData = ({ onClose }: { onClose: () => void }) => {
             items={WIKIDATA_ITEMS}
             onItemSelect={(s) => setActiveItem(s)}
             activeItem={activeItem}
-            ButtonProps={{ autoFocus: true }}
+            ButtonProps={{ elementRef: dropdownRef }}
           />
         </Label>
+        {activeItem === "Current Page" && (
+          <RadioGroup
+            onChange={(e) =>
+              setValue(
+                PAGE_QUERY.replace("{ID}", (e.target as HTMLInputElement).value)
+              )
+            }
+            selectedValue={/{\(wd:(.*?)\)}/.exec(value)?.[1] || ""}
+          >
+            {pageResults.map((pr) => (
+              <Radio
+                key={pr.id}
+                value={pr.id}
+                labelElement={
+                  <span>
+                    <b>{pr.label}</b>
+                    <span style={{ fontSize: 10 }}>({pr.description})</span>
+                  </span>
+                }
+              />
+            ))}
+          </RadioGroup>
+        )}
         {activeItem === "Custom Query" && (
           <div style={{ marginTop: 16 }}>
             <CodeMirror
