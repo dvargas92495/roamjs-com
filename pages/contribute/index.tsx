@@ -196,8 +196,8 @@ const ContributePage = (): React.ReactElement => {
           },
           {
             title: "Kacper Baranski",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
+            imgSrc: "sponsors/kacper.jfif",
+            url: "https://www.linkedin.com/in/kacper-baranski-69a37184/",
           },
         ]}
       />

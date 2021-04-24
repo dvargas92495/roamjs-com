@@ -7,6 +7,7 @@ import {
   getUidsFromId,
   TreeNode,
 } from "roam-client";
+import { toFlexRegex } from "../entry-helpers";
 
 export const useArrowKeyDown = <T>({
   results,
@@ -71,7 +72,7 @@ export const getSettingValueFromTree = ({
   key: string;
   defaultValue?: string;
 }): string => {
-  const node = tree.find((s) => new RegExp(key, "i").test(s.text.trim()));
+  const node = tree.find((s) => toFlexRegex(key).test(s.text.trim()));
   const value = node ? node.children[0].text.trim() : defaultValue;
   return value;
 };
@@ -85,7 +86,7 @@ export const getSettingIntFromTree = ({
   key: string;
   defaultValue?: number;
 }): number => {
-  const node = tree.find((s) => new RegExp(key, "i").test(s.text.trim()));
+  const node = tree.find((s) => toFlexRegex(key).test(s.text.trim()));
   const value = node?.children?.[0]?.text?.trim?.();
   return isNaN(Number(value)) ? defaultValue : parseInt(value);
 };
@@ -99,7 +100,7 @@ export const getSettingValuesFromTree = ({
   key: string;
   defaultValue?: string[];
 }): string[] => {
-  const node = tree.find((s) => new RegExp(key, "i").test(s.text.trim()));
+  const node = tree.find((s) => toFlexRegex(key).test(s.text.trim()));
   const value = node ? node.children.map((t) => t.text.trim()) : defaultValue;
   return value;
 };
