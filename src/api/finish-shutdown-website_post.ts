@@ -8,7 +8,7 @@ const ses = new AWS.SES({ apiVersion: "2010-12-01" });
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const { userId, callbackToken } = JSON.parse(event.body);
+  const { userId, callbackToken, domain } = JSON.parse(event.body);
   if (!userId) {
     return {
       statusCode: 400,
@@ -17,25 +17,18 @@ export const handler = async (
     };
   }
 
-  const {
-    websiteToken,
-    websiteGraph,
-    websiteDomain,
-    email,
-    ...rest
-  } = await users.getUser(userId).then(
-    (r) =>
-      ({
-        ...r.privateMetadata,
-        email: r.emailAddresses.find((e) => e.id === r.primaryEmailAddressId)
-          .emailAddress,
-      } as {
-        websiteToken: string;
-        websiteGraph: string;
-        websiteDomain: string;
-        email: string;
-      })
-  );
+  const { websiteToken, websiteGraph, email, ...rest } = await users
+    .getUser(userId)
+    .then(
+      (r) =>
+        ({
+          ...r.privateMetadata,
+          email: r.emailAddresses.find((e) => e.id === r.primaryEmailAddressId)
+            .emailAddress,
+        } as {
+          email: string;
+        } & Record<string, unknown>)
+    );
   if (!websiteToken) {
     return {
       statusCode: 401,
@@ -52,9 +45,7 @@ export const handler = async (
   }
 
   await users.updateUser(userId, {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    privateMetadata: JSON.stringify(rest),
+    privateMetadata: rest,
   });
 
   await ses
@@ -66,7 +57,7 @@ export const handler = async (
         Body: {
           Text: {
             Charset: "UTF-8",
-            Data: `Your static site is at ${websiteDomain} is no longer live. There are no sites connected to your graph ${websiteGraph}.`,
+            Data: `Your static site is at ${domain} is no longer live. There are no sites connected to your graph ${websiteGraph}.`,
           },
         },
         Subject: {

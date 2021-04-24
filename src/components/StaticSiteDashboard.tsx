@@ -1,6 +1,7 @@
 import {
   Alert,
   Button,
+  IAlertProps,
   Icon,
   InputGroup,
   Intent,
@@ -27,6 +28,7 @@ import {
   extractTag,
   setInputSetting,
   setInputSettings,
+  toFlexRegex,
 } from "../entry-helpers";
 import { allBlockMapper, toTitle } from "./hooks";
 import MenuItemSelect from "./MenuItemSelect";
@@ -602,6 +604,13 @@ const getNameServers = (statusProps: string): string[] => {
   }
 };
 
+type CfVariableDiff = {
+  field: string;
+  old: string;
+  value: string;
+  key: string;
+};
+
 const isWebsiteReady = (w: { status: string; deploys: { status: string }[] }) =>
   w.status === "LIVE" &&
   w.deploys.length &&
@@ -621,9 +630,47 @@ const progressTypeToIntent = (type: string) => {
     return Intent.DANGER;
   } else if (type === "DEPLOYING") {
     return Intent.SUCCESS;
+  } else if (type === "UPDATING") {
+    return Intent.WARNING;
   } else {
     return Intent.NONE;
   }
+};
+
+const WebsiteButton: React.FunctionComponent<
+  Pick<IAlertProps, "onConfirm"> & {
+    disabled?: boolean;
+    buttonText: string;
+    intent: Intent;
+  }
+> = ({ children, onConfirm, disabled = false, buttonText, intent }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
+  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
+  return (
+    <>
+      <Button
+        style={{ marginRight: 32 }}
+        disabled={disabled}
+        onClick={open}
+        intent={intent}
+      >
+        {buttonText}
+      </Button>
+      <Alert
+        isOpen={isOpen}
+        canOutsideClickCancel
+        canEscapeKeyCancel
+        onClose={close}
+        cancelButtonText={"Cancel"}
+        onConfirm={onConfirm}
+        confirmButtonText={"Confirm"}
+        style={{ maxWidth: 600, width: 600 }}
+      >
+        {children}
+      </Alert>
+    </>
+  );
 };
 
 const LiveContent: StageContent = () => {
@@ -632,8 +679,8 @@ const LiveContent: StageContent = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
-  const [isShutdownOpen, setIsShutdownOpen] = useState(false);
   const [statusProps, setStatusProps] = useState<string>();
+  const [cfVariableDiffs, setCfVariableDiffs] = useState<CfVariableDiff[]>([]);
   const [status, setStatus] = useState<string>();
   const [deploys, setDeploys] = useState<
     { status: string; date: string; uuid: string }[]
@@ -642,12 +689,6 @@ const LiveContent: StageContent = () => {
   const [progressType, setProgressType] = useState("");
   const timeoutRef = useRef(0);
 
-  const openShutdown = useCallback(() => setIsShutdownOpen(true), [
-    setIsShutdownOpen,
-  ]);
-  const closeShutdown = useCallback(() => setIsShutdownOpen(false), [
-    setIsShutdownOpen,
-  ]);
   const getWebsite = useCallback(
     () =>
       authenticatedAxiosGet(`website-status?graph=${getGraph()}`).then((r) => {
@@ -661,6 +702,38 @@ const LiveContent: StageContent = () => {
             timeoutRef.current = window.setTimeout(getWebsite, 5000);
           } else {
             setProgressType("");
+            authenticatedAxiosGet(`website-variables?graph=${getGraph()}`)
+              .then((r) => {
+                const diffs = [];
+                const tree = getTreeByPageName(`roam/js/static-site`);
+                const newDomain = tree.find((t) =>
+                  toFlexRegex("domain").test(t.text)
+                )?.children?.[0]?.text;
+                if (newDomain !== r.data.DomainName) {
+                  diffs.push({
+                    field: "Domain",
+                    old: r.data.DomainName,
+                    value: newDomain,
+                    key: "DomainName",
+                  });
+                }
+                const newIsCustomDomain = `${!newDomain.endsWith(
+                  ".roamjs.com"
+                )}`;
+                if (newIsCustomDomain !== r.data.CustomDomain) {
+                  diffs.push({
+                    field: "Is Custom Domain",
+                    old: r.data.CustomDomain,
+                    value: newIsCustomDomain,
+                    key: "CustomDomain",
+                  });
+                }
+                setCfVariableDiffs(diffs);
+              })
+              .catch((e) => {
+                console.error(e);
+                setCfVariableDiffs([]);
+              });
           }
         } else {
           setStatusProps("{}");
@@ -706,6 +779,14 @@ const LiveContent: StageContent = () => {
         graph: getGraph(),
       })),
     [wrapPost]
+  );
+  const updateSite = useCallback(
+    () =>
+      wrapPost("update-website", () => ({
+        graph: getGraph(),
+        diffs: cfVariableDiffs,
+      })),
+    [wrapPost, cfVariableDiffs]
   );
 
   useEffect(() => () => clearTimeout(timeoutRef.current), [timeoutRef]);
@@ -758,6 +839,43 @@ const LiveContent: StageContent = () => {
                 </div>
               )}
               <div style={{ marginTop: 8 }}>
+                {!!cfVariableDiffs.length && (
+                  <WebsiteButton
+                    onConfirm={updateSite}
+                    disabled={siteDeploying}
+                    buttonText={"Update Site"}
+                    intent={Intent.WARNING}
+                  >
+                    <p>A site update would make the following changes:</p>
+                    <table>
+                      <tbody>
+                        {cfVariableDiffs.map((diff) => (
+                          <tr key={diff.field}>
+                            <td>
+                              <b>Field: </b>
+                              {diff.field}
+                            </td>
+                            <td>
+                              <b>From: </b>
+                              {diff.old}
+                            </td>
+                            <td>
+                              <Icon icon={"arrow-right"} />
+                            </td>
+                            <td>
+                              <b>To: </b>
+                              {diff.value}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <p>
+                      Are you sure you want to make these changes? This
+                      operation could take several minutes.
+                    </p>
+                  </WebsiteButton>
+                )}
                 <Button
                   style={{ marginRight: 32 }}
                   disabled={siteDeploying}
@@ -766,27 +884,18 @@ const LiveContent: StageContent = () => {
                 >
                   Manual Deploy
                 </Button>
-                <Button
-                  onClick={openShutdown}
+                <WebsiteButton
                   disabled={siteDeploying}
+                  onConfirm={shutdownWebsite}
+                  buttonText={"Shutdown"}
                   intent={Intent.DANGER}
                 >
-                  Shutdown
-                </Button>
+                  <p>
+                    Are you sure you want to shut down this RoamJS website? This
+                    operation is irreversible.
+                  </p>
+                </WebsiteButton>
               </div>
-              <Alert
-                isOpen={isShutdownOpen}
-                onConfirm={shutdownWebsite}
-                onClose={closeShutdown}
-                canOutsideClickCancel
-                canEscapeKeyCancel
-                cancelButtonText={"Cancel"}
-              >
-                <p>
-                  Are you sure you want to shut down this RoamJS website? This
-                  operation is irreversible.
-                </p>
-              </Alert>
               <hr style={{ margin: "16px 0" }} />
               <h6>Deploys</h6>
               <ul>

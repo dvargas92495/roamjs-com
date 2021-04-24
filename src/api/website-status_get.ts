@@ -11,10 +11,16 @@ const getProgressProps = (
   if (!items) {
     return { progress: 0, progressType: "LAUNCHING" };
   }
-  const launchIndex = items.findIndex((s) => s.status.S === "INITIALIZING") + 1;
+  const launchIndex =
+    items.findIndex((s) => s.status.S === "INITIALIZING") + 1 ||
+    Number.MAX_VALUE;
+  const updateIndex =
+    items.findIndex((s) => s.status.S === "UPDATING") + 1 || Number.MAX_VALUE;
   const shutdownIndex =
-    items.findIndex((s) => s.status.S === "SHUTTING DOWN") + 1;
-  if (!shutdownIndex || launchIndex < shutdownIndex) {
+    items.findIndex((s) => s.status.S === "SHUTTING DOWN") + 1 ||
+    Number.MAX_VALUE;
+  const minIndex = Math.min(launchIndex, updateIndex, shutdownIndex);
+  if (launchIndex === minIndex) {
     const deployIndex = deployItems.findIndex((s) =>
       ["SUCCESS", "FAILURE"].includes(s.status.S)
     );
@@ -22,6 +28,8 @@ const getProgressProps = (
       return { progress: deployIndex / 5, progressType: "DEPLOYING" };
     }
     return { progress: launchIndex / 26, progressType: "LAUNCHING" };
+  } else if (updateIndex === minIndex) {
+    return { progress: updateIndex / 20, progressType: "UPDATING" };
   } else {
     return { progress: shutdownIndex / 18, progressType: "SHUTTING DOWN" };
   }

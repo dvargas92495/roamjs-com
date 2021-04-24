@@ -1,9 +1,9 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { v4 } from "uuid";
-import { authenticate, dynamo, headers, lambda } from "../lambda-helpers";
+import { authenticate, bareSuccessResponse, dynamo, headers, lambda } from "../lambda-helpers";
 
 export const handler = authenticate(async (event) => {
-  const { graph, domain, autoDeploysEnabled } = JSON.parse(event.body);
+  const { graph, diffs } = JSON.parse(event.body);
   if (!graph) {
     return {
       statusCode: 400,
@@ -12,36 +12,23 @@ export const handler = authenticate(async (event) => {
     };
   }
 
-  if (!domain) {
+  if (!diffs?.length) {
     return {
       statusCode: 400,
-      body: "Target Domain is required",
+      body: "Must have at least one diff to update",
       headers: headers(event),
     };
   }
 
   const user = await users.getUser(event.headers.Authorization);
   const { websiteGraph } = user.privateMetadata as { websiteGraph: string };
-  if (websiteGraph) {
+  if (websiteGraph !== graph) {
     return {
-      statusCode: 400,
-      body: "There's already a live static site with this token",
+      statusCode: 401,
+      body: "User is unauthorized to update the site to this graph",
       headers: headers(event),
     };
   }
-
-  await users.updateUser(user.id, {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    privateMetadata: JSON.stringify({
-      ...user.privateMetadata,
-      websiteGraph: graph,
-    }),
-  });
-
-  const email = user.emailAddresses.find(
-    (e) => e.id === user.primaryEmailAddressId
-  )?.emailAddress;
 
   await dynamo
     .putItem({
@@ -57,7 +44,7 @@ export const handler = authenticate(async (event) => {
           S: new Date().toJSON(),
         },
         status: {
-          S: "INITIALIZING",
+          S: "UPDATING",
         },
       },
     })
@@ -65,20 +52,14 @@ export const handler = authenticate(async (event) => {
 
   await lambda
     .invoke({
-      FunctionName: "RoamJS_launch",
+      FunctionName: "RoamJS_update",
       InvocationType: "Event",
       Payload: JSON.stringify({
         roamGraph: graph,
-        domain,
-        email,
-        autoDeploysEnabled,
+        diffs,
       }),
     })
     .promise();
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ graph, domain }),
-    headers: headers(event),
-  };
+  return bareSuccessResponse(event);
 }, 'staticSite');

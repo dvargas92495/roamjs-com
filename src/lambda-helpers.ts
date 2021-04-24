@@ -16,6 +16,7 @@ import randomstring from "randomstring";
 export const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 export const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
+export const ses = new AWS.SES({ apiVersion: "2010-12-01" });
 
 export const mixpanel = process.env.MIXPANEL_TOKEN
   ? Mixpanel.init(process.env.MIXPANEL_TOKEN)
@@ -289,3 +290,37 @@ export const authenticate = (
     return result;
   });
 };
+
+export const emailError = (subject: string, e: Error): Promise<string> =>
+  ses
+    .sendEmail({
+      Destination: {
+        ToAddresses: ["dvargas92495@gmail.com"],
+      },
+      Message: {
+        Body: {
+          Text: {
+            Charset: "UTF-8",
+            Data: `An error was thrown in a RoamJS lambda. Here's the error stack trace:
+
+${JSON.stringify(e)}`,
+          },
+        },
+        Subject: {
+          Charset: "UTF-8",
+          Data: `RoamJS Error: ${subject}`,
+        },
+      },
+      Source: "support@roamjs.com",
+    })
+    .promise()
+    .then((r) => r.MessageId);
+
+export const emailCatch = (subject: string, event: APIGatewayProxyEvent) => (
+  e: Error
+): Promise<APIGatewayProxyResult> =>
+  emailError(subject, e).then((id) => ({
+    statusCode: 500,
+    body: `Unknown error - Message Id ${id}`,
+    headers: headers(event),
+  }));

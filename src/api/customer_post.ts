@@ -1,12 +1,10 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import AWS from "aws-sdk";
 import axios from "axios";
-import { bareSuccessResponse } from "../lambda-helpers";
+import { bareSuccessResponse, ses } from "../lambda-helpers";
 import { Webhook } from "diahook";
 
 const wh = new Webhook(process.env.DIAHOOK_SECRET);
-const ses = new AWS.SES({ apiVersion: "2010-12-01" });
 
 export const handler = async (
   event: APIGatewayProxyEvent

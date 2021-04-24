@@ -11,9 +11,8 @@ const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
 export const handler = authenticate(async (event) => {
   const { data } = JSON.parse(event.body);
   const user = await users.getUser(event.headers.Authorization);
-  const { websiteGraph, websiteDomain } = user.privateMetadata as {
+  const { websiteGraph } = user.privateMetadata as {
     websiteGraph: string;
-    websiteDomain: string;
   };
   const date = new Date();
 
@@ -47,14 +46,13 @@ export const handler = authenticate(async (event) => {
       })
       .promise();
   }
-  
+
   await lambda
     .invoke({
       FunctionName: "RoamJS_deploy",
       InvocationType: "Event",
       Payload: JSON.stringify({
         roamGraph: websiteGraph,
-        domain: websiteDomain,
         key: Key,
       }),
     })
@@ -65,4 +63,4 @@ export const handler = authenticate(async (event) => {
     body: JSON.stringify({ success: true }),
     headers: headers(event),
   };
-}, 'staticSite');
+}, "staticSite");

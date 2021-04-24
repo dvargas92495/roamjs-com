@@ -326,7 +326,7 @@ const SettingsContent: StageContent = ({ openPanel }) => {
               })
             }
             style={{
-              minWidth: 128,
+              minWidth: 180,
               display: "flex",
               justifyContent: "space-between",
             }}
