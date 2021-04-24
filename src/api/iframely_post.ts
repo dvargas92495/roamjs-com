@@ -5,10 +5,10 @@ import { headers } from "../lambda-helpers";
 export const handler = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
-  const { url } = JSON.parse(event.body);
+  const { url, iframe = 'card-small' } = JSON.parse(event.body);
   return axios
     .get(
-      `http://iframe.ly/api/oembed?url=${url}&api_key=${process.env.IFRAMELY_API_KEY}&iframe=card-small`
+      `http://iframe.ly/api/oembed?url=${url}&api_key=${process.env.IFRAMELY_API_KEY}&iframe=${iframe}`
     )
     .then((r) => ({
       statusCode: 200,

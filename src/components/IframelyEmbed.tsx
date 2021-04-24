@@ -1,10 +1,27 @@
 import axios from "axios";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { getTextByBlockUid, PullBlock } from "roam-client";
-import { BLOCK_REF_REGEX } from "../entry-helpers";
+import {
+  getTextByBlockUid,
+  getTreeByBlockUid,
+  getTreeByPageName,
+  PullBlock,
+  TreeNode,
+} from "roam-client";
+import { BLOCK_REF_REGEX, toFlexRegex } from "../entry-helpers";
 import EditContainer, { editContainerRender } from "./EditContainer";
 
 const REGEX = /^https?:\/\//i;
+
+const IFRAME_VIEWS = {
+  summary: "card-small",
+  card: "card",
+  iframe: "1",
+  off: "0",
+};
+
+const getViewFromTree = (nodes: TreeNode[]): keyof typeof IFRAME_VIEWS =>
+  nodes.find((c) => toFlexRegex("view").test(c.text))?.children?.[0]
+    ?.text as keyof typeof IFRAME_VIEWS;
 
 const IframelyEmbed = ({
   blockUid,
@@ -16,8 +33,14 @@ const IframelyEmbed = ({
   const processUrl = useCallback(
     (inputUrl: string) => {
       const url = REGEX.test(inputUrl) ? inputUrl : `https://${inputUrl}`;
+      const view =
+        getViewFromTree(getTreeByBlockUid(blockUid).children) ||
+        getViewFromTree(getTreeByPageName("roam/js/iframely"));
       axios
-        .post(`${process.env.REST_API_URL}/iframely`, { url })
+        .post(`${process.env.REST_API_URL}/iframely`, {
+          url,
+          iframe: IFRAME_VIEWS[view],
+        })
         .then((r) => {
           const { html } = r.data;
           const children = new DOMParser().parseFromString(html, "text/html")
@@ -53,7 +76,7 @@ const IframelyEmbed = ({
           }
         });
     },
-    [containerRef]
+    [containerRef, blockUid]
   );
   useEffect(() => {
     const possibleBlockId = containerRef.current.closest(".roam-block")?.id;

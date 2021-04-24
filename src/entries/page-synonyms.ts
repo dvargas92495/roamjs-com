@@ -8,7 +8,6 @@ import {
   getUidsFromId,
 } from "roam-client";
 
-let blockElementSelected: Element;
 const ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME = "roamjs-alias-page-synonyms";
 const ALIAS_PAGE_SYNONYM_ATTRIBUTE = "data-roamjs-has-alias-option";
 
@@ -38,7 +37,7 @@ const getReplacer = () => {
     .q(
       `[:find ?u ?t :where [?parentPage :block/uid ?u] [?parentPage :node/title ?t] [?referencingBlock :block/page ?parentPage] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "Aliases"]]`
     )
-    .map(([uid, title]: string[]) => ({uid, title}));
+    .map(([uid, title]: string[]) => ({ uid, title }));
   const uidWithAliases = pagesWithAliases.map((p) => ({
     title: p.title,
     uid: p.uid,
@@ -66,12 +65,8 @@ const getReplacer = () => {
       }, input);
 };
 
-const optionCallback = () => {
-  if (!blockElementSelected) {
-    return;
-  }
+const optionCallback = (blockUid: string) => {
   const replace = getReplacer();
-  const { blockUid } = getUids(blockElementSelected as HTMLDivElement);
   const blockContent = getTextByBlockUid(blockUid);
   const newText = replace(blockContent);
   window.roamAlphaAPI.updateBlock({
@@ -83,7 +78,10 @@ const optionCallback = () => {
 };
 
 runExtension("page-synonyms", () => {
-  const option = createMenuOption(optionCallback);
+  window.roamAlphaAPI.ui.blockContextMenu.addCommand({
+    label: "Alias Page Synonyms (Alt-A)",
+    callback: (props) => optionCallback(props["block-uid"]),
+  });
 
   const multiOption = createMenuOption(async () => {
     const replace = getReplacer();
@@ -114,16 +112,9 @@ runExtension("page-synonyms", () => {
         ) {
           const ul = u as HTMLUListElement;
           ul.setAttribute(ALIAS_PAGE_SYNONYM_ATTRIBUTE, "true");
-          const dividers = Array.from(
-            ul.getElementsByClassName("bp3-menu-divider")
-          );
-          if (dividers.length > 0 && !ul.contains(option)) {
-            const divider = dividers[0];
-            ul.insertBefore(option, divider);
-          } else if (
+          if (
             !ul.contains(multiOption) &&
-            dividers.length === 0 &&
-            ul.innerText.indexOf("Jump to block") === -1
+            ul.innerText.includes("Copy block refs")
           ) {
             ul.appendChild(multiOption);
           }
@@ -131,27 +122,14 @@ runExtension("page-synonyms", () => {
       });
   });
 
-  document.addEventListener("mousedown", (e) => {
-    const htmlTarget = e.target as HTMLElement;
-    if (
-      htmlTarget.className === "rm-bullet" ||
-      htmlTarget.className ===
-        "bp3-icon-standard bp3-icon-caret-down rm-caret rm-caret-open rm-caret-hidden" ||
-      htmlTarget.className === "rm-bullet__inner" ||
-      htmlTarget.className === "rm-bullet__inner--user-icon"
-    ) {
-      const bullet = htmlTarget.closest(".controls");
-      blockElementSelected = bullet.parentElement.getElementsByClassName(
-        "rm-block-text"
-      )[0];
-    }
-  });
-
   document.addEventListener("keydown", (e) => {
     if (e.code === "KeyA" && e.altKey) {
-      blockElementSelected = document.activeElement;
-      optionCallback();
-      e.preventDefault();
+      if (document.activeElement.tagName === "TEXTAREA") {
+        optionCallback(
+          getUids(document.activeElement as HTMLTextAreaElement).blockUid
+        );
+        e.preventDefault();
+      }
     }
   });
 });
