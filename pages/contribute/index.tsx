@@ -194,6 +194,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/halem.jpg",
             url: "https://twitter.com/tj_allemaal",
           },
+          {
+            title: "Kacper Baranski",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
         ]}
       />
     </StandardLayout>

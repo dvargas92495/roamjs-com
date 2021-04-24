@@ -3,7 +3,7 @@ import {
   getChildrenLengthByPageUid,
   getCurrentPageUid,
   getPageTitle,
-  isApple,
+  // isApple,
   runExtension,
 } from "../entry-helpers";
 import {
@@ -29,8 +29,8 @@ import format from "date-fns/format";
 import { createConfigObserver } from "roamjs-components";
 import GoogleLogo from "../assets/Google.svg";
 import differenceInSeconds from "date-fns/differenceInSeconds";
-import { getRenderRoot } from "../components/hooks";
-import { render } from "../components/DeprecationWarning";
+// import { getRenderRoot } from "../components/hooks";
+// import { render } from "../components/DeprecationWarning";
 
 const GOOGLE_COMMAND = "Import Google Calendar";
 
@@ -199,20 +199,21 @@ const importGoogleCalendar = async (
   },
   blockUid?: string
 ) => {
+  /** Roam has no way to activate command palette on mobile yet -.-
   const parent = getRenderRoot("google-calendar-deprecation");
   render({
     parent,
     message:
       `The import google calendar button will be removed in a future version. Please start using the Import Google Calendar command from the command palette instead. To use the Roam command palette, hit ${isApple ? 'CMD' : 'CTRL'}+P.`,
-    callback: () => {
-      updateBlock({ text: "Loading...", uid: blockUid });
-      const parentUid = getParentUidByBlockUid(blockUid);
-      fetchGoogleCalendar().then((bullets) =>
-        pushBullets(bullets, blockUid, parentUid)
-      );
-    },
+    callback: () => {*/
+  updateBlock({ text: "Loading...", uid: blockUid });
+  const parentUid = getParentUidByBlockUid(blockUid);
+  fetchGoogleCalendar().then((bullets) =>
+    pushBullets(bullets, blockUid, parentUid)
+  );
+  /*  },
     type: "Google Calendar Button",
-  });
+  });*/
 };
 
 const loadBlockUid = (pageUid: string) => {
@@ -284,7 +285,8 @@ runExtension("google-calendar", () => {
             {
               type: "multitext",
               title: "calendars",
-              description: "The calendar ids to import events from. To find your calendar id, go to your calendar settings and scroll down to \"Integrate Calendar\".",
+              description:
+                'The calendar ids to import events from. To find your calendar id, go to your calendar settings and scroll down to "Integrate Calendar".',
               defaultValue: ["dvargas92495@gmail.com"],
             },
             {
@@ -329,11 +331,10 @@ createCustomSmartBlockCommand({
   processor: async () =>
     fetchGoogleCalendar().then(async (bullets) => {
       if (bullets.length) {
-        bullets
-          .forEach((s) =>
-            window.roam42.smartBlocks.activeWorkflow.outputAdditionalBlock(s)
-          );
-        return '';
+        bullets.forEach((s) =>
+          window.roam42.smartBlocks.activeWorkflow.outputAdditionalBlock(s)
+        );
+        return "";
       } else {
         return EMPTY_MESSAGE;
       }
