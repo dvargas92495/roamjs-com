@@ -15,7 +15,13 @@ import {
 } from "@blueprintjs/core";
 import { Controlled as CodeMirror } from "react-codemirror2";
 import "codemirror/mode/sparql/sparql";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
 import {
@@ -23,6 +29,9 @@ import {
   getTextByBlockUid,
   createBlock,
   getPageTitleByPageUid,
+  getPageTitleReferencesByPageTitle,
+  getPageUidByPageTitle,
+  deleteBlock,
 } from "roam-client";
 import { getRenderRoot, useArrowKeyDown } from "./hooks";
 import MenuItemSelect from "./MenuItemSelect";
@@ -196,7 +205,7 @@ const Wikipedia = ({
 };
 
 type PageResult = { description: string; id: string; label: string };
-const PAGE_QUERY = `SELECT ?wdLabel ?ps_Label {
+const PAGE_QUERY = `SELECT ?wd ?wdLabel ?ps_ ?ps_Label {
   VALUES (?id) {(wd:{ID})}
   
   ?id ?p ?statement .
@@ -208,21 +217,33 @@ const PAGE_QUERY = `SELECT ?wdLabel ?ps_Label {
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
 } ORDER BY ?wd ?statement ?ps_`;
 
-const WIKIDATA_ITEMS = ["Current Page", "Block on Page", "Custom Query"];
+const WIKIDATA_ITEMS = ["Current Page", "Custom Query"];
+
 const WikiData = ({ onClose }: { onClose: () => void }) => {
+  const parentUid = useMemo(getCurrentPageUid, []);
+  const pageTitle = useMemo(() => getPageTitleByPageUid(parentUid), [
+    parentUid,
+  ]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeItem, setActiveItem] = useState(WIKIDATA_ITEMS[0]);
-  const [value, setValue] = useState("");
+  const [radioValue, setRadioValue] = useState("");
+  const [codeValue, setCodeValue] = useState("");
+  const query = useMemo(() => {
+    if (activeItem === "Current Page") {
+      return PAGE_QUERY.replace("{ID}", radioValue);
+    } else if (activeItem === "Custom Query") {
+      return codeValue;
+    }
+    return "";
+  }, [codeValue, radioValue, activeItem]);
   const [pageResults, setPageResults] = useState<PageResult[]>([]);
   const dropdownRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     dropdownRef.current?.focus?.();
     axios
       .get(
-        `https://www.wikidata.org/w/api.php?origin=*&action=wbsearchentities&format=json&limit=5&continue=0&language=en&uselang=en&search=${getPageTitleByPageUid(
-          getCurrentPageUid()
-        )}&type=item`
+        `https://www.wikidata.org/w/api.php?origin=*&action=wbsearchentities&format=json&limit=5&continue=0&language=en&uselang=en&search=${pageTitle}&type=item`
       )
       .then((r) =>
         setPageResults(
@@ -234,6 +255,16 @@ const WikiData = ({ onClose }: { onClose: () => void }) => {
         )
       );
   }, [dropdownRef, setPageResults]);
+  const catchImport = useCallback(
+    (e: Error) => {
+      console.error(e);
+      setError(
+        "Unknown error occured when querying wiki data. Contact support@roamjs.com for help!"
+      );
+      setLoading(false);
+    },
+    [setLoading, setError]
+  );
   return (
     <Dialog
       isOpen={true}
@@ -255,11 +286,9 @@ const WikiData = ({ onClose }: { onClose: () => void }) => {
         {activeItem === "Current Page" && (
           <RadioGroup
             onChange={(e) =>
-              setValue(
-                PAGE_QUERY.replace("{ID}", (e.target as HTMLInputElement).value)
-              )
+              setRadioValue((e.target as HTMLInputElement).value)
             }
-            selectedValue={/{\(wd:(.*?)\)}/.exec(value)?.[1] || ""}
+            selectedValue={radioValue}
           >
             {pageResults.map((pr) => (
               <Radio
@@ -278,13 +307,13 @@ const WikiData = ({ onClose }: { onClose: () => void }) => {
         {activeItem === "Custom Query" && (
           <div style={{ marginTop: 16 }}>
             <CodeMirror
-              value={value}
+              value={codeValue}
               options={{
                 mode: { name: "sparql" },
                 lineNumbers: true,
                 lineWrapping: true,
               }}
-              onBeforeChange={(_, __, v) => setValue(v)}
+              onBeforeChange={(_, __, v) => setCodeValue(v)}
             />
           </div>
         )}
@@ -300,38 +329,75 @@ const WikiData = ({ onClose }: { onClose: () => void }) => {
               axios
                 .get(
                   `https://query.wikidata.org/sparql?format=json&query=${encodeURIComponent(
-                    value
+                    query
                   )}`
                 )
                 .then((r) => {
-                  const data = r.data.results.bindings as {
+                  const data = r.data.results.bindings.slice(0, 10) as {
                     [k: string]: { value: string };
                   }[];
                   const head = r.data.head.vars as string[];
-                  createBlock({
-                    node: {
-                      text: "Wikidata Import",
-                      children: data.slice(0, 10).map((p) => ({
-                        text: p[head[0]].value,
-                        children: head.slice(1).map((v) => ({
-                          text: v,
-                          children: [{ text: p[v].value }],
+                  if (activeItem === "Custom Query") {
+                    createBlock({
+                      node: {
+                        text: "Wikidata Import",
+                        children: data.map((p, i) => ({
+                          text: `Result ${i}`,
+                          children: head.map((v) => ({
+                            text: v,
+                            children: [{ text: p[v].value }],
+                          })),
                         })),
-                      })),
-                    },
-                    parentUid: getCurrentPageUid(),
-                    order: 0,
-                  });
+                      },
+                      parentUid,
+                    });
+                  } else if (activeItem === "Current Page") {
+                    const loadingUid = createBlock({
+                      node: {
+                        text: "Loading...",
+                      },
+                      parentUid,
+                    });
+                    createBlock({
+                      node: {
+                        text: "Wikidata Import",
+                        children: data.map((p) => ({
+                          text: `${p["wdLabel"].value}::`,
+                          children: [{ text: `[[${p["ps_Label"].value}]]` }],
+                        })),
+                      },
+                      parentUid,
+                    });
+                    const titlesSet = new Set(
+                      getPageTitleReferencesByPageTitle("same as")
+                    );
+                    data
+                      .flatMap((p) => [
+                        {
+                          link: p["wd"].value,
+                          title: p["wdLabel"].value,
+                        },
+                        { link: p["ps_"].value, title: p["ps_Label"].value },
+                      ])
+                      .filter(({ title }) => !titlesSet.has(title))
+                      .forEach(({ title, link }) =>
+                        createBlock({
+                          node: {
+                            text: `same as:: ${
+                              title === pageTitle
+                                ? `http://www.wikidata.org/entity/${radioValue}`
+                                : link
+                            }`,
+                          },
+                          parentUid: getPageUidByPageTitle(title),
+                        })
+                      );
+                    deleteBlock(loadingUid);
+                  }
 
                   onClose();
                 })
-                .catch((e) => {
-                  console.error(e);
-                  setError(
-                    "Unknown error occured when querying wiki data. Contact support@roamjs.com for help!"
-                  );
-                  setLoading(false);
-                });
+                .catch(catchImport);
             }}
           />
         </div>
