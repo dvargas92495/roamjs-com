@@ -103,6 +103,10 @@ variable "dropbox_client_secret" {
   type = string
 }
 
+variable "encryption_secret" {
+  type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -488,4 +492,10 @@ resource "github_actions_secret" "dropbox_client_secret" {
   repository       = "roam-js-extensions"
   secret_name      = "DROPBOX_CLIENT_SECRET"
   plaintext_value  = var.dropbox_client_secret
+}
+
+resource "github_actions_secret" "encryption_secret" {
+  repository       = "roam-js-extensions"
+  secret_name      = "ENCRYPTION_SECRET"
+  plaintext_value  = var.encryption_secret
 }

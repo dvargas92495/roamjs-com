@@ -16,6 +16,7 @@ env:
   CLOUDFRONT_ARN: ${{ secrets.CLOUDFRONT_ARN }}
   API_URL: https://api.roamjs.com
   DIAHOOK_SECRET: ${{ secrets.DIAHOOK_SECRET }}
+  ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
   FLOSS_API_URL: https://api.davidvargas.me
   FLOSS_TOKEN: ${{ secrets.FLOSS_TOKEN }}
   DROPBOX_CLIENT_ID: ${{ secrets.DROPBOX_CLIENT_ID }}
