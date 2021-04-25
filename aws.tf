@@ -159,6 +159,8 @@ module "aws-serverless-backend" {
         "github-repositories/get",
         "google-auth/post",
         "google-calendar/get",
+        "decrypt-proxy/post",
+        "encrypt/post",
         "end-service/post",
         "facebook-auth/post",
         "finish-launch-social/post",
