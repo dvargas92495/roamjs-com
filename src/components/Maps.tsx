@@ -31,6 +31,7 @@ import axios from "axios";
 import { Label } from "@blueprintjs/core";
 import PageInput from "./PageInput";
 import { getTreeByHtmlId, useTreeByHtmlId } from "./hooks";
+import { render as renderAlias } from "./AliasPreview";
 
 addStyle(`.leaflet-pane {
   z-index: 10 !important;
@@ -179,6 +180,19 @@ const Markers = ({
           );
           n.addEventListener("mouseenter", openMarker(marker));
           n.addEventListener("mouseleave", closeMarker(marker));
+        });
+      mrs
+        .flatMap((mr) => Array.from(mr.addedNodes))
+        .map((n) =>
+          n.parentElement.querySelector<HTMLAnchorElement>(".rm-alias")
+        )
+        .filter((n) => !!n)
+        .forEach((anchor) => {
+          renderAlias({
+            p: anchor,
+            children: anchor.innerText,
+            blockUid: anchor.href.match(/\/page\/(.*)/)?.[1] || "",
+          });
         });
     });
     observer.observe(document.getElementById(id), {
