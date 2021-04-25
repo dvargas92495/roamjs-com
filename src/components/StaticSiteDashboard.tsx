@@ -51,7 +51,7 @@ import {
 } from "./ServiceCommonComponents";
 import Description from "./Description";
 
-const RequestUserContent: StageContent = ({ openPanel }) => {
+const RequestShareContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
   const [ready, setReady] = useState(isFieldSet("share"));
@@ -69,40 +69,60 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
       if (
         target.tagName === "DIV" &&
         target.parentElement.className.includes("bp3-menu-item") &&
-        target.innerText.toUpperCase() === "SHARE"
+        target.innerText.toUpperCase() === "SETTINGS"
       ) {
         document.removeEventListener("click", shareListener);
         const shareItem = target.parentElement as HTMLAnchorElement;
         shareItem.style.border = "unset";
-        setReady(true);
         setTimeout(() => {
-          const input = Array.from(document.getElementsByTagName("input")).find(
-            (i) => i.placeholder === "Emails"
-          );
-          if (input) {
-            input.parentElement.parentElement.style.border = HIGHLIGHT;
-            const guide = document.createElement("span");
-            guide.style.fontSize = "8px";
-            guide.innerText = "(Press Enter after adding support@roamjs.com)";
-            input.parentElement.appendChild(guide);
-            const container = input.parentElement?.parentElement;
-            if (container) {
-              const perm = input.parentElement.parentElement.getElementsByClassName(
-                "rm-settings__permissions-button"
-              )?.[0] as HTMLButtonElement;
-              perm?.click?.();
-              setTimeout(() => {
-                const access = Array.from(
-                  document.getElementsByClassName("bp3-menu-item")
-                )
-                  .map((i) => i as HTMLAnchorElement)
-                  .find(
-                    (i) => (i as HTMLAnchorElement).innerText === "read access"
-                  );
-                access?.click?.();
-              }, 1);
-            }
-          }
+          const sharingTab = document.getElementById('bp3-tab-title_rm-settings-tabs_rm-sharing-tab');
+          sharingTab.style.border = HIGHLIGHT;
+          sharingTab.addEventListener('click', () => {
+            sharingTab.style.border = 'unset';
+            setTimeout(() => {
+              if (
+                Array.from(
+                  document.querySelectorAll<HTMLDivElement>(
+                    ".rm-settings-user-permissions>div:first-child"
+                  )
+                ).some((e) => e.innerText === "support@roamjs.com")
+              ) {
+                setReady(true);
+                return;
+              }
+              const input = Array.from(document.getElementsByTagName("input")).find(
+                (i) => i.placeholder.includes("Enter email")
+              );
+              if (input) {
+                input.parentElement.parentElement.style.border = HIGHLIGHT;
+                const container = input.parentElement?.parentElement;
+                if (container) {
+                  const perm = input.parentElement.parentElement.getElementsByClassName(
+                    "rm-settings__permissions-button"
+                  )?.[0] as HTMLButtonElement;
+                  perm?.click?.();
+                  setTimeout(() => {
+                    const access = Array.from(
+                      document.getElementsByClassName("bp3-menu-item")
+                    )
+                      .map((i) => i as HTMLAnchorElement)
+                      .find(
+                        (i) => (i as HTMLAnchorElement).innerText === "read access"
+                      );
+                    access?.click?.();
+                  }, 1);
+                }
+                input.addEventListener("keydown", (e) => {
+                  if (
+                    e.key === "Enter" &&
+                    (e.target as HTMLInputElement).value === "support@roamjs.com"
+                  ) {
+                    setReady(true);
+                  }
+                });
+              }
+            }, 500);
+          }, {once: true});
         }, 500);
       }
     },
@@ -130,7 +150,7 @@ const RequestUserContent: StageContent = ({ openPanel }) => {
                     menuItems.getElementsByClassName("bp3-menu-item")
                   )
                     .map((e) => e as HTMLAnchorElement)
-                    .find((e) => e.innerText === "Share");
+                    .find((e) => e.innerText === "Settings");
                   if (shareItem) {
                     shareItem.style.border = HIGHLIGHT;
                   }
@@ -870,7 +890,7 @@ const LiveContent: StageContent = () => {
                         ))}
                       </tbody>
                     </table>
-                    <p>
+                    <p style={{ marginTop: 10 }}>
                       Are you sure you want to make these changes? This
                       operation could take several minutes.
                     </p>
@@ -1038,7 +1058,7 @@ const RequestReferenceTemplateContent: StageContent = ({ openPanel }) => {
   );
 };
 
-const supportedPlugins = ["inline-block-references"];
+const supportedPlugins = ["inline-block-references", "header"];
 const RequestPluginsContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
@@ -1088,7 +1108,7 @@ const StaticSiteDashboard = (): React.ReactElement => (
     stages={[
       TOKEN_STAGE,
       {
-        component: RequestUserContent,
+        component: RequestShareContent,
         setting: "Share",
       },
       {
