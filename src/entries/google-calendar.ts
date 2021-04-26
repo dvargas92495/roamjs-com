@@ -265,7 +265,7 @@ runExtension("google-calendar", () => {
                 service: "google",
                 getPopoutUrl: () =>
                   Promise.resolve(
-                    `https://accounts.google.com/o/oauth2/v2/auth?prompt=consent&access_type=offline&client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=https://roamjs.com/oauth?auth=true&response_type=code&scope=https://www.googleapis.com/auth/calendar.readonly%20https://www.googleapis.com/auth/calendar.events.readonly`
+                    `https://accounts.google.com/o/oauth2/v2/auth?prompt=consent&access_type=offline&client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=https://roamjs.com/oauth?auth=true&response_type=code&scope=https://www.googleapis.com/auth/calendar.readonly%20https://www.googleapis.com/auth/calendar.events.readonly%20https://www.googleapis.com/auth/userinfo.email`
                   ),
                 getAuthData: (data) =>
                   axios
