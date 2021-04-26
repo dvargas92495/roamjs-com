@@ -41,6 +41,7 @@ type Event = {
   htmlLink: string;
   hangoutLink: string;
   location: string;
+  attendees: [];
   start: { dateTime: string };
   end: { dateTime: string };
   visibility: "private" | "public";
@@ -51,6 +52,7 @@ const CONFIG = "roam/js/google-calendar";
 const textareaRef: { current: HTMLTextAreaElement } = {
   current: null,
 };
+
 
 const resolveDate = (d: { dateTime?: string; format?: string }) => {
   if (!d?.dateTime) {
@@ -63,6 +65,14 @@ const resolveDate = (d: { dateTime?: string; format?: string }) => {
     return date.toLocaleTimeString();
   }
 };
+
+const resolveAttendees = (e: Event) => {
+  const attendessListString = e.attendees.map(attn => 
+    "[[" + attn["displayName"] + "]]"
+    ).join(", ");
+
+  return attendessListString;
+}
 
 const resolveSummary = (e: Event) =>
   e.visibility === "private" ? "busy" : e.summary || "No Summary";
@@ -151,7 +161,7 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
       }
       return events
         .filter((e: Event) => !skipFree || e.transparency !== "transparent")
-        .map((e: Event) => {
+        .map((e: Event) => { 
           if (format) {
             return (format as string)
               .replace("/Summary", resolveSummary(e))
@@ -164,6 +174,7 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
               .replace("{link}", e.htmlLink || "")
               .replace("{hangout}", e.hangoutLink || "")
               .replace("{location}", e.location || "")
+              .replace("{attendees}", resolveAttendees(e) || "")
               .replace(/{start:?(.*?)}/, (_, format) =>
                 resolveDate({ ...e.start, format })
               )
