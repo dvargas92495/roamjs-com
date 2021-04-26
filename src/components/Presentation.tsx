@@ -158,13 +158,27 @@ const SrcFromText: React.FunctionComponent<
   );
 };
 
-const TitleSlide = ({ text, note }: { text: string; note: Slide }) => {
+const TitleSlide = ({
+  text,
+  note,
+  transition,
+  animate,
+}: {
+  text: string;
+  note: Slide;
+  transition: string;
+  animate: boolean;
+}) => {
   const type = Object.keys(SRC_REGEXES).find((k: keyof typeof SRC_REGEXES) =>
     SRC_REGEXES[k].test(text)
   ) as keyof typeof SRC_REGEXES;
-  const style = type ? { bottom: 0 } : {};
+  const props = {
+    ...(type ? { style: { bottom: 0 } } : {}),
+    ...(animate ? { "data-auto-animate": true } : {}),
+    ...(transition ? { "data-transition": transition } : {}),
+  };
   return (
-    <section style={style}>
+    <section {...props}>
       <SrcFromText
         text={text}
         Alt={({ text }) => <h1>{text}</h1>}
@@ -180,7 +194,13 @@ const STARTS_WITH_IFRAME = new RegExp("^iframe ", "i");
 const ENDS_WITH_LEFT = new RegExp(" left$", "i");
 const ENDS_WITH_CENTER = new RegExp(" center$", "i");
 
-type ContentSlideExtras = { note: Slide; layout: string; collapsible: boolean };
+type ContentSlideExtras = {
+  note: Slide;
+  layout: string;
+  collapsible: boolean;
+  animate: boolean;
+  transition: string;
+};
 
 const setDocumentLis = ({
   e,
@@ -242,10 +262,14 @@ const ContentSlide = ({
   layout,
   collapsible,
   viewType,
+  animate,
+  transition,
 }: {
   text: string;
   children: Slides;
   viewType: ViewType;
+  transition: string;
+  animate: boolean;
 } & ContentSlideExtras) => {
   const isImageLayout = STARTS_WITH_IMAGE.test(layout);
   const isIframeLayout = STARTS_WITH_IFRAME.test(layout);
@@ -379,8 +403,13 @@ const ContentSlide = ({
   const onDialogClose = useCallback(() => setImageDialogSrc(""), [
     setImageDialogSrc,
   ]);
+
+  const props = {
+    ...(animate ? { "data-auto-animate": true } : {}),
+    ...(transition ? { "data-transition": transition } : {}),
+  };
   return (
-    <section style={{ textAlign: "left" }}>
+    <section style={{ textAlign: "left" }} {...props}>
       <h1>{text}</h1>
       <div
         style={{
@@ -477,6 +506,8 @@ const observerCallback = (ms: MutationRecord[]) =>
     });
 
 export const COLLAPSIBLE_REGEX = /(?:\[\[{|{\[\[|{)collapsible(:ignore)?(?:\]\]}|}\]\]|})/i;
+export const ANIMATE_REGEX = /(?:\[\[{|{\[\[|{)animate(?:\]\]}|}\]\]|})/i;
+export const TRANSITION_REGEX = /(?:\[\[{|{\[\[|{)transition:(none|fade|slide|convex|concave|zoom)(?:\]\]}|}\]\]|})/i;
 const HIDE_REGEX = /(?:\[\[{|{\[\[|{)hide(?:\]\]}|}\]\]|})/i;
 
 const PresentationContent: React.FunctionComponent<{
@@ -484,8 +515,18 @@ const PresentationContent: React.FunctionComponent<{
   showNotes: boolean;
   onClose: (index: number) => void;
   globalCollapsible: boolean;
+  globalAnimate: boolean;
+  globalTransition: string;
   startIndex: number;
-}> = ({ slides, onClose, showNotes, globalCollapsible, startIndex }) => {
+}> = ({
+  slides,
+  onClose,
+  showNotes,
+  globalCollapsible,
+  globalAnimate,
+  globalTransition,
+  startIndex,
+}) => {
   const revealRef = useRef(null);
   const slidesRef = useRef<HTMLDivElement>(null);
   const mappedSlides = slides
@@ -493,6 +534,8 @@ const PresentationContent: React.FunctionComponent<{
     .map((s) => {
       let layout = "default";
       let collapsible = globalCollapsible || false;
+      let transition: string;
+      let animate = globalAnimate || false;
       const text = s.text
         .replace(
           new RegExp(
@@ -510,12 +553,22 @@ const PresentationContent: React.FunctionComponent<{
           collapsible = !ignore;
           return "";
         })
+        .replace(ANIMATE_REGEX, () => {
+          animate = true;
+          return "";
+        })
+        .replace(TRANSITION_REGEX, (_, val) => {
+          transition = val;
+          return "";
+        })
         .trim();
       return {
         ...s,
         text,
         layout,
         collapsible,
+        animate,
+        transition,
         children: showNotes
           ? s.children.slice(0, s.children.length - 1)
           : s.children,
@@ -543,6 +596,7 @@ const PresentationContent: React.FunctionComponent<{
       showNotes,
       minScale: 1,
       maxScale: 1,
+      backgroundTransition: globalTransition,
     });
     deck.initialize();
     revealRef.current = deck;
@@ -605,7 +659,12 @@ const PresentationContent: React.FunctionComponent<{
               {s.children.length ? (
                 <ContentSlide {...s} />
               ) : (
-                <TitleSlide text={s.text} note={s.note} />
+                <TitleSlide
+                  text={s.text}
+                  note={s.note}
+                  transition={s.transition}
+                  animate={s.animate}
+                />
               )}
             </React.Fragment>
           ))}
@@ -626,7 +685,9 @@ const Presentation: React.FunctionComponent<{
   theme?: string;
   notes?: string;
   collapsible?: boolean;
-}> = ({ getSlides, theme, notes, collapsible }) => {
+  animate?: boolean;
+  transition?: string;
+}> = ({ getSlides, theme, notes, collapsible, animate, transition }) => {
   const normalizedTheme = useMemo(
     () =>
       (isSafari ? SAFARI_THEMES : VALID_THEMES).includes(theme)
@@ -711,6 +772,8 @@ const Presentation: React.FunctionComponent<{
             onClose={onClose}
             showNotes={showNotes}
             globalCollapsible={collapsible}
+            globalAnimate={animate}
+            globalTransition={transition}
             startIndex={startIndex}
           />
         </div>

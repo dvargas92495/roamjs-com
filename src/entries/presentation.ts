@@ -12,8 +12,10 @@ import "reveal.js/dist/theme/solarized.css";
 import "reveal.js/dist/theme/blood.css";
 import "reveal.js/dist/theme/moon.css";
 import {
+  ANIMATE_REGEX,
   COLLAPSIBLE_REGEX,
   render,
+  TRANSITION_REGEX,
   VALID_THEMES,
 } from "../components/Presentation";
 import {
@@ -93,6 +95,8 @@ runExtension("presentation", async () => {
               "(?:\\[\\[{|{\\[\\[|{)notes:(true|false)(?:\\]\\]}|}\\]\\]|})"
             )?.[1],
             collapsible: !!buttonText.match(COLLAPSIBLE_REGEX),
+            animate: !!buttonText.match(ANIMATE_REGEX),
+            transition: buttonText.match(TRANSITION_REGEX)?.[1] || '',
           }
         : {};
       render({

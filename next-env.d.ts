@@ -34,6 +34,7 @@ declare module "reveal.js" {
     showNotes?: boolean;
     minScale?: number;
     maxScale?: number;
+    backgroundTransition?: string;
   };
   declare class Reveal {
     constructor(options: RevealOptions);

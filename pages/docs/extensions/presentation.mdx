@@ -60,6 +60,25 @@ The following layouts are also supported:
 - `Iframe Left` - Split the slide vertically with the bullets on the right half and the iframe on the left half. The first bullet will be used for the iframe.
 - `Iframe Center` - The iframe on the first bullet will take up the contents of the slide. Note that any other bullets will be hidden.
 
+#### Transitions
+
+You could configure individual slides to have custom transitions. To give a slide a transition, add the `{transition:(type)}` attribute next to the slide title like this:
+
+- `Slide Title {transition:slide}`
+
+To apply to all of the slides in a presentation, add to it inside the presentation button:
+
+- `{{presentation:{transition:slide}}}`
+
+The following transition types are supported:
+
+- `none` - Switch backgrounds instantly
+- `fade` - Cross fade
+- `slide` - Slide between backgrounds
+- `convex` - Slide at a convex angle
+- `concave` - Slide at a concave angle
+- `zoom` - Scale the incoming slide up so it grows in from the center of the screen
+
 #### Collapsible
 
 You could configure individual slides to have collapsible bullets. To make a slide collapsible, add the `{collapsible}` attribute next to the slide title like this:
@@ -74,8 +93,12 @@ If you apply collapsible to the whole presentation, you could then ignore it for
 
 - `Slide Title {collapsible:ignore}`
 
-import DemoPresentation from '../../../components/DemoPresentation'
+#### Auto Animate
 
-### Playground
+You could configure individual slides to have automatically animate between them. The extension will make its best guess on matching elements to be animated across slides. To add animation to the slide, add the `{animate}` attribute next to the slide title like this:
 
-<DemoPresentation />
+- `Slide Title {animate}`
+
+To apply to all of the slides in a presentation, add to it inside the presentation button:
+
+- `{{presentation:{animate}}}`
