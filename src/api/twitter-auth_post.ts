@@ -20,10 +20,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       const parsedData = Object.fromEntries(
         r.data.split("&").map((s: string) => s.split("="))
       );
-      const { oauth_token, oauth_token_secret } = parsedData;
+      const { oauth_token, oauth_token_secret, screen_name } = parsedData;
       return {
         statusCode: 200,
-        body: JSON.stringify({ oauth_token, oauth_token_secret }),
+        body: JSON.stringify({
+          oauth_token,
+          oauth_token_secret,
+          label: screen_name,
+        }),
         headers: headers(event),
       };
     })

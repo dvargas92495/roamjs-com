@@ -20,8 +20,9 @@ import {
   getParentTextByBlockUidAndTag,
   getTextByBlockUid,
 } from "roam-client";
-import { getSettingValueFromTree } from "./hooks";
+import { getOauth, getSettingValueFromTree } from "./hooks";
 import { resolveRefs } from "../entry-helpers";
+import { useOauthAccounts } from "./OauthSelect";
 
 type ContentProps = {
   tag: string;
@@ -129,16 +130,13 @@ const SlackContent: React.FunctionComponent<
       setAsUser((e.target as HTMLInputElement).checked),
     [setAsUser]
   );
+  const {accountLabel, accountDropdown} = useOauthAccounts('slack');
   const onClick = useCallback(() => {
     setLoading(true);
     setError("");
     const tree = getTreeByPageName("roam/js/slack");
     const legacyToken = getSettingValueFromTree({ tree, key: "token" });
-    const oauth = getSettingValueFromTree({
-      tree,
-      key: "oauth",
-      defaultValue: "{}",
-    });
+    const oauth = getOauth(tree, accountLabel);
     const { token = legacyToken, user_token } = JSON.parse(oauth);
     const userFormat = getUserFormat(tree);
     const channelFormat = getChannelFormat(tree);
@@ -261,6 +259,7 @@ const SlackContent: React.FunctionComponent<
         style={{ marginBottom: 16 }}
       />
       <Checkbox label={"As User"} checked={asUser} onChange={onAsUserChanged} />
+      {accountDropdown}
       {loading && <Spinner />}
       {error && (
         <div style={{ color: "red", whiteSpace: "pre-line" }}>

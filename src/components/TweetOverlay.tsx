@@ -23,7 +23,7 @@ import {
   getTreeByPageName,
   getUids,
 } from "roam-client";
-import { getSettingValueFromTree, useSocialToken } from "./hooks";
+import { getOauth, getSettingValueFromTree, useSocialToken } from "./hooks";
 import axios from "axios";
 import twitter from "twitter-text";
 import addYears from "date-fns/addYears";
@@ -32,6 +32,7 @@ import format from "date-fns/format";
 import { getRoamUrlByPage, resolveRefs } from "../entry-helpers";
 import addMinutes from "date-fns/addMinutes";
 import startOfMinute from "date-fns/startOfMinute";
+import { useOauthAccounts } from "./OauthSelect";
 
 const ATTACHMENT_REGEX = /!\[[^\]]*\]\(([^\s)]*)\)/g;
 const UPLOAD_URL = `${process.env.REST_API_URL}/twitter-upload`;
@@ -157,14 +158,11 @@ const TwitterContent: React.FunctionComponent<{
   );
   const [error, setError] = useState("");
   const [tweetsSent, setTweetsSent] = useState(0);
+  const { accountLabel, accountDropdown } = useOauthAccounts("twitter");
   const onClick = useCallback(async () => {
     setError("");
     const tree = getTreeByPageName("roam/js/twitter");
-    const oauth = getSettingValueFromTree({
-      tree,
-      key: "oauth",
-      defaultValue: "{}",
-    });
+    const oauth = getOauth(tree, accountLabel);
     if (oauth === "{}") {
       setError(
         "Need to log in with Twitter to send Tweets! Head to roam/js/twitter page to log in."
@@ -294,7 +292,7 @@ const TwitterContent: React.FunctionComponent<{
     if (success) {
       close();
     }
-  }, [setTweetsSent, close, setError, tweetId]);
+  }, [setTweetsSent, close, setError, tweetId, accountLabel]);
 
   const initialDate = useMemo(
     () => addMinutes(startOfMinute(new Date()), 1),
@@ -311,11 +309,7 @@ const TwitterContent: React.FunctionComponent<{
     setShowSchedule,
   ]);
   const onScheduleClick = useCallback(() => {
-    const oauth = getSettingValueFromTree({
-      tree: getTreeByPageName("roam/js/twitter"),
-      key: "oauth",
-      defaultValue: "{}",
-    });
+    const oauth = getOauth(getTreeByPageName("roam/js/twitter"), accountLabel);
     if (oauth === "{}") {
       setError(
         "Need to log in with Twitter to schedule Tweets! Head to roam/js/twitter page to log in."
@@ -357,6 +351,7 @@ const TwitterContent: React.FunctionComponent<{
     setDialogMessage,
     message,
     tweetId,
+    accountLabel,
   ]);
   return (
     <div style={{ padding: 16, maxWidth: 400 }}>
@@ -385,6 +380,7 @@ const TwitterContent: React.FunctionComponent<{
         </>
       ) : (
         <>
+          {accountDropdown}
           <Button
             text={tweetId ? "Send Reply" : "Send Tweet"}
             onClick={onClick}

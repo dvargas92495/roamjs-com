@@ -65,7 +65,6 @@ runExtension(ID, () => {
             const { access_token } = JSON.parse(oauth);
             const dbx = new Dropbox({ accessToken: access_token });
             const { parentUid, offset } = getDropUidOffset(d);
-            console.log(parentUid, offset);
             const uid = createBlock({
               parentUid,
               order: offset,

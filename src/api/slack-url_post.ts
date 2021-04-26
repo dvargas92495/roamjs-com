@@ -2,19 +2,29 @@ import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
 import { headers } from "../lambda-helpers";
 import querystring from "querystring";
+import { WebClient } from "@slack/web-api";
+
+const web = new WebClient();
+delete web["axios"].defaults.headers["User-Agent"];
 
 export const handler = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
-  const { code, redirect_uri } = JSON.parse(event.body);
+  const { code } = JSON.parse(event.body);
   return axios
-    .post(
+    .post<{
+      access_token: string;
+      authed_user: { access_token: string; id: string };
+      team: { name: string };
+      ok: boolean;
+      error: string;
+    }>(
       "https://slack.com/api/oauth.v2.access",
       querystring.stringify({
         code,
         client_id: process.env.SLACK_CLIENT_ID,
         client_secret: process.env.SLACK_CLIENT_SECRET,
-        redirect_uri,
+        redirect_uri: "https://roamjs.com/oauth?auth=true",
       }),
       {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -22,15 +32,27 @@ export const handler = async (
     )
     .then((r) =>
       r.data.ok
-        ? {
-            statusCode: 200,
-            body: JSON.stringify({
-              token: r.data.access_token,
-              user_token: r.data.authed_user.access_token,
-              data: r.data,
-            }),
-            headers: headers(event),
-          }
+        ? web.users
+            .info({ token: r.data.access_token, user: r.data.authed_user.id })
+            .then((u) =>
+              u.ok
+                ? {
+                    statusCode: 200,
+                    body: JSON.stringify({
+                      token: r.data.access_token,
+                      user_token: r.data.authed_user.access_token,
+                      label: `${(u.user as { name: string }).name} (${
+                        r.data.team.name
+                      })`,
+                    }),
+                    headers: headers(event),
+                  }
+                : {
+                    statusCode: 500,
+                    body: r.data.error,
+                    headers: headers(event),
+                  }
+            )
         : {
             statusCode: 500,
             body: r.data.error,
