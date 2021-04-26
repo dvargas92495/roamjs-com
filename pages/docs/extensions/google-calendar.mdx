@@ -1,7 +1,7 @@
 ---
 layout: 'ExtensionPageLayout'
 description: 'The Google Calendar to Roam Integration allows users to import the list of events on a given day into their daily notes page.'
-contributors: Eric Anderson 💵, Joe Ocampo 💵, George Corple 💵
+contributors: Eric Anderson 💵, Joe Ocampo 💵, George Corple 💵, Marco Brambilla 💻
 loom: 47aded52527343929e6be51cbee85052
 ---
 
@@ -28,6 +28,7 @@ On the `import` tab, you will find numerous fields used to configure the calenda
 - `{location}` - the location for the event
 - `{start}` - the start time of the event. Add a colon and format to customize the start time format. For example, `{start:hh:mm}` will resolve to `12:00`
 - `{end}` - the end time of the event. Add a colon and format to customize the end time format. For example, `{end:hh:mm}` will resolve to `12:00`
+- `{attendees}` - the attendees of the event, using either their display name if available or email if not, each of whom are tagged and comma delimited.
 By default, `Format` will be `{summary} ({start:hh:mm am} - {end:hh:mm a}) - [Meet]({hangout})`
 
 In any page, activate the Roam Command Palette by hitting CTRL+P on windows or CMD+P on Mac, then click the `Import Google Calendar` command. The extension will fill the page with the events you have for that day. It will be displayed in the timezone of your browser. It will use either the page's title if it's a daily note, or the current date if it's not.

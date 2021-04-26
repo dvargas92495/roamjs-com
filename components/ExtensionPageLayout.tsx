@@ -82,12 +82,15 @@ const contributors = {
   "Jon Surrat": "https://twitter.com/surrjon",
   "Owen Cyrulnik": "https://twitter.com/cyrulnik",
   "Elizabeth Brott Beese": "https://elizabethbeese.com",
+  "Aneesh Makala": "https://twitter.com/makalaaneesh",
+  "Marco Brambilla": "https://github.com/marcobrambilla",
 };
 
 const emojisToTooltip = {
   "💵": "Financial",
   "📓": "Testing",
   "🤔": "Idea",
+  "💻": "Code",
 };
 
 const SponsorDialog = ({ id }: { id: string }) => {

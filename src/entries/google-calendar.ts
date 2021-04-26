@@ -41,7 +41,7 @@ type Event = {
   htmlLink: string;
   hangoutLink: string;
   location: string;
-  attendees: [];
+  attendees: {displayName:string; email:string}[];
   start: { dateTime: string };
   end: { dateTime: string };
   visibility: "private" | "public";
@@ -52,7 +52,6 @@ const CONFIG = "roam/js/google-calendar";
 const textareaRef: { current: HTMLTextAreaElement } = {
   current: null,
 };
-
 
 const resolveDate = (d: { dateTime?: string; format?: string }) => {
   if (!d?.dateTime) {
@@ -67,8 +66,8 @@ const resolveDate = (d: { dateTime?: string; format?: string }) => {
 };
 
 const resolveAttendees = (e: Event) => {
-  const attendessListString = e.attendees.map(attn => 
-    "[[" + attn["displayName"] + "]]"
+  const attendessListString = (e.attendees || []).map(attn => 
+    `[[${attn["displayName"] || attn['email']}]]`
     ).join(", ");
 
   return attendessListString;
