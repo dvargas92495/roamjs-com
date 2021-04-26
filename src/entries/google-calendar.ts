@@ -29,6 +29,7 @@ import format from "date-fns/format";
 import { createConfigObserver } from "roamjs-components";
 import GoogleLogo from "../assets/Google.svg";
 import differenceInSeconds from "date-fns/differenceInSeconds";
+import { getOauth } from "../components/hooks";
 // import { getRenderRoot } from "../components/hooks";
 // import { render } from "../components/DeprecationWarning";
 
@@ -74,9 +75,8 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
   const configTree = getTreeByPageName(CONFIG);
   const oauthNode = configTree.find((t) => /oauth/i.test(t.text))
     ?.children?.[0];
-  const { access_token, expires_in, refresh_token } = JSON.parse(
-    oauthNode?.text || "{}"
-  );
+  const oauthJson = getOauth(configTree);
+  const { access_token, expires_in, refresh_token } = JSON.parse(oauthJson);
   const tokenAge = differenceInSeconds(
     new Date(),
     oauthNode?.editTime || new Date()
@@ -91,7 +91,10 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
           .then((r) => {
             window.roamAlphaAPI.updateBlock({
               block: {
-                uid: oauthNode.uid,
+                uid:
+                  oauthNode.text === oauthJson
+                    ? oauthNode.uid
+                    : oauthNode.children[0]?.uid,
                 string: JSON.stringify({ refresh_token, ...r.data }),
               },
             });

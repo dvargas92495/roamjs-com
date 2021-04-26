@@ -9,6 +9,7 @@ import {
   updateBlock,
 } from "roam-client";
 import { Dropbox } from "dropbox";
+import { getOauth } from "../components/hooks";
 
 const ID = "dropbox";
 const CONFIG = `roam/js/${ID}`;
@@ -58,10 +59,8 @@ runExtension(ID, () => {
       d.addEventListener("drop", (e) => {
         const fileToUpload = e.dataTransfer.files[0];
         if (fileToUpload) {
-          const oauth = getTreeByPageName(CONFIG).find((t) =>
-            /oauth/i.test(t.text)
-          )?.children?.[0]?.text;
-          if (oauth) {
+          const oauth = getOauth(getTreeByPageName(CONFIG));
+          if (oauth !== "{}") {
             const { access_token } = JSON.parse(oauth);
             const dbx = new Dropbox({ accessToken: access_token });
             const { parentUid, offset } = getDropUidOffset(d);
