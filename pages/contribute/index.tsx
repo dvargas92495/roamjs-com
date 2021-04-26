@@ -199,6 +199,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/kacper.jfif",
             url: "https://www.linkedin.com/in/kacper-baranski-69a37184/",
           },
+          {
+            title: "Zak Weston",
+            imgSrc: "sponsors/weston.jpg",
+            url: "https://twitter.com/zakweston",
+          },
         ]}
       />
     </StandardLayout>
