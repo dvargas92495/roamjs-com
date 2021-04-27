@@ -12,15 +12,21 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       redirect_uri: "https://roamjs.com/oauth?auth=true",
     })
     .then((r) =>
-      axios
-        .get(
-          `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${r.data.access_token}`
-        )
-        .then((u) => ({
-          statusCode: 200,
-          body: JSON.stringify({ ...r.data, label: u.data.email}),
-          headers: headers(event),
-        }))
+      data.grant_type === "authorization_code"
+        ? axios
+            .get(
+              `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${r.data.access_token}`
+            )
+            .then((u) => ({
+              statusCode: 200,
+              body: JSON.stringify({ ...r.data, label: u.data.email }),
+              headers: headers(event),
+            }))
+        : {
+            statusCode: 200,
+            body: JSON.stringify(r.data),
+            headers: headers(event),
+          }
     )
     .catch((e) => ({
       statusCode: 500,
