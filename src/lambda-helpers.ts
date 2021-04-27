@@ -324,3 +324,18 @@ export const emailCatch = (subject: string, event: APIGatewayProxyEvent) => (
     body: `Unknown error - Message Id ${id}`,
     headers: headers(event),
   }));
+
+export const listAll = async (Prefix: string): Promise<AWS.S3.ObjectList> => {
+  const objects: AWS.S3.ObjectList = [];
+  let ContinuationToken: string = undefined;
+  let isTruncated = true;
+  while (isTruncated) {
+    const res = await s3
+      .listObjectsV2({ Bucket: "roamjs.com", Prefix, ContinuationToken })
+      .promise();
+    objects.push(...res.Contents);
+    ContinuationToken = res.ContinuationToken;
+    isTruncated = res.IsTruncated;
+  }
+  return objects;
+};

@@ -1,5 +1,11 @@
 import { users } from "@clerk/clerk-sdk-node";
-import { authenticate, headers, s3, userError } from "../lambda-helpers";
+import {
+  authenticate,
+  headers,
+  listAll,
+  s3,
+  userError,
+} from "../lambda-helpers";
 
 export const handler = authenticate(async (event) => {
   const { path } = JSON.parse(event.body || "{}") as { path?: string };
@@ -11,10 +17,7 @@ export const handler = authenticate(async (event) => {
     return userError("Invalid path: must either end in '/' or '.js'", event);
   }
 
-  const available = s3
-    .listObjectsV2({ Bucket: "roamjs.com", Prefix: path })
-    .promise()
-    .then((r) => !r.Contents.length);
+  const available = listAll(path).then((r) => !r.length);
   if (!available) {
     return userError("Requested path is not available", event);
   }
@@ -28,11 +31,13 @@ export const handler = authenticate(async (event) => {
       })
       .promise();
   } else if (path.endsWith(".js")) {
-    await s3.putObject({
-      Bucket: "roamjs.com",
-      Key: path,
-      Body: "// lock",
-    });
+    await s3
+      .putObject({
+        Bucket: "roamjs.com",
+        Key: path,
+        Body: "// lock",
+      })
+      .promise();
   }
 
   const id = event.headers.Authorization;

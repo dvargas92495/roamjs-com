@@ -1,18 +1,25 @@
 import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
 import React from "react";
+import { API_URL } from "../../components/constants";
 import { defaultLayoutProps } from "../../components/Layout";
 import StandardLayout from "../../components/StandardLayout";
+import renderToString from "next-mdx-remote/render-to-string";
+import hydrate from "next-mdx-remote/hydrate";
+import { MdxRemote } from "next-mdx-remote/types";
 
-const ExtensionPage = ({ id }: { id: string }): React.ReactElement => {
-  return (
-    <StandardLayout {...defaultLayoutProps}>{id} Coming soon...</StandardLayout>
-  );
+const ExtensionPage = ({
+  content,
+}: {
+  content: MdxRemote.Source;
+}): React.ReactElement => {
+  const children = hydrate(content, {});
+  return <StandardLayout {...defaultLayoutProps}>{children}</StandardLayout>;
 };
 
 export const getStaticPaths: GetStaticPaths = async () =>
   axios
-    .get("request-path")
+    .get(`${API_URL}/request-path`)
     .then((r) => ({
       paths: r.data.paths.map((id) => ({
         params: {
@@ -28,13 +35,25 @@ export const getStaticPaths: GetStaticPaths = async () =>
 
 export const getStaticProps: GetStaticProps<
   {
-    id: string;
+    content: MdxRemote.Source;
   },
   {
     id: string;
   }
-> = async (context) => ({
-  props: context.params,
-});
+> = (context) =>
+  axios
+    .get(`${API_URL}/request-path?id=${context.params.id}`)
+    .then((r) => renderToString(r.data.content, {}))
+    .then((content) => ({
+      props: { content },
+    }))
+    .catch(() => ({
+      props: {
+        content: {
+          compiledSource: "",
+          renderedOutput: "",
+        },
+      },
+    }));
 
 export default ExtensionPage;
