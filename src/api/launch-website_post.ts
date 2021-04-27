@@ -3,7 +3,9 @@ import { v4 } from "uuid";
 import { authenticate, dynamo, headers, lambda } from "../lambda-helpers";
 
 export const handler = authenticate(async (event) => {
-  const { graph, domain, autoDeploysEnabled } = JSON.parse(event.body);
+  const { graph, domain, autoDeploysEnabled } = JSON.parse(
+    event.body || "{}"
+  ) as { graph: string; domain: string; autoDeploysEnabled: boolean };
   if (!graph) {
     return {
       statusCode: 400,
@@ -69,7 +71,7 @@ export const handler = authenticate(async (event) => {
       InvocationType: "Event",
       Payload: JSON.stringify({
         roamGraph: graph,
-        domain,
+        domain: domain.toLowerCase(),
         email,
         autoDeploysEnabled,
       }),
@@ -81,4 +83,4 @@ export const handler = authenticate(async (event) => {
     body: JSON.stringify({ graph, domain }),
     headers: headers(event),
   };
-}, 'staticSite');
+}, "staticSite");

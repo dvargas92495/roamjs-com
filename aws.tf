@@ -182,6 +182,7 @@ module "aws-serverless-backend" {
         "publish/post",
         "publish/put",
         "queue-issues/get",
+        "request-path/get",
         "request-path/post",
         "request-path/delete",
         "slack-url/post",

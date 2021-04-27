@@ -14,7 +14,7 @@ export const getStaticPaths: GetStaticPaths = async () =>
   axios
     .get("request-path")
     .then((r) => ({
-      paths: r.data.map((id) => ({
+      paths: r.data.paths.map((id) => ({
         params: {
           id,
         },

@@ -225,6 +225,13 @@ functions:
           path: queue-issues
           method: get
           cors: true
+  request-path-get:
+    handler: out/request-path_get.handler
+    events:
+      - http:
+          path: request-path
+          method: get
+          cors: true
   request-path-post:
     handler: out/request-path_post.handler
     events:

@@ -75,54 +75,62 @@ const RequestShareContent: StageContent = ({ openPanel }) => {
         const shareItem = target.parentElement as HTMLAnchorElement;
         shareItem.style.border = "unset";
         setTimeout(() => {
-          const sharingTab = document.getElementById('bp3-tab-title_rm-settings-tabs_rm-sharing-tab');
+          const sharingTab = document.getElementById(
+            "bp3-tab-title_rm-settings-tabs_rm-sharing-tab"
+          );
           sharingTab.style.border = HIGHLIGHT;
-          sharingTab.addEventListener('click', () => {
-            sharingTab.style.border = 'unset';
-            setTimeout(() => {
-              if (
-                Array.from(
-                  document.querySelectorAll<HTMLDivElement>(
-                    ".rm-settings-user-permissions>div:first-child"
-                  )
-                ).some((e) => e.innerText === "support@roamjs.com")
-              ) {
-                setReady(true);
-                return;
-              }
-              const input = Array.from(document.getElementsByTagName("input")).find(
-                (i) => i.placeholder.includes("Enter email")
-              );
-              if (input) {
-                input.parentElement.parentElement.style.border = HIGHLIGHT;
-                const container = input.parentElement?.parentElement;
-                if (container) {
-                  const perm = input.parentElement.parentElement.getElementsByClassName(
-                    "rm-settings__permissions-button"
-                  )?.[0] as HTMLButtonElement;
-                  perm?.click?.();
-                  setTimeout(() => {
-                    const access = Array.from(
-                      document.getElementsByClassName("bp3-menu-item")
+          sharingTab.addEventListener(
+            "click",
+            () => {
+              sharingTab.style.border = "unset";
+              setTimeout(() => {
+                if (
+                  Array.from(
+                    document.querySelectorAll<HTMLDivElement>(
+                      ".rm-settings-user-permissions>div:first-child"
                     )
-                      .map((i) => i as HTMLAnchorElement)
-                      .find(
-                        (i) => (i as HTMLAnchorElement).innerText === "read access"
-                      );
-                    access?.click?.();
-                  }, 1);
+                  ).some((e) => e.innerText === "support@roamjs.com")
+                ) {
+                  setReady(true);
+                  return;
                 }
-                input.addEventListener("keydown", (e) => {
-                  if (
-                    e.key === "Enter" &&
-                    (e.target as HTMLInputElement).value === "support@roamjs.com"
-                  ) {
-                    setReady(true);
+                const input = Array.from(
+                  document.getElementsByTagName("input")
+                ).find((i) => i.placeholder.includes("Enter email"));
+                if (input) {
+                  input.parentElement.parentElement.style.border = HIGHLIGHT;
+                  const container = input.parentElement?.parentElement;
+                  if (container) {
+                    const perm = input.parentElement.parentElement.getElementsByClassName(
+                      "rm-settings__permissions-button"
+                    )?.[0] as HTMLButtonElement;
+                    perm?.click?.();
+                    setTimeout(() => {
+                      const access = Array.from(
+                        document.getElementsByClassName("bp3-menu-item")
+                      )
+                        .map((i) => i as HTMLAnchorElement)
+                        .find(
+                          (i) =>
+                            (i as HTMLAnchorElement).innerText === "read access"
+                        );
+                      access?.click?.();
+                    }, 1);
                   }
-                });
-              }
-            }, 500);
-          }, {once: true});
+                  input.addEventListener("keydown", (e) => {
+                    if (
+                      e.key === "Enter" &&
+                      (e.target as HTMLInputElement).value ===
+                        "support@roamjs.com"
+                    ) {
+                      setReady(true);
+                    }
+                  });
+                }
+              }, 500);
+            },
+            { once: true }
+          );
         }, 500);
       }
     },
@@ -234,7 +242,9 @@ const RequestDomainContent: StageContent = ({ openPanel }) => {
   );
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>
-      setValue(`${e.target.value}${domainSwitch ? "" : ".roamjs.com"}`),
+      setValue(
+        `${e.target.value.toLowerCase()}${domainSwitch ? "" : ".roamjs.com"}`
+      ),
     [setValue, domainSwitch]
   );
   const onBlur = useCallback(() => {
@@ -846,7 +856,22 @@ const LiveContent: StageContent = () => {
                   <span
                     style={{ marginLeft: 16, color: getStatusColor(status) }}
                   >
-                    {status}
+                    {status === "LIVE" ? (
+                      <a
+                        href={`https://${
+                          getTreeByPageName(`roam/js/static-site`).find((t) =>
+                            toFlexRegex("domain").test(t.text)
+                          )?.children?.[0]?.text
+                        }`}
+                        target="_blank"
+                        rel="noopener"
+                        style={{ color: "inherit" }}
+                      >
+                        LIVE
+                      </a>
+                    ) : (
+                      status
+                    )}
                   </span>
                 )}
               </div>
