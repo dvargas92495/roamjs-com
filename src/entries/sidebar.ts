@@ -113,9 +113,9 @@ runExtension(ID, () => {
           const tree = getTreeByPageName(CONFIG);
           const uid = tree.find((i) => /open/i.test(i.text))?.uid;
           const isOpen = !!uid;
-          const isCloseIconPresent = !!document.getElementsByClassName(
-            "bp3-icon-menu-closed"
-          ).length;
+          const isCloseIconPresent = !!document.querySelector(
+            ".rm-topbar .bp3-icon-menu-closed"
+          );
           if (isOpen && isCloseIconPresent) {
             deleteBlock(uid);
           } else if (!isOpen && !isCloseIconPresent) {

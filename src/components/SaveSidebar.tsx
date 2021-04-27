@@ -62,7 +62,10 @@ const SaveSidebar = (): React.ReactElement => {
                   text: value,
                   children: windows.map((w) => ({
                     text: w.type,
-                    children: [{ text: getWindowUid(w) }],
+                    children: [
+                      { text: getWindowUid(w) },
+                      ...(w["pinned?"] ? [{ text: "pinned" }] : []),
+                    ],
                   })),
                 };
                 createBlock({
@@ -119,16 +122,32 @@ const LoadSidebar = ({ onClose }: { onClose: () => void }) => {
             text={"Load"}
             disabled={!label}
             onClick={() => {
+              window.roamAlphaAPI.ui.rightSidebar.open();
+              const openUids = Object.fromEntries(
+                window.roamAlphaAPI.ui.rightSidebar
+                  .getWindows()
+                  .map((w) => [getWindowUid(w), w.type])
+              );
               savedSidebar.children
                 .find((t) => t.text === label)
-                .children.map((w) => ({
+                .children.map((w, i) => ({
                   type: w.text as SidebarWindow["type"],
                   "block-uid": w.children[0]?.text,
+                  order: i,
+                  "pinned?": /pinned/i.test(w.children[1]?.text),
                 }))
-                .forEach((w) =>
-                  window.roamAlphaAPI.ui.rightSidebar.addWindow({ window: w })
-                );
-              window.roamAlphaAPI.ui.rightSidebar.open();
+                .filter((w) => openUids[w["block-uid"]] !== w.type)
+                .forEach((w) => {
+                  window.roamAlphaAPI.ui.rightSidebar.addWindow({ window: w });
+                  window.roamAlphaAPI.ui.rightSidebar.setWindowOrder({
+                    window: w,
+                  });
+                  if (w["pinned?"]) {
+                    window.roamAlphaAPI.ui.rightSidebar.pinWindow({
+                      window: w,
+                    });
+                  }
+                });
               onClose();
             }}
           />
