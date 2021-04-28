@@ -30,27 +30,39 @@ const DATE_REGEX = new RegExp(`{(${DAYS.join("|")}):(.*?)}`, "g");
 const FORMAT_DEFAULT_VALUE = "{monday:MM/dd yyyy} - {sunday:MM/dd yyyy}";
 const CONFIG = `roam/js/${ID}`;
 
-const getFormat = () =>
+const getFormat = (tree = getTreeByPageName(CONFIG)) =>
   getSettingValueFromTree({
     key: "format",
     defaultValue: FORMAT_DEFAULT_VALUE,
-    tree: getTreeByPageName(CONFIG),
+    tree,
   });
 
 const createWeeklyPage = (pageName: string) => {
   const weekUid = createPage({ title: pageName });
-  const format = getFormat();
+  const tree = getTreeByPageName(CONFIG);
+  const format = getFormat(tree);
   const [, day, dayFormat] = format.match(new RegExp(DATE_REGEX.source));
   const firstDateFormatted = pageName.match(
     new RegExp(format.replace(/{(.*?)}/g, "(.*?)"))
   )[1];
   const date = parse(firstDateFormatted, dayFormat, new Date());
   const weekStartsOn = DAYS.indexOf(day) as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  const autoTag = tree.some((t) => toFlexRegex("auto tag").test(t.text));
+  const autoEmbed = tree.some((t) => toFlexRegex("auto embed").test(t.text));
   DAYS.forEach((_, i) => {
     const dayDate = setDay(date, i, { weekStartsOn });
     const title = toRoamDate(dayDate);
     const parentUid = getPageUidByPageTitle(title) || createPage({ title });
-    createBlock({ node: { text: `#[[${pageName}]]` }, parentUid });
+    if (autoTag) {
+      createBlock({ node: { text: `#[[${pageName}]]` }, parentUid });
+    }
+    if (autoEmbed) {
+      createBlock({
+        node: { text: `{{[[embed]]:((${parentUid}))}}` },
+        parentUid: weekUid,
+        order: (i - weekStartsOn) % 7,
+      });
+    }
   });
   return weekUid;
 };
@@ -79,6 +91,19 @@ runExtension(ID, () => {
               type: "flag",
               description:
                 "Automatically load the current weekly note on initial Roam load of daily note page",
+            },
+            {
+              title: "auto tag",
+              type: "flag",
+              description:
+                "Automatically tag the weekly page on all the related daily pages when it's created",
+              defaultValue: true,
+            },
+            {
+              title: "auto embed",
+              type: "flag",
+              description:
+                "Automatically embed the related daily pages into a newly created weekly page",
             },
           ],
         },
