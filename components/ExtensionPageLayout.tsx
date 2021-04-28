@@ -159,7 +159,7 @@ const ExtensionPageLayout: React.FunctionComponent<{
     <StandardLayout
       title={idToTitle(id)}
       description={frontMatter.description}
-      img={`/thumbnails/${id}.png`}
+      img={`https://roamjs.com/thumbnails/${id}.png`}
     >
       <Breadcrumbs
         page={label}
