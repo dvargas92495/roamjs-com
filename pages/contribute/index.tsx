@@ -14,7 +14,8 @@ const ContributePage = (): React.ReactElement => {
       <H1>Sponsor</H1>
       <Body>
         Sponsorships support the development and maintenance of free to use
-        extensions on RoamJS.
+        extensions on RoamJS. Monthly sponsors will receive 125% RoamJS credit
+        that could be allocated towards RoamJS Queue projects.
       </Body>
       <Outlined style={{ padding: "16px 32px" }}>
         <SponsorCard source={"RoamJS Contribute"} />
