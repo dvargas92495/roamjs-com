@@ -84,6 +84,7 @@ const contributors = {
   "Elizabeth Brott Beese": "https://elizabethbeese.com",
   "Aneesh Makala": "https://twitter.com/makalaaneesh",
   "Marco Brambilla": "https://github.com/marcobrambilla",
+  "David Schulman": "https://associationsrewired.com/",
 };
 
 const emojisToTooltip = {
