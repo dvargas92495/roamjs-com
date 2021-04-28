@@ -3,7 +3,9 @@ import {
   InputGroup,
   Intent,
   Label,
+  Position,
   Spinner,
+  Toaster,
   Tooltip,
 } from "@blueprintjs/core";
 import React, { useEffect, useState } from "react";
@@ -28,6 +30,10 @@ import {
   useAuthenticatedAxiosGet,
   useAuthenticatedAxiosPut,
 } from "./ServiceCommonComponents";
+
+export const developerToaster = Toaster.create({
+  position: Position.TOP,
+});
 
 const DeveloperContent: StageContent = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -96,14 +102,18 @@ const DeveloperContent: StageContent = () => {
                       blocks: children,
                       viewType,
                     })
-                      .then((r) =>
+                      .then((r) => {
                         setInputSetting({
                           blockUid: getPageUidByPageTitle(p),
                           value: r.data.etag,
                           key: "ETag",
                           index: 1,
-                        })
-                      )
+                        });
+                        developerToaster.show({
+                          message: "Documentation has updated successfully!",
+                          intent: Intent.SUCCESS,
+                        });
+                      })
                       .catch((e) =>
                         setError(
                           e.response?.data?.error ||

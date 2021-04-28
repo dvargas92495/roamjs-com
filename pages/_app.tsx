@@ -47,30 +47,43 @@ const MdxImage = (props) => (
   />
 );
 
-const MyApp = ({ Component, pageProps }: AppProps): JSX.Element => {
+const MDXProviderWrapper: React.FunctionComponent<{ pathname: string }> = ({
+  pathname,
+  children,
+}) => {
+  return pathname === "/extensions/[id]" ? (
+    <>{children}</>
+  ) : (
+    <MDXProvider
+      components={{
+        h1: H1,
+        h2: H2,
+        h3: H3,
+        h4: H4,
+        h5: H5,
+        h6: H6,
+        p: Body,
+        code: Code,
+        inlineCode: InlineCode,
+        pre: Pre,
+        img: MdxImage,
+      }}
+    >
+      {children}
+    </MDXProvider>
+  );
+};
+
+const MyApp = ({ Component, pageProps, router }: AppProps): JSX.Element => {
   useTawkTo();
   return (
     <ClerkProvider frontendApi={process.env.NEXT_PUBLIC_CLERK_FRONTEND_API}>
       <ThemeProvider>
-        <MDXProvider
-          components={{
-            h1: H1,
-            h2: H2,
-            h3: H3,
-            h4: H4,
-            h5: H5,
-            h6: H6,
-            p: Body,
-            code: Code,
-            inlineCode: InlineCode,
-            pre: Pre,
-            img: MdxImage,
-          }}
-        >
+        <MDXProviderWrapper pathname={router.pathname}>
           <FeatureFlagProvider>
             <Component {...pageProps} />
           </FeatureFlagProvider>
-        </MDXProvider>
+        </MDXProviderWrapper>
       </ThemeProvider>
     </ClerkProvider>
   );

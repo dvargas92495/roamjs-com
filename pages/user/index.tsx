@@ -7,7 +7,6 @@ import {
   DataLoader,
   ExternalLink,
   H6,
-  IconButton,
   Items,
   Loading,
   NumberField,
@@ -25,7 +24,6 @@ import Link from "next/link";
 import { stripe } from "../../components/constants";
 import { useUser, SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
-import ServiceToken from "../../components/ServiceToken";
 import { defaultLayoutProps } from "../../components/Layout";
 
 const UserValue: React.FunctionComponent = ({ children }) => (
@@ -374,74 +372,6 @@ const Funding = () => {
   );
 };
 
-const Developer = () => {
-  const data = (useUser().publicMetadata as {
-    developer?: { token: string; paths: string[] };
-  })?.["developer"];
-  const [paths, setPaths] = useState<string[]>(data?.paths || []);
-  const [newPath, setNewPath] = useState("");
-  const [loading, setLoading] = useState(false);
-  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const authenticatedAxiosDelete = useAuthenticatedAxiosDelete();
-  const [error, setError] = useState("");
-  return (
-    <div>
-      <ServiceToken id={"developer"} token={data?.token} />
-      <H6 style={{ marginTop: 80 }}>Paths</H6>
-      <Items
-        items={paths.map((p) => ({
-          primary: <UserValue>{p}</UserValue>,
-          key: p,
-          action: (
-            <IconButton
-              icon={"delete"}
-              onClick={() => {
-                setLoading(true);
-                authenticatedAxiosDelete(`request-path?path=${p}`)
-                  .then((r) => setPaths(r.data.paths))
-                  .catch((e) => setError(e.response?.data || e.message))
-                  .finally(() => setLoading(false));
-              }}
-            />
-          ),
-        }))}
-        noItemMessage={null}
-      />
-      <div style={{ marginTop: 16 }}>
-        <StringField
-          value={newPath}
-          setValue={(v) => {
-            setNewPath(v);
-            setError("");
-          }}
-          label={"Path"}
-          error={!!error}
-          helperText={error}
-        />
-        <Button
-          onClick={() => {
-            setLoading(true);
-            authenticatedAxiosPost("request-path", { path: newPath })
-              .then((r) => {
-                setNewPath("");
-                setPaths(r.data.paths);
-              })
-              .catch((e) => setError(e.response?.data || e.message))
-              .finally(() => setLoading(false));
-          }}
-          variant={"outlined"}
-          style={{ margin: "0 16px" }}
-          color={"primary"}
-          disabled={!!error}
-        >
-          Request Path
-        </Button>
-        <Loading loading={loading} size={16} />
-      </div>
-    </div>
-  );
-};
-
 const Profile = () => {
   const user = useUser();
   const [isClerk, setIsClerk] = useState(false);
@@ -462,9 +392,6 @@ const Profile = () => {
           </Card>
           <Card title={"Sponsorships"}>
             <Funding />
-          </Card>
-          <Card title={"Developer"}>
-            <Developer />
           </Card>
         </VerticalTabs>
       )}
