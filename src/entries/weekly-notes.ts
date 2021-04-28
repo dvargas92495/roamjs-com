@@ -60,7 +60,7 @@ const createWeeklyPage = (pageName: string) => {
       createBlock({
         node: { text: `{{[[embed]]:((${parentUid}))}}` },
         parentUid: weekUid,
-        order: (i - weekStartsOn) % 7,
+        order: (i - weekStartsOn + 7) % 7,
       });
     }
   });
