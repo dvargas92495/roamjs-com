@@ -1,7 +1,8 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyHandler } from "aws-lambda";
+import axios from "axios";
 import { TreeNode, ViewType } from "roam-client";
-import { authenticate, headers, s3 } from "../lambda-helpers";
+import { authenticate, getGithubOpts, headers, s3 } from "../lambda-helpers";
 
 const viewTypeToPrefix = {
   bullet: "- ",
@@ -30,6 +31,7 @@ export const handler: APIGatewayProxyHandler = authenticate((event) => {
     blocks: TreeNode[];
     viewType: ViewType;
   };
+  const extension = path.replace(/(\.js|\/)$/, "");
   return users
     .getUser(userId)
     .then(
@@ -46,15 +48,29 @@ export const handler: APIGatewayProxyHandler = authenticate((event) => {
         : s3
             .upload({
               Bucket: "roamjs.com",
-              Key: `markdown/${path.replace(/(\.js|\/)$/, "")}.md`,
+              Key: `markdown/${extension}.md`,
               Body: blocks.map((b) => blockToMarkdown(b, viewType, 0)).join(""),
             })
             .promise()
+            .then((r) =>
+              axios
+                .post(
+                  `https://api.github.com/repos/dvargas92495/roam-js-extensions/actions/workflows/isr.yaml/dispatches`,
+                  { ref: "master", inputs: { extension } },
+                  getGithubOpts(),
+                )
+                .then((gh) => ({
+                  etag: r.ETag,
+                  gh: gh.data,
+                }))
+                .catch((e) => ({
+                  etag: r.ETag,
+                  gh: e.response.data,
+                }))
+            )
             .then((r) => ({
               statusCode: 200,
-              body: JSON.stringify({
-                etag: r.ETag,
-              }),
+              body: JSON.stringify(r),
               headers: headers(event),
             }))
     );

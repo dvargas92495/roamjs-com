@@ -25,7 +25,8 @@
     "extension": "node scripts/extension.js",
     "digest": "node scripts/digest.js",
     "lint": "eslint . --ext .ts,.tsx",
-    "prebuild": "npm install"
+    "prebuild": "npm install",
+    "upload": "node scripts/upload.js"
   },
   "repository": {
     "type": "git",
