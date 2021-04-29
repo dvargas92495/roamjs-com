@@ -6,7 +6,7 @@ import { defaultLayoutProps } from "../../components/Layout";
 import StandardLayout from "../../components/StandardLayout";
 import renderToString from "next-mdx-remote/render-to-string";
 import hydrate from "next-mdx-remote/hydrate";
-import { MdxRemote } from "next-mdx-remote/types";
+import type { MdxRemote } from "next-mdx-remote/types";
 
 const ExtensionPage = ({
   content,
@@ -47,11 +47,13 @@ export const getStaticProps: GetStaticProps<
     .then((content) => ({
       props: { content },
     }))
-    .catch(() => ({
+    .catch((e) => ({
       props: {
         content: {
           compiledSource: "",
-          renderedOutput: "",
+          renderedOutput: `Failed to load ${
+            context.params.id
+          } due to error ${JSON.stringify(e)}`,
         },
       },
     }));

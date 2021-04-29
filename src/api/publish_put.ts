@@ -59,13 +59,8 @@ export const handler: APIGatewayProxyHandler = authenticate((event) => {
                   { ref: "master", inputs: { extension } },
                   getGithubOpts(),
                 )
-                .then((gh) => ({
+                .then(() => ({
                   etag: r.ETag,
-                  gh: gh.data,
-                }))
-                .catch((e) => ({
-                  etag: r.ETag,
-                  gh: e.response.data,
                 }))
             )
             .then((r) => ({
