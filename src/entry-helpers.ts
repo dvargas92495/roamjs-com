@@ -892,7 +892,15 @@ const context = {
     text: getTextByBlockUid(ref),
     page: getPageTitleByBlockUid(ref),
   }),
-  components: (() => false) as () => false,
+  components: (s: string, ac?: string) => {
+    if (/roam\/render/i.test(s)) {
+      const acCode = ac || "";
+      const uid = BLOCK_REF_REGEX.exec(acCode)?.[1];
+      const code = uid ? getTextByBlockUid(uid) : acCode;
+      return `<div>Roam Render of: <code>${code.slice(0,50)}</code></div>`;
+    }
+    return false;
+  },
 };
 export const parseRoamMarked = (text: string): string =>
   parseInline(text, context);
