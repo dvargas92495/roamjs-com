@@ -107,6 +107,10 @@ variable "encryption_secret" {
   type = string
 }
 
+variable "convertkit_api_token" {
+  type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -501,4 +505,10 @@ resource "github_actions_secret" "encryption_secret" {
   repository       = "roam-js-extensions"
   secret_name      = "ENCRYPTION_SECRET"
   plaintext_value  = var.encryption_secret
+}
+
+resource "github_actions_secret" "convertkit_api_token" {
+  repository       = "roam-js-extensions"
+  secret_name      = "CONVERTKIT_API_TOKEN"
+  plaintext_value  = var.convertkit_api_token
 }

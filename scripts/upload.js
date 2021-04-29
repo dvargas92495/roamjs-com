@@ -4,26 +4,32 @@ const path = require("path");
 
 const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
 const cloudfront = new AWS.CloudFront({ apiVersion: "2020-05-31" });
-const waitForCloudfront = (props) => new Promise((resolve) => {
-  const { trial = 0, ...args } = props;
-  const status = await cloudfront
-    .getInvalidation(args)
-    .promise()
-    .then((r) => r.Invalidation.Status);
-  if (status === "Completed") {
-    resolve("Done!");
-  } else if (trial === 60) {
-    resolve("Ran out of time waiting for cloudfront...");
-  } else {
-    console.log(
-      "Still waiting for invalidation. Found",
-      status,
-      "on trial",
-      trial
-    );
-    setTimeout(() => waitForCloudfront({ ...args, trial: trial + 1 }), 1000);
-  }
-});
+const waitForCloudfront = (props) =>
+  new Promise((resolve) => {
+    const { trial = 0, ...args } = props;
+    cloudfront
+      .getInvalidation(args)
+      .promise()
+      .then((r) => r.Invalidation.Status)
+      .then((status) => {
+        if (status === "Completed") {
+          resolve("Done!");
+        } else if (trial === 60) {
+          resolve("Ran out of time waiting for cloudfront...");
+        } else {
+          console.log(
+            "Still waiting for invalidation. Found",
+            status,
+            "on trial",
+            trial
+          );
+          setTimeout(
+            () => waitForCloudfront({ ...args, trial: trial + 1 }),
+            1000
+          );
+        }
+      });
+  });
 
 const extension = process.argv[2];
 const DistributionId = process.env.CLOUDFRONT_ARN.match(
@@ -47,16 +53,18 @@ const uploads = fileNames
     Body: fs.readFileSync(path.join(__dirname, "..", "out", m)).toString(),
   }))
   .map(({ name, Body }) =>
-    s3.upload({ 
-      Bucket: "roamjs.com", 
-      Body, 
-      Key: name.slice(1), 
-      ContentType: name.endsWith('.js')
-        ? 'text/javascript' 
-        : name.endsWith('.css') 
-          ? "text/css" 
-          : "text/plain" 
-    }).promise()
+    s3
+      .upload({
+        Bucket: "roamjs.com",
+        Body,
+        Key: name.slice(1),
+        ContentType: name.endsWith(".js")
+          ? "text/javascript"
+          : name.endsWith(".css")
+          ? "text/css"
+          : "text/plain",
+      })
+      .promise()
   );
 
 Promise.all([
@@ -85,5 +93,5 @@ Promise.all([
       })
       .promise();
   })
-  .then((r) => waitForCloudfront({Id: r.Invalidation.Id, DistributionId}))
+  .then((r) => waitForCloudfront({ Id: r.Invalidation.Id, DistributionId }))
   .then(console.log);
