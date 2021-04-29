@@ -16,11 +16,8 @@ env:
   NEXT_PUBLIC_REST_API_URL: "https://api.roamjs.com"
   NEXT_PUBLIC_FLOSS_API_URL: "https://api.davidvargas.me"
   NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
-  NEXT_PUBLIC_AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
   NEXT_PUBLIC_CLERK_FRONTEND_API: clerk.roamjs.com
   NEXT_PUBLIC_CLERK_SIGN_IN: https://accounts.roamjs.com/sign-in
-  NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
-  NEXT_PUBLIC_SLACK_CLIENT_ID: ${{ secrets.SLACK_CLIENT_ID }}
 
 jobs:
   deploy:

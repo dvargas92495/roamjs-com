@@ -3,23 +3,6 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { TreeNode, ViewType } from "roam-client";
 import { authenticate, headers, s3 } from "../lambda-helpers";
 
-/* Invalidate when we have ISR
-import AWS from "aws-sdk";
-
-const cloudfront = new AWS.CloudFront({ apiVersion: "2020-05-31" });
-cloudfront
-            .createInvalidation({
-              DistributionId: process.env.CLOUDFRONT_ARN.match(/:distribution\/(.*)$/)[1],
-              InvalidationBatch: {
-                CallerReference: new Date().toJSON(),
-                Paths: {
-                  Quantity: 1,
-                  Items: [`/${}`],
-                },
-              },
-            }).promise()
-*/
-
 const viewTypeToPrefix = {
   bullet: "- ",
   document: "",
