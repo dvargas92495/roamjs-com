@@ -23,6 +23,7 @@ import {
   getUidsFromButton,
   getTextByBlockUid,
   getTreeByBlockUid,
+  fixViewType,
 } from "roam-client";
 
 addStyle(`.roamjs-collapsible-caret {
@@ -96,12 +97,15 @@ runExtension("presentation", async () => {
             )?.[1],
             collapsible: !!buttonText.match(COLLAPSIBLE_REGEX),
             animate: !!buttonText.match(ANIMATE_REGEX),
-            transition: buttonText.match(TRANSITION_REGEX)?.[1] || '',
+            transition: buttonText.match(TRANSITION_REGEX)?.[1] || "",
           }
         : {};
       render({
         button,
-        getSlides: () => getTreeByBlockUid(blockUid).children,
+        getSlides: () =>
+          getTreeByBlockUid(blockUid).children.map((c) =>
+            fixViewType({ c, v: "bullet" })
+          ),
         options,
       });
     },

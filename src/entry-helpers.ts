@@ -9,13 +9,18 @@ import {
   getTreeByBlockUid,
   getUids,
   toRoamDate,
+  TreeNode,
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import { Dict } from "mixpanel-browser";
-import { getTextByBlockUid, RoamBlock } from "roam-client";
+import {
+  getTextByBlockUid,
+  RoamBlock,
+  parseInline,
+  parseRoamBlocksToHtml,
+} from "roam-client";
 import axios, { AxiosResponse } from "axios";
-import { SidebarWindow } from "roam-client/lib/types";
-import { parseInline } from "roam-marked";
+import { SidebarWindow, ViewType } from "roam-client/lib/types";
 
 declare global {
   interface Window {
@@ -196,16 +201,19 @@ export const replaceTagText = ({
   }
 };
 
-export const getReferenceBlockUid = (e: HTMLElement, className: 'rm-block-ref' | 'rm-alias--block'): string => {
+export const getReferenceBlockUid = (
+  e: HTMLElement,
+  className: "rm-block-ref" | "rm-alias--block"
+): string => {
   const parent = e.closest(".roam-block") as HTMLDivElement;
   if (!parent) {
     return "";
   }
   const { blockUid } = getUids(parent);
   const refs = getChildRefUidsByBlockUid(blockUid);
-  const index = Array.from(
-    parent.getElementsByClassName(className)
-  ).findIndex((el) => el === e || el.contains(e));
+  const index = Array.from(parent.getElementsByClassName(className)).findIndex(
+    (el) => el === e || el.contains(e)
+  );
   return refs[index];
 };
 
@@ -884,9 +892,23 @@ const context = {
     text: getTextByBlockUid(ref),
     page: getPageTitleByBlockUid(ref),
   }),
+  components: (() => false) as () => false,
 };
 export const parseRoamMarked = (text: string): string =>
   parseInline(text, context);
+export const parseRoamBlocks = ({
+  content,
+  viewType,
+}: {
+  content: TreeNode[];
+  viewType: ViewType;
+}): string =>
+  parseRoamBlocksToHtml({
+    content,
+    viewType,
+    level: 0,
+    context,
+  });
 
 export const getBlockUidFromTarget = (target: HTMLElement): string => {
   const ref = target.closest(".rm-block-ref") as HTMLSpanElement;
@@ -899,12 +921,14 @@ export const getBlockUidFromTarget = (target: HTMLElement): string => {
     return getUids(customView).blockUid;
   }
 
-  const aliasTooltip = target.closest('.rm-alias-tooltip__content')
+  const aliasTooltip = target.closest(".rm-alias-tooltip__content");
   if (aliasTooltip) {
-    const aliasRef = document.querySelector('.bp3-popover-open .rm-alias--block') as HTMLAnchorElement;
-    return getReferenceBlockUid(aliasRef, 'rm-alias--block');
+    const aliasRef = document.querySelector(
+      ".bp3-popover-open .rm-alias--block"
+    ) as HTMLAnchorElement;
+    return getReferenceBlockUid(aliasRef, "rm-alias--block");
   }
-  
+
   const { blockUid } = getUids(target.closest(".roam-block") as HTMLDivElement);
   const kanbanTitle = target.closest(".kanban-title");
   if (kanbanTitle) {

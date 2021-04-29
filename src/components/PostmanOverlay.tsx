@@ -3,8 +3,7 @@ import axios from "axios";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import { getTreeByBlockUid, TreeNode, TextNode } from "roam-client";
-import { createTagRegex, extractTag } from "../entry-helpers";
-import marked from "roam-marked";
+import { createTagRegex, extractTag, parseRoamBlocks } from "../entry-helpers";
 
 type PostmanProps = {
   apiUid: string;
@@ -20,17 +19,6 @@ const toText = ({ t, i }: { t: TreeNode; i: number }): string => {
   const line = `${"".padEnd(i * 2, " ")}${t.text}\n`;
   const lines = t.children.map((c) => toText({ t: c, i: i + 1 })).join("");
   return `${line}${lines}`;
-};
-
-const toHtml = ({ t }: { t: TreeNode }): string => {
-  const html = marked(t.text);
-  if (t.children.length) {
-    const ul = `<ul>${t.children
-      .map((c) => `<li>${toHtml({ t: c })}</li>`)
-      .join("")}</ul>`;
-    return `${html}${ul}`;
-  }
-  return html;
 };
 
 const convertTextToValue = ({
@@ -51,9 +39,7 @@ const convertTextToValue = ({
     .replace(/{tree(?::(text|html))?}/i, (_, f) => {
       const format = f?.toUpperCase?.();
       if (format === "HTML") {
-        return `<ul>${blockTree.children
-          .map((t) => toHtml({ t }))
-          .join("")}</ul>`;
+        return parseRoamBlocks({ content: blockTree.children, viewType: 'bullet' });
       } else if (format === "TEXT") {
         return blockTree.children.map((t) => toText({ t, i: 0 })).join("");
       } else {

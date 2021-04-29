@@ -1,5 +1,4 @@
 import { Button, Overlay, Dialog } from "@blueprintjs/core";
-import marked from "roam-marked";
 import React, {
   useCallback,
   useEffect,
@@ -9,9 +8,9 @@ import React, {
 } from "react";
 import ReactDOM from "react-dom";
 import Reveal from "reveal.js";
-import { addStyle, isControl, resolveRefs } from "../entry-helpers";
+import { addStyle, isControl, parseRoamBlocks } from "../entry-helpers";
 import { isSafari } from "mobile-device-detect";
-import { getUids, ViewType } from "roam-client";
+import { getUids, TreeNode, ViewType } from "roam-client";
 
 const SAFARI_THEMES = ["black", "white", "beige"];
 
@@ -30,56 +29,18 @@ export const VALID_THEMES = [
 const IMG_MAX_WIDTH = 580;
 const IMG_MAX_HEIGHT = 720;
 
-const renderViewType = (viewType: ViewType) => {
-  switch (viewType) {
-    case "numbered":
-      return "1. ";
-    case "document":
-    case "bullet":
-    default:
-      return "- ";
-  }
-};
-
 const unload = () =>
   Array.from(window.roamjs.dynamicElements)
     .filter((s) => !!s.parentElement)
     .forEach((s) => s.parentElement.removeChild(s));
 
-// I'll clean this up if anyone asks. My god it's horrendous
-const renderBullet = ({
-  c,
-  i,
-  parentViewType,
-}: {
-  c: Slide;
-  i: number;
-  parentViewType?: ViewType;
-}): string =>
-  `${"".padStart(i * 4, " ")}${renderViewType(parentViewType)}${
-    c.heading ? `${"".padStart(c.heading, "#")} ` : ""
-  }${resolveRefs(c.text.replace(/^\* /, "\\* "))}${
-    c.open && c.children.length
-      ? `\n${c.children
-          .map(
-            (nested) =>
-              `${renderBullet({
-                c: nested,
-                i: i + 1,
-                parentViewType: c.viewType,
-              })}`
-          )
-          .join(parentViewType === "document" ? "\n\n" : "\n")}`
-      : ""
-  }`;
-
-const Notes = ({ note }: { note?: Slide }) => (
+const Notes = ({ note }: { note?: TreeNode }) => (
   <>
     {note && (
       <aside
         className="notes"
         dangerouslySetInnerHTML={{
-          __html: marked(renderBullet({ c: note, i: 0 })),
+          __html: parseRoamBlocks({content: [note], viewType: 'bullet'}),
         }}
       />
     )}
@@ -165,7 +126,7 @@ const TitleSlide = ({
   animate,
 }: {
   text: string;
-  note: Slide;
+  note: TreeNode;
   transition: string;
   animate: boolean;
 }) => {
@@ -195,7 +156,7 @@ const ENDS_WITH_LEFT = new RegExp(" left$", "i");
 const ENDS_WITH_CENTER = new RegExp(" center$", "i");
 
 type ContentSlideExtras = {
-  note: Slide;
+  note: TreeNode;
   layout: string;
   collapsible: boolean;
   animate: boolean;
@@ -208,7 +169,7 @@ const setDocumentLis = ({
   v,
 }: {
   e: HTMLElement;
-  s: Slides;
+  s: TreeNode[];
   v: ViewType;
 }): void => {
   Array.from(e.children).forEach((li: HTMLLIElement, i) => {
@@ -237,7 +198,7 @@ const findLinkResize = ({
   slides,
   field,
 }: {
-  slides: Slides;
+  slides: TreeNode[];
   src: string;
   field: "imageResize" | "iframe";
 }): LinkResize => {
@@ -266,7 +227,7 @@ const ContentSlide = ({
   transition,
 }: {
   text: string;
-  children: Slides;
+  children: TreeNode[];
   viewType: ViewType;
   transition: string;
   animate: boolean;
@@ -422,11 +383,7 @@ const ContentSlide = ({
         <div
           className={"roamjs-bullets-container"}
           dangerouslySetInnerHTML={{
-            __html: marked(
-              bullets
-                .map((c) => renderBullet({ c, i: 0, parentViewType: viewType }))
-                .join(viewType === "document" ? "\n\n" : "\n")
-            ),
+            __html: parseRoamBlocks({content: bullets, viewType}),
           }}
           style={{
             width: isImageLayout ? "50%" : "100%",
@@ -510,8 +467,13 @@ export const ANIMATE_REGEX = /(?:\[\[{|{\[\[|{)animate(?:\]\]}|}\]\]|})/i;
 export const TRANSITION_REGEX = /(?:\[\[{|{\[\[|{)transition:(none|fade|slide|convex|concave|zoom)(?:\]\]}|}\]\]|})/i;
 const HIDE_REGEX = /(?:\[\[{|{\[\[|{)hide(?:\]\]}|}\]\]|})/i;
 
+const filterHideBlocks = (s: TreeNode) => {
+  s.children = s.children.filter(t => !HIDE_REGEX.test(t.text)).map(filterHideBlocks);
+  return s;
+}
+
 const PresentationContent: React.FunctionComponent<{
-  slides: Slides;
+  slides: TreeNode[];
   showNotes: boolean;
   onClose: (index: number) => void;
   globalCollapsible: boolean;
@@ -531,6 +493,7 @@ const PresentationContent: React.FunctionComponent<{
   const slidesRef = useRef<HTMLDivElement>(null);
   const mappedSlides = slides
     .filter((s) => !HIDE_REGEX.test(s.text))
+    .map((s) => filterHideBlocks(s))
     .map((s) => {
       let layout = "default";
       let collapsible = globalCollapsible || false;
@@ -654,7 +617,7 @@ const PresentationContent: React.FunctionComponent<{
     <>
       <div className="reveal" id="roamjs-reveal-root">
         <div className="slides" ref={slidesRef}>
-          {mappedSlides.map((s: Slide & ContentSlideExtras, i) => (
+          {mappedSlides.map((s: TreeNode & ContentSlideExtras, i) => (
             <React.Fragment key={i}>
               {s.children.length ? (
                 <ContentSlide {...s} />
@@ -681,7 +644,7 @@ const PresentationContent: React.FunctionComponent<{
 };
 
 const Presentation: React.FunctionComponent<{
-  getSlides: () => Slides;
+  getSlides: () => TreeNode[];
   theme?: string;
   notes?: string;
   collapsible?: boolean;
@@ -697,7 +660,7 @@ const Presentation: React.FunctionComponent<{
   );
   const showNotes = notes === "true";
   const [showOverlay, setShowOverlay] = useState(false);
-  const [slides, setSlides] = useState<Slides>([]);
+  const [slides, setSlides] = useState<TreeNode[]>([]);
   const [startIndex, setStartIndex] = useState(0);
   const onClose = useCallback(
     (currentSlide: number) => {
@@ -742,7 +705,7 @@ const Presentation: React.FunctionComponent<{
     setSlides(slides);
     const { blockUid } = getUids(document.activeElement as HTMLTextAreaElement);
     if (blockUid) {
-      const someFcn = (s: Slide) =>
+      const someFcn = (s: TreeNode) =>
         s.uid === blockUid || s.children.some(someFcn);
       const startIndex = slides.findIndex(someFcn);
       setStartIndex(Math.max(0, startIndex));
@@ -789,28 +752,13 @@ type LinkResize = {
   };
 };
 
-type Slide = {
-  uid: string;
-  text: string;
-  children: Slides;
-  heading?: number;
-  open: boolean;
-  viewType: ViewType;
-  props: {
-    imageResize: LinkResize;
-    iframe: LinkResize;
-  };
-};
-
-type Slides = Slide[];
-
 export const render = ({
   button,
   getSlides,
   options,
 }: {
   button: HTMLButtonElement;
-  getSlides: () => Slides;
+  getSlides: () => TreeNode[];
   options: { [key: string]: string | boolean };
 }): void =>
   ReactDOM.render(
