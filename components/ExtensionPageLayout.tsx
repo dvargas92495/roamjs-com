@@ -85,6 +85,7 @@ const contributors = {
   "Aneesh Makala": "https://twitter.com/makalaaneesh",
   "Marco Brambilla": "https://github.com/marcobrambilla",
   "David Schulman": "https://associationsrewired.com/",
+  "Scott Block": "https://twitter.com/insidetheblock",
 };
 
 const emojisToTooltip = {

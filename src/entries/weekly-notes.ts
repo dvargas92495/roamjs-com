@@ -52,13 +52,13 @@ const createWeeklyPage = (pageName: string) => {
   DAYS.forEach((_, i) => {
     const dayDate = setDay(date, i, { weekStartsOn });
     const title = toRoamDate(dayDate);
-    const parentUid = getPageUidByPageTitle(title) || createPage({ title });
     if (autoTag) {
+      const parentUid = getPageUidByPageTitle(title) || createPage({ title });
       createBlock({ node: { text: `#[[${pageName}]]` }, parentUid });
     }
     if (autoEmbed) {
       createBlock({
-        node: { text: `{{[[embed]]:((${parentUid}))}}` },
+        node: { text: `{{[[embed]]:[[${title}]]}}` },
         parentUid: weekUid,
         order: (i - weekStartsOn + 7) % 7,
       });
@@ -68,8 +68,15 @@ const createWeeklyPage = (pageName: string) => {
 };
 
 const navigateToPage = (pageName: string) => {
-  const pageUid = getPageUidByPageTitle(pageName) || createWeeklyPage(pageName);
-  setTimeout(() => window.location.assign(getRoamUrl(pageUid)), 100);
+  const existingPageUid = getPageUidByPageTitle(pageName);
+  const { pageUid, timeout } = existingPageUid
+    ? { pageUid: existingPageUid, timeout: 1 }
+    : { pageUid: createWeeklyPage(pageName), timeout: 500 };
+  setTimeout(() => {
+    if (pageUid) {
+      window.location.assign(getRoamUrl(pageUid));
+    }
+  }, timeout);
 };
 
 runExtension(ID, () => {
