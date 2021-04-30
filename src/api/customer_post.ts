@@ -5,6 +5,7 @@ import { bareSuccessResponse, ses } from "../lambda-helpers";
 import { Webhook } from "diahook";
 
 const wh = new Webhook(process.env.DIAHOOK_SECRET);
+const ckApiSecret = process.env.CONVERTKIT_API_TOKEN;
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -36,10 +37,34 @@ export const handler = async (
       email,
     })
     .then((r) =>
-      users.updateUser(id, {
-        privateMetadata: {
+      axios
+        .get(
+          `https://api.convertkit.com/v3/subscribers?api_secret=${ckApiSecret}&email_address=${email}`
+        )
+        .then((ck) =>
+          ck.data.total_subscribers > 0
+            ? ck.data.subscribers[0].id
+            : axios
+                .post("https://api.convertkit.com/v3/forms/2239289/subscribe", {
+                  api_secret: ckApiSecret,
+                  email,
+                })
+                .then((sub) => sub.data.subscription.subscriber.id)
+        )
+        .then((convertKit) => ({
           stripeId: r.data.customer,
-        },
+          convertKit,
+        }))
+        .catch((e) => {
+          console.error(e);
+          return {
+            stripeId: r.data.customer,
+          };
+        })
+    )
+    .then((privateMetadata) =>
+      users.updateUser(id, {
+        privateMetadata,
       })
     )
     .then((user) =>
@@ -62,6 +87,7 @@ export const handler = async (
 <p>Thanks for signing up for RoamJS!</p>
 <p>You already had access to the many free to use Roam extensions offered by RoamJS, which could be found <a href="https://roamjs.com/docs">here.</a></p>
 <p>Now with a RoamJS account, you have access to <b>premium</b> RoamJS services to really get the most out of your Roam graph. Browse through the available services <a href="https://roamjs.com/services">here!</a></p>
+<p>You have also been automatically subscribed to the RoamJS Digest, where you'll receive the latest news and updates on all things RoamJS. To unsubscribe, you could visit your <a href="https://roamjs.com/user">user page</a>.</p>
 <p>If you have any questions, always feel free to reach out <a href="mailto:support@roamjs.com">support@roamjs.com.</a></p>
 <p>Excited to have you join the rest of Roam's power users!</p>
 <br>
