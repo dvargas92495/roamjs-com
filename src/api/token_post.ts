@@ -1,11 +1,16 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { generateToken, getClerkUser, headers } from "../lambda-helpers";
+import {
+  generateToken,
+  getClerkUser,
+  getStripePriceId,
+  headers,
+} from "../lambda-helpers";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> =>
-  getClerkUser(event).then((user) => {
+  getClerkUser(event).then(async (user) => {
     if (!user) {
       return {
         statusCode: 401,
@@ -19,18 +24,26 @@ export const handler = async (
     const publicMetadata = user.publicMetadata as {
       [key: string]: Record<string, unknown>;
     };
+    if (!publicMetadata[service].token) {
+      if (await getStripePriceId(service).catch(() => "Invalid")) {
+        return {
+          statusCode: 401,
+          body: `Not authorized to generate a new token if there is no existing token for ${service}.`,
+          headers: headers(event),
+        };
+      }
+    }
+
     const token = generateToken(id);
     return users
       .updateUser(id, {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
-        publicMetadata: JSON.stringify({
+        publicMetadata: {
           ...publicMetadata,
           [service]: {
             ...publicMetadata[service],
             token,
           },
-        }),
+        },
       })
       .then(() => ({
         statusCode: 200,

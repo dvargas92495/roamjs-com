@@ -1,7 +1,6 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { generateToken, headers } from "../lambda-helpers";
-import randomstring from "randomstring";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -20,9 +19,10 @@ export const handler = async (
     };
   }
 
-  const { checkoutToken, ...rest } = await users
-    .getUser(userId)
-    .then((r) => r.privateMetadata as { checkoutToken?: string });
+  const {
+    privateMetadata: { checkoutToken, ...rest },
+    publicMetadata,
+  } = await users.getUser(userId);
   if (!checkoutToken) {
     return {
       statusCode: 401,
@@ -39,16 +39,13 @@ export const handler = async (
   }
 
   await users.updateUser(userId, {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
-    privateMetadata: JSON.stringify(rest),
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
-    publicMetadata: JSON.stringify({
+    privateMetadata: rest,
+    publicMetadata: {
+      ...publicMetadata,
       [service]: {
         token: generateToken(userId),
       },
-    }),
+    },
   });
 
   return {

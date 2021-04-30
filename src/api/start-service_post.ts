@@ -2,7 +2,7 @@ import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
 import { v4 } from "uuid";
-import { generateToken, getClerkUser, headers } from "../lambda-helpers";
+import { generateToken, getClerkUser, getStripePriceId, headers } from "../lambda-helpers";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -16,23 +16,13 @@ export const handler = async (
     };
   }
   const { service } = JSON.parse(event.body || "{}") as { service: string };
-  const productName = `roamjs ${service.split("-").slice(-1)}`;
   const serviceCamelCase = service
     .split("-")
     .map((s, i) =>
       i == 0 ? s : `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`
     )
     .join("");
-
-  const priceId = await axios
-    .get<{ products: { name: string; prices: { id: string }[] }[] }>(
-      `${process.env.FLOSS_API_URL}/stripe-products?project=RoamJS`
-    )
-    .then(
-      (r) =>
-        r.data.products.find((p) => p.name.toLowerCase() === productName)
-          ?.prices?.[0]?.id
-    );
+  const priceId = await getStripePriceId(service);
 
   const checkoutToken = v4();
 

@@ -6,7 +6,13 @@ import ServiceLayout, {
 
 const DeveloperPage: React.FC<ServicePageProps> = (props) => {
   return (
-    <ServiceLayout development {...props}>
+    <ServiceLayout
+      development
+      {...props}
+      description={
+        "Manage your RoamJS extensions and services from within Roam!"
+      }
+    >
       The Developer Service allows other developers to host extensions and
       services on RoamJS! Extensions can be hosted for free. RoamJS will charge
       5% of each subscription for services.

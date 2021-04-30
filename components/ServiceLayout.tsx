@@ -51,7 +51,7 @@ export const getStaticPropsForPage: (
       props: {
         description: "Failed to load description",
         price: 0,
-        image: "",
+        image: `/thumbnails/${id}.png`,
         id,
       },
     }));
@@ -59,10 +59,16 @@ export const getStaticPropsForPage: (
 const StartButtonText = ({ price }: { price: number }) => (
   <>
     <span style={{ fontSize: 14 }}>Start for</span>
-    <span style={{ fontWeight: 600, fontSize: 18, marginLeft: 4 }}>
-      ${price}
-    </span>
-    <span style={{ textTransform: "none" }}>/mo</span>
+    {price === 0 ? (
+      <span style={{ fontSize: 14, marginLeft: 4 }}>Free</span>
+    ) : (
+      <>
+        <span style={{ fontWeight: 600, fontSize: 18, marginLeft: 4 }}>
+          ${price}
+        </span>
+        <span style={{ textTransform: "none" }}>/mo</span>
+      </>
+    )}
   </>
 );
 
@@ -78,7 +84,9 @@ const LaunchButton: React.FC<{
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const startService = useCallback(
     () =>
-      authenticatedAxiosPost("start-service", { service: id }).then((r) =>
+      authenticatedAxiosPost(price === 0 ? "token" : "start-service", {
+        service: id,
+      }).then((r) =>
         r.data.sessionId
           ? stripe.then((s) =>
               s
@@ -97,7 +105,7 @@ const LaunchButton: React.FC<{
       buttonText={<StartButtonText price={price} />}
       content={`By clicking submit below, you will subscribe to the RoamJS Service: ${idToTitle(
         id
-      )} for $${price}/month.`}
+      )}${price > 0 ? ` for $${price}/month` : ""}.`}
       onSuccess={start}
       title={`RoamJS ${idToTitle(id)}`}
       defaultIsOpen={started === "true"}
@@ -241,14 +249,16 @@ const ServiceLayout = ({
           <Subtitle>{description}</Subtitle>
           <div style={{ marginBottom: 16 }} />
           <div>{StartNowButton}</div>
-          <div style={{ marginTop: 16 }}>
-            Interested? Set up a call with RoamJS and get the{" "}
-            <b>FIRST THREE MONTHS FREE!</b> Book a time{" "}
-            <ExternalLink href={"https://calendly.com/dvargas92495/roamjs"}>
-              here
-            </ExternalLink>{" "}
-            or reach out to support@roamjs.com to ask for more details!
-          </div>
+          {price > 0 && (
+            <div style={{ marginTop: 16 }}>
+              Interested? Set up a call with RoamJS and get the{" "}
+              <b>FIRST THREE MONTHS FREE!</b> Book a time{" "}
+              <ExternalLink href={"https://calendly.com/dvargas92495/roamjs"}>
+                here
+              </ExternalLink>{" "}
+              or reach out to support@roamjs.com to ask for more details!
+            </div>
+          )}
         </div>
         <div style={{ width: "50%", padding: "0 32px" }}>
           <span

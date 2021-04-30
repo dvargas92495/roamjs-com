@@ -339,3 +339,16 @@ export const listAll = async (Prefix: string): Promise<AWS.S3.ObjectList> => {
   }
   return objects;
 };
+
+export const getStripePriceId = (service: string): Promise<string> =>
+  axios
+    .get<{ products: { name: string; prices: { id: string }[] }[] }>(
+      `${process.env.FLOSS_API_URL}/stripe-products?project=RoamJS`
+    )
+    .then(
+      (r) =>
+        r.data.products.find(
+          (p) =>
+            p.name.toLowerCase() === `roamjs ${service.split("-").slice(-1)}`
+        )?.prices?.[0]?.id
+    );
