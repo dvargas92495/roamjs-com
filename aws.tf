@@ -128,7 +128,7 @@ module "aws-static-site" {
 
 module "aws_static_site" {
   source  = "dvargas92495/static-site/aws"
-  version = "2.1.1"
+  version = "2.1.2"
 
   domain = "roamjs.com"
   secret = var.secret
