@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
 import {
   Body,
@@ -70,6 +70,9 @@ const useEditableSetting = ({
 
 const Settings = ({ name, email }: { name: string; email: string }) => {
   const axiosPut = useAuthenticatedAxiosPut();
+  const axiosGet = useAuthenticatedAxiosGet();
+  const axiosPost = useAuthenticatedAxiosPost();
+  const axiosDelete = useAuthenticatedAxiosDelete();
   const onNameSave = useCallback(
     (n) => axiosPut("name", { name: n }).then(() => console.log("saved")),
     [axiosPut]
@@ -79,6 +82,29 @@ const Settings = ({ name, email }: { name: string; email: string }) => {
     name: "name",
     onSave: onNameSave,
   });
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const subscribe = useCallback(() => {
+    setLoading(true);
+    axiosPost("convertkit")
+      .then(() => {
+        setIsSubscribed(true);
+      })
+      .finally(() => setLoading(false));
+  }, [setLoading, setIsSubscribed, axiosPut]);
+  const unsubscribe = useCallback(() => {
+    setLoading(true);
+    axiosDelete("convertkit")
+      .then(() => {
+        setIsSubscribed(false);
+      })
+      .finally(() => setLoading(false));
+  }, [setLoading, setIsSubscribed, axiosDelete]);
+  useEffect(() => {
+    axiosGet("convertkit")
+      .then((r) => setIsSubscribed(r.data.isSubscribed))
+      .finally(() => setLoading(false));
+  }, [setLoading, setIsSubscribed, axiosGet]);
   return (
     <Items
       items={[
@@ -91,6 +117,42 @@ const Settings = ({ name, email }: { name: string; email: string }) => {
           primary: namePrimary,
           key: 1,
           avatar: <Subtitle>Name</Subtitle>,
+        },
+        {
+          primary: (
+            <UserValue>
+              <Body>
+                {loading ? (
+                  <Loading loading />
+                ) : isSubscribed ? (
+                  "Subscribed"
+                ) : (
+                  "Unsubscribed"
+                )}
+              </Body>
+            </UserValue>
+          ),
+          key: 2,
+          avatar: <Subtitle>Digest</Subtitle>,
+          action:
+            !loading &&
+            (isSubscribed ? (
+              <Button
+                variant={"outlined"}
+                color={"secondary"}
+                onClick={unsubscribe}
+              >
+                Unsubscribe
+              </Button>
+            ) : (
+              <Button
+                variant={"contained"}
+                color={"primary"}
+                onClick={subscribe}
+              >
+                Subscribe
+              </Button>
+            )),
         },
       ]}
     />

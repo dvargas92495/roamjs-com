@@ -29,6 +29,27 @@ functions:
           path: balance
           method: post
           cors: true
+  convertkit-get:
+    handler: out/convertkit_get.handler
+    events:
+      - http:
+          path: convertkit
+          method: get
+          cors: true
+  convertkit-delete:
+    handler: out/convertkit_delete.handler
+    events:
+      - http:
+          path: convertkit
+          method: delete
+          cors: true
+  convertkit-post:
+    handler: out/convertkit_post.handler
+    events:
+      - http:
+          path: convertkit
+          method: post
+          cors: true
   customer-post:
     handler: out/customer_post.handler
     events:

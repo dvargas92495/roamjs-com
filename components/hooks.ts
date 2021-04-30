@@ -107,11 +107,11 @@ export const useAuthenticatedAxiosGet = <T = unknown>(): ((
 
 export const useAuthenticatedAxiosPost = (): ((
   path: string,
-  data: Record<string, unknown>
+  data?: Record<string, unknown>
 ) => Promise<AxiosResponse>) => {
   const { session } = useClerk();
   return useCallback(
-    (path: string, data: Record<string, unknown>) => {
+    (path: string, data = {}) => {
       const url = new URL(`${API_URL}/${path}`);
       url.searchParams.set("_clerk_session_id", session.id);
       return axios.post(url.toString(), data, {
