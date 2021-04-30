@@ -168,9 +168,11 @@ const sortCallbacks = {
 };
 
 const onCreateSortIcons = (container: HTMLDivElement) => {
+  const pageConfig = getConfigFromPage("roam/js/query-tools");
   const config = getConfigFromBlock(container);
 
-  const defaultSort = config["Default Sort"] as keyof typeof sortCallbacks;
+  const defaultSort = (config["Default Sort"] ||
+    pageConfig["Default Sort"]) as keyof typeof sortCallbacks;
   if (defaultSort && sortCallbacks[defaultSort]) {
     sortCallbacks[defaultSort](container)();
   }
