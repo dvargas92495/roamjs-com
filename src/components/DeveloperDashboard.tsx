@@ -131,7 +131,7 @@ const DeveloperContent: StageContent = () => {
                   minimal
                   onClick={() => {
                     setLoading(true);
-                    authenticatedAxiosDelete(`request-path?path=${p}`)
+                    authenticatedAxiosDelete(`request-path?path=${encodeURIComponent(p)}`)
                       .then((r) => setPaths(r.data.paths))
                       .catch((e) =>
                         setError(
