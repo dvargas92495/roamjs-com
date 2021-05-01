@@ -226,7 +226,6 @@ module "aws-serverless-backend" {
       "customer",
       "payment-methods",
       "token",
-      "request-path",
       "subscribe-sponsorship",
       "sponsorships",
     ]
