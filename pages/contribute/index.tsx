@@ -205,6 +205,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/weston.jpg",
             url: "https://twitter.com/zakweston",
           },
+          {
+            title: "Erick Aparicio",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
         ]}
       />
     </StandardLayout>
