@@ -497,7 +497,7 @@ const PresentationContent: React.FunctionComponent<{
     .map((s) => {
       let layout = "default";
       let collapsible = globalCollapsible || false;
-      let transition: string;
+      let transition = globalTransition || undefined;
       let animate = globalAnimate || false;
       const text = s.text
         .replace(
@@ -559,7 +559,6 @@ const PresentationContent: React.FunctionComponent<{
       showNotes,
       minScale: 1,
       maxScale: 1,
-      backgroundTransition: globalTransition,
     });
     deck.initialize();
     revealRef.current = deck;
