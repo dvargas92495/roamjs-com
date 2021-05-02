@@ -13,7 +13,7 @@ import {
 } from "roam-client";
 import { createConfigObserver } from "roamjs-components";
 import { getSettingValueFromTree } from "../components/hooks";
-import { getRoamUrl, runExtension, toFlexRegex } from "../entry-helpers";
+import { getRoamUrl, isApple, runExtension, toFlexRegex } from "../entry-helpers";
 import { render } from "../components/Toast";
 
 const ID = "weekly-notes";
@@ -132,7 +132,7 @@ runExtension(ID, () => {
   };
 
   document.addEventListener("keydown", (e) => {
-    if (e.code === "KeyW" && e.altKey) {
+    if (e.code === "KeyW" && (e.altKey || (e.ctrlKey && e.shiftKey && isApple))) {
       e.preventDefault();
       e.stopPropagation();
       goToThisWeek();

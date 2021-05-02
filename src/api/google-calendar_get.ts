@@ -15,10 +15,11 @@ export const handler = async (
     ? `access_token=${event.headers.Authorization}`
     : `key=${apiKey}`;
   return Promise.all(
-    calendarId
-      .split(",")
-      .map((c) =>
-        axios.get(
+    calendarId.split(",").map((c) =>
+      axios
+        .get<{
+          items: { start?: { dateTime: string }; summary?: string }[];
+        }>(
           `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
             c
           )}/events?${token}&timeMin=${encodeURIComponent(
@@ -27,9 +28,24 @@ export const handler = async (
             timeMax
           )}&orderBy=startTime&singleEvents=true`
         )
-      )
+        .then((r) => ({ items: r.data.items, calendar: c }))
+    )
   )
-    .then((rs) => rs.flatMap((r) => r.data.items))
+    .then((rs) =>
+      rs
+        .flatMap((r) => r.items.map((i) => ({ ...i, calendar: r.calendar })))
+        .sort((a, b) => {
+          if (a.start?.dateTime === b.start?.dateTime) {
+            return (a.summary || "").localeCompare(b.summary || "");
+          } else if (!a.start?.dateTime) {
+            return -1;
+          } else if (!b.start?.dateTime) {
+            return 1;
+          } else {
+            return new Date(a.start.dateTime).valueOf() - new Date(b.start.dateTime).valueOf();
+          }
+        })
+    )
     .then((items) => ({
       statusCode: 200,
       body: JSON.stringify({ items }),
