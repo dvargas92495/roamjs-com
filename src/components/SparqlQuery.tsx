@@ -27,6 +27,9 @@ import {
   getPageUidByPageTitle,
   deleteBlock,
   InputTextNode,
+  getTextByBlockUid,
+  getPageTitleByBlockUid,
+  getUids,
 } from "roam-client";
 import { getCurrentPageUid } from "../entry-helpers";
 import { getRenderRoot } from "./hooks";
@@ -45,21 +48,37 @@ const PAGE_QUERY = `SELECT ?wd ?wdLabel ?ps_ ?ps_Label {
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
 } ORDER BY ?wd ?statement ?ps_`;
 
-const WIKIDATA_ITEMS = ["Current Page", "Custom Query"];
+const WIKIDATA_ITEMS = ["Current Page", "Current Block", "Custom Query"];
 const DATA_SOURCES = {
   wikidata: "https://query.wikidata.org/sparql?format=json&query=",
 };
 const OUTPUT_FORMATS = ["Parent", "Line", "Table"];
+const IMAGE_REGEX_URL = /(http(s?):)([/|.|\w|\s|\-|:|%])*\.(?:jpg|gif|png|svg)/i;
+const formatValue = (s: string) =>
+  IMAGE_REGEX_URL.test(s) ? `![](${s})` : `[[${s}]]`;
 
 const SparqlQuery = ({
   onClose,
+  textareaRef,
 }: {
+  textareaRef: { current: HTMLTextAreaElement };
   onClose: () => void;
 }): React.ReactElement => {
   const parentUid = useMemo(getCurrentPageUid, []);
-  const pageTitle = useMemo(() => getPageTitleByPageUid(parentUid), [
-    parentUid,
-  ]);
+  const pageTitle = useMemo(
+    () => getPageTitleByPageUid(parentUid) || getPageTitleByBlockUid(parentUid),
+    [parentUid]
+  );
+  const blockUid = useMemo(
+    () =>
+      getTextByBlockUid(parentUid) ? parentUid : getUids(textareaRef.current).blockUid,
+    [parentUid]
+  );
+  const blockString = useMemo(
+    () =>
+      getTextByBlockUid(blockUid),
+    [blockUid]
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeItem, setActiveItem] = useState(WIKIDATA_ITEMS[0]);
@@ -76,7 +95,7 @@ const SparqlQuery = ({
   const [outputFormat, setOutputFormat] = useState("Parent");
   const [limit, setLimit] = useState(10);
   const query = useMemo(() => {
-    if (activeItem === "Current Page") {
+    if (activeItem === "Current Page" || activeItem === "Current Block") {
       return PAGE_QUERY.replace("{ID}", radioValue);
     } else if (activeItem === "Custom Query") {
       return codeValue;
@@ -84,23 +103,31 @@ const SparqlQuery = ({
     return "";
   }, [codeValue, radioValue, activeItem]);
   const [pageResults, setPageResults] = useState<PageResult[]>([]);
+  const searchQuery = useMemo(
+    () => (activeItem === "Current Block" ? blockString : pageTitle),
+    [activeItem, blockString, pageTitle]
+  );
   const dropdownRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     dropdownRef.current?.focus?.();
-    axios
-      .get(
-        `https://www.wikidata.org/w/api.php?origin=*&action=wbsearchentities&format=json&limit=5&continue=0&language=en&uselang=en&search=${pageTitle}&type=item`
-      )
-      .then((r) =>
-        setPageResults(
-          r.data.search.map((i: PageResult) => ({
-            description: i.description,
-            id: i.id,
-            label: i.label,
-          }))
+    if (searchQuery) {
+      axios
+        .get(
+          `https://www.wikidata.org/w/api.php?origin=*&action=wbsearchentities&format=json&limit=5&continue=0&language=en&uselang=en&search=${searchQuery}&type=item`
         )
-      );
-  }, [dropdownRef, setPageResults]);
+        .then((r) =>
+          setPageResults(
+            r.data.search.map((i: PageResult) => ({
+              description: i.description,
+              id: i.id,
+              label: i.label,
+            }))
+          )
+        );
+    } else {
+      setPageResults([]);
+    }
+  }, [dropdownRef, setPageResults, searchQuery]);
   const catchImport = useCallback(
     (e: Error) => {
       console.error(e);
@@ -129,7 +156,7 @@ const SparqlQuery = ({
             ButtonProps={{ elementRef: dropdownRef }}
           />
         </Label>
-        {activeItem === "Current Page" && (
+        {(activeItem === "Current Page" || activeItem === "Current Block") && (
           <RadioGroup
             onChange={(e) =>
               setRadioValue((e.target as HTMLInputElement).value)
@@ -143,7 +170,7 @@ const SparqlQuery = ({
                 labelElement={
                   <span>
                     <b>{pr.label}</b>
-                    <span style={{ fontSize: 10 }}>({pr.description})</span>
+                    <span style={{ fontSize: 10 }}> ({pr.description})</span>
                   </span>
                 }
               />
@@ -259,7 +286,9 @@ const SparqlQuery = ({
                                       children: [prev],
                                     }),
                                     {
-                                      text: p[head[head.length - 1]].value,
+                                      text: formatValue(
+                                        p[head[head.length - 1]].value
+                                      ),
                                       children: [] as InputTextNode[],
                                     }
                                   )
@@ -268,13 +297,15 @@ const SparqlQuery = ({
                                   text: `Result ${i}`,
                                   children: head.map((v) => ({
                                     text: v,
-                                    children: [{ text: p[v].value }],
+                                    children: [
+                                      { text: formatValue(p[v].value) },
+                                    ],
                                   })),
                                 }
                               : {
                                   text: `Result ${i}`,
                                   children: head.map((v) => ({
-                                    text: `${v}:: ${p[v].value}`,
+                                    text: `${v}:: ${formatValue(p[v].value)}`,
                                   })),
                                 }
                           ),
@@ -282,12 +313,13 @@ const SparqlQuery = ({
                       },
                       parentUid,
                     });
-                  } else if (activeItem === "Current Page") {
+                  } else if (activeItem === "Current Page" || activeItem === 'Current Block') {
+                    const queryUid = activeItem === 'Current Block' ? blockUid : parentUid;
                     const loadingUid = createBlock({
                       node: {
                         text: "Loading...",
                       },
-                      parentUid,
+                      parentUid: queryUid,
                     });
                     createBlock({
                       node: {
@@ -307,31 +339,42 @@ const SparqlQuery = ({
                           ...data.map((p) => ({
                             text: `${p["wdLabel"].value}::${
                               outputFormat === "Line"
-                                ? `[[${p["ps_Label"].value}]]`
+                                ? formatValue(p["ps_Label"].value)
                                 : ""
                             }`,
                             children:
                               outputFormat === "Line"
                                 ? []
-                                : [{ text: `[[${p["ps_Label"].value}]]` }],
+                                : [{ text: formatValue(p["ps_Label"].value) }],
                           })),
                         ],
                       },
-                      parentUid,
+                      parentUid: queryUid,
                     });
                     const titlesSet = new Set(
                       getPageTitleReferencesByPageTitle("same as")
                     );
-                    data
-                      .flatMap((p) => [
-                        {
-                          link: p["wd"].value,
-                          title: p["wdLabel"].value,
-                        },
-                        { link: p["ps_"].value, title: p["ps_Label"].value },
-                      ])
-                      .filter(({ title }) => !titlesSet.has(title))
-                      .forEach(({ title, link }) =>
+                    setTimeout(() => {
+                      Array.from(
+                        new Set(
+                          data
+                            .flatMap((p) => [
+                              {
+                                link: p["wd"].value,
+                                title: p["wdLabel"].value,
+                              },
+                              {
+                                link: p["ps_"].value,
+                                title: p["ps_Label"].value,
+                              },
+                            ])
+                            .filter(
+                              ({ title }) =>
+                                !titlesSet.has(title) &&
+                                !IMAGE_REGEX_URL.test(title)
+                            )
+                        )
+                      ).forEach(({ title, link }) =>
                         createBlock({
                           node: {
                             text: `same as:: ${
@@ -343,7 +386,8 @@ const SparqlQuery = ({
                           parentUid: getPageUidByPageTitle(title),
                         })
                       );
-                    deleteBlock(loadingUid);
+                      deleteBlock(loadingUid);
+                    }, 1);
                   }
 
                   onClose();
@@ -357,10 +401,15 @@ const SparqlQuery = ({
   );
 };
 
-export const render = (): void => {
+export const render = ({
+  textareaRef,
+}: {
+  textareaRef: { current: HTMLTextAreaElement };
+}): void => {
   const parent = getRenderRoot("sparql-query");
   ReactDOM.render(
     <SparqlQuery
+      textareaRef={textareaRef}
       onClose={() => {
         ReactDOM.unmountComponentAtNode(parent);
         parent.remove();
