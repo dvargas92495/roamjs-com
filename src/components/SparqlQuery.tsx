@@ -8,6 +8,8 @@ import {
   Button,
   NumericInput,
   Icon,
+  Checkbox,
+  InputGroup,
 } from "@blueprintjs/core";
 import axios from "axios";
 import { Controlled as CodeMirror } from "react-codemirror2";
@@ -30,40 +32,178 @@ import {
   getTextByBlockUid,
   getPageTitleByBlockUid,
   getUids,
+  getShallowTreeByParentUid,
 } from "roam-client";
 import { getCurrentPageUid } from "../entry-helpers";
 import { getRenderRoot } from "./hooks";
 import MenuItemSelect from "./MenuItemSelect";
 
 type PageResult = { description: string; id: string; label: string };
-const PAGE_QUERY = `SELECT ?wd ?wdLabel ?ps_ ?ps_Label {
+const OUTPUT_FORMATS = ["Parent", "Line", "Table"] as const;
+export type OutputFormat = typeof OUTPUT_FORMATS[number];
+export type RenderProps = {
+  textareaRef: { current: HTMLTextAreaElement };
+  queriesCache: {
+    [uid: string]: {
+      query: string;
+      source: string;
+      outputFormat: OutputFormat;
+    };
+  };
+};
+
+export const DEFAULT_EXPORT_LABEL = "SPARQL Import";
+const getLabel = ({
+  outputFormat,
+  label,
+}: {
+  outputFormat: OutputFormat;
+  label: string;
+}) =>
+  `${label.replace("{date}", new Date().toLocaleString())} ${
+    outputFormat === "Table" ? "{{[[table]]}}" : ""
+  }`;
+
+const PAGE_QUERY = `SELECT ?property ?propertyLabel ?value ?valueLabel {
   VALUES (?id) {(wd:{ID})}
   
   ?id ?p ?statement .
-  ?statement ?ps ?ps_ .
+  ?statement ?ps ?value .
   
-  ?wd wikibase:claim ?p.
-  ?wd wikibase:statementProperty ?ps.
+  ?property wikibase:claim ?p.
+  ?property wikibase:statementProperty ?ps.
   
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
-} ORDER BY ?wd ?statement ?ps_`;
+} 
+ORDER BY ?property ?statement ?value
+LIMIT {LIMIT}`;
 
 const WIKIDATA_ITEMS = ["Current Page", "Current Block", "Custom Query"];
+const LIMIT_REGEX = /LIMIT ([\d]*)/;
 const DATA_SOURCES = {
   wikidata: "https://query.wikidata.org/sparql?format=json&query=",
 };
-const OUTPUT_FORMATS = ["Parent", "Line", "Table"];
 const IMAGE_REGEX_URL = /(http(s?):)([/|.|\w|\s|\-|:|%])*\.(?:jpg|gif|png|svg)/i;
-const formatValue = (s: string) =>
-  IMAGE_REGEX_URL.test(s) ? `![](${s})` : `[[${s}]]`;
+
+export const runSparqlQuery = ({
+  query,
+  source,
+  parentUid,
+  outputFormat,
+}: {
+  parentUid: string;
+} & RenderProps["queriesCache"][string]): Promise<void> =>
+  axios.get(`${source}${encodeURIComponent(query)}`).then((r) => {
+    const data = r.data.results.bindings as {
+      [k: string]: { value: string };
+    }[];
+    if (data.length) {
+      const head = r.data.head.vars as string[];
+      const loadingUid = createBlock({
+        node: {
+          text: "Loading...",
+        },
+        parentUid,
+      });
+      setTimeout(() => {
+        const dataLabels = head.filter((h) => !/Label$/.test(h));
+        const returnedLabels = new Set(head.filter((h) => /Label$/.test(h)));
+        const formatValue = (
+          p: { [h: string]: { value: string } },
+          h: string
+        ) => {
+          const s = p[returnedLabels.has(`${h}Label`) ? `${h}Label` : h].value;
+          return IMAGE_REGEX_URL.test(s)
+            ? `![](${s})`
+            : dataLabels.indexOf(h) === 0
+            ? `${s}::`
+            : dataLabels.indexOf(h) === 1
+            ? `[[${s}]]`
+            : s;
+        };
+        const output = [
+          ...(outputFormat === "Table"
+            ? [
+                dataLabels
+                  .slice()
+                  .reverse()
+                  .reduce(
+                    (prev, cur) => ({
+                      text: cur,
+                      children: prev.text ? [prev] : [],
+                    }),
+                    {
+                      text: "",
+                      children: [] as InputTextNode[],
+                    }
+                  ),
+              ]
+            : ([] as InputTextNode[])),
+          ...data.map((p) =>
+            outputFormat === "Line"
+              ? { text: dataLabels.map((h) => formatValue(p, h)).join(" ") }
+              : dataLabels
+                  .slice()
+                  .reverse()
+                  .reduce(
+                    (prev, cur) => ({
+                      text: formatValue(p, cur),
+                      children: prev.text ? [prev] : [],
+                    }),
+                    {
+                      text: "",
+                      children: [] as InputTextNode[],
+                    }
+                  )
+          ),
+        ];
+        output.forEach((node, order) =>
+          createBlock({ node, order, parentUid })
+        );
+        const titlesSet = new Set(getPageTitleReferencesByPageTitle("same as"));
+        setTimeout(() => {
+          Array.from(
+            new Set(
+              data
+                .flatMap((p) =>
+                  Array.from(returnedLabels).map((h) => ({
+                    link: p[h.replace(/Label$/, "")].value,
+                    title: p[h].value,
+                  }))
+                )
+                .filter(
+                  ({ title }) =>
+                    !titlesSet.has(title) && !IMAGE_REGEX_URL.test(title)
+                )
+            )
+          ).forEach(({ title, link }) =>
+            createBlock({
+              node: {
+                text: `same as:: ${link}`,
+              },
+              parentUid: getPageUidByPageTitle(title),
+            })
+          );
+        }, 1);
+      }, 1);
+      deleteBlock(loadingUid);
+    } else {
+      createBlock({
+        node: {
+          text: "No results found",
+        },
+        parentUid,
+      });
+    }
+  });
 
 const SparqlQuery = ({
   onClose,
   textareaRef,
+  queriesCache,
 }: {
-  textareaRef: { current: HTMLTextAreaElement };
   onClose: () => void;
-}): React.ReactElement => {
+} & RenderProps): React.ReactElement => {
   const parentUid = useMemo(getCurrentPageUid, []);
   const pageTitle = useMemo(
     () => getPageTitleByPageUid(parentUid) || getPageTitleByBlockUid(parentUid),
@@ -71,14 +211,12 @@ const SparqlQuery = ({
   );
   const blockUid = useMemo(
     () =>
-      getTextByBlockUid(parentUid) ? parentUid : getUids(textareaRef.current).blockUid,
+      getTextByBlockUid(parentUid)
+        ? parentUid
+        : getUids(textareaRef.current).blockUid,
     [parentUid]
   );
-  const blockString = useMemo(
-    () =>
-      getTextByBlockUid(blockUid),
-    [blockUid]
-  );
+  const blockString = useMemo(() => getTextByBlockUid(blockUid), [blockUid]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeItem, setActiveItem] = useState(WIKIDATA_ITEMS[0]);
@@ -89,19 +227,31 @@ const SparqlQuery = ({
     () => setShowAdditionalOptions(!showAdditionalOptions),
     [setShowAdditionalOptions, showAdditionalOptions]
   );
+  const [label, setLabel] = useState(DEFAULT_EXPORT_LABEL);
   const [dataSource, setDataSource] = useState<keyof typeof DATA_SOURCES>(
     "wikidata"
   );
-  const [outputFormat, setOutputFormat] = useState("Parent");
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>("Parent");
   const [limit, setLimit] = useState(10);
+  const [saveQuery, setSaveQuery] = useState(false);
   const query = useMemo(() => {
     if (activeItem === "Current Page" || activeItem === "Current Block") {
-      return PAGE_QUERY.replace("{ID}", radioValue);
+      return PAGE_QUERY.replace("{ID}", radioValue).replace(
+        "{LIMIT}",
+        `${limit}`
+      );
     } else if (activeItem === "Custom Query") {
-      return codeValue;
+      if (LIMIT_REGEX.test(codeValue)) {
+        return codeValue.replace(
+          LIMIT_REGEX,
+          (_, l) => `LIMIT ${Math.min(l, limit)}`
+        );
+      } else {
+        return `${codeValue}\nLIMIT ${limit}`;
+      }
     }
     return "";
-  }, [codeValue, radioValue, activeItem]);
+  }, [codeValue, radioValue, activeItem, limit]);
   const [pageResults, setPageResults] = useState<PageResult[]>([]);
   const searchQuery = useMemo(
     () => (activeItem === "Current Block" ? blockString : pageTitle),
@@ -157,28 +307,33 @@ const SparqlQuery = ({
           />
         </Label>
         {(activeItem === "Current Page" || activeItem === "Current Block") && (
-          <RadioGroup
-            onChange={(e) =>
-              setRadioValue((e.target as HTMLInputElement).value)
-            }
-            selectedValue={radioValue}
-          >
-            {pageResults.map((pr) => (
-              <Radio
-                key={pr.id}
-                value={pr.id}
-                labelElement={
-                  <span>
-                    <b>{pr.label}</b>
-                    <span style={{ fontSize: 10 }}> ({pr.description})</span>
-                  </span>
-                }
-              />
-            ))}
-          </RadioGroup>
+          <>
+            <RadioGroup
+              onChange={(e) =>
+                setRadioValue((e.target as HTMLInputElement).value)
+              }
+              selectedValue={radioValue}
+            >
+              {pageResults.map((pr) => (
+                <Radio
+                  key={pr.id}
+                  value={pr.id}
+                  labelElement={
+                    <span>
+                      <b>{pr.label}</b>
+                      <span style={{ fontSize: 10 }}> ({pr.description})</span>
+                    </span>
+                  }
+                />
+              ))}
+            </RadioGroup>
+            {!pageResults.length && (
+              <div>No results found for {searchQuery}</div>
+            )}
+          </>
         )}
         {activeItem === "Custom Query" && (
-          <div style={{ marginTop: 16 }}>
+          <div style={{ marginTop: 16 }} className={"roamjs-sparql-editor"}>
             <CodeMirror
               value={codeValue}
               options={{
@@ -191,7 +346,14 @@ const SparqlQuery = ({
           </div>
         )}
         {showAdditionalOptions && (
-          <>
+          <div style={{ marginTop: 16 }}>
+            <Label>
+              Label
+              <InputGroup
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+              />
+            </Label>
             <Label>
               Data Source
               <MenuItemSelect
@@ -210,17 +372,25 @@ const SparqlQuery = ({
               Output Format
               <MenuItemSelect
                 activeItem={outputFormat}
-                items={OUTPUT_FORMATS}
+                items={[...OUTPUT_FORMATS]}
                 onItemSelect={(s) => setOutputFormat(s)}
               />
             </Label>
-          </>
+            <Checkbox
+              label={"Save Query"}
+              checked={saveQuery}
+              onChange={(e) =>
+                setSaveQuery((e.target as HTMLInputElement).checked)
+              }
+            />
+          </div>
         )}
         <style>
           {`.roamjs-sparql-options-toggle {
   cursor: pointer;
   color: blue;
   margin-top: 8px;
+  display: inline-block;
 }
 
 .roamjs-sparql-options-toggle:hover {
@@ -241,155 +411,51 @@ const SparqlQuery = ({
           {loading && <Spinner size={Spinner.SIZE_SMALL} />}
           <Button
             text={"Import"}
+            disabled={activeItem === "Custom Query" ? !codeValue : !radioValue}
             onClick={() => {
               setLoading(true);
-              axios
-                .get(`${DATA_SOURCES[dataSource]}${encodeURIComponent(query)}`)
-                .then((r) => {
-                  const data = r.data.results.bindings.slice(0, limit) as {
-                    [k: string]: { value: string };
-                  }[];
-                  const head = r.data.head.vars as string[];
-                  if (activeItem === "Custom Query") {
-                    createBlock({
-                      node: {
-                        text:
-                          outputFormat === "Table"
-                            ? "{{[[table]]}}"
-                            : "Wikidata Import",
-                        children: [
-                          ...(outputFormat === "Table"
-                            ? [
-                                head
-                                  .slice(0, head.length - 1)
-                                  .reverse()
-                                  .reduce(
-                                    (prev, cur) => ({
-                                      text: cur,
-                                      children: [prev],
-                                    }),
-                                    {
-                                      text: head[head.length - 1],
-                                      children: [] as InputTextNode[],
-                                    }
-                                  ),
-                              ]
-                            : ([] as InputTextNode[])),
-                          ...data.map((p, i) =>
-                            outputFormat === "Table"
-                              ? head
-                                  .slice(0, head.length - 1)
-                                  .reverse()
-                                  .reduce(
-                                    (prev, cur) => ({
-                                      text: p[cur].value,
-                                      children: [prev],
-                                    }),
-                                    {
-                                      text: formatValue(
-                                        p[head[head.length - 1]].value
-                                      ),
-                                      children: [] as InputTextNode[],
-                                    }
-                                  )
-                              : outputFormat === "Parent"
-                              ? {
-                                  text: `Result ${i}`,
-                                  children: head.map((v) => ({
-                                    text: v,
-                                    children: [
-                                      { text: formatValue(p[v].value) },
-                                    ],
-                                  })),
-                                }
-                              : {
-                                  text: `Result ${i}`,
-                                  children: head.map((v) => ({
-                                    text: `${v}:: ${formatValue(p[v].value)}`,
-                                  })),
-                                }
-                          ),
-                        ],
-                      },
-                      parentUid,
-                    });
-                  } else if (activeItem === "Current Page" || activeItem === 'Current Block') {
-                    const queryUid = activeItem === 'Current Block' ? blockUid : parentUid;
-                    const loadingUid = createBlock({
-                      node: {
-                        text: "Loading...",
-                      },
-                      parentUid: queryUid,
-                    });
-                    createBlock({
-                      node: {
-                        text:
-                          outputFormat === "Table"
-                            ? "{{[[table]]}}"
-                            : "Wikidata Import",
-                        children: [
-                          ...(outputFormat === "Table"
-                            ? [
-                                {
-                                  text: "property",
-                                  children: [{ text: "value" }],
-                                },
-                              ]
-                            : []),
-                          ...data.map((p) => ({
-                            text: `${p["wdLabel"].value}::${
-                              outputFormat === "Line"
-                                ? formatValue(p["ps_Label"].value)
-                                : ""
-                            }`,
-                            children:
-                              outputFormat === "Line"
-                                ? []
-                                : [{ text: formatValue(p["ps_Label"].value) }],
-                          })),
-                        ],
-                      },
-                      parentUid: queryUid,
-                    });
-                    const titlesSet = new Set(
-                      getPageTitleReferencesByPageTitle("same as")
-                    );
-                    setTimeout(() => {
-                      Array.from(
-                        new Set(
-                          data
-                            .flatMap((p) => [
-                              {
-                                link: p["wd"].value,
-                                title: p["wdLabel"].value,
-                              },
-                              {
-                                link: p["ps_"].value,
-                                title: p["ps_Label"].value,
-                              },
-                            ])
-                            .filter(
-                              ({ title }) =>
-                                !titlesSet.has(title) &&
-                                !IMAGE_REGEX_URL.test(title)
-                            )
-                        )
-                      ).forEach(({ title, link }) =>
-                        createBlock({
-                          node: {
-                            text: `same as:: ${
-                              title === pageTitle
-                                ? `http://www.wikidata.org/entity/${radioValue}`
-                                : link
-                            }`,
-                          },
-                          parentUid: getPageUidByPageTitle(title),
-                        })
-                      );
-                      deleteBlock(loadingUid);
-                    }, 1);
-                  }
+              const labelUid = createBlock({
+                node: {
+                  text: getLabel({ outputFormat, label }),
+                },
+                parentUid:
+                  activeItem === "Current Block" ? blockUid : parentUid,
+              });
+              const queryInfo = {
+                query,
+                source: DATA_SOURCES[dataSource],
+                outputFormat,
+              };
+              runSparqlQuery({
+                ...queryInfo,
+                parentUid: labelUid,
+              })
+                .then(() => {
+                  if (saveQuery) {
+                    const configUid = getPageUidByPageTitle("roam/js/sparql");
 
+                    const queriesUid =
+                      getShallowTreeByParentUid(configUid).find(({ text }) =>
+                        /queries/i.test(text)
+                      )?.uid ||
+                      createBlock({
+                        node: { text: "queries" },
+                        parentUid: configUid,
+                      });
+
+                    createBlock({
+                      node: {
+                        text: labelUid,
+                        children: [
+                          { text: query },
+                          { text: queryInfo.source },
+                          { text: outputFormat },
+                        ],
+                      },
+                      parentUid: queriesUid,
+                    });
+                    queriesCache[labelUid] = queryInfo;
+                  }
                   onClose();
                 })
                 .catch(catchImport);
@@ -401,15 +467,11 @@ const SparqlQuery = ({
   );
 };
 
-export const render = ({
-  textareaRef,
-}: {
-  textareaRef: { current: HTMLTextAreaElement };
-}): void => {
+export const render = (props: RenderProps): void => {
   const parent = getRenderRoot("sparql-query");
   ReactDOM.render(
     <SparqlQuery
-      textareaRef={textareaRef}
+      {...props}
       onClose={() => {
         ReactDOM.unmountComponentAtNode(parent);
         parent.remove();

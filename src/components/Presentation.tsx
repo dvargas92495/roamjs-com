@@ -40,7 +40,7 @@ const Notes = ({ note }: { note?: TreeNode }) => (
       <aside
         className="notes"
         dangerouslySetInnerHTML={{
-          __html: parseRoamBlocks({content: [note], viewType: 'bullet'}),
+          __html: parseRoamBlocks({ content: [note], viewType: "bullet" }),
         }}
       />
     )}
@@ -86,17 +86,19 @@ const SrcFromText: React.FunctionComponent<
   const srcRef = useRef(null);
   const srcResize = match && resizes[match[SRC_INDEX[type]]];
   const srcOnLoad = useCallback(() => {
-    const srcAspectRatio = srcRef.current.width / srcRef.current.height;
-    const containerAspectRatio =
-      srcRef.current.parentElement.offsetWidth /
-      srcRef.current.parentElement.offsetHeight;
     if (srcResize) {
       setStyle(getResizeStyle(srcResize));
-    } else if (!isNaN(srcAspectRatio) && !isNaN(srcAspectRatio)) {
-      if (srcAspectRatio > containerAspectRatio) {
-        setStyle({ width: "100%", height: "auto" });
-      } else {
-        setStyle({ height: "100%", width: "auto" });
+    } else if (srcRef.current.parentElement) {
+      const srcAspectRatio = srcRef.current.width / srcRef.current.height;
+      const containerAspectRatio =
+        srcRef.current.parentElement.offsetWidth /
+        srcRef.current.parentElement.offsetHeight;
+      if (!isNaN(srcAspectRatio) && !isNaN(srcAspectRatio)) {
+        if (srcAspectRatio > containerAspectRatio) {
+          setStyle({ width: "100%", height: "auto" });
+        } else {
+          setStyle({ height: "100%", width: "auto" });
+        }
       }
     }
   }, [setStyle, srcRef, srcResize]);
@@ -383,7 +385,7 @@ const ContentSlide = ({
         <div
           className={"roamjs-bullets-container"}
           dangerouslySetInnerHTML={{
-            __html: parseRoamBlocks({content: bullets, viewType}),
+            __html: parseRoamBlocks({ content: bullets, viewType }),
           }}
           style={{
             width: isImageLayout ? "50%" : "100%",
@@ -448,8 +450,8 @@ const observerCallback = (ms: MutationRecord[]) =>
       const containerHeight = d.offsetHeight;
       const containerWidth = d.offsetWidth;
       if (containerHeight > 0 && containerWidth > 0) {
-        const contentHeight = (d.children[0] as HTMLElement).offsetHeight;
-        const contentWidth = (d.children[0] as HTMLElement).offsetWidth;
+        const contentHeight = (d.children[0] as HTMLElement)?.offsetHeight || 0;
+        const contentWidth = (d.children[0] as HTMLElement)?.offsetWidth || 0;
         if (contentHeight > containerHeight || contentWidth > containerWidth) {
           const scale = Math.min(
             containerHeight / contentHeight,
@@ -468,9 +470,11 @@ export const TRANSITION_REGEX = /(?:\[\[{|{\[\[|{)transition:(none|fade|slide|co
 const HIDE_REGEX = /(?:\[\[{|{\[\[|{)hide(?:\]\]}|}\]\]|})/i;
 
 const filterHideBlocks = (s: TreeNode) => {
-  s.children = s.children.filter(t => !HIDE_REGEX.test(t.text)).map(filterHideBlocks);
+  s.children = s.children
+    .filter((t) => !HIDE_REGEX.test(t.text))
+    .map(filterHideBlocks);
   return s;
-}
+};
 
 const PresentationContent: React.FunctionComponent<{
   slides: TreeNode[];
