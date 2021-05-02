@@ -77,6 +77,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/calepes.jpg",
             url: "https://www.calepes.com/",
           },
+          {
+            title: "Abhay Prasanna",
+            imgSrc: "sponsors/abhayprasanna.jpg",
+            url: "https://twitter.com/AbhayPrasanna",
+          },
         ]}
       />
       <H6>
@@ -89,11 +94,6 @@ const ContributePage = (): React.ReactElement => {
             title: "David Eaton",
             imgSrc: "sponsors/davideaton.jpg",
             url: "https://twitter.com/gottalead",
-          },
-          {
-            title: "Abhay Prasanna",
-            imgSrc: "sponsors/abhayprasanna.jpg",
-            url: "https://twitter.com/AbhayPrasanna",
           },
           {
             title: "Matt Brockwell",
@@ -209,6 +209,11 @@ const ContributePage = (): React.ReactElement => {
             title: "Erick Aparicio",
             imgSrc: "sponsors/default.jpg",
             url: "",
+          },
+          {
+            title: "Rodrigo Faerman",
+            imgSrc: "sponsors/faerman.jpg",
+            url: "https://rodrigofaerman.com",
           },
         ]}
       />
