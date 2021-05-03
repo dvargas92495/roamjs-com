@@ -82,6 +82,16 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/abhayprasanna.jpg",
             url: "https://twitter.com/AbhayPrasanna",
           },
+          {
+            title: "Lisa-Marie Cabrelli",
+            imgSrc: "sponsors/lisa.jpg",
+            url: "https://www.roamforresults.com/",
+          },
+          {
+            title: "Michael Colacino",
+            imgSrc: "sponsors/defult.jpg",
+            url: "",
+          },
         ]}
       />
       <H6>
@@ -214,11 +224,6 @@ const ContributePage = (): React.ReactElement => {
             title: "Rodrigo Faerman",
             imgSrc: "sponsors/faerman.jpg",
             url: "https://rodrigofaerman.com",
-          },
-          {
-            title: "Lisa-Marie Cabrelli",
-            imgSrc: "sponsors/lisa.jpg",
-            url: "https://www.roamforresults.com/",
           },
         ]}
       />
