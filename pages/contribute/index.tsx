@@ -215,6 +215,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/faerman.jpg",
             url: "https://rodrigofaerman.com",
           },
+          {
+            title: "Lisa-Marie Cabrelli",
+            imgSrc: "sponsors/lisa.jpg",
+            url: "https://www.roamforresults.com/",
+          },
         ]}
       />
     </StandardLayout>
