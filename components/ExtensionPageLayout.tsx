@@ -58,7 +58,7 @@ const prodItems = items.filter((f) => !f.development);
 const total = prodItems.length - 1;
 const rowLength = 4;
 
-const contributors = {
+export const contributors = {
   "Rodrigo Franco": "https://www.rodrigofranco.com/",
   "David Chelimsky": "http://blog.davidchelimsky.net/",
   "Tomáš Baránek": "https://twitter.com/tombarys",
@@ -88,14 +88,14 @@ const contributors = {
   "Scott Block": "https://twitter.com/insidetheblock",
 };
 
-const emojisToTooltip = {
+export const emojisToTooltip = {
   "💵": "Financial",
   "📓": "Testing",
   "🤔": "Idea",
   "💻": "Code",
 };
 
-const SponsorDialog = ({ id }: { id: string }) => {
+export const SponsorDialog = ({ id }: { id: string }): React.ReactElement => {
   const [open, setOpen] = useState(false);
   const handleOpen = useCallback(() => setOpen(true), [setOpen]);
   const handleClose = useCallback(() => setOpen(false), [setOpen]);

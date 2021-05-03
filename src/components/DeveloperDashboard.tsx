@@ -15,11 +15,13 @@ import {
   getTreeByPageName,
   TreeNode,
 } from "roam-client";
+import { getSettingValuesFromTree } from "roamjs-components";
 import {
   getRoamUrl,
   openBlockInSidebar,
   setInputSetting,
 } from "../entry-helpers";
+import { getSettingValueFromTree } from "./hooks";
 import {
   TOKEN_STAGE,
   MainStage,
@@ -73,7 +75,8 @@ const DeveloperContent: StageContent = () => {
                 cursor: "pointer",
               }}
               onClick={(e) => {
-                const uid = getPageUidByPageTitle(p) || createPage({title: p});
+                const uid =
+                  getPageUidByPageTitle(p) || createPage({ title: p });
                 if (e.shiftKey) {
                   openBlockInSidebar(uid);
                 } else {
@@ -91,9 +94,11 @@ const DeveloperContent: StageContent = () => {
                   style={{ margin: "0 8px" }}
                   onClick={() => {
                     setLoading(true);
-                    const { children, viewType } = getTreeByPageName(
-                      p
-                    ).find((t) => /documentation/i.test(t.text)) || {
+                    setError("");
+                    const tree = getTreeByPageName(p);
+                    const { children, viewType } = tree.find((t) =>
+                      /documentation/i.test(t.text)
+                    ) || {
                       children: [] as TreeNode[],
                       viewType: "document",
                     };
@@ -101,6 +106,9 @@ const DeveloperContent: StageContent = () => {
                       path: p,
                       blocks: children,
                       viewType,
+                      description: getSettingValueFromTree({ tree, key: "description" }),
+                      contributors: getSettingValuesFromTree({ tree, key: "contributors" }),
+                      entry: getSettingValueFromTree({ tree, key: "entry" }),
                     })
                       .then((r) => {
                         setInputSetting({
@@ -131,7 +139,10 @@ const DeveloperContent: StageContent = () => {
                   minimal
                   onClick={() => {
                     setLoading(true);
-                    authenticatedAxiosDelete(`request-path?path=${encodeURIComponent(p)}`)
+                    setError("");
+                    authenticatedAxiosDelete(
+                      `request-path?path=${encodeURIComponent(p)}`
+                    )
                       .then((r) => setPaths(r.data.paths))
                       .catch((e) =>
                         setError(
