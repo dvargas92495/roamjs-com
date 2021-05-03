@@ -82,7 +82,7 @@ export const getAliases = (tree: TreeNode[]): { [key: string]: string } =>
 
 const getCurrentUserEmail = () => {
   const globalAppState = localStorage.getItem("globalAppState") || '["","",[]]';
-  const userArray = JSON.parse(globalAppState)[2] as string[];
+  const userArray = (JSON.parse(globalAppState)[2] || []) as string[];
   const emailIndex = userArray.findIndex((s) => s === "~:email");
   if (emailIndex > 0) {
     return userArray[emailIndex + 1];
@@ -180,7 +180,6 @@ const SlackContent: React.FunctionComponent<
           (c) => c.name.toUpperCase() === aliasedName || channelFindFunction(c)
         )?.id;
         const channel = memberId || channelId;
-        const currentUserEmail = getCurrentUserEmail();
         if (channel) {
           return web.chat
             .postMessage({
@@ -226,7 +225,7 @@ const SlackContent: React.FunctionComponent<
               ...(asUser
                 ? {
                     username: members.find(
-                      (m) => m.profile.email === currentUserEmail
+                      (m) => m.profile.email === getCurrentUserEmail()
                     )?.name,
                     token: user_token,
                   }
