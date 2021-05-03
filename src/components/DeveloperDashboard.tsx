@@ -73,7 +73,7 @@ const DeveloperContent: StageContent = () => {
                 cursor: "pointer",
               }}
               onClick={(e) => {
-                const uid = getPageUidByPageTitle(p);
+                const uid = getPageUidByPageTitle(p) || createPage({title: p});
                 if (e.shiftKey) {
                   openBlockInSidebar(uid);
                 } else {

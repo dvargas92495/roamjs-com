@@ -208,7 +208,7 @@ const ContributePage = (): React.ReactElement => {
           {
             title: "Erick Aparicio",
             imgSrc: "sponsors/default.jpg",
-            url: "",
+            url: "https://www.linkedin.com/in/erick-aparicio-3301",
           },
           {
             title: "Rodrigo Faerman",
