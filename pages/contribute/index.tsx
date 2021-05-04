@@ -235,6 +235,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/default.jpg",
             url: "",
           },
+          {
+            title: "Denise Todd",
+            imgSrc: "sponsors/denise.jfif",
+            url: "",
+          },
         ]}
       />
     </StandardLayout>
