@@ -1,18 +1,23 @@
 import { Button, Portal } from "@blueprintjs/core";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import YouTube from "react-youtube";
 import {
   createBlock,
-  getFirstChildUidByBlockUid,
+  getShallowTreeByParentUid,
   getTextByBlockUid,
   getTreeByBlockUid,
   getUids,
-  TreeNode,
+  updateBlock,
 } from "roam-client";
-import { setInputSetting } from "../entry-helpers";
+import { toFlexRegex } from "../entry-helpers";
 import EditContainer from "./EditContainer";
-import { renderWithUnmount, useTree } from "./hooks";
-import ToggleIconButton from "./ToggleIconButton";
+import { renderWithUnmount } from "./hooks";
 
 type YoutubePlayerProps = {
   blockUid: string;
@@ -20,34 +25,50 @@ type YoutubePlayerProps = {
   blockId: string;
 };
 
-const getLoopEdge = (regex: RegExp, children?: TreeNode[]) =>
-  (children || []).find((t) => regex.test(t.text))?.children?.[0]?.text;
-
-const getLoopStart = (children?: TreeNode[]) => getLoopEdge(/start/i, children);
-const getLoopEnd = (children?: TreeNode[]) => getLoopEdge(/end/i, children);
+const valueToTimestamp = (value: number, duration: number): string => {
+  const colons = Math.floor(Math.log(duration) / Math.log(60));
+  const parts = [];
+  let currentValue = Math.floor(value);
+  for (let exp = 0; exp <= colons; exp++) {
+    parts.push(currentValue % 60);
+    currentValue = Math.floor(currentValue / 60);
+  }
+  return `${parts
+    .reverse()
+    .map((s) => `${s}`.padStart(2, "0"))
+    .join(":")}.${(value % 1).toFixed(3).substring(2)}`;
+};
+const timestampToValue = (timestamp: string): number => {
+  const timestampOnly = timestamp.split(/[\s|-]/)[0];
+  return timestampOnly
+    .split(":")
+    .map((s) => Number(s))
+    .reverse()
+    .reduce((prev, cur, i) => prev + cur * Math.pow(60, i), 0);
+};
 
 const YoutubePlayer = ({
   blockUid,
   youtubeId,
   blockId,
 }: YoutubePlayerProps): React.ReactElement => {
-  const tree = useTree(blockUid);
+  const latestTimeoutRef = useRef(0);
   const getTimestampNode = useCallback(
     () =>
       getTreeByBlockUid(blockUid).children.find((t) =>
-        /timestamps/i.test(t.text)
+        toFlexRegex("timestamps").test(t.text)
       ),
     [blockUid]
   );
   const initialTimestampNode = useMemo(getTimestampNode, [getTimestampNode]);
   const [timestamps, setTimestamps] = useState(
-    (initialTimestampNode?.children || []).map((t) => ({
-      uid: t.uid,
-      text: t.text,
-    }))
+    (initialTimestampNode?.children || []).map((t) => t.uid)
+  );
+  const [isLoopActive, setIsLoopActive] = useState(
+    (initialTimestampNode?.children || []).some((t) => t.text.endsWith(" - "))
   );
   const calcBlocks = useCallback(
-    (ts: { uid: string }[]) => {
+    (uids: string[]) => {
       const container = document
         .getElementById(blockId)
         .closest(".roam-block-container");
@@ -58,99 +79,127 @@ const YoutubePlayer = ({
         container.getElementsByClassName("roam-block")
       ) as HTMLDivElement[];
       return Object.fromEntries(
-        ts.map((ts) => [
-          ts.uid,
+        uids.map((uid) => [
+          uid,
           blocks
-            .find((b) => getUids(b).blockUid === ts.uid)
+            .find((b) => getUids(b).blockUid === uid)
             ?.closest?.(".roam-block-container") as HTMLDivElement,
         ])
       );
     },
     [blockId]
   );
-  const blocks = useRef(calcBlocks(timestamps));
+  const timestampBlocks = useRef(calcBlocks(timestamps));
   const playerRef = useRef(null);
-  const [visibleTimestamp, setVisibleTimestamp] = useState(timestamps[0]?.uid);
-  const [start, setStart] = useState(getLoopStart(tree.children));
-  const [end, setEnd] = useState(getLoopEnd(tree.children));
-  const jumpToStart = useCallback(() => {
-    playerRef.current.seekTo(parseInt(getTextByBlockUid(start) || "0"));
-  }, [playerRef, start]);
+  const [visibleTimestamp, setVisibleTimestamp] = useState(timestamps[0]);
   const onReady = useCallback(
     (e) => {
       playerRef.current = e.target;
-      const configEnd = getLoopEnd(getTreeByBlockUid(blockUid).children);
-      if (configEnd) {
-        setEnd(configEnd);
-      }
-      jumpToStart();
+      const iframe = document.getElementById(
+        `roamjs-youtube-${blockUid}`
+      ) as HTMLIFrameElement;
+      iframe.allow = iframe.allow.replace(" autoplay;", "");
     },
-    [blockUid, jumpToStart, setEnd, playerRef]
+    [blockUid, playerRef]
+  );
+  const onClick = useCallback(
+    (
+      writeTimestamp: ({
+        children,
+        time,
+        text,
+        parentUid,
+      }: {
+        children: { text: string; uid: string }[];
+        time: number;
+        text: string;
+        parentUid: string;
+      }) => string
+    ) => {
+      const time = playerRef.current.getCurrentTime();
+      const text = valueToTimestamp(time, playerRef.current?.getDuration?.());
+      const parentUid =
+        getTimestampNode().uid ||
+        createBlock({
+          node: { text: "timestamps", children: [] },
+          parentUid: blockUid,
+          order: 0,
+        });
+      setTimeout(() => {
+        const children = getShallowTreeByParentUid(parentUid);
+        const uid = writeTimestamp({ children, time, text, parentUid });
+        setTimeout(() => {
+          const ts = uid ? [...timestamps, uid] : timestamps;
+          timestampBlocks.current = calcBlocks(ts);
+          setTimestamps(ts);
+        }, 50);
+      }, 1);
+    },
+    [
+      playerRef,
+      blockUid,
+      getTimestampNode,
+      timestamps,
+      setTimestamps,
+      calcBlocks,
+      timestampBlocks,
+    ]
   );
   const onMarkerClick = useCallback(() => {
-    const time = Math.round(playerRef.current.getCurrentTime());
-    const text = time.toString();
-    const timestampNode = getTimestampNode();
-    if (timestampNode) {
-      const index = timestampNode.children.findIndex(
-        (t) => parseInt(t.text) > time
-      );
-      const uid = createBlock({
+    onClick(({ children, time, text, parentUid }) => {
+      const index = children.findIndex((t) => timestampToValue(t.text) > time);
+      return createBlock({
         node: { text },
-        parentUid: timestampNode.uid,
-        order: index < 0 ? timestampNode.children.length : index,
+        parentUid,
+        order: index < 0 ? children.length : index,
       });
-      setTimeout(() => {
-        const ts = [...timestamps, { text, uid }];
-        blocks.current = calcBlocks(ts);
-        setTimestamps(ts);
-      }, 50);
-    } else {
-      const uid = createBlock({
-        node: { text: "timestamps", children: [{ text }] },
-        parentUid: blockUid,
-        order: 0,
-      });
-      setTimeout(() => {
-        const childUid = getFirstChildUidByBlockUid(uid);
-        const ts = [...timestamps, { text, uid: childUid }];
-        blocks.current = calcBlocks(ts);
-        setTimestamps(ts);
-      }, 50);
-    }
-  }, [
-    playerRef,
-    blockUid,
-    setStart,
-    setEnd,
-    getTimestampNode,
-    timestamps,
-    setTimestamps,
-    calcBlocks,
-    blocks,
-  ]);
-  const playerVars = useMemo(
-    () => ({
-      start: parseInt(getTextByBlockUid(start) || "0"),
-      end: parseInt(
-        getTextByBlockUid(end) || playerRef.current?.getDuration?.() || "0"
-      ),
-      origin: window.location.origin,
-      autoplay: 0 as const,
-    }),
-    [start, end]
-  );
+    });
+  }, [onClick]);
+  const onLoopClick = useCallback(() => {
+    onClick(({ children, time, text, parentUid }) => {
+      if (isLoopActive) {
+        const node = children.find(
+          (t) => timestampToValue(t.text) < time && /-\s*$/.test(t.text)
+        );
+        if (node) {
+          setIsLoopActive(
+            children.some((t) => t.uid !== node?.uid && /-\s*$/.test(t.text))
+          );
+          updateBlock({ text: `${node?.text}${text}`, uid: node?.uid });
+        }
+        return "";
+      } else {
+        setIsLoopActive(true);
+        const index = children.findIndex(
+          (t) => timestampToValue(t.text) > time
+        );
+        return createBlock({
+          node: { text: `${text} - ` },
+          parentUid,
+          order: index < 0 ? children.length : index,
+        });
+      }
+    });
+  }, [onClick, isLoopActive, setIsLoopActive]);
+  useEffect(() => {
+    return () => clearTimeout(latestTimeoutRef.current);
+  }, [latestTimeoutRef]);
   return (
     <div style={{ display: "flex" }}>
       <EditContainer containerStyleProps={{ flexGrow: 1 }} blockId={blockId}>
         <YouTube
           videoId={youtubeId}
+          id={`roamjs-youtube-${blockUid}`}
           opts={{
             width: "100%",
-            playerVars,
+            playerVars: {
+              origin: window.location.origin,
+              autoplay: 0 as const,
+              rel: 0 as const,
+            },
           }}
           onReady={onReady}
-          onEnd={jumpToStart}
+          onPause={() => clearTimeout(latestTimeoutRef.current)}
         />
       </EditContainer>
       <div
@@ -168,52 +217,52 @@ const YoutubePlayer = ({
           onClick={onMarkerClick}
           style={{ marginBottom: 32 }}
         />
+        <Button
+          icon={"refresh"}
+          minimal
+          onClick={onLoopClick}
+          active={isLoopActive}
+          style={{ marginBottom: 32 }}
+        />
         {timestamps
-          .filter((ts) => !!blocks.current[ts.uid])
+          .filter((ts) => !!timestampBlocks.current[ts])
           .map((ts) => {
-            const container = blocks.current[ts.uid];
+            const container = timestampBlocks.current[ts];
             container.addEventListener("mouseenter", () =>
-              setVisibleTimestamp(ts.uid)
+              setVisibleTimestamp(ts)
             );
             return (
-              <Portal container={container} key={ts.uid}>
+              <Portal container={container} key={ts}>
                 <span
                   style={{
-                    display:
-                      ts.uid === visibleTimestamp ? "inline-block" : "none",
+                    display: ts === visibleTimestamp ? "inline-block" : "none",
                     position: "absolute",
                     top: 0,
                     right: 0,
                   }}
                 >
-                  <ToggleIconButton
-                    icon={"pin"}
-                    on={start === ts.uid}
-                    onClick={() => {
-                      setInputSetting({
-                        blockUid,
-                        value: ts.uid,
-                        key: "start",
-                      });
-                      setStart(ts.uid);
-                    }}
-                    style={{ transform: "scale(-1,1)" }}
-                  />
-                  <ToggleIconButton
-                    icon={"pin"}
-                    on={end === ts.uid}
-                    onClick={() => {
-                      setInputSetting({ blockUid, value: ts.uid, key: "end" });
-                      setEnd(ts.uid);
-                    }}
-                  />
                   <Button
                     icon={"play"}
                     minimal
                     onClick={() => {
-                      const stamp = parseInt(getTextByBlockUid(ts.uid));
-                      playerRef.current.seekTo(stamp);
-                      playerRef.current.playVideo();
+                      clearTimeout(latestTimeoutRef.current);
+                      const text = getTextByBlockUid(ts);
+                      const stamp = timestampToValue(text);
+                      const loopend = /\d\d(?::\d\d){0,2}\.\d\d\d\s*-\s*(\d\d(?::\d\d){0,2}\.\d\d\d)/.exec(
+                        text
+                      )?.[1];
+                      const loop = () => {
+                        playerRef.current.seekTo(stamp);
+                        playerRef.current.playVideo();
+                        if (loopend) {
+                          const end = timestampToValue(loopend);
+                          latestTimeoutRef.current = window.setTimeout(
+                            loop,
+                            (end - stamp) * 1000
+                          );
+                        }
+                      };
+                      loop();
                     }}
                   />
                   <Button
@@ -222,7 +271,8 @@ const YoutubePlayer = ({
                     onClick={() =>
                       navigator.clipboard.writeText(
                         `https://youtube.com/watch?v=${youtubeId}&t=${
-                          parseInt(ts.text) || 0
+                          Math.floor(timestampToValue(getTextByBlockUid(ts))) ||
+                          0
                         }s`
                       )
                     }
