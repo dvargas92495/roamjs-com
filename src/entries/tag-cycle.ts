@@ -172,11 +172,7 @@ runExtension("tag-cycle", () => {
   };
 
   const isValidShortcut = (t: Pick<TreeNode, "text">) =>
-    t.text.toUpperCase().startsWith("CTRL+") ||
-    t.text.toUpperCase().startsWith("CMD+") ||
-    t.text.toUpperCase().startsWith("ALT+") ||
-    t.text.toUpperCase().startsWith("OPT+") ||
-    t.text.toUpperCase().startsWith("WIN+");
+    /^(CTRL|CMD|ALT|OPT|WIN)(\s*)\+/i.test(t.text);
 
   const watchTagCycleBlockUid = (blockUid: string) => {
     const shortcutCallback = () => {
