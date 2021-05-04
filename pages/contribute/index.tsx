@@ -89,7 +89,7 @@ const ContributePage = (): React.ReactElement => {
           },
           {
             title: "Michael Colacino",
-            imgSrc: "sponsors/defult.jpg",
+            imgSrc: "sponsors/default.jpg",
             url: "",
           },
           {

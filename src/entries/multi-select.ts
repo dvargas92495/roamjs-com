@@ -12,7 +12,7 @@ const ID = "multi-select";
 const HIGHLIGHT_CLASS = "block-highlight-blue";
 const DRAG_CLASS = "block-highlight-grey";
 const globalRefs = {
-  blocksToMove: [] as string[],
+  blocksToMove: new Set<string>(),
   shiftKey: false,
 };
 
@@ -30,10 +30,13 @@ runExtension(ID, () => {
         b.setAttribute("data-roamjs-multi-select-listener", "true");
         b.addEventListener("mousedown", (e) => {
           if (isControl(e)) {
+            const { blockUid } = getUids(d);
             if (b.classList.contains(HIGHLIGHT_CLASS)) {
               b.classList.remove(HIGHLIGHT_CLASS);
+              globalRefs.blocksToMove.delete(blockUid);
             } else {
               b.classList.add(HIGHLIGHT_CLASS);
+              globalRefs.blocksToMove.add(blockUid)
             }
             e.stopPropagation();
           }
@@ -49,12 +52,11 @@ runExtension(ID, () => {
         .closest(".roam-block-container")
         ?.className?.includes?.(HIGHLIGHT_CLASS)
     ) {
-      globalRefs.blocksToMove = Array.from(
+      Array.from(
         document.getElementsByClassName(HIGHLIGHT_CLASS)
-      ).map((d) => {
+      ).forEach((d) => {
         d.classList.remove(HIGHLIGHT_CLASS);
         d.classList.add(DRAG_CLASS);
-        return getUidByContainer(d);
       });
     } else if (
       !isControl(e) ||
@@ -73,18 +75,24 @@ runExtension(ID, () => {
     callback: (d: HTMLDivElement) => {
       d.addEventListener("drop", () => {
         const { parentUid, offset } = getDropUidOffset(d);
-        globalRefs.blocksToMove.forEach((uid, order) =>
-          window.roamAlphaAPI.moveBlock({
-            location: {
-              "parent-uid": parentUid,
-              order: offset + order,
-            },
-            block: {
-              uid,
-            },
-          })
-        );
-        globalRefs.blocksToMove = [];
+        const containers = Array.from(
+          document.getElementsByClassName(DRAG_CLASS)
+        )
+        Array.from(globalRefs.blocksToMove)
+          .map((uid) => ({ uid, index: containers.findIndex((c) => getUidByContainer(c) === uid) }))
+          .sort(({ index: a }, { index: b }) => a - b)
+          .forEach(({uid}, order) =>
+            window.roamAlphaAPI.moveBlock({
+              location: {
+                "parent-uid": parentUid,
+                order: offset + order,
+              },
+              block: {
+                uid,
+              },
+            })
+          );
+        globalRefs.blocksToMove = new Set();
       });
     },
   });
