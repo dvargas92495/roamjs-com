@@ -260,6 +260,13 @@ functions:
           path: request-path
           method: post
           cors: true
+  request-path-post:
+    handler: out/request-path_delete.handler
+    events:
+      - http:
+          path: request-path
+          method: delete
+          cors: true
   shutdown-website-post:
     handler: out/shutdown-website_post.handler
     events:
@@ -385,6 +392,13 @@ functions:
       - http:
           path: update-website
           method: post
+          cors: true
+  versions-get:
+    handler: out/versions_get.handler
+    events:
+      - http:
+          path: versions
+          method: get
           cors: true
   website-status-get:
     handler: out/website-status_get.handler
