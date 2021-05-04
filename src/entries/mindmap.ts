@@ -9,7 +9,7 @@ import {
 import { NODE_CLASSNAME, render } from "../components/MarkmapPanel";
 import { addStyle, resolveRefs, runExtension } from "../entry-helpers";
 
-addStyle(`span.roamjs-mindmap-node {
+addStyle(`span.${NODE_CLASSNAME} {
   width: 300px;
   display: inline-block;
   word-break: break-word;

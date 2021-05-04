@@ -92,6 +92,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/defult.jpg",
             url: "",
           },
+          {
+            title: "Norman Chella",
+            imgSrc: "sponsors/chella.jpg",
+            url: "https://thatsthenorm.com/start/",
+          },
         ]}
       />
       <H6>
