@@ -230,6 +230,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/faerman.jpg",
             url: "https://rodrigofaerman.com",
           },
+          {
+            title: "David Plummer",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
         ]}
       />
     </StandardLayout>

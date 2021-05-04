@@ -16,7 +16,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   }): Promise<{ id: string }[]> => {
     const url = `https://api.twitter.com/1.1/favorites/list.json?count=200${
       maxId ? `&max_id=${maxId}` : ""
-    }`;
+    }&tweet_mode=extended`;
     const oauthHeaders = twitterOAuth.toHeader(
       twitterOAuth.authorize(
         {
@@ -31,7 +31,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         {
           id_str: string;
           created_at: string;
-          text: string;
+          full_text: string;
           user: { name: string; screen_name: string };
         }[]
       >(url, {
@@ -46,7 +46,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
           )
           .map((t) => ({
             id: t.id_str,
-            text: t.text,
+            text: t.full_text,
             handle: t.user?.screen_name,
             author: t.user?.name,
           }));
