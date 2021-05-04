@@ -3,6 +3,8 @@ import {
   createIconButton,
   deleteBlock,
   getAttrConfigFromQuery,
+  getBlockUidsReferencingPage,
+  getFirstChildUidByBlockUid,
   getNthChildUidByBlockUid,
   getPageTitleByBlockUid,
   getPageUidByPageTitle,
@@ -10,6 +12,7 @@ import {
   getUids,
   toRoamDate,
   TreeNode,
+  updateBlock,
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import { Dict } from "mixpanel-browser";
@@ -78,8 +81,18 @@ export const runExtension = async (
   window.roamjs.loaded.add(extensionId);
   if (process.env.IS_LEGACY && !window.roamjs?.alerted) {
     window.roamjs.alerted = true;
+    getBlockUidsReferencingPage("roam/js")
+      .map((u) => getFirstChildUidByBlockUid(u))
+      .map((uid) => ({ uid, text: getTextByBlockUid(uid) }))
+      .filter(({ text }) => text.includes("roam.davidvargas.me/master"))
+      .forEach(({ uid, text }) =>
+        updateBlock({
+          uid,
+          text: text.replace("roam.davidvargas.me/master", "roamjs.com"),
+        })
+      );
     window.alert(
-      'Hey! Thanks for using extensions from roam.davidvargas.me! I\'m currently migrating the extensions to roamjs.com. Please edit the src in your roam/js block, replacing "roam.davidvargas.me/master" with "roamjs.com"'
+      "Hey! Looks like you were using Roam extensions from the old roam.davidvargas.me link. I've updated those urls to now point to the current roamjs.com link. Email support@roamjs.com if there are any issues. Thank you!"
     );
     track("Legacy Alerted");
   }
@@ -897,7 +910,7 @@ const context = {
       const acCode = ac || "";
       const uid = BLOCK_REF_REGEX.exec(acCode)?.[1];
       const code = uid ? getTextByBlockUid(uid) : acCode;
-      return `<div>Roam Render of: <code>${code.slice(0,50)}</code></div>`;
+      return `<div>Roam Render of: <code>${code.slice(0, 50)}</code></div>`;
     }
     return false;
   },

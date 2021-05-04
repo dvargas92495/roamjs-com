@@ -9,7 +9,10 @@ export const cleanCode = (text: string): string =>
 
 export const getSingleCodeContent = (
   id: string
-): string => `var existing = document.getElementById("roamjs-${id}");
+): string => `var existing = document.getElementById("roamjs-${id.replace(
+  "/",
+  "-"
+)}");
 if (!existing) {
   var extension = document.createElement("script");
   extension.src = "${
@@ -17,7 +20,7 @@ if (!existing) {
       ? "http://localhost:8080/build"
       : "https://roamjs.com"
   }/${id}.js";
-  extension.id = "roamjs-${id}";
+  extension.id = "roamjs-${id.replace("/", "-")}";
   extension.async = true;
   extension.type = "text/javascript";
   document.getElementsByTagName("head")[0].appendChild(extension);

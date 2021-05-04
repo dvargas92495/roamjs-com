@@ -3,11 +3,26 @@ import StandardLayout from "../../components/StandardLayout";
 import { Body, CardGrid, H1, H4 } from "@dvargas92495/ui";
 import { items } from "../../components/ExtensionPageLayout";
 import { defaultLayoutProps } from "../../components/Layout";
+import { GetStaticProps } from "next";
+import axios from "axios";
+import { API_URL } from "../../components/constants";
+import { idToTitle } from "../../components/hooks";
 
+type ExtensionMetadata = {
+  title: string;
+  description: string;
+  image: string;
+  href: string;
+  development: boolean;
+};
 const prodItems = items.filter((f) => !f.development);
 const devItems = items.filter((f) => f.development);
 
-const ExtensionHomePage = (): React.ReactElement => {
+const ExtensionHomePage = ({
+  extensions,
+}: {
+  extensions: ExtensionMetadata[];
+}): React.ReactElement => {
   return (
     <StandardLayout
       title={"RoamJS Extensions"}
@@ -21,7 +36,13 @@ const ExtensionHomePage = (): React.ReactElement => {
         Welcome to RoamJS Extensions! Click on any of the extensions below to
         find out more about how to install and use them.
       </Body>
-      <CardGrid items={prodItems} width={3} />
+      <CardGrid
+        items={[
+          ...prodItems,
+          ...extensions,
+        ].sort(({ title: a }, { title: b }) => a.localeCompare(b))}
+        width={3}
+      />
       <H4>Under Development</H4>
       <Body>
         The following extensions are still under development and are not yet
@@ -31,5 +52,27 @@ const ExtensionHomePage = (): React.ReactElement => {
     </StandardLayout>
   );
 };
+
+export const getStaticProps: GetStaticProps<{
+  extensions: ExtensionMetadata[];
+}> = () =>
+  axios
+    .get(`${API_URL}/request-path`)
+    .then((r) => ({
+      props: {
+        extensions: r.data.paths
+          .filter((id) => id !== "example")
+          .map((id) => ({
+            title: idToTitle(id),
+            description: "Description for " + idToTitle(id),
+            image: `/thumbnails/${id}.png`,
+            href: `/extensions/${id}`,
+            development: false,
+          })),
+      },
+    }))
+    .catch(() => ({
+      props: { extensions: [] },
+    }));
 
 export default ExtensionHomePage;

@@ -33,8 +33,9 @@ import {
   SponsorDialog,
 } from "../../components/ExtensionPageLayout";
 import RoamJSDigest from "../../components/RoamJSDigest";
+import MdxComponents from '../../components/MdxComponents';
 
-const components = { Loom };
+const components = { Loom, ...MdxComponents };
 const total = 30 - 1;
 const rowLength = 4;
 
@@ -74,7 +75,7 @@ const ExtensionPage = ({
       img={`https://roamjs.com/thumbnails/${id}.png`}
     >
       <Breadcrumbs
-        page={title}
+        page={title.toUpperCase()}
         links={[
           {
             text: "EXTENSIONS",
@@ -83,7 +84,7 @@ const ExtensionPage = ({
         ]}
       />
       {development && <H2>UNDER DEVELOPMENT</H2>}
-      <H1>{title}</H1>
+      <H1>{title.toUpperCase()}</H1>
       <Subtitle>{description}</Subtitle>
       <H3>Installation</H3>
       <Body>
@@ -93,9 +94,7 @@ const ExtensionPage = ({
       </Body>
       <div style={{ marginBottom: 24 }}>
         <Button
-          onClick={() =>
-            onSave([extensionEntry])
-          }
+          onClick={() => onSave([extensionEntry])}
           color="primary"
           variant="contained"
         >
@@ -109,7 +108,11 @@ const ExtensionPage = ({
         with the text <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam
         DB. Then, copy and paste this code block as a child of the block.
       </Body>
-      <Prism language="javascript">{getSingleCodeContent(extensionEntry)}</Prism>
+      <div style={{ marginBottom: 48 }}>
+        <Prism language="javascript">
+          {getSingleCodeContent(extensionEntry)}
+        </Prism>
+      </div>
       {children}
       <H3>Contributors</H3>
       <Body>
