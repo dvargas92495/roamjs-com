@@ -13,8 +13,11 @@ export const handler = authenticate(async (event) => {
     return userError("Path is required", event);
   }
 
-  if (!/(\/|\.js)$/.test(path)) {
-    return userError("Invalid path: must either end in '/' or '.js'", event);
+  if (!/^[a-z][a-z0-9-]*$/.test(path)) {
+    return userError(
+      "Invalid path: must consist of only lowercase letters, numbers, and dashes, starting with a letter",
+      event
+    );
   }
 
   const available = listAll(path).then((r) => !r.length);
@@ -22,23 +25,13 @@ export const handler = authenticate(async (event) => {
     return userError("Requested path is not available", event);
   }
 
-  if (path.endsWith("/")) {
-    await s3
-      .putObject({
-        Bucket: "roamjs.com",
-        Key: `${path}index`,
-        Body: "lock",
-      })
-      .promise();
-  } else if (path.endsWith(".js")) {
-    await s3
-      .putObject({
-        Bucket: "roamjs.com",
-        Key: path,
-        Body: "// lock",
-      })
-      .promise();
-  }
+  await s3
+    .putObject({
+      Bucket: "roamjs.com",
+      Key: `${path}/index`,
+      Body: "lock",
+    })
+    .promise();
 
   const id = event.headers.Authorization;
   const user = await users.getUser(id);

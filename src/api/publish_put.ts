@@ -72,7 +72,6 @@ export const handler: APIGatewayProxyHandler = authenticate(async (event) => {
       event
     );
   }
-  const extension = path.replace(/(\.js|\/)$/, "");
   const frontmatter = `---
 description: "${description}"${
     contributors?.length ? `\ncontributors: ${contributors.join(", ")}` : ""
@@ -96,7 +95,7 @@ description: "${description}"${
         : s3
             .upload({
               Bucket: "roamjs.com",
-              Key: `markdown/${extension}.md`,
+              Key: `markdown/${path}.md`,
               Body: `${frontmatter}${blocks
                 .map((b) => blockToMarkdown(b, viewType, 0))
                 .join("")}`,
@@ -106,7 +105,7 @@ description: "${description}"${
               axios
                 .post(
                   `https://api.github.com/repos/dvargas92495/roam-js-extensions/actions/workflows/isr.yaml/dispatches`,
-                  { ref: "master", inputs: { extension } },
+                  { ref: "master", inputs: { extension: path } },
                   getGithubOpts()
                 )
                 .then(() => ({

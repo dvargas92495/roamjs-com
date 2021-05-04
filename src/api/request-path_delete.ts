@@ -34,15 +34,13 @@ export const handler = authenticate(async (event) => {
   );
   return users
     .updateUser(id, {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
-      publicMetadata: JSON.stringify({
+      publicMetadata: {
         ...publicMetadata,
         developer: {
           ...publicMetadata.developer,
           paths,
         },
-      }),
+      },
     })
     .then(() => ({
       statusCode: 200,
