@@ -34,7 +34,10 @@ export const handler: APIGatewayProxyHandler = authenticate((event) => {
                   {
                     Sid: "InvalidateCache",
                     Effect: "Allow",
-                    Action: "cloudfront:CreateInvalidation",
+                    Action: [
+                      "cloudfront:CreateInvalidation",
+                      "cloudfront:GetInvalidation",
+                    ],
                     Resource: process.env.CLOUDFRONT_ARN,
                   },
                 ],
