@@ -260,7 +260,7 @@ functions:
           path: request-path
           method: post
           cors: true
-  request-path-post:
+  request-path-delete:
     handler: out/request-path_delete.handler
     events:
       - http:
