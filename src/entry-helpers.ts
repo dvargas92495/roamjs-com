@@ -4,10 +4,10 @@ import {
   deleteBlock,
   getAttrConfigFromQuery,
   getBlockUidsReferencingPage,
-  getFirstChildUidByBlockUid,
   getNthChildUidByBlockUid,
   getPageTitleByBlockUid,
   getPageUidByPageTitle,
+  getShallowTreeByParentUid,
   getTreeByBlockUid,
   getUids,
   toRoamDate,
@@ -82,8 +82,7 @@ export const runExtension = async (
   if (process.env.IS_LEGACY && !window.roamjs?.alerted) {
     window.roamjs.alerted = true;
     getBlockUidsReferencingPage("roam/js")
-      .map((u) => getFirstChildUidByBlockUid(u))
-      .map((uid) => ({ uid, text: getTextByBlockUid(uid) }))
+      .flatMap((u) => getShallowTreeByParentUid(u))
       .filter(({ text }) => text.includes("roam.davidvargas.me/master"))
       .forEach(({ uid, text }) =>
         updateBlock({
