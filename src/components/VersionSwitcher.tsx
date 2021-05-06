@@ -9,13 +9,12 @@ import {
 } from "@blueprintjs/core";
 import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
-import ReactDOM from "react-dom";
 import {
   getBlockUidsReferencingPage,
   getShallowTreeByParentUid,
   updateBlock,
 } from "roam-client";
-import { getRenderRoot } from "./hooks";
+import { createOverlayRender } from "roamjs-components";
 
 export type VersionSwitcherProps = {
   id: string;
@@ -140,18 +139,7 @@ const VersionSwitcher = ({
   );
 };
 
-export const render = (props: VersionSwitcherProps): void => {
-  const parent = getRenderRoot(`versioning-${props.id}`);
-  ReactDOM.render(
-    <VersionSwitcher
-      {...props}
-      onClose={() => {
-        ReactDOM.unmountComponentAtNode(parent);
-        parent.remove();
-      }}
-    />,
-    parent
-  );
-};
+export const render = (props: VersionSwitcherProps): void =>
+  createOverlayRender(`versioning-${props.id}`, VersionSwitcher)(props);
 
 export default VersionSwitcher;
