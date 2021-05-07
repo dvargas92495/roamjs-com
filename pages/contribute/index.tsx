@@ -97,6 +97,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/chella.jpg",
             url: "https://thatsthenorm.com/start/",
           },
+          {
+            title: 'Rick Wilkes',
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          }
         ]}
       />
       <H6>
@@ -238,8 +243,13 @@ const ContributePage = (): React.ReactElement => {
           {
             title: "Denise Todd",
             imgSrc: "sponsors/denise.jfif",
-            url: "",
+            url: "https://denisetodd.com",
           },
+          {
+            title: 'Nadir Samji',
+            imgSrc: "sponsors/samji.png",
+            url: "",
+          }
         ]}
       />
     </StandardLayout>

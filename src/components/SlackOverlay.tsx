@@ -19,6 +19,7 @@ import {
   getParentTextByBlockUid,
   getParentTextByBlockUidAndTag,
   getTextByBlockUid,
+  getBlockUidByTextOnPage,
 } from "roam-client";
 import { getOauth, getSettingValueFromTree } from "./hooks";
 import { resolveRefs } from "../entry-helpers";
@@ -81,12 +82,18 @@ export const getAliases = (tree: TreeNode[]): { [key: string]: string } =>
   getSettingMapFromTree({ key: "aliases", tree });
 
 const getCurrentUserEmail = () => {
-  const globalAppState = localStorage.getItem("globalAppState") || '["","",[]]';
-  const userArray = (JSON.parse(globalAppState)[2] || []) as string[];
-  const emailIndex = userArray.findIndex((s) => s === "~:email");
-  if (emailIndex > 0) {
-    return userArray[emailIndex + 1];
+  const globalAppState = JSON.parse(
+    localStorage.getItem("globalAppState") || '["","",[]]'
+  ) as (string | string[])[];
+  const userIndex = globalAppState.findIndex((s) => s === "~:user");
+  if (userIndex > 0) {
+    const userArray = globalAppState[userIndex + 1] as string[];
+    const emailIndex = userArray.findIndex((s) => s === "~:email");
+    if (emailIndex > 0) {
+      return userArray[emailIndex + 1];
+    }
   }
+  getBlockUidByTextOnPage
   return "";
 };
 const web = new WebClient();
@@ -130,7 +137,7 @@ const SlackContent: React.FunctionComponent<
       setAsUser((e.target as HTMLInputElement).checked),
     [setAsUser]
   );
-  const {accountLabel, accountDropdown} = useOauthAccounts('slack');
+  const { accountLabel, accountDropdown } = useOauthAccounts("slack");
   const onClick = useCallback(() => {
     setLoading(true);
     setError("");
