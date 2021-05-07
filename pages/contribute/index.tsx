@@ -248,7 +248,7 @@ const ContributePage = (): React.ReactElement => {
           {
             title: 'Nadir Samji',
             imgSrc: "sponsors/samji.png",
-            url: "",
+            url: "https://twitter.com/_nadir",
           }
         ]}
       />
