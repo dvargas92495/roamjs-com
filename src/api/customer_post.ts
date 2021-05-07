@@ -1,7 +1,7 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
-import { bareSuccessResponse, ses } from "../lambda-helpers";
+import { bareSuccessResponse, emptyResponse, ses } from "../lambda-helpers";
 import { Webhook } from "diahook";
 
 const wh = new Webhook(process.env.DIAHOOK_SECRET);
@@ -16,6 +16,7 @@ export const handler = async (
     last_name,
     email_addresses,
     primary_email_address_id,
+    private_metadata,
   } = wh.verify(event.body, {
     "dh-id": event.headers["dh-id"] || event.headers["Dh-Id"],
     "dh-signature":
@@ -28,7 +29,11 @@ export const handler = async (
     last_name: string;
     email_addresses: { id: string; email_address: string }[];
     primary_email_address_id: string;
+    private_metadata: { stripeId?: string };
   };
+  if (private_metadata.stripeId) {
+    return emptyResponse(event);
+  }
   const email = email_addresses.find((e) => e.id === primary_email_address_id)
     .email_address;
   return axios
