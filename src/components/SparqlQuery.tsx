@@ -33,10 +33,12 @@ import {
   getPageTitleByBlockUid,
   getUids,
   getShallowTreeByParentUid,
+  getTreeByBlockUid,
 } from "roam-client";
-import { getCurrentPageUid } from "../entry-helpers";
+import { extractTag, getCurrentPageUid, toFlexRegex } from "../entry-helpers";
 import { getRenderRoot } from "./hooks";
 import MenuItemSelect from "./MenuItemSelect";
+import { getSettingValueFromTree } from "roamjs-components";
 
 type PageResult = { description: string; id: string; label: string };
 const OUTPUT_FORMATS = ["Parent", "Line", "Table"] as const;
@@ -95,7 +97,7 @@ export const runSparqlQuery = ({
 } & RenderProps["queriesCache"][string]): Promise<void> =>
   axios.get(`${source}${encodeURIComponent(query)}`).then((r) => {
     const data = r.data.results.bindings as {
-      [k: string]: { value: string };
+      [k: string]: { value: string; type: string };
     }[];
     if (data.length) {
       const head = r.data.head.vars as string[];
@@ -109,15 +111,17 @@ export const runSparqlQuery = ({
         const dataLabels = head.filter((h) => !/Label$/.test(h));
         const returnedLabels = new Set(head.filter((h) => /Label$/.test(h)));
         const formatValue = (
-          p: { [h: string]: { value: string } },
+          p: { [h: string]: { value: string; type: string } },
           h: string
         ) => {
-          const s = p[returnedLabels.has(`${h}Label`) ? `${h}Label` : h].value;
+          const valueKey = returnedLabels.has(`${h}Label`) ? `${h}Label` : h;
+          const s = p[valueKey].value;
           return IMAGE_REGEX_URL.test(s)
             ? `![](${s})`
-            : dataLabels.indexOf(h) === 0
+            : returnedLabels.has(`${h}Label`) &&
+              /entity\/P\d*$/.test(p[h].value)
             ? `${s}::`
-            : dataLabels.indexOf(h) === 1
+            : p[valueKey].type === "literal"
             ? `[[${s}]]`
             : s;
         };
@@ -204,6 +208,7 @@ const SparqlQuery = ({
 }: {
   onClose: () => void;
 } & RenderProps): React.ReactElement => {
+  const configUid = useMemo(() => getPageUidByPageTitle("roam/js/sparql"), []);
   const parentUid = useMemo(getCurrentPageUid, []);
   const pageTitle = useMemo(
     () => getPageTitleByPageUid(parentUid) || getPageTitleByBlockUid(parentUid),
@@ -216,7 +221,7 @@ const SparqlQuery = ({
         : getUids(textareaRef.current).blockUid,
     [parentUid]
   );
-  const blockString = useMemo(() => getTextByBlockUid(blockUid), [blockUid]);
+  const blockString = useMemo(() => extractTag(getTextByBlockUid(blockUid)), [blockUid]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeItem, setActiveItem] = useState(WIKIDATA_ITEMS[0]);
@@ -227,7 +232,16 @@ const SparqlQuery = ({
     () => setShowAdditionalOptions(!showAdditionalOptions),
     [setShowAdditionalOptions, showAdditionalOptions]
   );
-  const [label, setLabel] = useState(DEFAULT_EXPORT_LABEL);
+  const [label, setLabel] = useState(
+    getSettingValueFromTree({
+      tree:
+        getTreeByBlockUid(configUid).children.find((t) =>
+          toFlexRegex("import").test(t.text)
+        )?.children || [],
+      key: "default label",
+      defaultValue: DEFAULT_EXPORT_LABEL,
+    })
+  );
   const [dataSource, setDataSource] = useState<keyof typeof DATA_SOURCES>(
     "wikidata"
   );

@@ -9,6 +9,7 @@ import {
 } from "roam-client";
 import { createConfigObserver } from "roamjs-components";
 import {
+  DEFAULT_EXPORT_LABEL,
   OutputFormat,
   render,
   RenderProps,
@@ -58,7 +59,12 @@ runExtension(ID, () => {
       tabs: [
         {
           id: "import",
-          fields: [],
+          fields: [{
+            type: 'text',
+            title: 'default label',
+            description: 'The default label each Sparql query will have on import',
+            defaultValue: DEFAULT_EXPORT_LABEL,
+          }],
         },
       ],
     },
