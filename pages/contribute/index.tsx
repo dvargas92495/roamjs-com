@@ -44,8 +44,8 @@ const ContributePage = (): React.ReactElement => {
           },
           {
             title: "Alexander Young",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
+            imgSrc: "sponsors/ayoung.jfif",
+            url: "https://www.linkedin.com/in/alyoung419/",
           },
           {
             title: "Keenan Payne",

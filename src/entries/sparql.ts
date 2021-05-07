@@ -59,12 +59,15 @@ runExtension(ID, () => {
       tabs: [
         {
           id: "import",
-          fields: [{
-            type: 'text',
-            title: 'default label',
-            description: 'The default label each Sparql query will have on import',
-            defaultValue: DEFAULT_EXPORT_LABEL,
-          }],
+          fields: [
+            {
+              type: "text",
+              title: "default label",
+              description:
+                "The default label each Sparql query will have on import",
+              defaultValue: DEFAULT_EXPORT_LABEL,
+            },
+          ],
         },
       ],
     },
@@ -110,5 +113,18 @@ runExtension(ID, () => {
   window.roamAlphaAPI.ui.commandPalette.addCommand({
     label: "Run SPARQL Query",
     callback: () => render({ textareaRef, queriesCache }),
+  });
+
+  createHTMLObserver({
+    callback: (s: HTMLSpanElement) => {
+      if (s.innerText === "sparql") {
+        const editor = s.closest(".rm-code-block");
+        if (editor && !editor.classList.contains("roamjs-sparql-editor")) {
+          editor.classList.add("roamjs-sparql-editor");
+        }
+      }
+    },
+    tag: "SPAN",
+    className: "bp3-button-text",
   });
 });

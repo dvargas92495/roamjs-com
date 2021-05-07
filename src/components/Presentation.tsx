@@ -8,9 +8,16 @@ import React, {
 } from "react";
 import ReactDOM from "react-dom";
 import Reveal from "reveal.js";
-import { addStyle, isControl, parseRoamBlocks } from "../entry-helpers";
+import {
+  addStyle,
+  getBlockUidFromTarget,
+  isControl,
+  openBlockElement,
+  parseRoamBlocks,
+} from "../entry-helpers";
 import { isSafari } from "mobile-device-detect";
 import { getUids, TreeNode, ViewType } from "roam-client";
+import { BlockErrorBoundary } from "roamjs-components";
 
 const SAFARI_THEMES = ["black", "white", "beige"];
 
@@ -674,21 +681,7 @@ const Presentation: React.FunctionComponent<{
         const target = Array.from(
           document.getElementsByClassName("roam-block")
         ).find((d) => d.id.endsWith(uidToFocus));
-        if (target) {
-          target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-          setTimeout(() => {
-            const textArea = document.getElementById(
-              target.id
-            ) as HTMLTextAreaElement;
-            textArea.dispatchEvent(
-              new MouseEvent("mouseup", { bubbles: true })
-            );
-            textArea.setSelectionRange(
-              textArea.value.length,
-              textArea.value.length
-            );
-          }, 50);
-        }
+        openBlockElement(target as HTMLElement);
       }, 1);
     },
     [setShowOverlay, slides]
@@ -765,7 +758,14 @@ export const render = ({
   options: { [key: string]: string | boolean };
 }): void =>
   ReactDOM.render(
-    <Presentation getSlides={getSlides} {...options} />,
+    <BlockErrorBoundary
+      blockUid={getBlockUidFromTarget(button)}
+      message={
+        "Error thrown when rendering presentation. Reach out to support@roamjs.com for help with this message: {ERROR}"
+      }
+    >
+      <Presentation getSlides={getSlides} {...options} />
+    </BlockErrorBoundary>,
     button.parentElement
   );
 
