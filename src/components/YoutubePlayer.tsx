@@ -1,4 +1,4 @@
-import { Button, Portal } from "@blueprintjs/core";
+import { Button, Portal, Tooltip } from "@blueprintjs/core";
 import React, {
   useCallback,
   useEffect,
@@ -38,7 +38,10 @@ const valueToTimestamp = (value: number, duration: number): string => {
     .map((s) => `${s}`.padStart(2, "0"))
     .join(":")}.${(value % 1).toFixed(3).substring(2)}`;
 };
-const timestampToValue = (timestamp: string): number => {
+const timestampToValue = (timestamp?: string): number => {
+  if (!timestamp) {
+    return 0;
+  }
   const timestampOnly = timestamp.split(/[\s|-]/)[0];
   return timestampOnly
     .split(":")
@@ -52,7 +55,12 @@ const YoutubePlayer = ({
   youtubeId,
   blockId,
 }: YoutubePlayerProps): React.ReactElement => {
-  const latestTimeoutRef = useRef(0);
+  const latestTimeoutRef = useRef({
+    value: 0,
+    active: false,
+    start: 0,
+    end: 0,
+  });
   const getTimestampNode = useCallback(
     () =>
       getTreeByBlockUid(blockUid).children.find((t) =>
@@ -119,9 +127,9 @@ const YoutubePlayer = ({
       const time = playerRef.current.getCurrentTime();
       const text = valueToTimestamp(time, playerRef.current?.getDuration?.());
       const parentUid =
-        getTimestampNode().uid ||
+        getTimestampNode()?.uid ||
         createBlock({
-          node: { text: "timestamps", children: [] },
+          node: { text: "Timestamps", children: [] },
           parentUid: blockUid,
           order: 0,
         });
@@ -182,7 +190,42 @@ const YoutubePlayer = ({
     });
   }, [onClick, isLoopActive, setIsLoopActive]);
   useEffect(() => {
-    return () => clearTimeout(latestTimeoutRef.current);
+    return () => clearTimeout(latestTimeoutRef.current.value);
+  }, [latestTimeoutRef]);
+  const clearLoop = useCallback(() => {
+    clearTimeout(latestTimeoutRef.current.value);
+    latestTimeoutRef.current.active = false;
+  }, [latestTimeoutRef]);
+  const generateLoop = useCallback((start: number, end: number) => {
+    const loop = () => {
+      playerRef.current.seekTo(start);
+      playerRef.current.playVideo();
+      if (end) {
+        latestTimeoutRef.current = {
+          value: window.setTimeout(
+            loop,
+            ((end - start) * 1000) / playerRef.current.getPlaybackRate()
+          ),
+          active: true,
+          start,
+          end,
+        };
+      }
+    };
+    return loop;
+  }, []);
+  const onPlaybackRateChange = useCallback(() => {
+    if (latestTimeoutRef.current.active) {
+      window.clearInterval(latestTimeoutRef.current.value);
+      latestTimeoutRef.current.value = window.setTimeout(
+        generateLoop(
+          latestTimeoutRef.current.start,
+          latestTimeoutRef.current.end
+        ),
+        1000*(latestTimeoutRef.current.end - playerRef.current.getCurrentTime()) /
+          playerRef.current.getPlaybackRate()
+      );
+    }
   }, [latestTimeoutRef]);
   return (
     <div style={{ display: "flex" }}>
@@ -199,7 +242,8 @@ const YoutubePlayer = ({
             },
           }}
           onReady={onReady}
-          onPause={() => clearTimeout(latestTimeoutRef.current)}
+          onPause={clearLoop}
+          onPlaybackRateChange={onPlaybackRateChange}
         />
       </EditContainer>
       <div
@@ -211,19 +255,27 @@ const YoutubePlayer = ({
           paddingLeft: 4,
         }}
       >
-        <Button
-          icon={"map-marker"}
-          minimal
-          onClick={onMarkerClick}
-          style={{ marginBottom: 32 }}
-        />
-        <Button
-          icon={"refresh"}
-          minimal
-          onClick={onLoopClick}
-          active={isLoopActive}
-          style={{ marginBottom: 32 }}
-        />
+        <Tooltip content={"Save this point in time as a Timestamp"}>
+          <Button
+            icon={"map-marker"}
+            minimal
+            onClick={onMarkerClick}
+            style={{ marginBottom: 32 }}
+          />
+        </Tooltip>
+        <Tooltip
+          content={
+            isLoopActive ? "End the playback loop" : "Start a playback loop"
+          }
+        >
+          <Button
+            icon={"refresh"}
+            minimal
+            onClick={onLoopClick}
+            active={isLoopActive}
+            style={{ marginBottom: 32 }}
+          />
+        </Tooltip>
         {timestamps
           .filter((ts) => !!timestampBlocks.current[ts])
           .map((ts) => {
@@ -241,42 +293,40 @@ const YoutubePlayer = ({
                     right: 0,
                   }}
                 >
-                  <Button
-                    icon={"play"}
-                    minimal
-                    onClick={() => {
-                      clearTimeout(latestTimeoutRef.current);
-                      const text = getTextByBlockUid(ts);
-                      const stamp = timestampToValue(text);
-                      const loopend = /\d\d(?::\d\d){0,2}\.\d\d\d\s*-\s*(\d\d(?::\d\d){0,2}\.\d\d\d)/.exec(
-                        text
-                      )?.[1];
-                      const loop = () => {
-                        playerRef.current.seekTo(stamp);
-                        playerRef.current.playVideo();
-                        if (loopend) {
-                          const end = timestampToValue(loopend);
-                          latestTimeoutRef.current = window.setTimeout(
-                            loop,
-                            (end - stamp) * 1000
-                          );
-                        }
-                      };
-                      loop();
-                    }}
-                  />
-                  <Button
-                    icon={"duplicate"}
-                    minimal
-                    onClick={() =>
-                      navigator.clipboard.writeText(
-                        `https://youtube.com/watch?v=${youtubeId}&t=${
-                          Math.floor(timestampToValue(getTextByBlockUid(ts))) ||
-                          0
-                        }s`
-                      )
-                    }
-                  />
+                  <Tooltip content={"Play video from this timestamp"}>
+                    <Button
+                      icon={"play"}
+                      minimal
+                      onClick={() => {
+                        clearLoop();
+                        const text = getTextByBlockUid(ts);
+                        const stamp = timestampToValue(text);
+                        const loopend = /\d\d(?::\d\d){0,2}\.\d\d\d\s*-\s*(\d\d(?::\d\d){0,2}\.\d\d\d)/.exec(
+                          text
+                        )?.[1];
+                        const end = timestampToValue(loopend);
+                        const loop = generateLoop(stamp, end);
+                        loop();
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip
+                    content={"Copy YouTube link from this point in time"}
+                  >
+                    <Button
+                      icon={"duplicate"}
+                      minimal
+                      onClick={() =>
+                        navigator.clipboard.writeText(
+                          `https://youtube.com/watch?v=${youtubeId}&t=${
+                            Math.floor(
+                              timestampToValue(getTextByBlockUid(ts))
+                            ) || 0
+                          }s`
+                        )
+                      }
+                    />
+                  </Tooltip>
                 </span>
               </Portal>
             );
