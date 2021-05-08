@@ -101,6 +101,11 @@ const ContributePage = (): React.ReactElement => {
             title: 'Rick Wilkes',
             imgSrc: "sponsors/default.jpg",
             url: "",
+          },
+          {
+            title: 'David Hislop',
+            imgSrc: "sponsors/hislop.png",
+            url: "",
           }
         ]}
       />
