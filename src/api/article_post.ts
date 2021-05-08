@@ -32,10 +32,18 @@ export const handler = async (
     body: e.response?.data ? JSON.stringify(e.response.data) : e.message,
     headers: headers(event),
   });
-  return fetch({ "Content-type": "text/html", "user-agent": "Mozilla/5.0" })
+  const mostHeaders = {
+    "Content-type": "text/html",
+    accept: "*/*",
+    pragma: "no-cache",
+  }
+  return fetch({
+    "user-agent": "Mozilla/5.0",
+    ...mostHeaders
+  })
     .catch((e) =>
       e.response.status === 502
-        ? fetch({ "Content-type": "text/html" })
+        ? fetch(mostHeaders)
         : handleError(e)
     )
     .catch(handleError);
