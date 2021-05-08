@@ -241,9 +241,7 @@ module "aws_cron_job" {
   
   rule_name = "RoamJS"
   schedule  = "cron(0 4 ? * * *)"
-  lambdas    = [
-    "template-daily-note"
-  ]
+  lambdas    = []
   tags      = {
     Application = "Roam JS Extensions"
   }

@@ -9,7 +9,6 @@
     "automate": "node scripts/automation.js",
     "build": "webpack --config ./webpack.production.config.js",
     "build:api": "webpack --config ./webpack.lambda.config.js --env dir=api",
-    "build:automations": "webpack --config ./webpack.lambda.config.js --env dir=automations",
     "build:next": "next build",
     "hook": "node scripts/diahook.js",
     "postbuild:next": "next export",
