@@ -235,18 +235,6 @@ module "aws-serverless-backend" {
     }
 }
 
-module "aws_cron_job" {
-  source    = "dvargas92495/cron-job/aws"
-  version   = "1.1.0"
-  
-  rule_name = "RoamJS"
-  schedule  = "cron(0 4 ? * * *)"
-  lambdas    = []
-  tags      = {
-    Application = "Roam JS Extensions"
-  }
-}
-
 module "aws_email" {
   source  = "dvargas92495/email/aws"
   version = "1.1.7"
@@ -317,6 +305,37 @@ resource "aws_route53_record" "google-verifu" {
   type    = "TXT"
   ttl     = "300"
   records = ["google-site-verification=A9q11tN2qoTRaIdwMmlNqvbjgX4UQOj1okRat6CHtyE"]
+}
+
+resource "aws_dynamodb_table" "extensions" {
+  name           = "RoamJSExtensions"
+  billing_mode   = "PAY_PER_REQUEST"
+  hash_key       = "id"
+  range_key      = "version"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  attribute {
+    name = "version"
+    type = "S"
+  }
+
+  global_secondary_index {
+    hash_key           = "version"
+    name               = "version-index"
+    non_key_attributes = []
+    range_key          = "id"
+    projection_type    = "ALL"
+    read_capacity      = 0
+    write_capacity     = 0
+  }
+
+  tags = {
+    Application = "Roam JS Extensions"
+  }
 }
 
 provider "github" {
