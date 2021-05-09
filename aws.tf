@@ -311,26 +311,10 @@ resource "aws_dynamodb_table" "extensions" {
   name           = "RoamJSExtensions"
   billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "id"
-  range_key      = "version"
 
   attribute {
     name = "id"
     type = "S"
-  }
-
-  attribute {
-    name = "version"
-    type = "S"
-  }
-
-  global_secondary_index {
-    hash_key           = "version"
-    name               = "version-index"
-    non_key_attributes = []
-    range_key          = "id"
-    projection_type    = "ALL"
-    read_capacity      = 0
-    write_capacity     = 0
   }
 
   tags = {
