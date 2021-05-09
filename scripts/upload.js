@@ -50,7 +50,7 @@ const allContent = fs.existsSync(`out/extensions/${extension}`)
 const fileNames = Array.from(
   new Set(
     allContent.flatMap((c) =>
-      c.Key.match(new RegExp(linkRegex, "g"))
+      (c.Body.match(new RegExp(linkRegex, "g")) || [])
         .map((m) => m.match(linkRegex)[1])
         .map(decodeURIComponent)
     )

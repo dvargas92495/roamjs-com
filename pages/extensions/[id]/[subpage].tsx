@@ -4,7 +4,6 @@ import renderToString from "next-mdx-remote/render-to-string";
 import { MdxRemote } from "next-mdx-remote/types";
 import React from "react";
 import { API_URL } from "../../../components/constants";
-import { defaultLayoutProps } from "../../../components/Layout";
 import StandardLayout from "../../../components/StandardLayout";
 import hydrate from "next-mdx-remote/hydrate";
 import MdxComponents from "../../../components/MdxComponents";
