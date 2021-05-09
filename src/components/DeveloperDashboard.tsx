@@ -12,6 +12,7 @@ import React, { useEffect, useState } from "react";
 import {
   createPage,
   getPageUidByPageTitle,
+  getPageViewType,
   getTreeByPageName,
   TreeNode,
 } from "roam-client";
@@ -102,13 +103,32 @@ const DeveloperContent: StageContent = () => {
                       children: [] as TreeNode[],
                       viewType: "document",
                     };
+                    const subpageTitles = window.roamAlphaAPI
+                      .q(
+                        `[:find ?title :where [?b :node/title ?title][(clojure.string/starts-with? ?title  "${p}/")]]`
+                      )
+                      .map((r) => r[0]);
                     authenticatedAxiosPut("publish", {
                       path: p,
                       blocks: children,
                       viewType,
-                      description: getSettingValueFromTree({ tree, key: "description" }),
-                      contributors: getSettingValuesFromTree({ tree, key: "contributors" }),
-                      entry: getSettingValueFromTree({ tree, key: "entry" }),
+                      description: getSettingValueFromTree({
+                        tree,
+                        key: "description",
+                      }),
+                      contributors: getSettingValuesFromTree({
+                        tree,
+                        key: "contributors",
+                      }),
+                      subpages: Object.fromEntries(
+                        subpageTitles.map((t) => [
+                          t.substring(p.length + 1),
+                          {
+                            nodes: getTreeByPageName(t),
+                            viewType: getPageViewType(t),
+                          },
+                        ])
+                      ),
                     })
                       .then((r) => {
                         setInputSetting({

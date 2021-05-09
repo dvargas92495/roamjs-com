@@ -26,35 +26,31 @@ import {
   Subtitle,
   Tooltip,
 } from "@dvargas92495/ui";
-import Loom from "../../components/Loom";
 import {
   contributors as allContributors,
   emojisToTooltip,
   SponsorDialog,
 } from "../../components/ExtensionPageLayout";
 import RoamJSDigest from "../../components/RoamJSDigest";
-import MdxComponents from '../../components/MdxComponents';
+import MdxComponents from "../../components/MdxComponents";
 
-const components = { Loom, ...MdxComponents };
 const total = 30 - 1;
 const rowLength = 4;
 
 const ExtensionPage = ({
   content,
   id,
-  entry,
   description,
   development,
   contributors,
 }: {
   id: string;
-  entry?: string;
   content: MdxRemote.Source;
   description: string;
   development: boolean;
   contributors?: string;
 }): React.ReactElement => {
-  const children = hydrate(content, { components });
+  const children = hydrate(content, { components: MdxComponents });
   const title = idToTitle(id);
   const [copied, setCopied] = useState(false);
   const onSave = useCopyCode(setCopied);
@@ -67,7 +63,6 @@ const ExtensionPage = ({
     () => setPagination((pagination + rowLength + total) % total),
     [pagination, setPagination]
   );
-  const extensionEntry = entry ? `${id}/${entry.replace(/\.js$/, "")}` : id;
   return (
     <StandardLayout
       title={title}
@@ -94,7 +89,7 @@ const ExtensionPage = ({
       </Body>
       <div style={{ marginBottom: 24 }}>
         <Button
-          onClick={() => onSave([extensionEntry])}
+          onClick={() => onSave([`${id}/main`])}
           color="primary"
           variant="contained"
         >
@@ -110,7 +105,7 @@ const ExtensionPage = ({
       </Body>
       <div style={{ marginBottom: 48 }}>
         <Prism language="javascript">
-          {getSingleCodeContent(extensionEntry)}
+          {getSingleCodeContent(`${id}/main`)}
         </Prism>
       </div>
       {children}
@@ -227,21 +222,24 @@ export const getStaticProps: GetStaticProps<
   },
   {
     id: string;
+    subpath: string;
   }
 > = (context) =>
   axios
     .get(`${API_URL}/request-path?id=${context.params.id}`)
     .then((r) => matter(r.data.content))
     .then(({ content: preRender, data }) =>
-      renderToString(preRender, { components }).then((content) => ({
-        props: {
-          content,
-          id: context.params.id,
-          // Query a data source for this as a way to verify extensions
-          development: false,
-          ...data,
-        },
-      }))
+      renderToString(preRender, { components: MdxComponents }).then(
+        (content) => ({
+          props: {
+            content,
+            id: context.params.id,
+            // Query a data source for this as a way to verify extensions
+            development: false,
+            ...data,
+          },
+        })
+      )
     )
     .catch((e) => ({
       props: {

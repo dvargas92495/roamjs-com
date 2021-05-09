@@ -24,7 +24,7 @@ export const handler = async (
     const publicMetadata = user.publicMetadata as {
       [key: string]: Record<string, unknown>;
     };
-    if (!publicMetadata[service].token) {
+    if (!publicMetadata[service]?.token) {
       if (await getStripePriceId(service).catch(() => "Invalid")) {
         return {
           statusCode: 401,

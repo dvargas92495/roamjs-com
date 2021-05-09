@@ -20,7 +20,7 @@ export const handler = authenticate(async (event) => {
     );
   }
 
-  const available = listAll(path).then((r) => !r.length);
+  const available = listAll(path).then((r) => !r.objects.length && !r.prefixes.length);
   if (!available) {
     return userError("Requested path is not available", event);
   }

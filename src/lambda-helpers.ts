@@ -325,19 +325,23 @@ export const emailCatch = (subject: string, event: APIGatewayProxyEvent) => (
     headers: headers(event),
   }));
 
-export const listAll = async (Prefix: string): Promise<AWS.S3.ObjectList> => {
+export const listAll = async (
+  Prefix: string
+): Promise<{ objects: AWS.S3.ObjectList; prefixes: AWS.S3.CommonPrefixList }> => {
   const objects: AWS.S3.ObjectList = [];
+  const prefixes: AWS.S3.CommonPrefixList = [];
   let ContinuationToken: string = undefined;
   let isTruncated = true;
   while (isTruncated) {
     const res = await s3
-      .listObjectsV2({ Bucket: "roamjs.com", Prefix, ContinuationToken })
+      .listObjectsV2({ Bucket: "roamjs.com", Prefix, ContinuationToken, Delimiter: '/' })
       .promise();
     objects.push(...res.Contents);
+    prefixes.push(...res.CommonPrefixes);
     ContinuationToken = res.ContinuationToken;
     isTruncated = res.IsTruncated;
   }
-  return objects;
+  return { objects, prefixes };
 };
 
 export const getStripePriceId = (service: string): Promise<string> =>

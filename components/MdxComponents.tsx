@@ -1,5 +1,6 @@
 import { H1, H2, H3, H4, H5, H6, Body } from "@dvargas92495/ui";
 import React from "react";
+import Loom from "./Loom";
 import { Prism } from "react-syntax-highlighter";
 
 const Pre: React.FunctionComponent<HTMLPreElement> = ({ children }) => (
@@ -55,4 +56,5 @@ export default {
   inlineCode: InlineCode,
   pre: Pre,
   img: MdxImage,
+  Loom,
 };

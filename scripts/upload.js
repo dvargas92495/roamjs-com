@@ -38,15 +38,30 @@ const DistributionId = process.env.CLOUDFRONT_ARN.match(
 
 const content = fs.readFileSync(`out/extensions/${extension}.html`).toString();
 const linkRegex = /<(?:link|script) (?:.*?)(?:href|src)="(.*?)"(?:.*?)(?:\/)?>/;
+const allContent = fs.existsSync(`out/extensions/${extension}`)
+  ? [
+      { Key: `extensions/${extension}`, Body: content },
+      ...fs.readdirSync(`out/extensions/${extension}`).map((f) => ({
+        Key: `extensions/${extension}/${f}`,
+        Body: fs.readFileSync(`out/extensions/${extension}/${f}`).toString(),
+      })),
+    ]
+  : [content];
 const fileNames = Array.from(
   new Set(
-    content
-      .match(new RegExp(linkRegex, "g"))
-      .map((m) => m.match(linkRegex)[1])
-      .map(decodeURIComponent)
+    allContent.flatMap((c) =>
+      c.Key.match(new RegExp(linkRegex, "g"))
+        .map((m) => m.match(linkRegex)[1])
+        .map(decodeURIComponent)
+    )
   )
 );
-console.log("filenames to upload with", extension, "\n", fileNames);
+console.log(
+  "filenames to upload with",
+  allContent.map(({ Key }) => Key.replace(/^extension\//, "")),
+  "\n",
+  fileNames
+);
 const uploads = fileNames
   .map((m) => ({
     name: m,
@@ -68,18 +83,20 @@ const uploads = fileNames
   );
 
 Promise.all([
-  s3
-    .upload({
-      Bucket: "roamjs.com",
-      Body: content,
-      Key: `extensions/${extension}`,
-      ContentType: "text/html",
-    })
-    .promise(),
+  ...allContent.map(({ Key, Body }) =>
+    s3
+      .upload({
+        Bucket: "roamjs.com",
+        Body,
+        Key,
+        ContentType: "text/html",
+      })
+      .promise()
+  ),
   ...uploads,
 ])
-  .then(() => {
-    console.log("Successfully uploaded files");
+  .then((items) => {
+    console.log("Successfully uploaded", items.length, "files");
     return cloudfront
       .createInvalidation({
         DistributionId,
@@ -87,7 +104,7 @@ Promise.all([
           CallerReference: new Date().toJSON(),
           Paths: {
             Quantity: 1,
-            Items: [`/extensions/${extension}`],
+            Items: [`/extensions/${extension}*`],
           },
         },
       })

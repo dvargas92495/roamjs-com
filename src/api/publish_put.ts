@@ -4,6 +4,7 @@ import axios from "axios";
 import { TreeNode, ViewType } from "roam-client";
 import {
   authenticate,
+  dynamo,
   emailCatch,
   getGithubOpts,
   headers,
@@ -11,31 +12,13 @@ import {
   userError,
 } from "../lambda-helpers";
 
+const Bucket = "roamjs.com";
+const toDoubleDigit = (n: number) => n.toString().padStart(2, "0");
 const viewTypeToPrefix = {
   bullet: "- ",
   document: "",
   numbered: "1. ",
 };
-
-const replaceComponents = (text: string): string =>
-  text.replace(
-    /{{(?:\[\[)?video(?:\]\])?:(?:\s)*https:\/\/www.loom.com\/share\/([0-9a-f]*)}}/,
-    (_, id) => `<Loom id={"${id}"} />`
-  );
-
-const blockToMarkdown = (
-  block: TreeNode,
-  viewType: ViewType,
-  depth: number
-): string =>
-  `${"".padStart(depth * 4, " ")}${viewTypeToPrefix[viewType]}${"".padStart(
-    block.heading,
-    "#"
-  )}${block.heading > 0 ? " " : ""}${replaceComponents(block.text)}\n${
-    viewType === "document" ? "\n" : ""
-  }${block.children
-    .map((v) => blockToMarkdown(v, block.viewType, depth + 1))
-    .join("")}`;
 
 export const handler: APIGatewayProxyHandler = authenticate(async (event) => {
   const userId = event.headers.Authorization;
@@ -45,14 +28,14 @@ export const handler: APIGatewayProxyHandler = authenticate(async (event) => {
     viewType,
     description,
     contributors,
-    entry,
+    subpages,
   } = JSON.parse(event.body || "{}") as {
     path: string;
     blocks: TreeNode[];
     viewType: ViewType;
     description: string;
     contributors: string[];
-    entry: string;
+    subpages: { [name: string]: { nodes: TreeNode[]; viewType: ViewType } };
   };
   if (blocks.length === 0) {
     return userError(
@@ -75,10 +58,62 @@ export const handler: APIGatewayProxyHandler = authenticate(async (event) => {
   const frontmatter = `---
 description: "${description}"${
     contributors?.length ? `\ncontributors: ${contributors.join(", ")}` : ""
-  }${entry ? `\nentry: ${entry}` : ""}
+  }
 ---
 
 `;
+
+  const today = new Date();
+  const version = `${today.getFullYear()}-${toDoubleDigit(
+    today.getMonth() + 1
+  )}-${toDoubleDigit(today.getDate())}-${toDoubleDigit(
+    today.getHours()
+  )}-${toDoubleDigit(today.getMinutes())}`;
+  await s3
+    .upload({
+      Bucket,
+      Key: `markdown-version-cache/${path}/${version}.json`,
+      Body: event.body,
+      ContentType: "application/json",
+    })
+    .promise()
+    .then(() =>
+      dynamo
+        .putItem({
+          TableName: "RoamJSExtensions",
+          Item: {
+            id: {
+              S: path,
+            },
+            description: {
+              S: description,
+            },
+            state: {
+              S: "DEVELOPMENT",
+            },
+          },
+        })
+        .promise()
+    );
+
+  const replaceComponents = (text: string): string =>
+    text
+      .replace(
+        /{{(?:\[\[)?video(?:\]\])?:(?:\s)*https:\/\/www.loom.com\/share\/([0-9a-f]*)}}/,
+        (_, id) => `<Loom id={"${id}"} />`
+      )
+      .replace(
+        new RegExp(`\\[(.*?)\\]\\(\\[\\[${path}/(.*?)\\]\\]\\)`),
+        (_, label, page) => `[${label}](/extensions/${path}/${page})`
+      );
+
+  const blockToMarkdown = (block: TreeNode, viewType: ViewType): string =>
+    `${viewTypeToPrefix[viewType]}${"".padStart(block.heading, "#")}${
+      block.heading > 0 ? " " : ""
+    }${replaceComponents(block.text)}\n${
+      viewType === "document" ? "\n" : ""
+    }${block.children.map((v) => blockToMarkdown(v, block.viewType)).join("")}`;
+
   return users
     .getUser(userId)
     .then(
@@ -92,15 +127,30 @@ description: "${description}"${
             statusCode: 401,
             body: `User does not have access to path ${path}`,
           }
-        : s3
-            .upload({
-              Bucket: "roamjs.com",
-              Key: `markdown/${path}.md`,
-              Body: `${frontmatter}${blocks
-                .map((b) => blockToMarkdown(b, viewType, 0))
-                .join("")}`,
-            })
-            .promise()
+        : Promise.all([
+            s3
+              .upload({
+                Bucket,
+                Key: `markdown/${path}.md`,
+                Body: `${frontmatter}${blocks
+                  .map((b) => blockToMarkdown(b, viewType))
+                  .join("")}`,
+                ContentType: "text/markdown",
+              })
+              .promise(),
+            ...Object.keys(subpages).map((p) =>
+              s3
+                .upload({
+                  Bucket,
+                  Key: `markdown/${path}/${p}.md`,
+                  Body: subpages[p].nodes
+                    .map((b) => blockToMarkdown(b, subpages[p].viewType))
+                    .join(""),
+                  ContentType: "text/markdown",
+                })
+                .promise()
+            ),
+          ])
             .then((r) =>
               axios
                 .post(
@@ -109,7 +159,7 @@ description: "${description}"${
                   getGithubOpts()
                 )
                 .then(() => ({
-                  etag: r.ETag,
+                  etag: r[0].ETag,
                 }))
             )
             .then((r) => ({
