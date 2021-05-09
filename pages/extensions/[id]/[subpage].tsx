@@ -25,7 +25,11 @@ const ExtensionSubPage = ({
   const children = hydrate(content, { components: MdxComponents });
   const title = idToTitle(subpage);
   return (
-    <StandardLayout {...defaultLayoutProps} title={`${subpage} | ${id}`}>
+    <StandardLayout
+      title={`${subpage} | ${id}`}
+      description={`${title} page of the ${idToTitle(id)} extension.`}
+      img={`https://roamjs.com/thumbnails/${id}.png`}
+    >
       <Breadcrumbs
         page={title.toUpperCase()}
         links={[
