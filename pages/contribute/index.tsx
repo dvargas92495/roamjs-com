@@ -254,6 +254,11 @@ const ContributePage = (): React.ReactElement => {
             title: 'Nadir Samji',
             imgSrc: "sponsors/samji.png",
             url: "https://twitter.com/_nadir",
+          },
+          {
+            title: 'Tobias Harmes',
+            imgSrc: "sponsors/default.jpg",
+            url: "",
           }
         ]}
       />

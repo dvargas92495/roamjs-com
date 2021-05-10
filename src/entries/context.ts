@@ -5,8 +5,11 @@ import {
   getPageUidByPageTitle,
   getParentUidByBlockUid,
   getTextByBlockUid,
+  getUids,
+  watchOnce,
 } from "roam-client";
 import {
+  getReferenceBlockUid,
   getRoamUrl,
   openBlockInSidebar,
   parseRoamMarked,
@@ -20,20 +23,20 @@ runExtension(ID, () => {
     attribute: "data-roamjs-context-parent",
     callback: (s) => {
       if (s.getAttribute("data-tag") === "parent") {
-        const uid = getBlockUidFromTarget(s);
-        const parentUid = getParentUidByBlockUid(uid);
-        const parentText = getTextByBlockUid(parentUid);
-        s.className = "rm-block-ref dont-focus-block";
-        s.style.userSelect = 'none';
-        s.innerHTML = parseRoamMarked(parentText);
-        s.onmousedown = (e) => e.stopPropagation();
-        s.onclick = (e) => {
-          if (e.shiftKey) {
-            openBlockInSidebar(parentUid);
-          } else {
-            window.location.assign(getRoamUrl(parentUid));
-          }
-        };
+          const uid = getBlockUidFromTarget(s);
+          const parentUid = getParentUidByBlockUid(uid);
+          const parentText = getTextByBlockUid(parentUid);
+          s.className = "rm-block-ref dont-focus-block";
+          s.style.userSelect = "none";
+          s.innerHTML = parseRoamMarked(parentText);
+          s.onmousedown = (e) => e.stopPropagation();
+          s.onclick = (e) => {
+            if (e.shiftKey) {
+              openBlockInSidebar(parentUid);
+            } else {
+              window.location.assign(getRoamUrl(parentUid));
+            }
+          };
       }
     },
   });
@@ -55,8 +58,8 @@ runExtension(ID, () => {
         const rightBracket = document.createElement("span");
         rightBracket.className = "rm-page-ref__brackets";
         rightBracket.innerText = "]]";
-        s.innerHTML = '';
-        s.style.userSelect = 'none';
+        s.innerHTML = "";
+        s.style.userSelect = "none";
         s.appendChild(leftBracket);
         s.appendChild(pageRef);
         s.appendChild(rightBracket);
