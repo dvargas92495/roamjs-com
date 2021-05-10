@@ -46,7 +46,7 @@ const allContent = fs.existsSync(`out/extensions/${extension}`)
         Body: fs.readFileSync(`out/extensions/${extension}/${f}`).toString(),
       })),
     ]
-  : [content];
+  : [{ Key: `extensions/${extension}`, Body: content }];
 const fileNames = Array.from(
   new Set(
     allContent.flatMap((c) =>
