@@ -51,15 +51,12 @@ const ExtensionSubPage = ({
 export const getStaticPaths: GetStaticPaths = async () =>
   axios
     .get(`${API_URL}/request-path?sub=true`)
-    .then((r) => {
-      console.log(r.data.paths);
-      return {
-        paths: r.data.paths.map((params) => ({
-          params,
-        })),
-        fallback: false,
-      };
-    })
+    .then((r) => ({
+      paths: r.data.paths.map((params) => ({
+        params,
+      })),
+      fallback: false,
+    }))
     .catch(() => ({
       paths: [],
       fallback: false,

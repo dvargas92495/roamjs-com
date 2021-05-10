@@ -105,7 +105,7 @@ const ContributePage = (): React.ReactElement => {
           {
             title: 'David Hislop',
             imgSrc: "sponsors/hislop.png",
-            url: "",
+            url: "https://twitter.com/davehislop",
           }
         ]}
       />

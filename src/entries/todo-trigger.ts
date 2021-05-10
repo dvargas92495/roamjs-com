@@ -63,7 +63,7 @@ const onTodo = (blockUid: string, oldValue: string) => {
     const formattedText = ` ${onTodo
       .replace("/Current Time", format(today, "HH:mm"))
       .replace("/Today", `[[${toRoamDate(today)}]]`)}`;
-    value = `${value}${formattedText}`;
+    value = value.includes(formattedText) ? value : `${value}${formattedText}`;
   }
 
   if (value !== oldValue) {
