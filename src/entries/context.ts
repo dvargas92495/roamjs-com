@@ -5,11 +5,8 @@ import {
   getPageUidByPageTitle,
   getParentUidByBlockUid,
   getTextByBlockUid,
-  getUids,
-  watchOnce,
 } from "roam-client";
 import {
-  getReferenceBlockUid,
   getRoamUrl,
   openBlockInSidebar,
   parseRoamMarked,

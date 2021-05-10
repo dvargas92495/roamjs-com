@@ -12,6 +12,15 @@ To run a SPARQL query, open the Roam command palette with CMD+p (CTRL+p on Windo
 
 This will run a query to search all of the properties of an entity based on the current page name. All properties and entities imported will automatically tagged with a reference to their link on their respective pages.
 
+#### Current Block
+
+Whis will run a query to search all of the properties of an entity based on the current block text. If the current block text is empty, it will use the parent block. All properties and entities imported will automatically tagged with a reference to their link on their respective pages.
+
 #### Custom Query
 
 You could write your own query in the code box in the dialog. The code block supports SPARQL query syntax. The results of the query will output with entity values being chilren of select variable names.
+
+#### Label
+
+You could define a custom global default label on the `roam/js/sparql` page. Each query could also use its own label, accessible by expanding the additional options. The `{date}` placeholder can be used to record the datetime of the import.
+ 

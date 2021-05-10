@@ -34,6 +34,7 @@ import {
   getUids,
   getShallowTreeByParentUid,
   getTreeByBlockUid,
+  getParentUidByBlockUid,
 } from "roam-client";
 import { extractTag, getCurrentPageUid, toFlexRegex } from "../entry-helpers";
 import { getRenderRoot } from "./hooks";
@@ -214,13 +215,15 @@ const SparqlQuery = ({
     () => getPageTitleByPageUid(parentUid) || getPageTitleByBlockUid(parentUid),
     [parentUid]
   );
-  const blockUid = useMemo(
+  const cursorBlockUid = useMemo(
     () =>
       getTextByBlockUid(parentUid)
         ? parentUid
         : getUids(textareaRef.current).blockUid,
     [parentUid]
   );
+  const cursorBlockString = useMemo(() => extractTag(getTextByBlockUid(cursorBlockUid)), [cursorBlockUid]);
+  const blockUid = useMemo(() => cursorBlockString ? cursorBlockUid : getParentUidByBlockUid(cursorBlockUid), [cursorBlockString, cursorBlockUid]);
   const blockString = useMemo(() => extractTag(getTextByBlockUid(blockUid)), [blockUid]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -440,36 +443,36 @@ const SparqlQuery = ({
                 source: DATA_SOURCES[dataSource],
                 outputFormat,
               };
+              if (saveQuery) {
+                const configUid = getPageUidByPageTitle("roam/js/sparql");
+
+                const queriesUid =
+                  getShallowTreeByParentUid(configUid).find(({ text }) =>
+                    /queries/i.test(text)
+                  )?.uid ||
+                  createBlock({
+                    node: { text: "queries" },
+                    parentUid: configUid,
+                  });
+
+                createBlock({
+                  node: {
+                    text: labelUid,
+                    children: [
+                      { text: query },
+                      { text: queryInfo.source },
+                      { text: outputFormat },
+                    ],
+                  },
+                  parentUid: queriesUid,
+                });
+                queriesCache[labelUid] = queryInfo;
+              }
               runSparqlQuery({
                 ...queryInfo,
                 parentUid: labelUid,
               })
                 .then(() => {
-                  if (saveQuery) {
-                    const configUid = getPageUidByPageTitle("roam/js/sparql");
-
-                    const queriesUid =
-                      getShallowTreeByParentUid(configUid).find(({ text }) =>
-                        /queries/i.test(text)
-                      )?.uid ||
-                      createBlock({
-                        node: { text: "queries" },
-                        parentUid: configUid,
-                      });
-
-                    createBlock({
-                      node: {
-                        text: labelUid,
-                        children: [
-                          { text: query },
-                          { text: queryInfo.source },
-                          { text: outputFormat },
-                        ],
-                      },
-                      parentUid: queriesUid,
-                    });
-                    queriesCache[labelUid] = queryInfo;
-                  }
                   onClose();
                 })
                 .catch(catchImport);
