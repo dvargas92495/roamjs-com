@@ -4,9 +4,8 @@ import { Prism } from "react-syntax-highlighter";
 import React, { useCallback, useState } from "react";
 import { API_URL } from "../../components/constants";
 import StandardLayout from "../../components/StandardLayout";
-import renderToString from "next-mdx-remote/render-to-string";
-import hydrate from "next-mdx-remote/hydrate";
-import type { MdxRemote } from "next-mdx-remote/types";
+import { serialize } from "next-mdx-remote/serialize";
+import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import matter from "gray-matter";
 import {
   getSingleCodeContent,
@@ -45,12 +44,11 @@ const ExtensionPage = ({
   contributors,
 }: {
   id: string;
-  content: MdxRemote.Source;
+  content: MDXRemoteSerializeResult;
   description: string;
   development: boolean;
   contributors?: string;
 }): React.ReactElement => {
-  const children = hydrate(content, { components: MdxComponents });
   const title = idToTitle(id);
   const [copied, setCopied] = useState(false);
   const onSave = useCopyCode(setCopied);
@@ -108,7 +106,7 @@ const ExtensionPage = ({
           {getSingleCodeContent(`${id}/main`)}
         </Prism>
       </div>
-      {children}
+      <MDXRemote {...content} components={MdxComponents} />
       <H3>Contributors</H3>
       <Body>
         This extension is brought to you by RoamJS! If you are facing any issues
@@ -216,7 +214,7 @@ export const getStaticPaths: GetStaticPaths = async () =>
 
 export const getStaticProps: GetStaticProps<
   {
-    content: MdxRemote.Source;
+    content: MDXRemoteSerializeResult;
     id: string;
     development: boolean;
   },
@@ -229,7 +227,7 @@ export const getStaticProps: GetStaticProps<
     .get(`${API_URL}/request-path?id=${context.params.id}`)
     .then((r) => matter(r.data.content))
     .then(({ content: preRender, data }) =>
-      renderToString(preRender, { components: MdxComponents }).then(
+      serialize(preRender).then(
         (content) => ({
           props: {
             content,

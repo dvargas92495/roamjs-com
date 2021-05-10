@@ -1,17 +1,16 @@
 import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
-import renderToString from "next-mdx-remote/render-to-string";
-import { MdxRemote } from "next-mdx-remote/types";
+import { serialize } from "next-mdx-remote/serialize";
 import React from "react";
 import { API_URL } from "../../../components/constants";
 import StandardLayout from "../../../components/StandardLayout";
-import hydrate from "next-mdx-remote/hydrate";
+import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import MdxComponents from "../../../components/MdxComponents";
 import { Breadcrumbs, H1 } from "@dvargas92495/ui";
 import { idToTitle } from "../../../components/hooks";
 
 type ExtensionSubPageProps = {
-  content: MdxRemote.Source;
+  content: MDXRemoteSerializeResult;
   id: string;
   subpage: string;
 };
@@ -21,7 +20,6 @@ const ExtensionSubPage = ({
   id,
   subpage,
 }: ExtensionSubPageProps): React.ReactElement => {
-  const children = hydrate(content, { components: MdxComponents });
   const title = idToTitle(subpage);
   return (
     <StandardLayout
@@ -43,7 +41,7 @@ const ExtensionSubPage = ({
         ]}
       />
       <H1>{title.toUpperCase()}</H1>
-      {children}
+      <MDXRemote {...content} components={MdxComponents} />
     </StandardLayout>
   );
 };
@@ -74,14 +72,12 @@ export const getStaticProps: GetStaticProps<
       `${API_URL}/request-path?id=${context.params.id}/${context.params.subpage}`
     )
     .then((r) =>
-      renderToString(r.data.content, { components: MdxComponents }).then(
-        (content) => ({
-          props: {
-            content,
-            ...context.params,
-          },
-        })
-      )
+      serialize(r.data.content).then((content) => ({
+        props: {
+          content,
+          ...context.params,
+        },
+      }))
     )
     .catch((e) => ({
       props: {
