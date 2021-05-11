@@ -8,6 +8,7 @@ As part of a RoamJS Developer effort started in April, 2021, we've started to mi
 
 ### Repositories
 
+- [Otter](https://github.com/dvargas92495/roamjs-otter)
 - [Roam42](https://github.com/dvargas92495/roam42)
 
 ## Contributing
