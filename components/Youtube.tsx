@@ -1,9 +1,11 @@
 import React from "react";
-import YouTube from "react-youtube";
+import dynamic from "next/dynamic";
 
-const Loom: React.FunctionComponent<{ id: string }> = ({ id }) => {
+const DynamicYoutube = dynamic(() => import("react-youtube"));
+
+const Youtube: React.FunctionComponent<{ id: string }> = ({ id }) => {
   return (
-    <YouTube
+    <DynamicYoutube
       videoId={id}
       id={`roamjs-youtube-${id}`}
       opts={{
@@ -18,4 +20,4 @@ const Loom: React.FunctionComponent<{ id: string }> = ({ id }) => {
   );
 };
 
-export default Loom;
+export default Youtube;
