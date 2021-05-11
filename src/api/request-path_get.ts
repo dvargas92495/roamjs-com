@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { headers, listAll, s3 } from "../lambda-helpers";
+import { dynamo, headers, listAll, s3 } from "../lambda-helpers";
 
 export const handler: APIGatewayProxyHandler = (event) => {
   const id = event.queryStringParameters?.id;
@@ -13,44 +13,52 @@ export const handler: APIGatewayProxyHandler = (event) => {
           body: JSON.stringify({ content: c.Body.toString() }),
           headers: headers(event),
         }))
-    : listAll("markdown/").then((r) =>
-        sub
-          ? Promise.all(
-              r.prefixes.map((prefix) =>
-                s3
-                  .listObjectsV2({
-                    Bucket: "roamjs.com",
-                    Prefix: prefix.Prefix,
-                  })
-                  .promise()
-                  .then((res) =>
-                    res.Contents.map((id) => ({
-                      subpage: id.Key.substring(prefix.Prefix.length).replace(
-                        /\.md$/,
-                        ""
-                      ),
-                      id: prefix.Prefix.replace(/markdown\//, "").replace(
-                        /\/$/,
-                        ""
-                      ),
-                    }))
-                  )
-              )
+    : sub
+    ? listAll("markdown/")
+        .then((r) =>
+          Promise.all(
+            r.prefixes.map((prefix) =>
+              s3
+                .listObjectsV2({
+                  Bucket: "roamjs.com",
+                  Prefix: prefix.Prefix,
+                })
+                .promise()
+                .then((res) =>
+                  res.Contents.map((id) => ({
+                    subpage: id.Key.substring(prefix.Prefix.length).replace(
+                      /\.md$/,
+                      ""
+                    ),
+                    id: prefix.Prefix.replace(/markdown\//, "").replace(
+                      /\/$/,
+                      ""
+                    ),
+                  }))
+                )
             )
-              .then((paths) => paths.flatMap((subpaths) => subpaths))
-              .then((paths) => ({
-                statusCode: 200,
-                body: JSON.stringify({ paths }),
-                headers: headers(event),
-              }))
-          : {
-              statusCode: 200,
-              body: JSON.stringify({
-                paths: r.objects.map((c) =>
-                  c.Key.replace(/^markdown\//, "").replace(/\.md$/, "")
-                ),
-              }),
-              headers: headers(event),
-            }
-      );
+          )
+        )
+        .then((paths) => paths.flatMap((subpaths) => subpaths))
+        .then((paths) => ({
+          statusCode: 200,
+          body: JSON.stringify({ paths }),
+          headers: headers(event),
+        }))
+    : dynamo
+        .scan({
+          TableName: "RoamJSExtensions",
+        })
+        .promise()
+        .then((r) => ({
+          statusCode: 200,
+          body: JSON.stringify({
+            paths: r.Items.map((c) => ({
+              id: c.id.S,
+              description: c.description.S,
+              state: c.state.S,
+            })),
+          }),
+          headers: headers(event),
+        }));
 };

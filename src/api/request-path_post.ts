@@ -1,6 +1,7 @@
 import { users } from "@clerk/clerk-sdk-node";
 import {
   authenticate,
+  dynamo,
   headers,
   listAll,
   s3,
@@ -20,7 +21,9 @@ export const handler = authenticate(async (event) => {
     );
   }
 
-  const available = listAll(path).then((r) => !r.objects.length && !r.prefixes.length);
+  const available = listAll(path).then(
+    (r) => !r.objects.length && !r.prefixes.length
+  );
   if (!available) {
     return userError("Requested path is not available", event);
   }
@@ -39,15 +42,34 @@ export const handler = authenticate(async (event) => {
     developer: { paths?: string[] };
   };
   const paths = [...(publicMetadata.developer.paths || []), path];
-  await users.updateUser(id, {
-    publicMetadata: {
-      ...publicMetadata,
-      developer: {
-        ...publicMetadata.developer,
-        paths,
+  await users
+    .updateUser(id, {
+      publicMetadata: {
+        ...publicMetadata,
+        developer: {
+          ...publicMetadata.developer,
+          paths,
+        },
       },
-    },
-  });
+    })
+    .then(() =>
+      dynamo
+        .putItem({
+          TableName: "RoamJSExtensions",
+          Item: {
+            id: {
+              S: path,
+            },
+            description: {
+              S: "",
+            },
+            state: {
+              S: "DEVELOPMENT",
+            },
+          },
+        })
+        .promise()
+    );
   return {
     statusCode: 200,
     body: JSON.stringify({ paths }),

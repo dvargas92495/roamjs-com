@@ -79,18 +79,19 @@ description: "${description}"${
     .promise()
     .then(() =>
       dynamo
-        .putItem({
+        .updateItem({
           TableName: "RoamJSExtensions",
-          Item: {
+          Key: {
             id: {
               S: path,
             },
-            description: {
-              S: description,
-            },
-            state: {
-              S: "DEVELOPMENT",
-            },
+          },
+          UpdateExpression: "SET #d=:d",
+          ExpressionAttributeNames: {
+            "#d": "description",
+          },
+          ExpressionAttributeValues: {
+            ":d": { S: description },
           },
         })
         .promise()
@@ -101,6 +102,10 @@ description: "${description}"${
       .replace(
         /{{(?:\[\[)?video(?:\]\])?:(?:\s)*https:\/\/www.loom.com\/share\/([0-9a-f]*)}}/,
         (_, id) => `<Loom id={"${id}"} />`
+      )
+      .replace(
+        /{{(?:\[\[)?youtube(?:\]\])?:(?:\s)*https:\/\/youtu.be\/([\w\d-]*)}}/,
+        (_, id) => `<YouTube id={"${id}"} />`
       )
       .replace(
         new RegExp(`\\[(.*?)\\]\\(\\[\\[${path}/(.*?)\\]\\]\\)`),

@@ -60,15 +60,13 @@ export const getStaticProps: GetStaticProps<{
     .get(`${API_URL}/request-path`)
     .then((r) => ({
       props: {
-        extensions: r.data.paths
-          .filter((id) => id !== "example")
-          .map((id) => ({
-            title: idToTitle(id),
-            description: "Description for " + idToTitle(id),
-            image: `/thumbnails/${id}.png`,
-            href: `/extensions/${id}`,
-            development: false,
-          })),
+        extensions: r.data.paths.map(({ id, description, state }) => ({
+          title: idToTitle(id),
+          description: description || "Description for " + idToTitle(id),
+          image: `/thumbnails/${id}.png`,
+          href: `/extensions/${id}`,
+          development: state === "DEVELOPMENT",
+        })),
       },
     }))
     .catch(() => ({

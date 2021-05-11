@@ -200,7 +200,7 @@ export const getStaticPaths: GetStaticPaths = async () =>
   axios
     .get(`${API_URL}/request-path`)
     .then((r) => ({
-      paths: r.data.paths.map((id) => ({
+      paths: r.data.paths.map(({ id }) => ({
         params: {
           id,
         },
@@ -227,17 +227,15 @@ export const getStaticProps: GetStaticProps<
     .get(`${API_URL}/request-path?id=${context.params.id}`)
     .then((r) => matter(r.data.content))
     .then(({ content: preRender, data }) =>
-      serialize(preRender).then(
-        (content) => ({
-          props: {
-            content,
-            id: context.params.id,
-            // Query a data source for this as a way to verify extensions
-            development: false,
-            ...data,
-          },
-        })
-      )
+      serialize(preRender).then((content) => ({
+        props: {
+          content,
+          id: context.params.id,
+          // Query a data source for this as a way to verify extensions
+          development: false,
+          ...data,
+        },
+      }))
     )
     .catch((e) => ({
       props: {
