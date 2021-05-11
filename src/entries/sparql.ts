@@ -94,19 +94,22 @@ runExtension(ID, () => {
   });
 
   createBlockObserver((b) => {
-    const { blockUid } = getUids(b);
-    const queryInfo = queriesCache[blockUid];
-    if (queryInfo) {
-      const updateButton = createIconButton("refresh");
-      updateButton.style.float = "right";
-      updateButton.onmousedown = (e) => e.stopPropagation();
-      updateButton.onclick = () => {
-        getShallowTreeByParentUid(blockUid).forEach(({ uid }) =>
-          deleteBlock(uid)
-        );
-        runSparqlQuery({ ...queryInfo, parentUid: blockUid });
-      };
-      b.appendChild(updateButton);
+    if (!b.hasAttribute("roamjs-sparql-update-button")) {
+      b.setAttribute("roamjs-sparql-update-button", "true");
+      const { blockUid } = getUids(b);
+      const queryInfo = queriesCache[blockUid];
+      if (queryInfo) {
+        const updateButton = createIconButton("refresh");
+        updateButton.style.float = "right";
+        updateButton.onmousedown = (e) => e.stopPropagation();
+        updateButton.onclick = () => {
+          getShallowTreeByParentUid(blockUid).forEach(({ uid }) =>
+            deleteBlock(uid)
+          );
+          runSparqlQuery({ ...queryInfo, parentUid: blockUid });
+        };
+        b.appendChild(updateButton);
+      }
     }
   });
 

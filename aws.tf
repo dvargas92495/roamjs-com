@@ -355,7 +355,7 @@ resource "aws_acm_certificate" "api" {
 resource "aws_route53_record" "api_cert" {
   name    = tolist(aws_acm_certificate.api.domain_validation_options)[0].resource_record_name
   type    = tolist(aws_acm_certificate.api.domain_validation_options)[0].resource_record_type
-  zone_id = data.aws_route53_zone.zone.id
+  zone_id = module.aws_static_site.route53_zone_id
   records = [tolist(aws_acm_certificate.api.domain_validation_options)[0].resource_record_value]
   ttl     = 60
 }
