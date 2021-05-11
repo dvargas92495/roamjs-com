@@ -71,7 +71,7 @@ export const getStaticProps: GetStaticProps<{
           description: description || "Description for " + idToTitle(id),
           image: `/thumbnails/${id}.png`,
           href: `/extensions/${id}`,
-          development: state === "DEVELOPMENT",
+          development: !state || state === "DEVELOPMENT",
         })),
       },
     }))
