@@ -414,6 +414,9 @@ resource "aws_route53_record" "api" {
 resource "aws_api_gateway_deployment" "production" {
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   stage_name  = "production"
+  depends_on  = [
+    aws_api_gateway_integration.mock, 
+  ]
 }
 
 resource "aws_api_gateway_base_path_mapping" "api" {
