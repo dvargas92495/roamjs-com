@@ -54,9 +54,9 @@ export const handler: APIGatewayProxyHandler = (event) => {
           statusCode: 200,
           body: JSON.stringify({
             paths: r.Items.map((c) => ({
-              id: c.id.S,
-              description: c.description.S,
-              state: c.state.S,
+              id: c.id?.S,
+              description: c.description?.S,
+              state: c.state?.S,
             })),
           }),
           headers: headers(event),
