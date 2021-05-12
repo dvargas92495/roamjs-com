@@ -147,6 +147,10 @@ const DeveloperContent: StageContent = () => {
                           },
                         ])
                       ),
+                      thumbnail: getSettingValueFromTree({
+                        tree,
+                        key: 'thumbnail'
+                      }).match(/!\[(?:.*?)\]\((.*?)\)/)?.[1]
                     })
                       .then((r) => {
                         setInputSetting({

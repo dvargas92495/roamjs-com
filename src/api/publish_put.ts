@@ -29,6 +29,7 @@ export const handler: APIGatewayProxyHandler = authenticate(async (event) => {
     description,
     contributors,
     subpages,
+    thumbnail,
   } = JSON.parse(event.body || "{}") as {
     path: string;
     blocks: TreeNode[];
@@ -36,6 +37,7 @@ export const handler: APIGatewayProxyHandler = authenticate(async (event) => {
     description: string;
     contributors: string[];
     subpages: { [name: string]: { nodes: TreeNode[]; viewType: ViewType } };
+    thumbnail?: string;
   };
   if (blocks.length === 0) {
     return userError(
@@ -155,6 +157,22 @@ description: "${description}"${
                 })
                 .promise()
             ),
+            ...(thumbnail
+              ? [
+                  axios.get(thumbnail, {
+                    responseType: 'stream'
+                  }).then((r) =>
+                    s3
+                      .upload({
+                        Bucket,
+                        Key: `thumbnails/${path}.png`,
+                        Body: r.data,
+                        ContentType: "image/png",
+                      })
+                      .promise()
+                  ),
+                ]
+              : []),
           ])
             .then((r) =>
               axios
