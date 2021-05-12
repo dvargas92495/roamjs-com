@@ -34,10 +34,10 @@ import { allBlockMapper, toTitle } from "./hooks";
 import MenuItemSelect from "./MenuItemSelect";
 import PageInput from "./PageInput";
 import {
-  getField,
-  getFieldVals,
+  useField,
+  useFieldVals,
   HIGHLIGHT,
-  isFieldSet,
+  useIsFieldSet,
   MainStage,
   NextButton,
   ServiceDashboard,
@@ -54,9 +54,9 @@ import Description from "./Description";
 const RequestShareContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
-  const [ready, setReady] = useState(isFieldSet("share"));
+  const [ready, setReady] = useState(useIsFieldSet("share"));
   const [deploySwitch, setDeploySwitch] = useState(
-    !ready || getField("share") === "true"
+    !ready || useField("share") === "true"
   );
   const onSwitchChange = useCallback(
     (e: React.FormEvent<HTMLInputElement>) =>
@@ -225,7 +225,7 @@ const DOMAIN_REGEX = /^(\*\.)?(((?!-)[A-Za-z0-9-]{0,62}[A-Za-z0-9])\.)+((?!-)[A-
 const RequestDomainContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
-  const [value, setValue] = useState(getField("domain"));
+  const [value, setValue] = useState(useField("domain"));
   const [error, setError] = useState("");
   const [domainSwitch, setDomainSwitch] = useState(
     !value.endsWith(".roamjs.com")
@@ -314,7 +314,7 @@ const RequestDomainContent: StageContent = ({ openPanel }) => {
 const RequestIndexContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
-  const [value, setValue] = useState(getField("index"));
+  const [value, setValue] = useState(useField("index"));
   const onSubmit = useCallback(() => {
     setInputSetting({ blockUid: pageUid, key: "index", value, index: 1 });
     nextStage();
@@ -996,7 +996,7 @@ const RequestHtmlContent = ({
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
   const [value, setValue] = useState(
-    getField(field).match(HTML_REGEX)?.[1] || defaultValue
+    useField(field).match(HTML_REGEX)?.[1] || defaultValue
   );
   const onBeforeChange = useCallback((_, __, value) => setValue(value), [
     setValue,
@@ -1087,7 +1087,7 @@ const supportedPlugins = ["inline-block-references", "header"];
 const RequestPluginsContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
-  const [values, setValues] = useState(getFieldVals("plugins"));
+  const [values, setValues] = useState(useFieldVals("plugins"));
   const onSubmit = useCallback(() => {
     setInputSettings({
       blockUid: pageUid,

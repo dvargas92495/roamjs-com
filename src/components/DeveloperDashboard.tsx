@@ -8,9 +8,10 @@ import {
   Toaster,
   Tooltip,
 } from "@blueprintjs/core";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   createPage,
+  getPageTitlesStartingWithPrefix,
   getPageUidByPageTitle,
   getPageViewType,
   getTreeByPageName,
@@ -32,6 +33,12 @@ import {
   useAuthenticatedAxiosPost,
   useAuthenticatedAxiosGet,
   useAuthenticatedAxiosPut,
+  useNextStage,
+  usePageUid,
+  useField,
+  NextButton,
+  useSetMetadata,
+  useGetMetadata,
 } from "./ServiceCommonComponents";
 
 export const developerToaster = Toaster.create({
@@ -42,20 +49,29 @@ const DeveloperContent: StageContent = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [paths, setPaths] = useState<string[]>([]);
+  const setMetadataPaths = useSetMetadata("paths");
   const [newPath, setNewPath] = useState("");
   const authenticatedAxiosGet = useAuthenticatedAxiosGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const authenticatedAxiosPut = useAuthenticatedAxiosPut();
   const authenticatedAxiosDelete = useAuthenticatedAxiosDelete();
   const [error, setError] = useState("");
+  const setAllPaths = useCallback(
+    (ps) => {
+      setPaths(ps);
+      setMetadataPaths(ps);
+    },
+    [setPaths, setMetadataPaths]
+  );
   useEffect(() => {
     if (initialLoading) {
       authenticatedAxiosGet("metadata?service=developer&key=paths")
-        .then((r) => setPaths(r.data.value || []))
-        .catch(() => setPaths([]))
+        .then((r) => setAllPaths(r.data.value || []))
+        .catch(() => setAllPaths([]))
         .finally(() => setInitialLoading(false));
     }
   }, [initialLoading, setInitialLoading]);
+  const prefix = useField("prefix");
   return initialLoading ? (
     <Spinner />
   ) : (
@@ -76,8 +92,9 @@ const DeveloperContent: StageContent = () => {
                 cursor: "pointer",
               }}
               onClick={(e) => {
+                const title = `${prefix}${p}`;
                 const uid =
-                  getPageUidByPageTitle(p) || createPage({ title: p });
+                  getPageUidByPageTitle(title) || createPage({ title });
                 if (e.shiftKey) {
                   openBlockInSidebar(uid);
                 } else {
@@ -96,7 +113,8 @@ const DeveloperContent: StageContent = () => {
                   onClick={() => {
                     setLoading(true);
                     setError("");
-                    const tree = getTreeByPageName(p);
+                    const title = `${prefix}${p}`;
+                    const tree = getTreeByPageName(title);
                     const { children, viewType } = tree.find((t) =>
                       /documentation/i.test(t.text)
                     ) || {
@@ -105,7 +123,7 @@ const DeveloperContent: StageContent = () => {
                     };
                     const subpageTitles = window.roamAlphaAPI
                       .q(
-                        `[:find ?title :where [?b :node/title ?title][(clojure.string/starts-with? ?title  "${p}/")]]`
+                        `[:find ?title :where [?b :node/title ?title][(clojure.string/starts-with? ?title  "${title}/")]]`
                       )
                       .map((r) => r[0]);
                     authenticatedAxiosPut("publish", {
@@ -122,7 +140,7 @@ const DeveloperContent: StageContent = () => {
                       }),
                       subpages: Object.fromEntries(
                         subpageTitles.map((t) => [
-                          t.substring(p.length + 1),
+                          t.substring(title.length + 1),
                           {
                             nodes: getTreeByPageName(t),
                             viewType: getPageViewType(t),
@@ -132,7 +150,7 @@ const DeveloperContent: StageContent = () => {
                     })
                       .then((r) => {
                         setInputSetting({
-                          blockUid: getPageUidByPageTitle(p),
+                          blockUid: getPageUidByPageTitle(title),
                           value: r.data.etag,
                           key: "ETag",
                           index: 1,
@@ -163,7 +181,7 @@ const DeveloperContent: StageContent = () => {
                     authenticatedAxiosDelete(
                       `request-path?path=${encodeURIComponent(p)}`
                     )
-                      .then((r) => setPaths(r.data.paths))
+                      .then((r) => setAllPaths(r.data.paths))
                       .catch((e) =>
                         setError(
                           e.response?.data?.error ||
@@ -202,7 +220,7 @@ const DeveloperContent: StageContent = () => {
                   tree: [{ text: "Documentation" }],
                 });
                 setNewPath("");
-                setPaths(r.data.paths);
+                setAllPaths(r.data.paths);
               })
               .catch((e) => setError(e.response?.data || e.message))
               .finally(() => setLoading(false));
@@ -218,10 +236,73 @@ const DeveloperContent: StageContent = () => {
   );
 };
 
+const RequestPrefixContent: StageContent = ({ openPanel }) => {
+  const nextStage = useNextStage(openPanel);
+  const pageUid = usePageUid();
+  const paths = useGetMetadata("paths") as string[];
+  const oldPrefix = useField("prefix");
+  const [value, setValue] = useState(oldPrefix);
+  const onChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
+    [setValue]
+  );
+  const onSubmit = useCallback(() => {
+    setInputSetting({ blockUid: pageUid, key: "prefix", value, index: 1 });
+    paths
+      .flatMap((s) => [
+        s,
+        ...getPageTitlesStartingWithPrefix(`${oldPrefix}${s}/`).map((sp) =>
+          sp.substring(oldPrefix.length)
+        ),
+      ])
+      .forEach((s) =>
+        window.roamAlphaAPI.updatePage({
+          page: {
+            uid: getPageUidByPageTitle(`${oldPrefix}${s}`),
+            title: `${value}${s}`,
+          },
+        })
+      );
+    nextStage();
+  }, [value, nextStage, pageUid]);
+  const disabled = value === oldPrefix;
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (
+        e.key === "Enter" &&
+        !e.shiftKey &&
+        !e.altKey &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !disabled
+      ) {
+        onSubmit();
+      }
+    },
+    [onSubmit]
+  );
+  return (
+    <>
+      <Label>
+        {"Documentation Prefix"}
+        <InputGroup value={value} onChange={onChange} onKeyDown={onKeyDown} />
+      </Label>
+      <NextButton onClick={onSubmit} disabled={disabled} />
+    </>
+  );
+};
+
 const DeveloperDashboard = (): React.ReactElement => (
   <ServiceDashboard
     service={"developer"}
-    stages={[TOKEN_STAGE, MainStage(DeveloperContent)]}
+    stages={[
+      TOKEN_STAGE,
+      MainStage(DeveloperContent),
+      {
+        component: RequestPrefixContent,
+        setting: "Prefix",
+      },
+    ]}
   />
 );
 

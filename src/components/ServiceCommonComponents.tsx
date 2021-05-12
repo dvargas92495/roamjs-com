@@ -51,15 +51,17 @@ export const getTokenFromTree = (tree: TreeNode[]): string =>
 
 const isTokenInTree = (tree: TreeNode[]): boolean => !!getTokenFromTree(tree);
 
-export const isFieldInTree = (field: string) => (tree: TreeNode[]): boolean =>
-  tree.some((t) => new RegExp(field, "i").test(t.text));
+export const isFieldInTree =
+  (field: string) =>
+  (tree: TreeNode[]): boolean =>
+    tree.some((t) => new RegExp(field, "i").test(t.text));
 
-export const isFieldSet = (field: string): boolean => {
+export const useIsFieldSet = (field: string): boolean => {
   const service = useService();
   return isFieldInTree(field)(getTreeByPageName(`roam/js/${service}`));
 };
 
-export const getField = (field: string): string => {
+export const useField = (field: string): string => {
   const service = useService();
   return (
     getTreeByPageName(`roam/js/${service}`).find((t) =>
@@ -68,7 +70,7 @@ export const getField = (field: string): string => {
   );
 };
 
-export const getFieldVals = (field: string): string[] => {
+export const useFieldVals = (field: string): string[] => {
   const service = useService();
   return (
     getTreeByPageName(`roam/js/${service}`).find((t) =>
@@ -227,15 +229,25 @@ const ServiceContext = React.createContext<{
   getStage: GetStage;
   service: string;
   settings: string[];
+  metadata: Record<string, unknown>;
 }>({
   pageUid: "UNSET-UID",
   getStage: () => () => <div />,
   service: "service",
   settings: [],
+  metadata: {},
 });
 
 const useService = (): string => useContext(ServiceContext).service;
 export const usePageUid = (): string => useContext(ServiceContext).pageUid;
+export const useSetMetadata = (k: string): ((v: unknown) => void) => {
+  const { metadata } = useContext(ServiceContext);
+  return (v: unknown): void => {
+    metadata[k] = v;
+  };
+};
+export const useGetMetadata = (k: string): unknown =>
+  useContext(ServiceContext).metadata[k];
 
 export const useNextStage = (
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -405,7 +417,7 @@ export const ServiceDashboard: React.FC<{
       <Card>
         <h4 style={{ padding: 4 }}>{toTitle(service)} Dashboard</h4>
         <ServiceContext.Provider
-          value={{ getStage, pageUid, service, settings }}
+          value={{ getStage, pageUid, service, settings, metadata: {} }}
         >
           <style>
             {`.roamjs-service-panel {
