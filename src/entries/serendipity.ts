@@ -122,6 +122,7 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
           : includes
               .map(extractTag)
               .flatMap((tag) => getBlockUidsReferencingPage(tag))
+              .filter((uid) => !excludeBlockUids.has(uid))
               .flatMap((uid) =>
                 allBlockMapper(getTreeByBlockUid(uid)).map((b) => ({
                   uid: b.uid,
@@ -151,8 +152,9 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
                   ) >= timeout
                 );
               })
+              .map((o) => JSON.stringify(o))
           )
-        );
+        ).map((s) => JSON.parse(s) as { uid: string; text: string });
         const children: { text: string }[] = [];
         for (let c = 0; c < count; c++) {
           if (blockUids.length) {
@@ -180,8 +182,7 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
         );
         createBlock({
           node: {
-            text:
-              "An error occured while pulling block references. Email support@roamjs.com with this error:",
+            text: "An error occured while pulling block references. Email support@roamjs.com with this error:",
             children: [{ text: e.message }],
           },
           parentUid: labelUid,

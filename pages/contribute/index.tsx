@@ -259,6 +259,11 @@ const ContributePage = (): React.ReactElement => {
             title: 'Tobias Harmes',
             imgSrc: "sponsors/default.jpg",
             url: "",
+          },
+          {
+            title: 'Weston Wagner',
+            imgSrc: "sponsors/wagner.jpg",
+            url: "https://westonwagner.com/",
           }
         ]}
       />
