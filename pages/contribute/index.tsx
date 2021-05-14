@@ -264,6 +264,11 @@ const ContributePage = (): React.ReactElement => {
             title: 'Weston Wagner',
             imgSrc: "sponsors/wagner.jpg",
             url: "https://westonwagner.com/",
+          },
+          {
+            title: 'Adam Rogers',
+            imgSrc: "sponsors/default.jpg",
+            url: "",
           }
         ]}
       />

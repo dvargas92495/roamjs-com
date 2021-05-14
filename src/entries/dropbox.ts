@@ -152,32 +152,23 @@ runExtension(ID, () => {
   createHTMLObserver({
     tag: "TEXTAREA",
     className: "rm-block-input",
-    callback: (t: HTMLTextAreaElement) => (textareaRef.current = t),
-  });
-
-  /*new MutationObserver((mrs) => {
-    mrs
-      .flatMap((mr) => Array.from(mr.addedNodes))
-      .filter((n) => n.nodeName === "INPUT")
-      .map((n) => n as HTMLInputElement)
-      .filter((n) => n.type === "file")
-      .forEach((n) => {
-        n.replaceWith(n.cloneNode(false));
-        n.onchange = (e) => {
-          uploadToDropbox({
-            files: (e.target as HTMLInputElement).files,
-            getLoadingUid: () => {
-              const { blockUid } = getUids(textareaRef.current);
-              return updateBlock({
-                text: "Loading...",
-                uid: blockUid,
-              });
-            },
-            e,
-          });
-        };
+    callback: (t: HTMLTextAreaElement) => {
+      textareaRef.current = t;
+      t.addEventListener("paste", (e) => {
+        uploadToDropbox({
+          files: e.clipboardData.files,
+          getLoadingUid: () => {
+            const { blockUid } = getUids(t);
+            return updateBlock({
+              text: "Loading...",
+              uid: blockUid,
+            });
+          },
+          e,
+        });
       });
-  }).observe(document.body, { childList: true });*/
+    },
+  });
 
   document.addEventListener("click", (e) => {
     const target = e.target as HTMLInputElement;
