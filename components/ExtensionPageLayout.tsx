@@ -87,6 +87,7 @@ export const contributors = {
   "David Schulman": "https://associationsrewired.com/",
   "Scott Block": "https://twitter.com/insidetheblock",
   "Dave Prout": "https://twitter.com/Prouticus",
+  "Amanda Payton": "http://amandapeyton.com/",
 };
 
 export const emojisToTooltip = {

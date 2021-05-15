@@ -1,5 +1,6 @@
 import {
   Button,
+  Checkbox,
   Icon,
   InputGroup,
   Menu,
@@ -8,17 +9,10 @@ import {
   Spinner,
   Text,
 } from "@blueprintjs/core";
-import React, {
-  useCallback,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
-import {
-  getUidsFromId,
-  getTextByBlockUid,
-} from "roam-client";
+import { getUidsFromId, getTextByBlockUid, createBlock } from "roam-client";
 import { useArrowKeyDown } from "./hooks";
 
 const MENUITEM_CLASSNAME = "roamjs-wiki-data-result";
@@ -35,6 +29,7 @@ const WikiContent = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [results, setResults] = useState<string[]>([]);
+  const [importMetadata, setImportMetadata] = useState(false);
   const onChange = useCallback(
     (e) => {
       setHasSearched(false);
@@ -71,30 +66,73 @@ const WikiContent = ({
       setError("");
       setLoading(true);
       setResults([]);
-      axios
-        .get(
-          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
-            title
-          )}`
-        )
-        .then(async (r) => {
-          const { blockUid } = getUidsFromId(blockId);
-          const { extract } = r.data;
-          const text = getTextByBlockUid(blockUid);
-          window.roamAlphaAPI.updateBlock({
-            block: {
-              uid: blockUid,
-              string: text.replace(/{{wiki(-data)?}}/i, extract),
-            },
-          });
-          closePopover();
-        })
+      const { blockUid } = getUidsFromId(blockId);
+      Promise.all([
+        axios
+          .get(
+            `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
+              title
+            )}`
+          )
+          .then(async (r) => {
+            const { extract } = r.data;
+            const text = getTextByBlockUid(blockUid);
+            window.roamAlphaAPI.updateBlock({
+              block: {
+                uid: blockUid,
+                string: text.replace(/{{wiki(-data)?}}/i, extract),
+              },
+            });
+          }),
+        importMetadata
+          ? axios
+              .get(
+                `https://en.wikipedia.org/api/rest_v1/page/html/${encodeURIComponent(
+                  title
+                )}`
+              )
+              .then((r) => {
+                const dom = new DOMParser().parseFromString(
+                  r.data,
+                  "text/html"
+                );
+                Array.from(
+                  dom.querySelectorAll<HTMLTableRowElement>("table.infobox tr")
+                )
+                  .filter(
+                    (tr) =>
+                      tr.style.display !== "none" &&
+                      tr.firstElementChild.classList.contains("infobox-label")
+                  )
+                  .forEach((tr, order) =>
+                    createBlock({
+                      node: {
+                        text: `${
+                          (tr.firstElementChild as HTMLTableHeaderCellElement)
+                            .innerText
+                        }::`,
+                        children: [
+                          {
+                            text: (
+                              tr.lastElementChild as HTMLTableDataCellElement
+                            ).innerText,
+                          },
+                        ],
+                      },
+                      order,
+                      parentUid: blockUid,
+                    })
+                  );
+              })
+          : Promise.resolve(),
+      ])
+        .then(closePopover)
         .catch((e) => {
           setError(e.response?.data || e.message);
           setLoading(false);
         });
     },
-    [setError, setLoading, closePopover, setResults]
+    [setError, setLoading, closePopover, setResults, importMetadata]
   );
   const { activeIndex, onKeyDown } = useArrowKeyDown({
     onEnter: onMenuItem,
@@ -130,6 +168,14 @@ const WikiContent = ({
             }
           }}
           inputRef={inputRef}
+        />
+        <Checkbox
+          label={"Import Metadata"}
+          checked={importMetadata}
+          onChange={(e) =>
+            setImportMetadata((e.target as HTMLInputElement).checked)
+          }
+          style={{ marginTop: 8 }}
         />
       </div>
       {hasSearched && (
