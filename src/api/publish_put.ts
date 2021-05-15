@@ -59,7 +59,7 @@ export const handler: APIGatewayProxyHandler = authenticate(async (event) => {
   }
   const frontmatter = `---
 description: "${description}"${
-    contributors?.length ? `\ncontributors: ${contributors.join(", ")}` : ""
+    contributors?.length ? `\ncontributors: "${contributors.join(", ")}"` : ""
   }
 ---
 

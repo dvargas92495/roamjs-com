@@ -237,17 +237,17 @@ export const getStaticProps: GetStaticProps<
         },
       }))
     )
-    .catch((e) => ({
-      props: {
-        content: {
-          compiledSource: "",
-          renderedOutput: `Failed to load ${
-            context.params.id
-          } due to error ${JSON.stringify(e)}`,
+    .catch((e) => {
+      console.log(e);
+      return serialize(
+        `Failed to render due to: ${e.response?.data || e.message}`
+      ).then((content) => ({
+        props: {
+          content,
+          id: context.params.id,
+          development: true,
         },
-        id: context.params.id,
-        development: true,
-      },
-    }));
+      }));
+    });
 
 export default ExtensionPage;
