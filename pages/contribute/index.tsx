@@ -106,6 +106,11 @@ const ContributePage = (): React.ReactElement => {
             title: 'David Hislop',
             imgSrc: "sponsors/hislop.png",
             url: "https://twitter.com/davehislop",
+          },
+          {
+            title: 'Patrick Stoeckmann',
+            imgSrc: "sponsors/default.jpg",
+            url: "",
           }
         ]}
       />
