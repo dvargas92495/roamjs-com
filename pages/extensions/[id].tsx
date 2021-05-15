@@ -128,8 +128,15 @@ const ExtensionPage = ({
           <ul>
             {contributors.split(",").map((s) => {
               const parts = s.trim().split(" ");
-              const name = parts.slice(0, parts.length - 1).join(" ");
               const emojis = parts[parts.length - 1];
+              const emojiKeys = emojis
+                .split("")
+                .map((s, i) => `${s}${emojis.charAt(i + 1)}`)
+                .filter((_, i) => i % 2 === 0)
+                .filter((s) => !!emojisToTooltip[s]);
+              const name = parts
+                .slice(0, emojiKeys.length ? parts.length - 1 : parts.length)
+                .join(" ");
               const href = allContributors[name];
               return (
                 <li key={s}>
