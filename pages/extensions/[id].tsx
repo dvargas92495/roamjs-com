@@ -147,11 +147,7 @@ const ExtensionPage = ({
                   ) : (
                     name
                   )}{" "}
-                  {emojis
-                    .split("")
-                    .map((s, i) => `${s}${emojis.charAt(i + 1)}`)
-                    .filter((_, i) => i % 2 === 0)
-                    .filter((s) => !!emojisToTooltip[s])
+                  {emojiKeys
                     .map((s) => (
                       <Tooltip title={emojisToTooltip[s]} key={s}>
                         <span style={{ cursor: "help" }}>{s}</span>

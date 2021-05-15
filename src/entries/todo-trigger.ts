@@ -128,33 +128,67 @@ runExtension("todo-trigger", () => {
           }
         }, 50);
       }
+    } else if (
+      target.parentElement.getElementsByClassName(
+        "bp3-text-overflow-ellipsis"
+      )[0]?.innerHTML === "TODO"
+    ) {
+      const textarea = target
+        .closest(".roam-block-container")
+        ?.getElementsByTagName?.("textarea")?.[0];
+      if (textarea) {
+        const { blockUid } = getUids(textarea);
+        onTodo(blockUid, textarea.value);
+      }
     }
   });
 
   const keydownEventListener = async (e: KeyboardEvent) => {
-    if (e.key === "Enter" && isControl(e)) {
-      const target = e.target as HTMLElement;
-      if (target.tagName === "TEXTAREA") {
-        const textArea = target as HTMLTextAreaElement;
-        const { blockUid } = getUids(textArea);
-        if (textArea.value.startsWith("{{[[DONE]]}}")) {
-          onDone(blockUid, textArea.value);
-        } else if (textArea.value.startsWith("{{[[TODO]]}}")) {
-          onTodo(blockUid, textArea.value);
-        }
-        return;
-      }
-      Array.from(document.getElementsByClassName("block-highlight-blue"))
-        .map((d) => d.getElementsByClassName("roam-block")[0] as HTMLDivElement)
-        .map((d) => getUids(d).blockUid)
-        .map((blockUid) => ({ blockUid, text: getTextByBlockUid(blockUid) }))
-        .forEach(({ blockUid, text }) => {
-          if (text.startsWith("{{[[DONE]]}}")) {
-            onTodo(blockUid, text);
-          } else if (text.startsWith("{{[[TODO]]}}")) {
-            onDone(blockUid, text);
+    if (e.key === "Enter") {
+      if (isControl(e)) {
+        const target = e.target as HTMLElement;
+        if (target.tagName === "TEXTAREA") {
+          const textArea = target as HTMLTextAreaElement;
+          const { blockUid } = getUids(textArea);
+          if (textArea.value.startsWith("{{[[DONE]]}}")) {
+            onDone(blockUid, textArea.value);
+          } else if (textArea.value.startsWith("{{[[TODO]]}}")) {
+            onTodo(blockUid, textArea.value);
           }
-        });
+          return;
+        }
+        Array.from(document.getElementsByClassName("block-highlight-blue"))
+          .map(
+            (d) => d.getElementsByClassName("roam-block")[0] as HTMLDivElement
+          )
+          .map((d) => getUids(d).blockUid)
+          .map((blockUid) => ({ blockUid, text: getTextByBlockUid(blockUid) }))
+          .forEach(({ blockUid, text }) => {
+            if (text.startsWith("{{[[DONE]]}}")) {
+              onTodo(blockUid, text);
+            } else if (text.startsWith("{{[[TODO]]}}")) {
+              onDone(blockUid, text);
+            }
+          });
+      } else {
+        const target = e.target as HTMLElement;
+        if (target.tagName === "TEXTAREA") {
+          const todoItem = Array.from(
+            target.parentElement.querySelectorAll<HTMLDivElement>(
+              ".bp3-text-overflow-ellipsis"
+            )
+          ).find((t) => t.innerText === "TODO");
+          if (
+            todoItem &&
+            getComputedStyle(todoItem.parentElement).backgroundColor ===
+              "rgb(213, 218, 223)"
+          ) {
+            const textArea = target as HTMLTextAreaElement;
+            const { blockUid } = getUids(textArea);
+            onTodo(blockUid, textArea.value);
+          }
+        }
+      }
     }
   };
 
@@ -171,9 +205,9 @@ runExtension("todo-trigger", () => {
         if (input.checked && !input.disabled) {
           const zoom = l.closest(".rm-zoom-item-content") as HTMLSpanElement;
           if (zoom) {
-            (zoom.firstElementChild
-              .firstElementChild as HTMLDivElement).style.textDecoration =
-              "line-through";
+            (
+              zoom.firstElementChild.firstElementChild as HTMLDivElement
+            ).style.textDecoration = "line-through";
             return;
           }
           const block = CLASSNAMES_TO_CHECK.map(
@@ -185,9 +219,9 @@ runExtension("todo-trigger", () => {
         } else {
           const zoom = l.closest(".rm-zoom-item-content") as HTMLSpanElement;
           if (zoom) {
-            (zoom.firstElementChild
-              .firstElementChild as HTMLDivElement).style.textDecoration =
-              "none";
+            (
+              zoom.firstElementChild.firstElementChild as HTMLDivElement
+            ).style.textDecoration = "none";
             return;
           }
           const block = CLASSNAMES_TO_CHECK.map(

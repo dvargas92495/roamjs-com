@@ -11,6 +11,7 @@ import {
 } from "roam-client";
 import { Dropbox } from "dropbox";
 import { getOauth } from "../components/hooks";
+import mime from "mime-types";
 
 const ID = "dropbox";
 const CONFIG = `roam/js/${ID}`;
@@ -80,12 +81,13 @@ runExtension(ID, () => {
               contents: fileToUpload,
               autorename: true,
             })
-            .then((r) =>
-              dbx
+            .then((r) => {
+              const contentType = mime.lookup(r.result.name);
+              return dbx
                 .sharingListSharedLinks({ path: r.result.path_display })
                 .then((l) =>
                   l.result.links.length
-                    ? l.result.links[0].url
+                    ? { contentType, url: l.result.links[0].url }
                     : dbx
                         .sharingCreateSharedLinkWithSettings({
                           path: r.result.path_display,
@@ -93,14 +95,17 @@ runExtension(ID, () => {
                             requested_visibility: { ".tag": "public" },
                           },
                         })
-                        .then((c) => c.result.url)
-                )
-            )
-            .then((r) => {
-              const url = r.replace(/dl=0$/, "raw=1");
+                        .then((c) => ({ url: c.result.url, contentType }))
+                );
+            })
+            .then(({ url, contentType }) => {
+              const dbxUrl = url.replace(/dl=0$/, "raw=1");
               updateBlock({
                 uid,
-                text: `![](${url})`,
+                text:
+                  contentType && contentType.includes("pdf")
+                    ? `{{pdf: ${dbxUrl}}}`
+                    : `![](${dbxUrl})`,
               });
             })
             .catch((e) => {
