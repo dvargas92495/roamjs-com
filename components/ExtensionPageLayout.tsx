@@ -86,6 +86,7 @@ export const contributors = {
   "Marco Brambilla": "https://github.com/marcobrambilla",
   "David Schulman": "https://associationsrewired.com/",
   "Scott Block": "https://twitter.com/insidetheblock",
+  "Dave Prout": "https://twitter.com/Prouticus",
 };
 
 export const emojisToTooltip = {
