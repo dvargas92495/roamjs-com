@@ -170,6 +170,8 @@ module "aws-serverless-backend" {
         "encrypt/post",
         "end-service/post",
         "facebook-auth/post",
+        "facebook-groups/get",
+        "facebook-groups/post",
         "finish-launch-social/post",
         "finish-launch-website/post",
         "finish-shutdown-website/post",

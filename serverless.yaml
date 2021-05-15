@@ -106,6 +106,20 @@ functions:
           path: facebook-auth
           method: post
           cors: true
+  facebook-groups-get:
+    handler: out/facebook-groups_get.handler
+    events:
+      - http:
+          path: facebook-groups
+          method: get
+          cors: true
+  facebook-groups-post:
+    handler: out/facebook-groups_post.handler
+    events:
+      - http:
+          path: facebook-groups
+          method: post
+          cors: true
   finish-launch-social-post:
     handler: out/finish-launch-social_post.handler
     events:
