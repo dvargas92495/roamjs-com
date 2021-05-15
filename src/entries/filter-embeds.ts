@@ -3,11 +3,15 @@ import {
   getUids,
   getPageTitleByBlockUid,
 } from "roam-client";
-import { getPageTitle, isPopoverThePageFilter, runExtension } from "../entry-helpers";
+import {
+  getPageTitle,
+  isPopoverThePageFilter,
+  runExtension,
+} from "../entry-helpers";
 
 const KEY = "roamjsPageFilters";
 type Filter = {
-  [pagename: string]: { removes: string[] };
+  [pagename: string]: { removes: string[]; includes: string[] };
 };
 
 if (!localStorage.getItem(KEY)) {
@@ -19,16 +23,22 @@ const getRemoveTags = (includeRemoveContainer: Element) =>
     includeRemoveContainer.lastElementChild.getElementsByClassName("bp3-button")
   ).map((b) => b.firstChild.nodeValue);
 
+const getIncludeTags = (includeRemoveContainer: Element) =>
+  Array.from(
+    includeRemoveContainer.lastElementChild.getElementsByClassName("bp3-button")
+  ).map((b) => b.firstChild.nodeValue);
+
 const filterEmbed = ({
   e,
-  style,
-  targetTag,
+  includes,
+  removes,
 }: {
   e: HTMLDivElement;
-  style: string;
-  targetTag: string;
+  includes: string[];
+  removes: string[];
 }) => {
   const blocks = Array.from(e.getElementsByClassName("roam-block"));
+  const blockIdToResult: { [id: string]: boolean } = {};
   blocks
     .map((b) => b.closest(".rm-block") as HTMLDivElement)
     .filter((b) => !!b)
@@ -38,8 +48,20 @@ const filterEmbed = ({
         .substring(1, pageLinks.length - 1)
         .split(",")
         .map((t) => t.substring(1, t.length - 1));
-      if (tags.includes(targetTag)) {
-        b.style.display = style;
+      if (
+        removes.some((t) => tags.includes(t)) ||
+        (includes.length &&
+          !includes.every((t) => tags.includes(t)) &&
+          !blockIdToResult[
+            b.parentElement.closest(".roam-block-container")?.querySelector?.(".roam-block")
+              ?.id
+          ])
+      ) {
+        b.style.display = "none";
+        blockIdToResult[b.querySelector(".roam-block").id] = false;
+      } else {
+        b.style.display = "";
+        blockIdToResult[b.querySelector(".roam-block").id] = true;
       }
     });
 };
@@ -58,52 +80,79 @@ runExtension("filter-embeds", () => {
         const currentFilters =
           storage[title]?.removes ||
           getRemoveTags(popover.getElementsByClassName("flex-h-box")[0]);
+        const currentIncludes =
+          storage[title]?.includes ||
+          getIncludeTags(popover.getElementsByClassName("flex-h-box")[0]);
         const embeds = Array.from(
           document.getElementsByClassName("rm-embed-container")
         ).map((e) => e as HTMLDivElement);
         if (!storage[title]) {
-          currentFilters.forEach((t) =>
-            embeds.forEach((e) =>
-              filterEmbed({ e, targetTag: t, style: "none" })
-            )
+          embeds.forEach((e) =>
+            filterEmbed({
+              e,
+              includes: currentIncludes,
+              removes: currentFilters,
+            })
           );
         }
         if (includeRemoveContainer) {
           if (includeRemoveContainer.lastElementChild.contains(button)) {
-            embeds.forEach((e) => filterEmbed({ e, targetTag, style: "" }));
+            const titleData = {
+              removes: currentFilters.filter((f) => f !== targetTag),
+              includes: currentIncludes,
+            };
+            embeds.forEach((e) => filterEmbed({ e, ...titleData }));
             localStorage.setItem(
               KEY,
               JSON.stringify({
                 ...storage,
-                [title]: {
-                  removes: currentFilters.filter((f) => f !== targetTag),
-                },
+                [title]: titleData,
+              })
+            );
+          } else if (
+            includeRemoveContainer.firstElementChild.contains(button)
+          ) {
+            const titleData = {
+              removes: currentFilters,
+              includes: currentIncludes.filter((f) => f !== targetTag),
+            };
+            embeds.forEach((e) => filterEmbed({ e, ...titleData }));
+            localStorage.setItem(
+              KEY,
+              JSON.stringify({
+                ...storage,
+                [title]: titleData,
               })
             );
           }
-          /* Skipping Includes logic for now
-          else if (includeRemoveContainer.firstElementChild.contains(button)) {
-            console.log("uninclude", targetTag);
-          }
-          */
         } else {
           if (e.shiftKey) {
-            embeds.forEach((e) => filterEmbed({ e, targetTag, style: "none" }));
+            const titleData = {
+              removes: [...currentFilters, targetTag],
+              includes: currentIncludes,
+            };
+            embeds.forEach((e) => filterEmbed({ e, ...titleData }));
             localStorage.setItem(
               KEY,
               JSON.stringify({
                 ...storage,
-                [title]: {
-                  removes: [...currentFilters, targetTag],
-                },
+                [title]: titleData,
+              })
+            );
+          } else {
+            const titleData = {
+              removes: currentFilters,
+              includes: [...currentIncludes, targetTag],
+            };
+            embeds.forEach((e) => filterEmbed({ e, ...titleData }));
+            localStorage.setItem(
+              KEY,
+              JSON.stringify({
+                ...storage,
+                [title]: titleData,
               })
             );
           }
-          /* Skipping Includes logic for now
-          else {
-            console.log("include", targetTag);
-          }
-          */
         }
       }
     }
@@ -119,23 +168,17 @@ runExtension("filter-embeds", () => {
       const title = getPageTitleByBlockUid(blockUid);
       const storage = JSON.parse(localStorage.getItem(KEY)) as Filter;
       if (storage[title]) {
-        storage[title].removes.forEach((targetTag) =>
-          filterEmbed({
-            e,
-            style: "none",
-            targetTag,
-          })
-        );
+        filterEmbed({
+          e,
+          ...storage[title],
+        });
       }
       const currentTitle = getPageTitle(e).textContent;
       if (storage[currentTitle]) {
-        storage[currentTitle].removes.forEach((targetTag) =>
-          filterEmbed({
-            e,
-            style: "none",
-            targetTag,
-          })
-        );
+        filterEmbed({
+          e,
+          ...storage[title],
+        });
       }
     },
   });
