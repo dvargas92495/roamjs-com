@@ -114,12 +114,25 @@ description: "${description}"${
         (_, label, page) => `[${label}](/extensions/${path}/${page})`
       );
 
-  const blockToMarkdown = (block: TreeNode, viewType: ViewType): string =>
-    `${viewTypeToPrefix[viewType]}${"".padStart(block.heading, "#")}${
-      block.heading > 0 ? " " : ""
-    }${replaceComponents(block.text)}\n${
+  const blockToMarkdown = (
+    block: TreeNode,
+    viewType: ViewType,
+    depth = 0
+  ): string =>
+    `${"".padStart(depth * 4, " ")}${viewTypeToPrefix[viewType]}${"".padStart(
+      block.heading,
+      "#"
+    )}${block.heading > 0 ? " " : ""}${replaceComponents(block.text)}\n${
       viewType === "document" ? "\n" : ""
-    }${block.children.map((v) => blockToMarkdown(v, block.viewType)).join("")}`;
+    }${block.children
+      .map((v) =>
+        blockToMarkdown(
+          v,
+          block.viewType,
+          viewType === "document" ? depth : depth + 1
+        )
+      )
+      .join("")}`;
 
   return users
     .getUser(userId)
@@ -159,18 +172,20 @@ description: "${description}"${
             ),
             ...(thumbnail
               ? [
-                  axios.get(thumbnail, {
-                    responseType: 'stream'
-                  }).then((r) =>
-                    s3
-                      .upload({
-                        Bucket,
-                        Key: `thumbnails/${path}.png`,
-                        Body: r.data,
-                        ContentType: "image/png",
-                      })
-                      .promise()
-                  ),
+                  axios
+                    .get(thumbnail, {
+                      responseType: "stream",
+                    })
+                    .then((r) =>
+                      s3
+                        .upload({
+                          Bucket,
+                          Key: `thumbnails/${path}.png`,
+                          Body: r.data,
+                          ContentType: "image/png",
+                        })
+                        .promise()
+                    ),
                 ]
               : []),
           ])
