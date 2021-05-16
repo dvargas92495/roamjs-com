@@ -1,10 +1,10 @@
 import { H1, H2, H3, H4, H5, H6, Body } from "@dvargas92495/ui";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Loom from "./Loom";
 import YouTube from "./Youtube";
 import { Prism } from "react-syntax-highlighter";
-import { serialize } from "next-mdx-remote/serialize";
-import { MDXRemote } from "next-mdx-remote";
+// import { serialize } from "next-mdx-remote/serialize";
+// import { MDXRemote } from "next-mdx-remote";
 
 const Pre: React.FunctionComponent<HTMLPreElement> = ({ children }) => (
   <>{children}</>
@@ -64,18 +64,19 @@ const inlineComponents = {
 };
 
 const Center: React.FunctionComponent = ({ children }) => {
-  const [contents, setContents] = useState({
+  /*const [contents, setContents] = useState({
     compiledSource: children as string,
   });
   useEffect(() => {
     serialize(children as string).then(setContents);
-  }, [setContents]);
+  }, [setContents]);*/
   return (
     <div style={{ textAlign: "center" }}>
-      <MDXRemote
+      {/*<MDXRemote
         compiledSource={contents.compiledSource}
         components={inlineComponents}
-      />
+      />*/}
+      {children}
     </div>
   );
 };
