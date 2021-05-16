@@ -32,9 +32,8 @@ const waitForCloudfront = (props) =>
   });
 
 const extension = process.argv[2];
-const DistributionId = process.env.CLOUDFRONT_ARN.match(
-  /:distribution\/(.*)$/
-)[1];
+const DistributionId =
+  process.env.CLOUDFRONT_ARN.match(/:distribution\/(.*)$/)[1];
 
 const content = fs.readFileSync(`out/extensions/${extension}.html`).toString();
 const linkRegex = /<(?:link|script) (?:.*?)(?:href|src)="(.*?)"(?:.*?)(?:\/)?>/;
@@ -88,7 +87,7 @@ Promise.all([
       .upload({
         Bucket: "roamjs.com",
         Body,
-        Key,
+        Key: Key.replace(/\.html$/, ""),
         ContentType: "text/html",
       })
       .promise()

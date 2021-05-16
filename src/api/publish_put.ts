@@ -122,7 +122,11 @@ description: "${description}"${
     `${"".padStart(depth * 4, " ")}${viewTypeToPrefix[viewType]}${"".padStart(
       block.heading,
       "#"
-    )}${block.heading > 0 ? " " : ""}${replaceComponents(block.text)}\n${
+    )}${block.heading > 0 ? " " : ""}${
+      block.textAlign === "center" ? "<Center>" : ""
+    }${replaceComponents(block.text)}${
+      block.textAlign === "center" ? "</Center>" : ""
+    }\n${
       viewType === "document" ? "\n" : ""
     }${block.children
       .map((v) =>
