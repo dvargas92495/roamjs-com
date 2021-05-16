@@ -106,7 +106,7 @@ const ExtensionPage = ({
           {getSingleCodeContent(`${id}/main`)}
         </Prism>
       </div>
-      <MDXRemote {...content} components={MdxComponents} />
+      {content.compiledSource ? <MDXRemote {...content} components={MdxComponents} /> : 'No content'}
       <H3>Contributors</H3>
       <Body>
         This extension is brought to you by RoamJS! If you are facing any issues
