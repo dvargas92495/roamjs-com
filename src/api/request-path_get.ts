@@ -26,10 +26,10 @@ export const handler: APIGatewayProxyHandler = (event) => {
                 .promise()
                 .then((res) =>
                   res.Contents.map((id) => ({
-                    subpage: id.Key.substring(prefix.Prefix.length).replace(
-                      /\.md$/,
-                      ""
-                    ),
+                    subpage: id.Key.substring(prefix.Prefix.length)
+                      .replace(/\.md$/, "")
+                      .replace(/ /g, "_")
+                      .toLowerCase(),
                     id: prefix.Prefix.replace(/markdown\//, "").replace(
                       /\/$/,
                       ""

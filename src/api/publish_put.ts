@@ -111,7 +111,10 @@ description: "${description}"${
       )
       .replace(
         new RegExp(`\\[(.*?)\\]\\(\\[\\[${path}/(.*?)\\]\\]\\)`),
-        (_, label, page) => `[${label}](/extensions/${path}/${page})`
+        (_, label, page) =>
+          `[${label}](/extensions/${path}/${page
+            .replace(/ /g, "_")
+            .toLowerCase()})`
       );
 
   const blockToMarkdown = (
@@ -126,9 +129,7 @@ description: "${description}"${
       block.textAlign === "center" ? "<Center>" : ""
     }${replaceComponents(block.text)}${
       block.textAlign === "center" ? "</Center>" : ""
-    }\n${
-      viewType === "document" ? "\n" : ""
-    }${block.children
+    }\n${viewType === "document" ? "\n" : ""}${block.children
       .map((v) =>
         blockToMarkdown(
           v,
@@ -166,7 +167,9 @@ description: "${description}"${
               s3
                 .upload({
                   Bucket,
-                  Key: `markdown/${path}/${p}.md`,
+                  Key: `markdown/${path}/${p
+                    .replace(/ /g, "_")
+                    .toLowerCase()}.md`,
                   Body: subpages[p].nodes
                     .map((b) => blockToMarkdown(b, subpages[p].viewType))
                     .join(""),
