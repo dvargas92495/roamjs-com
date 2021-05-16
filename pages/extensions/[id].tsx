@@ -241,7 +241,6 @@ export const getStaticProps: GetStaticProps<
       }))
     )
     .catch((e) => {
-      console.log(e);
       return serialize(
         `Failed to render due to: ${e.response?.data || e.message}`
       ).then((content) => ({
