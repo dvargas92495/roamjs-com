@@ -106,7 +106,7 @@ description: "${description}"${
         (_, id) => `<Loom id={"${id}"} />`
       )
       .replace(
-        /{{(?:\[\[)?youtube(?:\]\])?:(?:\s)*https:\/\/youtu.be\/([\w\d-]*)}}/,
+        /{{(?:\[\[)?(?:youtube|video)(?:\]\])?:(?:\s)*https:\/\/youtu\.be\/([\w\d-]*)}}/,
         (_, id) => `<YouTube id={"${id}"} />`
       )
       .replace(
