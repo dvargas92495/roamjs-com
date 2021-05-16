@@ -10,6 +10,7 @@ import axios from "axios";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import {
+  createBlock,
   getBlockUidFromTarget,
   getFirstChildUidByBlockUid,
   getTextByBlockUid,
@@ -71,6 +72,17 @@ const FacebookGroupContent = ({
                 message,
               })
               .then(close)
+              .catch((e) => {
+                const fbError = e.response?.data?.error?.message;
+                if (fbError) {
+                  createBlock({
+                    parentUid: blockUid,
+                    order: 1,
+                    node: { text: fbError },
+                  });
+                  close();
+                }
+              })
               .finally(() => setLoading(false));
           }}
         />
