@@ -3,11 +3,12 @@ import axios from "axios";
 import { headers } from "../lambda-helpers";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  const { code } = JSON.parse(event.body || "{}");
+  const { accessToken, groupId, message } = JSON.parse(event.body || "{}");
   return axios
-    .get(
-      `https://graph.facebook.com/v10.0/oauth/access_token?client_id=${process.env.FACEBOOK_CLIENT_ID}&client_secret=${process.env.FACEBOOK_CLIENT_SECRET}&code=${code}&redirect_uri=https://roamjs.com/oauth?auth=true`
-    )
+    .post(`https://graph.facebook.com/${groupId}/feed`, {
+      access_token: accessToken,
+      message,
+    })
     .then((r) =>
       axios
         .get(
@@ -15,11 +16,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         )
         .then((me) => ({
           statusCode: 200,
-          body: JSON.stringify({
-            ...r.data,
-            label: me.data.name,
-            userId: me.data.id,
-          }),
+          body: JSON.stringify({ ...r.data, me }),
           headers: headers(event),
         }))
     )

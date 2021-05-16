@@ -2,6 +2,8 @@ import { createConfigObserver } from "roamjs-components";
 import { runExtension } from "../entry-helpers";
 import FacebookLogo from "../assets/Facebook.svg";
 import axios from "axios";
+import { createButtonObserver } from "roam-client";
+import { render } from '../components/FacebookGroupOverlay';
 
 const ID = "facebook";
 const CONFIG = `roam/js/${ID}`;
@@ -39,4 +41,10 @@ runExtension(ID, () => {
       ],
     },
   });
+
+  createButtonObserver({
+    shortcut: 'fb',
+    attribute: 'facebook-group',
+    render
+  })
 });
