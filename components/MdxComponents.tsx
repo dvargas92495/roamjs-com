@@ -47,7 +47,15 @@ const MdxImage = (
   />
 );
 
-const inlineComponents = {
+const Center: React.FunctionComponent = ({ children }) => {
+  return <div style={{ textAlign: "center" }}>{children}</div>;
+};
+
+const Highlight: React.FunctionComponent = ({ children }) => {
+  return <span style={{ backgroundColor: "#ffff00" }}>{children}</span>;
+};
+
+export default {
   h1: H1,
   h2: H2,
   h3: H3,
@@ -61,27 +69,6 @@ const inlineComponents = {
   img: MdxImage,
   Loom,
   YouTube,
-};
-
-const Center: React.FunctionComponent = ({ children }) => {
-  /*const [contents, setContents] = useState({
-    compiledSource: children as string,
-  });
-  useEffect(() => {
-    serialize(children as string).then(setContents);
-  }, [setContents]);*/
-  return (
-    <div style={{ textAlign: "center" }}>
-      {/*<MDXRemote
-        compiledSource={contents.compiledSource}
-        components={inlineComponents}
-      />*/}
-      {children}
-    </div>
-  );
-};
-
-export default {
-  ...inlineComponents,
   Center,
+  Highlight,
 };

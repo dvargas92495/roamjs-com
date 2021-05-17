@@ -115,6 +115,10 @@ description: "${description}"${
           `[${label}](/extensions/${path}/${page
             .replace(/ /g, "_")
             .toLowerCase()})`
+      )
+      .replace(
+        /\^\^(.*?)\^\^/,
+        (_, i) => `<Highlight>\n\n${i}\n\n</Highlight>`
       );
 
   const blockToMarkdown = (
@@ -126,9 +130,9 @@ description: "${description}"${
       block.heading,
       "#"
     )}${block.heading > 0 ? " " : ""}${
-      block.textAlign === "center" ? "<Center>" : ""
+      block.textAlign === "center" ? "<Center>\n\n" : ""
     }${replaceComponents(block.text)}${
-      block.textAlign === "center" ? "</Center>" : ""
+      block.textAlign === "center" ? "\n\n</Center>" : ""
     }\n${viewType === "document" ? "\n" : ""}${block.children
       .map((v) =>
         blockToMarkdown(
