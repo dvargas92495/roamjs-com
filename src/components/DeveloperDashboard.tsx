@@ -113,65 +113,67 @@ const DeveloperContent: StageContent = () => {
                   onClick={() => {
                     setLoading(true);
                     setError("");
-                    const title = `${prefix}${p}`;
-                    const tree = getTreeByPageName(title);
-                    const { children, viewType } = tree.find((t) =>
-                      /documentation/i.test(t.text)
-                    ) || {
-                      children: [] as TreeNode[],
-                      viewType: "document",
-                    };
-                    const subpageTitles = window.roamAlphaAPI
-                      .q(
-                        `[:find ?title :where [?b :node/title ?title][(clojure.string/starts-with? ?title  "${title}/")]]`
-                      )
-                      .map((r) => r[0]);
-                    authenticatedAxiosPut("publish", {
-                      path: p,
-                      blocks: children,
-                      viewType,
-                      description: getSettingValueFromTree({
-                        tree,
-                        key: "description",
-                      }),
-                      contributors: getSettingValuesFromTree({
-                        tree,
-                        key: "contributors",
-                      }),
-                      subpages: Object.fromEntries(
-                        subpageTitles.map((t) => [
-                          t.substring(title.length + 1),
-                          {
-                            nodes: getTreeByPageName(t),
-                            viewType: getPageViewType(t),
-                          },
-                        ])
-                      ),
-                      thumbnail: getSettingValueFromTree({
-                        tree,
-                        key: 'thumbnail'
-                      }).match(/!\[(?:.*?)\]\((.*?)\)/)?.[1]
-                    })
-                      .then((r) => {
-                        setInputSetting({
-                          blockUid: getPageUidByPageTitle(title),
-                          value: r.data.etag,
-                          key: "ETag",
-                          index: 1,
-                        });
-                        developerToaster.show({
-                          message: "Documentation has updated successfully!",
-                          intent: Intent.SUCCESS,
-                        });
-                      })
-                      .catch((e) =>
-                        setError(
-                          e.response?.data?.error ||
-                            e.response?.data ||
-                            e.message
+                    setTimeout(() => {
+                      const title = `${prefix}${p}`;
+                      const tree = getTreeByPageName(title);
+                      const { children, viewType } = tree.find((t) =>
+                        /documentation/i.test(t.text)
+                      ) || {
+                        children: [] as TreeNode[],
+                        viewType: "document",
+                      };
+                      const subpageTitles = window.roamAlphaAPI
+                        .q(
+                          `[:find ?title :where [?b :node/title ?title][(clojure.string/starts-with? ?title  "${title}/")]]`
                         )
-                      )
-                      .finally(() => setLoading(false));
+                        .map((r) => r[0]);
+                      authenticatedAxiosPut("publish", {
+                        path: p,
+                        blocks: children,
+                        viewType,
+                        description: getSettingValueFromTree({
+                          tree,
+                          key: "description",
+                        }),
+                        contributors: getSettingValuesFromTree({
+                          tree,
+                          key: "contributors",
+                        }),
+                        subpages: Object.fromEntries(
+                          subpageTitles.map((t) => [
+                            t.substring(title.length + 1),
+                            {
+                              nodes: getTreeByPageName(t),
+                              viewType: getPageViewType(t),
+                            },
+                          ])
+                        ),
+                        thumbnail: getSettingValueFromTree({
+                          tree,
+                          key: "thumbnail",
+                        }).match(/!\[(?:.*?)\]\((.*?)\)/)?.[1],
+                      })
+                        .then((r) => {
+                          setInputSetting({
+                            blockUid: getPageUidByPageTitle(title),
+                            value: r.data.etag,
+                            key: "ETag",
+                            index: 1,
+                          });
+                          developerToaster.show({
+                            message: "Documentation has updated successfully!",
+                            intent: Intent.SUCCESS,
+                          });
+                        })
+                        .catch((e) =>
+                          setError(
+                            e.response?.data?.error ||
+                              e.response?.data ||
+                              e.message
+                          )
+                        )
+                        .finally(() => setLoading(false));
+                    }, 1);
                   }}
                 />
               </Tooltip>

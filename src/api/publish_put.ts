@@ -118,7 +118,7 @@ description: "${description}"${
       )
       .replace(
         /\^\^(.*?)\^\^/,
-        (_, i) => `<Highlight>\n\n${i}\n\n</Highlight>`
+        (_, i) => `<Highlight>${i}</Highlight>`
       );
 
   const blockToMarkdown = (
