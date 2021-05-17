@@ -1,6 +1,7 @@
 import { isApple, runExtension } from "../entry-helpers";
 import {
   createOverlayObserver,
+  extractTag,
   getConfigFromPage,
   getTextByBlockUid,
   getTreeByPageName,
@@ -42,7 +43,7 @@ const getReplacer = () => {
     title: p.title,
     uid: p.uid,
     aliases: (getConfigFromPage(p.title)?.Aliases?.split(",") || [])
-      .map((a: string) => a.trim())
+      .map((a: string) => extractTag(a.trim()))
       .filter((a: string) => !!a),
   }));
   const linkByAlias: { [key: string]: string } = {};

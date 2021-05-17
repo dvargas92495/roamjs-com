@@ -10,20 +10,17 @@ const ckApiSecret = process.env.CONVERTKIT_API_TOKEN;
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const {
-    id,
-    first_name,
-    last_name,
-    email_addresses,
-    primary_email_address_id,
-    private_metadata,
-  } = wh.verify(event.body, {
+  const payload = wh.verify(event.body, {
     "dh-id": event.headers["dh-id"] || event.headers["Dh-Id"],
     "dh-signature":
       event.headers["dh-signature"] || event.headers["Dh-Signature"],
     "dh-timestamp":
       event.headers["dh-timestamp"] || event.headers["Dh-Timestamp"],
-  }) as {
+  }) as {data?: Record<string,string>, type?: string}; 
+  if (payload.type && payload.type !== 'user.created') {
+    return emptyResponse(event);
+  }
+  const data = (payload.data || payload) as {
     id: string;
     first_name: string;
     last_name: string;
@@ -31,6 +28,14 @@ export const handler = async (
     primary_email_address_id: string;
     private_metadata: { stripeId?: string };
   };
+  const {
+    id,
+    first_name,
+    last_name,
+    email_addresses,
+    primary_email_address_id,
+    private_metadata,
+  } = data;
   if (private_metadata.stripeId) {
     return emptyResponse(event);
   }

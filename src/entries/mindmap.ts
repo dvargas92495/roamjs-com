@@ -21,7 +21,7 @@ const div = document.createElement("div");
 const toMarkdown = ({ c, i }: { c: TreeNode; i: number }): string =>
   `${"".padStart(i * 4, " ")}- ${
     c.heading ? `${"".padStart(c.heading, "#")} ` : ""
-  }<span class="${NODE_CLASSNAME}" data-block-uid="${c.uid}">${resolveRefs(
+  }<span class="${NODE_CLASSNAME} roamjs-block-view" data-block-uid="${c.uid}" id="roamjs-mindmap-node-${c.uid}">${resolveRefs(
     c.text.trim()
   )}</span>${c.children
     .filter((nested) => !!nested.text || nested.children.length)
@@ -40,6 +40,15 @@ const expandEmbeds = (c: TreeNode) => {
   );
 };
 
+const replaceTags = (c: TreeNode) => {
+  c.children.forEach(replaceTags);
+  c.text = c.text.replace(
+    /#([\w\d/_-]*)/,
+    (_, tag) =>
+      `<span class="rm-page-ref--tag" data-tag="${tag}">#${tag}</span>`
+  );
+};
+
 const hideTagChars = (c: TreeNode) => {
   c.children.forEach(hideTagChars);
   c.text = c.text.replace(/#|\[\[|\]\]/g, "");
@@ -50,6 +59,7 @@ const getMarkdown = (): string => {
   const uid = match ? match[1] : toRoamDateUid(new Date());
   const nodes = getTreeByBlockUid(uid).children;
   nodes.forEach((c) => expandEmbeds(c));
+  nodes.forEach((c) => replaceTags(c));
   const hideTags = getTreeByPageName("roam/js/mindmap").some((t) =>
     /hide tags/i.test(t.text)
   );
@@ -62,9 +72,9 @@ const getMarkdown = (): string => {
 runExtension("markmap", () => {
   createHTMLObserver({
     callback: (u: HTMLUListElement) => {
-      const lis = Array.from(
-        u.getElementsByTagName("li")
-      ).map((l: HTMLLIElement) => l.innerText.trim());
+      const lis = Array.from(u.getElementsByTagName("li")).map(
+        (l: HTMLLIElement) => l.innerText.trim()
+      );
       if (
         lis.includes("Settings") &&
         !u.getAttribute("data-roamjs-has-markmap")
