@@ -17,7 +17,7 @@ import {
 import { SidebarWindow } from "roam-client/lib/types";
 import { getWindowUid } from "../entry-helpers";
 import { getRenderRoot } from "./hooks";
-import MenuItemSelect from "./MenuItemSelect";
+import { MenuItemSelect } from "roamjs-components";
 
 const SaveSidebar = (): React.ReactElement => {
   const [isOpen, setIsOpen] = useState(false);

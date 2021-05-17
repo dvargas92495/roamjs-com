@@ -1,4 +1,13 @@
-import { Button, Drawer, MenuItem, Position } from "@blueprintjs/core";
+import {
+  Button,
+  Classes,
+  Dialog,
+  Drawer,
+  Intent,
+  Label,
+  MenuItem,
+  Position,
+} from "@blueprintjs/core";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { ITransformResult, Transformer } from "markmap-lib";
@@ -6,6 +15,15 @@ import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 import { format } from "date-fns";
 import { isSafari } from "mobile-device-detect";
 import download from "downloadjs";
+import { MenuItemSelect } from "roamjs-components";
+import {
+  getCurrentPageUid,
+  getPageTitleByPageUid,
+  getTextByBlockUid,
+  getTreeByBlockUid,
+  TreeNode,
+} from "roam-client";
+import { resolveRefs } from "../entry-helpers";
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
@@ -46,11 +64,23 @@ const componentModes = {
   button: Button,
 };
 
+const EXPORT_FORMATS = ["PNG", "OPML"] as const;
+type ExportFormat = typeof EXPORT_FORMATS[number];
+
 const MarkmapPanel: React.FunctionComponent<{
   getMarkdown: () => string;
   mode: "menu" | "button";
 }> = ({ getMarkdown, mode }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const openExport = useCallback(
+    () => setIsExportOpen(true),
+    [setIsExportOpen]
+  );
+  const closeExport = useCallback(
+    () => setIsExportOpen(false),
+    [setIsExportOpen]
+  );
   const [loaded, setLoaded] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const expand = useCallback(() => setIsFullScreen(true), [setIsFullScreen]);
@@ -133,30 +163,57 @@ const MarkmapPanel: React.FunctionComponent<{
       }
     }
   }, [containerRef.current, loaded, loadMarkmap]);
+  const [activeFormat, setActiveFormat] = useState<ExportFormat>(
+    EXPORT_FORMATS[0]
+  );
   const exporter = useCallback(async () => {
-    const svgElement = document.getElementById(SVG_ID);
-    const filename = `${format(new Date(), "yyyyMMddhhmmss")}_mindmap.png`;
+    const filename = `${format(
+      new Date(),
+      "yyyyMMddhhmmss"
+    )}_mindmap.${activeFormat.toLowerCase()}`;
+    if (activeFormat === "PNG") {
+      const svgElement = document.getElementById(SVG_ID);
 
-    const canvas = document.createElement("canvas");
-    canvas.width = svgElement.parentElement.offsetWidth;
-    canvas.height = svgElement.parentElement.offsetHeight;
-    const ctx = canvas.getContext("2d");
-    const data = new XMLSerializer().serializeToString(svgElement);
-    const img = new Image(canvas.width, canvas.height);
-    img.onload = () => {
-      document.body.appendChild(canvas);
-      document.body.appendChild(img);
-      // hack to allow image to paint on safari
-      setTimeout(() => {
-        ctx.drawImage(img, 0, 0);
-        const uri = canvas.toDataURL("image/png");
-        download(uri, filename, "image/png");
-        img.remove();
-        canvas.remove();
-      }, 1);
-    };
-    img.src = `data:image/svg+xml; charset=utf8, ${encodeURIComponent(data)}`;
-  }, []);
+      const canvas = document.createElement("canvas");
+      canvas.width = svgElement.parentElement.offsetWidth;
+      canvas.height = svgElement.parentElement.offsetHeight;
+      const ctx = canvas.getContext("2d");
+      const data = new XMLSerializer().serializeToString(svgElement);
+      const img = new Image(canvas.width, canvas.height);
+      img.onload = () => {
+        document.body.appendChild(canvas);
+        document.body.appendChild(img);
+        // hack to allow image to paint on safari
+        setTimeout(() => {
+          ctx.drawImage(img, 0, 0);
+          const uri = canvas.toDataURL("image/png");
+          download(uri, filename, "image/png");
+          img.remove();
+          canvas.remove();
+        }, 1);
+      };
+      img.src = `data:image/svg+xml; charset=utf8, ${encodeURIComponent(data)}`;
+    } else if (activeFormat === "OPML") {
+      const uid = getCurrentPageUid();
+      const title = getPageTitleByPageUid(uid) || getTextByBlockUid(uid);
+      const tree = getTreeByBlockUid(uid);
+      tree.text = tree.text || title;
+      const toOpml = (node: TreeNode): string =>
+        `<outline text="${resolveRefs(node.text)}">${node.children
+          .map(toOpml)
+          .join("")}</outline>`;
+      const content = `<?xml version="1.0" encoding="UTF-8"?>
+<opml version="1.0">
+<head>
+<title>${title}</title>
+</head>
+<body>
+${toOpml(tree)}
+</body>
+</opml>`;
+      download(content, filename, "application/xml");
+    }
+  }, [activeFormat]);
   useEffect(() => {
     if (containerRef.current) {
       const content = containerRef.current.closest(
@@ -194,10 +251,58 @@ const MarkmapPanel: React.FunctionComponent<{
           style={{ height: "100%", position: "relative" }}
         >
           <svg id={SVG_ID} style={{ width: "100%", height: "100%" }} />
+          <style>
+            {`.roamjs-mindmap-exporter {
+  z-index: 2000;
+}`}
+          </style>
+          <Dialog
+            isOpen={isExportOpen}
+            onClose={closeExport}
+            title={"Export Mindmap"}
+            portalClassName={"roamjs-mindmap-exporter"}
+          >
+            <div className={Classes.DIALOG_BODY}>
+              <Label>
+                Format
+                <MenuItemSelect
+                  activeItem={activeFormat}
+                  onItemSelect={(i) => setActiveFormat(i)}
+                  items={[...EXPORT_FORMATS]}
+                  popoverProps={{ portalClassName: "roamjs-mindmap-exporter" }}
+                  ButtonProps={{
+                    // blueprint select still uses popover 1, which has a bug of not putting the class name on the actual portal
+                    onClick: () =>
+                      setTimeout(() => {
+                        Array.from(
+                          document.getElementsByClassName(
+                            "roamjs-mindmap-exporter"
+                          )
+                        )
+                          .map(
+                            (d) => d.closest(".bp3-portal") as HTMLDivElement
+                          )
+                          .filter((d) => !!d)
+                          .forEach((d) => (d.style.zIndex = "2000"));
+                      }, 1),
+                  }}
+                />
+              </Label>
+            </div>
+            <div className={Classes.DIALOG_FOOTER}>
+              <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+                <Button
+                  intent={Intent.PRIMARY}
+                  text={"Export"}
+                  onClick={exporter}
+                />
+              </div>
+            </div>
+          </Dialog>
           <Button
             minimal
             icon={"export"}
-            onClick={exporter}
+            onClick={openExport}
             style={{ position: "absolute", top: 8, right: 100 }}
           />
           <Button

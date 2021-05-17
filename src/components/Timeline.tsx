@@ -26,7 +26,7 @@ import {
   parseRoamMarked,
   resolveRefs,
 } from "../entry-helpers";
-import MenuItemSelect from "./MenuItemSelect";
+import { MenuItemSelect } from "roamjs-components";
 
 type TimelineProps = { blockId: string };
 

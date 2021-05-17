@@ -11,7 +11,7 @@ import {
   TextArea,
 } from "@blueprintjs/core";
 import { getUids, getTreeByBlockUid } from "roam-client";
-import MenuItemSelect from "./MenuItemSelect";
+import { MenuItemSelect } from "roamjs-components";
 import parse from "date-fns/parse";
 import EditContainer from "./EditContainer";
 
@@ -225,7 +225,8 @@ export const renderBarChart = ({
 }: {
   blockId: string;
   parent: HTMLElement;
-}): void => ReactDOM.render(<Charts type={"bar"} {...getProps(blockId)} />, parent);
+}): void =>
+  ReactDOM.render(<Charts type={"bar"} {...getProps(blockId)} />, parent);
 
 export const DemoCharts = (): JSX.Element => {
   const [data, setData] = React.useState([

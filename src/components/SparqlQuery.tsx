@@ -38,7 +38,7 @@ import {
 } from "roam-client";
 import { extractTag, getCurrentPageUid, toFlexRegex } from "../entry-helpers";
 import { getRenderRoot } from "./hooks";
-import MenuItemSelect from "./MenuItemSelect";
+import { MenuItemSelect } from "roamjs-components";
 import { getSettingValueFromTree } from "roamjs-components";
 
 type PageResult = { description: string; id: string; label: string };

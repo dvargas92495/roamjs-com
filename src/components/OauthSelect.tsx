@@ -2,7 +2,7 @@ import { Label } from "@blueprintjs/core";
 import React, { useState } from "react";
 import { getTreeByPageName } from "roam-client";
 import { toFlexRegex } from "../entry-helpers";
-import MenuItemSelect from "./MenuItemSelect";
+import { MenuItemSelect } from "roamjs-components";
 
 export const useOauthAccounts = (id:string): {
   accountDropdown: React.ReactElement;

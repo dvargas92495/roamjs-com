@@ -31,7 +31,7 @@ import {
   toFlexRegex,
 } from "../entry-helpers";
 import { allBlockMapper, toTitle } from "./hooks";
-import MenuItemSelect from "./MenuItemSelect";
+import { MenuItemSelect } from "roamjs-components";
 import PageInput from "./PageInput";
 import {
   useField,

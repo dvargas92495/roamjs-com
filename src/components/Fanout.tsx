@@ -14,7 +14,7 @@ import {
 } from "roam-client";
 import { extractTag, getRefTitlesByBlockUid } from "../entry-helpers";
 import EditContainer from "./EditContainer";
-import MenuItemSelect from "./MenuItemSelect";
+import { MenuItemSelect } from "roamjs-components";
 
 type FanoutProps = {
   title: string;

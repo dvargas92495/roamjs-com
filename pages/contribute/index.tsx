@@ -109,8 +109,8 @@ const ContributePage = (): React.ReactElement => {
           },
           {
             title: 'Patrick Stoeckmann',
-            imgSrc: "sponsors/default.jpg",
-            url: "",
+            imgSrc: "sponsors/stoeckmann.jpg",
+            url: "https://twitter.com/palladion",
           }
         ]}
       />
@@ -272,8 +272,8 @@ const ContributePage = (): React.ReactElement => {
           },
           {
             title: 'Adam Rogers',
-            imgSrc: "sponsors/default.jpg",
-            url: "",
+            imgSrc: "sponsors/adamr.jpg",
+            url: "https://twitter.com/adamr",
           }
         ]}
       />

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="1.0">
+<head>
+<title>42SmartBlock</title>
+</head>
+<body>
+<outline text="42SmartBlock"><outline text="Hey hey"></outline><outline text="Some"><outline text=" yo wat"></outline></outline><outline text="{{[[TODO]]}} Hello"><outline text="{{[[TODO]]}} Anoter one"></outline><outline text="bullets"><outline text="{{[[TODO]]}} checking from [[May 2nd, 2021]]"></outline><outline text="Hey hey"></outline></outline></outline><outline text="Some"><outline text="[[May 24th, 2021]]"></outline><outline text="[[May 16th, 2021]]"></outline></outline><outline text="bullets"></outline></outline>
+</body>
+</opml>
