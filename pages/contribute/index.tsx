@@ -111,6 +111,16 @@ const ContributePage = (): React.ReactElement => {
             title: 'Patrick Stoeckmann',
             imgSrc: "sponsors/stoeckmann.jpg",
             url: "https://twitter.com/palladion",
+          },
+          {
+            title: 'Zach Phillips',
+            imgSrc: "sponsors/zphillips.jpg",
+            url: "https://twitter.com/zachphillips",
+          },
+          {
+            title: 'Brent Hueth',
+            imgSrc: "sponsors/default.jpg",
+            url: "",
           }
         ]}
       />
