@@ -115,7 +115,7 @@ const ContributePage = (): React.ReactElement => {
           {
             title: 'Zach Phillips',
             imgSrc: "sponsors/zphillips.jpg",
-            url: "https://twitter.com/zachphillips",
+            url: "https://zachphillips.blog/",
           },
           {
             title: 'Brent Hueth',
