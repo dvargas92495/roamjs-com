@@ -116,10 +116,10 @@ description: "${description}"${
             .replace(/ /g, "_")
             .toLowerCase()})`
       )
-      .replace(
+      /*.replace(
         /\^\^(.*?)\^\^/,
         (_, i) => `<Highlight>${i}</Highlight>`
-      );
+      )*/;
 
   const blockToMarkdown = (
     block: TreeNode,
