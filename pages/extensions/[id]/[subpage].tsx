@@ -79,16 +79,15 @@ export const getStaticProps: GetStaticProps<
         },
       }))
     )
-    .catch((e) => ({
-      props: {
-        content: {
-          compiledSource: "",
-          renderedOutput: `Failed to load ${context.params.id}/${
-            context.params.subpage
-          } due to error ${JSON.stringify(e)}`,
+    .catch((e) =>
+      serialize(
+        `Failed to render due to: ${e.response?.data || e.message}`
+      ).then((content) => ({
+        props: {
+          content,
+          ...context.params,
         },
-        ...context.params,
-      },
-    }));
+      }))
+    );
 
 export default ExtensionSubPage;
