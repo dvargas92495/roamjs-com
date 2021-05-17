@@ -115,13 +115,11 @@ description: "${description}"${
           `[${label}](/extensions/${path}/${page
             .replace(/ /g, "_")
             .toLowerCase()})`
-      )
-      /*.replace(
+      );
+  /*.replace(
         /\^\^(.*?)\^\^/,
         (_, i) => `<Highlight>${i}</Highlight>`
-      )*/;
-
-  const blockToMarkdown = (
+      )*/ const blockToMarkdown = (
     block: TreeNode,
     viewType: ViewType,
     depth = 0
@@ -130,9 +128,11 @@ description: "${description}"${
       block.heading,
       "#"
     )}${block.heading > 0 ? " " : ""}${
-      block.textAlign === "center" ? "<Center>\n\n" : ""
+      ""
+      // block.textAlign === "center" ? "<Center>\n\n" : ""
     }${replaceComponents(block.text)}${
-      block.textAlign === "center" ? "\n\n</Center>" : ""
+      ""
+      // block.textAlign === "center" ? "\n\n</Center>" : ""
     }\n${viewType === "document" ? "\n" : ""}${block.children
       .map((v) =>
         blockToMarkdown(
