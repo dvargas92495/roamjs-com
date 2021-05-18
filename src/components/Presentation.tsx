@@ -69,7 +69,7 @@ const URL_REGEX =
   /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 const SRC_REGEXES = {
   image: /!\[(.*)\]\((.*)\)/,
-  iframe: new RegExp(`{{(?:\\[\\[)?iframe(?:\\]\\])?:(${URL_REGEX.source})}}`),
+  iframe: new RegExp(`{{(?:\\[\\[)?iframe(?:\\]\\])?:\\s*(${URL_REGEX.source})}}`),
 };
 const SRC_INDEX = {
   image: 2,
