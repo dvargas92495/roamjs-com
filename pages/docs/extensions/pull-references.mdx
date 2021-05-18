@@ -15,3 +15,7 @@ Here's an example configuration from my personal DB:
 Create a button by typing `{{pull references}}` into a page. Clicking the button adds all the linked references as references on the current page.
 
 This extension is also integrated with [Smart Blocks](https://roamresearch.com/#/app/roamhacker/page/GH0401tnt)! If you have both this extension and Roam42 installed, there will be a `<%PULLREFERENCES%>` command available. The command will automatically pull the linked references and paste blocks before continuing with the rest of the workflow.
+
+### Moving TODOs
+
+To enable this feature, add the phrase `Move Todos` to a block on the `roam/js/pull-references` page and refresh Roam. On any block with a TODO on a daily notes page, a rightward facing arrow icon will appear on hover. Clicking the icon will allow you to pick a date to "move" the TODO to. After moving, the new block will block alias the original block and the original block will block alias the new block.

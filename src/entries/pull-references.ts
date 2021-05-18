@@ -1,11 +1,18 @@
 import {
   addButtonListener,
+  createHTMLObserver,
+  getBlockUidsReferencingBlock,
+  getBlockUidFromTarget,
   getConfigFromPage,
+  getPageTitleByBlockUid,
   getParentUidByBlockUid,
   getTextByBlockUid,
   getUidsFromId,
   pushBullets,
+  getUids,
+  getTreeByPageName,
 } from "roam-client";
+import { DAILY_NOTE_PAGE_REGEX } from "roam-client/lib/date";
 import {
   createCustomSmartBlockCommand,
   createTagRegex,
@@ -13,12 +20,14 @@ import {
   getPageTitle,
   runExtension,
 } from "../entry-helpers";
+import { render } from "../components/MoveTodoMenu";
 
 const PULL_REFERENCES_COMMAND = "Pull References";
 const REPLACE = "${ref}";
+const CONFIG = "roam/js/pull-references";
 
 const pullReferences = async () => {
-  const config = getConfigFromPage("roam/js/pull-references");
+  const config = getConfigFromPage(CONFIG);
   const format = config["Format"] || REPLACE;
   const pageTitle = getPageTitle(document.activeElement);
   const pageTitleText = pageTitle.textContent;
@@ -60,6 +69,62 @@ runExtension("pull-references", () => {
       pushBullets(bts, blockUid, getParentUidByBlockUid(blockUid))
     )
   );
+
+  const isMoveTodoEnabled = getTreeByPageName(CONFIG).some((t) =>
+    /move todos/i.test(t.text)
+  );
+  if (isMoveTodoEnabled) {
+    createHTMLObserver({
+      tag: "LABEL",
+      className: "check-container",
+      callback: (l: HTMLLabelElement) => {
+        const input = l.getElementsByTagName("input")[0];
+        if (!input.checked) {
+          const blockUid = getBlockUidFromTarget(input);
+          const title = getPageTitleByBlockUid(blockUid);
+          if (DAILY_NOTE_PAGE_REGEX.test(title)) {
+            const block = input.closest(".roam-block") as HTMLDivElement;
+            if (!block.hasAttribute("data-roamjs-move-todo")) {
+              block.setAttribute("data-roamjs-move-todo", "true");
+              const p = document.createElement("span");
+              p.onmousedown = (e) => e.stopPropagation();
+              block.appendChild(p);
+              render({
+                p,
+                blockUid,
+              });
+            }
+          }
+        }
+      },
+    });
+
+    createHTMLObserver({
+      tag: "BUTTON",
+      className: "rm-block__ref-count",
+      callback: (b: HTMLButtonElement) => {
+        const main = b.closest(".rm-block-main");
+        const block = main.querySelector<HTMLDivElement>(".roam-block");
+        const blockUid = getUids(block).blockUid;
+        const refs = getBlockUidsReferencingBlock(blockUid);
+        const text = getTextByBlockUid(blockUid);
+        if (
+          refs.some(
+            (ref) =>
+              text.endsWith(`[*](((${ref})))`) &&
+              getTextByBlockUid(ref).includes(
+                text.replace(
+                  new RegExp(`\\s*\\[\\*\\]\\(\\(\\(${ref}\\)\\)\\)`),
+                  ""
+                )
+              )
+          )
+        ) {
+          block.style.textDecoration = "line-through";
+        }
+      },
+    });
+  }
 });
 
 createCustomSmartBlockCommand({

@@ -121,7 +121,22 @@ const ContributePage = (): React.ReactElement => {
             title: 'Brent Hueth',
             imgSrc: "sponsors/default.jpg",
             url: "",
-          }
+          },
+          {
+            title: 'Bruno Santos',
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
+          {
+            title: 'Manel Punti Sarda',
+            imgSrc: "sponsors/manel.png",
+            url: "https://www.musicdistribucion.com/",
+          },
+          {
+            title: "Kathryn E. Foy",
+            imgSrc: "sponsors/katefoy.jpg",
+            url: "https://about.me/Dramagirl",
+          },
         ]}
       />
       <H6>
@@ -214,11 +229,6 @@ const ContributePage = (): React.ReactElement => {
             title: "Parham Shafti",
             imgSrc: "sponsors/parham.jfif",
             url: "https://www.forthisworld.org",
-          },
-          {
-            title: "Kathryn E. Foy",
-            imgSrc: "sponsors/katefoy.jpg",
-            url: "https://about.me/Dramagirl",
           },
           {
             title: "Simon Nazer",
