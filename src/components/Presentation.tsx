@@ -65,7 +65,8 @@ type SrcFromTextProps = {
   type?: "image" | "iframe";
 };
 
-const URL_REGEX = /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+const URL_REGEX =
+  /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 const SRC_REGEXES = {
   image: /!\[(.*)\]\((.*)\)/,
   iframe: new RegExp(`{{(?:\\[\\[)?iframe(?:\\]\\])?:(${URL_REGEX.source})}}`),
@@ -129,16 +130,17 @@ const SrcFromText: React.FunctionComponent<
 };
 
 const TitleSlide = ({
-  text,
+  texts,
   note,
   transition,
   animate,
 }: {
-  text: string;
+  texts: string[];
   note: TreeNode;
   transition: string;
   animate: boolean;
 }) => {
+  const text = texts[0];
   const type = Object.keys(SRC_REGEXES).find((k: keyof typeof SRC_REGEXES) =>
     SRC_REGEXES[k].test(text)
   ) as keyof typeof SRC_REGEXES;
@@ -151,7 +153,13 @@ const TitleSlide = ({
     <section {...props}>
       <SrcFromText
         text={text}
-        Alt={({ text }) => <h1>{text}</h1>}
+        Alt={() => (
+          <>
+            {texts.map((t, i) =>
+              i === 0 ? <h1 key={i}>{t}</h1> : <h3 key={i}>{t}</h3>
+            )}
+          </>
+        )}
         type={type}
       />
       <Notes note={note} />
@@ -170,6 +178,7 @@ type ContentSlideExtras = {
   collapsible: boolean;
   animate: boolean;
   transition: string;
+  isTitle: boolean;
 };
 
 const setDocumentLis = ({
@@ -370,9 +379,10 @@ const ContentSlide = ({
     },
     [collapsible, setImageDialogSrc]
   );
-  const onDialogClose = useCallback(() => setImageDialogSrc(""), [
-    setImageDialogSrc,
-  ]);
+  const onDialogClose = useCallback(
+    () => setImageDialogSrc(""),
+    [setImageDialogSrc]
+  );
 
   const props = {
     ...(animate ? { "data-auto-animate": true } : {}),
@@ -471,9 +481,12 @@ const observerCallback = (ms: MutationRecord[]) =>
       }
     });
 
-export const COLLAPSIBLE_REGEX = /(?:\[\[{|{\[\[|{)collapsible(:ignore)?(?:\]\]}|}\]\]|})/i;
+export const COLLAPSIBLE_REGEX =
+  /(?:\[\[{|{\[\[|{)collapsible(:ignore)?(?:\]\]}|}\]\]|})/i;
 export const ANIMATE_REGEX = /(?:\[\[{|{\[\[|{)animate(?:\]\]}|}\]\]|})/i;
-export const TRANSITION_REGEX = /(?:\[\[{|{\[\[|{)transition:(none|fade|slide|convex|concave|zoom)(?:\]\]}|}\]\]|})/i;
+export const TRANSITION_REGEX =
+  /(?:\[\[{|{\[\[|{)transition:(none|fade|slide|convex|concave|zoom)(?:\]\]}|}\]\]|})/i;
+export const TITLE_REGEX = /(?:\[\[{|{\[\[|{)title(?:\]\]}|}\]\]|})/i;
 const HIDE_REGEX = /(?:\[\[{|{\[\[|{)hide(?:\]\]}|}\]\]|})/i;
 
 const filterHideBlocks = (s: TreeNode) => {
@@ -510,6 +523,7 @@ const PresentationContent: React.FunctionComponent<{
       let collapsible = globalCollapsible || false;
       let transition = globalTransition || undefined;
       let animate = globalAnimate || false;
+      let isTitle = !s.children.length;
       const text = s.text
         .replace(
           new RegExp(
@@ -535,10 +549,15 @@ const PresentationContent: React.FunctionComponent<{
           transition = val;
           return "";
         })
+        .replace(TITLE_REGEX, () => {
+          isTitle = true;
+          return "";
+        })
         .trim();
       return {
         ...s,
         text,
+        isTitle,
         layout,
         collapsible,
         animate,
@@ -629,15 +648,15 @@ const PresentationContent: React.FunctionComponent<{
         <div className="slides" ref={slidesRef}>
           {mappedSlides.map((s: TreeNode & ContentSlideExtras, i) => (
             <React.Fragment key={i}>
-              {s.children.length ? (
-                <ContentSlide {...s} />
-              ) : (
+              {s.isTitle ? (
                 <TitleSlide
-                  text={s.text}
+                  texts={[s.text, ...s.children.map((ss) => ss.text)]}
                   note={s.note}
                   transition={s.transition}
                   animate={s.animate}
                 />
+              ) : (
+                <ContentSlide {...s} />
               )}
             </React.Fragment>
           ))}

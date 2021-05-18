@@ -19,6 +19,8 @@ To specify what content is part of the presentation, create a child block for ea
         - Third bullet sealing the deal
     - Final Slide
 
+If a slide has `{title}` in the title or has no children, it will render as a title slide. Otherwise, the slide will render as a content slide.
+
 By default, presentations start on the first slide. If the cursor is in any of the other slide trees when the button is pressed, the presentation will start on that slide. When the presentation closes, it will return focus to the title block of whichever slide it was on.
 
 Any blocks with images will be rendered without a bullet. Any bullets that are collapsed will be filtered out of the presentation view.
