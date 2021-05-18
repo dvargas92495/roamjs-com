@@ -1,7 +1,6 @@
 import {
   addButtonListener,
   createHTMLObserver,
-  getBlockUidsReferencingBlock,
   getBlockUidFromTarget,
   getConfigFromPage,
   getPageTitleByBlockUid,
@@ -9,7 +8,6 @@ import {
   getTextByBlockUid,
   getUidsFromId,
   pushBullets,
-  getUids,
   getTreeByPageName,
 } from "roam-client";
 import { DAILY_NOTE_PAGE_REGEX } from "roam-client/lib/date";
@@ -95,32 +93,6 @@ runExtension("pull-references", () => {
               });
             }
           }
-        }
-      },
-    });
-
-    createHTMLObserver({
-      tag: "BUTTON",
-      className: "rm-block__ref-count",
-      callback: (b: HTMLButtonElement) => {
-        const main = b.closest(".rm-block-main");
-        const block = main.querySelector<HTMLDivElement>(".roam-block");
-        const blockUid = getUids(block).blockUid;
-        const refs = getBlockUidsReferencingBlock(blockUid);
-        const text = getTextByBlockUid(blockUid);
-        if (
-          refs.some(
-            (ref) =>
-              text.endsWith(`[*](((${ref})))`) &&
-              getTextByBlockUid(ref).includes(
-                text.replace(
-                  new RegExp(`\\s*\\[\\*\\]\\(\\(\\(${ref}\\)\\)\\)`),
-                  ""
-                )
-              )
-          )
-        ) {
-          block.style.textDecoration = "line-through";
         }
       },
     });

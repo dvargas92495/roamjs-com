@@ -15,6 +15,8 @@ import {
   getChildrenLengthByPageUid,
   getPageUidByPageTitle,
   getTextByBlockUid,
+  getUids,
+  getUidsFromId,
   toRoamDate,
   updateBlock,
 } from "roam-client";
@@ -46,27 +48,45 @@ const MoveTodoMenu = ({
   const [loading, setLoading] = useState(false);
   const onClick = useCallback(() => {
     setLoading(true);
-    const text = getTextByBlockUid(blockUid);
+    const blockUids = [
+      blockUid,
+      ...Array.from(document.getElementsByClassName("block-highlight-blue"))
+        .map((d) => getUids(d.querySelector(".roam-block")).blockUid)
+        .filter((b) => b !== blockUid),
+    ];
     const targetDate = toRoamDate(target);
     const parentUid =
       getPageUidByPageTitle(targetDate) || createPage({ title: targetDate });
-    setTimeout(() => {
-      const order = getChildrenLengthByPageUid(parentUid);
-      const uid = createBlock({
-        node: { text: `${text} [*](((${blockUid})))` },
-        order,
-        parentUid,
-      });
-      updateBlock({
-        uid: blockUid,
-        text: `${text.replace(
-          /{{(\[\[)?TODO(\]\])?}}\s*/,
-          ""
-        )} [*](((${uid})))`,
-      });
+    const order = getChildrenLengthByPageUid(parentUid);
+    Promise.all(
+      blockUids.map(
+        (buid, i) =>
+          new Promise<void>((resolve) => {
+            const text = getTextByBlockUid(buid);
+            setTimeout(() => {
+              const uid = createBlock({
+                node: { text: `${text} [*](((${buid})))` },
+                order: order + i,
+                parentUid,
+              });
+              updateBlock({
+                uid: buid,
+                text: `${text.replace(
+                  /{{(\[\[)?TODO(\]\])?}}\s*/,
+                  `[→](((${uid}))) {{[[DONE]]}} `
+                )}`,
+              });
+              resolve();
+            }, 1);
+          })
+      )
+    ).then(() => {
+      Array.from(
+        document.getElementsByClassName("block-highlight-blue")
+      ).forEach((d) => d.classList.remove("block-highlight-blue"));
       unmount();
       onSuccess();
-    }, 1);
+    });
   }, [blockUid, target, unmount, onSuccess]);
   return (
     <Popover
@@ -76,6 +96,25 @@ const MoveTodoMenu = ({
             minimal
             icon={"play"}
             style={{ minHeight: 18, height: 18, width: 18, minWidth: 18 }}
+            onClick={() => {
+              const blockIds = Array.from(
+                document.getElementsByClassName("block-highlight-blue")
+              )
+                .map((d) => d.querySelector(".roam-block")?.id)
+                .filter((d) =>
+                  /{{\[\[TODO\]\]}}/.test(
+                    getTextByBlockUid(getUidsFromId(d).blockUid)
+                  )
+                );
+              setTimeout(() => {
+                blockIds.forEach((id) =>
+                  document
+                    .getElementById(id)
+                    .closest(".roam-block-container")
+                    .classList.add("block-highlight-blue")
+                );
+              }, 1);
+            }}
           />
         </Tooltip>
       }
@@ -84,6 +123,7 @@ const MoveTodoMenu = ({
           style={{ padding: 16 }}
           onMouseEnter={clear}
           onMouseLeave={unmount}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           <DatePicker
             value={target}
