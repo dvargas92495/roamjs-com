@@ -204,7 +204,9 @@ const TwitterContent: React.FunctionComponent<{
       const { text, uid } = message[index];
       const attachmentUrls: string[] = [];
       const content = text.replace(ATTACHMENT_REGEX, (_, url) => {
-        attachmentUrls.push(url);
+        attachmentUrls.push(
+          url.replace("www.dropbox.com", "dl.dropboxusercontent.com")
+        );
         return "";
       });
       const media_ids = await uploadAttachments({
@@ -302,12 +304,14 @@ const TwitterContent: React.FunctionComponent<{
   const [showSchedule, setShowSchedule] = useState(false);
   const [loading, setLoading] = useState(false);
   const [scheduleDate, setScheduleDate] = useState(new Date());
-  const openSchedule = useCallback(() => setShowSchedule(true), [
-    setShowSchedule,
-  ]);
-  const closeSchedule = useCallback(() => setShowSchedule(false), [
-    setShowSchedule,
-  ]);
+  const openSchedule = useCallback(
+    () => setShowSchedule(true),
+    [setShowSchedule]
+  );
+  const closeSchedule = useCallback(
+    () => setShowSchedule(false),
+    [setShowSchedule]
+  );
   const onScheduleClick = useCallback(() => {
     const oauth = getOauth(getTreeByPageName("roam/js/twitter"), accountLabel);
     if (oauth === "{}") {

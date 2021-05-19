@@ -100,8 +100,7 @@ runExtension(ID, () => {
             })
             .then(({ url, contentType }) => {
               const dbxUrl = url
-                .replace(/dl=0$/, "raw=1")
-                .replace("www.dropbox.com", "dl.dropboxusercontent.com");
+                .replace(/dl=0$/, "raw=1");
               updateBlock({
                 uid,
                 text:
