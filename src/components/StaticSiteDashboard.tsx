@@ -363,7 +363,7 @@ const RequestFiltersContent: StageContent = ({ openPanel }) => {
         window.roamAlphaAPI.deleteBlock({ block: { uid } })
       );
       filters.forEach((node, order) =>
-        createBlock({ node, order, parentUid: pageUid })
+        createBlock({ node, order, parentUid: keyNode.uid })
       );
     } else if (!keyNode) {
       createBlock({
