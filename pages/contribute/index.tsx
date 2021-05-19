@@ -137,6 +137,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/katefoy.jpg",
             url: "https://about.me/Dramagirl",
           },
+          {
+            title: "Mark Lavercombe",
+            imgSrc: "sponsors/lavercombe.jpg",
+            url: "https://twitter.com/LavercombeMark",
+          },
         ]}
       />
       <H6>

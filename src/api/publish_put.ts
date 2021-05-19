@@ -8,6 +8,7 @@ import {
   emailCatch,
   getGithubOpts,
   headers,
+  listAll,
   s3,
   userError,
 } from "../lambda-helpers";
@@ -150,13 +151,34 @@ description: "${description}"${
         (u.publicMetadata as { developer: { paths: string[] } })["developer"]
           .paths || []
     )
-    .then((paths) =>
-      !paths.includes(path)
-        ? {
-            statusCode: 401,
-            body: `User does not have access to path ${path}`,
-          }
-        : Promise.all([
+    .then((paths) => {
+      if (!paths.includes(path)) {
+        return {
+          statusCode: 401,
+          body: `User does not have access to path ${path}`,
+          headers: headers(event),
+        };
+      }
+      const subpageKeys = new Set(
+        Object.keys(subpages).map(
+          (p) => `markdown/${path}/${p.replace(/ /g, "_").toLowerCase()}.md`
+        )
+      );
+      return listAll(`markdown/${path}/`)
+        .then((r) =>
+          s3
+            .deleteObjects({
+              Bucket,
+              Delete: {
+                Objects: r.objects
+                  .filter(({ Key }) => !subpageKeys.has(Key))
+                  .map(({ Key }) => ({ Key })),
+              },
+            })
+            .promise()
+        )
+        .then(() =>
+          Promise.all([
             s3
               .upload({
                 Bucket,
@@ -216,6 +238,7 @@ description: "${description}"${
               body: JSON.stringify(r),
               headers: headers(event),
             }))
-    )
+        );
+    })
     .catch(emailCatch(`Failed to publish documentation for ${path}.`, event));
 }, "developer");
