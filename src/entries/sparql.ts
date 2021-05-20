@@ -5,14 +5,11 @@ import {
   deleteBlock,
   getPageUidByPageTitle,
   getShallowTreeByParentUid,
-  getTreeByPageName,
+  getTextByBlockUid,
   getUids,
   updateBlock,
 } from "roam-client";
-import {
-  createConfigObserver,
-  getSettingValueFromTree,
-} from "roamjs-components";
+import { createConfigObserver } from "roamjs-components";
 import {
   DEFAULT_EXPORT_LABEL,
   getLabel,
@@ -117,14 +114,10 @@ runExtension(ID, () => {
             uid: blockUid,
             text: getLabel({
               outputFormat: queryInfo.outputFormat,
-              label: getSettingValueFromTree({
-                tree:
-                  getTreeByPageName(CONFIG).find((t) =>
-                    toFlexRegex("import").test(t.text)
-                  )?.children || [],
-                key: "default label",
-                defaultValue: DEFAULT_EXPORT_LABEL,
-              }),
+              label: getTextByBlockUid(blockUid).replace(
+                /(\d)?\d\/(\d)?\d\/\d\d\d\d, (\d)?\d:\d\d:\d\d [A|P]M/,
+                "{date}"
+              ),
             }),
           });
         };
