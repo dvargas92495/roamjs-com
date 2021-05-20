@@ -309,7 +309,7 @@ resource "aws_route53_record" "google-verifu" {
   records = ["google-site-verification=A9q11tN2qoTRaIdwMmlNqvbjgX4UQOj1okRat6CHtyE"]
 }
 
-resource "aws_route53_record" "clerk-accounts" {
+resource "aws_route53_record" "gitbook" {
   zone_id = module.aws_static_site.route53_zone_id
   name    = "developer"
   type    = "CNAME"
