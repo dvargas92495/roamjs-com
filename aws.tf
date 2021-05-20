@@ -309,6 +309,14 @@ resource "aws_route53_record" "google-verifu" {
   records = ["google-site-verification=A9q11tN2qoTRaIdwMmlNqvbjgX4UQOj1okRat6CHtyE"]
 }
 
+resource "aws_route53_record" "clerk-accounts" {
+  zone_id = module.aws_static_site.route53_zone_id
+  name    = "developer"
+  type    = "CNAME"
+  ttl     = "300"
+  records = ["hosting.gitbook.io"]
+}
+
 resource "aws_dynamodb_table" "extensions" {
   name           = "RoamJSExtensions"
   billing_mode   = "PAY_PER_REQUEST"
