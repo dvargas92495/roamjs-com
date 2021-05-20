@@ -1,6 +1,6 @@
 ---
 layout: "ExtensionPageLayout"
-description: "Run SPARQL again different data sources, importing the results into Roam!"
+description: "Run SPARQL against different data sources, importing the results into Roam!"
 development: true
 ---
 
@@ -10,11 +10,11 @@ To run a SPARQL query, open the Roam command palette with CMD+p (CTRL+p on Windo
 
 #### Current Page
 
-This will run a query to search all of the properties of an entity based on the current page name. All properties and entities imported will automatically tagged with a reference to their link on their respective pages.
+This will run a query to search all the properties of an entity based on the current page name and will bring the specified number of values. They will be created as pairs of blocks in your graph in the following way: properties as Roam attributes and their values as child blocks. All attributes will show the matching Wikidata property in their page, linked with `same as::` attribute. All property values, which are entities (people, places, and things as opposed to numbers and dates ) will be created (or reused if existing) as page references and their matching Wikidata item URI will be inserted as value of `same as::` attribute, the same way as the property.
 
 #### Current Block
 
-Whis will run a query to search all of the properties of an entity based on the current block text. If the current block text is empty, it will use the parent block. All properties and entities imported will automatically tagged with a reference to their link on their respective pages.
+This will run a query to search all of the properties of an entity based on the current block text. If the current block text is empty, it will use the parent block. All properties and entities imported will automatically tagged with a reference to their link on their respective pages.
 
 #### Custom Query
 

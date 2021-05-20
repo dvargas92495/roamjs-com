@@ -5,11 +5,17 @@ import {
   deleteBlock,
   getPageUidByPageTitle,
   getShallowTreeByParentUid,
+  getTreeByPageName,
   getUids,
+  updateBlock,
 } from "roam-client";
-import { createConfigObserver } from "roamjs-components";
+import {
+  createConfigObserver,
+  getSettingValueFromTree,
+} from "roamjs-components";
 import {
   DEFAULT_EXPORT_LABEL,
+  getLabel,
   OutputFormat,
   render,
   RenderProps,
@@ -107,6 +113,20 @@ runExtension(ID, () => {
             deleteBlock(uid)
           );
           runSparqlQuery({ ...queryInfo, parentUid: blockUid });
+          updateBlock({
+            uid: blockUid,
+            text: getLabel({
+              outputFormat: queryInfo.outputFormat,
+              label: getSettingValueFromTree({
+                tree:
+                  getTreeByPageName(CONFIG).find((t) =>
+                    toFlexRegex("import").test(t.text)
+                  )?.children || [],
+                key: "default label",
+                defaultValue: DEFAULT_EXPORT_LABEL,
+              }),
+            }),
+          });
         };
         b.appendChild(updateButton);
       }

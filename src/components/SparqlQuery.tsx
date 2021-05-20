@@ -40,6 +40,7 @@ import { extractTag, getCurrentPageUid, toFlexRegex } from "../entry-helpers";
 import { getRenderRoot } from "./hooks";
 import { MenuItemSelect } from "roamjs-components";
 import { getSettingValueFromTree } from "roamjs-components";
+import urlRegex from "url-regex-safe";
 
 type PageResult = { description: string; id: string; label: string };
 const OUTPUT_FORMATS = ["Parent", "Line", "Table"] as const;
@@ -56,16 +57,17 @@ export type RenderProps = {
 };
 
 export const DEFAULT_EXPORT_LABEL = "SPARQL Import";
-const getLabel = ({
+export const getLabel = ({
   outputFormat,
   label,
 }: {
   outputFormat: OutputFormat;
   label: string;
-}) =>
+}): string =>
   `${label.replace("{date}", new Date().toLocaleString())} ${
     outputFormat === "Table" ? "{{[[table]]}}" : ""
   }`;
+const URL_REGEX = urlRegex({ strict: true })
 
 const PAGE_QUERY = `SELECT ?property ?propertyLabel ?value ?valueLabel {
   VALUES (?id) {(wd:{ID})}
@@ -83,10 +85,8 @@ LIMIT {LIMIT}`;
 
 const WIKIDATA_ITEMS = ["Current Page", "Current Block", "Custom Query"];
 const LIMIT_REGEX = /LIMIT ([\d]*)/;
-const DATA_SOURCES = {
-  wikidata: "https://query.wikidata.org/sparql?format=json&query=",
-};
 const IMAGE_REGEX_URL = /(http(s?):)([/|.|\w|\s|\-|:|%])*\.(?:jpg|gif|png|svg)/i;
+const WIKIDATA_SOURCE = "https://query.wikidata.org/sparql?format=json&query=";
 
 export const runSparqlQuery = ({
   query,
@@ -119,6 +119,8 @@ export const runSparqlQuery = ({
           const s = p[valueKey].value;
           return IMAGE_REGEX_URL.test(s)
             ? `![](${s})`
+            : URL_REGEX.test(s)
+            ? `[${s}](${s})`
             : returnedLabels.has(`${h}Label`) &&
               /entity\/P\d*$/.test(p[h].value)
             ? `${s}::`
@@ -245,8 +247,8 @@ const SparqlQuery = ({
       defaultValue: DEFAULT_EXPORT_LABEL,
     })
   );
-  const [dataSource, setDataSource] = useState<keyof typeof DATA_SOURCES>(
-    "wikidata"
+  const [dataSource, setDataSource] = useState<string>(
+    WIKIDATA_SOURCE
   );
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("Parent");
   const [limit, setLimit] = useState(10);
@@ -318,7 +320,10 @@ const SparqlQuery = ({
           Query Type
           <MenuItemSelect
             items={WIKIDATA_ITEMS}
-            onItemSelect={(s) => setActiveItem(s)}
+            onItemSelect={(s) => {
+              setActiveItem(s);
+              setDataSource(WIKIDATA_SOURCE)
+            }}
             activeItem={activeItem}
             ButtonProps={{ elementRef: dropdownRef }}
           />
@@ -360,6 +365,13 @@ const SparqlQuery = ({
               }}
               onBeforeChange={(_, __, v) => setCodeValue(v)}
             />
+            <Label>
+              Data Source
+              <InputGroup
+                value={dataSource}
+                onChange={(e) => setDataSource(e.target.value)}
+              />
+            </Label>
           </div>
         )}
         {showAdditionalOptions && (
@@ -369,16 +381,6 @@ const SparqlQuery = ({
               <InputGroup
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
-              />
-            </Label>
-            <Label>
-              Data Source
-              <MenuItemSelect
-                activeItem={dataSource}
-                items={
-                  Object.keys(DATA_SOURCES) as (keyof typeof DATA_SOURCES)[]
-                }
-                onItemSelect={(s) => setDataSource(s)}
               />
             </Label>
             <Label>
@@ -440,7 +442,7 @@ const SparqlQuery = ({
               });
               const queryInfo = {
                 query,
-                source: DATA_SOURCES[dataSource],
+                source: dataSource,
                 outputFormat,
               };
               if (saveQuery) {
