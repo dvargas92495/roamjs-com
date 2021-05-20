@@ -142,6 +142,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/lavercombe.jpg",
             url: "https://twitter.com/LavercombeMark",
           },
+          {
+            title: "Justin Mather",
+            imgSrc: "sponsors/justmath.jpg",
+            url: "https://twitter.com/itsjustmath",
+          },
         ]}
       />
       <H6>
@@ -299,7 +304,12 @@ const ContributePage = (): React.ReactElement => {
             title: 'Adam Rogers',
             imgSrc: "sponsors/adamr.jpg",
             url: "https://twitter.com/adamr",
-          }
+          },
+          {
+            title: "Nate Stell",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
         ]}
       />
     </StandardLayout>
