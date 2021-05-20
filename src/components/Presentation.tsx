@@ -92,7 +92,7 @@ const SrcFromText: React.FunctionComponent<
   const match = text.match(SRC_REGEXES[type]);
   const [style, setStyle] = useState({});
   const srcRef = useRef(null);
-  const srcResize = match && resizes[match[SRC_INDEX[type]]];
+  const srcResize = match && resizes && resizes[match[SRC_INDEX[type]]];
   const srcOnLoad = useCallback(() => {
     if (srcResize) {
       setStyle(getResizeStyle(srcResize));

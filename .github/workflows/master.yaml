@@ -37,20 +37,9 @@ jobs:
         run: npm install
       - name: Build
         run: npm run build
-        env:
-          IS_LEGACY: true
-      - name: Upload Old
-        run: aws s3 sync build s3://roam.davidvargas.me/master
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.OLD_AWS_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.OLD_AWS_ACCESS_SECRET }}
-      - name: Build
-        run: npm run build
       - name: Upload
         run: aws s3 sync build s3://roamjs.com
       - name: Invalidate Cache
         run: |
-          CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[*].{Alias:Aliases.Items[0],Id:Id}[?Alias=='roam.davidvargas.me'].Id" --output text)
-          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_ID --paths "/*"
           CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[*].{Alias:Aliases.Items[0],Id:Id}[?Alias=='roamjs.com'].Id" --output text)
           aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_ID --paths "/*"
