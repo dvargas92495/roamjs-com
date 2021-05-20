@@ -103,24 +103,23 @@ description: "${description}"${
   const replaceComponents = (text: string): string =>
     text
       .replace(
-        /{{(?:\[\[)?video(?:\]\])?:(?:\s)*https:\/\/www.loom.com\/share\/([0-9a-f]*)}}/,
+        /{{(?:\[\[)?video(?:\]\])?:(?:\s)*https:\/\/www.loom.com\/share\/([0-9a-f]*)}}/g,
         (_, id) => `<Loom id={"${id}"} />`
       )
       .replace(
-        /{{(?:\[\[)?(?:youtube|video)(?:\]\])?:(?:\s)*https:\/\/youtu\.be\/([\w\d-]*)}}/,
+        /{{(?:\[\[)?(?:youtube|video)(?:\]\])?:(?:\s)*https:\/\/youtu\.be\/([\w\d-]*)}}/g,
         (_, id) => `<YouTube id={"${id}"} />`
       )
       .replace(
-        new RegExp(`\\[(.*?)\\]\\(\\[\\[${path}/(.*?)\\]\\]\\)`),
+        new RegExp(`\\[(.*?)\\]\\(\\[\\[${path}/(.*?)\\]\\]\\)`, 'g'),
         (_, label, page) =>
           `[${label}](/extensions/${path}/${page
             .replace(/ /g, "_")
             .toLowerCase()})`
-      );
-  /*.replace(
-        /\^\^(.*?)\^\^/,
-        (_, i) => `<Highlight>${i}</Highlight>`
-      )*/ const blockToMarkdown = (
+      )
+      .replace(/\^\^(.*?)\^\^/g, (_, i) => `<Highlight>${i}</Highlight>`)
+      .replace(/__/g, '_');
+  const blockToMarkdown = (
     block: TreeNode,
     viewType: ViewType,
     depth = 0
@@ -129,11 +128,9 @@ description: "${description}"${
       block.heading,
       "#"
     )}${block.heading > 0 ? " " : ""}${
-      ""
-      // block.textAlign === "center" ? "<Center>\n\n" : ""
+      block.textAlign === "center" ? "<Center>" : ""
     }${replaceComponents(block.text)}${
-      ""
-      // block.textAlign === "center" ? "\n\n</Center>" : ""
+      block.textAlign === "center" ? "</Center>" : ""
     }\n${viewType === "document" ? "\n" : ""}${block.children
       .map((v) =>
         blockToMarkdown(
@@ -164,19 +161,30 @@ description: "${description}"${
           (p) => `markdown/${path}/${p.replace(/ /g, "_").toLowerCase()}.md`
         )
       );
+      console.log(
+        `${frontmatter}${blocks
+          .map((b) => blockToMarkdown(b, viewType))
+          .join("")}`
+      );
       return listAll(`markdown/${path}/`)
-        .then((r) =>
-          s3
-            .deleteObjects({
-              Bucket,
-              Delete: {
-                Objects: r.objects
-                  .filter(({ Key }) => !subpageKeys.has(Key))
-                  .map(({ Key }) => ({ Key })),
-              },
-            })
-            .promise()
-        )
+        .then((r) => {
+          const Objects = r.objects
+            .filter(({ Key }) => !subpageKeys.has(Key))
+            .map(({ Key }) => ({ Key }));
+          return Objects.length
+            ? s3
+                .deleteObjects({
+                  Bucket,
+                  Delete: {
+                    Objects,
+                  },
+                })
+                .promise()
+                .then((r) => {
+                  console.log(`Deleted ${r.Deleted.length} subpages.`);
+                })
+            : Promise.resolve();
+        })
         .then(() =>
           Promise.all([
             s3

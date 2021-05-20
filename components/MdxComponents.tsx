@@ -3,8 +3,6 @@ import React from "react";
 import Loom from "./Loom";
 import YouTube from "./Youtube";
 import { Prism } from "react-syntax-highlighter";
-// import { serialize } from "next-mdx-remote/serialize";
-// import { MDXRemote } from "next-mdx-remote";
 
 const Pre: React.FunctionComponent<HTMLPreElement> = ({ children }) => (
   <>{children}</>
@@ -47,7 +45,7 @@ const MdxImage = (
   />
 );
 
-const Center: React.FunctionComponent = ({ children }) => {
+export const Center: React.FunctionComponent = ({ children }) => {
   return <div style={{ textAlign: "center" }}>{children}</div>;
 };
 
