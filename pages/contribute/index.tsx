@@ -310,6 +310,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/default.jpg",
             url: "",
           },
+          {
+            title: "Violeta Kristof",
+            imgSrc: "sponsors/violeta.jpg",
+            url: "https://twitter.com/MamanLunettes",
+          },
         ]}
       />
     </StandardLayout>
