@@ -315,6 +315,16 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/violeta.jpg",
             url: "https://twitter.com/MamanLunettes",
           },
+          {
+            title: "Bala Chandrasekhar Manda",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
+          {
+            title: "Jason Phillips",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
         ]}
       />
     </StandardLayout>
