@@ -117,7 +117,7 @@ provider "aws" {
 
 module "aws_static_site" {
   source  = "dvargas92495/static-site/aws"
-  version = "2.2.2"
+  version = "2.2.3"
 
   domain = "roamjs.com"
   redirects = ["roam.davidvargas.me"]
