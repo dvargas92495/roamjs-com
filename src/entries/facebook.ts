@@ -21,7 +21,7 @@ runExtension(ID, () => {
               title: "oauth",
               options: {
                 ServiceIcon: FacebookLogo,
-                service: "service",
+                service: "Facebook",
                 getPopoutUrl: () =>
                   Promise.resolve(
                     `https://www.facebook.com/v10.0/dialog/oauth?client_id=${process.env.FACEBOOK_CLIENT_ID}&scope=publish_to_groups&response_type=code&redirect_uri=https://roamjs.com/oauth?auth=true`

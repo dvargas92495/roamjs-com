@@ -26,7 +26,7 @@ import { render as feedRender } from "../components/TwitterFeed";
 import { createConfigObserver } from "roamjs-components";
 import { twitterLoginOptions } from "../components/TwitterLogin";
 
-addStyle(`.roamjs-twitter-count {
+addStyle(`div.roamjs-twitter-count {
   position: relative;
 }
 

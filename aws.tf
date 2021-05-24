@@ -115,22 +115,12 @@ provider "aws" {
     region = "us-east-1"
 }
 
-module "aws-static-site" {
-  source  = "dvargas92495/static-site/aws"
-  version = "1.1.0"
-
-  domain = "roam.davidvargas.me"
-  secret = var.secret
-  tags = {
-      Application = "Roam JS Extensions"
-  }
-}
-
 module "aws_static_site" {
   source  = "dvargas92495/static-site/aws"
-  version = "2.1.2"
+  version = "2.2.0"
 
   domain = "roamjs.com"
+  redirects = ["roam.davidvargas.me"]
   secret = var.secret
   allowed_origins = ["https://roamresearch.com"]
   tags = {
