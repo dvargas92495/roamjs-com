@@ -193,9 +193,10 @@ const MouselessDialog = (): JSX.Element => {
   }, [setAllCommands]);
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState("");
-  const onInputChange = useCallback((e) => setValue(e.target.value), [
-    setValue,
-  ]);
+  const onInputChange = useCallback(
+    (e) => setValue(e.target.value),
+    [setValue]
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const results = useMemo(
     () =>
@@ -208,7 +209,11 @@ const MouselessDialog = (): JSX.Element => {
   );
   const eventListener = useCallback(
     (e: KeyboardEvent) => {
-      if ((e.key === "?" || e.key === "/") && e.shiftKey && e.ctrlKey) {
+      if (
+        (e.key === "?" || e.key === "/" || e.key === "+") &&
+        e.shiftKey &&
+        e.ctrlKey
+      ) {
         previousFocus.current = document.activeElement;
         setIsOpen(true);
         const currentValue = inputRef.current?.value || "";
