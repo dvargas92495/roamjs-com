@@ -199,9 +199,10 @@ const MarkmapPanel: React.FunctionComponent<{
       const tree = getTreeByBlockUid(uid);
       tree.text = tree.text || title;
       const toOpml = (node: TreeNode): string =>
-        `<outline text="${resolveRefs(node.text)}">${node.children
-          .map(toOpml)
-          .join("")}</outline>`;
+        `<outline text="${resolveRefs(node.text).replace(
+          /"/g,
+          "&quot;"
+        )}">${node.children.map(toOpml).join("")}</outline>`;
       const content = `<?xml version="1.0" encoding="UTF-8"?>
 <opml version="1.0">
 <head>
