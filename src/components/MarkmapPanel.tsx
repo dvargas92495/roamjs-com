@@ -33,6 +33,7 @@ const RENDERED_TODO =
   '<span><label class="check-container"><input type="checkbox" disabled=""><span class="checkmark"></span></label></span>';
 const RENDERED_DONE =
   '<span><label class="check-container"><input type="checkbox" checked="" disabled=""><span class="checkmark"></span></label></span>';
+const IMAGE_REGEX = /<img src="(.*?)" alt="">/;
 
 const transformRoot = ({ root }: Partial<ITransformResult>) => {
   if (root.c) {
@@ -46,6 +47,9 @@ const transformRoot = ({ root }: Partial<ITransformResult>) => {
     .replace(/{{(?:\[\[)?DONE(?:\]\])?}}/g, (s) =>
       isSafari ? s : RENDERED_DONE
     );
+  if (IMAGE_REGEX.test(root.v) && root.p) {
+    root.p.s = [300, 300];
+  }
 };
 
 const shiftClickListener = (e: MouseEvent) => {
@@ -95,7 +99,6 @@ const MarkmapPanel: React.FunctionComponent<{
   const loadMarkmap = useCallback(() => {
     const { root, features } = transformer.transform(getMarkdown());
     const { styles, scripts } = transformer.getUsedAssets(features);
-    transformRoot({ root });
     styles.forEach(({ type, data }) => {
       if (type === "stylesheet") {
         data["class"] = CLASSNAME;
@@ -110,7 +113,13 @@ const MarkmapPanel: React.FunctionComponent<{
     });
     loadCSS(styles);
     loadJS(scripts, { getMarkmap: () => ({ refreshHook }) });
-    markmapRef.current = Markmap.create(`#${SVG_ID}`, null, root);
+    // markmapRef.current = Markmap.create(`#${SVG_ID}`, null, root);
+    markmapRef.current = new Markmap(`#${SVG_ID}`, null);
+    markmapRef.current.state.data = root;
+    markmapRef.current.initializeData(root);
+    transformRoot({ root });
+    markmapRef.current.renderData();
+    markmapRef.current.fit();
   }, [markmapRef, getMarkdown]);
   const containerRef = useRef<HTMLDivElement>(null);
   const refresh = useCallback(() => {

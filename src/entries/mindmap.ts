@@ -1,28 +1,42 @@
 import {
   createButtonObserver,
   createHTMLObserver,
+  getPageUidByPageTitle,
+  getShallowTreeByParentUid,
   getTreeByBlockUid,
-  getTreeByPageName,
   toRoamDateUid,
   TreeNode,
 } from "roam-client";
+import { createConfigObserver } from "roamjs-components";
 import { NODE_CLASSNAME, render } from "../components/MarkmapPanel";
+import { render as imageRender } from "../components/ImagePreview";
 import { addStyle, resolveRefs, runExtension } from "../entry-helpers";
+
+const CONFIG = "roam/js/mindmap";
 
 addStyle(`span.${NODE_CLASSNAME} {
   width: 300px;
   display: inline-block;
   word-break: break-word;
   white-space: normal;
-}`);
+}
+
+span.${NODE_CLASSNAME} img {
+  max-width: 300px;
+  max-height: 300px;
+}
+`);
 
 const div = document.createElement("div");
 
 const toMarkdown = ({ c, i }: { c: TreeNode; i: number }): string =>
   `${"".padStart(i * 4, " ")}- ${
     c.heading ? `${"".padStart(c.heading, "#")} ` : ""
-  }<span class="${NODE_CLASSNAME} roamjs-block-view" data-block-uid="${c.uid}" id="roamjs-mindmap-node-${c.uid}">${resolveRefs(
-    c.text.trim()
+  }<span class="${NODE_CLASSNAME} roamjs-block-view" data-block-uid="${
+    c.uid
+  }" id="roamjs-mindmap-node-${c.uid}">${resolveRefs(c.text.trim()).replace(
+    /\^\^(.*?)\^\^/,
+    (_, inner) => `<span class="rm-highlight">${inner}</span>`
   )}</span>${c.children
     .filter((nested) => !!nested.text || nested.children.length)
     .map((nested) => `\n${toMarkdown({ c: nested, i: i + 1 })}`)
@@ -54,22 +68,53 @@ const hideTagChars = (c: TreeNode) => {
   c.text = c.text.replace(/#|\[\[|\]\]/g, "");
 };
 
+const hideImageText = (c: TreeNode) => {
+  c.children.forEach(hideImageText);
+  c.text = c.text.replace(/!\[\]\((.*?)\)/, "");
+};
+
 const getMarkdown = (): string => {
   const match = window.location.href.match("/page/(.*)$");
   const uid = match ? match[1] : toRoamDateUid(new Date());
   const nodes = getTreeByBlockUid(uid).children;
   nodes.forEach((c) => expandEmbeds(c));
   nodes.forEach((c) => replaceTags(c));
-  const hideTags = getTreeByPageName("roam/js/mindmap").some((t) =>
-    /hide tags/i.test(t.text)
-  );
+  const config = getShallowTreeByParentUid(getPageUidByPageTitle(CONFIG));
+  const hideTags = config.some((t) => /hide tags/i.test(t.text));
   if (hideTags) {
     nodes.forEach((c) => hideTagChars(c));
+  }
+  const hideImages = config.some((t) => /hide images/i.test(t.text));
+  if (hideImages) {
+    nodes.forEach((c) => hideImageText(c));
   }
   return nodes.map((c) => toMarkdown({ c, i: 0 })).join("\n");
 };
 
 runExtension("markmap", () => {
+  createConfigObserver({
+    title: CONFIG,
+    config: {
+      tabs: [
+        {
+          id: "home",
+          fields: [
+            {
+              title: "hide tags",
+              description: "Whether or not to hide tag syntax from mindmap",
+              type: "flag",
+            },
+            {
+              title: "hide images",
+              description: "Whether or not to filter out images from mindmap",
+              type: "flag",
+            },
+          ],
+        },
+      ],
+    },
+  });
+
   createHTMLObserver({
     callback: (u: HTMLUListElement) => {
       const lis = Array.from(u.getElementsByTagName("li")).map(
@@ -93,5 +138,21 @@ runExtension("markmap", () => {
     attribute: "open-mindmap",
     render: (b: HTMLButtonElement) =>
       render({ parent: b.parentElement, getMarkdown, mode: "button" }),
+  });
+
+  createHTMLObserver({
+    tag: "span",
+    className: NODE_CLASSNAME,
+    useBody: true,
+    callback: (s: HTMLSpanElement) => {
+      Array.from(s.getElementsByTagName("img"))
+        .filter((i) => !i.hasAttribute("data-roamjs-image-preview"))
+        .forEach((i) => {
+          const span = document.createElement("span");
+          i.parentElement.insertBefore(span, i);
+          imageRender({ p: span, src: i.src });
+          i.remove();
+        });
+    },
   });
 });
