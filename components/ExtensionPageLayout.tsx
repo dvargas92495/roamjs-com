@@ -88,6 +88,7 @@ export const contributors = {
   "Scott Block": "https://twitter.com/insidetheblock",
   "Dave Prout": "https://twitter.com/Prouticus",
   "Amanda Peyton": "http://amandapeyton.com/",
+  "Daniel Rahal": "https://twitter.com/danhrahal",
 };
 
 export const emojisToTooltip = {

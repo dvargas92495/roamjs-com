@@ -10,12 +10,18 @@ runExtension("todont", () => {
   const TODONT_CLASSNAME = "roamjs-todont";
   const css = document.createElement("style");
   css.textContent = `.bp3-button.bp3-small.${TODONT_CLASSNAME} {
-    background-color: red;
-    border-radius: 0;
     padding: 0;
     min-height: 0;
     min-width: 0;
-    height: 16px;
+    top: -1px;
+    left: -2px;
+    height: 14px;
+    border-radius: 4px;
+    width: 14px;
+    color: #2E2E2E;
+    background-color: #EF5151;
+    border: #EA666656;
+    border-width: 0 2px 2px 0;
 }`;
   document.getElementsByTagName("head")[0].appendChild(css);
 
