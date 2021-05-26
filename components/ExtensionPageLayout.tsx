@@ -68,7 +68,7 @@ export const contributors = {
   "Matt Brockwell": "https://twitter.com/Jeanvaljean689",
   "Eddie Cohen": "https://eddiecohen.com/",
   "Rushi Bhavsar": "https://twitter.com/RushiBhavsar",
-  "RoamHacker": "https://twitter.com/roamhacker",
+  RoamHacker: "https://twitter.com/roamhacker",
   "Ivo Velitchkov": "https://www.strategicstructures.com/",
   "Mathew McGann": "http://www.mcgannfreestone.com.au/",
   "Bardia Pourvakil": "https://twitter.com/thepericulum",
@@ -96,6 +96,7 @@ export const emojisToTooltip = {
   "📓": "Testing",
   "🤔": "Idea",
   "💻": "Code",
+  "📖": "Documentation",
 };
 
 export const SponsorDialog = ({ id }: { id: string }): React.ReactElement => {
