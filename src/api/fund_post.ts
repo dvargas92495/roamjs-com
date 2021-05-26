@@ -11,7 +11,9 @@ export const handler = async (
           .post(
             `${process.env.FLOSS_API_URL}/stripe-setup-intent`,
             JSON.parse(event.body),
-            getClerkOpts(email)
+            getClerkOpts(email, {
+              Origin: event.headers.origin || event.headers.Origin,
+            })
           )
           .then((r) => ({
             statusCode: 200,

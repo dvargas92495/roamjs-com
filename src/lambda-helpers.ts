@@ -186,9 +186,10 @@ export const getClerkEmail = async (
     : "";
 };
 
-export const getClerkOpts = (email: string): AxiosRequestConfig => ({
+export const getClerkOpts = (email: string, headers?: Record<string,string>): AxiosRequestConfig => ({
   headers: {
     Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
+    ...headers,
   },
 });
 
