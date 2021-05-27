@@ -255,7 +255,7 @@ const toQueryStateChildren = (v: string): QueryState[] => {
         (c === "[" && v.charAt(pointer + 1) === "["))
     ) {
       inTag++;
-    } else if (!inHashTag && c === "#") {
+    } else if (!inHashTag && c === "#" && !inTag) {
       inHashTag = true;
     }
     if (inParent || inTag || inHashTag) {
@@ -265,7 +265,7 @@ const toQueryStateChildren = (v: string): QueryState[] => {
       inParent--;
     } else if (inTag > 0 && c === "]" && v.charAt(pointer - 1) === "]") {
       inTag--;
-    } else if (inHashTag && c === " ") {
+    } else if (inHashTag && /(\s|\])/.test(c)) {
       inHashTag = false;
     }
     if (inParent === 0 && inTag === 0 && !inHashTag && content) {
