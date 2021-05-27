@@ -91,7 +91,7 @@ runExtension(ID, () => {
               title: "format",
               type: "text",
               defaultValue: FORMAT_DEFAULT_VALUE,
-              description: "Format of your weekly page titles",
+              description: "Format of your weekly page titles. When changing the format, be sure to rename your old weekly pages.",
             },
             {
               title: "auto load",

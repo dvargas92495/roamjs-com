@@ -89,6 +89,7 @@ export const contributors = {
   "Dave Prout": "https://twitter.com/Prouticus",
   "Amanda Peyton": "http://amandapeyton.com/",
   "Daniel Rahal": "https://twitter.com/danhrahal",
+  "Orkhan Allahverdi": "https://twitter.com/o_allahverdi",
 };
 
 export const emojisToTooltip = {
