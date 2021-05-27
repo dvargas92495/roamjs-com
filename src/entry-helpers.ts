@@ -3,16 +3,13 @@ import {
   createIconButton,
   deleteBlock,
   getAttrConfigFromQuery,
-  getBlockUidsReferencingPage,
   getNthChildUidByBlockUid,
   getPageTitleByBlockUid,
   getPageUidByPageTitle,
-  getShallowTreeByParentUid,
   getTreeByBlockUid,
   getUids,
   toRoamDate,
   TreeNode,
-  updateBlock,
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import { Dict } from "mixpanel-browser";
@@ -28,7 +25,6 @@ import { SidebarWindow, ViewType } from "roam-client/lib/types";
 declare global {
   interface Window {
     roamjs?: {
-      alerted: boolean;
       loaded: Set<string>;
       extension: {
         [id: string]: {
@@ -69,7 +65,6 @@ export const runExtension = async (
 ): Promise<void> => {
   if (!window.roamjs) {
     window.roamjs = {
-      alerted: false,
       loaded: new Set(),
       extension: {},
       dynamicElements: new Set(),
@@ -79,22 +74,6 @@ export const runExtension = async (
     return;
   }
   window.roamjs.loaded.add(extensionId);
-  if (process.env.IS_LEGACY && !window.roamjs?.alerted) {
-    window.roamjs.alerted = true;
-    getBlockUidsReferencingPage("roam/js")
-      .flatMap((u) => getShallowTreeByParentUid(u))
-      .filter(({ text }) => text.includes("roam.davidvargas.me/master"))
-      .forEach(({ uid, text }) =>
-        updateBlock({
-          uid,
-          text: text.replace("roam.davidvargas.me/master", "roamjs.com"),
-        })
-      );
-    window.alert(
-      "Hey! Looks like you were using Roam extensions from the old roam.davidvargas.me link. I've updated those urls to now point to the current roamjs.com link. Email support@roamjs.com if there are any issues. Thank you!"
-    );
-    track("Legacy Alerted");
-  }
 
   track("Load Extension", {
     extensionId,
