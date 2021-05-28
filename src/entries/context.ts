@@ -78,9 +78,9 @@ runExtension(ID, () => {
   createBlockObserver((b: HTMLDivElement) => {
     const { blockUid } = getUids(b);
     const found = window.roamAlphaAPI.q(
-      `[:find ?p :where [?p :block/uid "${blockUid}"] [?p :block/parents ?r] [?r :block/refs ?e] [?e :node/title "context"]]`
-    )?.[0]?.[0];
-    if (found) {
+      `[:find ?t :where [?c :block/uid "${blockUid}"] [?r :block/parents ?c] [?r :block/refs ?e] [?e :node/title ?t]]`
+    ).map(p => p[0] as string);
+    if (found.includes('context')) {
       console.log(found);
     }
   });
