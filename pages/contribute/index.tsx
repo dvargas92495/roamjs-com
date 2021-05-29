@@ -325,6 +325,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/default.jpg",
             url: "",
           },
+          {
+            title: "Dun Jack Fu",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
         ]}
       />
     </StandardLayout>

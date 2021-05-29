@@ -8,6 +8,8 @@ As part of a RoamJS Developer effort started in April, 2021, we've started to mi
 
 ### Repositories
 
+- [Google Drive](https://github.com/dvargas92495/roamjs-google-drive)
+- [Graph Overview](https://github.com/dvargas92495/roamjs-graph-overview)
 - [Otter](https://github.com/dvargas92495/roamjs-otter)
 - [Roam42](https://github.com/dvargas92495/roam42)
 
