@@ -5,11 +5,9 @@ import {
   Button,
   Card,
   DataLoader,
-  ExternalLink,
   H6,
   Items,
   Loading,
-  NumberField,
   StringField,
   Subtitle,
   VerticalTabs,
@@ -21,7 +19,6 @@ import {
   useAuthenticatedAxiosDelete,
 } from "../../components/hooks";
 import Link from "next/link";
-import { stripe } from "../../components/constants";
 import { useUser, SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
 import { defaultLayoutProps } from "../../components/Layout";
@@ -296,29 +293,11 @@ const Billing = () => {
 };
 
 const Funding = () => {
-  const [balance, setBalance] = useState(0);
-  const [subscriptionId, setSubscriptionId] = useState(0);
-  const [sponsorship, setSponsorship] = useState(20);
   const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(false);
   const authenticatedAxios = useAuthenticatedAxiosGet();
-  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const getBalance = useCallback(
-    () =>
-      authenticatedAxios("balance").then((r) =>
-        setBalance(parseFloat(r.data.balance))
-      ),
-    [setBalance, authenticatedAxios]
-  );
   const loadItems = useCallback(
     () =>
-      Promise.all([
-        authenticatedAxios(
-          `is-subscribed?product=${encodeURI("RoamJS Sponsor")}`
-        ),
-        authenticatedAxios("sponsorships"),
-      ]).then(([s, r]) => {
-        setSubscriptionId(s.data.subscriptionId);
+      authenticatedAxios("sponsorships").then((r) => {
         setItems(
           r.data.contracts.sort(
             (a, b) =>
@@ -327,108 +306,34 @@ const Funding = () => {
           )
         );
       }),
-    [setItems, setSubscriptionId, authenticatedAxios]
+    [setItems, authenticatedAxios]
   );
-  const onClick = useCallback(() => {
-    setLoading(true);
-    authenticatedAxiosPost("subscribe-sponsorship", { sponsorship }).then(
-      (r) => {
-        if (r.data.active) {
-          setLoading(false);
-          setSubscriptionId(r.data.id);
-          setBalance(balance + sponsorship * 1.25);
-        } else {
-          stripe.then((s) => s.redirectToCheckout({ sessionId: r.data.id }));
-        }
-      }
-    );
-  }, [
-    balance,
-    sponsorship,
-    authenticatedAxiosPost,
-    setSubscriptionId,
-    setBalance,
-  ]);
   return (
     <DataLoader loadAsync={loadItems}>
-      {!subscriptionId && (
-        <div>
-          <Body>
-            As a thank you for your recurring support, you will receive 125% of
-            your monthly sponsorship amount as RoamJS credit which you could
-            then use to prioritize projects on the{" "}
-            <ExternalLink href="/queue">Queue</ExternalLink>. You will also be
-            added to the <b>Thank You</b> section in the{" "}
-            <ExternalLink href="/contribute">Contribute</ExternalLink> page.
-          </Body>
-          <div
-            style={{
-              padding: "32px 0",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-around",
-            }}
-          >
-            <NumberField
-              value={sponsorship}
-              setValue={setSponsorship}
-              variant="filled"
-              label="Sponsorship"
-              dimension="money"
-            />
-            <Button
-              variant={"contained"}
-              color={"primary"}
-              onClick={onClick}
-              disabled={loading}
-            >
-              SUBSCRIBE
-            </Button>
-            <Loading loading={loading} />
-          </div>
-          <Body>
-            This ${sponsorship} subscription will give you ${sponsorship * 1.25}{" "}
-            in RoamJS credit each month!
-          </Body>
-        </div>
-      )}
       <Items
-        items={[
-          {
-            primary: (
-              <UserValue>
-                <DataLoader loadAsync={getBalance}>
-                  <H6>${balance}</H6>
-                </DataLoader>
-              </UserValue>
-            ),
-            key: 1,
-            avatar: <Subtitle>Credit</Subtitle>,
-          },
-          ...items.map((f) => ({
-            primary: (
-              <UserValue>
-                <H6>
-                  <Link
-                    href={`queue/${f.label}${f.link.substring(
-                      "https://github.com/dvargas92495/roam-js-extensions/issues"
-                        .length
-                    )}`}
-                  >
-                    {f.name}
-                  </Link>
-                </H6>
-              </UserValue>
-            ),
-            secondary: (
-              <UserValue>
-                {`Funded on ${f.createdDate}. Due on ${f.dueDate}`}
-              </UserValue>
-            ),
-            key: f.uuid,
-            avatar: <Subtitle>${f.reward}</Subtitle>,
-          })),
-        ]}
+        items={items.map((f) => ({
+          primary: (
+            <UserValue>
+              <H6>
+                <Link
+                  href={`queue/${f.label}${f.link.substring(
+                    "https://github.com/dvargas92495/roam-js-extensions/issues"
+                      .length
+                  )}`}
+                >
+                  {f.name}
+                </Link>
+              </H6>
+            </UserValue>
+          ),
+          secondary: (
+            <UserValue>
+              {`Funded on ${f.createdDate}. Due on ${f.dueDate}`}
+            </UserValue>
+          ),
+          key: f.uuid,
+          avatar: <Subtitle>${f.reward}</Subtitle>,
+        }))}
       />
     </DataLoader>
   );
@@ -452,7 +357,7 @@ const Profile = () => {
           <Card title={"Billing"}>
             <Billing />
           </Card>
-          <Card title={"Sponsorships"}>
+          <Card title={"Projects"}>
             <Funding />
           </Card>
         </VerticalTabs>
