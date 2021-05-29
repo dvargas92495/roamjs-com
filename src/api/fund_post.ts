@@ -20,6 +20,11 @@ export const handler = async (
             body: JSON.stringify(r.data),
             headers: headers(event),
           }))
+          .catch((e) => ({
+            statusCode: e.response.status,
+            body: e.response.data,
+            headers: headers(event),
+          }))
       : Promise.resolve({
           statusCode: 401,
           body: "No Active Session",
