@@ -5,11 +5,11 @@ import {
   deleteBlock,
   getPageTitleByPageUid,
   getPageUidByPageTitle,
+  getRoamUrl,
   getTreeByPageName,
 } from "roam-client";
 import {
   getCurrentPageUid,
-  getRoamUrlByPage,
   getWindowUid,
   isPopoverThePageFilter,
   openBlockElement,
@@ -21,6 +21,13 @@ import { createConfigObserver } from "roamjs-components";
 
 const ID = "sidebar";
 const CONFIG = `roam/js/${ID}`;
+
+const htmlToTitle = (s: HTMLElement): string =>
+  Array.from(s.childNodes)
+    .map((c) =>
+      c.nodeName === "SPAN" ? htmlToTitle(c as HTMLSpanElement) : c.nodeValue
+    )
+    .join("");
 
 const clickButton = (text: string, shiftKey: boolean) =>
   new Promise<void>((resolve) =>
@@ -83,7 +90,7 @@ runExtension(ID, () => {
                 ".rm-sidebar-window .window-headers .rm-caret-closed"
               )
               .forEach((e) => e.click());
-              /* Roam has a bug for non block windows
+            /* Roam has a bug for non block windows
             window.roamAlphaAPI.ui.rightSidebar.getWindows().forEach((w) => {
               window.roamAlphaAPI.ui.rightSidebar.expandWindow({
                 window: {
@@ -143,22 +150,27 @@ runExtension(ID, () => {
     callback: (d: HTMLDivElement) =>
       Array.from(d.getElementsByClassName("rm-title-display")).forEach(
         (h: HTMLHeadingElement) => {
-          const linkIconContainer = document.createElement("span");
-          h.addEventListener("mousedown", (e) => {
-            if (linkIconContainer.contains(e.target as HTMLElement)) {
-              e.stopPropagation();
-            }
-          });
-          iconRender({
-            p: linkIconContainer,
-            tooltipContent: "Go to page",
-            onClick: () =>
-              window.location.assign(
-                getRoamUrlByPage(h.firstElementChild.innerHTML)
-              ),
-            icon: "link",
-          });
-          h.appendChild(linkIconContainer);
+          const pageUid = getPageUidByPageTitle(
+            htmlToTitle(h.firstElementChild as HTMLSpanElement)
+          );
+          if (pageUid) {
+            const linkIconContainer = document.createElement("span");
+            h.addEventListener("mousedown", (e) => {
+              if (linkIconContainer.contains(e.target as HTMLElement)) {
+                e.stopPropagation();
+              }
+            });
+            iconRender({
+              p: linkIconContainer,
+              tooltipContent: "Go to page",
+              onClick: () =>
+                window.location.assign(
+                  getRoamUrl(pageUid)
+                ),
+              icon: "link",
+            });
+            h.appendChild(linkIconContainer);
+          }
         }
       ),
   });
@@ -217,9 +229,11 @@ runExtension(ID, () => {
               );
               includePromise.then(() =>
                 setTimeout(() => {
-                  (d.getElementsByClassName(
-                    "bp3-icon-filter"
-                  )[0] as HTMLSpanElement)?.click?.();
+                  (
+                    d.getElementsByClassName(
+                      "bp3-icon-filter"
+                    )[0] as HTMLSpanElement
+                  )?.click?.();
                 }, 1)
               );
             }
