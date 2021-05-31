@@ -13,10 +13,8 @@ type ExtensionMetadata = {
   description: string;
   image: string;
   href: string;
-  development: boolean;
+  state: "LIVE" | "DEVELOPMENT" | "PRIVATE";
 };
-const prodItems = items.filter((f) => !f.development);
-const devItems = items.filter((f) => f.development);
 
 const ExtensionHomePage = ({
   extensions,
@@ -37,10 +35,9 @@ const ExtensionHomePage = ({
         find out more about how to install and use them.
       </Body>
       <CardGrid
-        items={[
-          ...prodItems,
-          ...extensions.filter(({ development }) => !development),
-        ].sort(({ title: a }, { title: b }) => a.localeCompare(b))}
+        items={extensions
+          .filter(({ state }) => state === "LIVE")
+          .sort(({ title: a }, { title: b }) => a.localeCompare(b))}
         width={3}
       />
       <H4>Under Development</H4>
@@ -49,10 +46,9 @@ const ExtensionHomePage = ({
         ready for use!
       </Body>
       <CardGrid
-        items={[
-          ...devItems,
-          ...extensions.filter(({ development }) => development),
-        ]}
+        items={extensions
+          .filter(({ state }) => state === "DEVELOPMENT")
+          .sort(({ title: a }, { title: b }) => a.localeCompare(b))}
         width={3}
       />
     </StandardLayout>
@@ -66,13 +62,19 @@ export const getStaticProps: GetStaticProps<{
     .get(`${API_URL}/request-path`)
     .then((r) => ({
       props: {
-        extensions: r.data.paths.map(({ id, description, state }) => ({
-          title: idToTitle(id),
-          description: description || "Description for " + idToTitle(id),
-          image: `/thumbnails/${id}.png`,
-          href: `/extensions/${id}`,
-          development: !state || state === "DEVELOPMENT",
-        })),
+        extensions: [
+          ...items.map((i) => ({
+            ...i,
+            state: i.development ? "DEVELOPMENT" : "LIVE",
+          })),
+          ...r.data.paths.map(({ id, description, state }) => ({
+            title: idToTitle(id),
+            description: description || "Description for " + idToTitle(id),
+            image: `https://roamjs.com/thumbnails/${id}.png`,
+            href: `/extensions/${id}`,
+            state,
+          })),
+        ],
       },
     }))
     .catch(() => ({
