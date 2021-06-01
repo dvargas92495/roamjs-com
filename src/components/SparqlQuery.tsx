@@ -67,7 +67,7 @@ export const getLabel = ({
   `${label.replace("{date}", new Date().toLocaleString())} ${
     outputFormat === "Table" ? "{{[[table]]}}" : ""
   }`;
-const URL_REGEX = urlRegex({ strict: true })
+const URL_REGEX = urlRegex({ strict: true });
 
 const PAGE_QUERY = `SELECT ?property ?propertyLabel ?value ?valueLabel {
   VALUES (?id) {(wd:{ID})}
@@ -85,7 +85,8 @@ LIMIT {LIMIT}`;
 
 const WIKIDATA_ITEMS = ["Current Page", "Current Block", "Custom Query"];
 const LIMIT_REGEX = /LIMIT ([\d]*)/;
-const IMAGE_REGEX_URL = /(http(s?):)([/|.|\w|\s|\-|:|%])*\.(?:jpg|gif|png|svg)/i;
+const IMAGE_REGEX_URL =
+  /(http(s?):)([/|.|\w|\s|\-|:|%])*\.(?:jpg|gif|png|svg)/i;
 const WIKIDATA_SOURCE = "https://query.wikidata.org/sparql?format=json&query=";
 
 export const runSparqlQuery = ({
@@ -146,23 +147,37 @@ export const runSparqlQuery = ({
                   ),
               ]
             : ([] as InputTextNode[])),
-          ...data.map((p) =>
-            outputFormat === "Line"
-              ? { text: dataLabels.map((h) => formatValue(p, h)).join(" ") }
-              : dataLabels
-                  .slice()
-                  .reverse()
-                  .reduce(
-                    (prev, cur) => ({
-                      text: formatValue(p, cur),
-                      children: prev.text ? [prev] : [],
-                    }),
-                    {
-                      text: "",
-                      children: [] as InputTextNode[],
-                    }
-                  )
-          ),
+          ...data
+            .map((p) =>
+              outputFormat === "Line"
+                ? {
+                    text: dataLabels.map((h) => formatValue(p, h)).join(" "),
+                    children: [] as InputTextNode[],
+                  }
+                : dataLabels
+                    .slice()
+                    .reverse()
+                    .reduce(
+                      (prev, cur) => ({
+                        text: formatValue(p, cur),
+                        children: prev.text ? [prev] : [],
+                      }),
+                      {
+                        text: "",
+                        children: [] as InputTextNode[],
+                      }
+                    )
+            )
+            .sort(({ text: a }, { text: b }) => a.localeCompare(b))
+            .map((node, i, arr) => {
+              const firstIndex = arr.findIndex(n => n.text === node.text);
+              if (i > firstIndex) {
+                arr[firstIndex].children.push(...node.children);
+                node.text = "";
+              }
+              return node;
+            })
+            .filter((node) => !!node.text),
         ];
         output.forEach((node, order) =>
           createBlock({ node, order, parentUid })
@@ -224,9 +239,21 @@ const SparqlQuery = ({
         : getUids(textareaRef.current).blockUid,
     [parentUid]
   );
-  const cursorBlockString = useMemo(() => extractTag(getTextByBlockUid(cursorBlockUid)), [cursorBlockUid]);
-  const blockUid = useMemo(() => cursorBlockString ? cursorBlockUid : getParentUidByBlockUid(cursorBlockUid), [cursorBlockString, cursorBlockUid]);
-  const blockString = useMemo(() => extractTag(getTextByBlockUid(blockUid)), [blockUid]);
+  const cursorBlockString = useMemo(
+    () => extractTag(getTextByBlockUid(cursorBlockUid)),
+    [cursorBlockUid]
+  );
+  const blockUid = useMemo(
+    () =>
+      cursorBlockString
+        ? cursorBlockUid
+        : getParentUidByBlockUid(cursorBlockUid),
+    [cursorBlockString, cursorBlockUid]
+  );
+  const blockString = useMemo(
+    () => extractTag(getTextByBlockUid(blockUid)),
+    [blockUid]
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeItem, setActiveItem] = useState(WIKIDATA_ITEMS[0]);
@@ -247,9 +274,7 @@ const SparqlQuery = ({
       defaultValue: DEFAULT_EXPORT_LABEL,
     })
   );
-  const [dataSource, setDataSource] = useState<string>(
-    WIKIDATA_SOURCE
-  );
+  const [dataSource, setDataSource] = useState<string>(WIKIDATA_SOURCE);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("Parent");
   const [limit, setLimit] = useState(10);
   const [saveQuery, setSaveQuery] = useState(false);
@@ -301,7 +326,7 @@ const SparqlQuery = ({
     (e: Error) => {
       console.error(e);
       setError(
-        "Unknown error occured when querying wiki data. Contact support@roamjs.com for help!"
+        "Unknown error occured when querying. Contact support@roamjs.com for help!"
       );
       setLoading(false);
     },
@@ -311,7 +336,7 @@ const SparqlQuery = ({
     <Dialog
       isOpen={true}
       onClose={onClose}
-      title={"Import Wiki Data"}
+      title={"SPARQL Import"}
       canEscapeKeyClose
       canOutsideClickClose
     >
@@ -322,7 +347,7 @@ const SparqlQuery = ({
             items={WIKIDATA_ITEMS}
             onItemSelect={(s) => {
               setActiveItem(s);
-              setDataSource(WIKIDATA_SOURCE)
+              setDataSource(WIKIDATA_SOURCE);
             }}
             activeItem={activeItem}
             ButtonProps={{ elementRef: dropdownRef }}
@@ -365,13 +390,15 @@ const SparqlQuery = ({
               }}
               onBeforeChange={(_, __, v) => setCodeValue(v)}
             />
-            <Label>
-              Data Source
-              <InputGroup
-                value={dataSource}
-                onChange={(e) => setDataSource(e.target.value)}
-              />
-            </Label>
+            <span style={{ marginTop: 8, display: "inline-block" }}>
+              <Label>
+                SPARQL Endpoint
+                <InputGroup
+                  value={dataSource}
+                  onChange={(e) => setDataSource(e.target.value)}
+                />
+              </Label>
+            </span>
           </div>
         )}
         {showAdditionalOptions && (
