@@ -101,9 +101,10 @@ const RequestShareContent: StageContent = ({ openPanel }) => {
                   input.parentElement.parentElement.style.border = HIGHLIGHT;
                   const container = input.parentElement?.parentElement;
                   if (container) {
-                    const perm = input.parentElement.parentElement.getElementsByClassName(
-                      "rm-settings__permissions-button"
-                    )?.[0] as HTMLButtonElement;
+                    const perm =
+                      input.parentElement.parentElement.getElementsByClassName(
+                        "rm-settings__permissions-button"
+                      )?.[0] as HTMLButtonElement;
                     perm?.click?.();
                     setTimeout(() => {
                       const access = Array.from(
@@ -221,7 +222,8 @@ const RequestShareContent: StageContent = ({ openPanel }) => {
 };
 
 const SUBDOMAIN_REGEX = /^((?!-)[A-Za-z0-9-]{0,62}[A-Za-z0-9])$/;
-const DOMAIN_REGEX = /^(\*\.)?(((?!-)[A-Za-z0-9-]{0,62}[A-Za-z0-9])\.)+((?!-)[A-Za-z0-9-]{1,62}[A-Za-z0-9])$/;
+const DOMAIN_REGEX =
+  /^(\*\.)?(((?!-)[A-Za-z0-9-]{0,62}[A-Za-z0-9])\.)+((?!-)[A-Za-z0-9-]{1,62}[A-Za-z0-9])$/;
 const RequestDomainContent: StageContent = ({ openPanel }) => {
   const nextStage = useNextStage(openPanel);
   const pageUid = usePageUid();
@@ -502,6 +504,11 @@ const getContentRuleFromNode = ({ rule: text, values: children }: Filter) => {
   return undefined;
 };
 
+type HydratedTreeNode = Omit<TreeNode, "children"> & {
+  references: { title: string; uid: string }[];
+  children: HydratedTreeNode[];
+};
+
 const getDeployBody = () => {
   const autoDeploysEnabled = /true/i.test(
     getTreeByPageName("roam/js/static-site").find((t) => /share/i.test(t.text))
@@ -545,7 +552,19 @@ const getDeployBody = () => {
     : {};
   const withReferenceTemplate = referenceTemplate ? { referenceTemplate } : {};
   const withPlugins = pluginsNode?.children?.length
-    ? { plugins: pluginsNode.children.map((p) => p.text) }
+    ? {
+        plugins: Object.fromEntries(
+          pluginsNode.children.map((p) => [
+            p.text,
+            Object.fromEntries(
+              (p.children || []).map((c) => [
+                c.text,
+                c.children.map((v) => v.text),
+              ])
+            ),
+          ])
+        ),
+      }
     : {};
 
   const config = {
@@ -569,6 +588,25 @@ const getDeployBody = () => {
     !titleFilters.length || titleFilters.some((r) => r && r(t));
   const contentFilter = (c: TreeNode[]) =>
     !contentFilters.length || contentFilters.some((r) => r && r(c));
+  const blockReferences = config.plugins["inline-block-references"]
+    ? window.roamAlphaAPI
+        .q(
+          "[:find ?pu ?pt ?ru :where [?pp :node/title ?pt] [?p :block/page ?pp] [?p :block/uid ?pu] [?r :block/uid ?ru] [?p :block/refs ?r]]"
+        )
+        .reduce((cur, [uid, title, u]: string[]) => {
+          if (cur[u]) {
+            cur[u].push({ uid, title });
+          } else {
+            cur[u] = [{ uid, title }];
+          }
+          return cur;
+        }, {} as { [uid: string]: { uid: string; title: string }[] })
+    : {};
+  const getReferences = (t: TreeNode): HydratedTreeNode => ({
+    ...t,
+    references: blockReferences[t.uid] || [],
+    children: t.children.map(getReferences),
+  });
 
   const pageNamesWithContent = allPageNames
     .filter((pageName) => pageName === config.index || titleFilter(pageName))
@@ -583,14 +621,17 @@ const getDeployBody = () => {
         pageName === config.index || contentFilter(content)
     )
     .map(({ pageName, content }) => {
-      const references = getPageTitlesAndBlockUidsReferencingPage(
-        pageName
-      ).map(({ title, uid }) => ({ title, node: getTreeByBlockUid(uid) }));
+      const references = getPageTitlesAndBlockUidsReferencingPage(pageName).map(
+        ({ title, uid }) => ({
+          title,
+          node: getReferences(getTreeByBlockUid(uid)),
+        })
+      );
       const viewType = getPageViewType(pageName);
       return {
         references,
         pageName,
-        content,
+        content: content.map(getReferences),
         viewType,
       };
     });
@@ -786,16 +827,20 @@ const LiveContent: StageContent = () => {
     (path: string, getData: () => Record<string, unknown>) => {
       setError("");
       setLoading(true);
-      return authenticatedAxiosPost(path, getData())
+      return new Promise<Record<string, unknown>>((resolve) =>
+        setTimeout(() => resolve(getData()), 1)
+      )
+        .then((data) => authenticatedAxiosPost(path, data))
         .then(getWebsite)
         .catch((e) => setError(e.response?.data || e.message))
         .finally(() => setLoading(false));
     },
     [setError, setLoading, getWebsite, authenticatedAxiosPost]
   );
-  const manualDeploy = useCallback(() => wrapPost("deploy", getDeployBody), [
-    wrapPost,
-  ]);
+  const manualDeploy = useCallback(
+    () => wrapPost("deploy", getDeployBody),
+    [wrapPost]
+  );
   const launchWebsite = useCallback(
     () =>
       wrapPost("launch-website", getLaunchBody).then(() =>
@@ -998,9 +1043,10 @@ const RequestHtmlContent = ({
   const [value, setValue] = useState(
     useField(field).match(HTML_REGEX)?.[1] || defaultValue
   );
-  const onBeforeChange = useCallback((_, __, value) => setValue(value), [
-    setValue,
-  ]);
+  const onBeforeChange = useCallback(
+    (_, __, value) => setValue(value),
+    [setValue]
+  );
   const onSubmit = useCallback(() => {
     setInputSetting({
       blockUid: pageUid,

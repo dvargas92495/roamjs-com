@@ -36,7 +36,7 @@ export const handler = authenticate(async (event) => {
     })
     .promise();
 
-  const Key = data && `${websiteGraph}/${format(date, "yyyyMMddhhmmss")}`;
+  const Key = data && `${websiteGraph}/${format(date, "yyyyMMddhhmmss")}.json`;
   if (Key) {
     await s3
       .upload({
