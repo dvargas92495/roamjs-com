@@ -184,7 +184,7 @@ const randomize = (q: HTMLDivElement) => {
     Number.isNaN(config["Random"]) ? 1 : parseInt(config["Random"]),
     1
   );
-  const refsByPageView = q.lastElementChild;
+  const refsByPageView = q.querySelector('.refs-by-page-view');
   const allChildren = Array.from(q.getElementsByClassName("rm-reference-item"));
   const selected = allChildren
     .sort(() => 0.5 - Math.random())
