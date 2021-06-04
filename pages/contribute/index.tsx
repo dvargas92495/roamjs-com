@@ -147,6 +147,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/justmath.jpg",
             url: "https://twitter.com/itsjustmath",
           },
+          {
+            title: "Michael Brockbals",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
         ]}
       />
       <H6>
@@ -323,7 +328,7 @@ const ContributePage = (): React.ReactElement => {
           {
             title: "Jason Phillips",
             imgSrc: "sponsors/default.jpg",
-            url: "",
+            url: "https://jasonwphillips.com/",
           },
           {
             title: "Dun Jack Fu",
