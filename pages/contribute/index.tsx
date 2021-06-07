@@ -335,6 +335,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/default.jpg",
             url: "",
           },
+          {
+            title: "Zahid A Ali",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
         ]}
       />
     </StandardLayout>
