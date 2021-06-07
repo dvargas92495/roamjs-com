@@ -20,65 +20,63 @@ import {
 
 let isSortByBlocks = false;
 
-const menuItemCallback = (
-  sortContainer: Element,
-  sortBy: (a: string, b: string) => number
-) => () => {
-  const blockConfig = getConfigFromBlock(sortContainer as HTMLDivElement);
-  const pageConfig = getConfigFromPage("roam/js/query-tools");
-  isSortByBlocks = !!blockConfig["Sort Blocks"] || !!pageConfig["Sort Blocks"];
-  const refContainer = sortContainer.getElementsByClassName(
-    "refs-by-page-view"
-  )[0];
-  const refsInView = Array.from(
-    refContainer.getElementsByClassName("rm-ref-page-view")
-  );
-  refsInView.forEach((r) => refContainer.removeChild(r));
-  if (isSortByBlocks) {
-    const blocksInView = refsInView.flatMap((r) =>
-      Array.from(r.lastElementChild.children).filter(
-        (c) => (c as HTMLDivElement).style.display !== "none"
-      ).length === 1
-        ? [r]
-        : Array.from(r.lastElementChild.children).map((c) => {
-            const refClone = r.cloneNode(true) as HTMLDivElement;
-            Array.from(refClone.lastElementChild.children).forEach((cc) => {
-              const ccDiv = cc as HTMLDivElement;
-              if (
-                cc.getElementsByClassName("roam-block")[0]?.id ===
-                c.getElementsByClassName("roam-block")[0]?.id
-              ) {
-                ccDiv.style.display = "flex";
-              } else {
-                ccDiv.style.display = "none";
-              }
-            });
-            return refClone;
-          })
+const menuItemCallback =
+  (sortContainer: Element, sortBy: (a: string, b: string) => number) => () => {
+    const blockConfig = getConfigFromBlock(sortContainer as HTMLDivElement);
+    const pageConfig = getConfigFromPage("roam/js/query-tools");
+    isSortByBlocks =
+      !!blockConfig["Sort Blocks"] || !!pageConfig["Sort Blocks"];
+    const refContainer =
+      sortContainer.getElementsByClassName("refs-by-page-view")[0];
+    const refsInView = Array.from(
+      refContainer.getElementsByClassName("rm-ref-page-view")
     );
-    const getRoamBlock = (e: Element) =>
-      Array.from(e.lastElementChild.children)
-        .filter((c) => (c as HTMLDivElement).style.display != "none")[0]
-        .getElementsByClassName("roam-block")[0] as HTMLDivElement;
-    blocksInView.sort((a, b) => {
-      const { blockUid: aUid } = getUids(getRoamBlock(a));
-      const { blockUid: bUid } = getUids(getRoamBlock(b));
-      return sortBy(aUid, bUid);
-    });
-    blocksInView.forEach((r) => refContainer.appendChild(r));
-  } else {
-    refsInView.sort((a, b) => {
-      const aTitle = a.getElementsByClassName(
-        "rm-ref-page-view-title"
-      )[0] as HTMLDivElement;
-      const bTitle = b.getElementsByClassName(
-        "rm-ref-page-view-title"
-      )[0] as HTMLDivElement;
-      return sortBy(aTitle.textContent, bTitle.textContent);
-    });
-    refsInView.forEach((r) => refContainer.appendChild(r));
-  }
-};
+    refsInView.forEach((r) => refContainer.removeChild(r));
+    if (isSortByBlocks) {
+      const blocksInView = refsInView.flatMap((r) =>
+        Array.from(r.lastElementChild.children).filter(
+          (c) => (c as HTMLDivElement).style.display !== "none"
+        ).length === 1
+          ? [r]
+          : Array.from(r.lastElementChild.children).map((c) => {
+              const refClone = r.cloneNode(true) as HTMLDivElement;
+              Array.from(refClone.lastElementChild.children).forEach((cc) => {
+                const ccDiv = cc as HTMLDivElement;
+                if (
+                  cc.getElementsByClassName("roam-block")[0]?.id ===
+                  c.getElementsByClassName("roam-block")[0]?.id
+                ) {
+                  ccDiv.style.display = "flex";
+                } else {
+                  ccDiv.style.display = "none";
+                }
+              });
+              return refClone;
+            })
+      );
+      const getRoamBlock = (e: Element) =>
+        Array.from(e.lastElementChild.children)
+          .filter((c) => (c as HTMLDivElement).style.display != "none")[0]
+          .getElementsByClassName("roam-block")[0] as HTMLDivElement;
+      blocksInView.sort((a, b) => {
+        const { blockUid: aUid } = getUids(getRoamBlock(a));
+        const { blockUid: bUid } = getUids(getRoamBlock(b));
+        return sortBy(aUid, bUid);
+      });
+      blocksInView.forEach((r) => refContainer.appendChild(r));
+    } else {
+      refsInView.sort((a, b) => {
+        const aTitle = a.getElementsByClassName(
+          "rm-ref-page-view-title"
+        )[0] as HTMLDivElement;
+        const bTitle = b.getElementsByClassName(
+          "rm-ref-page-view-title"
+        )[0] as HTMLDivElement;
+        return sortBy(aTitle.textContent, bTitle.textContent);
+      });
+      refsInView.forEach((r) => refContainer.appendChild(r));
+    }
+  };
 
 const sortCallbacks = {
   "Page Title": (refContainer: Element) =>
@@ -184,7 +182,7 @@ const randomize = (q: HTMLDivElement) => {
     Number.isNaN(config["Random"]) ? 1 : parseInt(config["Random"]),
     1
   );
-  const refsByPageView = q.querySelector('.refs-by-page-view');
+  const refsByPageView = q.querySelector(".refs-by-page-view");
   const allChildren = Array.from(q.getElementsByClassName("rm-reference-item"));
   const selected = allChildren
     .sort(() => 0.5 - Math.random())
@@ -231,6 +229,20 @@ const observerCallback = () => {
         e.preventDefault();
       };
       randomize(q);
+    }
+  });
+
+  // Alias
+  const queryTitles = Array.from(
+    document.getElementsByClassName("rm-query-title-text")
+  ).filter(
+    (e) => !e.getAttribute("data-roamjs-query-alias")
+  ) as HTMLDivElement[];
+  queryTitles.forEach((q) => {
+    const config = getConfigFromBlock(q);
+    if (config["Alias"]) {
+      q.setAttribute("data-roamjs-query-alias", "true");
+      q.innerText = config["Alias"];
     }
   });
 
