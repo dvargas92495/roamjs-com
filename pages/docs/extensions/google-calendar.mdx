@@ -31,8 +31,8 @@ On the `import` tab, you will find numerous fields used to configure the calenda
 - `{end}` - the end time of the event. Add a colon and format to customize the end time format. For example, `{end:hh:mmaaaaa}` will resolve to `12:00p`
 - `{attendees}` - the attendees of the event, using either their display name if available or email if not, each of whom are tagged and comma delimited.
 
-By default, `Format` will be `{summary} ({start:hh:mm a} - {end:hh:mm a}) - {confLink}`
-Sample custom format: `{{[[TODO]]}} {start:hh:mmaaaaa} - {end:hh:mmaaaaa} - {summary} - {confLink}`
+By default, `Format` will be `{summary} ({start:hh:mm a} - {end:hh:mm a}) - [Meet|Zoom]{link}`
+Sample custom format: `{{[[TODO]]}} {start:hh:mmaaaaa} - {end:hh:mmaaaaa} - {summary}{confLink}`
 
 See the [date-fns library](https://date-fns.org/v2.22.1/docs/format) for more details on time formats.
 
