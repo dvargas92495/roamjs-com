@@ -3,9 +3,6 @@ layout: "ExtensionPageLayout"
 description: "The Charts extension allows users to render excel-esque charts in Roam!"
 ---
 
-import AddStyle from '../../../components/AddStyle';
-import { DemoCharts, styleContent } from "../../../src/components/Charts";
-
 The script is not configurable.
 
 There are two types of charts supported:
@@ -31,10 +28,3 @@ You could save the types that the axis use by setting the follwing attributes as
 Here's an example:
 
 ![](/images/charts-axis.png)
-
-### Playground
-
-In the playground below, the chart will update dynamically based on the inputs. Each text input will be the data label, and each text area will be the data values. Deliminate each value with a new line to resemble new blocks in Roam.
-
-<AddStyle styleContent={styleContent} />
-<DemoCharts />
