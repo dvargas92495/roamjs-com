@@ -180,7 +180,7 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
               .replace("{summary}", summary)
               .replace("{link}", e.htmlLink || "")
               .replace("{hangout}", e.hangoutLink || "")
-              .replace("{confLink}", meetLink || zoomLink || "")
+              .replace("{confLink}", (meetLink + zoomLink) || "")
               .replace("{location}", e.location || "")
               .replace("{attendees}", resolveAttendees(e) || "")
               .replace(/{start:?(.*?)}/, (_, format) =>
