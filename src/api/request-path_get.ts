@@ -8,11 +8,23 @@ export const handler: APIGatewayProxyHandler = (event) => {
     ? s3
         .getObject({ Bucket: "roamjs.com", Key: `markdown/${id}.md` })
         .promise()
-        .then((c) => ({
-          statusCode: 200,
-          body: JSON.stringify({ content: c.Body.toString() }),
-          headers: headers(event),
-        }))
+        .then((c) =>
+          dynamo
+            .getItem({
+              TableName: "RoamJSExtensions",
+              Key: { id: { S: id } },
+            })
+            .promise()
+            .then((r) => ({
+              statusCode: 200,
+              body: JSON.stringify({
+                content: c.Body.toString(),
+                state: r.Item.state.S,
+                description: r.Item.description.S,
+              }),
+              headers: headers(event),
+            }))
+        )
     : sub
     ? listAll("markdown/")
         .then((r) =>

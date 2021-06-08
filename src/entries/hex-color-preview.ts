@@ -1,9 +1,10 @@
+import { getRefTitlesByBlockUid, runExtension } from "../entry-helpers";
 import {
+  createBlockObserver,
   getReferenceBlockUid,
-  getRefTitlesByBlockUid,
-  runExtension,
-} from "../entry-helpers";
-import { createBlockObserver, getUids, getTreeByPageName } from "roam-client";
+  getUids,
+  getTreeByPageName,
+} from "roam-client";
 import Color from "color";
 
 runExtension("hex-color-preview", () => {

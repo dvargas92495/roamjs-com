@@ -106,7 +106,11 @@ const ExtensionPage = ({
           {getSingleCodeContent(`${id}/main`)}
         </Prism>
       </div>
-      {content.compiledSource ? <MDXRemote {...content} components={MdxComponents} /> : 'No content'}
+      {content.compiledSource ? (
+        <MDXRemote {...content} components={MdxComponents} />
+      ) : (
+        "No content"
+      )}
       <H3>Contributors</H3>
       <Body>
         This extension is brought to you by RoamJS! If you are facing any issues
@@ -147,12 +151,11 @@ const ExtensionPage = ({
                   ) : (
                     name
                   )}{" "}
-                  {emojiKeys
-                    .map((s) => (
-                      <Tooltip title={emojisToTooltip[s]} key={s}>
-                        <span style={{ cursor: "help" }}>{s}</span>
-                      </Tooltip>
-                    ))}
+                  {emojiKeys.map((s) => (
+                    <Tooltip title={emojisToTooltip[s]} key={s}>
+                      <span style={{ cursor: "help" }}>{s}</span>
+                    </Tooltip>
+                  ))}
                 </li>
               );
             })}
@@ -228,14 +231,14 @@ export const getStaticProps: GetStaticProps<
 > = (context) =>
   axios
     .get(`${API_URL}/request-path?id=${context.params.id}`)
-    .then((r) => matter(r.data.content))
-    .then(({ content: preRender, data }) =>
+    .then(({ data: { content, ...rest } }) => ({ ...matter(content), ...rest }))
+    .then(({ content: preRender, data, state, description }) =>
       serialize(preRender).then((content) => ({
         props: {
           content,
           id: context.params.id,
-          // Query a data source for this as a way to verify extensions
-          development: false,
+          development: state === "DEVELOPMENT",
+          description,
           ...data,
         },
       }))

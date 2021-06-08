@@ -340,6 +340,11 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/default.jpg",
             url: "",
           },
+          {
+            title: "Franz Wiesbauer",
+            imgSrc: "sponsors/Franz.jpg",
+            url: "https://twitter.com/medmastery",
+          },
         ]}
       />
     </StandardLayout>

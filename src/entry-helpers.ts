@@ -6,6 +6,7 @@ import {
   getNthChildUidByBlockUid,
   getPageTitleByBlockUid,
   getPageUidByPageTitle,
+  getReferenceBlockUid,
   getTreeByBlockUid,
   getUids,
   toRoamDate,
@@ -190,22 +191,6 @@ export const replaceTagText = ({
   } else {
     replaceText({ before: "", after: `[[${after}]]`, prepend });
   }
-};
-
-export const getReferenceBlockUid = (
-  e: HTMLElement,
-  className: "rm-block-ref" | "rm-alias--block"
-): string => {
-  const parent = e.closest(".roam-block") as HTMLDivElement;
-  if (!parent) {
-    return "";
-  }
-  const { blockUid } = getUids(parent);
-  const refs = getChildRefUidsByBlockUid(blockUid);
-  const index = Array.from(parent.getElementsByClassName(className)).findIndex(
-    (el) => el === e || el.contains(e)
-  );
-  return refs[index];
 };
 
 export const createPageTitleObserver = ({
@@ -535,13 +520,6 @@ export const getChildRefStringsByBlockUid = (b: string): string[] =>
     )
     .filter((r) => r.length && r[0])
     .map((r: RoamBlock[]) => r[0].string || "");
-
-export const getChildRefUidsByBlockUid = (b: string): string[] =>
-  window.roamAlphaAPI
-    .q(
-      `[:find (pull ?r [:block/uid]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
-    )
-    .map((r: RoamBlock[]) => r[0].uid);
 
 export const getLinkedReferences = (t: string): RoamBlock[] => {
   const parentBlocks = window.roamAlphaAPI
