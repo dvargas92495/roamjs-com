@@ -14,32 +14,32 @@ import {
   getPageTitlesStartingWithPrefix,
   getPageUidByPageTitle,
   getPageViewType,
+  getRoamUrl,
   getTreeByPageName,
   TreeNode,
 } from "roam-client";
-import { getSettingValuesFromTree } from "roamjs-components";
 import {
-  getRoamUrl,
-  openBlockInSidebar,
-  setInputSetting,
-} from "../entry-helpers";
-import { getSettingValueFromTree } from "./hooks";
-import {
-  TOKEN_STAGE,
-  MainStage,
+  getSettingValueFromTree,
+  getSettingValuesFromTree,
   ServiceDashboard,
   StageContent,
-  useAuthenticatedAxiosDelete,
-  useAuthenticatedAxiosPost,
-  useAuthenticatedAxiosGet,
-  useAuthenticatedAxiosPut,
-  useNextStage,
-  usePageUid,
-  useField,
-  NextButton,
-  useSetMetadata,
-  useGetMetadata,
-} from "./ServiceCommonComponents";
+  ServiceNextButton,
+  setInputSetting,
+  SERVICE_TOKEN_STAGE,
+  useAuthenticatedDelete,
+  useAuthenticatedPost,
+  useAuthenticatedGet,
+  useAuthenticatedPut,
+  useServiceNextStage,
+  useServicePageUid,
+  useServiceField,
+  useServiceSetMetadata,
+  useServiceGetMetadata,
+  WrapServiceMainStage,
+} from "roamjs-components";
+import {
+  openBlockInSidebar,
+} from "../entry-helpers";
 
 export const developerToaster = Toaster.create({
   position: Position.TOP,
@@ -49,12 +49,12 @@ const DeveloperContent: StageContent = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [paths, setPaths] = useState<string[]>([]);
-  const setMetadataPaths = useSetMetadata("paths");
+  const setMetadataPaths = useServiceSetMetadata("paths");
   const [newPath, setNewPath] = useState("");
-  const authenticatedAxiosGet = useAuthenticatedAxiosGet();
-  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const authenticatedAxiosPut = useAuthenticatedAxiosPut();
-  const authenticatedAxiosDelete = useAuthenticatedAxiosDelete();
+  const authenticatedGet = useAuthenticatedGet();
+  const authenticatedPost = useAuthenticatedPost();
+  const authenticatedPut = useAuthenticatedPut();
+  const authenticatedDelete = useAuthenticatedDelete();
   const [error, setError] = useState("");
   const setAllPaths = useCallback(
     (ps) => {
@@ -65,13 +65,13 @@ const DeveloperContent: StageContent = () => {
   );
   useEffect(() => {
     if (initialLoading) {
-      authenticatedAxiosGet("metadata?service=developer&key=paths")
+      authenticatedGet("metadata?service=developer&key=paths")
         .then((r) => setAllPaths(r.data.value || []))
         .catch(() => setAllPaths([]))
         .finally(() => setInitialLoading(false));
     }
   }, [initialLoading, setInitialLoading]);
-  const prefix = useField("prefix");
+  const prefix = useServiceField("prefix");
   return initialLoading ? (
     <Spinner />
   ) : (
@@ -127,7 +127,7 @@ const DeveloperContent: StageContent = () => {
                           `[:find ?title :where [?b :node/title ?title][(clojure.string/starts-with? ?title  "${title}/")]]`
                         )
                         .map((r) => r[0]);
-                      authenticatedAxiosPut("publish", {
+                      authenticatedPut("publish", {
                         path: p,
                         blocks: children,
                         viewType,
@@ -184,7 +184,7 @@ const DeveloperContent: StageContent = () => {
                   onClick={() => {
                     setLoading(true);
                     setError("");
-                    authenticatedAxiosDelete(
+                    authenticatedDelete(
                       `request-path?path=${encodeURIComponent(p)}`
                     )
                       .then((r) => setAllPaths(r.data.paths))
@@ -219,7 +219,7 @@ const DeveloperContent: StageContent = () => {
         <Button
           onClick={() => {
             setLoading(true);
-            authenticatedAxiosPost("request-path", { path: newPath })
+            authenticatedPost("request-path", { path: newPath })
               .then((r) => {
                 createPage({
                   title: newPath,
@@ -243,10 +243,10 @@ const DeveloperContent: StageContent = () => {
 };
 
 const RequestPrefixContent: StageContent = ({ openPanel }) => {
-  const nextStage = useNextStage(openPanel);
-  const pageUid = usePageUid();
-  const paths = useGetMetadata("paths") as string[];
-  const oldPrefix = useField("prefix");
+  const nextStage = useServiceNextStage(openPanel);
+  const pageUid = useServicePageUid();
+  const paths = useServiceGetMetadata("paths") as string[];
+  const oldPrefix = useServiceField("prefix");
   const [value, setValue] = useState(oldPrefix);
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value),
@@ -293,7 +293,7 @@ const RequestPrefixContent: StageContent = ({ openPanel }) => {
         {"Documentation Prefix"}
         <InputGroup value={value} onChange={onChange} onKeyDown={onKeyDown} />
       </Label>
-      <NextButton onClick={onSubmit} disabled={disabled} />
+      <ServiceNextButton onClick={onSubmit} disabled={disabled} />
     </>
   );
 };
@@ -302,8 +302,8 @@ const DeveloperDashboard = (): React.ReactElement => (
   <ServiceDashboard
     service={"developer"}
     stages={[
-      TOKEN_STAGE,
-      MainStage(DeveloperContent),
+      SERVICE_TOKEN_STAGE,
+      WrapServiceMainStage(DeveloperContent),
       {
         component: RequestPrefixContent,
         setting: "Prefix",
