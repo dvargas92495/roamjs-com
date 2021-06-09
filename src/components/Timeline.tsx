@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import EditContainer from "./EditContainer";
 import {
@@ -27,6 +27,7 @@ import {
   resolveRefs,
 } from "../entry-helpers";
 import { MenuItemSelect } from "roamjs-components";
+import TagFilter from "./TagFilter";
 
 type TimelineProps = { blockId: string };
 
@@ -190,6 +191,29 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
     return [];
   }, [blockId]);
   const [timelineElements, setTimelineElements] = useState(getTimelineElements);
+  const [filters, setFilters] = useState({ includes: [], excludes: [] });
+  const filteredElements = useMemo(() => {
+    const validUids = filters.includes.length
+      ? new Set()
+      : new Set(timelineElements.map((t) => t.uid));
+    filters.includes.forEach((inc) =>
+      window.roamAlphaAPI
+        .q(
+          `[:find ?u ?pu :where [?par :block/uid ?pu] [?b :block/parents ?par] [?b :block/uid ?u] [?b :block/refs ?p] [?p :node/title "${inc}"]]`
+        )
+        .map((uids) => uids.filter((u) => !!u).forEach((u) => validUids.add(u)))
+    );
+    filters.excludes.forEach((exc) =>
+      window.roamAlphaAPI
+        .q(
+          `[:find ?u ?pu :where [?par :block/uid ?pu] [?b :block/parents ?par] [?b :block/uid ?u] [?b :block/refs ?p] [?p :node/title "${exc}"]]`
+        )
+        .map((uids) =>
+          uids.filter((u) => !!u).forEach((u) => validUids.delete(u))
+        )
+    );
+    return timelineElements.filter((t) => validUids.has(t.uid));
+  }, [filters, timelineElements]);
   const [colors, setColors] = useState(() => getColors(blockUid));
   const [layout, setLayout] = useState(() => getLayout(blockUid));
   const refresh = useCallback(() => {
@@ -315,7 +339,7 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
           // @ts-ignore types doesn't support left/right
           layout={layout}
         >
-          {timelineElements.map((t, i) => (
+          {filteredElements.map((t, i) => (
             <VerticalTimelineElement
               contentStyle={{
                 backgroundColor: colors[i % colors.length],
@@ -371,6 +395,32 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
               />
             </VerticalTimelineElement>
           ))}
+          {filteredElements.length &&
+            (() => {
+              const tag = getTag(blockUid);
+              const tags = new Set(
+                filteredElements.flatMap((t) =>
+                  [
+                    ...window.roamAlphaAPI.q(
+                      `[:find ?t :where [?p :node/title ?t] [?b :block/refs ?p] [?b :block/uid "${t.uid}"]]`
+                    ),
+                    ...window.roamAlphaAPI.q(
+                      `[:find ?t :where [?p :node/title ?t] [?c :block/parents ?b] [?c :block/refs ?p] [?b :block/uid "${t.uid}"]]`
+                    ),
+                  ].map((s) => s[0])
+                )
+              );
+              tags.delete(tag);
+              return (
+                <div style={{ position: "absolute", top: 8 }}>
+                  <TagFilter
+                    blockUid={blockUid}
+                    onChange={setFilters}
+                    tags={Array.from(tags)}
+                  />
+                </div>
+              );
+            })()}
         </VerticalTimeline>
       </EditContainer>
     </>
