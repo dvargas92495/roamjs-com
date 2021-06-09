@@ -9,7 +9,7 @@ import {
   Label,
   Popover,
 } from "@blueprintjs/core";
-import { getUidsFromId } from "roam-client";
+import { getTextByBlockUid, getUidsFromId } from "roam-client";
 import { parseDate } from "chrono-node";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
@@ -237,10 +237,12 @@ const ConfirmationDialog: React.FunctionComponent<{
   const onClose = useCallback(() => {
     setIsOpen(false);
     setScheduled("DONE");
+    const { blockUid } = getUidsFromId(blockId);
+    const text = getTextByBlockUid(blockUid);
     window.roamAlphaAPI.updateBlock({
       block: {
-        uid: getUidsFromId(blockId).blockUid,
-        string: "",
+        uid: blockUid,
+        string: text.replace(/{{(\[\[)?alert(\]\])?}}/i, ""),
       },
     });
   }, [setIsOpen, setScheduled, blockId]);
