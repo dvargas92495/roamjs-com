@@ -161,6 +161,14 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
       return events
         .filter((e: Event) => !skipFree || e.transparency !== "transparent")
         .map((e: Event) => { 
+          const summaryText = resolveSummary(e);
+          const summary = includeLink && e.htmlLink 
+                ? `[${summaryText}](${e.htmlLink})` 
+                : summaryText;
+          const meetLink = e.hangoutLink ? ` - [Meet](${e.hangoutLink})` : "";
+          const zoomLink = e.location && e.location.indexOf("zoom.us") > -1 
+                ? ` - [Zoom](${e.location})`
+                : "";
           if (format) {
             return (format as string)
               .replace("/Summary", resolveSummary(e))
@@ -169,9 +177,10 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
               .replace("/Location", e.location || "")
               .replace("/Start Time", resolveDate(e.start))
               .replace("/End Time", resolveDate(e.end))
-              .replace("{summary}", resolveSummary(e))
+              .replace("{summary}", summary)
               .replace("{link}", e.htmlLink || "")
               .replace("{hangout}", e.hangoutLink || "")
+              .replace("{confLink}", (meetLink + zoomLink) || "")
               .replace("{location}", e.location || "")
               .replace("{attendees}", resolveAttendees(e) || "")
               .replace(/{start:?(.*?)}/, (_, format) =>
@@ -181,19 +190,7 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
                 resolveDate({ ...e.end, format })
               );
           } else {
-            const summaryText = resolveSummary(e);
-            const summary =
-              includeLink && e.htmlLink
-                ? `[${summaryText}](${e.htmlLink})`
-                : summaryText;
-            const meetLink = e.hangoutLink ? ` - [Meet](${e.hangoutLink})` : "";
-            const zoomLink =
-              e.location && e.location.indexOf("zoom.us") > -1
-                ? ` - [Zoom](${e.location})`
-                : "";
-            return `${summary} (${resolveDate(e.start)} - ${resolveDate(
-              e.end
-            )})${meetLink}${zoomLink}`;
+            return `${summary} (${resolveDate(e.start)} - ${resolveDate(e.end)})${meetLink}${zoomLink}`;
           }
         });
     })
