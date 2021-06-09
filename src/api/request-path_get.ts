@@ -12,7 +12,7 @@ export const handler: APIGatewayProxyHandler = (event) => {
           dynamo
             .getItem({
               TableName: "RoamJSExtensions",
-              Key: { id: { S: id } },
+              Key: { id: { S: id.split('/')[0] } },
             })
             .promise()
             .then((r) => ({
