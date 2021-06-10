@@ -7,19 +7,17 @@ import {
   getPageTitleByBlockUid,
   getPageUidByPageTitle,
   getReferenceBlockUid,
+  getTextByBlockUid,
   getTreeByBlockUid,
   getUids,
+  parseInline,
+  parseRoamBlocksToHtml,
+  RoamBlock,
   toRoamDate,
   TreeNode,
 } from "roam-client";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import { Dict } from "mixpanel-browser";
-import {
-  getTextByBlockUid,
-  RoamBlock,
-  parseInline,
-  parseRoamBlocksToHtml,
-} from "roam-client";
 import axios, { AxiosResponse } from "axios";
 import { SidebarWindow, ViewType } from "roam-client/lib/types";
 
