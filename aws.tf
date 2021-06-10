@@ -142,6 +142,7 @@ module "aws-serverless-backend" {
         "article/post",
         "balance/get",
         "balance/post",
+        "connected/get",
         "convertkit/get",
         "convertkit/post",
         "convertkit/delete",
@@ -210,6 +211,7 @@ module "aws-serverless-backend" {
         "website-variables/get",
     ]
     cors = [
+      "connected",
       "convertkit",
       "launch-social",
       "start-service",
