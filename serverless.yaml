@@ -29,6 +29,13 @@ functions:
           path: balance
           method: post
           cors: true
+  connected-get:
+    handler: out/connected_get.handler
+    events:
+      - http:
+          path: connected
+          method: get
+          cors: true
   convertkit-get:
     handler: out/convertkit_get.handler
     events:

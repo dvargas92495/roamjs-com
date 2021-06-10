@@ -15,6 +15,7 @@ import { useRouter } from "next/router";
 import {
   idToCamel,
   idToTitle,
+  useAuthenticatedAxiosGet,
   useAuthenticatedAxiosPost,
   useCopyCode,
 } from "./hooks";
@@ -30,8 +31,10 @@ export type ServicePageProps = {
   id: string;
 };
 
-export const findById = (id: string) => ({ name }: { name: string }): boolean =>
-  name.toLowerCase() === `roamjs ${id.split("-").slice(-1)}`;
+export const findById =
+  (id: string) =>
+  ({ name }: { name: string }): boolean =>
+    name.toLowerCase() === `roamjs ${id.split("-").slice(-1)}`;
 
 export const getStaticPropsForPage: (
   id: string
@@ -81,6 +84,7 @@ const LaunchButton: React.FC<{
   const {
     query: { started },
   } = useRouter();
+  const authenticatedAxiosGet = useAuthenticatedAxiosGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const startService = useCallback(
     () =>
@@ -99,6 +103,20 @@ const LaunchButton: React.FC<{
       ),
     [authenticatedAxiosPost]
   );
+  const [disabled, setDisabled] = useState(true);
+  useEffect(() => {
+    const checkStripe = () =>
+      authenticatedAxiosGet("connected?key=stripeId")
+        .then((r) => {
+          if (r.data.connected) {
+            setDisabled(false);
+          } else {
+            setTimeout(checkStripe, 1000);
+          }
+        })
+        .catch(() => setTimeout(checkStripe, 5000));
+    checkStripe();
+  }, [authenticatedAxiosGet]);
   return (
     <ConfirmationDialog
       action={startService}
@@ -109,6 +127,7 @@ const LaunchButton: React.FC<{
       onSuccess={start}
       title={`RoamJS ${idToTitle(id)}`}
       defaultIsOpen={started === "true"}
+      disabled={disabled}
     />
   );
 };
@@ -140,7 +159,7 @@ const CheckSubscription = ({
           price={price}
           refreshUser={() =>
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            //@ts-ignore refresh metadata state
+            // @ts-ignore refresh metadata state
             user.update()
           }
         />
@@ -155,10 +174,8 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
   };
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const camel = idToCamel(id);
-  const {
-    token = "NO TOKEN FOUND FOR USER",
-    authenticated = false,
-  } = userData?.[camel];
+  const { token = "NO TOKEN FOUND FOR USER", authenticated = false } =
+    userData?.[camel];
   const [copied, setCopied] = useState(false);
   const onSave = useCopyCode(
     setCopied,
@@ -236,9 +253,10 @@ const ServiceLayout = ({
   const router = useRouter();
   const start = useCallback(() => setStarted(true), [setStarted]);
   const end = useCallback(() => setStarted(false), [setStarted]);
-  const login = useCallback(() => router.push(`/login?service=${id}`), [
-    router,
-  ]);
+  const login = useCallback(
+    () => router.push(`/login?service=${id}`),
+    [router]
+  );
   const SplashLayout: React.FC<{ StartNowButton: React.ReactNode }> = ({
     StartNowButton,
   }) => (

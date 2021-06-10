@@ -1,8 +1,9 @@
-import { Root } from "@dvargas92495/ui";
+import { Loading, Root } from "@dvargas92495/ui";
 import React, { useEffect, useState } from "react";
 import { v4 } from "uuid";
 
 const OauthPage = (): React.ReactElement => {
+  const [loading, setLoading] = useState(false);
   const [mock, setMock] = useState("");
   useEffect(() => {
     if (window.opener && window.opener !== window) {
@@ -42,14 +43,17 @@ const OauthPage = (): React.ReactElement => {
             the button below to simulate the flow.
           </p>
           <button
-            onClick={() =>
+            onClick={() => {
+              setLoading(true);
               window.location.assign(
                 `${window.location.origin}/oauth?auth=true&code=${v4()}`
-              )
-            }
+              );
+            }}
+            style={{ width: 200 }}
           >
             Log In
           </button>
+          <Loading loading={loading} />
         </>
       )}
     </Root>
