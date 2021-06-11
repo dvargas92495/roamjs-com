@@ -38,7 +38,7 @@ import {
 } from "roam-client";
 import { extractTag, getCurrentPageUid, toFlexRegex } from "../entry-helpers";
 import { getRenderRoot } from "./hooks";
-import { MenuItemSelect } from "roamjs-components";
+import { getSettingIntFromTree, MenuItemSelect } from "roamjs-components";
 import { getSettingValueFromTree } from "roamjs-components";
 import urlRegex from "url-regex-safe";
 
@@ -69,7 +69,7 @@ export const getLabel = ({
   }`;
 const URL_REGEX = urlRegex({ strict: true });
 
-const PAGE_QUERY = `SELECT ?property ?propertyLabel ?value ?valueLabel {
+const PAGE_QUERY = `SELECT ?property ?propertyLabel ?value ?valueLabel {QUALIFIER_SELECT}{
   VALUES (?id) {(wd:{ID})}
   
   ?id ?p ?statement .
@@ -77,13 +77,17 @@ const PAGE_QUERY = `SELECT ?property ?propertyLabel ?value ?valueLabel {
   
   ?property wikibase:claim ?p.
   ?property wikibase:statementProperty ?ps.
-  
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
+
+{QUALIFIER_QUERY}  SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
 } 
 ORDER BY ?property ?statement ?value
 LIMIT {LIMIT}`;
 
-const WIKIDATA_ITEMS = ["Current Page", "Current Block", "Custom Query"];
+const WIKIDATA_ITEMS = [
+  "Current Page",
+  "Current Block",
+  "Custom Query",
+] as const;
 const LIMIT_REGEX = /LIMIT ([\d]*)/;
 const IMAGE_REGEX_URL =
   /(http(s?):)([/|.|\w|\s|\-|:|%])*\.(?:jpg|gif|png|svg)/i;
@@ -117,8 +121,10 @@ export const runSparqlQuery = ({
           h: string
         ) => {
           const valueKey = returnedLabels.has(`${h}Label`) ? `${h}Label` : h;
-          const s = p[valueKey].value;
-          return IMAGE_REGEX_URL.test(s)
+          const s = p[valueKey]?.value;
+          return !s
+            ? ""
+            : IMAGE_REGEX_URL.test(s)
             ? `![](${s})`
             : URL_REGEX.test(s)
             ? `[${s}](${s})`
@@ -170,7 +176,7 @@ export const runSparqlQuery = ({
             )
             .sort(({ text: a }, { text: b }) => a.localeCompare(b))
             .map((node, i, arr) => {
-              const firstIndex = arr.findIndex(n => n.text === node.text);
+              const firstIndex = arr.findIndex((n) => n.text === node.text);
               if (i > firstIndex) {
                 arr[firstIndex].children.push(...node.children);
                 node.text = "";
@@ -184,8 +190,8 @@ export const runSparqlQuery = ({
         );
         const titlesSet = new Set(getPageTitleReferencesByPageTitle("same as"));
         setTimeout(() => {
-          Array.from(
-            new Set(
+          Object.entries(
+            Object.fromEntries(
               data
                 .flatMap((p) =>
                   Array.from(returnedLabels).map((h) => ({
@@ -197,8 +203,9 @@ export const runSparqlQuery = ({
                   ({ title }) =>
                     !titlesSet.has(title) && !IMAGE_REGEX_URL.test(title)
                 )
+                .map(({ title, link }) => [title, link])
             )
-          ).forEach(({ title, link }) =>
+          ).forEach(([title, link]) =>
             createBlock({
               node: {
                 text: `same as:: ${link}`,
@@ -256,7 +263,9 @@ const SparqlQuery = ({
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [activeItem, setActiveItem] = useState(WIKIDATA_ITEMS[0]);
+  const [activeItem, setActiveItem] = useState<typeof WIKIDATA_ITEMS[number]>(
+    WIKIDATA_ITEMS[0]
+  );
   const [radioValue, setRadioValue] = useState("");
   const [codeValue, setCodeValue] = useState("");
   const [showAdditionalOptions, setShowAdditionalOptions] = useState(false);
@@ -264,26 +273,54 @@ const SparqlQuery = ({
     () => setShowAdditionalOptions(!showAdditionalOptions),
     [setShowAdditionalOptions, showAdditionalOptions]
   );
+  const importTree = useMemo(
+    () =>
+      getTreeByBlockUid(configUid).children.find((t) =>
+        toFlexRegex("import").test(t.text)
+      )?.children || [],
+    [configUid]
+  );
   const [label, setLabel] = useState(
     getSettingValueFromTree({
-      tree:
-        getTreeByBlockUid(configUid).children.find((t) =>
-          toFlexRegex("import").test(t.text)
-        )?.children || [],
+      tree: importTree,
       key: "default label",
       defaultValue: DEFAULT_EXPORT_LABEL,
     })
   );
   const [dataSource, setDataSource] = useState<string>(WIKIDATA_SOURCE);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("Parent");
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(
+    getSettingIntFromTree({
+      tree: importTree,
+      key: "default limit",
+      defaultValue: 10,
+    })
+  );
   const [saveQuery, setSaveQuery] = useState(false);
+  const [importQualifiers, setImportQualifiers] = useState(
+    importTree.some((t) => toFlexRegex("qualifiers").test(t.text))
+  );
   const query = useMemo(() => {
     if (activeItem === "Current Page" || activeItem === "Current Block") {
-      return PAGE_QUERY.replace("{ID}", radioValue).replace(
-        "{LIMIT}",
-        `${limit}`
-      );
+      return PAGE_QUERY.replace("{ID}", radioValue)
+        .replace("{LIMIT}", `${limit}`)
+        .replace(
+          "{QUALIFIER_SELECT}",
+          importQualifiers
+            ? "?qualifierProperty ?qualifierPropertyLabel ?qualifierValue ?qualifierValueLabel "
+            : ""
+        )
+        .replace(
+          "{QUALIFIER_QUERY}",
+          importQualifiers
+            ? `  OPTIONAL {
+          ?statement ?pq ?qualifierValue .
+          ?qualifierProperty wikibase:qualifier ?pq .
+        }
+        
+`
+            : ""
+        );
     } else if (activeItem === "Custom Query") {
       if (LIMIT_REGEX.test(codeValue)) {
         return codeValue.replace(
@@ -295,7 +332,7 @@ const SparqlQuery = ({
       }
     }
     return "";
-  }, [codeValue, radioValue, activeItem, limit]);
+  }, [codeValue, radioValue, activeItem, limit, importQualifiers]);
   const [pageResults, setPageResults] = useState<PageResult[]>([]);
   const searchQuery = useMemo(
     () => (activeItem === "Current Block" ? blockString : pageTitle),
@@ -344,7 +381,7 @@ const SparqlQuery = ({
         <Label>
           Query Type
           <MenuItemSelect
-            items={WIKIDATA_ITEMS}
+            items={[...WIKIDATA_ITEMS]}
             onItemSelect={(s) => {
               setActiveItem(s);
               setDataSource(WIKIDATA_SOURCE);
@@ -429,6 +466,15 @@ const SparqlQuery = ({
                 setSaveQuery((e.target as HTMLInputElement).checked)
               }
             />
+            {activeItem !== "Custom Query" && (
+              <Checkbox
+                label={"Import Qualifiers"}
+                checked={importQualifiers}
+                onChange={(e) =>
+                  setImportQualifiers((e.target as HTMLInputElement).checked)
+                }
+              />
+            )}
           </div>
         )}
         <style>

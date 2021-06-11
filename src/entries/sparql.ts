@@ -70,6 +70,19 @@ runExtension(ID, () => {
                 "The default label each Sparql query will have on import",
               defaultValue: DEFAULT_EXPORT_LABEL,
             },
+            {
+              type: "number",
+              title: "default limit",
+              description:
+                "The default limit each Sparql query will have on import",
+              defaultValue: 10,
+            },
+            {
+              type: "flag",
+              title: "qualifiers",
+              description:
+                "Whether sparql queries for blocks and pages should import qualifiers by default",
+            },
           ],
         },
       ],

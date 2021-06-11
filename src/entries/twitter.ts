@@ -1,14 +1,14 @@
 import {
-  addStyle,
-  createPageTitleObserver,
   getPageTitle,
   isTagOnPage,
   runExtension,
 } from "../entry-helpers";
 import {
   addButtonListener,
+  addStyle,
   createButtonObserver,
   createHTMLObserver,
+  createPageTitleObserver,
   pushBullets,
   getConfigFromPage,
   genericError,
