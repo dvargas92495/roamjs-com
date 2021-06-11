@@ -21,7 +21,7 @@ import {
   getTextByBlockUid,
   getBlockUidByTextOnPage,
 } from "roam-client";
-import { getOauth, getSettingValueFromTree } from "./hooks";
+import { getOauth, getSettingValueFromTree } from "roamjs-components";
 import { resolveRefs } from "../entry-helpers";
 import { useOauthAccounts } from "./OauthSelect";
 
@@ -143,7 +143,7 @@ const SlackContent: React.FunctionComponent<
     setError("");
     const tree = getTreeByPageName("roam/js/slack");
     const legacyToken = getSettingValueFromTree({ tree, key: "token" });
-    const oauth = getOauth(tree, accountLabel);
+    const oauth = getOauth("slack", accountLabel);
     const { token = legacyToken, user_token } = JSON.parse(oauth);
     const userFormat = getUserFormat(tree);
     const channelFormat = getChannelFormat(tree);

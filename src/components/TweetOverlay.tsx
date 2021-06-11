@@ -23,7 +23,7 @@ import {
   getTreeByPageName,
   getUids,
 } from "roam-client";
-import { getOauth, getSettingValueFromTree, useSocialToken } from "./hooks";
+import { getSettingValueFromTree, useSocialToken } from "./hooks";
 import axios from "axios";
 import twitter from "twitter-text";
 import addYears from "date-fns/addYears";
@@ -33,6 +33,7 @@ import { getRoamUrlByPage, resolveRefs } from "../entry-helpers";
 import addMinutes from "date-fns/addMinutes";
 import startOfMinute from "date-fns/startOfMinute";
 import { useOauthAccounts } from "./OauthSelect";
+import { getOauth } from 'roamjs-components';
 
 const ATTACHMENT_REGEX = /!\[[^\]]*\]\(([^\s)]*)\)/g;
 const UPLOAD_URL = `${process.env.REST_API_URL}/twitter-upload`;
@@ -161,8 +162,7 @@ const TwitterContent: React.FunctionComponent<{
   const { accountLabel, accountDropdown } = useOauthAccounts("twitter");
   const onClick = useCallback(async () => {
     setError("");
-    const tree = getTreeByPageName("roam/js/twitter");
-    const oauth = getOauth(tree, accountLabel);
+    const oauth = getOauth('twitter');
     if (oauth === "{}") {
       setError(
         "Need to log in with Twitter to send Tweets! Head to roam/js/twitter page to log in."
@@ -170,6 +170,7 @@ const TwitterContent: React.FunctionComponent<{
       return;
     }
     const { oauth_token: key, oauth_token_secret: secret } = JSON.parse(oauth);
+    const tree = getTreeByPageName("roam/js/twitter");
     const sentBlockUid = getSettingValueFromTree({
       tree,
       key: "sent",
@@ -313,7 +314,7 @@ const TwitterContent: React.FunctionComponent<{
     [setShowSchedule]
   );
   const onScheduleClick = useCallback(() => {
-    const oauth = getOauth(getTreeByPageName("roam/js/twitter"), accountLabel);
+    const oauth = getOauth("twitter", accountLabel);
     if (oauth === "{}") {
       setError(
         "Need to log in with Twitter to schedule Tweets! Head to roam/js/twitter page to log in."

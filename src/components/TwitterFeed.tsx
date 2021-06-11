@@ -9,7 +9,7 @@ import {
   toRoamDate,
   toRoamDateUid,
 } from "roam-client";
-import { getOauth } from "./hooks";
+import { getOauth } from "roamjs-components";
 import subDays from "date-fns/subDays";
 import startOfDay from "date-fns/startOfDay";
 import endOfDay from "date-fns/endOfDay";
@@ -86,8 +86,7 @@ const TwitterFeed = ({
     onClose();
   }, [onClose, date, title]);
   useEffect(() => {
-    const tree = getTreeByPageName("roam/js/twitter");
-    const oauth = getOauth(tree);
+    const oauth = getOauth("twitter");
     if (oauth === "{}") {
       setError(
         "Need to log in with Twitter to use Daily Twitter Feed! Head to roam/js/twitter page to log in."

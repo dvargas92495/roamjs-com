@@ -14,11 +14,10 @@ import {
   getBlockUidFromTarget,
   getFirstChildUidByBlockUid,
   getTextByBlockUid,
-  getTreeByPageName,
 } from "roam-client";
 import FacebookLogo from "../assets/Facebook.svg";
 import { resolveRefs } from "../entry-helpers";
-import { getOauth } from "./hooks";
+import { getOauth } from "roamjs-components";
 
 const FacebookGroupContent = ({
   blockUid,
@@ -30,12 +29,11 @@ const FacebookGroupContent = ({
   const [loading, setLoading] = useState(true);
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([]);
   const [activeGroup, setActiveGroup] = useState("");
-  const tree = useMemo(() => getTreeByPageName("roam/js/facebook"), []);
   const message = useMemo(
     () => resolveRefs(getTextByBlockUid(getFirstChildUidByBlockUid(blockUid))),
     [blockUid]
   );
-  const { userId, access_token } = JSON.parse(getOauth(tree) || "{}");
+  const { userId, access_token } = JSON.parse(getOauth("facebook") || "{}");
   useEffect(() => {
     axios
       .get(

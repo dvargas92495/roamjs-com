@@ -1,16 +1,14 @@
-import { createConfigObserver } from "roamjs-components";
+import { createConfigObserver, getOauth } from "roamjs-components";
 import { getDropUidOffset, runExtension } from "../entry-helpers";
 import DropboxLogo from "../assets/Dropbox.svg";
 import axios from "axios";
 import {
   createBlock,
   createHTMLObserver,
-  getTreeByPageName,
   getUids,
   updateBlock,
 } from "roam-client";
 import { Dropbox } from "dropbox";
-import { getOauth } from "../components/hooks";
 import mime from "mime-types";
 
 const ID = "dropbox";
@@ -65,7 +63,7 @@ runExtension(ID, () => {
   }) => {
     const fileToUpload = files[0];
     if (fileToUpload) {
-      const oauth = getOauth(getTreeByPageName(CONFIG));
+      const oauth = getOauth(ID);
       if (oauth !== "{}") {
         const { access_token } = JSON.parse(oauth);
         const dbx = new Dropbox({ accessToken: access_token });

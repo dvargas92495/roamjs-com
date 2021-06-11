@@ -84,7 +84,7 @@ const fetchGoogleCalendar = async (): Promise<string[]> => {
   const configTree = getTreeByPageName(CONFIG);
   const oauthNode = configTree.find((t) => /oauth/i.test(t.text))
     ?.children?.[0];
-  const oauthJson = getOauth(configTree);
+  const oauthJson = getOauth('google-calendar');
   const { access_token, expires_in, refresh_token } = JSON.parse(oauthJson);
   const tokenAge = differenceInSeconds(
     new Date(),

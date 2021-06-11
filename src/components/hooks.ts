@@ -105,23 +105,6 @@ export const getSettingValuesFromTree = ({
   return value;
 };
 
-export const getOauth = (tree: TreeNode[], label?:string): string => {
-  const node = tree.find((s) => toFlexRegex('oauth').test(s.text.trim()));
-  if (!node) {
-    return '{}';
-  }
-  const index = label ? node.children.findIndex(t => toFlexRegex(label).test(t.text)): 0
-  const labelNode = node.children[index];
-  if (!labelNode) {
-    return '{}';
-  }
-  if (labelNode.text.startsWith('{') && labelNode.text.endsWith('}')) {
-    return labelNode.text;
-  }
-  const data = labelNode.children[0]?.text;
-  return data || '{}';
-}
-
 export const allBlockMapper = (t: TreeNode): TreeNode[] => [
   t,
   ...t.children.flatMap(allBlockMapper),
