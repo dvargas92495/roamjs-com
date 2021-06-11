@@ -26,10 +26,9 @@ import formatRFC3339 from "date-fns/formatRFC3339";
 import startOfDay from "date-fns/startOfDay";
 import endOfDay from "date-fns/endOfDay";
 import format from "date-fns/format";
-import { createConfigObserver } from "roamjs-components";
+import { createConfigObserver, getOauth } from "roamjs-components";
 import GoogleLogo from "../assets/Google.svg";
 import differenceInSeconds from "date-fns/differenceInSeconds";
-import { getOauth } from "../components/hooks";
 // import { getRenderRoot } from "../components/hooks";
 // import { render } from "../components/DeprecationWarning";
 
