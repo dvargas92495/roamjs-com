@@ -23,30 +23,8 @@ import { SidebarWindow, ViewType } from "roam-client/lib/types";
 
 declare global {
   interface Window {
-    roamjs?: {
-      loaded: Set<string>;
-      extension: {
-        [id: string]: {
-          [method: string]: (args?: unknown) => void;
-        };
-      };
-      dynamicElements: Set<HTMLElement>;
-    };
     // https://github.com/microsoft/TypeScript/pull/26797
     [key: string]: string;
-    roam42?: {
-      smartBlocks?: {
-        customCommands: {
-          key: string; // `<% ${string} %> (SmartBlock function)`, sad - https://github.com/microsoft/TypeScript/issues/13969
-          icon: "gear";
-          value: string;
-          processor: (match: string) => Promise<string | void>;
-        }[];
-        activeWorkflow: {
-          outputAdditionalBlock: (text: string) => void;
-        };
-      };
-    };
   }
 }
 
