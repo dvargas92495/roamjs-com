@@ -155,8 +155,6 @@ module "aws-serverless-backend" {
         "github-issues/get",
         "github-projects/get",
         "github-repositories/get",
-        "google-auth/post",
-        "google-calendar/get",
         "decrypt-proxy/post",
         "encrypt/post",
         "end-service/post",
