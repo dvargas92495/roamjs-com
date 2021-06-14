@@ -8,6 +8,9 @@ export const handler: CloudFrontRequestHandler = (event, _, callback) => {
   if (movedUris.includes(olduri)) {
     request.uri = olduri.replace(/\.js$/, "/main.js");
     console.log("Mapped", olduri, "to", request.uri);
+  } else if (olduri.endsWith("/")) {
+    request.uri = olduri.replace(/\/$/, "");
+    console.log("Mapped", olduri, "to", request.uri);
   }
   return callback(null, request);
 };
