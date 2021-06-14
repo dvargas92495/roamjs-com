@@ -111,14 +111,15 @@ description: "${description}"${
         (_, id) => `<YouTube id={"${id}"} />`
       )
       .replace(
-        new RegExp(`\\[(.*?)\\]\\(\\[\\[${path}/(.*?)\\]\\]\\)`, 'g'),
+        new RegExp(`\\[(.*?)\\]\\(\\[\\[${path}/(.*?)\\]\\]\\)`, "g"),
         (_, label, page) =>
           `[${label}](/extensions/${path}/${page
             .replace(/ /g, "_")
             .toLowerCase()})`
       )
       .replace(/\^\^(.*?)\^\^/g, (_, i) => `<Highlight>${i}</Highlight>`)
-      .replace(/__/g, '_');
+      .replace(/__/g, "_")
+      .replace(new RegExp(String.fromCharCode(160), "g"), " ");
   const blockToMarkdown = (
     block: TreeNode,
     viewType: ViewType,
