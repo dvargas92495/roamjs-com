@@ -154,8 +154,8 @@ const ContributePage = (): React.ReactElement => {
           },
           {
             title: "Jason Kleinberg",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
+            imgSrc: "sponsors/kleinberg.jpg",
+            url: "https://www.jkleinberg.com/now",
           },
         ]}
       />

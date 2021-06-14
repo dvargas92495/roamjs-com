@@ -684,8 +684,7 @@ type CfVariableDiff = {
 
 const isWebsiteReady = (w: { status: string; deploys: { status: string }[] }) =>
   w.status === "LIVE" &&
-  w.deploys.length &&
-  ["SUCCESS", "FAILURE"].includes(w.deploys[0].status);
+  (!w.deploys.length || ["SUCCESS", "FAILURE"].includes(w.deploys[0].status));
 
 const getStatusColor = (status: string) =>
   ["LIVE", "SUCCESS"].includes(status)

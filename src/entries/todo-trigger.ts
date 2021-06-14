@@ -1,15 +1,15 @@
 import format from "date-fns/format";
 import {
   createHTMLObserver,
+  createTagRegex,
+  DAILY_NOTE_PAGE_REGEX,
+  getBlockUidFromTarget,
   getConfigFromPage,
   getTextByBlockUid,
   getUids,
   toRoamDate,
 } from "roam-client";
 import {
-  createTagRegex,
-  DAILY_NOTE_PAGE_REGEX,
-  getBlockUidFromTarget,
   isControl,
   runExtension,
 } from "../entry-helpers";
