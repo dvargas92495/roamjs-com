@@ -1,13 +1,14 @@
 const fs = require("fs");
 const path = require("path");
 const Dotenv = require("dotenv-webpack");
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
-  .BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 const buildEntry = (dir) => {
-  const extensions = fs.readdirSync(`./src/${dir}/`);
+  const srcDir = dir === "lambdas" ? `./lambdas/` : `./src/${dir}/`;
+  const extensions = fs.readdirSync(srcDir);
   const entry = Object.fromEntries(
-    extensions.map((e) => [e.substring(0, e.length - 3), `./src/${dir}/${e}`])
+    extensions.map((e) => [e.substring(0, e.length - 3), `${srcDir}${e}`])
   );
   return entry;
 };
@@ -56,6 +57,6 @@ module.exports = (env) => ({
             generateStatsFile: true,
           }),
         ]
-      : [])
+      : []),
   ],
 });

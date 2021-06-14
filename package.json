@@ -10,6 +10,7 @@
     "build": "webpack --config ./webpack.production.config.js",
     "build:api": "webpack --config ./webpack.lambda.config.js --env dir=api",
     "build:next": "next build",
+    "build:lambdas": "webpack --config ./webpack.lambda.config.js --env dir=lambdas",
     "hook": "node scripts/diahook.js",
     "postbuild:next": "next export",
     "prebuild:pr": "echo 'Building extensions: Process will take a couple of minutes...'",
