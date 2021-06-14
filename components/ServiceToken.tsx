@@ -13,7 +13,7 @@ const GenerateToken: React.FC<{ id: string }> = ({ id }) => {
       .then(() =>
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore refresh metadata state
-        user.update()
+        user.update({})
       )
       .finally(() => setLoading(false));
   }, [authenticatedAxiosPost, user, id, setLoading]);
