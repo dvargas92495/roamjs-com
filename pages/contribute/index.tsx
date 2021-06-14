@@ -98,37 +98,37 @@ const ContributePage = (): React.ReactElement => {
             url: "https://thatsthenorm.com/start/",
           },
           {
-            title: 'Rick Wilkes',
+            title: "Rick Wilkes",
             imgSrc: "sponsors/default.jpg",
             url: "",
           },
           {
-            title: 'David Hislop',
+            title: "David Hislop",
             imgSrc: "sponsors/hislop.png",
             url: "https://twitter.com/davehislop",
           },
           {
-            title: 'Patrick Stoeckmann',
+            title: "Patrick Stoeckmann",
             imgSrc: "sponsors/stoeckmann.jpg",
             url: "https://twitter.com/palladion",
           },
           {
-            title: 'Zach Phillips',
+            title: "Zach Phillips",
             imgSrc: "sponsors/zphillips.jpg",
             url: "https://zachphillips.blog/",
           },
           {
-            title: 'Brent Hueth',
+            title: "Brent Hueth",
             imgSrc: "sponsors/default.jpg",
             url: "",
           },
           {
-            title: 'Bruno Santos',
+            title: "Bruno Santos",
             imgSrc: "sponsors/default.jpg",
             url: "",
           },
           {
-            title: 'Manel Punti Sarda',
+            title: "Manel Punti Sarda",
             imgSrc: "sponsors/manel.png",
             url: "https://www.musicdistribucion.com/",
           },
@@ -149,6 +149,11 @@ const ContributePage = (): React.ReactElement => {
           },
           {
             title: "Michael Brockbals",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
+          {
+            title: "Jason Kleinberg",
             imgSrc: "sponsors/default.jpg",
             url: "",
           },
@@ -291,22 +296,22 @@ const ContributePage = (): React.ReactElement => {
             url: "https://denisetodd.com",
           },
           {
-            title: 'Nadir Samji',
+            title: "Nadir Samji",
             imgSrc: "sponsors/samji.png",
             url: "https://twitter.com/_nadir",
           },
           {
-            title: 'Tobias Harmes',
+            title: "Tobias Harmes",
             imgSrc: "sponsors/default.jpg",
             url: "",
           },
           {
-            title: 'Weston Wagner',
+            title: "Weston Wagner",
             imgSrc: "sponsors/wagner.jpg",
             url: "https://westonwagner.com/",
           },
           {
-            title: 'Adam Rogers',
+            title: "Adam Rogers",
             imgSrc: "sponsors/adamr.jpg",
             url: "https://twitter.com/adamr",
           },
@@ -344,6 +349,11 @@ const ContributePage = (): React.ReactElement => {
             title: "Franz Wiesbauer",
             imgSrc: "sponsors/Franz.jpg",
             url: "https://twitter.com/medmastery",
+          },
+          {
+            title: "Henry Harboe",
+            imgSrc: "sponsors/harboe.jfif",
+            url: "https://twitter.com/henryharboe",
           },
         ]}
       />

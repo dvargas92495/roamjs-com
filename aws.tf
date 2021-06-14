@@ -71,14 +71,6 @@ variable "floss_token" {
     type = string
 }
 
-variable "google_client_id" {
-    type = string  
-}
-
-variable "google_client_secret" {
-    type = string  
-}
-
 variable "facebook_client_id" {
     type = string
 }
@@ -535,18 +527,6 @@ resource "github_actions_secret" "cloudfront_arn" {
   repository       = "roam-js-extensions"
   secret_name      = "CLOUDFRONT_ARN"
   plaintext_value  = module.aws_static_site.cloudfront_arn
-}
-
-resource "github_actions_secret" "google_client_id" {
-  repository       = "roam-js-extensions"
-  secret_name      = "GOOGLE_CLIENT_ID"
-  plaintext_value  = var.google_client_id
-}
-
-resource "github_actions_secret" "google_client_secret" {
-  repository       = "roam-js-extensions"
-  secret_name      = "GOOGLE_CLIENT_SECRET"
-  plaintext_value  = var.google_client_secret
 }
 
 resource "github_actions_secret" "facebook_client_id" {
