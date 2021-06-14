@@ -13,7 +13,12 @@ import {
 } from "roam-client";
 import { createConfigObserver } from "roamjs-components";
 import { getSettingValueFromTree } from "../components/hooks";
-import { getRoamUrl, isApple, runExtension, toFlexRegex } from "../entry-helpers";
+import {
+  getRoamUrl,
+  isApple,
+  runExtension,
+  toFlexRegex,
+} from "../entry-helpers";
 import { render } from "../components/Toast";
 
 const ID = "weekly-notes";
@@ -43,7 +48,12 @@ const createWeeklyPage = (pageName: string) => {
   const format = getFormat(tree);
   const [, day, dayFormat] = format.match(new RegExp(DATE_REGEX.source));
   const firstDateFormatted = pageName.match(
-    new RegExp(format.replace(/{(.*?)}/g, "(.*?)"))
+    new RegExp(
+      format
+        .replace(/{(.*?)}/g, "(.*?)")
+        .replace(/\[/g, "\\[")
+        .replace(/\]/g, "\\]")
+    )
   )[1];
   const date = parse(firstDateFormatted, dayFormat, new Date());
   const weekStartsOn = DAYS.indexOf(day) as 0 | 1 | 2 | 3 | 4 | 5 | 6;
@@ -91,7 +101,8 @@ runExtension(ID, () => {
               title: "format",
               type: "text",
               defaultValue: FORMAT_DEFAULT_VALUE,
-              description: "Format of your weekly page titles. When changing the format, be sure to rename your old weekly pages.",
+              description:
+                "Format of your weekly page titles. When changing the format, be sure to rename your old weekly pages.",
             },
             {
               title: "auto load",
@@ -132,7 +143,10 @@ runExtension(ID, () => {
   };
 
   document.addEventListener("keydown", (e) => {
-    if (e.code === "KeyW" && (e.altKey || (e.ctrlKey && e.shiftKey && isApple))) {
+    if (
+      e.code === "KeyW" &&
+      (e.altKey || (e.ctrlKey && e.shiftKey && isApple))
+    ) {
       e.preventDefault();
       e.stopPropagation();
       goToThisWeek();
@@ -147,10 +161,13 @@ runExtension(ID, () => {
       const format = getFormat();
       const formats: string[] = [];
       const formatRegex = new RegExp(
-        `^${format.replace(DATE_REGEX, (_, __, og) => {
-          formats.push(og);
-          return "(.*?)";
-        })}$`
+        `^${format
+          .replace(DATE_REGEX, (_, __, og) => {
+            formats.push(og);
+            return "(.*?)";
+          })
+          .replace(/\[/g, "\\[")
+          .replace(/\]/g, "\\]")}$`
       );
       const exec = formatRegex.exec(title);
       if (exec) {
