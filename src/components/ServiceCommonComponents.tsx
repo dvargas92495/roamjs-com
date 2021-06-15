@@ -149,7 +149,7 @@ export const runService = ({
     title,
     callback: (d: HTMLDivElement) => {
       const parent = document.createElement("div");
-      parent.id = "roamjs-static-site-dashboard";
+      parent.id = `roamjs-${id}-dashboard`;
       d.firstElementChild.insertBefore(
         parent,
         d.firstElementChild.firstElementChild.nextElementSibling

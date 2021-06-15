@@ -33,22 +33,23 @@ import {
   resolveRefs,
 } from "../entry-helpers";
 import {
-  HIGHLIGHT,
-  MainStage,
+  SERVICE_TOKEN_STAGE,
   ServiceDashboard,
   StageContent,
-  TOKEN_STAGE,
-  useAuthenticatedAxiosDelete,
-  useAuthenticatedAxiosGet,
-  useAuthenticatedAxiosPut,
-  usePageUid,
-} from "./ServiceCommonComponents";
+  useAuthenticatedDelete,
+  useAuthenticatedGet,
+  useAuthenticatedPut,
+  useServicePageUid,
+  WrapServiceMainStage,
+} from "roamjs-components";
 import { render as loginRender } from "../components/TwitterLogin";
 import startOfMinute from "date-fns/startOfMinute";
 import addMinutes from "date-fns/addMinutes";
 import endOfYear from "date-fns/endOfYear";
 import addYears from "date-fns/addYears";
 import { DatePicker } from "@blueprintjs/datetime";
+
+const HIGHLIGHT = "3px dashed yellowgreen";
 
 type AttemptedTweet = {
   status: "FAILED" | "SUCCESS";
@@ -430,7 +431,7 @@ const EditScheduledContent = ({
   date: Date;
   blockUid: string;
 }) => {
-  const authenticatedAxiosPut = useAuthenticatedAxiosPut();
+  const authenticatedAxiosPut = useAuthenticatedPut();
   const initialDate = useMemo(
     () => addMinutes(startOfMinute(new Date()), 1),
     []
@@ -519,9 +520,9 @@ const EditScheduledContent = ({
 };
 
 const ScheduledContent: StageContent = () => {
-  const authenticatedAxiosGet = useAuthenticatedAxiosGet();
-  const authenticatedAxiosDelete = useAuthenticatedAxiosDelete();
-  const pageUid = usePageUid();
+  const authenticatedAxiosGet = useAuthenticatedGet();
+  const authenticatedAxiosDelete = useAuthenticatedDelete();
+  const pageUid = useServicePageUid();
   const [loading, setLoading] = useState(true);
   const [valid, setValid] = useState(false);
   const [scheduledTweets, setScheduledTweets] = useState<ScheduledTweet[]>([]);
@@ -724,7 +725,7 @@ const ScheduledContent: StageContent = () => {
 const SocialDashboard = (): React.ReactElement => (
   <ServiceDashboard
     service={"social"}
-    stages={[TOKEN_STAGE, MainStage(ScheduledContent)]}
+    stages={[SERVICE_TOKEN_STAGE, WrapServiceMainStage(ScheduledContent)]}
   />
 );
 
