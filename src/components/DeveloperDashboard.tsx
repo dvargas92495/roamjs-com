@@ -10,11 +10,14 @@ import {
 } from "@blueprintjs/core";
 import React, { useCallback, useEffect, useState } from "react";
 import {
+  BLOCK_REF_REGEX,
   createPage,
   getPageTitlesStartingWithPrefix,
   getPageUidByPageTitle,
   getPageViewType,
   getRoamUrl,
+  getTextByBlockUid,
+  getTreeByBlockUid,
   getTreeByPageName,
   TreeNode,
 } from "roam-client";
@@ -37,13 +40,30 @@ import {
   useServiceGetMetadata,
   WrapServiceMainStage,
 } from "roamjs-components";
-import {
-  openBlockInSidebar,
-} from "../entry-helpers";
+import { openBlockInSidebar } from "../entry-helpers";
 
 export const developerToaster = Toaster.create({
   position: Position.TOP,
 });
+
+const EMBED_REF_REGEX = new RegExp(
+  `{{(?:[[)embed(?:]]):\\s*${BLOCK_REF_REGEX.source}\\s*}}`,
+  "g"
+);
+
+const resolveRefsInNode = (t: TreeNode) => {
+  t.text = t.text
+    .replace(EMBED_REF_REGEX, (_, blockUid) => {
+      const tree = getTreeByBlockUid(blockUid);
+      t.children.push(...tree.children);
+      return tree.text;
+    })
+    .replace(BLOCK_REF_REGEX, (_, blockUid) => {
+      const reference = getTextByBlockUid(blockUid);
+      return reference || blockUid;
+    });
+  t.children.forEach(resolveRefsInNode);
+};
 
 const DeveloperContent: StageContent = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -122,6 +142,7 @@ const DeveloperContent: StageContent = () => {
                         children: [] as TreeNode[],
                         viewType: "document",
                       };
+                      children.forEach(resolveRefsInNode);
                       const subpageTitles = window.roamAlphaAPI
                         .q(
                           `[:find ?title :where [?b :node/title ?title][(clojure.string/starts-with? ?title  "${title}/")]]`
@@ -143,7 +164,10 @@ const DeveloperContent: StageContent = () => {
                           subpageTitles.map((t) => [
                             t.substring(title.length + 1),
                             {
-                              nodes: getTreeByPageName(t),
+                              nodes: getTreeByPageName(t).map((t) => {
+                                resolveRefsInNode(t);
+                                return t;
+                              }),
                               viewType: getPageViewType(t),
                             },
                           ])
