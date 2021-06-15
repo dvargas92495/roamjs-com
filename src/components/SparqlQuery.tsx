@@ -93,6 +93,23 @@ const IMAGE_REGEX_URL =
   /(http(s?):)([/|.|\w|\s|\-|:|%])*\.(?:jpg|gif|png|svg)/i;
 const WIKIDATA_SOURCE = "https://query.wikidata.org/sparql?format=json&query=";
 
+const combineTextNodes = (nodes: InputTextNode[]) =>
+  nodes
+    .sort(({ text: a }, { text: b }) => a.localeCompare(b))
+    .map((node, i, arr) => {
+      const firstIndex = arr.findIndex((n) => n.text === node.text);
+      if (i > firstIndex) {
+        arr[firstIndex].children.push(...node.children);
+        node.text = "";
+      }
+      return node;
+    })
+    .filter((node) => !!node.text)
+    .map((node) => {
+      node.children = combineTextNodes(node.children);
+      return node;
+    });
+
 export const runSparqlQuery = ({
   query,
   source,
@@ -153,8 +170,8 @@ export const runSparqlQuery = ({
                   ),
               ]
             : ([] as InputTextNode[])),
-          ...data
-            .map((p) =>
+          ...combineTextNodes(
+            data.map((p) =>
               outputFormat === "Line"
                 ? {
                     text: dataLabels.map((h) => formatValue(p, h)).join(" "),
@@ -174,16 +191,7 @@ export const runSparqlQuery = ({
                       }
                     )
             )
-            .sort(({ text: a }, { text: b }) => a.localeCompare(b))
-            .map((node, i, arr) => {
-              const firstIndex = arr.findIndex((n) => n.text === node.text);
-              if (i > firstIndex) {
-                arr[firstIndex].children.push(...node.children);
-                node.text = "";
-              }
-              return node;
-            })
-            .filter((node) => !!node.text),
+          ),
         ];
         output.forEach((node, order) =>
           createBlock({ node, order, parentUid })
@@ -194,10 +202,12 @@ export const runSparqlQuery = ({
             Object.fromEntries(
               data
                 .flatMap((p) =>
-                  Array.from(returnedLabels).map((h) => ({
-                    link: p[h.replace(/Label$/, "")].value,
-                    title: p[h].value,
-                  }))
+                  Array.from(returnedLabels)
+                    .map((h) => ({
+                      link: p[h.replace(/Label$/, "")]?.value,
+                      title: p[h]?.value,
+                    }))
+                    .filter(({ link, title }) => !!link && !!title)
                 )
                 .filter(
                   ({ title }) =>
@@ -506,12 +516,23 @@ const SparqlQuery = ({
             disabled={activeItem === "Custom Query" ? !codeValue : !radioValue}
             onClick={() => {
               setLoading(true);
+              const importParentUid =
+                activeItem === "Current Block" ? blockUid : parentUid;
+              const isQuery = activeItem === "Custom Query";
+              if (!isQuery) {
+                createBlock({
+                  parentUid: importParentUid,
+                  node: {
+                    text: `same as:: http://www.wikidata.org/entity/${radioValue}`,
+                  },
+                });
+              }
               const labelUid = createBlock({
                 node: {
                   text: getLabel({ outputFormat, label }),
                 },
-                parentUid:
-                  activeItem === "Current Block" ? blockUid : parentUid,
+                parentUid: importParentUid,
+                order: isQuery ? 0 : 1,
               });
               const queryInfo = {
                 query,
