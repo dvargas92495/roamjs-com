@@ -169,6 +169,7 @@ module "aws-serverless-backend" {
         "payment-methods/put",
         "postman/post",
         "products/get",
+        "project-fund/delete",
         "project-fund/post",
         "publish/post",
         "publish/put",
