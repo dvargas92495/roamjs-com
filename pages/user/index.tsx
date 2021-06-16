@@ -170,10 +170,10 @@ type Subscription = {
   interval: "mo" | "yr";
 };
 
-const ApiButton: React.FunctionComponent<{ request: () => Promise<void> }> = ({
-  children,
-  request,
-}) => {
+const ApiButton: React.FunctionComponent<{
+  request: () => Promise<void>;
+  disabled?: boolean;
+}> = ({ children, request, disabled }) => {
   const [loading, setLoading] = useState(false);
   const onClick = useCallback(() => {
     setLoading(true);
@@ -181,7 +181,9 @@ const ApiButton: React.FunctionComponent<{ request: () => Promise<void> }> = ({
   }, [setLoading, request]);
   return (
     <>
-      <Button onClick={onClick}>{children}</Button>
+      <Button onClick={onClick} disabled={disabled || loading}>
+        {children}
+      </Button>
       <Loading loading={loading} size={16} />
     </>
   );
@@ -295,16 +297,18 @@ const Billing = () => {
 const Funding = () => {
   const [items, setItems] = useState([]);
   const authenticatedAxios = useAuthenticatedAxiosGet();
+  const authenticatedDelete = useAuthenticatedAxiosDelete();
   const loadItems = useCallback(
     () =>
       authenticatedAxios("sponsorships").then((r) => {
-        setItems(
-          r.data.contracts.sort(
+        setItems([
+          ...r.data.projects,
+          ...r.data.contracts.sort(
             (a, b) =>
               new Date(a.createdDate).valueOf() -
               new Date(b.createdDate).valueOf()
-          )
-        );
+          ),
+        ]);
       }),
     [setItems, authenticatedAxios]
   );
@@ -315,24 +319,25 @@ const Funding = () => {
           primary: (
             <UserValue>
               <H6>
-                <Link
-                  href={`queue/${f.label}${f.link.substring(
-                    "https://github.com/dvargas92495/roam-js-extensions/issues"
-                      .length
-                  )}`}
-                >
-                  {f.name}
-                </Link>
+                <Link href={f.link}>{f.name}</Link>
               </H6>
             </UserValue>
           ),
-          secondary: (
-            <UserValue>
-              {`Funded on ${f.createdDate}. Due on ${f.dueDate}`}
-            </UserValue>
-          ),
+          secondary: <UserValue>{f.description}</UserValue>,
           key: f.uuid,
-          avatar: <Subtitle>${f.reward}</Subtitle>,
+          avatar: <Subtitle>${f.funding}</Subtitle>,
+          action: (
+            <ApiButton
+              request={() =>
+                authenticatedDelete(`project-fund?uuid=${f.uuid}`).then(() =>
+                  setItems(items.filter((i) => i.uuid != f.uuid))
+                )
+              }
+              disabled={true}
+            >
+              Remove
+            </ApiButton>
+          ),
         }))}
       />
     </DataLoader>
