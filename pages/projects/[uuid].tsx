@@ -1,12 +1,13 @@
 import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FLOSS_API_URL } from "../../components/constants";
 import StandardLayout from "../../components/StandardLayout";
 import {
   Card,
   DataLoader,
   H1,
+  H3,
   H4,
   Items,
   LinearProgress,
@@ -58,12 +59,50 @@ const ProjectPage = ({
     () => Math.floor((100 * fundsRaised) / target),
     [fundsRaised, target]
   );
+  const [isCheckout, setIsCheckout] = useState(false);
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const param = query.get("checkout");
+    setIsCheckout(param === "true");
+  }, [setIsCheckout]);
+  useEffect(() => {
+    if (isCheckout) {
+      const script = document.createElement("script");
+      script.src = "https://platform.twitter.com/widgets.js";
+      script.async = true;
+      document.head.appendChild(script);
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
+  }, [isCheckout]);
   return (
     <StandardLayout
       title={name}
       description={description}
       img={defaultLayoutProps.img}
     >
+      {isCheckout && (
+        <>
+          <H3>Thank you for funding!</H3>
+          <p>
+            To help us reach our funding goal, be sure to share the project on
+            Twitter!
+          </p>
+          <a
+            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+            className="twitter-share-button"
+            data-size="large"
+            data-text={`I just funded the ${name.replace(
+              /!/g,
+              ""
+            )} project on RoamJS!\n\nHelp it reach its funding goal by visiting`}
+            data-show-count="false"
+            data-url={`https://roamjs.com/projects/${uuid}`}
+          >
+            Tweet
+          </a>
+        </>
+      )}
       <H1>{name}</H1>
       <H4>Description</H4>
       <div style={{ marginBottom: 16 }}>
@@ -75,7 +114,11 @@ const ProjectPage = ({
       </div>
       <Card title={"Funding Progress"}>
         <DataLoader loadAsync={loadAsync}>
-          <ProjectFundButton name={name} uuid={uuid} onSuccess={loadAsync} />
+          <ProjectFundButton
+            name={name}
+            uuid={uuid}
+            onSuccess={() => loadAsync().then(() => setIsCheckout(true))}
+          />
           <hr style={{ marginTop: 16, opacity: 0.3 }} />
           <div style={{ display: "flex", alignItems: "center" }}>
             <LinearProgress

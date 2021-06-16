@@ -19,13 +19,19 @@ const ProjectsPage = (): JSX.Element => {
   const loadItems = useCallback(
     () =>
       axios
-        .get(`${FLOSS_API_URL}/projects?tenant=${process.env.NEXT_PUBLIC_FLOSS_TENANT}`)
+        .get(
+          `${FLOSS_API_URL}/projects?tenant=${process.env.NEXT_PUBLIC_FLOSS_TENANT}`
+        )
         .then((r) => r.data.projects || []),
     []
   );
   const mapper = useCallback(
-    (item: ProjectResponse, refresh: () => Promise<void>) => ({
-      avatar: <div style={{minWidth: 100}}>{Math.floor((item.progress / item.target) * 100)}% Funded</div>,
+    (item: ProjectResponse) => ({
+      avatar: (
+        <div style={{ minWidth: 100 }}>
+          {Math.floor((item.progress / item.target) * 100)}% Funded
+        </div>
+      ),
       primary: item.name,
       secondary: (
         <span>
@@ -36,7 +42,11 @@ const ProjectsPage = (): JSX.Element => {
         <ProjectFundButton
           uuid={item.uuid}
           name={item.name}
-          onSuccess={refresh}
+          onSuccess={() =>
+            Promise.resolve(
+              window.location.assign(`/projects/${item.uuid}?checkout=true`)
+            )
+          }
         />
       ),
       key: item.uuid,
