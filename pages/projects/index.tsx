@@ -25,7 +25,7 @@ const ProjectsPage = (): JSX.Element => {
   );
   const mapper = useCallback(
     (item: ProjectResponse, refresh: () => Promise<void>) => ({
-      avatar: <div>{Math.floor((item.progress / item.target) * 100)}%</div>,
+      avatar: <div style={{minWidth: 100}}>{Math.floor((item.progress / item.target) * 100)}% Funded</div>,
       primary: item.name,
       secondary: (
         <span>

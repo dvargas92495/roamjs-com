@@ -303,11 +303,13 @@ const Funding = () => {
       authenticatedAxios("sponsorships").then((r) => {
         setItems([
           ...r.data.projects,
-          ...r.data.contracts.sort(
-            (a, b) =>
-              new Date(a.createdDate).valueOf() -
-              new Date(b.createdDate).valueOf()
-          ),
+          ...r.data.contracts
+            .sort(
+              (a, b) =>
+                new Date(a.createdDate).valueOf() -
+                new Date(b.createdDate).valueOf()
+            )
+            .map((c) => ({ ...c, isContract: true })),
         ]);
       }),
     [setItems, authenticatedAxios]
@@ -329,11 +331,12 @@ const Funding = () => {
           action: (
             <ApiButton
               request={() =>
-                authenticatedDelete(`project-fund?uuid=${f.uuid}`).then(() =>
-                  setItems(items.filter((i) => i.uuid != f.uuid))
-                )
+                authenticatedDelete(
+                  `project-fund?uuid=${f.uuid}${
+                    f.isContract ? `&contract=true` : ""
+                  }`
+                ).then(() => setItems(items.filter((i) => i.uuid != f.uuid)))
               }
-              disabled={true}
             >
               Remove
             </ApiButton>

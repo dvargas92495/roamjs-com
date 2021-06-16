@@ -21,7 +21,7 @@ import { serialize } from "next-mdx-remote/serialize";
 
 type Backer = {
   funding: number;
-  createdBy: string;
+  backer: string;
   uuid: string;
 };
 
@@ -55,7 +55,7 @@ const ProjectPage = ({
     [backers]
   );
   const value = useMemo(
-    () => Math.ceil((100 * fundsRaised) / target),
+    () => Math.floor((100 * fundsRaised) / target),
     [fundsRaised, target]
   );
   return (
@@ -76,7 +76,7 @@ const ProjectPage = ({
       <Card title={"Funding Progress"}>
         <DataLoader loadAsync={loadAsync}>
           <ProjectFundButton name={name} uuid={uuid} onSuccess={loadAsync} />
-          <hr style={{ marginTop: 16 }} />
+          <hr style={{ marginTop: 16, opacity: 0.3 }} />
           <div style={{ display: "flex", alignItems: "center" }}>
             <LinearProgress
               color={"primary"}
@@ -142,7 +142,7 @@ const ProjectPage = ({
               </div>
             </div>
           </div>
-          <hr style={{ marginTop: 16 }} />
+          <hr style={{ marginTop: 16, opacity: 0.3 }} />
           <H4>Backers</H4>
           {backers.length === 0 ? (
             <div style={{ marginBottom: 16 }}>
@@ -154,7 +154,7 @@ const ProjectPage = ({
           ) : (
             <Items
               items={backers.map((c) => ({
-                primary: c.createdBy,
+                primary: c.backer,
                 secondary: `Funded $${c.funding}.`,
                 key: c.uuid,
               }))}
