@@ -6,6 +6,7 @@ import StandardLayout from "../../components/StandardLayout";
 import {
   Card,
   DataLoader,
+  ExternalLink,
   H1,
   H3,
   H4,
@@ -31,6 +32,7 @@ type Props = {
   name: string;
   description: string;
   target: number;
+  link: string;
   body: MDXRemoteSerializeResult;
   backers: Backer[];
 };
@@ -40,6 +42,7 @@ const ProjectPage = ({
   name,
   description,
   body,
+  link,
   target,
   backers: initialBackers,
 }: Props): JSX.Element => {
@@ -60,11 +63,14 @@ const ProjectPage = ({
     [fundsRaised, target]
   );
   const [isCheckout, setIsCheckout] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
     const param = query.get("checkout");
+    const fund = query.get("fund");
     setIsCheckout(param === "true");
-  }, [setIsCheckout]);
+    setIsOpen(fund === "true");
+  }, [setIsCheckout, setIsOpen]);
   useEffect(() => {
     if (isCheckout) {
       const script = document.createElement("script");
@@ -97,13 +103,17 @@ const ProjectPage = ({
               ""
             )} project on RoamJS!\n\nHelp it reach its funding goal by visiting`}
             data-show-count="false"
-            data-url={`https://roamjs.com/projects/${uuid}`}
+            data-url={`https://roamjs.com/projects/${uuid}?fund=true`}
           >
             Tweet
           </a>
         </>
       )}
       <H1>{name}</H1>
+      <Subtitle>
+        Track progress on the{" "}
+        <ExternalLink href={link}>Github Project Page.</ExternalLink>
+      </Subtitle>
       <H4>Description</H4>
       <div style={{ marginBottom: 16 }}>
         {body.compiledSource ? (
@@ -117,6 +127,7 @@ const ProjectPage = ({
           <ProjectFundButton
             name={name}
             uuid={uuid}
+            isOpen={isOpen}
             onSuccess={() => loadAsync().then(() => setIsCheckout(true))}
           />
           <hr style={{ marginTop: 16, opacity: 0.3 }} />
@@ -190,8 +201,7 @@ const ProjectPage = ({
           {backers.length === 0 ? (
             <div style={{ marginBottom: 16 }}>
               <Subtitle>
-                No one has funded this issue. Fund it to move it up the priority
-                queue!
+                No one has funded this issue. Fund it to help us reach our goal!
               </Subtitle>
             </div>
           ) : (

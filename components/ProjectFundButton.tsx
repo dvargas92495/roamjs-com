@@ -9,9 +9,10 @@ const ProjectFundButtonDialog: React.FunctionComponent<
     apiUrl: string;
     apiOpts?: AxiosRequestConfig;
   }
-> = ({ name, uuid, apiUrl, apiOpts = {}, onSuccess }) => {
+> = ({ name, uuid, apiUrl, apiOpts = {}, onSuccess, isOpen=false }) => {
   return (
     <FormDialog
+      defaultIsOpen={isOpen}
       title={name}
       contentText={`Funding will be held in escrow until completion of the project.`}
       buttonText={"FUND"}
@@ -79,6 +80,7 @@ const SignedOutFundButton: React.FunctionComponent<ProjectFundButtonProps> = (
 type ProjectFundButtonProps = {
   uuid: string;
   name: string;
+  isOpen?: boolean;
   onSuccess: () => Promise<void>;
 };
 
