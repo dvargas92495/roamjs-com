@@ -239,6 +239,13 @@ functions:
           path: products
           method: get
           cors: true
+  project-fund-post:
+    handler: out/project-fund_post.handler
+    events:
+      - http:
+          path: project-fund
+          method: post
+          cors: true
   publish-put:
     handler: out/publish_put.handler
     events:
