@@ -1,4 +1,4 @@
-import { Queue, StringField } from "@dvargas92495/ui";
+import { Queue, StringField, Subtitle } from "@dvargas92495/ui";
 import Link from "next/link";
 import React, { useCallback, useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
@@ -77,6 +77,12 @@ const QueuePage = (): JSX.Element => {
       }
       img={defaultLayoutProps.img}
     >
+      <Subtitle>
+        We are actively looking for other Roam developers to take on these
+        projects in the queue. You will be offered 70% of the bounty listed. If
+        you are interested in working on some of these projects, please reach
+        out to support@roamjs.com for help getting started!
+      </Subtitle>
       <div style={{ marginBottom: 16, padding: "0 16px" }}>
         <StringField
           value={search}
