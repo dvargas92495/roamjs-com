@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FLOSS_API_URL } from "../../components/constants";
 import StandardLayout from "../../components/StandardLayout";
 import {
+  Button,
   Card,
   DataLoader,
   ExternalLink,
@@ -37,6 +38,8 @@ type Props = {
   backers: Backer[];
 };
 
+const PAGE_SIZE = 8;
+
 const ProjectPage = ({
   uuid,
   name,
@@ -47,11 +50,22 @@ const ProjectPage = ({
   backers: initialBackers,
 }: Props): JSX.Element => {
   const [backers, setBackers] = useState<Backer[]>(initialBackers);
+  const [page, setPage] = useState(0);
+  const currentBackers = useMemo(
+    () => backers.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE),
+    [page, backers]
+  );
   const loadAsync = useCallback(
     () =>
       axios
-        .get(`${FLOSS_API_URL}/projects?uuid=${uuid}&simple=true`)
-        .then((r) => setBackers(r.data.backers)),
+        .get<{ backers: Backer[] }>(
+          `${FLOSS_API_URL}/projects?uuid=${uuid}&simple=true`
+        )
+        .then((r) =>
+          setBackers(
+            r.data.backers.sort(({ funding: a }, { funding: b }) => b - a)
+          )
+        ),
     [setBackers, uuid]
   );
   const fundsRaised = useMemo(
@@ -206,13 +220,31 @@ const ProjectPage = ({
             </div>
           ) : (
             <Items
-              items={backers.map((c) => ({
+              items={currentBackers.map((c) => ({
                 primary: c.backer,
                 secondary: `Funded $${c.funding}.`,
                 key: c.uuid,
               }))}
             />
           )}
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <Button
+              color={"primary"}
+              variant={"contained"}
+              disabled={page === 0}
+              onClick={() => setPage(page - 1)}
+            >
+              Previous
+            </Button>
+            <Button
+              color={"primary"}
+              variant={"contained"}
+              disabled={(page + 1) * PAGE_SIZE >= backers.length}
+              onClick={() => setPage(page + 1)}
+            >
+              Next
+            </Button>
+          </div>
         </DataLoader>
       </Card>
     </StandardLayout>
