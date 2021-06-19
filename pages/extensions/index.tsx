@@ -13,7 +13,7 @@ type ExtensionMetadata = {
   description: string;
   image: string;
   href: string;
-  state: "LIVE" | "DEVELOPMENT" | "PRIVATE";
+  state: "LIVE" | "DEVELOPMENT" | "PRIVATE" | "LEGACY";
 };
 
 const ExtensionHomePage = ({

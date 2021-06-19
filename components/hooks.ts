@@ -11,14 +11,14 @@ export const getCodeContent = (
   id: string,
   src: string
 ): string => `var existing = document.getElementById("roamjs-${id}");
-  if (!existing) {
-    var extension = document.createElement("script");
-    extension.src = "${src}";
-    extension.id = "roamjs-${id}";
-    extension.async = true;
-    extension.type = "text/javascript";
-    document.getElementsByTagName("head")[0].appendChild(extension);
-  }`;
+if (!existing) {
+  var extension = document.createElement("script");
+  extension.src = "${src}";
+  extension.id = "roamjs-${id}";
+  extension.async = true;
+  extension.type = "text/javascript";
+  document.getElementsByTagName("head")[0].appendChild(extension);
+}`;
 
 export const getSingleCodeContent = (id: string): string =>
   getCodeContent(
