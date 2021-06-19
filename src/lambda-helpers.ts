@@ -186,7 +186,10 @@ export const getClerkEmail = async (
     : "";
 };
 
-export const getClerkOpts = (email: string, headers?: Record<string,string>): AxiosRequestConfig => ({
+export const getClerkOpts = (
+  email: string,
+  headers?: Record<string, string>
+): AxiosRequestConfig => ({
   headers: {
     Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
     ...headers,
@@ -236,61 +239,76 @@ const findUser = async (predicate: (u: User) => boolean): Promise<User> => {
   }
 };
 
-export const authenticate = (
-  handler: APIGatewayProxyHandler,
-  inputService?: "staticSite" | "social" | "developer"
-): APIGatewayProxyHandler => (event, ctx, callback) => {
-  const service = inputService || event.queryStringParameters.service;
-  const Authorization = event.headers.Authorization || "";
-  const [userId, token] =
-    Authorization.length === 32 || Authorization.includes(":")
-      ? // the old ways of generating tokens did not have user id encoded, so we query all users
-        [null, Authorization.split(":").slice(-1)[0]]
-      : [
-          Buffer.from(Authorization, "base64").toString().split(":")[0],
-          Authorization,
-        ];
+export const authenticate =
+  (
+    handler: APIGatewayProxyHandler,
+    inputService?: "staticSite" | "social" | "developer"
+  ): APIGatewayProxyHandler =>
+  (event, ctx, callback) => {
+    const service = inputService || event.queryStringParameters.service;
+    const Authorization = event.headers.Authorization || "";
+    const [userId, token] =
+      Authorization.length === 32 || Authorization.includes(":")
+        ? // the old ways of generating tokens did not have user id encoded, so we query all users
+          [null, Authorization.split(":").slice(-1)[0]]
+        : [
+            Buffer.from(Authorization, "base64").toString().split(":")[0],
+            Authorization,
+          ];
 
-  return (userId
-    ? users.getUser(`user_${userId}`).catch(() => undefined)
-    : findUser(
-        (user) =>
-          (user.publicMetadata as { [s: string]: { token: string } })?.[service]
-            ?.token === token
-      )
-  ).then((user) => {
-    if (!user) {
-      return {
-        statusCode: 401,
-        body: "Invalid token",
-        headers: headers(event),
-      };
-    }
-    const publicMetadata = user.publicMetadata;
-    const serviceData = (publicMetadata as {
-      [s: string]: { authenticated: boolean };
-    })[service];
-    if (!serviceData.authenticated) {
-      users.updateUser(user.id, {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
-        publicMetadata: JSON.stringify({
-          ...publicMetadata,
-          [service]: {
-            ...serviceData,
-            authenticated: true,
-          },
-        }),
-      });
-    }
-    event.headers.Authorization = user.id;
-    const result = handler(event, ctx, callback);
-    if (!result) {
-      return emptyResponse(event);
-    }
-    return result;
-  });
-};
+    return (
+      userId
+        ? users
+            .getUser(`user_${userId}`)
+            .then((user) =>
+              (user.publicMetadata as { [s: string]: { token: string } })?.[
+                service
+              ]?.token === token
+                ? user
+                : undefined
+            )
+            .catch(() => undefined)
+        : findUser(
+            (user) =>
+              (user.publicMetadata as { [s: string]: { token: string } })?.[
+                service
+              ]?.token === token
+          )
+    ).then((user) => {
+      if (!user) {
+        return {
+          statusCode: 401,
+          body: "Invalid token",
+          headers: headers(event),
+        };
+      }
+      const publicMetadata = user.publicMetadata;
+      const serviceData = (
+        publicMetadata as {
+          [s: string]: { authenticated: boolean };
+        }
+      )[service];
+      if (!serviceData.authenticated) {
+        users.updateUser(user.id, {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
+          publicMetadata: JSON.stringify({
+            ...publicMetadata,
+            [service]: {
+              ...serviceData,
+              authenticated: true,
+            },
+          }),
+        });
+      }
+      event.headers.Authorization = user.id;
+      const result = handler(event, ctx, callback);
+      if (!result) {
+        return emptyResponse(event);
+      }
+      return result;
+    });
+  };
 
 export const emailError = (subject: string, e: Error): Promise<string> =>
   ses
@@ -317,25 +335,33 @@ ${JSON.stringify(e)}`,
     .promise()
     .then((r) => r.MessageId);
 
-export const emailCatch = (subject: string, event: APIGatewayProxyEvent) => (
-  e: Error
-): Promise<APIGatewayProxyResult> =>
-  emailError(subject, e).then((id) => ({
-    statusCode: 500,
-    body: `Unknown error - Message Id ${id}`,
-    headers: headers(event),
-  }));
+export const emailCatch =
+  (subject: string, event: APIGatewayProxyEvent) =>
+  (e: Error): Promise<APIGatewayProxyResult> =>
+    emailError(subject, e).then((id) => ({
+      statusCode: 500,
+      body: `Unknown error - Message Id ${id}`,
+      headers: headers(event),
+    }));
 
 export const listAll = async (
   Prefix: string
-): Promise<{ objects: AWS.S3.ObjectList; prefixes: AWS.S3.CommonPrefixList }> => {
+): Promise<{
+  objects: AWS.S3.ObjectList;
+  prefixes: AWS.S3.CommonPrefixList;
+}> => {
   const objects: AWS.S3.ObjectList = [];
   const prefixes: AWS.S3.CommonPrefixList = [];
   let ContinuationToken: string = undefined;
   let isTruncated = true;
   while (isTruncated) {
     const res = await s3
-      .listObjectsV2({ Bucket: "roamjs.com", Prefix, ContinuationToken, Delimiter: '/' })
+      .listObjectsV2({
+        Bucket: "roamjs.com",
+        Prefix,
+        ContinuationToken,
+        Delimiter: "/",
+      })
       .promise();
     objects.push(...res.Contents);
     prefixes.push(...res.CommonPrefixes);
