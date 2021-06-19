@@ -17,6 +17,7 @@ The structure of the config is as follows:
         - `{id}` - The block reference id of the current block 
         - `{block}` - The text contents of the current block. Use `{block:clean}` to omit the tag used to setup the endpoint.
         - `{tree}` - The full contents of the block tree, in a stringified JSON. Use `{tree:text}` to get the tree in a plain text format and `{text:html}` to get the tree in a HTML format.
+        - `{attribute:{field}}` - Finds a child block with the Roam attribute of "field" (case-insensitive), and replaces with the attribute value. For example, a configuration of `{attribute:foo}` on a block with a child of `Foo:: bar` will replace the placeholder with `"bar"`. 
     - headers - The set of headers to send with the request, useful for sending Authorization or other headers. Just like body, each child represents the header name, and the child of the header name is the header value.
 
 The image above renders an icon next to any `#[[PostmanExample]]` tags. Clicking the icon on a block that says `Send This! #[[PostmanExample]]` would send the following request:

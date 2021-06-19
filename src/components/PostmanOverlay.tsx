@@ -39,7 +39,10 @@ const convertTextToValue = ({
     .replace(/{tree(?::(text|html))?}/i, (_, f) => {
       const format = f?.toUpperCase?.();
       if (format === "HTML") {
-        return parseRoamBlocks({ content: blockTree.children, viewType: 'bullet' });
+        return parseRoamBlocks({
+          content: blockTree.children,
+          viewType: "bullet",
+        });
       } else if (format === "TEXT") {
         return blockTree.children.map((t) => toText({ t, i: 0 })).join("");
       } else {
@@ -47,6 +50,12 @@ const convertTextToValue = ({
       }
     })
     .replace(/{id}/i, blockTree.blockUid)
+    .replace(/{attribute:(.*?)}/, (original, i) => {
+      const blockText = blockTree.children.find((t) =>
+        new RegExp(`${i}::`, "i").test(t.text)
+      )?.text;
+      return blockText ? blockText.split("::")[1].trim() : original;
+    })
     .trim();
 
 type BodyValue = string | boolean | Record<string, unknown> | number;
