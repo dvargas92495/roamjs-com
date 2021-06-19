@@ -414,6 +414,13 @@ functions:
           path: update-website
           method: post
           cors: true
+  user-get:
+    handler: out/user_get.handler
+    events:
+      - http:
+          path: user
+          method: get
+          cors: true
   versions-get:
     handler: out/versions_get.handler
     events:
