@@ -91,12 +91,14 @@ description: "${description}"${
               S: path,
             },
           },
-          UpdateExpression: "SET #d=:d",
+          UpdateExpression: "SET #d=:d, #s=:s",
           ExpressionAttributeNames: {
             "#d": "description",
+            "#s": "src",
           },
           ExpressionAttributeValues: {
             ":d": { S: description },
+            ":s": { S: entry || `https://roamjs.com/${path}/main.js` },
           },
         })
         .promise()

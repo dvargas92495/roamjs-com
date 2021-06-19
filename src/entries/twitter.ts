@@ -117,6 +117,11 @@ runExtension("twitter", () => {
               type: "text",
               description: "Text to append at the end of a sent tweet block",
             },
+            {
+              title: "append parent",
+              type: "text",
+              description: "Text to append at the end of the parent block that sent the tweet thread"
+            }
           ],
         },
         {

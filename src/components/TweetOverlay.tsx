@@ -19,9 +19,11 @@ import ReactDOM from "react-dom";
 import Twitter from "../assets/Twitter.svg";
 import {
   getEditTimeByBlockUid,
+  getTextByBlockUid,
   getTreeByBlockUid,
   getTreeByPageName,
   getUids,
+  updateBlock,
 } from "roam-client";
 import { getSettingValueFromTree, useSocialToken } from "./hooks";
 import axios from "axios";
@@ -33,7 +35,7 @@ import { getRoamUrlByPage, resolveRefs } from "../entry-helpers";
 import addMinutes from "date-fns/addMinutes";
 import startOfMinute from "date-fns/startOfMinute";
 import { useOauthAccounts } from "./OauthSelect";
-import { getOauth } from 'roamjs-components';
+import { getOauth } from "roamjs-components";
 
 const ATTACHMENT_REGEX = /!\[[^\]]*\]\(([^\s)]*)\)/g;
 const UPLOAD_URL = `${process.env.REST_API_URL}/twitter-upload`;
@@ -162,7 +164,7 @@ const TwitterContent: React.FunctionComponent<{
   const { accountLabel, accountDropdown } = useOauthAccounts("twitter");
   const onClick = useCallback(async () => {
     setError("");
-    const oauth = getOauth('twitter');
+    const oauth = getOauth("twitter");
     if (oauth === "{}") {
       setError(
         "Need to log in with Twitter to send Tweets! Head to roam/js/twitter page to log in."
@@ -200,6 +202,7 @@ const TwitterContent: React.FunctionComponent<{
     }
     let in_reply_to_status_id = tweetId;
     let success = true;
+    const links: string[] = [];
     for (let index = 0; index < message.length; index++) {
       setTweetsSent(index + 1);
       const { text, uid } = message[index];
@@ -244,8 +247,9 @@ const TwitterContent: React.FunctionComponent<{
             user: { screen_name },
           } = r.data;
           in_reply_to_status_id = id_str;
+          const link = `https://twitter.com/${screen_name}/status/${id_str}`;
+          links.push(link);
           if (appendText) {
-            const link = `https://twitter.com/${screen_name}/status/${id_str}`;
             window.roamAlphaAPI.updateBlock({
               block: {
                 uid,
@@ -293,6 +297,14 @@ const TwitterContent: React.FunctionComponent<{
       }
     }
     if (success) {
+      const appendParent = getSettingValueFromTree({
+        tree,
+        key: "append parent",
+      });
+      if (appendParent) {
+        const text = getTextByBlockUid(blockUid);
+        updateBlock({uid: blockUid, text: `${text}${appendParent.replace(/{link}/g, links[0])}`})
+      }
       close();
     }
   }, [setTweetsSent, close, setError, tweetId, accountLabel]);
