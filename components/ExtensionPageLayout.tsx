@@ -188,11 +188,7 @@ const ExtensionPageLayout: React.FunctionComponent<{
         click "Yes, I Know What I'm Doing".
       </Body>
       <div style={{ marginBottom: 24 }}>
-        <Button
-          onClick={() => onSave([id])}
-          color="primary"
-          variant="contained"
-        >
+        <Button onClick={() => onSave(id)} color="primary" variant="contained">
           COPY EXTENSION
         </Button>
         {copied && <span style={{ marginLeft: 24 }}>COPIED!</span>}

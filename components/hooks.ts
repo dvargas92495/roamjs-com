@@ -30,30 +30,12 @@ export const getSingleCodeContent = (id: string): string =>
     }/${id}.js`
   );
 
-const copyCode = (items: string[], initialLines: string) => (e) => {
-  const codeContent =
-    items.length === 1
-      ? `\`\`\`javascript
-${initialLines}${getSingleCodeContent(
-          items[0].replace(/ /g, "-").toLowerCase()
-        )}
-\`\`\``
-      : `\`\`\`javascript
-var installScript = name => {
-  var existing = document.getElementById(name);
-  if (existing) {
-    return;
-  }  
-  var extension = document.createElement("script");      
-  extension.type = "text/javascript";
-  extension.src = \`https://roamjs.com/$\{name}.js\`;
-  extension.async = true;
-  extension.id = name;
-  document.getElementsByTagName("head")[0].appendChild(extension);
-};
-${items
-  .map((f) => `installScript("${f.replace(/ /g, "-").toLowerCase()}");`)
-  .join("\n")}
+const copyCode = (id: string, entry: string, initialLines: string) => (e) => {
+  const idNormal = id.replace(/ /g, "-").toLowerCase();
+  const codeContent = `\`\`\`javascript
+${initialLines}${
+    entry ? getCodeContent(idNormal, entry) : getSingleCodeContent(id)
+  }
 \`\`\``;
   e.clipboardData.setData(
     "text/plain",
@@ -73,12 +55,16 @@ ${items
 export const useCopyCode = (
   setCopied: (flag: boolean) => void,
   initialLines?: string
-): ((items: string[]) => void) =>
+): ((id: string, entry?: string) => void) =>
   useCallback(
-    (items: string[]) => {
-      document.addEventListener("copy", copyCode(items, initialLines || ""), {
-        once: true,
-      });
+    (id: string, entry?: string) => {
+      document.addEventListener(
+        "copy",
+        copyCode(id, entry || "", initialLines || ""),
+        {
+          once: true,
+        }
+      );
       document.execCommand("copy");
       setCopied(true);
       setTimeout(() => setCopied(false), 1000);

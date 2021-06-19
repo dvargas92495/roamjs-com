@@ -210,7 +210,7 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
               in your graph to get started!
             </span>
             <Button
-              onClick={() => onSave([id])}
+              onClick={() => onSave(id)}
               color="primary"
               variant="contained"
             >

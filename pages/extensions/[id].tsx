@@ -90,7 +90,7 @@ const ExtensionPage = ({
       </Body>
       <div style={{ marginBottom: 24 }}>
         <Button
-          onClick={() => onSave([`${id}/main`])}
+          onClick={() => onSave(`${id}/main`, entry)}
           color="primary"
           variant="contained"
         >
