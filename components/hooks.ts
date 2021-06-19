@@ -7,24 +7,28 @@ import { API_URL } from "./constants";
 export const cleanCode = (text: string): string =>
   text.replace(/\n/g, "\\n").replace(/"/g, '\\"');
 
-export const getSingleCodeContent = (
-  id: string
-): string => `var existing = document.getElementById("roamjs-${id.replace(
-  "/",
-  "-"
-)}");
-if (!existing) {
-  var extension = document.createElement("script");
-  extension.src = "${
-    process.env.NODE_ENV === "development"
-      ? "http://localhost:8080/build"
-      : "https://roamjs.com"
-  }/${id}.js";
-  extension.id = "roamjs-${id.replace("/", "-")}";
-  extension.async = true;
-  extension.type = "text/javascript";
-  document.getElementsByTagName("head")[0].appendChild(extension);
-}`;
+export const getCodeContent = (
+  id: string,
+  src: string
+): string => `var existing = document.getElementById("roamjs-${id}");
+  if (!existing) {
+    var extension = document.createElement("script");
+    extension.src = "${src}";
+    extension.id = "roamjs-${id}";
+    extension.async = true;
+    extension.type = "text/javascript";
+    document.getElementsByTagName("head")[0].appendChild(extension);
+  }`;
+
+export const getSingleCodeContent = (id: string): string =>
+  getCodeContent(
+    id.replace("/", "-"),
+    `${
+      process.env.NODE_ENV === "development"
+        ? "http://localhost:8080/build"
+        : "https://roamjs.com"
+    }/${id}.js`
+  );
 
 const copyCode = (items: string[], initialLines: string) => (e) => {
   const codeContent =

@@ -8,6 +8,7 @@ import { serialize } from "next-mdx-remote/serialize";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import matter from "gray-matter";
 import {
+  getCodeContent,
   getSingleCodeContent,
   idToTitle,
   useCopyCode,
@@ -42,11 +43,13 @@ const ExtensionPage = ({
   description,
   development,
   contributors,
+  entry,
 }: {
   id: string;
   content: MDXRemoteSerializeResult;
   description: string;
   development: boolean;
+  entry: string;
   contributors?: string;
 }): React.ReactElement => {
   const title = idToTitle(id);
@@ -103,7 +106,7 @@ const ExtensionPage = ({
       </Body>
       <div style={{ marginBottom: 48 }}>
         <Prism language="javascript">
-          {getSingleCodeContent(`${id}/main`)}
+          {entry ? getCodeContent(id, entry) : getSingleCodeContent(`${id}/main`)}
         </Prism>
       </div>
       {content.compiledSource ? (

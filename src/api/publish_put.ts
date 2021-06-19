@@ -31,6 +31,7 @@ export const handler: APIGatewayProxyHandler = authenticate(async (event) => {
     contributors,
     subpages,
     thumbnail,
+    entry,
   } = JSON.parse(event.body || "{}") as {
     path: string;
     blocks: TreeNode[];
@@ -39,6 +40,7 @@ export const handler: APIGatewayProxyHandler = authenticate(async (event) => {
     contributors: string[];
     subpages: { [name: string]: { nodes: TreeNode[]; viewType: ViewType } };
     thumbnail?: string;
+    entry?: string;
   };
   if (blocks.length === 0) {
     return userError(
@@ -61,7 +63,7 @@ export const handler: APIGatewayProxyHandler = authenticate(async (event) => {
   const frontmatter = `---
 description: "${description}"${
     contributors?.length ? `\ncontributors: "${contributors.join(", ")}"` : ""
-  }
+  }${entry ? `\nentry: "${entry}"` : ""}
 ---
 
 `;
