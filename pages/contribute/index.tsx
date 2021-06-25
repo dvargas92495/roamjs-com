@@ -157,6 +157,16 @@ const ContributePage = (): React.ReactElement => {
             imgSrc: "sponsors/kleinberg.jpg",
             url: "https://www.jkleinberg.com/now",
           },
+          {
+            title: "Tsun Kuo Kuo",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
+          {
+            title: "Lance Tracey",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
         ]}
       />
       <H6>
@@ -354,6 +364,16 @@ const ContributePage = (): React.ReactElement => {
             title: "Henry Harboe",
             imgSrc: "sponsors/harboe.jfif",
             url: "https://twitter.com/henryharboe",
+          },
+          {
+            title: "George Roukas",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
+          },
+          {
+            title: "Thomas C Eaves",
+            imgSrc: "sponsors/default.jpg",
+            url: "",
           },
         ]}
       />

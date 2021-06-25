@@ -9,10 +9,7 @@ import {
   getUids,
   toRoamDate,
 } from "roam-client";
-import {
-  isControl,
-  runExtension,
-} from "../entry-helpers";
+import { isControl, runExtension } from "../entry-helpers";
 
 const CLASSNAMES_TO_CHECK = [
   "rm-block-ref",
@@ -194,41 +191,53 @@ runExtension("todo-trigger", () => {
 
   document.addEventListener("keydown", keydownEventListener);
 
-  const isStrikethrough = !!getConfigFromPage("roam/js/todo-trigger")[
-    "Strikethrough"
-  ];
+  const config = getConfigFromPage("roam/js/todo-trigger");
+  const isStrikethrough = !!config["Strikethrough"];
+  const isClassname = !!config["Classname"];
+  const styleBlock = (block: HTMLElement) => {
+    if (isStrikethrough) {
+      block.style.textDecoration = "line-through";
+    }
+    if (isClassname) {
+      block.classList.add("roamjs-done");
+    }
+  };
+  const unstyleBlock = (block: HTMLElement) => {
+    block.style.textDecoration = "none";
+    block.classList.remove("roamjs-done");
+  };
 
-  if (isStrikethrough) {
+  if (isStrikethrough || isClassname) {
     createHTMLObserver({
       callback: (l: HTMLLabelElement) => {
         const input = l.getElementsByTagName("input")[0];
         if (input.checked && !input.disabled) {
           const zoom = l.closest(".rm-zoom-item-content") as HTMLSpanElement;
           if (zoom) {
-            (
+            styleBlock(
               zoom.firstElementChild.firstElementChild as HTMLDivElement
-            ).style.textDecoration = "line-through";
+            );
             return;
           }
           const block = CLASSNAMES_TO_CHECK.map(
             (c) => l.closest(`.${c}`) as HTMLElement
           ).find((d) => !!d);
           if (block) {
-            block.style.textDecoration = "line-through";
+            styleBlock(block);
           }
         } else {
           const zoom = l.closest(".rm-zoom-item-content") as HTMLSpanElement;
           if (zoom) {
-            (
+            unstyleBlock(
               zoom.firstElementChild.firstElementChild as HTMLDivElement
-            ).style.textDecoration = "none";
+            );
             return;
           }
           const block = CLASSNAMES_TO_CHECK.map(
             (c) => l.closest(`.${c}`) as HTMLElement
           ).find((d) => !!d);
           if (block) {
-            block.style.textDecoration = "none";
+            unstyleBlock(block);
           }
         }
       },
