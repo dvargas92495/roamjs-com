@@ -1,8 +1,4 @@
-import {
-  getPageTitle,
-  isTagOnPage,
-  runExtension,
-} from "../entry-helpers";
+import { getPageTitle, isTagOnPage, runExtension } from "../entry-helpers";
 import {
   addButtonListener,
   addStyle,
@@ -19,11 +15,12 @@ import {
   toRoamDate,
   getPageTitleByPageUid,
   parseRoamDateUid,
+  getCurrentPageUid,
 } from "roam-client";
 import axios from "axios";
 import { render } from "../components/TweetOverlay";
 import { render as feedRender } from "../components/TwitterFeed";
-import { createConfigObserver } from "roamjs-components";
+import { createConfigObserver, getRenderRoot } from "roamjs-components";
 import { twitterLoginOptions } from "../components/TwitterLogin";
 
 addStyle(`div.roamjs-twitter-count {
@@ -120,8 +117,9 @@ runExtension("twitter", () => {
             {
               title: "append parent",
               type: "text",
-              description: "Text to append at the end of the parent block that sent the tweet thread"
-            }
+              description:
+                "Text to append at the end of the parent block that sent the tweet thread",
+            },
           ],
         },
         {
@@ -242,5 +240,14 @@ runExtension("twitter", () => {
         callback: (d: HTMLDivElement) => callback({ d, title }),
       });
     }
+    window.roamAlphaAPI.ui.commandPalette.addCommand({
+      label: "Open Twitter Feed",
+      callback: () => {
+        const title = getPageTitleByPageUid(getCurrentPageUid());
+        const root = getRenderRoot("twitter-feed");
+        root.id = root.id.replace(/-root$/, "");
+        feedRender(root, { format, title });
+      },
+    });
   }
 });
