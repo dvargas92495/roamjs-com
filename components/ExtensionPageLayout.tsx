@@ -91,6 +91,7 @@ export const contributors = {
   "Daniel Rahal": "https://twitter.com/danhrahal",
   "Orkhan Allahverdi": "https://twitter.com/o_allahverdi",
   "Monty Kosma": "https://twitter.com/mkosma",
+  "Mark Robertson": "https://twitter.com/calhistorian",
 };
 
 export const emojisToTooltip = {

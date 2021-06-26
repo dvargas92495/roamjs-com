@@ -1,6 +1,6 @@
 import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
-import { serialize } from "next-mdx-remote/serialize";
+import { serialize } from "../../../components/serverSide";
 import React from "react";
 import { API_URL } from "../../../components/constants";
 import StandardLayout from "../../../components/StandardLayout";

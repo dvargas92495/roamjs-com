@@ -134,7 +134,7 @@ description: "${description}"${
       "#"
     )}${block.heading > 0 ? " " : ""}${
       block.textAlign === "center" ? "<Center>" : ""
-    }${replaceComponents(block.text)}${
+    }((${block.uid}))${replaceComponents(block.text)}${
       block.textAlign === "center" ? "</Center>" : ""
     }\n${viewType === "document" ? "\n" : ""}${block.children
       .map((v) =>
@@ -165,11 +165,6 @@ description: "${description}"${
         Object.keys(subpages).map(
           (p) => `markdown/${path}/${p.replace(/ /g, "_").toLowerCase()}.md`
         )
-      );
-      console.log(
-        `${frontmatter}${blocks
-          .map((b) => blockToMarkdown(b, viewType))
-          .join("")}`
       );
       return listAll(`markdown/${path}/`)
         .then((r) => {

@@ -53,6 +53,10 @@ const Highlight: React.FunctionComponent = ({ children }) => {
   return <span style={{ backgroundColor: "#ffff00" }}>{children}</span>;
 };
 
+const Block: React.FunctionComponent<{ id: string }> = ({ id, children }) => {
+  return <div id={id}>{children}</div>;
+};
+
 export default {
   h1: H1,
   h2: H2,
@@ -69,4 +73,5 @@ export default {
   YouTube,
   Center,
   Highlight,
+  Block,
 };

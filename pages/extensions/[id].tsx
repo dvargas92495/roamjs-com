@@ -4,7 +4,7 @@ import { Prism } from "react-syntax-highlighter";
 import React, { useCallback, useState } from "react";
 import { API_URL } from "../../components/constants";
 import StandardLayout from "../../components/StandardLayout";
-import { serialize } from "next-mdx-remote/serialize";
+import { serialize } from "../../components/serverSide";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import matter from "gray-matter";
 import {
@@ -106,7 +106,9 @@ const ExtensionPage = ({
       </Body>
       <div style={{ marginBottom: 48 }}>
         <Prism language="javascript">
-          {entry ? getCodeContent(id, entry) : getSingleCodeContent(`${id}/main`)}
+          {entry
+            ? getCodeContent(id, entry)
+            : getSingleCodeContent(`${id}/main`)}
         </Prism>
       </div>
       {content.compiledSource ? (

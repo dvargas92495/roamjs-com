@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   BLOCK_REF_REGEX,
   createPage,
+  getPageTitleByBlockUid,
   getPageTitlesStartingWithPrefix,
   getPageUidByPageTitle,
   getPageViewType,
@@ -51,6 +52,11 @@ const EMBED_REF_REGEX = new RegExp(
   "g"
 );
 
+const ALIAS_BLOCK_REGEX = new RegExp(
+  `\\[(.*?)\\]\\(${BLOCK_REF_REGEX.source}\\)`,
+  "g"
+);
+
 const resolveRefsInNode = (t: TreeNode) => {
   t.text = t.text
     .replace(EMBED_REF_REGEX, (_, blockUid) => {
@@ -58,9 +64,18 @@ const resolveRefsInNode = (t: TreeNode) => {
       t.children.push(...tree.children);
       return tree.text;
     })
+    .replace(ALIAS_BLOCK_REGEX, (_, alias, blockUid) => {
+      const page = getPageTitleByBlockUid(blockUid)
+        .replace(/ /g, "_")
+        .toLowerCase();
+      return `[${alias}](/extensions/${page}#${blockUid})`;
+    })
     .replace(BLOCK_REF_REGEX, (_, blockUid) => {
       const reference = getTextByBlockUid(blockUid);
-      return reference || blockUid;
+      const page = getPageTitleByBlockUid(blockUid)
+        .replace(/ /g, "_")
+        .toLowerCase();
+      return `[${reference}](/extensions/${page}#${blockUid})`;
     });
   t.children.forEach(resolveRefsInNode);
 };

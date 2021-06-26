@@ -20,7 +20,7 @@ import { defaultLayoutProps } from "../../components/Layout";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import MdxComponents from "../../components/MdxComponents";
 import ProjectFundButton from "../../components/ProjectFundButton";
-import { serialize } from "next-mdx-remote/serialize";
+import { serialize } from "../../components/serverSide";
 
 type Backer = {
   funding: number;
