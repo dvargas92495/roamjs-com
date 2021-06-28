@@ -138,12 +138,18 @@ const ProjectPage = ({
       </div>
       <Card title={"Funding Progress"}>
         <DataLoader loadAsync={loadAsync}>
-          <ProjectFundButton
-            name={name}
-            uuid={uuid}
-            isOpen={isOpen}
-            onSuccess={() => loadAsync().then(() => setIsCheckout(true))}
-          />
+          {fundsRaised >= target ? (
+            <H4 style={{ marginTop: 0 }}>
+              Funding target reached! Thanks your support!
+            </H4>
+          ) : (
+            <ProjectFundButton
+              name={name}
+              uuid={uuid}
+              isOpen={isOpen}
+              onSuccess={() => loadAsync().then(() => setIsCheckout(true))}
+            />
+          )}
           <hr style={{ marginTop: 16, opacity: 0.3 }} />
           <div style={{ display: "flex", alignItems: "center" }}>
             <LinearProgress
