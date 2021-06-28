@@ -17,7 +17,7 @@ import {
 } from "../entry-helpers";
 import { render as iconRender } from "../components/MinimalIcon";
 import { loadRender, render as saveRender } from "../components/SaveSidebar";
-import { createConfigObserver } from "roamjs-components";
+import { createConfigObserver, toFlexRegex } from "roamjs-components";
 
 const ID = "sidebar";
 const CONFIG = `roam/js/${ID}`;
@@ -50,7 +50,20 @@ runExtension(ID, () => {
   createConfigObserver({
     title: CONFIG,
     config: {
-      tabs: [],
+      tabs: [
+        {
+          id: "home",
+          fields: [
+            {
+              title: "auto focus",
+              type: "flag",
+              description:
+                "Whether or not the sidebar should be automatically focused upon opening.",
+              defaultValue: true,
+            },
+          ],
+        },
+      ],
     },
   });
 
@@ -127,11 +140,13 @@ runExtension(ID, () => {
             deleteBlock(uid);
           } else if (!isOpen && !isCloseIconPresent) {
             createBlock({ node: { text: "open" }, parentUid });
-            const firstBlock = rightSidebar.getElementsByClassName(
-              "roam-block"
-            )[0] as HTMLElement;
-            if (firstBlock) {
-              openBlockElement(firstBlock);
+            if (tree.some((t) => toFlexRegex("auto focus").test(t.text))) {
+              const firstBlock = rightSidebar.getElementsByClassName(
+                "roam-block"
+              )[0] as HTMLElement;
+              if (firstBlock) {
+                openBlockElement(firstBlock);
+              }
             }
           }
         }, 50);
@@ -163,10 +178,7 @@ runExtension(ID, () => {
             iconRender({
               p: linkIconContainer,
               tooltipContent: "Go to page",
-              onClick: () =>
-                window.location.assign(
-                  getRoamUrl(pageUid)
-                ),
+              onClick: () => window.location.assign(getRoamUrl(pageUid)),
               icon: "link",
             });
             h.appendChild(linkIconContainer);
