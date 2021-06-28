@@ -164,6 +164,11 @@ const ContributePage = (): React.ReactElement => {
           },
           {
             title: "Lance Tracey",
+            imgSrc: "sponsors/ltracey.jpg",
+            url: "https://twitter.com/elty",
+          },
+          {
+            title: "Francis Miller",
             imgSrc: "sponsors/default.jpg",
             url: "",
           },
@@ -377,8 +382,8 @@ const ContributePage = (): React.ReactElement => {
           },
           {
             title: "Constance M Yowell",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
+            imgSrc: "sponsors/connie.jpeg",
+            url: "https://twitter.com/connie",
           },
         ]}
       />
