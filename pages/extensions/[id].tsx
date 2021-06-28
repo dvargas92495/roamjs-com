@@ -24,15 +24,14 @@ import {
   H4,
   IconButton,
   Subtitle,
-  Tooltip,
+  ThankYou,
+  ThankYouSponsor,
+  isThankYouEmoji,
 } from "@dvargas92495/ui";
-import {
-  contributors as allContributors,
-  emojisToTooltip,
-  SponsorDialog,
-} from "../../components/ExtensionPageLayout";
+import SponsorDialog from "../../components/SponsorDialog";
 import RoamJSDigest from "../../components/RoamJSDigest";
 import MdxComponents from "../../components/MdxComponents";
+import fs from "fs";
 
 const total = 30 - 1;
 const rowLength = 4;
@@ -42,7 +41,7 @@ const ExtensionPage = ({
   id,
   description,
   development,
-  contributors,
+  sponsors,
   entry,
 }: {
   id: string;
@@ -50,7 +49,7 @@ const ExtensionPage = ({
   description: string;
   development: boolean;
   entry: string;
-  contributors?: string;
+  sponsors?: ThankYouSponsor[];
 }): React.ReactElement => {
   const title = idToTitle(id);
   const [copied, setCopied] = useState(false);
@@ -128,43 +127,16 @@ const ExtensionPage = ({
         button below!
       </Body>
       <SponsorDialog id={id} />
-      {contributors?.length && (
+      {sponsors?.length && (
         <>
           <Body>
             A special thanks to those who's contributions also helped make this
             extension possible:
           </Body>
-          <ul>
-            {contributors.split(",").map((s) => {
-              const parts = s.trim().split(" ");
-              const emojis = parts[parts.length - 1];
-              const emojiKeys = emojis
-                .split("")
-                .map((s, i) => `${s}${emojis.charAt(i + 1)}`)
-                .filter((_, i) => i % 2 === 0)
-                .filter((s) => !!emojisToTooltip[s]);
-              const name = parts
-                .slice(0, emojiKeys.length ? parts.length - 1 : parts.length)
-                .join(" ");
-              const href = allContributors[name];
-              return (
-                <li key={s}>
-                  {href ? (
-                    <>
-                      <ExternalLink href={href}>{name}</ExternalLink>
-                    </>
-                  ) : (
-                    name
-                  )}{" "}
-                  {emojiKeys.map((s) => (
-                    <Tooltip title={emojisToTooltip[s]} key={s}>
-                      <span style={{ cursor: "help" }}>{s}</span>
-                    </Tooltip>
-                  ))}
-                </li>
-              );
-            })}
-          </ul>
+          <ThankYou
+            sponsors={sponsors}
+            defaultImgSrc={"/sponsors/default.jpg"}
+          />
         </>
       )}
       <div style={{ margin: "128px 0" }}>
@@ -237,17 +209,39 @@ export const getStaticProps: GetStaticProps<
   axios
     .get(`${API_URL}/request-path?id=${context.params.id}`)
     .then(({ data: { content, ...rest } }) => ({ ...matter(content), ...rest }))
-    .then(({ content: preRender, data, state, description }) =>
-      serialize(preRender).then((content) => ({
+    .then(({ content: preRender, data, state, description }) => {
+      const { contributors: contributorsJson } = JSON.parse(
+        fs.readFileSync("./thankyou.json").toString()
+      );
+      return serialize(preRender).then((content) => ({
         props: {
           content,
           id: context.params.id,
           development: state === "DEVELOPMENT",
           description,
+          sponsors: (data.contributors || "")
+            .split(",")
+            .map((s: string) => {
+              const parts = s.trim().split(" ");
+              const emojis = parts[parts.length - 1];
+              const emojiKeys = emojis
+                .split("")
+                .map((s, i) => `${s}${emojis.charAt(i + 1)}`)
+                .filter((_, i) => i % 2 === 0)
+                .filter(isThankYouEmoji);
+              const title = parts
+                .slice(0, emojiKeys.length ? parts.length - 1 : parts.length)
+                .join(" ");
+              return {
+                ...contributorsJson[title],
+                title,
+                emojis: emojiKeys,
+              };
+            }),
           ...data,
         },
-      }))
-    )
+      }));
+    })
     .catch((e) => {
       return serialize(
         `Failed to render due to: ${e.response?.data || e.message}`

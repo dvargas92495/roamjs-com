@@ -3,8 +3,15 @@ import StandardLayout from "../../components/StandardLayout";
 import { Body, H1, H2, H6, Outlined, ThankYou } from "@dvargas92495/ui";
 import SponsorCard from "../../components/SponsorCard";
 import { defaultLayoutProps } from "../../components/Layout";
+import { GetStaticProps } from "next";
+import fs from "fs";
 
-const ContributePage = (): React.ReactElement => {
+type Props = {
+  recurring: { title: string; imgSrc: string; url: string }[];
+  oneTime: { title: string; imgSrc: string; url: string }[];
+};
+
+const ContributePage = ({ recurring, oneTime }: Props): React.ReactElement => {
   return (
     <StandardLayout
       title={"Sponsor RoamJS"}
@@ -14,8 +21,7 @@ const ContributePage = (): React.ReactElement => {
       <H1>Sponsor</H1>
       <Body>
         Sponsorships support the development and maintenance of free to use
-        extensions on RoamJS. Monthly sponsors will receive 125% RoamJS credit
-        that could be allocated towards RoamJS Queue projects.
+        extensions on RoamJS.
       </Body>
       <Outlined style={{ padding: "16px 32px" }}>
         <SponsorCard source={"RoamJS Contribute"} />
@@ -25,370 +31,102 @@ const ContributePage = (): React.ReactElement => {
         A huge thank you to RoamJS' recurring sponsors. Click on their link to
         see what they're up to!
       </H6>
-      <ThankYou
-        sponsors={[
-          {
-            title: "Scott Block",
-            imgSrc: "sponsors/scottblock.jpg",
-            url: "https://twitter.com/insidetheblock",
-          },
-          {
-            title: "Conor White-Sullivan",
-            imgSrc: "sponsors/conaws.jpg",
-            url: "https://twitter.com/Conaw",
-          },
-          {
-            title: "Tom Kirkendall",
-            imgSrc: "sponsors/kir.jpeg",
-            url: "https://www.kir.com/",
-          },
-          {
-            title: "Alexander Young",
-            imgSrc: "sponsors/ayoung.jfif",
-            url: "https://www.linkedin.com/in/alyoung419/",
-          },
-          {
-            title: "Keenan Payne",
-            imgSrc: "sponsors/keenan.jpg",
-            url: "https://keenanpayne.com/",
-          },
-          {
-            title: "Salem Al-Mansoori",
-            imgSrc: "sponsors/salem.png",
-            url: "https://twitter.com/uncomposition",
-          },
-          {
-            title: "Erik Bjäreholt",
-            imgSrc: "sponsors/bjareholt.jfif",
-            url: "https://erik.bjareholt.com/",
-          },
-          {
-            title: "Kurt Harriger",
-            imgSrc: "sponsors/kurt.jfif",
-            url: "https://www.linkedin.com/in/kurtharriger/",
-          },
-          {
-            title: "Rodrigo Franco",
-            imgSrc: "sponsors/franco.png",
-            url: "https://www.rodrigofranco.com/",
-          },
-          {
-            title: "Carlos Lepesqueur",
-            imgSrc: "sponsors/calepes.jpg",
-            url: "https://www.calepes.com/",
-          },
-          {
-            title: "Abhay Prasanna",
-            imgSrc: "sponsors/abhayprasanna.jpg",
-            url: "https://twitter.com/AbhayPrasanna",
-          },
-          {
-            title: "Lisa-Marie Cabrelli",
-            imgSrc: "sponsors/lisa.jpg",
-            url: "https://www.roamforresults.com/",
-          },
-          {
-            title: "Michael Colacino",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "Norman Chella",
-            imgSrc: "sponsors/chella.jpg",
-            url: "https://thatsthenorm.com/start/",
-          },
-          {
-            title: "Rick Wilkes",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "David Hislop",
-            imgSrc: "sponsors/hislop.png",
-            url: "https://twitter.com/davehislop",
-          },
-          {
-            title: "Patrick Stoeckmann",
-            imgSrc: "sponsors/stoeckmann.jpg",
-            url: "https://twitter.com/palladion",
-          },
-          {
-            title: "Zach Phillips",
-            imgSrc: "sponsors/zphillips.jpg",
-            url: "https://zachphillips.blog/",
-          },
-          {
-            title: "Brent Hueth",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "Bruno Santos",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "Manel Punti Sarda",
-            imgSrc: "sponsors/manel.png",
-            url: "https://www.musicdistribucion.com/",
-          },
-          {
-            title: "Kathryn E. Foy",
-            imgSrc: "sponsors/katefoy.jpg",
-            url: "https://about.me/Dramagirl",
-          },
-          {
-            title: "Mark Lavercombe",
-            imgSrc: "sponsors/lavercombe.jpg",
-            url: "https://twitter.com/LavercombeMark",
-          },
-          {
-            title: "Justin Mather",
-            imgSrc: "sponsors/justmath.jpg",
-            url: "https://twitter.com/itsjustmath",
-          },
-          {
-            title: "Michael Brockbals",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "Jason Kleinberg",
-            imgSrc: "sponsors/kleinberg.jpg",
-            url: "https://www.jkleinberg.com/now",
-          },
-          {
-            title: "Tsun Kuo Kuo",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "Lance Tracey",
-            imgSrc: "sponsors/ltracey.jpg",
-            url: "https://twitter.com/elty",
-          },
-          {
-            title: "Francis Miller",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-        ]}
-      />
+      <ThankYou sponsors={recurring} defaultImgSrc={'sponsors/default.jpg'} />
       <H6>
         A big thank you to RoamJS' individual sponsors. Click on their link to
         see what they're up to!
       </H6>
-      <ThankYou
-        sponsors={[
-          {
-            title: "David Eaton",
-            imgSrc: "sponsors/davideaton.jpg",
-            url: "https://twitter.com/gottalead",
-          },
-          {
-            title: "Matt Brockwell",
-            imgSrc: "sponsors/mattbrockwell.jpg",
-            url: "https://twitter.com/jeanvaljean689",
-          },
-          {
-            title: "David Mehlman",
-            imgSrc: "sponsors/mehlman.jpg",
-            url: "https://twitter.com/DMehlo",
-          },
-          {
-            title: "Shawn Murphy",
-            imgSrc: "sponsors/murf.jpg",
-            url: "https://twitter.com/shawnpmurphy8",
-          },
-          {
-            title: "Joe Ocampo",
-            imgSrc: "sponsors/ocampo.jpg",
-            url: "https://twitter.com/joe_ocampo",
-          },
-          {
-            title: "Dharam Kapila",
-            imgSrc: "sponsors/dharam.jpg",
-            url: "https://twitter.com/DharamKapila",
-          },
-          {
-            title: "Tracy Winchell",
-            imgSrc: "sponsors/tracy.jpg",
-            url: "https://twitter.com/tracyplaces",
-          },
-          {
-            title: "Tomáš Baránek",
-            imgSrc: "sponsors/barys.jpg",
-            url: "https://barys.me",
-          },
-          {
-            title: "Zach Holmquist",
-            imgSrc: "sponsors/holmquist.jpg",
-            url: "https://twitter.com/zholmquist",
-          },
-          {
-            title: "David Rangel",
-            imgSrc: "sponsors/rangel.png",
-            url: "https://davidrangel.com",
-          },
-          {
-            title: "Andrey Kumanov",
-            imgSrc: "sponsors/andrey.jpg",
-            url: "https://twitter.com/andreynocap",
-          },
-          {
-            title: "Chris Pavese",
-            imgSrc: "sponsors/pavese.jpg",
-            url: "https://twitter.com/ChrisPavese",
-          },
-          {
-            title: "Chris Hubbard",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "SJ Klein",
-            imgSrc: "sponsors/default.jpg",
-            url: "https://underlay.mit.edu/",
-          },
-          {
-            title: "Sai Satish Kandukuri",
-            imgSrc: "sponsors/sai.jpg",
-            url: "https://twitter.com/saisatik",
-          },
-          {
-            title: "Daniel D Ostlund",
-            imgSrc: "sponsors/dostlund.jfif",
-            url: "https://twitter.com/dostlund",
-          },
-          {
-            title: "Parham Shafti",
-            imgSrc: "sponsors/parham.jfif",
-            url: "https://www.forthisworld.org",
-          },
-          {
-            title: "Simon Nazer",
-            imgSrc: "sponsors/nazer.jpg",
-            url: "https://www.wordimagedesign.com/",
-          },
-          {
-            title: "Elizabeth Beese",
-            imgSrc: "sponsors/beese.jpg",
-            url: "https://elizabethbeese.com",
-          },
-          {
-            title: "Halem Jan Kirgil",
-            imgSrc: "sponsors/halem.jpg",
-            url: "https://twitter.com/tj_allemaal",
-          },
-          {
-            title: "Kacper Baranski",
-            imgSrc: "sponsors/kacper.jfif",
-            url: "https://www.linkedin.com/in/kacper-baranski-69a37184/",
-          },
-          {
-            title: "Zak Weston",
-            imgSrc: "sponsors/weston.jpg",
-            url: "https://twitter.com/zakweston",
-          },
-          {
-            title: "Erick Aparicio",
-            imgSrc: "sponsors/default.jpg",
-            url: "https://www.linkedin.com/in/erick-aparicio-3301",
-          },
-          {
-            title: "Rodrigo Faerman",
-            imgSrc: "sponsors/faerman.jpg",
-            url: "https://rodrigofaerman.com",
-          },
-          {
-            title: "David Plummer",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "Denise Todd",
-            imgSrc: "sponsors/denise.jfif",
-            url: "https://denisetodd.com",
-          },
-          {
-            title: "Nadir Samji",
-            imgSrc: "sponsors/samji.png",
-            url: "https://twitter.com/_nadir",
-          },
-          {
-            title: "Tobias Harmes",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "Weston Wagner",
-            imgSrc: "sponsors/wagner.jpg",
-            url: "https://westonwagner.com/",
-          },
-          {
-            title: "Adam Rogers",
-            imgSrc: "sponsors/adamr.jpg",
-            url: "https://twitter.com/adamr",
-          },
-          {
-            title: "Nate Stell",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "Violeta Kristof",
-            imgSrc: "sponsors/violeta.jpg",
-            url: "https://twitter.com/MamanLunettes",
-          },
-          {
-            title: "Bala Chandrasekhar Manda",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "Jason Phillips",
-            imgSrc: "sponsors/default.jpg",
-            url: "https://jasonwphillips.com/",
-          },
-          {
-            title: "Dun Jack Fu",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "Zahid A Ali",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "Franz Wiesbauer",
-            imgSrc: "sponsors/Franz.jpg",
-            url: "https://twitter.com/medmastery",
-          },
-          {
-            title: "Henry Harboe",
-            imgSrc: "sponsors/harboe.jfif",
-            url: "https://twitter.com/henryharboe",
-          },
-          {
-            title: "George Roukas",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "Thomas C Eaves",
-            imgSrc: "sponsors/default.jpg",
-            url: "",
-          },
-          {
-            title: "Constance M Yowell",
-            imgSrc: "sponsors/connie.jpeg",
-            url: "https://twitter.com/connie",
-          },
-        ]}
-      />
+      <ThankYou sponsors={oneTime} defaultImgSrc={'sponsors/default.jpg'} />
     </StandardLayout>
   );
+};
+
+const RECURRING = [
+  "Scott Block",
+  "Conor White-Sullivan",
+  "Tom Kirkendall",
+  "Alexander Young",
+  "Keenan Payne",
+  "Salem Al-Mansoori",
+  "Erik Bjäreholt",
+  "Kurt Harriger",
+  "Rodrigo Franco",
+  "Carlos Lepesqueur",
+  "Abhay Prasanna",
+  "Lisa-Marie Cabrelli",
+  "Michael Colacino",
+  "Norman Chella",
+  "Rick Wilkes",
+  "David Hislop",
+  "Patrick Stoeckmann",
+  "Zach Phillips",
+  "Brent Hueth",
+  "Bruno Santos",
+  "Manel Punti Sarda",
+  "Kathryn E. Foy",
+  "Mark Lavercombe",
+  "Justin Mather",
+  "Michael Brockbals",
+  "Jason Kleinberg",
+  "Tsun Kuo Kuo",
+  "Lance Tracey",
+  "Francis Miller",
+];
+
+const ONE_TIME = [
+  "David Eaton",
+  "Matt Brockwell",
+  "David Mehlman",
+  "Shawn Murphy",
+  "Joe Ocampo",
+  "Dharam Kapila",
+  "Tracy Winchell",
+  "Tomáš Baránek",
+  "Zach Holmquist",
+  "David Rangel",
+  "Andrey Kumanov",
+  "Chris Pavese",
+  "Chris Hubbard",
+  "SJ Klein",
+  "Sai Satish Kandukuri",
+  "Daniel D Ostlund",
+  "Parham Shafti",
+  "Simon Nazer",
+  "Elizabeth Beese",
+  "Halem Jan Kirgil",
+  "Kacper Baranski",
+  "Zak Weston",
+  "Erick Aparicio",
+  "Rodrigo Faerman",
+  "David Plummer",
+  "Denise Todd",
+  "Nadir Samji",
+  "Tobias Harmes",
+  "Weston Wagner",
+  "Adam Rogers",
+  "Nate Stell",
+  "Violeta Kristof",
+  "Bala Chandrasekhar Manda",
+  "Jason Phillips",
+  "Dun Jack Fu",
+  "Zahid A Ali",
+  "Franz Wiesbauer",
+  "Henry Harboe",
+  "George Roukas",
+  "Thomas C Eaves",
+  "Constance M Yowell",
+];
+
+export const getStaticProps: GetStaticProps<Props> = () => {
+  const { contributors } = JSON.parse(
+    fs.readFileSync("./thankyou.json").toString()
+  );
+  return Promise.resolve({
+    props: {
+      recurring: RECURRING.map((title) => ({ ...contributors[title], title })),
+      oneTime: ONE_TIME.map((title) => ({ ...contributors[title], title })),
+    },
+  });
 };
 
 export default ContributePage;

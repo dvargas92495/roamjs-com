@@ -3,9 +3,6 @@ import {
   Breadcrumbs,
   Button,
   CardGrid,
-  Dialog,
-  DialogContent,
-  DialogTitle,
   ExternalLink,
   H1,
   H2,
@@ -15,7 +12,7 @@ import {
   Subtitle,
   Tooltip,
 } from "@dvargas92495/ui";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import DemoVideo from "./DemoVideo";
 import Loom from "./Loom";
@@ -23,7 +20,7 @@ import { frontMatter as frontMatters } from "../pages/docs/extensions/*.mdx";
 import { getSingleCodeContent, idToTitle, useCopyCode } from "./hooks";
 import StandardLayout from "./StandardLayout";
 import RoamJSDigest from "./RoamJSDigest";
-import SponsorCard from "./SponsorCard";
+import SponsorDialog from "./SponsorDialog";
 
 export interface FrontMatter {
   __resourcePath: string;
@@ -100,36 +97,6 @@ export const emojisToTooltip = {
   "🤔": "Idea",
   "💻": "Code",
   "📖": "Documentation",
-};
-
-export const SponsorDialog = ({ id }: { id: string }): React.ReactElement => {
-  const [open, setOpen] = useState(false);
-  const handleOpen = useCallback(() => setOpen(true), [setOpen]);
-  const handleClose = useCallback(() => setOpen(false), [setOpen]);
-  useEffect(() => {
-    const query = new URLSearchParams(window.location.search);
-    setOpen(query.get("sponsor") === "true");
-  }, [setOpen]);
-  return (
-    <>
-      <Button color={"primary"} variant="contained" onClick={handleOpen}>
-        Sponsor
-      </Button>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Sponsor RoamJS</DialogTitle>
-        <DialogContent>
-          <SponsorCard source={`RoamJS Docs ${id}`} />
-          <Button
-            onClick={handleClose}
-            color="secondary"
-            style={{ marginBottom: -16, right: -320, bottom: 36 }}
-          >
-            Cancel
-          </Button>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
 };
 
 const ExtensionPageLayout: React.FunctionComponent<{
