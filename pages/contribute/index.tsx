@@ -71,6 +71,8 @@ const RECURRING = [
   "Tsun Kuo Kuo",
   "Lance Tracey",
   "Francis Miller",
+  "Matthew Mckinlay",
+  "George Silverman",
 ];
 
 const ONE_TIME = [
