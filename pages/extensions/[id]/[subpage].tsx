@@ -23,7 +23,7 @@ const ExtensionSubPage = ({
   const title = idToTitle(subpage);
   return (
     <StandardLayout
-      title={`${subpage} | ${id}`}
+      title={`${title} | ${idToTitle(id)}`}
       description={`${title} page of the ${idToTitle(id)} extension.`}
       img={`https://roamjs.com/thumbnails/${id}.png`}
     >
