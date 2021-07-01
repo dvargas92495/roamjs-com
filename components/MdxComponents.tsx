@@ -1,4 +1,4 @@
-import { H1, H2, H3, H4, H5, H6, Body } from "@dvargas92495/ui";
+import { H1, H2, H3, H4, H5, H6, Body, LI } from "@dvargas92495/ui";
 import React from "react";
 import Loom from "./Loom";
 import YouTube from "./Youtube";
@@ -45,8 +45,12 @@ const MdxImage = (
   />
 );
 
-export const Center: React.FunctionComponent = ({ children }) => {
-  return <div style={{ textAlign: "center" }}>{children}</div>;
+export const Center: React.FunctionComponent = ({ children, ...props }) => {
+  return (
+    <div style={{ textAlign: "center" }} {...props}>
+      {children}
+    </div>
+  );
 };
 
 const Highlight: React.FunctionComponent = ({ children }) => {
@@ -55,6 +59,23 @@ const Highlight: React.FunctionComponent = ({ children }) => {
 
 const Block: React.FunctionComponent<{ id: string }> = ({ id, children }) => {
   return <div id={id}>{children}</div>;
+};
+
+const Blockquote: React.FunctionComponent<{ id: string }> = ({ children }) => {
+  return (
+    <blockquote
+      style={{
+        backgroundColor: "#F5F8FA",
+        borderLeft: "5px solid #30404D",
+        fontSize: 14,
+        margin: "0 0 10px",
+        wordWrap: "break-word",
+        padding: 4,
+      }}
+    >
+      {children}
+    </blockquote>
+  );
 };
 
 export default {
@@ -69,9 +90,11 @@ export default {
   inlineCode: InlineCode,
   pre: Pre,
   img: MdxImage,
+  li: LI,
   Loom,
   YouTube,
   Center,
   Highlight,
   Block,
+  blockquote: Blockquote,
 };

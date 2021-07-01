@@ -48,7 +48,7 @@ export const developerToaster = Toaster.create({
 });
 
 const EMBED_REF_REGEX = new RegExp(
-  `{{(?:[[)embed(?:]]):\\s*${BLOCK_REF_REGEX.source}\\s*}}`,
+  `{{(?:\\[\\[)embed(?:\\]\\]):\\s*${BLOCK_REF_REGEX.source}\\s*}}`,
   "g"
 );
 
@@ -56,29 +56,6 @@ const ALIAS_BLOCK_REGEX = new RegExp(
   `\\[(.*?)\\]\\(${BLOCK_REF_REGEX.source}\\)`,
   "g"
 );
-
-const resolveRefsInNode = (t: TreeNode) => {
-  t.text = t.text
-    .replace(EMBED_REF_REGEX, (_, blockUid) => {
-      const tree = getTreeByBlockUid(blockUid);
-      t.children.push(...tree.children);
-      return tree.text;
-    })
-    .replace(ALIAS_BLOCK_REGEX, (_, alias, blockUid) => {
-      const page = getPageTitleByBlockUid(blockUid)
-        .replace(/ /g, "_")
-        .toLowerCase();
-      return `[${alias}](/extensions/${page}#${blockUid})`;
-    })
-    .replace(BLOCK_REF_REGEX, (_, blockUid) => {
-      const reference = getTextByBlockUid(blockUid);
-      const page = getPageTitleByBlockUid(blockUid)
-        .replace(/ /g, "_")
-        .toLowerCase();
-      return `[${reference}](/extensions/${page}#${blockUid})`;
-    });
-  t.children.forEach(resolveRefsInNode);
-};
 
 const DeveloperContent: StageContent = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -156,6 +133,34 @@ const DeveloperContent: StageContent = () => {
                       ) || {
                         children: [] as TreeNode[],
                         viewType: "document",
+                      };
+                      const isExternal = (s: string) =>
+                        s !== p && !s.startsWith(`${p}/`);
+                      const resolveRefsInNode = (t: TreeNode) => {
+                        t.text = t.text
+                          .replace(EMBED_REF_REGEX, (_, blockUid) => {
+                            const tree = getTreeByBlockUid(blockUid);
+                            t.children.push(...tree.children);
+                            return tree.text;
+                          })
+                          .replace(ALIAS_BLOCK_REGEX, (_, alias, blockUid) => {
+                            const page = getPageTitleByBlockUid(blockUid)
+                              .replace(/ /g, "_")
+                              .toLowerCase();
+                            return isExternal(page)
+                              ? alias
+                              : `[${alias}](/extensions/${page}#${blockUid})`;
+                          })
+                          .replace(BLOCK_REF_REGEX, (_, blockUid) => {
+                            const reference = getTextByBlockUid(blockUid);
+                            const page = getPageTitleByBlockUid(blockUid)
+                              .replace(/ /g, "_")
+                              .toLowerCase();
+                            return isExternal(page)
+                              ? reference
+                              : `[${reference}](/extensions/${page}#${blockUid})`;
+                          });
+                        t.children.forEach(resolveRefsInNode);
                       };
                       children.forEach(resolveRefsInNode);
                       const subpageTitles = window.roamAlphaAPI
