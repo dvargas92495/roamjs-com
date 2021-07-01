@@ -235,12 +235,19 @@
     "Rushi Bhavsar": { "url": "https://twitter.com/RushiBhavsar" },
     "RoamHacker": { "url": "https://twitter.com/roamhacker" },
     "Ivo Velitchkov": { "url": "https://www.strategicstructures.com/" },
-    "Mathew McGann": { "url": "http://www.mcgannfreestone.com.au/" },
+    "Mathew McGann": {
+      "url": "http://www.mcgannfreestone.com.au/",
+      "imgSrc": "/sponsors/mcgann.jfif"
+    },
     "Bardia Pourvakil": { "url": "https://twitter.com/thepericulum" },
     "Gene Kim": { "url": "https://twitter.com/RealGeneKim" },
     "Tony Ennis": { "url": "https://tonyennis.com" },
     "Sharon Dale": { "url": "http://www.sharondale.co.uk/" },
     "Eric Anderson": { "url": "http://ecanderson.com/" },
+    "Planetary Holdings": {
+      "url": "https://planetaryholdings.com/",
+      "imgSrc": "/sponsors/planetory.jpg"
+    },
     "Isabela Granic": { "url": "http://isabelagranic.com/" },
     "Jon Surrat": { "url": "https://twitter.com/surrjon" },
     "Owen Cyrulnik": { "url": "https://twitter.com/cyrulnik" },
@@ -255,6 +262,14 @@
     "Mark Robertson": { "url": "https://twitter.com/calhistorian" },
     "George Silverman": {},
     "Matthew Mckinlay": {},
-    "Ryan Levander": { "imgSrc": "/sponsors/levander.png" }
+    "Ryan Levander": { "imgSrc": "/sponsors/levander.png" },
+    "Joel Gustafson": {
+      "url": "https://joelgustafson.com/",
+      "imgSrc": "/sponsors/joelg.jpg"
+    },
+    "Kyle Harrison": {
+      "url": "https://linktr.ee/kwharrison13",
+      "imgSrc": "/sponsors/kyleh.jpg"
+    }
   }
 }
