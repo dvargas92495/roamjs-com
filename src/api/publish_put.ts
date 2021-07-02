@@ -135,7 +135,7 @@ description: "${description}"${
     viewType: ViewType,
     depth = 0
   ): string =>
-    `${"".padStart(depth * 4, " ")}${viewTypeToPrefix[viewType]}<Block id={"${
+    `${"".padStart(depth * 4, " ")}${viewTypeToPrefix[viewType || 'bullet']}<Block id={"${
       block.uid
     }"}>${"".padStart(block.heading, "#")}${block.heading > 0 ? " " : ""}${
       block.textAlign === "center" ? "<Center>" : ""

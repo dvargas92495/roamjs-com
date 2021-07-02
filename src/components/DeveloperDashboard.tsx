@@ -142,7 +142,7 @@ const DeveloperContent: StageContent = () => {
                             const tree = getTreeByBlockUid(blockUid);
                             t.children.push(...tree.children);
                             t.heading = tree.heading;
-                            t.viewType = tree.viewType;
+                            t.viewType = tree.viewType || 'bullet';
                             t.textAlign = tree.textAlign;
                             return tree.text;
                           })
