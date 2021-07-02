@@ -133,14 +133,13 @@ description: "${description}"${
     viewType: ViewType,
     depth = 0
   ): string =>
-    `${"".padStart(depth * 4, " ")}${viewTypeToPrefix[viewType]}${"".padStart(
-      block.heading,
-      "#"
-    )}${block.heading > 0 ? " " : ""}${
+    `${"".padStart(depth * 4, " ")}${viewTypeToPrefix[viewType]}<Block id={"${
+      block.uid
+    }"}>${"".padStart(block.heading, "#")}${block.heading > 0 ? " " : ""}${
       block.textAlign === "center" ? "<Center>" : ""
-    }${block.text === "---" ? "" : `((${block.uid}))`}${replaceComponents(
-      block.text
-    )}${block.textAlign === "center" ? "</Center>" : ""}\n${block.children
+    }${replaceComponents(block.text)}${
+      block.textAlign === "center" ? "</Center>" : ""
+    }</Block>\n${viewType === "document" ? "\n" : ""}${block.children
       .map((v) =>
         blockToMarkdown(
           v,
@@ -148,7 +147,9 @@ description: "${description}"${
           viewType === "document" ? depth : depth + 1
         )
       )
-      .join("")}${viewType === "document" ? "\n" : ""}`;
+      .join("")}${
+      viewType === "document" && block.children.length ? "\n" : ""
+    }`;
 
   return users
     .getUser(userId)

@@ -1,11 +1,14 @@
 import { serialize as mdxSerialize } from "next-mdx-remote/serialize";
 import type { Node } from "unist";
-import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
-import ReactDOMServer from "react-dom/server";
-import MdxComponents from "./MdxComponents";
-import React from "react";
+import { MDXRemoteSerializeResult } from "next-mdx-remote";
+import { createMdxAstCompiler } from "@mdx-js/mdx";
 
-const CONTENT_REGEX = /(<\w*>)(.*?)(<\/\w*>)/s;
+const strToHastCompiler = createMdxAstCompiler({
+  remarkPlugins: [],
+  rehypePlugins: [],
+  compilers: [],
+  skipExport: true,
+});
 
 export const serialize = (
   s: string
@@ -14,48 +17,41 @@ export const serialize = (
     mdxOptions: {
       rehypePlugins: [
         () => (tree) => {
-          const BLOCK_REF_REGEX = /\(\(([\w\d-]{9})\)\)/;
-          const getUid = (n: Node) => {
-            if (n.value) {
-              const value = n.value as string;
-              const uid = BLOCK_REF_REGEX.exec(value)?.[1];
-              if (uid) {
-                n.value = value.replace(BLOCK_REF_REGEX, "");
-                return uid;
+          const expandJsx = async (n: Node) => {
+            if (n.type === "jsx") {
+              const match = /^<(\w*)((?: \w*={"[\w\d_-]*"})*?)>(.*)$/s.exec(
+                n.value as string
+              );
+              if (match && match.length >= 3) {
+                const [, tag, props, rest] = match;
+                const content = new RegExp(`^(.*?)(</${tag}>)$`, "s").exec(
+                  rest
+                )?.[1];
+                if (content) {
+                  n.type = "element";
+                  n.tagName = tag;
+                  n.children = await strToHastCompiler
+                    .run(strToHastCompiler.parse(content))
+                    .then((c) => c.children);
+                  n.properties = props
+                    ? Object.fromEntries(
+                        props
+                          .trim()
+                          .split(" ")
+                          .map((prop) =>
+                            /(\w*)={"([\w\d_-]*)"}/.exec(prop.trim())
+                          )
+                          .filter((prop) => !!prop)
+                          .map(([, key, value]) => [key, value])
+                      )
+                    : {};
+                  delete n.value;
+                }
               }
             }
-            const c = n.children as Node[];
-            if (c?.length) {
-              return c.map((n) => getUid(n)).find((v) => !!v);
-            }
-            return "";
+            ((n.children as Node[]) || []).forEach(expandJsx);
           };
-          const addId = async (n: Node) => {
-            const props = n.properties as { id: string };
-            if (n.type === "element" && props) {
-              const id = getUid(n);
-              if (id) {
-                props.id = id;
-              }
-            } else if (n.type === "jsx") {
-              const id = getUid(n);
-              n.properties = { id };
-              const match = CONTENT_REGEX.exec(n.value as string);
-              if (match && match.length >= 4) {
-                const [, openingTag, content, closingTag] = match;
-                n.value = `${openingTag}${ReactDOMServer.renderToString(
-                  React.createElement(MDXRemote, {
-                    components: MdxComponents,
-                    compiledSource: await serialize(content)
-                      .then((r) => r.compiledSource)
-                      .catch(() => "Failed to render: " + content),
-                  })
-                )}${closingTag}`;
-              }
-            }
-            ((n.children as Node[]) || []).forEach(addId);
-          };
-          return Promise.all((tree.children as Node[]).map((n) => addId(n)))
+          return Promise.all((tree.children as Node[]).map(expandJsx))
             .then((a) => {
               return a[0];
             })

@@ -141,6 +141,9 @@ const DeveloperContent: StageContent = () => {
                           .replace(EMBED_REF_REGEX, (_, blockUid) => {
                             const tree = getTreeByBlockUid(blockUid);
                             t.children.push(...tree.children);
+                            t.heading = tree.heading;
+                            t.viewType = tree.viewType;
+                            t.textAlign = tree.textAlign;
                             return tree.text;
                           })
                           .replace(ALIAS_BLOCK_REGEX, (_, alias, blockUid) => {
