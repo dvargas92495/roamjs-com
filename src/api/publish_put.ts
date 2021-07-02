@@ -127,7 +127,9 @@ description: "${description}"${
       )
       .replace(/\^\^(.*?)\^\^/g, (_, i) => `<Highlight>${i}</Highlight>`)
       .replace(/__/g, "_")
-      .replace(new RegExp(String.fromCharCode(160), "g"), " ");
+      .replace(new RegExp(String.fromCharCode(160), "g"), " ")
+      .replace(/^```/, '\n\n```')
+      .replace(/```$/, '\n```\n\n');
   const blockToMarkdown = (
     block: TreeNode,
     viewType: ViewType,
