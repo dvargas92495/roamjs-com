@@ -14,7 +14,7 @@ const strToHastCompiler = createMdxAstCompiler({
 const debug = (tree: Node) => {
   if (process.env.NODE_ENV === "development") {
     let charcode = 97;
-    while (charcode < 120) {
+    while (charcode < 123) {
       const fn = `out/${String.fromCharCode(charcode)}.json`;
       if (!fs.existsSync(fn)) {
         if (process.env.NODE_ENV === "development")

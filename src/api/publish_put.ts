@@ -139,7 +139,7 @@ description: "${description}"${
       block.textAlign === "center" ? "<Center>" : ""
     }${replaceComponents(block.text)}${
       block.textAlign === "center" ? "</Center>" : ""
-    }</Block>\n${viewType === "document" ? "\n" : ""}${block.children
+    }</Block>\n\n${block.children
       .map((v) =>
         blockToMarkdown(
           v,
