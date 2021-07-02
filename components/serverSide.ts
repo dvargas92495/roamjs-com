@@ -2,6 +2,7 @@ import { serialize as mdxSerialize } from "next-mdx-remote/serialize";
 import type { Node } from "unist";
 import { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { createMdxAstCompiler } from "@mdx-js/mdx";
+import fs from "fs";
 
 const strToHastCompiler = createMdxAstCompiler({
   remarkPlugins: [],
@@ -10,13 +11,33 @@ const strToHastCompiler = createMdxAstCompiler({
   skipExport: true,
 });
 
+const debug = (tree: Node) => {
+  if (process.env.NODE_ENV === "development") {
+    let charcode = 97;
+    while (charcode < 120) {
+      const fn = `out/${String.fromCharCode(charcode)}.json`;
+      if (!fs.existsSync(fn)) {
+        if (process.env.NODE_ENV === "development")
+          fs.writeFileSync(fn, JSON.stringify(tree, null, 2));
+      } else {
+        charcode++;
+      }
+    }
+  }
+};
+
 export const serialize = (
   s: string
-): Promise<MDXRemoteSerializeResult<Record<string, unknown>>> =>
-  mdxSerialize(s, {
+): Promise<MDXRemoteSerializeResult<Record<string, unknown>>> => {
+  if (process.env.NODE_ENV === "development")
+    fs.readdirSync("./out")
+      .filter((s) => s.endsWith(".json"))
+      .forEach((s) => {console.log('deleting', s); fs.unlinkSync(`./out/${s}`);});
+  return mdxSerialize(s, {
     mdxOptions: {
       rehypePlugins: [
         () => (tree) => {
+          debug(tree);
           const expandJsx = async (n: Node) => {
             if (n.type === "jsx") {
               const match = /^<(\w*)((?: \w*={"[\w\d_-]*"})*?)>(.*)$/s.exec(
@@ -51,6 +72,7 @@ export const serialize = (
             }
             ((n.children as Node[]) || []).forEach(expandJsx);
           };
+          debug(tree);
           return Promise.all((tree.children as Node[]).map(expandJsx))
             .then((a) => {
               return a[0];
@@ -62,3 +84,4 @@ export const serialize = (
       ],
     },
   });
+};
