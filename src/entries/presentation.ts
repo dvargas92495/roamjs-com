@@ -70,6 +70,10 @@ addStyle(`.roamjs-collapsible-caret {
   width: 36px;
   top: 3px;
 }
+.reveal li>blockquote {
+  font-size: 1em;
+  width: 100%;
+}
 `);
 
 runExtension("presentation", async () => {

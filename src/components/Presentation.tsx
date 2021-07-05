@@ -324,6 +324,12 @@ const ContentSlide = ({
           iframe.height = `${height || 500}px`;
         }
       );
+      Array.from(slideRoot.current.getElementsByTagName("blockquote")).forEach(
+        (bq) => {
+          const item = bq.closest<HTMLLIElement>('li');
+          item.style.listStyle = 'none';
+        }
+      );
       setHtmlEditsLoaded(true);
     }
   }, [

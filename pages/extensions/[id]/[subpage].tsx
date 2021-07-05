@@ -6,19 +6,21 @@ import { API_URL } from "../../../components/constants";
 import StandardLayout from "../../../components/StandardLayout";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import MdxComponents from "../../../components/MdxComponents";
-import { Breadcrumbs, H1 } from "@dvargas92495/ui";
+import { Breadcrumbs, H1, H2 } from "@dvargas92495/ui";
 import { idToTitle } from "../../../components/hooks";
 
 type ExtensionSubPageProps = {
   content: MDXRemoteSerializeResult;
   id: string;
   subpage: string;
+  state: 'LIVE' | 'DEVELOPMENT' | 'LEGACY';
 };
 
 const ExtensionSubPage = ({
   content,
   id,
   subpage,
+  state,
 }: ExtensionSubPageProps): React.ReactElement => {
   const title = idToTitle(subpage);
   return (
@@ -40,6 +42,7 @@ const ExtensionSubPage = ({
           },
         ]}
       />
+      {state === 'DEVELOPMENT' && <H2>UNDER DEVELOPMENT</H2>}
       <H1>{title.toUpperCase()}</H1>
       <MDXRemote {...content} components={MdxComponents} />
     </StandardLayout>
@@ -75,6 +78,7 @@ export const getStaticProps: GetStaticProps<
       serialize(r.data.content).then((content) => ({
         props: {
           content,
+          state: r.data.state,
           ...context.params,
         },
       }))
