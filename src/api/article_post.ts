@@ -36,13 +36,13 @@ export const handler = async (
     "Content-type": "text/html",
     accept: "*/*",
     pragma: "no-cache",
-  }
+  };
   return fetch({
     "user-agent": "Mozilla/5.0",
-    ...mostHeaders
+    ...mostHeaders,
   })
     .catch((e) =>
-      e.response.status === 502
+      [406, 502].includes(e.response.status)
         ? fetch(mostHeaders)
         : handleError(e)
     )

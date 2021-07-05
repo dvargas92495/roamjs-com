@@ -1,9 +1,11 @@
 import {
+  createBlock,
   createButtonObserver,
   getActiveUids,
   getFirstChildUidByBlockUid,
   getUidsFromId,
   updateActiveBlock,
+  updateBlock,
 } from "roam-client";
 import urlRegex from "url-regex-safe";
 import {
@@ -25,9 +27,9 @@ const inlineImportArticle = async ({
   if (match) {
     const indent = getIndentConfig();
     const url = match[0];
-    window.roamAlphaAPI.createBlock({
-      block: { string: "Loading..." },
-      location: { "parent-uid": parentUid, order: 0 },
+    const loadingUid = createBlock({
+      node: { text: "Loading..." },
+      parentUid,
     });
     const blockUid = await new Promise<string>((resolve) =>
       setTimeout(() => resolve(getFirstChildUidByBlockUid(parentUid)), 1)
@@ -37,7 +39,7 @@ const inlineImportArticle = async ({
       blockUid,
       indent,
     }).catch(() => {
-      updateActiveBlock(ERROR_MESSAGE);
+      updateBlock({ uid: loadingUid, text: ERROR_MESSAGE });
     });
     return `[Source](${url})`;
   } else {

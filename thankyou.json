@@ -48,7 +48,10 @@
       "imgSrc": "/sponsors/lisa.jpg",
       "url": "https://www.roamforresults.com/"
     },
-    "Michael Colacino": {},
+    "Michael Colacino": {
+      "url": "https://twitter.com/mcolacino",
+      "imgSrc": "/sponsors/colacino.jpg"
+    },
     "Norman Chella": {
       "imgSrc": "/sponsors/chella.jpg",
       "url": "https://thatsthenorm.com/start/"
@@ -278,6 +281,10 @@
     "Christian Walter": {
       "url": "https://www.linkedin.com/in/christian--walter",
       "imgSrc": "/sponsors/walter.jfif"
+    },
+    "Beau Haan": {
+      "url": "https://twitter.com/beauhaan",
+      "imgSrc": "/sponsors/beau.jpg"
     }
   }
 }
