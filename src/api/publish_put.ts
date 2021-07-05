@@ -128,18 +128,21 @@ description: "${description}"${
       .replace(/\^\^(.*?)\^\^/g, (_, i) => `<Highlight>${i}</Highlight>`)
       .replace(/__/g, "_")
       .replace(new RegExp(String.fromCharCode(160), "g"), " ")
-      .replace(/^```/, '\n\n```')
-      .replace(/```$/, '\n```\n\n');
+      .replace(/```$/, '\n```');
   const blockToMarkdown = (
     block: TreeNode,
     viewType: ViewType,
     depth = 0
   ): string =>
-    `${"".padStart(depth * 4, " ")}${viewTypeToPrefix[viewType || 'bullet']}<Block id={"${
-      block.uid
-    }"}>${"".padStart(block.heading, "#")}${block.heading > 0 ? " " : ""}${
-      block.textAlign === "center" ? "<Center>" : ""
+    `${"".padStart(depth * 4, " ")}${
+      viewTypeToPrefix[viewType || "bullet"]
+    }<Block id={"${block.uid}"}>${"".padStart(block.heading, "#")}${
+      block.heading > 0 ? " " : ""
+    }${block.textAlign === "center" ? "<Center>" : ""}${
+      /\n/.test(block.text) ? "\n\n" : ""
     }${replaceComponents(block.text)}${
+      /\n/.test(block.text) ? "\n\n" : ""
+    }${
       block.textAlign === "center" ? "</Center>" : ""
     }</Block>\n\n${block.children
       .map((v) =>
