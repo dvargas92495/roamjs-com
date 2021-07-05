@@ -104,7 +104,7 @@ description: "${description}"${
         .promise()
     );
 
-  const replaceComponents = (text: string): string =>
+  const replaceComponents = (text: string, prefix: string): string =>
     text
       .replace(
         /{{(?:\[\[)?video(?:\]\])?:(?:\s)*https:\/\/www.loom.com\/share\/([0-9a-f]*)}}/g,
@@ -128,20 +128,25 @@ description: "${description}"${
       .replace(/\^\^(.*?)\^\^/g, (_, i) => `<Highlight>${i}</Highlight>`)
       .replace(/__/g, "_")
       .replace(new RegExp(String.fromCharCode(160), "g"), " ")
-      .replace(/```$/, '\n```');
+      .replace(/```$/, "\n```")
+      .replace(/\n/g, `\n${"".padStart(prefix.length, " ")}`);
   const blockToMarkdown = (
     block: TreeNode,
     viewType: ViewType,
     depth = 0
-  ): string =>
-    `${"".padStart(depth * 4, " ")}${
+  ): string => {
+    const prefix = `${"".padStart(depth * 4, " ")}${
       viewTypeToPrefix[viewType || "bullet"]
-    }<Block id={"${block.uid}"}>${"".padStart(block.heading, "#")}${
-      block.heading > 0 ? " " : ""
-    }${block.textAlign === "center" ? "<Center>" : ""}${
-      /\n/.test(block.text) ? "\n\n" : ""
-    }${replaceComponents(block.text)}${
-      /\n/.test(block.text) ? "\n\n" : ""
+    }`;
+    return `${prefix}<Block id={"${block.uid}"}>${"".padStart(
+      block.heading,
+      "#"
+    )}${block.heading > 0 ? " " : ""}${
+      block.textAlign === "center" ? "<Center>" : ""
+    }${
+      /\n/.test(block.text) ? `\n\n${"".padStart(prefix.length)}` : ""
+    }${replaceComponents(block.text, prefix)}${
+      /\n/.test(block.text) ? `\n\n${"".padStart(prefix.length)}` : ""
     }${
       block.textAlign === "center" ? "</Center>" : ""
     }</Block>\n\n${block.children
@@ -155,6 +160,7 @@ description: "${description}"${
       .join("")}${
       viewType === "document" && block.children.length ? "\n" : ""
     }`;
+  };
 
   return users
     .getUser(userId)
