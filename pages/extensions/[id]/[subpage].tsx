@@ -13,14 +13,14 @@ type ExtensionSubPageProps = {
   content: MDXRemoteSerializeResult;
   id: string;
   subpage: string;
-  state: 'LIVE' | 'DEVELOPMENT' | 'LEGACY';
+  development: boolean;
 };
 
 const ExtensionSubPage = ({
   content,
   id,
   subpage,
-  state,
+  development,
 }: ExtensionSubPageProps): React.ReactElement => {
   const title = idToTitle(subpage);
   return (
@@ -42,7 +42,7 @@ const ExtensionSubPage = ({
           },
         ]}
       />
-      {state === 'DEVELOPMENT' && <H2>UNDER DEVELOPMENT</H2>}
+      {development && <H2>UNDER DEVELOPMENT</H2>}
       <H1>{title.toUpperCase()}</H1>
       <MDXRemote {...content} components={MdxComponents} />
     </StandardLayout>
@@ -78,7 +78,7 @@ export const getStaticProps: GetStaticProps<
       serialize(r.data.content).then((content) => ({
         props: {
           content,
-          state: r.data.state,
+          development: r.data.state !== 'LIVE',
           ...context.params,
         },
       }))
@@ -95,6 +95,7 @@ export const getStaticProps: GetStaticProps<
       ).then((content) => ({
         props: {
           content,
+          development: true,
           ...context.params,
         },
       }))
