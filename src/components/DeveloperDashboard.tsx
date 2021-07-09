@@ -48,7 +48,7 @@ export const developerToaster = Toaster.create({
 });
 
 const EMBED_REF_REGEX = new RegExp(
-  `{{(?:\\[\\[)embed(?:\\]\\]):\\s*${BLOCK_REF_REGEX.source}\\s*}}`,
+  `{{(?:\\[\\[)?embed(?:\\]\\])?:\\s*${BLOCK_REF_REGEX.source}\\s*}}`,
   "g"
 );
 
