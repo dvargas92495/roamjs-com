@@ -38,7 +38,7 @@ import { useOauthAccounts } from "./OauthSelect";
 import { getOauth } from "roamjs-components";
 
 const ATTACHMENT_REGEX = /!\[[^\]]*\]\(([^\s)]*)\)/g;
-const UPLOAD_URL = `${process.env.REST_API_URL}/twitter-upload`;
+const UPLOAD_URL = `${process.env.API_URL}/twitter-upload`;
 const TWITTER_MAX_SIZE = 5000000;
 
 const toCategory = (mime: string) => {
@@ -233,7 +233,7 @@ const TwitterContent: React.FunctionComponent<{
         return "";
       }
       success = await axios
-        .post(`${process.env.REST_API_URL}/twitter-tweet`, {
+        .post(`${process.env.API_URL}/twitter-tweet`, {
           key,
           secret,
           content,
@@ -336,7 +336,7 @@ const TwitterContent: React.FunctionComponent<{
     setLoading(true);
     axios
       .post(
-        `${process.env.REST_API_URL}/twitter-schedule`,
+        `${process.env.API_URL}/twitter-schedule`,
         {
           scheduleDate: scheduleDate.toJSON(),
           payload: JSON.stringify({ blocks: message, tweetId }),

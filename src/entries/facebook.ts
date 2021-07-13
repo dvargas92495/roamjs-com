@@ -29,7 +29,7 @@ runExtension(ID, () => {
                 getAuthData: (d) =>
                   axios
                     .post(
-                      `${process.env.REST_API_URL}/facebook-auth`,
+                      `${process.env.API_URL}/facebook-auth`,
                       JSON.parse(d)
                     )
                     .then((r) => r.data),

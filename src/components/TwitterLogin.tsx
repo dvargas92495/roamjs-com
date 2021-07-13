@@ -11,14 +11,14 @@ export const twitterLoginOptions = {
   service: "twitter",
   getPopoutUrl: () =>
     axios
-      .post(`${process.env.REST_API_URL}/twitter-login`)
+      .post(`${process.env.API_URL}/twitter-login`)
       .then(
         (r) =>
           `https://api.twitter.com/oauth/authenticate?oauth_token=${r.data.token}`
       ),
   getAuthData: (data) =>
     axios
-      .post(`${process.env.REST_API_URL}/twitter-auth`, JSON.parse(data))
+      .post(`${process.env.API_URL}/twitter-auth`, JSON.parse(data))
       .then((r) => r.data),
   ServiceIcon: Twitter,
 } as ExternalLoginOptions;

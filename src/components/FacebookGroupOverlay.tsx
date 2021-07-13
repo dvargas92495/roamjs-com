@@ -37,7 +37,7 @@ const FacebookGroupContent = ({
   useEffect(() => {
     axios
       .get(
-        `${process.env.REST_API_URL}/facebook-groups?userId=${userId}&accessToken=${access_token}`
+        `${process.env.API_URL}/facebook-groups?userId=${userId}&accessToken=${access_token}`
       )
       .then((r) => {
         setGroups(r.data.groups);
@@ -63,7 +63,7 @@ const FacebookGroupContent = ({
           onClick={() => {
             setLoading(true);
             axios
-              .post(`${process.env.REST_API_URL}/facebook-groups`, {
+              .post(`${process.env.API_URL}/facebook-groups`, {
                 accessToken: access_token,
                 userId,
                 groupId: activeGroup,

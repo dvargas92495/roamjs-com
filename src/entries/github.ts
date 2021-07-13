@@ -38,7 +38,7 @@ const importGithubIssues = async (
         },
       })
     : axios.get(
-        `${process.env.REST_API_URL}/github-issues?username=${username}`
+        `${process.env.API_URL}/github-issues?username=${username}`
       );
   githubReq
     .then(async (r) => {
@@ -80,7 +80,7 @@ const importGithubRepos = async (
         },
       })
     : axios.get(
-        `${process.env.REST_API_URL}/github-repositories?username=${username}`
+        `${process.env.API_URL}/github-repositories?username=${username}`
       );
   githubReq
     .then(async (r) => {
@@ -118,7 +118,7 @@ const importGithubProjects = async (
         },
       })
     : axios.get(
-        `${process.env.REST_API_URL}/github-projects?repository=${repository}`
+        `${process.env.API_URL}/github-projects?repository=${repository}`
       );
   githubReq
     .then(async (r) => {
@@ -158,7 +158,7 @@ const importGithubCards = async (
   if (!config["Token"]) {
     axios
       .get(
-        `${process.env.REST_API_URL}/github-cards?repository=${repository}&project=${project}&column=${column}`
+        `${process.env.API_URL}/github-cards?repository=${repository}&project=${project}&column=${column}`
       )
       .then(async (r) => {
         const cards = r.data;

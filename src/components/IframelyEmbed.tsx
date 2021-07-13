@@ -37,7 +37,7 @@ const IframelyEmbed = ({
         getViewFromTree(getTreeByBlockUid(blockUid).children) ||
         getViewFromTree(getTreeByPageName("roam/js/iframely"));
       axios
-        .post(`${process.env.REST_API_URL}/iframely`, {
+        .post(`${process.env.API_URL}/iframely`, {
           url,
           iframe: IFRAME_VIEWS[view],
         })

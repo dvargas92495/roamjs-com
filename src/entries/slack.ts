@@ -33,7 +33,7 @@ runExtension("slack", () => {
                   ),
                 getAuthData: (d) =>
                   axios
-                    .post(`${process.env.REST_API_URL}/slack-url`, {
+                    .post(`${process.env.API_URL}/slack-url`, {
                       ...JSON.parse(d),
                       redirect_uri: "https://roamjs.com/oauth?auth=true",
                     })

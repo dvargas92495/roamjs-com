@@ -40,7 +40,7 @@ runExtension(ID, () => {
                 getAuthData: (data) =>
                   axios
                     .post(
-                      `${process.env.REST_API_URL}/dropbox-auth`,
+                      `${process.env.API_URL}/dropbox-auth`,
                       JSON.parse(data)
                     )
                     .then((r) => r.data),

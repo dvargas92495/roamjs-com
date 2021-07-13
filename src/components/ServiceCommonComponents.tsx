@@ -85,7 +85,7 @@ export const useAuthenticatedAxiosGet = (): ((
   const service = useService();
   return useCallback(
     (path: string) =>
-      axios.get(`${process.env.REST_API_URL}/${path}`, {
+      axios.get(`${process.env.API_URL}/${path}`, {
         headers: { Authorization: getToken(service) },
       }),
     [service]
@@ -99,7 +99,7 @@ export const useAuthenticatedAxiosPost = (): ((
   const service = useService();
   return useCallback(
     (path: string, data?: Record<string, unknown>) =>
-      axios.post(`${process.env.REST_API_URL}/${path}`, data || {}, {
+      axios.post(`${process.env.API_URL}/${path}`, data || {}, {
         headers: { Authorization: getToken(service) },
       }),
     []
@@ -113,7 +113,7 @@ export const useAuthenticatedAxiosPut = (): ((
   const service = useService();
   return useCallback(
     (path: string, data?: Record<string, unknown>) =>
-      axios.put(`${process.env.REST_API_URL}/${path}`, data || {}, {
+      axios.put(`${process.env.API_URL}/${path}`, data || {}, {
         headers: { Authorization: getToken(service) },
       }),
     []
@@ -126,7 +126,7 @@ export const useAuthenticatedAxiosDelete = (): ((
   const service = useService();
   return useCallback(
     (path: string) =>
-      axios.delete(`${process.env.REST_API_URL}/${path}`, {
+      axios.delete(`${process.env.API_URL}/${path}`, {
         headers: { Authorization: getToken(service) },
       }),
     []

@@ -45,7 +45,7 @@ const VersionSwitcher = ({
     setLoading(true);
     axios
       .get(
-        `${process.env.REST_API_URL}/versions?limit=${
+        `${process.env.API_URL}/versions?limit=${
           page === 0 ? 4 : 5
         }&id=${id}&page=${page}`
       )

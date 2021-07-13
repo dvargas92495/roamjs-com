@@ -18,7 +18,7 @@ env:
   MIXPANEL_TOKEN: ${{ secrets.MIXPANEL_TOKEN }}
   MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
   GIPHY_KEY: ${{ secrets.GIPHY_KEY }}
-  REST_API_URL: https://api.roamjs.com
+  API_URL: https://api.roamjs.com
   GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
   SLACK_CLIENT_ID: ${{ secrets.SLACK_CLIENT_ID }}
   FACEBOOK_CLIENT_ID: ${{ secrets.FACEBOOK_CLIENT_ID }}

@@ -108,7 +108,7 @@ const TwitterFeed = ({
     const { oauth_token: key, oauth_token_secret: secret } = JSON.parse(oauth);
     axios
       .get<{ tweets: Omit<Tweet, "checked">[] }>(
-        `${process.env.REST_API_URL}/twitter-feed?from=${startOfDay(
+        `${process.env.API_URL}/twitter-feed?from=${startOfDay(
           yesterday
         ).toJSON()}&to=${endOfDay(yesterday).toJSON()}`,
         {

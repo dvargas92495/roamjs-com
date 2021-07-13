@@ -90,7 +90,7 @@ export const importArticle = ({
 }): Promise<void> =>
   axios
     .post(
-      `${process.env.REST_API_URL}/article`,
+      `${process.env.API_URL}/article`,
       { url },
       { headers: { "Content-Type": "application/json" } }
     )
