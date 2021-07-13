@@ -1,6 +1,8 @@
 import { Loading, Root } from "@dvargas92495/ui";
 import React, { useEffect, useState } from "react";
 import { v4 } from "uuid";
+import axios from "axios";
+import { API_URL } from "../../components/constants";
 
 const OauthPage = (): React.ReactElement => {
   const [loading, setLoading] = useState(false);
@@ -17,12 +19,14 @@ const OauthPage = (): React.ReactElement => {
         );
         Array.from(query.entries())
           .concat(Array.from(hashParams.entries()))
-          .filter(([k]) => k !== "auth")
+          .filter(([k]) => k !== "auth" && k !== "state")
           .forEach(([k, v]) => (params[k] = v));
-        window.opener.postMessage(
-          JSON.stringify(params),
-          "https://roamresearch.com"
-        );
+        const auth = JSON.stringify(params);
+        window.opener.postMessage(auth, "https://roamresearch.com");
+        const state = query.get("state");
+        if (state) {
+          axios.post(`${API_URL}/auth`, { state, auth });
+        }
       } else if (mockService) {
         setMock(mockService);
       }
