@@ -8,28 +8,30 @@ const OauthPage = (): React.ReactElement => {
   const [loading, setLoading] = useState(false);
   const [mock, setMock] = useState("");
   useEffect(() => {
+    const params = {};
+    const query = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(
+      window.location.hash.replace("#", "?")
+    );
+    Array.from(query.entries())
+      .concat(Array.from(hashParams.entries()))
+      .filter(([k]) => k !== "auth" && k !== "state")
+      .forEach(([k, v]) => (params[k] = v));
+    const auth = JSON.stringify(params);
     if (window.opener && window.opener !== window) {
-      const query = new URLSearchParams(window.location.search);
+      console.log("qeurt");
       const isAuth = query.get("auth");
       const mockService = query.get("mock");
       if (isAuth) {
-        const params = {};
-        const hashParams = new URLSearchParams(
-          window.location.hash.replace("#", "?")
-        );
-        Array.from(query.entries())
-          .concat(Array.from(hashParams.entries()))
-          .filter(([k]) => k !== "auth" && k !== "state")
-          .forEach(([k, v]) => (params[k] = v));
-        const auth = JSON.stringify(params);
+        console.log("isauth");
         window.opener.postMessage(auth, "https://roamresearch.com");
-        const state = query.get("state");
-        if (state) {
-          axios.post(`${API_URL}/auth`, { state, auth });
-        }
       } else if (mockService) {
         setMock(mockService);
       }
+    }
+    const state = query.get("state");
+    if (state) {
+      axios.post(`${API_URL}/auth`, { state, auth });
     }
   }, [setMock]);
   return (
