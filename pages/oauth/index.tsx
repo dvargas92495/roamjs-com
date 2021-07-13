@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { v4 } from "uuid";
 import axios from "axios";
 import { API_URL } from "../../components/constants";
+import Cryptr from "cryptr";
 
 const OauthPage = (): React.ReactElement => {
   const [loading, setLoading] = useState(false);
@@ -17,21 +18,21 @@ const OauthPage = (): React.ReactElement => {
       .concat(Array.from(hashParams.entries()))
       .filter(([k]) => k !== "auth" && k !== "state")
       .forEach(([k, v]) => (params[k] = v));
-    const auth = JSON.stringify(params);
+    const authData = JSON.stringify(params);
     if (window.opener && window.opener !== window) {
-      console.log("qeurt");
       const isAuth = query.get("auth");
       const mockService = query.get("mock");
       if (isAuth) {
-        console.log("isauth");
-        window.opener.postMessage(auth, "https://roamresearch.com");
+        window.opener.postMessage(authData, "https://roamresearch.com");
       } else if (mockService) {
         setMock(mockService);
       }
     }
     const state = query.get("state");
     if (state) {
-      axios.post(`${API_URL}/auth`, { state, auth });
+      const [service, otp, key] = state.split("_");
+      const auth = new Cryptr(key).encrypt(authData);
+      axios.post(`${API_URL}/auth`, { service, otp, auth });
     }
   }, [setMock]);
   return (

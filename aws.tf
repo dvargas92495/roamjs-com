@@ -132,6 +132,7 @@ module "aws-serverless-backend" {
     domain = "roamjs.com"
     paths = [
         "article/post",
+        "auth/get",
         "auth/post",
         "balance/get",
         "balance/post",
