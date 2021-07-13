@@ -32,7 +32,15 @@ const OauthPage = (): React.ReactElement => {
     if (state) {
       const [service, otp, key] = state.split("_");
       const auth = new Cryptr(key).encrypt(authData);
-      axios.post(`${API_URL}/auth`, { service, otp, auth });
+      axios.post(`${API_URL}/auth`, { service, otp, auth }).then(() => {
+        const poll = () =>
+          axios
+            .get(`${API_URL}/auth?state=${service}_${otp}`)
+            .then((r) =>
+              r.data.success ? window.close() : setTimeout(poll, 1000)
+            );
+        poll();
+      });
     }
   }, [setMock]);
   return (
