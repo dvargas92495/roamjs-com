@@ -4,7 +4,7 @@ import {
   getActiveUids,
   getFirstChildUidByBlockUid,
   getUidsFromId,
-  updateActiveBlock,
+  registerSmartBlocksCommand,
   updateBlock,
 } from "roam-client";
 import urlRegex from "url-regex-safe";
@@ -66,9 +66,19 @@ runExtension("article", () => {
     }
   });
 
+  // legacy v1
   createCustomSmartBlockCommand({
     command: "ARTICLE",
     processor: async (value) => {
+      const { blockUid } = getActiveUids();
+      return inlineImportArticle({ value, parentUid: blockUid });
+    },
+  });
+
+  // v2
+  registerSmartBlocksCommand({
+    text: "ARTICLE",
+    handler: (value) => {
       const { blockUid } = getActiveUids();
       return inlineImportArticle({ value, parentUid: blockUid });
     },

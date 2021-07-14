@@ -9,6 +9,7 @@ import {
   getUidsFromId,
   pushBullets,
   getTreeByPageName,
+  registerSmartBlocksCommand,
 } from "roam-client";
 import { DAILY_NOTE_PAGE_REGEX } from "roam-client/lib/date";
 import {
@@ -99,6 +100,7 @@ runExtension("pull-references", () => {
   }
 });
 
+// legacy v1
 createCustomSmartBlockCommand({
   command: "PULLREFERENCES",
   processor: async () =>
@@ -109,3 +111,9 @@ createCustomSmartBlockCommand({
       return "";
     }),
 });
+
+// v2
+registerSmartBlocksCommand({
+  text: "PULLREFERENCES",
+  handler: pullReferences,
+})
