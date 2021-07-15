@@ -299,6 +299,10 @@
     "Clevertech": {
       "url": "https://clevertech.biz/",
       "imgSrc": "/sponsors/clevertech.png"
+    },
+    "Daniel McNichol": {
+      "url": "https://twitter.com/dnlmc",
+      "imgSrc": "/sponsors/dnlmc.jpg"
     }
   }
 }
