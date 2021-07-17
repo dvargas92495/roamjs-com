@@ -49,10 +49,10 @@ const createWeeklyPage = (pageName: string) => {
   const [, day, dayFormat] = format.match(new RegExp(DATE_REGEX.source));
   const firstDateFormatted = pageName.match(
     new RegExp(
-      format
+      `^${format
         .replace(/{(.*?)}/g, "(.*?)")
         .replace(/\[/g, "\\[")
-        .replace(/\]/g, "\\]")
+        .replace(/\]/g, "\\]")}$`
     )
   )[1];
   const date = parse(firstDateFormatted, dayFormat, new Date());
