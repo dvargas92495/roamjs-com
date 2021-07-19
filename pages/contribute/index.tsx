@@ -117,7 +117,8 @@ const ONE_TIME = [
   "Henry Harboe",
   "George Roukas",
   "Thomas C Eaves",
-  "Constance M Yowell"
+  "Constance M Yowell",
+  "Essam Fakieh"
 ];
 
 export const getStaticProps: GetStaticProps<Props> = () => {
