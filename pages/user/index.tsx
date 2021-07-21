@@ -3,6 +3,7 @@ import StandardLayout from "../../components/StandardLayout";
 import {
   Body,
   Button,
+  ButtonProps,
   Card,
   DataLoader,
   H6,
@@ -22,6 +23,7 @@ import Link from "next/link";
 import { useUser, SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
 import { defaultLayoutProps } from "../../components/Layout";
+import { stripe } from "../../components/constants";
 
 const UserValue: React.FunctionComponent = ({ children }) => (
   <span style={{ paddingLeft: 64, display: "block" }}>{children}</span>
@@ -170,10 +172,12 @@ type Subscription = {
   interval: "mo" | "yr";
 };
 
-const ApiButton: React.FunctionComponent<{
-  request: () => Promise<void>;
-  disabled?: boolean;
-}> = ({ children, request, disabled }) => {
+const ApiButton: React.FunctionComponent<
+  {
+    request: () => Promise<void>;
+    disabled?: boolean;
+  } & Pick<ButtonProps, "color" | "variant">
+> = ({ children, request, disabled, ...bprops }) => {
   const [loading, setLoading] = useState(false);
   const onClick = useCallback(() => {
     setLoading(true);
@@ -181,7 +185,7 @@ const ApiButton: React.FunctionComponent<{
   }, [setLoading, request]);
   return (
     <>
-      <Button onClick={onClick} disabled={disabled || loading}>
+      <Button onClick={onClick} disabled={disabled || loading} {...bprops}>
         {children}
       </Button>
       <Loading loading={loading} size={16} />
@@ -194,6 +198,7 @@ const Billing = () => {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const authenticatedAxios = useAuthenticatedAxiosGet();
+  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const authenticatedAxiosPut = useAuthenticatedAxiosPut();
   const authenticatedAxiosDel = useAuthenticatedAxiosDelete();
   const getPayment = useCallback(
@@ -210,6 +215,21 @@ const Billing = () => {
         setSubscriptions(r.data.subscriptions)
       ),
     [setSubscriptions]
+  );
+  const addCard = useCallback(
+    () =>
+      authenticatedAxiosPost("payment-methods").then(
+        (r) =>
+          r.data.id &&
+          stripe
+            .then((s) =>
+              s.redirectToCheckout({
+                sessionId: r.data.id,
+              })
+            )
+            .then(() => Promise.resolve())
+      ),
+    [authenticatedAxiosPost]
   );
   return (
     <>
@@ -270,6 +290,7 @@ const Billing = () => {
             ),
             key: 0,
             avatar: <Subtitle>Card</Subtitle>,
+            action: <ApiButton request={addCard} variant={'outlined'} color={'secondary'}>Add Card</ApiButton>,
           },
         ]}
       />
