@@ -168,6 +168,7 @@ module "aws-serverless-backend" {
         "mixpanel/post",
         "payment-methods/delete",
         "payment-methods/get",
+        "payment-methods/post",
         "payment-methods/put",
         "postman/post",
         "products/get",

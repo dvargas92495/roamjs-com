@@ -218,6 +218,13 @@ functions:
           path: payment-methods
           method: get
           cors: true
+  payment-methods-post:
+    handler: out/payment-methods_post.handler
+    events:
+      - http:
+          path: payment-methods
+          method: post
+          cors: true
   payment-methods-put:
     handler: out/payment-methods_put.handler
     events:
