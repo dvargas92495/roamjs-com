@@ -15,8 +15,8 @@ export const handler = async (
     };
     return axios
       .post(
-        `${process.env.FLOSS_API_URL}/stripe-payment-method?customer=${customer}`,
-        {},
+        `${process.env.FLOSS_API_URL}/stripe-payment-method`,
+        { customer },
         opts
       )
       .then((r) => ({
