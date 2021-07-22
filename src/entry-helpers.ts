@@ -150,7 +150,7 @@ export const replaceTagText = ({
         prepend,
       });
     } else if (textArea.value.includes(`#${before}`)) {
-      const hashAfter = after.match(/(\s|\[\[.*\]\])/)
+      const hashAfter = after.match(/(\s|\[\[.*\]\]|[^\x00-\xff])/)
         ? `#[[${after}]]`
         : `#${after}`;
       replaceText({
@@ -160,7 +160,7 @@ export const replaceTagText = ({
       });
     }
   } else if (addHash) {
-    const hashAfter = after.match(/(\s|\[\[.*\]\])/)
+    const hashAfter = after.match(/(\s|\[\[.*\]\]|[^\x00-\xff])/)
       ? `#[[${after}]]`
       : `#${after}`;
     replaceText({ before: "", after: hashAfter, prepend });
