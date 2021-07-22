@@ -17,8 +17,7 @@ const debug = (tree: Node) => {
     while (charcode < 123) {
       const fn = `out/${String.fromCharCode(charcode)}.json`;
       if (!fs.existsSync(fn)) {
-        if (process.env.NODE_ENV === "development")
-          fs.writeFileSync(fn, JSON.stringify(tree, null, 2));
+        fs.writeFileSync(fn, JSON.stringify(tree, null, 2));
       } else {
         charcode++;
       }
@@ -32,7 +31,7 @@ export const serialize = (
   if (process.env.NODE_ENV === "development")
     fs.readdirSync("./out")
       .filter((s) => s.endsWith(".json"))
-      .forEach((s) => {console.log('deleting', s); fs.unlinkSync(`./out/${s}`);});
+      .forEach((s) => fs.unlinkSync(`./out/${s}`));
   return mdxSerialize(s, {
     mdxOptions: {
       rehypePlugins: [
