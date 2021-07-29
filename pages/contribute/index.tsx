@@ -31,12 +31,12 @@ const ContributePage = ({ recurring, oneTime }: Props): React.ReactElement => {
         A huge thank you to RoamJS' recurring sponsors. Click on their link to
         see what they're up to!
       </H6>
-      <ThankYou sponsors={recurring} defaultImgSrc={'sponsors/default.jpg'} />
+      <ThankYou sponsors={recurring} defaultImgSrc={"sponsors/default.jpg"} />
       <H6>
         A big thank you to RoamJS' individual sponsors. Click on their link to
         see what they're up to!
       </H6>
-      <ThankYou sponsors={oneTime} defaultImgSrc={'sponsors/default.jpg'} />
+      <ThankYou sponsors={oneTime} defaultImgSrc={"sponsors/default.jpg"} />
     </StandardLayout>
   );
 };
@@ -118,7 +118,8 @@ const ONE_TIME = [
   "George Roukas",
   "Thomas C Eaves",
   "Constance M Yowell",
-  "Essam Fakieh"
+  "Essam Fakieh",
+  "Margaret Appleton",
 ];
 
 export const getStaticProps: GetStaticProps<Props> = () => {
