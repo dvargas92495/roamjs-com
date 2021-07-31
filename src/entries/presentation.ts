@@ -74,6 +74,16 @@ addStyle(`.roamjs-collapsible-caret {
   font-size: 1em;
   width: 100%;
 }
+.roamjs-bullets-container iframe {
+  position: unset;
+}
+.roamjs-bullets-container .roam-render .roam-block-container .rm-block-children {
+  display: none;
+}
+
+.roamjs-bullets-container .ex-embed-button {
+  display: none !important;
+}
 `);
 
 runExtension("presentation", async () => {

@@ -69,7 +69,9 @@ const URL_REGEX =
   /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=$]*)/;
 const SRC_REGEXES = {
   image: /!\[(.*)\]\((.*)\)/,
-  iframe: new RegExp(`{{(?:\\[\\[)?iframe(?:\\]\\])?:\\s*(${URL_REGEX.source})}}`),
+  iframe: new RegExp(
+    `{{(?:\\[\\[)?iframe(?:\\]\\])?:\\s*(${URL_REGEX.source})}}`
+  ),
 };
 const SRC_INDEX = {
   image: 2,
@@ -326,10 +328,34 @@ const ContentSlide = ({
       );
       Array.from(slideRoot.current.getElementsByTagName("blockquote")).forEach(
         (bq) => {
-          const item = bq.closest<HTMLLIElement>('li');
-          item.style.listStyle = 'none';
+          const item = bq.closest<HTMLLIElement>("li");
+          item.style.listStyle = "none";
         }
       );
+      Array.from(
+        slideRoot.current.querySelectorAll<HTMLDivElement>("div.roam-render")
+      ).forEach((el) => {
+        window.roamAlphaAPI.ui.components.renderBlock({
+          uid: el.parentElement.id,
+          el,
+        });
+        setTimeout(() => {
+          Array.from(
+            slideRoot.current.querySelectorAll<HTMLDivElement>(
+              "div.excalidraw-host"
+            )
+          ).forEach((d) => {
+            const style = getComputedStyle(d);
+            if (style.height.startsWith("0")) {
+              d.style.height = "400px";
+            }
+            if (style.width.startsWith("0")) {
+              d.style.width = "400px";
+            }
+            d.style.resize = 'unset';
+          });
+        }, 1);
+      });
       setHtmlEditsLoaded(true);
     }
   }, [
