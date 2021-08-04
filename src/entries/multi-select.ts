@@ -2,9 +2,11 @@ import {
   createBlockObserver,
   createHTMLObserver,
   deleteBlock,
+  getShallowTreeByParentUid,
   getTreeByBlockUid,
   getUids,
   TreeNode,
+  updateBlock,
 } from "roam-client";
 import { getDropUidOffset, isControl, runExtension } from "../entry-helpers";
 
@@ -36,7 +38,7 @@ runExtension(ID, () => {
               globalRefs.blocksToMove.delete(blockUid);
             } else {
               b.classList.add(HIGHLIGHT_CLASS);
-              globalRefs.blocksToMove.add(blockUid)
+              globalRefs.blocksToMove.add(blockUid);
             }
             e.stopPropagation();
           }
@@ -52,20 +54,20 @@ runExtension(ID, () => {
         .closest(".roam-block-container")
         ?.className?.includes?.(HIGHLIGHT_CLASS)
     ) {
-      Array.from(
-        document.getElementsByClassName(HIGHLIGHT_CLASS)
-      ).forEach((d) => {
-        d.classList.remove(HIGHLIGHT_CLASS);
-        d.classList.add(DRAG_CLASS);
-      });
+      Array.from(document.getElementsByClassName(HIGHLIGHT_CLASS)).forEach(
+        (d) => {
+          d.classList.remove(HIGHLIGHT_CLASS);
+          d.classList.add(DRAG_CLASS);
+        }
+      );
     } else if (
       !isControl(e) ||
       (!target.classList.contains("roam-block-container") &&
         !target.closest(".roam-block-container"))
     ) {
-      Array.from(
-        document.getElementsByClassName(HIGHLIGHT_CLASS)
-      ).forEach((d) => d.classList.remove(HIGHLIGHT_CLASS));
+      Array.from(document.getElementsByClassName(HIGHLIGHT_CLASS)).forEach(
+        (d) => d.classList.remove(HIGHLIGHT_CLASS)
+      );
     }
   });
 
@@ -77,11 +79,14 @@ runExtension(ID, () => {
         const { parentUid, offset } = getDropUidOffset(d);
         const containers = Array.from(
           document.getElementsByClassName(DRAG_CLASS)
-        )
+        );
         Array.from(globalRefs.blocksToMove)
-          .map((uid) => ({ uid, index: containers.findIndex((c) => getUidByContainer(c) === uid) }))
+          .map((uid) => ({
+            uid,
+            index: containers.findIndex((c) => getUidByContainer(c) === uid),
+          }))
           .sort(({ index: a }, { index: b }) => a - b)
-          .forEach(({uid}, order) =>
+          .forEach(({ uid }, order) =>
             window.roamAlphaAPI.moveBlock({
               location: {
                 "parent-uid": parentUid,
@@ -106,18 +111,18 @@ runExtension(ID, () => {
     }
   });
 
-  const treeNodeToString = (n: TreeNode, i: number): string =>
-    `${"".padStart(i * 4, " ")}- ${n.text}\n${n.children
-      .map((c) => treeNodeToString(c, i + 1))
+  const treeNodeToString = (n: TreeNode, i: number, prefix = "- "): string =>
+    `${"".padStart(i * 4, " ")}${prefix}${n.text}\n${n.children
+      .map((c) => treeNodeToString(c, i + 1, prefix))
       .join("")}`;
 
-  const getUidsToCopy = () =>
+  const getHighlightedUids = () =>
     Array.from(document.getElementsByClassName(HIGHLIGHT_CLASS)).map(
       getUidByContainer
     );
 
   document.addEventListener("copy", (e) => {
-    const data = getUidsToCopy()
+    const data = getHighlightedUids()
       .map((uid) =>
         globalRefs.shiftKey
           ? `- ((${uid}))\n`
@@ -132,7 +137,7 @@ runExtension(ID, () => {
   });
 
   document.addEventListener("cut", (e) => {
-    const data = getUidsToCopy()
+    const data = getHighlightedUids()
       .map((uid) => {
         const text = treeNodeToString(getTreeByBlockUid(uid), 0);
         deleteBlock(uid);
@@ -150,6 +155,20 @@ runExtension(ID, () => {
       e.preventDefault();
       globalRefs.shiftKey = true;
       document.execCommand("copy");
+    } else if (e.shiftKey && isControl(e) && e.code === "KeyM") {
+      e.preventDefault();
+      const uids = getHighlightedUids();
+      if (uids.length) {
+        const text = uids
+          .map((u) => treeNodeToString(getTreeByBlockUid(u), 0, ""))
+          .join("")
+          .slice(0, -1); // trim trailing newline
+        updateBlock({ text, uid: uids[0] });
+        getShallowTreeByParentUid(uids[0]).forEach(({ uid }) =>
+          deleteBlock(uid)
+        );
+        uids.slice(1).forEach((u) => deleteBlock(u));
+      }
     }
   });
 });

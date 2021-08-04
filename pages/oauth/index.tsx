@@ -8,9 +8,14 @@ import Cryptr from "cryptr";
 const OauthPage = (): React.ReactElement => {
   const [loading, setLoading] = useState(false);
   const [mock, setMock] = useState("");
+  const [close, setClose] = useState(false);
   useEffect(() => {
     const params = {};
     const query = new URLSearchParams(window.location.search);
+    if (query.get("close")) {
+      setClose(true);
+      return;
+    }
     const hashParams = new URLSearchParams(
       window.location.hash.replace("#", "?")
     );
@@ -37,14 +42,15 @@ const OauthPage = (): React.ReactElement => {
           axios
             .get(`${API_URL}/auth?state=${service}_${otp}`)
             .then((r) =>
-              r.data.success ? window.close() : setTimeout(poll, 1000)
+              r.data.success ? setClose(true) : setTimeout(poll, 1000)
             );
         poll();
       });
     }
-  }, [setMock]);
+  }, [setMock, setClose]);
   return (
     <Root>
+      {close && <h3>Success! You may close this window.</h3>}
       {!mock ? (
         <img
           src={"/images/logo-high-res.jpg"}
