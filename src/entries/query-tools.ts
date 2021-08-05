@@ -79,13 +79,13 @@ const menuItemCallback =
   };
 
 const sortCallbacks = {
-  "Page Title": (refContainer: Element) =>
+  "Alphabetically": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
       isSortByBlocks
         ? getTextByBlockUid(a).localeCompare(getTextByBlockUid(b))
         : a.localeCompare(b)
     ),
-  "Page Title Descending": (refContainer: Element) =>
+  "Alphabetically Descending": (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
       isSortByBlocks
         ? getTextByBlockUid(b).localeCompare(getTextByBlockUid(a))
