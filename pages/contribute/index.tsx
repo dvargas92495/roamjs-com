@@ -74,7 +74,8 @@ const RECURRING = [
   "Matthew Mckinlay",
   "George Silverman",
   "Daniel McNichol",
-  "Guo Miin Fang"
+  "Guo Miin Fang",
+  "Allen Tyson"
 ];
 
 const ONE_TIME = [
