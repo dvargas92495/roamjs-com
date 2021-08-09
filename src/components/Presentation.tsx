@@ -62,7 +62,7 @@ type SrcFromTextProps = {
       width: number;
     };
   };
-  type?: "image" | "iframe";
+  type?: "image" | "iframe" | "media";
 };
 
 const URL_REGEX =
@@ -72,10 +72,12 @@ const SRC_REGEXES = {
   iframe: new RegExp(
     `{{(?:\\[\\[)?iframe(?:\\]\\])?:\\s*(${URL_REGEX.source})}}`
   ),
+  media: /$^/,
 };
 const SRC_INDEX = {
   image: 2,
   iframe: 1,
+  media: 0,
 };
 const getResizeStyle = (imageResize?: { width: number; height: number }) => ({
   width: isNaN(imageResize?.width)
@@ -91,7 +93,7 @@ const SrcFromText: React.FunctionComponent<
     Alt: React.FunctionComponent<SrcFromTextProps>;
   }
 > = ({ text, Alt, resizes, type = "image" }) => {
-  const match = text.match(SRC_REGEXES[type]);
+  const match = text.match(SRC_REGEXES[type] || "");
   const [style, setStyle] = useState({});
   const srcRef = useRef(null);
   const srcResize = match && resizes && resizes[match[SRC_INDEX[type]]];
@@ -117,8 +119,22 @@ const SrcFromText: React.FunctionComponent<
       srcRef.current.onload = srcOnLoad;
     }
   }, [srcOnLoad, srcRef]);
-  return match ? (
+  return type === "media" ? (
+    <div
+      ref={srcRef}
+      dangerouslySetInnerHTML={{
+        __html: parseRoamBlocks({ viewType: "document", content: [] }),
+      }}
+    />
+  ) : match ? (
     <>
+      <span
+        style={{
+          display: "inline-block",
+          verticalAlign: "middle",
+          height: "100%",
+        }}
+      />
       {type === "image" && (
         <img alt={match[1]} src={match[2]} ref={srcRef} style={style} />
       )}
@@ -171,6 +187,7 @@ const TitleSlide = ({
 
 const STARTS_WITH_IMAGE = new RegExp("^image ", "i");
 const STARTS_WITH_IFRAME = new RegExp("^iframe ", "i");
+const STARTS_WITH_MEDIA = new RegExp("^media ", "i");
 const ENDS_WITH_LEFT = new RegExp(" left$", "i");
 const ENDS_WITH_CENTER = new RegExp(" center$", "i");
 
@@ -199,8 +216,6 @@ const setDocumentLis = ({
     }
     if (v === "document") {
       li.classList.add("roamjs-document-li");
-    } else if (Array.from(li.children).some((e) => e.tagName === "IMG")) {
-      li.classList.add("roamjs-document-li");
     }
   });
 };
@@ -212,6 +227,9 @@ const LAYOUTS = [
   "Iframe Left",
   "Iframe Center",
   "Iframe Right",
+  "Media Left",
+  "Media Center",
+  "Media Right",
 ];
 const findLinkResize = ({
   src,
@@ -254,7 +272,8 @@ const ContentSlide = ({
 } & ContentSlideExtras) => {
   const isImageLayout = STARTS_WITH_IMAGE.test(layout);
   const isIframeLayout = STARTS_WITH_IFRAME.test(layout);
-  const isSourceLayout = isImageLayout || isIframeLayout;
+  const isMediaLayout = STARTS_WITH_MEDIA.test(layout);
+  const isSourceLayout = isImageLayout || isIframeLayout || isMediaLayout;
   const isLeftLayout = ENDS_WITH_LEFT.test(layout);
   const isCenterLayout = ENDS_WITH_CENTER.test(layout);
   const bullets = isSourceLayout ? children.slice(1) : children;
@@ -311,6 +330,9 @@ const ContentSlide = ({
           const { width, height } = getResizeStyle(resizeProps[src]);
           img.style.width = width;
           img.style.height = height;
+
+          const item = img.closest<HTMLLIElement>("li");
+          if (item) item.classList.add("roamjs-document-li");
         }
       );
       Array.from(slideRoot.current.getElementsByTagName("iframe")).forEach(
@@ -324,6 +346,9 @@ const ContentSlide = ({
           const { width, height } = resizeProps[src] || {};
           iframe.width = `${width || 500}px`;
           iframe.height = `${height || 500}px`;
+
+          const item = iframe.closest<HTMLLIElement>("li");
+          if (item) item.classList.add("roamjs-document-li");
         }
       );
       Array.from(slideRoot.current.getElementsByTagName("blockquote")).forEach(
@@ -333,7 +358,7 @@ const ContentSlide = ({
         }
       );
       Array.from(
-        slideRoot.current.querySelectorAll<HTMLDivElement>("div.roam-render")
+        slideRoot.current.parentElement.querySelectorAll<HTMLDivElement>("div.roam-render")
       ).forEach((el) => {
         window.roamAlphaAPI.ui.components.renderBlock({
           uid: el.parentElement.id,
@@ -341,7 +366,7 @@ const ContentSlide = ({
         });
         setTimeout(() => {
           Array.from(
-            slideRoot.current.querySelectorAll<HTMLDivElement>(
+            el.querySelectorAll<HTMLDivElement>(
               "div.excalidraw-host"
             )
           ).forEach((d) => {
@@ -352,9 +377,17 @@ const ContentSlide = ({
             if (style.width.startsWith("0")) {
               d.style.width = "400px";
             }
-            d.style.resize = 'unset';
+            d.style.maxWidth = '100%';
+            d.style.resize = "unset";
+            const roamBlock = d.closest<HTMLDivElement>('.roam-block');
+            if (roamBlock) {
+              roamBlock.style.minWidth = '100%';
+            }
           });
         }, 1);
+
+        const item = el.closest<HTMLLIElement>("li");
+        if (item) item.classList.add("roamjs-document-li");
       });
       setHtmlEditsLoaded(true);
     }
@@ -453,21 +486,31 @@ const ContentSlide = ({
               height: "100%",
             }}
           >
-            <span
-              style={{
-                display: "inline-block",
-                verticalAlign: "middle",
-                height: "100%",
-              }}
-            />
-            <SrcFromText
-              text={children[0].text}
-              Alt={() => <div />}
-              resizes={
-                children[0].props[isIframeLayout ? "iframe" : "imageResize"]
-              }
-              type={isIframeLayout ? "iframe" : "image"}
-            />
+            {isMediaLayout ? (
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: parseRoamBlocks({
+                    viewType: "document",
+                    content: children.slice(0, 1),
+                  }),
+                }}
+              />
+            ) : (
+              <SrcFromText
+                text={children[0].text}
+                Alt={() => <div />}
+                resizes={
+                  isMediaLayout
+                    ? {}
+                    : children[0].props[
+                        isIframeLayout ? "iframe" : "imageResize"
+                      ]
+                }
+                type={
+                  isIframeLayout ? "iframe" : isMediaLayout ? "media" : "image"
+                }
+              />
+            )}
           </div>
         )}
       </div>

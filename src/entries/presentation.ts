@@ -81,8 +81,8 @@ addStyle(`.roamjs-collapsible-caret {
   display: none;
 }
 
-.roamjs-bullets-container .ex-embed-button {
-  display: none !important;
+.reveal .excalidraw-host {
+  pointer-events: none;
 }
 `);
 
