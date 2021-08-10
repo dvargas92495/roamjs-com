@@ -6,10 +6,10 @@ import {
   getPageTitleByBlockUid,
   getParentUidByBlockUid,
   getTextByBlockUid,
-  getUidsFromId,
   pushBullets,
   getTreeByPageName,
   registerSmartBlocksCommand,
+  getBlockUidsReferencingPage,
 } from "roam-client";
 import { DAILY_NOTE_PAGE_REGEX } from "roam-client/lib/date";
 import {
@@ -25,11 +25,11 @@ const PULL_REFERENCES_COMMAND = "Pull References";
 const REPLACE = "${ref}";
 const CONFIG = "roam/js/pull-references";
 
-const pullReferences = async () => {
+const pullReferences = async (
+  pageTitleText = getPageTitle(document.activeElement)?.textContent
+) => {
   const config = getConfigFromPage(CONFIG);
   const format = config["Format"] || REPLACE;
-  const pageTitle = getPageTitle(document.activeElement);
-  const pageTitleText = pageTitle.textContent;
   const linkedReferences = getLinkedReferences(pageTitleText);
   const bullets = linkedReferences.map((l) =>
     format.replace(REPLACE, `((${l.uid}))`)
@@ -39,17 +39,8 @@ const pullReferences = async () => {
   }
 
   const removeTags = !!config["Remove Tags"];
-  if (removeTags && !document.activeElement.closest(".rm-sidebar-outline")) {
-    const container =
-      pageTitle.parentElement.closest(".roam-log-page") || document;
-    const blockReferences = Array.from(
-      container.getElementsByClassName("rm-reference-main")
-    )
-      .find((d) => d.className.indexOf("rm-query-content") < 0)
-      .getElementsByClassName("roam-block");
-    const blockReferenceIds = Array.from(blockReferences).map((b) => b.id);
-    for (let b = 0; b < blockReferenceIds.length; b++) {
-      const { blockUid } = getUidsFromId(blockReferenceIds[b]);
+  if (removeTags) {
+    getBlockUidsReferencingPage(pageTitleText).forEach((blockUid) => {
       const value = getTextByBlockUid(blockUid);
       window.roamAlphaAPI.updateBlock({
         block: {
@@ -57,7 +48,7 @@ const pullReferences = async () => {
           uid: blockUid,
         },
       });
-    }
+    });
   }
   return bullets;
 };
@@ -115,5 +106,8 @@ createCustomSmartBlockCommand({
 // v2
 registerSmartBlocksCommand({
   text: "PULLREFERENCES",
-  handler: pullReferences,
-})
+  handler:
+    (context: {targetUid: string}) =>
+    () =>
+      pullReferences(getPageTitleByBlockUid(context.targetUid)),
+});

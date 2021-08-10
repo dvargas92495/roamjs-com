@@ -78,9 +78,8 @@ runExtension("article", () => {
   // v2
   registerSmartBlocksCommand({
     text: "ARTICLE",
-    handler: (value) => {
-      const { blockUid } = getActiveUids();
-      return inlineImportArticle({ value, parentUid: blockUid });
+    handler: () => (value) => {
+      return 'Smart blocks V2 currently doesnt support article command. Reach out to support@roamjs.com if you need this feature!';
     },
   });
 });
