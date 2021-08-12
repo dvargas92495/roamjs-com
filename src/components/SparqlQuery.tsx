@@ -104,7 +104,7 @@ const combineTextNodes = (nodes: InputTextNode[]) =>
       }
       return node;
     })
-    .filter((node) => !!node.text)
+    .filter((node) => !!node.text || !!node.children.length)
     .map((node) => {
       node.children = combineTextNodes(node.children);
       return node;
