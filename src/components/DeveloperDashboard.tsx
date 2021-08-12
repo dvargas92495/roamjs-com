@@ -98,6 +98,7 @@ const DeveloperContent: StageContent = () => {
               alignItems: "center",
               justifyContent: "space-between",
             }}
+            className={'roamjs-developer-path'}
           >
             <span
               style={{

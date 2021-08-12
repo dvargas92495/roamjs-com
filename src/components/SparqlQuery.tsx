@@ -517,7 +517,7 @@ const SparqlQuery = ({
             onClick={() => {
               setLoading(true);
               const importParentUid =
-                activeItem === "Current Block" ? blockUid : parentUid;
+                activeItem === "Current Page" ? parentUid : blockUid;
               const isQuery = activeItem === "Custom Query";
               if (!isQuery) {
                 createBlock({
