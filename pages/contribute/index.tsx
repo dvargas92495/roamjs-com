@@ -122,6 +122,7 @@ const ONE_TIME = [
   "Constance M Yowell",
   "Essam Fakieh",
   "Margaret Appleton",
+  "Jeremy Georges-Filteau",
 ];
 
 export const getStaticProps: GetStaticProps<Props> = () => {
