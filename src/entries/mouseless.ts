@@ -15,7 +15,7 @@ runExtension("mouseless", () => {
       }
     },
     tag: "SPAN",
-    className: "bp3-button"
+    className: "bp3-button",
   });
 
   document.addEventListener("keydown", (e: KeyboardEvent) => {

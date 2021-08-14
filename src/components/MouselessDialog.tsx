@@ -210,7 +210,7 @@ const MouselessDialog = (): JSX.Element => {
   const eventListener = useCallback(
     (e: KeyboardEvent) => {
       if (
-        (e.key === "?" || e.key === "/" || e.key === "+") &&
+        (e.code === "Slash" || e.key === "?") &&
         e.shiftKey &&
         e.ctrlKey
       ) {
