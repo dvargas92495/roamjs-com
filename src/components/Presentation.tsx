@@ -354,7 +354,13 @@ const ContentSlide = ({
       Array.from(slideRoot.current.getElementsByTagName("blockquote")).forEach(
         (bq) => {
           const item = bq.closest<HTMLLIElement>("li");
-          item.style.listStyle = "none";
+          if (item) item.style.listStyle = "none";
+        }
+      );
+      Array.from(slideRoot.current.getElementsByTagName("table")).forEach(
+        (t) => {
+          const item = t.closest<HTMLLIElement>("li");
+          if (item) item.classList.add("roamjs-document-li");
         }
       );
       Array.from(

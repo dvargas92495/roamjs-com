@@ -4,32 +4,31 @@ const path = require("path");
 
 const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
 const cloudfront = new AWS.CloudFront({ apiVersion: "2020-05-31" });
-const waitForCloudfront = (props) =>
-  new Promise((resolve) => {
-    const { trial = 0, ...args } = props;
-    cloudfront
-      .getInvalidation(args)
-      .promise()
-      .then((r) => r.Invalidation.Status)
-      .then((status) => {
-        if (status === "Completed") {
-          resolve("Done!");
-        } else if (trial === 60) {
-          resolve("Ran out of time waiting for cloudfront...");
-        } else {
-          console.log(
-            "Still waiting for invalidation. Found",
-            status,
-            "on trial",
-            trial
-          );
-          setTimeout(
-            () => waitForCloudfront({ ...args, trial: trial + 1 }),
-            1000
-          );
-        }
-      });
-  });
+const waitForCloudfront = (props) => {
+  const { trial = 0, resolve, ...args } = props;
+  cloudfront
+    .getInvalidation(args)
+    .promise()
+    .then((r) => r.Invalidation.Status)
+    .then((status) => {
+      if (status === "Completed") {
+        resolve("Done!");
+      } else if (trial === 60) {
+        resolve("Ran out of time waiting for cloudfront...");
+      } else {
+        console.log(
+          "Still waiting for invalidation. Found",
+          status,
+          "on trial",
+          trial
+        );
+        setTimeout(
+          () => waitForCloudfront({ ...args, trial: trial + 1, resolve }),
+          1000
+        );
+      }
+    });
+};
 
 const extension = process.argv[2];
 const DistributionId =
@@ -109,5 +108,5 @@ Promise.all([
       })
       .promise();
   })
-  .then((r) => waitForCloudfront({ Id: r.Invalidation.Id, DistributionId }))
+  .then((r) => new Promise((resolve) => waitForCloudfront({ Id: r.Invalidation.Id, DistributionId, resolve })))
   .then(console.log);
