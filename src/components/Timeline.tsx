@@ -9,6 +9,7 @@ import "react-vertical-timeline-component/style.min.css";
 import { Checkbox, Icon, InputGroup, Label } from "@blueprintjs/core";
 import {
   getTreeByBlockUid,
+  getTreeByPageName,
   getUidsFromId,
   parseRoamDate,
   toRoamDate,
@@ -26,7 +27,10 @@ import {
   parseRoamMarked,
   resolveRefs,
 } from "../entry-helpers";
-import { MenuItemSelect } from "roamjs-components";
+import {
+  getSettingIntFromTree,
+  MenuItemSelect,
+} from "roamjs-components";
 import TagFilter from "./TagFilter";
 
 type TimelineProps = { blockId: string };
@@ -142,6 +146,15 @@ const BooleanSetting = ({
 
 const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
   const { blockUid } = getUidsFromId(blockId);
+  const depth = useMemo(
+    () =>
+      getSettingIntFromTree({
+        tree: getTreeByPageName("roam/js/timeline"),
+        key: "depth",
+        defaultValue: -1,
+      }),
+    []
+  );
   const getTimelineElements = useCallback(() => {
     const tag = getTag(blockUid);
     const reverse = getReverse(blockUid);
@@ -159,7 +172,17 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
             DAILY_NOTE_TAG_REGEX.test(text)
         )
         .flatMap(([text, pageTitle, uid, creationDate]) => {
-          const { children } = getTreeByBlockUid(uid);
+          const node = getTreeByBlockUid(uid);
+          if (depth >= 0) {
+            const trim = (n:TreeNode, level: number) => {
+              if (level >= depth) {
+                n.children = [];
+              }
+              n.children.forEach(c => trim(c, level + 1));
+            }
+            trim(node, 0);
+          }
+          const { children } = node;
           const dates = useCreationDate
             ? [toRoamDate(new Date(creationDate))]
             : DAILY_NOTE_PAGE_REGEX.test(pageTitle)

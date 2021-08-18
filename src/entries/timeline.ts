@@ -1,6 +1,7 @@
 import { render } from "../components/Timeline";
 import { addStyle, runExtension } from "../entry-helpers";
 import { createButtonObserver } from "roam-client";
+import { createConfigObserver } from "roamjs-components";
 
 addStyle(`.roamjs-timeline-date > a, 
 .roamjs-timeline-date > a:hover,
@@ -18,6 +19,25 @@ addStyle(`.roamjs-timeline-date > a,
 }`);
 
 runExtension("timeline", () => {
+  createConfigObserver({
+    title: "roam/js/timeline",
+    config: {
+      tabs: [
+        {
+          id: "home",
+          fields: [
+            {
+              title: "depth",
+              description:
+                "The number of child levels included with each timeline element.",
+              type: "number",
+              defaultValue: -1,
+            },
+          ],
+        },
+      ],
+    },
+  });
   createButtonObserver({
     attribute: "vertical-timeline",
     shortcut: "timeline",
