@@ -41,3 +41,7 @@ By default, all the blocks queried use the associated daily note page for orderi
 #### Clean
 
 By default, all the blocks queried keep the query tag in its block text. To filter out both the tag and the daily note tag from the block text, add a child block to the timeline with the text `Clean`. This setting could also be toggled on and off from the timeline configuration.
+
+### Depth
+
+By default, all timeline elements included will include the full tree under the block. To edit the depth of the timeline elements in your graph, head to the `roam/js/timeline` page and edit the `depth` field. A value of `-1` include the full tree, a value of `0` includes just the targeted node, a value of `1` includes just the targeted node and its children, etc.
