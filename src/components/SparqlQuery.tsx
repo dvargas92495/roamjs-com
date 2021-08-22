@@ -101,6 +101,7 @@ const combineTextNodes = (nodes: InputTextNode[]) =>
       if (i > firstIndex) {
         arr[firstIndex].children.push(...node.children);
         node.text = "";
+        node.children = [];
       }
       return node;
     })
