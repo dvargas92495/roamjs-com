@@ -372,7 +372,7 @@ const QueryContent = ({
     const text = getTextByBlockUid(blockUid);
     const newText = initialValue
       ? text.replace(initialValue, outputText)
-      : text.replace(/{{(qb|query builder)}}/, outputText);
+      : text.replace(/{{(\[\[)?(qb|query builder)(\]\])?}}/, outputText);
     window.roamAlphaAPI.updateBlock({
       block: { string: newText, uid: blockUid },
     });
