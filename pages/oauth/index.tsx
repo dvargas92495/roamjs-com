@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { v4 } from "uuid";
 import axios from "axios";
 import { API_URL } from "../../components/constants";
-import Cryptr from "cryptr";
+import AES from "crypto-js/aes";
 
 const OauthPage = (): React.ReactElement => {
   const [loading, setLoading] = useState(false);
@@ -36,7 +36,7 @@ const OauthPage = (): React.ReactElement => {
     const state = query.get("state");
     if (state) {
       const [service, otp, key] = state.split("_");
-      const auth = new Cryptr(key).encrypt(authData);
+      const auth = AES.encrypt(authData, key).toString();
       axios.post(`${API_URL}/auth`, { service, otp, auth }).then(() => {
         const poll = () =>
           axios
