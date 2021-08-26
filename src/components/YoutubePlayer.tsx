@@ -228,7 +228,7 @@ const YoutubePlayer = ({
     }
   }, [latestTimeoutRef]);
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex", width: 'fit-content' }}>
       <EditContainer containerStyleProps={{ flexGrow: 1 }} blockId={blockId}>
         <YouTube
           videoId={youtubeId}
