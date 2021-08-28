@@ -222,13 +222,14 @@ const YoutubePlayer = ({
           latestTimeoutRef.current.start,
           latestTimeoutRef.current.end
         ),
-        1000*(latestTimeoutRef.current.end - playerRef.current.getCurrentTime()) /
+        (1000 *
+          (latestTimeoutRef.current.end - playerRef.current.getCurrentTime())) /
           playerRef.current.getPlaybackRate()
       );
     }
   }, [latestTimeoutRef]);
   return (
-    <div style={{ display: "flex", width: 'fit-content' }}>
+    <div style={{ display: "flex", width: "fit-content", minWidth: "100%" }}>
       <EditContainer containerStyleProps={{ flexGrow: 1 }} blockId={blockId}>
         <YouTube
           videoId={youtubeId}
@@ -301,9 +302,10 @@ const YoutubePlayer = ({
                         clearLoop();
                         const text = getTextByBlockUid(ts);
                         const stamp = timestampToValue(text);
-                        const loopend = /\d\d(?::\d\d){0,2}\.\d\d\d\s*-\s*(\d\d(?::\d\d){0,2}\.\d\d\d)/.exec(
-                          text
-                        )?.[1];
+                        const loopend =
+                          /\d\d(?::\d\d){0,2}\.\d\d\d\s*-\s*(\d\d(?::\d\d){0,2}\.\d\d\d)/.exec(
+                            text
+                          )?.[1];
                         const end = timestampToValue(loopend);
                         const loop = generateLoop(stamp, end);
                         loop();
