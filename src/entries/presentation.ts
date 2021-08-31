@@ -77,12 +77,13 @@ addStyle(`.roamjs-collapsible-caret {
 .roamjs-bullets-container iframe {
   position: unset;
 }
-.roamjs-bullets-container .roam-render .roam-block-container .rm-block-children {
+.reveal .roam-render .roam-block-container .rm-block-children {
   display: none;
 }
 
 .reveal .excalidraw-host {
   pointer-events: none;
+  display: inline-block;
 }
 `);
 
