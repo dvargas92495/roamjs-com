@@ -3,11 +3,13 @@ import axios from "axios";
 import { headers, twitterOAuth } from "../lambda-helpers";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
+  const {state} = JSON.parse(event.body);
+  const data = {
+    oauth_callback: `https://roamjs.com/oauth?auth=true&state=${state}`,
+  };
   const oauthHeaders = twitterOAuth.toHeader(
     twitterOAuth.authorize({
-      data: {
-        oauth_callback: "https://roamjs.com/oauth?auth=true",
-      },
+      data,
       url: "https://api.twitter.com/oauth/request_token",
       method: "POST",
     })
@@ -16,9 +18,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   return axios
     .post(
       "https://api.twitter.com/oauth/request_token",
-      {
-        oauth_callback: `https://roamjs.com/oauth?auth=true`,
-      },
+      data,
       { headers: oauthHeaders }
     )
     .then((r) => {

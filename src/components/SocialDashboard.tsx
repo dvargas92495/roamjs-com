@@ -22,6 +22,7 @@ import {
   createBlock,
   getPageUidByPageTitle,
   getParentUidByBlockUid,
+  getRoamUrl,
   getTreeByBlockUid,
   getTreeByPageName,
   TreeNode,
@@ -42,7 +43,6 @@ import {
   useServicePageUid,
   WrapServiceMainStage,
 } from "roamjs-components";
-import { render as loginRender } from "../components/TwitterLogin";
 import startOfMinute from "date-fns/startOfMinute";
 import addMinutes from "date-fns/addMinutes";
 import endOfYear from "date-fns/endOfYear";
@@ -107,9 +107,9 @@ const renderTooltip = ({
   );
 
 const getBulletElement = (uid: string) => {
-  const block = Array.from(
-    document.getElementsByClassName("roam-block")
-  ).find((d) => d.id.endsWith(uid));
+  const block = Array.from(document.getElementsByClassName("roam-block")).find(
+    (d) => d.id.endsWith(uid)
+  );
   return {
     block,
     bullet: block.parentElement.getElementsByClassName(
@@ -226,9 +226,10 @@ const TwitterTutorial = ({ pageUid }: { pageUid: string }) => {
                                         portalContainer
                                       );
                                       setTimeout(() => {
-                                        const statusTable = document.getElementsByClassName(
-                                          "bp3-html-table"
-                                        )[0] as HTMLTableElement;
+                                        const statusTable =
+                                          document.getElementsByClassName(
+                                            "bp3-html-table"
+                                          )[0] as HTMLTableElement;
                                         statusTable.insertBefore(
                                           portalContainer,
                                           statusTable.firstChild
@@ -304,7 +305,10 @@ const TwitterTutorial = ({ pageUid }: { pageUid: string }) => {
         span.style.textAlign = "center";
         span.style.marginTop = "16px";
         d.appendChild(span);
-        loginRender(span);
+        span.onclick = () =>
+          window.location.assign(
+            getRoamUrl(getPageUidByPageTitle("roam/js/twitter"))
+          );
         const styleEl = document.createElement("style");
         styleEl.innerText = `.bp3-alert-footer {
   display: none;
