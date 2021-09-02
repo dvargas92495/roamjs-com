@@ -19,11 +19,11 @@ export const handler = async (
     .then(() => {
       console.log(JSON.stringify(event.headers, null, 4));
       const payload = wh.verify(event.body, {
-        "dh-id": event.headers["dh-id"] || event.headers["Dh-Id"],
+        "dh-id": event.headers["svix-id"] || event.headers["Svix-Id"],
         "dh-signature":
-          event.headers["dh-signature"] || event.headers["Dh-Signature"],
+          event.headers["svix-signature"] || event.headers["Svix-Signature"],
         "dh-timestamp":
-          event.headers["dh-timestamp"] || event.headers["Dh-Timestamp"],
+          event.headers["svix-timestamp"] || event.headers["Svix-Timestamp"],
       }) as { data?: Record<string, string>; type?: string };
       if (payload.type && payload.type !== "user.created") {
         return emptyResponse(event);
