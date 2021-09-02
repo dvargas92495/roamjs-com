@@ -129,7 +129,7 @@
     "color": "^3.1.3",
     "crypto-js": "^4.1.1",
     "date-fns": "^2.16.1",
-    "diahook": "^0.10.7",
+    "diahook": "^0.11.5",
     "downloadjs": "^1.4.7",
     "draft-js": "^0.11.7",
     "dropbox": "^9.6.0",

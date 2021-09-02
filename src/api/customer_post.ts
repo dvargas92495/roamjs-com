@@ -17,12 +17,11 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> =>
   Promise.resolve()
     .then(() => {
-      console.log(JSON.stringify(event.headers, null, 4));
       const payload = wh.verify(event.body, {
-        "dh-id": event.headers["svix-id"] || event.headers["Svix-Id"],
-        "dh-signature":
+        "svix-id": event.headers["svix-id"] || event.headers["Svix-Id"],
+        "svix-signature":
           event.headers["svix-signature"] || event.headers["Svix-Signature"],
-        "dh-timestamp":
+        "svix-timestamp":
           event.headers["svix-timestamp"] || event.headers["Svix-Timestamp"],
       }) as { data?: Record<string, string>; type?: string };
       if (payload.type && payload.type !== "user.created") {

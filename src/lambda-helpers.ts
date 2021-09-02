@@ -320,9 +320,10 @@ export const emailError = (subject: string, e: Error): Promise<string> =>
         Body: {
           Text: {
             Charset: "UTF-8",
-            Data: `An error was thrown in a RoamJS lambda. Here's the error stack trace:
+            Data: `An error was thrown in a RoamJS lambda:
 
-${JSON.stringify(e)}`,
+${e.name}: ${e.message}
+${e.stack}`,
           },
         },
         Subject: {
