@@ -9,5 +9,6 @@
   ],
   "rules": {
     "no-control-regex": 0
-  }
+  },
+  "ignorePatterns": ["**/dist/*", "scripts/"]
 }
