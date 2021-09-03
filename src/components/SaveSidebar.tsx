@@ -1,5 +1,6 @@
 import {
   Button,
+  Checkbox,
   Classes,
   Dialog,
   InputGroup,
@@ -11,19 +12,26 @@ import React, { useCallback, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import {
   createBlock,
+  getCurrentPageUid,
   getPageUidByPageTitle,
+  getRoamUrl,
   getTreeByPageName,
 } from "roam-client";
 import { SidebarWindow } from "roam-client/lib/types";
-import { getWindowUid } from "../entry-helpers";
+import { getWindowUid, openBlockElement } from "../entry-helpers";
 import { getRenderRoot } from "./hooks";
 import { MenuItemSelect } from "roamjs-components";
 
 const SaveSidebar = (): React.ReactElement => {
   const [isOpen, setIsOpen] = useState(false);
-  const open = useCallback(() => setIsOpen(true), [setIsOpen]);
+  const [blockUid, setBlockUid] = useState("");
+  const open = useCallback(() => {
+    setIsOpen(true);
+    setBlockUid(window.roamAlphaAPI.ui.getFocusedBlock()?.["block-uid"] || "");
+  }, [setIsOpen]);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const [value, setValue] = useState("");
+  const [savePageState, setSavePageState] = useState(false);
   return (
     <>
       <Tooltip content={"Save sidebar windows"}>
@@ -45,6 +53,13 @@ const SaveSidebar = (): React.ReactElement => {
               onChange={(e) => setValue(e.target.value)}
             />
           </Label>
+          <Checkbox
+            checked={savePageState}
+            onChange={(e) =>
+              setSavePageState((e.target as HTMLInputElement).checked)
+            }
+            label={"Save Page State?"}
+          />
         </div>
         <div className={Classes.DIALOG_FOOTER}>
           <div className={Classes.DIALOG_FOOTER_ACTIONS}>
@@ -52,7 +67,8 @@ const SaveSidebar = (): React.ReactElement => {
               text={"Save"}
               disabled={!value}
               onClick={() => {
-                const windows = window.roamAlphaAPI.ui.rightSidebar.getWindows();
+                const windows =
+                  window.roamAlphaAPI.ui.rightSidebar.getWindows();
                 const parentUid = getPageUidByPageTitle("roam/js/sidebar");
                 const { uid, children } =
                   getTreeByPageName("roam/js/sidebar").find((c) =>
@@ -60,13 +76,29 @@ const SaveSidebar = (): React.ReactElement => {
                   ) || {};
                 const configToSave = {
                   text: value,
-                  children: windows.map((w) => ({
-                    text: w.type,
-                    children: [
-                      { text: getWindowUid(w) },
-                      ...(w["pinned?"] ? [{ text: "pinned" }] : []),
-                    ],
-                  })),
+                  children: windows
+                    .map((w) => ({
+                      text: w.type as string,
+                      children: [
+                        { text: getWindowUid(w) },
+                        ...(w["pinned?"] ? [{ text: "pinned" }] : []),
+                      ],
+                    }))
+                    .concat(
+                      ...(savePageState
+                        ? [
+                            {
+                              text: "page",
+                              children: [
+                                { text: getCurrentPageUid() },
+                                {
+                                  text: blockUid,
+                                },
+                              ],
+                            },
+                          ]
+                        : [])
+                    ),
                 };
                 createBlock({
                   node: uid
@@ -128,9 +160,12 @@ const LoadSidebar = ({ onClose }: { onClose: () => void }) => {
                   .getWindows()
                   .map((w) => [getWindowUid(w), w.type])
               );
-              savedSidebar.children
-                .find((t) => t.text === label)
-                .children.map((w, i) => ({
+              const config =
+                savedSidebar.children.find((t) => t.text === label)?.children ||
+                [];
+              config
+                .filter((w) => w.text !== "page")
+                .map((w, i) => ({
                   type: w.text as SidebarWindow["type"],
                   "block-uid": w.children[0]?.text,
                   order: i,
@@ -148,6 +183,25 @@ const LoadSidebar = ({ onClose }: { onClose: () => void }) => {
                     });
                   }
                 });
+              const pageConfig = config.find((t) => t.text === "page");
+              if (pageConfig) {
+                const [pageUid, blockUid] = pageConfig.children;
+                if (pageUid) {
+                  setTimeout(() => {
+                    window.location.assign(getRoamUrl(pageUid.text));
+                    if (blockUid) {
+                      setTimeout(() => {
+                        const div = Array.from(
+                          document.querySelectorAll<HTMLDivElement>(
+                            ".roam-block"
+                          )
+                        ).find((d) => d.id.endsWith(blockUid.text));
+                        if (div) openBlockElement(div);
+                      }, 1000);
+                    }
+                  }, 1);
+                }
+              }
               onClose();
             }}
           />

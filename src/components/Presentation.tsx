@@ -364,7 +364,9 @@ const ContentSlide = ({
         }
       );
       Array.from(
-        slideRoot.current.parentElement.querySelectorAll<HTMLDivElement>("div.roam-render")
+        slideRoot.current.parentElement.querySelectorAll<HTMLDivElement>(
+          "div.roam-render"
+        )
       ).forEach((el) => {
         window.roamAlphaAPI.ui.components.renderBlock({
           uid: el.parentElement.id,
@@ -372,22 +374,50 @@ const ContentSlide = ({
         });
         setTimeout(() => {
           Array.from(
-            el.querySelectorAll<HTMLDivElement>(
-              "div.excalidraw-host"
-            )
+            el.querySelectorAll<HTMLDivElement>("div.excalidraw-host")
           ).forEach((d) => {
             const style = getComputedStyle(d);
-            if (style.height.startsWith("0")) {
-              d.style.height = "400px";
+            const rect = d.getElementsByTagName("rect")[0];
+            if (style.height.startsWith("0") && rect) {
+              d.style.height = `${rect.height.animVal.valueAsString}px`;
             }
-            if (style.width.startsWith("0")) {
-              d.style.width = "400px";
+            if (style.width.startsWith("0") && rect) {
+              d.style.width = `${rect.width.animVal.valueAsString}px`;
             }
-            d.style.maxWidth = '100%';
+
+            const clientWidth = Number(d.style.width.replace("px", ""));
+            const clientHeight = Number(d.style.height.replace("px", ""));
+            const parent = d.closest('.roamjs-bullets-container') || d.closest('.roamjs-media-container');
+            if (parent) {
+              const containerWidth = parent.clientWidth;
+              const containerHeight = parent.clientHeight;
+              if (
+                clientWidth / clientHeight <
+                containerWidth / containerHeight
+              ) {
+                d.style.height = `${containerHeight}px`;
+                d.style.width = `${
+                  (containerHeight * clientWidth) / clientHeight
+                }px`;
+              } else if (
+                clientWidth / clientHeight >
+                containerWidth / containerHeight
+              ) {
+                d.style.height = `${
+                  (containerWidth * clientHeight) / clientWidth
+                }px`;
+                d.style.width = `${containerWidth}px`;
+              } else {
+                d.style.height = `${containerHeight}px`;
+                d.style.width = `${containerWidth}px`;
+              }
+            }
+
+            d.style.maxWidth = "100%";
             d.style.resize = "unset";
-            const roamBlock = d.closest<HTMLDivElement>('.roam-block');
+            const roamBlock = d.closest<HTMLDivElement>(".roam-block");
             if (roamBlock) {
-              roamBlock.style.minWidth = '100%';
+              roamBlock.style.minWidth = "100%";
             }
           });
         }, 1);
@@ -491,6 +521,7 @@ const ContentSlide = ({
               alignSelf: "center",
               height: "100%",
             }}
+            className={"roamjs-media-container"}
           >
             {isMediaLayout ? (
               <div
