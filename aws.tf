@@ -202,6 +202,7 @@ module "aws-serverless-backend" {
         "twitter-upload/post",
         "update-website/post",
         "user/get",
+        "user/put",
         "versions/get",
         "website-status/get",
         "website-variables/get",
