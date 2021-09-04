@@ -1,5 +1,4 @@
-import { users } from "@clerk/clerk-sdk-node";
-import { authenticate, headers } from "../lambda-helpers";
+import { authenticate, getUserFromEvent, headers } from "../lambda-helpers";
 
 const normalize = (hdrs: Record<string, string>) =>
   Object.fromEntries(
@@ -10,13 +9,17 @@ export const handler = authenticate(async (event) => {
   const hs = normalize(event.headers);
   const service = hs["x-roamjs-service"];
   const token = hs["x-roamjs-token"];
-  const userId = Buffer.from(token, "base64").toString().split(":")[0];
-  const user = await users
-    .getUser(`user_${userId}`)
-    .catch(() => ({ publicMetadata: {} }));
+  const user = await getUserFromEvent(token, service).catch(() => ({
+    publicMetadata: {},
+    emailAddresses: [],
+    primaryEmailAddressId: "",
+  }));
   const { token: storedToken, ...data } = (
-    user.publicMetadata as { [s: string]: { token: string } }
+    user.publicMetadata as {
+      [s: string]: { token: string; authenticated: boolean };
+    }
   )?.[service];
+  delete data.authenticated;
   if (!storedToken || token !== storedToken) {
     return {
       statusCode: 401,
@@ -26,7 +29,12 @@ export const handler = authenticate(async (event) => {
   }
   return {
     statusCode: 200,
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      ...data,
+      email: user.emailAddresses.find(
+        (e) => e.id === user.primaryEmailAddressId
+      )?.emailAddress,
+    }),
     headers: headers(event),
   };
 }, "developer");

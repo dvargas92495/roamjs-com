@@ -239,6 +239,35 @@ const findUser = async (predicate: (u: User) => boolean): Promise<User> => {
   }
 };
 
+export const getUserFromEvent = (
+  Authorization: string,
+  service: string
+): Promise<User> => {
+  const [userId, token] =
+    Authorization.length === 32 || Authorization.includes(":")
+      ? // the old ways of generating tokens did not have user id encoded, so we query all users
+        [null, Authorization.split(":").slice(-1)[0]]
+      : [
+          Buffer.from(Authorization, "base64").toString().split(":")[0],
+          Authorization,
+        ];
+  return userId
+    ? users
+        .getUser(`user_${userId}`)
+        .then((user) =>
+          (user.publicMetadata as { [s: string]: { token: string } })?.[service]
+            ?.token === token
+            ? user
+            : undefined
+        )
+        .catch(() => undefined)
+    : findUser(
+        (user) =>
+          (user.publicMetadata as { [s: string]: { token: string } })?.[service]
+            ?.token === token
+      );
+};
+
 export const authenticate =
   (
     handler: APIGatewayProxyHandler,
@@ -246,35 +275,10 @@ export const authenticate =
   ): APIGatewayProxyHandler =>
   (event, ctx, callback) => {
     const service = inputService || event.queryStringParameters.service;
-    const Authorization = event.headers.Authorization || "";
-    const [userId, token] =
-      Authorization.length === 32 || Authorization.includes(":")
-        ? // the old ways of generating tokens did not have user id encoded, so we query all users
-          [null, Authorization.split(":").slice(-1)[0]]
-        : [
-            Buffer.from(Authorization, "base64").toString().split(":")[0],
-            Authorization,
-          ];
+    const Authorization =
+      event.headers.Authorization || event.headers.authorization || "";
 
-    return (
-      userId
-        ? users
-            .getUser(`user_${userId}`)
-            .then((user) =>
-              (user.publicMetadata as { [s: string]: { token: string } })?.[
-                service
-              ]?.token === token
-                ? user
-                : undefined
-            )
-            .catch(() => undefined)
-        : findUser(
-            (user) =>
-              (user.publicMetadata as { [s: string]: { token: string } })?.[
-                service
-              ]?.token === token
-          )
-    ).then((user) => {
+    return getUserFromEvent(Authorization, service).then((user) => {
       if (!user) {
         return {
           statusCode: 401,
