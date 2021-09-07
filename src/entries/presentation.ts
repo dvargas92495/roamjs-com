@@ -85,6 +85,10 @@ addStyle(`.roamjs-collapsible-caret {
   pointer-events: none;
   display: inline-block;
 }
+
+.reveal .rm-block-ref {
+  pointer-events: none;
+}
 `);
 
 runExtension("presentation", async () => {
