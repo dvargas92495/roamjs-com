@@ -15,6 +15,7 @@ As part of a RoamJS Developer effort started in April, 2021, we've started to mi
 - [Roam42](https://github.com/dvargas92495/roam42)
 - [SmartBlocks](https://github.com/dvargas92495/roamjs-smartblocks)
 - [Static Site](https://github.com/dvargas92495/roamjs-service-static-site)
+- [Twitter](https://github.com/dvargas92495/roamjs-twitter)
 
 ## Contributing
 
