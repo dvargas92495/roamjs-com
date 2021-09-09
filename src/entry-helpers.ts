@@ -783,11 +783,11 @@ export const isPopoverThePageFilter = (popover?: HTMLElement): boolean => {
 };
 
 export const getWindowUid = (w: SidebarWindow): string =>
-  w.type === "block"
-    ? w["block-uid"]
+  w.type === "outline"
+    ? w["page-uid"]
     : w.type === "mentions"
     ? w["mentions-uid"]
-    : w["page-uid"];
+    : w["block-uid"];
 
 export const openBlock = (blockId?: string): void =>
   openBlockElement(document.getElementById(blockId));
