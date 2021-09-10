@@ -35,7 +35,7 @@ const pullReferences = async (
     format.replace(REPLACE, `((${l.uid}))`)
   );
   if (bullets.length === 0) {
-    return ["No linked references for this page!"];
+    return [`No linked references for ${pageTitleText}!`];
   }
 
   const removeTags = !!config["Remove Tags"];
