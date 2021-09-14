@@ -10,6 +10,7 @@ import {
   getTreeByPageName,
   registerSmartBlocksCommand,
   getBlockUidsReferencingPage,
+  getPageTitleByPageUid,
 } from "roam-client";
 import { DAILY_NOTE_PAGE_REGEX } from "roam-client/lib/date";
 import {
@@ -106,8 +107,9 @@ createCustomSmartBlockCommand({
 // v2
 registerSmartBlocksCommand({
   text: "PULLREFERENCES",
-  handler:
-    (context: {targetUid: string}) =>
-    () =>
-      pullReferences(getPageTitleByBlockUid(context.targetUid)),
+  handler: (context: { targetUid: string }) => () =>
+    pullReferences(
+      getPageTitleByBlockUid(context.targetUid) ||
+        getPageTitleByPageUid(context.targetUid)
+    ),
 });
