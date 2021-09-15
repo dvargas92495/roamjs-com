@@ -1,4 +1,4 @@
-import { users } from "@clerk/clerk-sdk-node";
+import { setClerkApiKey, users } from "@clerk/clerk-sdk-node";
 import { authenticate, bareSuccessResponse, headers } from "../lambda-helpers";
 
 const normalize = (hdrs: Record<string, string>) =>
@@ -10,6 +10,10 @@ export const handler = authenticate(async (event) => {
   const hs = normalize(event.headers);
   const service = hs["x-roamjs-service"];
   const token = hs["x-roamjs-token"];
+  const dev = !!hs["x-roamjs-dev"];
+  if (dev) {
+    setClerkApiKey(process.env.CLERK_DEV_API_KEY);
+  }
   const userId = Buffer.from(token, "base64").toString().split(":")[0];
   const { publicMetadata } = await users
     .getUser(`user_${userId}`)

@@ -9,7 +9,8 @@ export const handler = authenticate(async (event) => {
   const hs = normalize(event.headers);
   const service = hs["x-roamjs-service"];
   const token = hs["x-roamjs-token"];
-  const user = await getUserFromEvent(token, service).catch(() => ({
+  const dev = !!hs["x-roamjs-dev"];
+  const user = await getUserFromEvent(token, service, dev).catch(() => ({
     publicMetadata: {},
     emailAddresses: [],
     primaryEmailAddressId: "",

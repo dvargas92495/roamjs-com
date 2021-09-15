@@ -1,7 +1,7 @@
 import { AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
 import Cookies from "universal-cookie";
-import { sessions, users, User } from "@clerk/clerk-sdk-node";
+import { sessions, users, User, setClerkApiKey } from "@clerk/clerk-sdk-node";
 import {
   APIGatewayProxyEvent,
   APIGatewayProxyHandler,
@@ -241,16 +241,22 @@ const findUser = async (predicate: (u: User) => boolean): Promise<User> => {
 
 export const getUserFromEvent = (
   Authorization: string,
-  service: string
+  service: string,
+  dev?: boolean
 ): Promise<User> => {
-  const [userId, token] =
+  if (dev) {
+    setClerkApiKey(process.env.CLERK_DEV_API_KEY);
+  }
+  const [userId, token,] =
     Authorization.length === 32 || Authorization.includes(":")
       ? // the old ways of generating tokens did not have user id encoded, so we query all users
-        [null, Authorization.split(":").slice(-1)[0]]
+        [null, Authorization.split(":").slice(-1)[0], Authorization.split(":").slice(-1)[0]]
       : [
           Buffer.from(Authorization, "base64").toString().split(":")[0],
           Authorization,
+          Buffer.from(Authorization, "base64").toString().split(":")[1],
         ];
+        
   return userId
     ? users
         .getUser(`user_${userId}`)
