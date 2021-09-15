@@ -2,7 +2,7 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Button } from "@dvargas92495/ui";
 import React from "react";
 
-const UserIcon: React.FC<{ flag: boolean }> = () => {
+const UserIcon = (): React.ReactElement => {
   return (
     <>
       <SignedIn>

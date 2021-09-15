@@ -27,18 +27,6 @@ variable "secret" {
     type = string
 }
 
-variable "twitter_consumer_key" {
-    type = string
-}
-
-variable "twitter_consumer_secret" {
-    type = string
-}
-
-variable "twitter_bearer_token" {
-    type = string
-}
-
 variable "stripe_public" {
     type = string
 }
@@ -64,6 +52,10 @@ variable "slack_client_secret" {
 }
 
 variable "clerk_api_key" {
+    type = string
+}
+
+variable "clerk_dev_api_key" {
     type = string
 }
 
@@ -462,24 +454,6 @@ resource "github_actions_secret" "deploy_aws_access_secret" {
   plaintext_value  = module.aws_static_site.deploy-secret
 }
 
-resource "github_actions_secret" "twitter_consumer_key" {
-  repository       = "roam-js-extensions"
-  secret_name      = "TWITTER_CONSUMER_KEY"
-  plaintext_value  = var.twitter_consumer_key
-}
-
-resource "github_actions_secret" "twitter_consumer_secret" {
-  repository       = "roam-js-extensions"
-  secret_name      = "TWITTER_CONSUMER_SECRET"
-  plaintext_value  = var.twitter_consumer_secret
-}
-
-resource "github_actions_secret" "twitter_bearer_token" {
-  repository       = "roam-js-extensions"
-  secret_name      = "TWITTER_BEARER_TOKEN"
-  plaintext_value  = var.twitter_bearer_token
-}
-
 resource "github_actions_secret" "roam_api_key" {
   repository       = "roam-js-extensions"
   secret_name      = "ROAM_CLIENT_API_KEY"
@@ -538,6 +512,12 @@ resource "github_actions_secret" "clerk_api_key" {
   repository       = "roam-js-extensions"
   secret_name      = "CLERK_API_KEY"
   plaintext_value  = var.clerk_api_key
+}
+
+resource "github_actions_secret" "clerk_dev_api_key" {
+  repository       = "roam-js-extensions"
+  secret_name      = "CLERK_DEV_API_KEY"
+  plaintext_value  = var.clerk_dev_api_key
 }
 
 resource "github_actions_secret" "floss_token" {

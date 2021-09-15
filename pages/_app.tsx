@@ -3,7 +3,6 @@ import { ThemeProvider } from "@dvargas92495/ui";
 import React from "react";
 import { MDXProvider } from "@mdx-js/react";
 import { ClerkProvider } from "@clerk/clerk-react";
-import FeatureFlagProvider from "../components/FeatureFlagProvider";
 import "../components/global.css";
 import "normalize.css/normalize.css";
 import "@blueprintjs/icons/lib/css/blueprint-icons.css";
@@ -28,9 +27,7 @@ const MyApp = ({ Component, pageProps, router }: AppProps): JSX.Element => {
     <ClerkProvider frontendApi={process.env.NEXT_PUBLIC_CLERK_FRONTEND_API}>
       <ThemeProvider>
         <MDXProviderWrapper pathname={router.pathname}>
-          <FeatureFlagProvider>
-            <Component {...pageProps} />
-          </FeatureFlagProvider>
+          <Component {...pageProps} />
         </MDXProviderWrapper>
       </ThemeProvider>
     </ClerkProvider>

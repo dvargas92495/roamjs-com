@@ -3,7 +3,6 @@ import Head from "next/head";
 import { AppBar, Root, Main, Footer } from "@dvargas92495/ui";
 import RoamJSLogo from "./RoamJSLogo";
 import dynamic from "next/dynamic";
-import { useFlag } from "./FeatureFlagProvider";
 
 export type LayoutProps = {
   title: string;
@@ -27,7 +26,6 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
   description,
   img,
 }) => {
-  const flag = useFlag();
   return (
     <Root>
       <Head>
@@ -47,7 +45,7 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
       </Head>
       <AppBar
         homeIcon={<RoamJSLogo />}
-        userIcon={<UserIconDynamic flag={flag} />}
+        userIcon={<UserIconDynamic />}
         pages={["docs", "services", "projects", "queue", "contribute"]}
       />
       <Main>{children}</Main>
