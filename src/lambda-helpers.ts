@@ -283,8 +283,9 @@ export const authenticate =
     const service = inputService || event.queryStringParameters.service;
     const Authorization =
       event.headers.Authorization || event.headers.authorization || "";
+    const dev = !!event.headers['x-roamjs-dev'];
 
-    return getUserFromEvent(Authorization, service).then((user) => {
+    return getUserFromEvent(Authorization, service, dev).then((user) => {
       if (!user) {
         return {
           statusCode: 401,
