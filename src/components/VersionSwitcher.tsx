@@ -1,5 +1,6 @@
 import {
   Button,
+  Checkbox,
   Classes,
   Dialog,
   Intent,
@@ -37,22 +38,17 @@ const VersionSwitcher = ({
     [id]
   );
   const [page, setPage] = useState(0);
-  const [versions, setVersions] = useState([]);
+  const [versions, setVersions] = useState<string[]>([]);
   const [isEnd, setIsEnd] = useState(true);
   const [loading, setLoading] = useState(false);
   const [selectedValue, setSelectedValue] = useState(currentVersion);
+  const [useLatest, setUseLatest] = useState(currentVersion === "latest");
   useEffect(() => {
     setLoading(true);
     axios
-      .get(
-        `${process.env.API_URL}/versions?limit=${
-          page === 0 ? 4 : 5
-        }&id=${id}&page=${page}`
-      )
+      .get(`${process.env.API_URL}/versions?limit=${5}&id=${id}&page=${page}`)
       .then((r) => {
-        setVersions(
-          page === 0 ? ["latest", ...r.data.versions] : r.data.versions
-        );
+        setVersions(r.data.versions);
         setIsEnd(r.data.isEnd);
       })
       .finally(() => setLoading(false));
@@ -72,6 +68,7 @@ const VersionSwitcher = ({
           }
           selectedValue={selectedValue}
           className={loading ? Classes.SKELETON : ""}
+          disabled={useLatest}
         >
           {versions.map((v) => (
             <Radio
@@ -88,6 +85,17 @@ const VersionSwitcher = ({
             />
           ))}
         </RadioGroup>
+        <Checkbox
+          checked={useLatest}
+          onChange={(e) => {
+            const checked = (e.target as HTMLInputElement).checked;
+            setUseLatest(checked);
+            if (!checked && !selectedValue) {
+              setSelectedValue(versions[0]);
+            }
+          }}
+          label={"Use Latest"}
+        />
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Button
             disabled={loading || page === 0}
@@ -99,7 +107,7 @@ const VersionSwitcher = ({
             disabled={loading || isEnd}
             icon={"arrow-right"}
             text={"Older"}
-            onClick={() => setPage(page === 0 ? 4 : page + 5)}
+            onClick={() => setPage(page + 5)}
           />
         </div>
       </div>
@@ -123,7 +131,7 @@ const VersionSwitcher = ({
                       text: text.replace(
                         extensionRegex,
                         `https://roamjs.com/${id}${
-                          selectedValue === "latest" ? "" : `/${selectedValue}`
+                          useLatest ? "" : `/${selectedValue}`
                         }/main.js`
                       ),
                     })
