@@ -23,9 +23,12 @@ export const handler = authenticate(async (event) => {
       statusCode: 401,
       body: "Could not find user from the given token",
       headers: headers(event),
-    }
+    };
   }
-  const {[service]: serviceData} = publicMetadata as Record<string, {token: string}>;
+  const { [service]: serviceData } = publicMetadata as Record<
+    string,
+    { token: string }
+  >;
   const { token: storedToken } = serviceData;
   if (!storedToken || token !== storedToken) {
     return {
@@ -34,7 +37,7 @@ export const handler = authenticate(async (event) => {
       headers: headers(event),
     };
   }
-  await users.updateUser(userId, {
+  await users.updateUser(`user_${userId}`, {
     publicMetadata: {
       ...publicMetadata,
       [service]: {

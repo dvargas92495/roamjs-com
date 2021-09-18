@@ -247,16 +247,20 @@ export const getUserFromEvent = (
   if (dev) {
     setClerkApiKey(process.env.CLERK_DEV_API_KEY);
   }
-  const [userId, token,] =
+  const [userId, token] =
     Authorization.length === 32 || Authorization.includes(":")
       ? // the old ways of generating tokens did not have user id encoded, so we query all users
-        [null, Authorization.split(":").slice(-1)[0], Authorization.split(":").slice(-1)[0]]
+        [
+          null,
+          Authorization.split(":").slice(-1)[0],
+          Authorization.split(":").slice(-1)[0],
+        ]
       : [
           Buffer.from(Authorization, "base64").toString().split(":")[0],
           Authorization,
           Buffer.from(Authorization, "base64").toString().split(":")[1],
         ];
-        
+
   return userId
     ? users
         .getUser(`user_${userId}`)
@@ -283,7 +287,7 @@ export const authenticate =
     const service = inputService || event.queryStringParameters.service;
     const Authorization =
       event.headers.Authorization || event.headers.authorization || "";
-    const dev = !!event.headers['x-roamjs-dev'];
+    const dev = !!event.headers["x-roamjs-dev"];
 
     return getUserFromEvent(Authorization, service, dev).then((user) => {
       if (!user) {
