@@ -17,7 +17,14 @@ export const handler = authenticate(async (event) => {
   const userId = Buffer.from(token, "base64").toString().split(":")[0];
   const { publicMetadata } = await users
     .getUser(`user_${userId}`)
-    .catch(() => ({ publicMetadata: {} }));
+    .catch(() => ({ publicMetadata: undefined }));
+  if (!publicMetadata) {
+    return {
+      statusCode: 401,
+      body: "Could not find user from the given token",
+      headers: headers(event),
+    }
+  }
   const {[service]: serviceData} = publicMetadata as Record<string, {token: string}>;
   const { token: storedToken } = serviceData;
   if (!storedToken || token !== storedToken) {

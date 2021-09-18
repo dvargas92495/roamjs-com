@@ -20,15 +20,21 @@ export const handler = async (
     }
 
     const { service } = JSON.parse(event.body);
+    const serviceCamelCase = (service as string)
+      .split("-")
+      .map((s, i) =>
+        i == 0 ? s : `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`
+      )
+      .join("");
     const id = user.id;
     const publicMetadata = user.publicMetadata as {
       [key: string]: Record<string, unknown>;
     };
-    if (!publicMetadata[service]?.token) {
-      if (await getStripePriceId(service).catch(() => "Invalid")) {
+    if (!publicMetadata[serviceCamelCase]?.token) {
+      if (await getStripePriceId(serviceCamelCase).catch(() => "Invalid")) {
         return {
           statusCode: 401,
-          body: `Not authorized to generate a new token if there is no existing token for ${service}.`,
+          body: `Not authorized to generate a new token if there is no existing token for ${serviceCamelCase}.`,
           headers: headers(event),
         };
       }
@@ -39,8 +45,8 @@ export const handler = async (
       .updateUser(id, {
         publicMetadata: {
           ...publicMetadata,
-          [service]: {
-            ...publicMetadata[service],
+          [serviceCamelCase]: {
+            ...publicMetadata[serviceCamelCase],
             token,
           },
         },
