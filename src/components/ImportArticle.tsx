@@ -120,12 +120,11 @@ export const importArticle = ({
       let previousNodeTabbed = false;
       let bulletIsParagraph = false;
       for (const node of nodes) {
-        const isHeader =
-          node.startsWith("# ") ||
-          node.startsWith("## ") ||
-          node.startsWith("### ");
+        const isHeader = /^#{1,3} /.test(node);
         const isBullet = node.startsWith("* ");
-        const text = isBullet ? node.substring(2).trim() : node;
+        const bulletText = isBullet ? node.substring(2).trim() : node;
+        const text = isHeader ? bulletText.replace(/^#+ /, "") : bulletText;
+        const heading = isHeader ? node.split(' ')[0].length : 0;
         if (isBullet && previousNodeTabbed) {
           bulletIsParagraph = true;
         }
@@ -150,11 +149,11 @@ export const importArticle = ({
         }
         if (stack.length === 1 && location.order === firstOrder) {
           window.roamAlphaAPI.updateBlock({
-            block: { string: text, uid: blockUid },
+            block: { string: text, uid: blockUid, heading },
           });
         } else {
           window.roamAlphaAPI.createBlock({
-            block: { string: text },
+            block: { string: text, heading },
             location,
           });
         }
