@@ -7,8 +7,10 @@ import {
   createButtonObserver,
   createIconButton,
   getAllBlockUidsAndTexts,
+  getBasicTreeByParentUid,
   getBlockUidByTextOnPage,
   getBlockUidsReferencingPage,
+  getChildrenLengthByPageUid,
   getPageTitleByBlockUid,
   getPageTitlesReferencingBlockUid,
   getTextByBlockUid,
@@ -76,9 +78,16 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
       });
       return;
     }
+    const location = getSettingValueFromTree({
+      tree,
+      key: "location",
+      defaultValue: "TOP",
+    });
     const labelUid = createBlock({
       node: { text: label, children: [{ text: "Loading..." }] },
       parentUid: todayPageUid,
+      order:
+        location === "BOTTOM" ? getChildrenLengthByPageUid(todayPageUid) : 0,
     });
     const count = getSettingIntFromTree({
       tree,
@@ -166,7 +175,7 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
             break;
           }
         }
-        getTreeByBlockUid(labelUid).children.forEach(({ uid }) =>
+        getBasicTreeByParentUid(labelUid).forEach(({ uid }) =>
           window.roamAlphaAPI.deleteBlock({ block: { uid } })
         );
         children.forEach((node, order) =>
@@ -177,7 +186,7 @@ const pullDaily = ({ todayPage }: { todayPage: string }) => {
           })
         );
       } catch (e) {
-        getTreeByBlockUid(labelUid).children.forEach(({ uid }) =>
+        getBasicTreeByParentUid(labelUid).forEach(({ uid }) =>
           window.roamAlphaAPI.deleteBlock({ block: { uid } })
         );
         createBlock({
@@ -244,6 +253,15 @@ runExtension(ID, () => {
               type: "number",
               description:
                 "Block must have at least this many words to be considered for random selection.",
+            },
+            {
+              title: "location",
+              type: "select",
+              description:
+                "Where the daily serendipity block should be inserted on the DNP",
+              options: {
+                items: ["TOP", "BOTTOM"],
+              },
             },
           ],
         },
