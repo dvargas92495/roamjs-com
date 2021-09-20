@@ -45,6 +45,7 @@ export const runExtension = async (
       loaded: new Set(),
       extension: {},
       dynamicElements: new Set(),
+      version: {},
     };
   }
   if (window.roamjs.loaded.has(extensionId)) {
