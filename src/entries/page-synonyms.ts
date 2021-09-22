@@ -34,18 +34,25 @@ const createMenuOption = (menuOnClick: () => void) => {
 const getReplacer = () => {
   const tree = getTreeByPageName("roam/js/page-synonyms");
   const useTags = tree.some((t) => t.text.toUpperCase() === "USE TAGS");
-  const pagesWithAliases = window.roamAlphaAPI
+  const uidWithAliases = window.roamAlphaAPI
     .q(
-      `[:find ?u ?t :where [?parentPage :block/uid ?u] [?parentPage :node/title ?t] [?referencingBlock :block/page ?parentPage] [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "Aliases"]]`
+      `[:find (pull ?parentPage [:block/uid :node/title]) (pull ?referencingBlock [[:block/string :as "text"]]) :where 
+        [?referencedPage :node/title "Aliases"] 
+        [?referencingBlock :block/refs ?referencedPage] 
+        [?referencingBlock :block/page ?parentPage]]`
     )
-    .map(([uid, title]: string[]) => ({ uid, title }));
-  const uidWithAliases = pagesWithAliases.map((p) => ({
-    title: p.title,
-    uid: p.uid,
-    aliases: (getConfigFromPage(p.title)?.Aliases?.split(",") || [])
-      .map((a: string) => extractTag(a.trim()))
-      .filter((a: string) => !!a),
-  }));
+    .map(([{ uid, title }, { text }]: Record<string, string>[]) => ({
+      uid,
+      title,
+      aliases: (
+        text
+          .replace(/^Aliases::/, "")
+          .trim()
+          .split(",") || []
+      )
+        .map((a: string) => extractTag(a.trim()))
+        .filter((a: string) => !!a),
+    })).filter(({aliases}) => aliases.length);
   const linkByAlias: { [key: string]: string } = {};
   uidWithAliases.forEach((p) => {
     const link = useTags ? `[[${p.title}]]` : `((${p.uid}))`;
