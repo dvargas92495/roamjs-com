@@ -2,7 +2,6 @@ import { isApple, runExtension } from "../entry-helpers";
 import {
   createOverlayObserver,
   extractTag,
-  getConfigFromPage,
   getTextByBlockUid,
   getTreeByPageName,
   getUids,
