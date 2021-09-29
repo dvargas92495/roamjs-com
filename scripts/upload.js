@@ -106,8 +106,12 @@ Promise.all([
         InvalidationBatch: {
           CallerReference: new Date().toJSON(),
           Paths: {
-            Quantity: 1,
-            Items: [`/extensions/${extension}*`],
+            Quantity: 3,
+            Items: [
+              `/extensions/${extension}*`,
+              "/extensions",
+              "/extensions.html",
+            ],
           },
         },
       })
