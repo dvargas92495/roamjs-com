@@ -34,17 +34,22 @@ const extension = process.argv[2];
 const DistributionId =
   process.env.CLOUDFRONT_ARN.match(/:distribution\/(.*)$/)[1];
 
+const catalog = {
+  Key: "extensions",
+  Body: fs.readFileSync(`out/extensions.html`).toString(),
+};
 const content = fs.readFileSync(`out/extensions/${extension}.html`).toString();
 const linkRegex = /<(?:link|script) (?:.*?)(?:href|src)="(.*?)"(?:.*?)(?:\/)?>/;
 const allContent = fs.existsSync(`out/extensions/${extension}`)
   ? [
+      catalog,
       { Key: `extensions/${extension}`, Body: content },
       ...fs.readdirSync(`out/extensions/${extension}`).map((f) => ({
         Key: `extensions/${extension}/${f}`,
         Body: fs.readFileSync(`out/extensions/${extension}/${f}`).toString(),
       })),
     ]
-  : [{ Key: `extensions/${extension}`, Body: content }];
+  : [catalog, { Key: `extensions/${extension}`, Body: content }];
 const fileNames = Array.from(
   new Set(
     allContent.flatMap((c) =>
@@ -108,5 +113,10 @@ Promise.all([
       })
       .promise();
   })
-  .then((r) => new Promise((resolve) => waitForCloudfront({ Id: r.Invalidation.Id, DistributionId, resolve })))
+  .then(
+    (r) =>
+      new Promise((resolve) =>
+        waitForCloudfront({ Id: r.Invalidation.Id, DistributionId, resolve })
+      )
+  )
   .then(console.log);
