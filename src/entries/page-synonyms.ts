@@ -51,7 +51,8 @@ const getReplacer = () => {
       )
         .map((a: string) => extractTag(a.trim()))
         .filter((a: string) => !!a),
-    })).filter(({aliases}) => aliases.length);
+    }))
+    .filter(({ title, aliases }) => !!title && aliases.length);
   const linkByAlias: { [key: string]: string } = {};
   uidWithAliases.forEach((p) => {
     const link = useTags ? `[[${p.title}]]` : `((${p.uid}))`;
@@ -63,7 +64,9 @@ const getReplacer = () => {
       .sort((a, b) => b.length - a.length)
       .reduce((prevText: string, alias: string) => {
         const regex = new RegExp(
-          `(^|[^a-zA-Z0-9_\\[\\]])${alias}([^a-zA-Z0-9_\\[\\]]|$)`,
+          `(^|[^a-zA-Z0-9_\\[\\]])${alias
+            .replace(/\[/g, "\\[")
+            .replace(/\]/g, "\\]")}([^a-zA-Z0-9_\\[\\]]|$)`,
           "g"
         );
         return prevText.replace(regex, (match) =>
