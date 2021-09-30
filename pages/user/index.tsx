@@ -176,7 +176,7 @@ const ApiButton: React.FunctionComponent<
   {
     request: () => Promise<void>;
     disabled?: boolean;
-  } & Pick<ButtonProps, "color" | "variant">
+  } & Pick<ButtonProps, "color" | "variant" | "style">
 > = ({ children, request, disabled, ...bprops }) => {
   const [loading, setLoading] = useState(false);
   const onClick = useCallback(() => {
@@ -228,6 +228,13 @@ const Billing = () => {
               })
             )
             .then(() => Promise.resolve())
+      ),
+    [authenticatedAxiosPost]
+  );
+  const unsubscribe = useCallback(
+    (subscription) => () =>
+      authenticatedAxiosPost("end-service", { subscription }).then(() =>
+        setSubscriptions(subscriptions.filter((s) => s.id !== subscription))
       ),
     [authenticatedAxiosPost]
   );
@@ -290,7 +297,15 @@ const Billing = () => {
             ),
             key: 0,
             avatar: <Subtitle>Card</Subtitle>,
-            action: <ApiButton request={addCard} variant={'outlined'} color={'secondary'}>Add Card</ApiButton>,
+            action: (
+              <ApiButton
+                request={addCard}
+                variant={"outlined"}
+                color={"secondary"}
+              >
+                Add Card
+              </ApiButton>
+            ),
           },
         ]}
       />
@@ -300,12 +315,28 @@ const Billing = () => {
         <Items
           items={subscriptions.map((p) => ({
             primary: <UserValue>{p.name}</UserValue>,
-            secondary: <UserValue>{p.description}</UserValue>,
+            secondary: (
+              <UserValue>
+                <span style={{ paddingRight: 96, display: "block" }}>
+                  {p.description}
+                </span>
+              </UserValue>
+            ),
             key: p.id,
             avatar: (
               <Subtitle>
                 ${p.amount}/{p.interval}
               </Subtitle>
+            ),
+            action: (
+              <ApiButton
+                request={unsubscribe(p.id)}
+                variant={"outlined"}
+                color={"secondary"}
+                style={{ fontSize: "0.75rem" }}
+              >
+                Unsubscribe
+              </ApiButton>
             ),
           }))}
           noItemMessage="No Currently Subscribed Services"
@@ -377,16 +408,16 @@ const Profile = () => {
         <UserProfile />
       ) : (
         <VerticalTabs title={"User Info"}>
-          <Card title={"Details"}>
+          <Card title={"Details"} className={"roamjs-user-card"}>
             <Settings
               name={user.fullName}
               email={user.primaryEmailAddress.emailAddress}
             />
           </Card>
-          <Card title={"Billing"}>
+          <Card title={"Billing"} className={"roamjs-user-card"}>
             <Billing />
           </Card>
-          <Card title={"Projects"}>
+          <Card title={"Projects"} className={"roamjs-user-card"}>
             <Funding />
           </Card>
         </VerticalTabs>

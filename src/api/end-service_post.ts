@@ -12,8 +12,6 @@ import {
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const { service } = JSON.parse(event.body || "{}") as { service: string };
-
   const user = await getClerkUser(event);
   if (!user) {
     return {
@@ -22,25 +20,32 @@ export const handler = async (
       headers: headers(event),
     };
   }
+  const email = user.emailAddresses.find(
+    (e) => e.id === user.primaryEmailAddressId
+  )?.emailAddress;
+  const { service = "", subscription } = JSON.parse(event.body || "{}") as {
+    service: string;
+    subscription: string;
+  };
+
   const name = service.split("-").slice(-1)[0];
   const productName = `RoamJS ${name
     .substring(0, 1)
     .toUpperCase()}${name.substring(1)}`;
-  const email = user.emailAddresses.find(
-    (e) => e.id === user.primaryEmailAddressId
-  )?.emailAddress;
-  const { subscriptionId } = await axios
-    .get(
-      `${process.env.FLOSS_API_URL}/stripe-is-subscribed?product=${encodeURI(
-        productName
-      )}`,
-      getClerkOpts(email)
-    )
-    .then((r) => r.data)
-    .catch((e) => {
-      console.error(e);
-      return {};
-    });
+  const subscriptionId =
+    subscription ||
+    (await axios
+      .get(
+        `${process.env.FLOSS_API_URL}/stripe-is-subscribed?product=${encodeURI(
+          productName
+        )}`,
+        getClerkOpts(email)
+      )
+      .then((r) => r.data.subscriptionId || "")
+      .catch((e) => {
+        console.error(e);
+        return "";
+      }));
   if (!subscriptionId) {
     return serverError(
       `Current user is not subscribed to ${productName}`,
@@ -66,7 +71,7 @@ export const handler = async (
   if (!success) {
     return {
       statusCode: 500,
-      body: `Failed to cancel RoamJS Site subscription: ${message}`,
+      body: `Failed to cancel RoamJS subscription: ${message}`,
       headers: headers(event),
     };
   }
@@ -88,7 +93,7 @@ export const handler = async (
       publicMetadata: JSON.stringify(rest),
     });
   } else {
-    console.warn('No metadata value to clear for field', serviceField);
+    console.warn("No metadata value to clear for field", serviceField);
   }
 
   return bareSuccessResponse(event);

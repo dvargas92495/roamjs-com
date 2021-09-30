@@ -46,3 +46,7 @@
 .service-link {
   color: black;
 }
+
+.roamjs-user-card .MuiListItem-root {
+  display: flex;
+}
