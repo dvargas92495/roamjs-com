@@ -76,6 +76,7 @@ const RECURRING = [
   "Daniel McNichol",
   "Guo Miin Fang",
   "Allen Tyson",
+  "Sidney J Bienvenu",
 ];
 
 const ONE_TIME = [
@@ -125,6 +126,7 @@ const ONE_TIME = [
   "Jeremy Georges-Filteau",
   "Camilo Vera",
   "Paul Atkins",
+  "Nicolas Heras",
 ];
 
 export const getStaticProps: GetStaticProps<Props> = () => {

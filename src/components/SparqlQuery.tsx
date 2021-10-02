@@ -35,6 +35,7 @@ import {
   getShallowTreeByParentUid,
   getTreeByBlockUid,
   getParentUidByBlockUid,
+  toRoamDate,
 } from "roam-client";
 import { extractTag, getCurrentPageUid, toFlexRegex } from "../entry-helpers";
 import { getRenderRoot } from "./hooks";
@@ -149,6 +150,10 @@ export const runSparqlQuery = ({
             : returnedLabels.has(`${h}Label`) &&
               /entity\/P\d*$/.test(p[h].value)
             ? `${s}::`
+            : /^\d+$/.test(s)
+            ? s
+            : !isNaN(new Date(s).valueOf())
+            ? `[[${toRoamDate(new Date(s))}]]`
             : p[valueKey].type === "literal"
             ? `[[${s}]]`
             : s;
