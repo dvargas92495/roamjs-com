@@ -1,4 +1,8 @@
-import { createHTMLObserver, getUids } from "roam-client";
+import {
+  createHTMLObserver,
+  getUids,
+  ViewType,
+} from "roam-client";
 import { renderMouselessDialog } from "../components/MouselessDialog";
 import { isControl, runExtension } from "../entry-helpers";
 
@@ -43,6 +47,27 @@ runExtension("mouseless", () => {
             navigator.clipboard.writeText(`((${blockUid}))`);
             e.preventDefault();
             e.stopPropagation();
+          }
+        }
+      }
+    } else if (e.altKey) {
+      if (e.code === "KeyV") {
+        const el = e.target as HTMLElement;
+        if (el.nodeName === "TEXTAREA") {
+          const { blockUid: uid } = getUids(el as HTMLTextAreaElement);
+          if (uid) {
+            const viewType = window.roamAlphaAPI.q(
+              `[:find (pull ?b [:children/view-type]) :where [?b :block/uid "${uid}"]]`
+            )[0]?.[0]?.["view-type"] as ViewType;
+            const newViewType =
+              viewType === "document"
+                ? "numbered"
+                : viewType === "numbered"
+                ? "bullet"
+                : "document";
+            window.roamAlphaAPI.updateBlock({
+              block: { uid, "children-view-type": newViewType },
+            });
           }
         }
       }

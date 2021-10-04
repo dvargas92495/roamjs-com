@@ -69,6 +69,7 @@ const COMMANDS = [
   { command: "Jump to Last Block", shortcut: control("Shift-Enter") },
   { command: "Add Shortcut To Page", shortcut: control("Shift-S") },
   { command: "Copy Current Block Ref", shortcut: control("Shift-C") },
+  { command: "Toggle Parent Block View Type", shortcut: "Alt-v" },
 ];
 
 const convertKey = (k: string) => {
