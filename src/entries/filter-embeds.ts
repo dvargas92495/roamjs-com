@@ -30,8 +30,8 @@ const getIncludeTags = (includeRemoveContainer: Element) =>
 
 const filterEmbed = ({
   e,
-  includes,
-  removes,
+  includes = [],
+  removes = [],
 }: {
   e: HTMLDivElement;
   includes: string[];

@@ -39,11 +39,14 @@ const OauthPage = (): React.ReactElement => {
       const auth = AES.encrypt(authData, key).toString();
       axios.post(`${API_URL}/auth`, { service, otp, auth }).then(() => {
         const poll = () =>
-          axios
-            .get(`${API_URL}/auth?state=${service}_${otp}`)
-            .then((r) =>
-              r.data.success ? setClose(true) : setTimeout(poll, 1000)
-            );
+          axios.get(`${API_URL}/auth?state=${service}_${otp}`).then((r) => {
+            if (r.data.success) {
+              setClose(true);
+              window.close();
+            } else {
+              setTimeout(poll, 1000);
+            }
+          });
         poll();
       });
     }
