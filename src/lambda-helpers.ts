@@ -270,7 +270,32 @@ export const getUserFromEvent = (
             ? user
             : undefined
         )
-        .catch(() => undefined)
+        .catch((e) => {
+          return ses
+            .sendEmail({
+              Destination: {
+                ToAddresses: ["dvargas92495@gmail.com"],
+              },
+              Message: {
+                Body: {
+                  Text: {
+                    Charset: "UTF-8",
+                    Data: `An error was thrown in a RoamJS lambda:
+
+${e.name}: ${e.message}
+${e.stack}`,
+                  },
+                },
+                Subject: {
+                  Charset: "UTF-8",
+                  Data: `RoamJS Error: Getting User From Clerk`,
+                },
+              },
+              Source: "support@roamjs.com",
+            })
+            .promise()
+            .then(() => undefined);
+        })
     : findUser(
         (user) =>
           (user.publicMetadata as { [s: string]: { token: string } })?.[service]
@@ -291,6 +316,12 @@ export const authenticate =
 
     return getUserFromEvent(Authorization, service, dev).then((user) => {
       if (!user) {
+        console.log(
+          "Failed to authenticate",
+          Authorization.slice(-5),
+          service,
+          dev
+        );
         return {
           statusCode: 401,
           body: "Invalid token",
