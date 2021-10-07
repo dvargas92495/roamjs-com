@@ -68,6 +68,7 @@ runExtension("mouseless", () => {
             window.roamAlphaAPI.updateBlock({
               block: { uid, "children-view-type": newViewType },
             });
+            e.preventDefault();
           }
         }
       }
