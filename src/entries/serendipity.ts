@@ -1,5 +1,6 @@
 import { addDays, differenceInMilliseconds, startOfDay } from "date-fns";
 import differenceInDays from "date-fns/differenceInDays";
+import isAfter from "date-fns/isAfter";
 import dateMax from "date-fns/max";
 import {
   createBlock,
@@ -18,9 +19,12 @@ import {
   getTreeByPageName,
   getUids,
   getUidsFromButton,
+  localStorageGet,
+  localStorageSet,
   parseRoamDate,
   toRoamDate,
   toRoamDateUid,
+  TreeNode,
 } from "roam-client";
 import { createConfigObserver } from "roamjs-components";
 import {
@@ -48,157 +52,160 @@ type Node = {
   children: Node[];
 };
 
-const pullDaily = ({ todayPage }: { todayPage: string }) => {
-  const date = parseRoamDate(todayPage);
-  const todayPageUid = toRoamDateUid(date);
-  const tree =
-    getTreeByPageName("roam/js/serendipity").find((t) => /daily/i.test(t.text))
-      ?.children || [];
-  const label = getSettingValueFromTree({
+const LOCAL_STORAGE_KEY = "serendipity-daily";
+
+const pullDaily = ({
+  date,
+  tree = getTreeByPageName("roam/js/serendipity").find((t) =>
+    /daily/i.test(t.text)
+  )?.children || [],
+  label = getSettingValueFromTree({
     tree,
     key: "label",
     defaultValue: DEFAULT_DAILY_LABEL,
+  }),
+}: {
+  date: Date;
+  tree?: TreeNode[];
+  label?: string;
+}) => {
+  const todayPageUid = toRoamDateUid(date);
+  const includes = getSettingValuesFromTree({
+    tree,
+    key: "includes",
   });
-  if (!getBlockUidByTextOnPage({ text: label, title: todayPage })) {
-    const includes = getSettingValuesFromTree({
-      tree,
-      key: "includes",
+  if (includes.length === 0) {
+    createBlock({
+      node: {
+        text: label,
+        children: [
+          {
+            text: `The set of block references to randomly choose from is empty. Add some tags in the \`includes\` field on #[[${CONFIG}]]!`,
+          },
+        ],
+      },
+      parentUid: todayPageUid,
     });
-    if (includes.length === 0) {
+    return;
+  }
+  const location = getSettingValueFromTree({
+    tree,
+    key: "location",
+    defaultValue: "TOP",
+  });
+  const labelUid = createBlock({
+    node: { text: label, children: [{ text: "Loading..." }] },
+    parentUid: todayPageUid,
+    order: location === "BOTTOM" ? getChildrenLengthByPageUid(todayPageUid) : 0,
+  });
+  const count = getSettingIntFromTree({
+    tree,
+    key: "count",
+    defaultValue: DEFAULT_DAILY_COUNT,
+  });
+  const timeout = getSettingIntFromTree({
+    tree,
+    key: "timeout",
+    defaultValue: DEFAULT_TIMEOUT_COUNT,
+  });
+  const characterMinimum = getSettingIntFromTree({
+    tree,
+    key: "character minimum",
+  });
+  const wordMinimum = getSettingIntFromTree({
+    tree,
+    key: "word minimum",
+  });
+  const excludes = getSettingValuesFromTree({
+    tree,
+    key: "excludes",
+  });
+  const excludeBlockUids = new Set(
+    excludes.map(extractTag).flatMap((tag) => getBlockUidsReferencingPage(tag))
+  );
+
+  const allBlockMapper = (t: Node): Node[] => [
+    t,
+    ...t.children
+      .filter(({ uid }) => !excludeBlockUids.has(uid))
+      .flatMap(allBlockMapper),
+  ];
+
+  setTimeout(() => {
+    try {
+      const includeBlocks = includes.some((i) => i === "{all}")
+        ? getAllBlockUidsAndTexts()
+        : includes
+            .map(extractTag)
+            .flatMap((tag) => getBlockUidsReferencingPage(tag))
+            .filter((uid) => !excludeBlockUids.has(uid))
+            .flatMap((uid) =>
+              allBlockMapper(getTreeByBlockUid(uid)).map((b) => ({
+                uid: b.uid,
+                text: b.text,
+              }))
+            );
+
+      const blockUids = Array.from(
+        new Set(
+          includeBlocks
+            .filter(({ uid }) => !excludeBlockUids.has(uid))
+            .filter(({ text }) => text.length >= characterMinimum)
+            .filter(({ text }) => getWordCount(text) >= wordMinimum)
+            .filter(({ uid }) => {
+              if (timeout === 0) {
+                return true;
+              }
+              return (
+                differenceInDays(
+                  date,
+                  getPageTitlesReferencingBlockUid(uid)
+                    .filter((t) => DAILY_NOTE_PAGE_REGEX.test(t))
+                    .reduce(
+                      (prev, cur) => dateMax([parseRoamDate(cur), prev]),
+                      new Date(0)
+                    )
+                ) >= timeout
+              );
+            })
+            .map((o) => JSON.stringify(o))
+        )
+      ).map((s) => JSON.parse(s) as { uid: string; text: string });
+      const children: { text: string }[] = [];
+      for (let c = 0; c < count; c++) {
+        if (blockUids.length) {
+          const i = Math.floor(Math.random() * blockUids.length);
+          children.push({
+            text: `((${blockUids.splice(i, 1)[0].uid}))`,
+          });
+        } else {
+          break;
+        }
+      }
+      getBasicTreeByParentUid(labelUid).forEach(({ uid }) =>
+        window.roamAlphaAPI.deleteBlock({ block: { uid } })
+      );
+      children.forEach((node, order) =>
+        createBlock({
+          node,
+          parentUid: labelUid,
+          order,
+        })
+      );
+      localStorageSet(LOCAL_STORAGE_KEY, JSON.stringify({latest: date.valueOf()}));
+    } catch (e) {
+      getBasicTreeByParentUid(labelUid).forEach(({ uid }) =>
+        window.roamAlphaAPI.deleteBlock({ block: { uid } })
+      );
       createBlock({
         node: {
-          text: label,
-          children: [
-            {
-              text: `The set of block references to randomly choose from is empty. Add some tags in the \`includes\` field on #[[${CONFIG}]]!`,
-            },
-          ],
+          text: "An error occured while pulling block references. Email support@roamjs.com with this error:",
+          children: [{ text: e.message }],
         },
-        parentUid: todayPageUid,
+        parentUid: labelUid,
       });
-      return;
     }
-    const location = getSettingValueFromTree({
-      tree,
-      key: "location",
-      defaultValue: "TOP",
-    });
-    const labelUid = createBlock({
-      node: { text: label, children: [{ text: "Loading..." }] },
-      parentUid: todayPageUid,
-      order:
-        location === "BOTTOM" ? getChildrenLengthByPageUid(todayPageUid) : 0,
-    });
-    const count = getSettingIntFromTree({
-      tree,
-      key: "count",
-      defaultValue: DEFAULT_DAILY_COUNT,
-    });
-    const timeout = getSettingIntFromTree({
-      tree,
-      key: "timeout",
-      defaultValue: DEFAULT_TIMEOUT_COUNT,
-    });
-    const characterMinimum = getSettingIntFromTree({
-      tree,
-      key: "character minimum",
-    });
-    const wordMinimum = getSettingIntFromTree({
-      tree,
-      key: "word minimum",
-    });
-    const excludes = getSettingValuesFromTree({
-      tree,
-      key: "excludes",
-    });
-    const excludeBlockUids = new Set(
-      excludes
-        .map(extractTag)
-        .flatMap((tag) => getBlockUidsReferencingPage(tag))
-    );
-
-    const allBlockMapper = (t: Node): Node[] => [
-      t,
-      ...t.children
-        .filter(({ uid }) => !excludeBlockUids.has(uid))
-        .flatMap(allBlockMapper),
-    ];
-
-    setTimeout(() => {
-      try {
-        const includeBlocks = includes.some((i) => i === "{all}")
-          ? getAllBlockUidsAndTexts()
-          : includes
-              .map(extractTag)
-              .flatMap((tag) => getBlockUidsReferencingPage(tag))
-              .filter((uid) => !excludeBlockUids.has(uid))
-              .flatMap((uid) =>
-                allBlockMapper(getTreeByBlockUid(uid)).map((b) => ({
-                  uid: b.uid,
-                  text: b.text,
-                }))
-              );
-
-        const blockUids = Array.from(
-          new Set(
-            includeBlocks
-              .filter(({ uid }) => !excludeBlockUids.has(uid))
-              .filter(({ text }) => text.length >= characterMinimum)
-              .filter(({ text }) => getWordCount(text) >= wordMinimum)
-              .filter(({ uid }) => {
-                if (timeout === 0) {
-                  return true;
-                }
-                return (
-                  differenceInDays(
-                    date,
-                    getPageTitlesReferencingBlockUid(uid)
-                      .filter((t) => DAILY_NOTE_PAGE_REGEX.test(t))
-                      .reduce(
-                        (prev, cur) => dateMax([parseRoamDate(cur), prev]),
-                        new Date(0)
-                      )
-                  ) >= timeout
-                );
-              })
-              .map((o) => JSON.stringify(o))
-          )
-        ).map((s) => JSON.parse(s) as { uid: string; text: string });
-        const children: { text: string }[] = [];
-        for (let c = 0; c < count; c++) {
-          if (blockUids.length) {
-            const i = Math.floor(Math.random() * blockUids.length);
-            children.push({
-              text: `((${blockUids.splice(i, 1)[0].uid}))`,
-            });
-          } else {
-            break;
-          }
-        }
-        getBasicTreeByParentUid(labelUid).forEach(({ uid }) =>
-          window.roamAlphaAPI.deleteBlock({ block: { uid } })
-        );
-        children.forEach((node, order) =>
-          createBlock({
-            node,
-            parentUid: labelUid,
-            order,
-          })
-        );
-      } catch (e) {
-        getBasicTreeByParentUid(labelUid).forEach(({ uid }) =>
-          window.roamAlphaAPI.deleteBlock({ block: { uid } })
-        );
-        createBlock({
-          node: {
-            text: "An error occured while pulling block references. Email support@roamjs.com with this error:",
-            children: [{ text: e.message }],
-          },
-          parentUid: labelUid,
-        });
-      }
-    }, 1);
-  }
+  }, 1);
 };
 
 runExtension(ID, () => {
@@ -269,12 +276,32 @@ runExtension(ID, () => {
     },
   });
 
+  if (!localStorageGet(LOCAL_STORAGE_KEY)) {
+    localStorageSet(LOCAL_STORAGE_KEY, JSON.stringify({ latest: 0 }));
+  }
+
   const timeoutFunction = () => {
     const date = new Date();
     const todayPage = toRoamDate(date);
-    pullDaily({ todayPage });
+    const tree =
+      getTreeByPageName("roam/js/serendipity").find((t) =>
+        /daily/i.test(t.text)
+      )?.children || [];
+    const label = getSettingValueFromTree({
+      tree,
+      key: "label",
+      defaultValue: DEFAULT_DAILY_LABEL,
+    });
+    const { latest } = JSON.parse(localStorageGet(LOCAL_STORAGE_KEY)) as {
+      latest: number;
+    };
+    if (
+      !getBlockUidByTextOnPage({ text: label, title: todayPage }) &&
+      isAfter(startOfDay(date), startOfDay(latest))
+    ) {
+      pullDaily({ date, tree, label });
+    }
     const tomorrow = addDays(startOfDay(date), 1);
-    console.log(differenceInMilliseconds(tomorrow, date));
     setTimeout(timeoutFunction, differenceInMilliseconds(tomorrow, date));
   };
   timeoutFunction();
@@ -286,7 +313,8 @@ runExtension(ID, () => {
       const { blockUid } = getUidsFromButton(b);
       const todayPage = getPageTitleByBlockUid(blockUid);
       if (DAILY_NOTE_PAGE_REGEX.test(todayPage)) {
-        b.onclick = () => pullDaily({ todayPage });
+        b.onclick = () =>
+          pullDaily({ date: parseRoamDate(todayPage) });
       }
     },
   });

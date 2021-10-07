@@ -73,6 +73,7 @@ addStyle(`.roamjs-collapsible-caret {
 .reveal li>blockquote {
   font-size: 1em;
   width: 100%;
+  padding: 10px 20px;
 }
 .roamjs-bullets-container iframe {
   position: unset;
