@@ -5,11 +5,14 @@ import addWeeks from "date-fns/addWeeks";
 import subWeeks from "date-fns/subWeeks";
 import {
   createBlock,
+  createHTMLObserver,
   createPage,
+  getPageTitleValueByHtmlElement,
   getPageTitleByPageUid,
   getPageUidByPageTitle,
   getTreeByPageName,
   toRoamDate,
+  TreeNode,
 } from "roam-client";
 import { createConfigObserver } from "roamjs-components";
 import { getSettingValueFromTree } from "../components/hooks";
@@ -35,12 +38,14 @@ const DATE_REGEX = new RegExp(`{(${DAYS.join("|")}):(.*?)}`, "g");
 const FORMAT_DEFAULT_VALUE = "{monday:MM/dd yyyy} - {sunday:MM/dd yyyy}";
 const CONFIG = `roam/js/${ID}`;
 
-const getFormat = (tree = getTreeByPageName(CONFIG)) =>
-  getSettingValueFromTree({
+const formatCache = { current: "" };
+const getFormat = (tree?: TreeNode[]) =>
+  formatCache.current ||
+  (formatCache.current = getSettingValueFromTree({
     key: "format",
     defaultValue: FORMAT_DEFAULT_VALUE,
-    tree,
-  });
+    tree: tree || getTreeByPageName(CONFIG),
+  }));
 
 const createWeeklyPage = (pageName: string) => {
   const weekUid = createPage({ title: pageName });
@@ -158,6 +163,10 @@ runExtension(ID, () => {
     const urlUid = newUrl.match(/\/page\/(.*)$/)?.[1];
     if (urlUid) {
       const title = getPageTitleByPageUid(urlUid);
+      if (title === CONFIG) {
+        formatCache.current = "";
+        return;
+      }
       const format = getFormat();
       const formats: string[] = [];
       const formatRegex = new RegExp(
@@ -195,13 +204,6 @@ runExtension(ID, () => {
             const header = document.querySelector(
               ".roam-article h1.rm-title-display"
             ) as HTMLHeadingElement;
-            header.onmousedown = (e) => {
-              render({
-                id: "week-uid",
-                content: "Weekly Note Titles Cannot be Changed",
-              });
-              e.stopPropagation();
-            };
             const headerContainer = header.parentElement;
             const buttonContainer = document.createElement("div");
             buttonContainer.style.display = "flex";
@@ -233,4 +235,30 @@ runExtension(ID, () => {
   if (autoLoad && !window.location.hash.includes("/page/")) {
     goToThisWeek();
   }
+
+  createHTMLObserver({
+    tag: "H1",
+    className: "rm-title-display",
+    callback: (header: HTMLHeadingElement) => {
+      const title = getPageTitleValueByHtmlElement(header);
+      const format = getFormat();
+      const formatRegex = new RegExp(
+        `^${format
+          .replace(DATE_REGEX, "(.*?)")
+          .replace(/\[/g, "\\[")
+          .replace(/\]/g, "\\]")}$`
+      );
+      if (formatRegex.test(title)) {
+        header.onmousedown = (e) => {
+          if (!e.shiftKey) {
+            render({
+              id: "week-uid",
+              content: "Weekly Note Titles Cannot be Changed",
+            });
+            e.stopPropagation();
+          }
+        };
+      }
+    },
+  });
 });

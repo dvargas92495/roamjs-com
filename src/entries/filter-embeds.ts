@@ -48,20 +48,23 @@ const filterEmbed = ({
         .substring(1, pageLinks.length - 1)
         .split(",")
         .map((t) => t.substring(1, t.length - 1));
-      if (
+      const blockId = b.querySelector(".roam-block")?.id;
+      const filterOut =
         removes.some((t) => tags.includes(t)) ||
         (includes.length &&
           !includes.every((t) => tags.includes(t)) &&
           !blockIdToResult[
-            b.parentElement.closest(".roam-block-container")?.querySelector?.(".roam-block")
-              ?.id
-          ])
-      ) {
+            b.parentElement
+              .closest(".roam-block-container")
+              ?.querySelector?.(".roam-block")?.id
+          ]);
+      if (filterOut) {
         b.style.display = "none";
-        blockIdToResult[b.querySelector(".roam-block").id] = false;
       } else {
         b.style.display = "";
-        blockIdToResult[b.querySelector(".roam-block").id] = true;
+      }
+      if (blockId) {
+        blockIdToResult[blockId] = !filterOut;
       }
     });
 };

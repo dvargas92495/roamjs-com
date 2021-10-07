@@ -171,7 +171,7 @@
     "remark-slug": "^6.0.0",
     "remark-unwrap-images": "^2.0.0",
     "reveal.js": "^4.1.0",
-    "roam-client": "^1.89.3",
+    "roam-client": "^1.91.0",
     "roamjs-components": "^0.24.12",
     "tesseract.js": "^2.1.4",
     "turndown": "^7.0.0",

@@ -17,6 +17,7 @@ import {
 } from "../entry-helpers";
 import { render as iconRender } from "../components/MinimalIcon";
 import { loadRender, render as saveRender } from "../components/SaveSidebar";
+import SavedSidebarConfig from "../components/SavedSidebarConfig";
 import { createConfigObserver, toFlexRegex } from "roamjs-components";
 
 const ID = "sidebar";
@@ -61,6 +62,14 @@ runExtension(ID, () => {
                 "Whether or not the sidebar should be automatically focused upon opening.",
               defaultValue: true,
             },
+            {
+              title: "saved",
+              type: "custom",
+              description: "The list of saved sidebar states",
+              options: {
+                component: SavedSidebarConfig,
+              }
+            }
           ],
         },
       ],
