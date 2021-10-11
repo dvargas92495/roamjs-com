@@ -1,4 +1,11 @@
-import { Button, Intent, Popover, Spinner, Tooltip } from "@blueprintjs/core";
+import {
+  Button,
+  Checkbox,
+  Intent,
+  Popover,
+  Spinner,
+  Tooltip,
+} from "@blueprintjs/core";
 import { DatePicker } from "@blueprintjs/datetime";
 import { addDays } from "date-fns";
 import React, {
@@ -25,9 +32,11 @@ const MoveTodoMenu = ({
   blockUid,
   p,
   onSuccess,
+  archivedDefault,
 }: {
   blockUid: string;
   p: HTMLElement;
+  archivedDefault: boolean;
   onSuccess: () => void;
 }): React.ReactElement => {
   const tomorrow = useMemo(() => addDays(new Date(), 1), []);
@@ -46,7 +55,8 @@ const MoveTodoMenu = ({
     p.parentElement.addEventListener("mouseenter", clear);
   }, [clear, unmount]);
   const [loading, setLoading] = useState(false);
-  const onClick = useCallback(() => {
+  const [archive, setArchive] = useState(archivedDefault);
+  const onClick = () => {
     setLoading(true);
     const blockUids = [
       blockUid,
@@ -73,7 +83,7 @@ const MoveTodoMenu = ({
                 uid: buid,
                 text: `${text.replace(
                   /{{(\[\[)?TODO(\]\])?}}\s*/,
-                  `[→](((${uid}))) {{[[DONE]]}} `
+                  `[→](((${uid}))) {{[[${archive ? "ARCHIVED" : "DONE"}]]}} `
                 )}`,
               });
               resolve();
@@ -87,7 +97,7 @@ const MoveTodoMenu = ({
       unmount();
       onSuccess();
     });
-  }, [blockUid, target, unmount, onSuccess]);
+  };
   return (
     <Popover
       target={
@@ -130,12 +140,29 @@ const MoveTodoMenu = ({
             onChange={(s) => setTarget(s)}
             minDate={tomorrow}
           />
-          <Button
-            onClick={onClick}
-            intent={Intent.PRIMARY}
-            disabled={loading}
-            text={loading ? <Spinner size={Spinner.SIZE_SMALL} /> : "Move"}
-          />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              onClick={onClick}
+              intent={Intent.PRIMARY}
+              disabled={loading}
+              text={loading ? <Spinner size={Spinner.SIZE_SMALL} /> : "Move"}
+            />
+            {window.roamjs.loaded.has("todont") && (
+              <Checkbox
+                label={"Archive"}
+                checked={archive}
+                onChange={(e) =>
+                  setArchive((e.target as HTMLInputElement).checked)
+                }
+              />
+            )}
+          </div>
         </div>
       }
     />
@@ -145,9 +172,11 @@ const MoveTodoMenu = ({
 export const render = ({
   p,
   blockUid,
+  archivedDefault,
 }: {
   p: HTMLElement;
   blockUid: string;
+  archivedDefault: boolean;
 }): void => {
   const block = p.parentElement;
   const onEnter = () =>
@@ -157,6 +186,7 @@ export const render = ({
         p={p}
         blockUid={blockUid}
         onSuccess={() => block.removeEventListener("mouseenter", onEnter)}
+        archivedDefault={archivedDefault}
       />,
       p
     );

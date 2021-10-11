@@ -5,7 +5,6 @@ import {
   getParentUidByBlockUid,
   parseRoamDate,
   pushBullets,
-  updateActiveBlock,
 } from "roam-client";
 import { getPageTitle, runExtension } from "../entry-helpers";
 import axios from "axios";

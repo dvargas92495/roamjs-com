@@ -74,12 +74,12 @@ runExtension("todont", () => {
   const todontCallback = () => {
     if (document.activeElement.tagName === "TEXTAREA") {
       const textArea = document.activeElement as HTMLTextAreaElement;
-      const value = textArea.value;
-      if (value.startsWith("{{[[TODO]]}}")) {
+      const firstButtonTag = /{{\[\[([A-Z]{4,8})\]\]}}/.exec(textArea.value)?.[1];
+      if (firstButtonTag === "TODO") {
         replaceText({ before: "{{[[TODO]]}}", after: "{{[[ARCHIVED]]}}" });
-      } else if (value.startsWith("{{[[DONE]]}}")) {
+      } else if (firstButtonTag === "DONE") {
         replaceText({ before: "{{[[DONE]]}}", after: "{{[[ARCHIVED]]}}" });
-      } else if (value.startsWith("{{[[ARCHIVED]]}}")) {
+      } else if (firstButtonTag === "ARCHIVED") {
         replaceText({ before: "{{[[ARCHIVED]]}}", after: "", prepend: true });
       } else {
         replaceText({ before: "", prepend: true, after: "{{[[ARCHIVED]]}}" });

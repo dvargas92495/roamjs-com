@@ -19,6 +19,7 @@ import {
   getLinkedReferences,
   getPageTitle,
   runExtension,
+  toFlexRegex,
 } from "../entry-helpers";
 import { render } from "../components/MoveTodoMenu";
 
@@ -61,8 +62,8 @@ runExtension("pull-references", () => {
     )
   );
 
-  const isMoveTodoEnabled = getTreeByPageName(CONFIG).some((t) =>
-    /move todos/i.test(t.text)
+  const isMoveTodoEnabled = getTreeByPageName(CONFIG).find((t) =>
+    toFlexRegex("move todos").test(t.text)
   );
   if (isMoveTodoEnabled) {
     createHTMLObserver({
@@ -83,6 +84,7 @@ runExtension("pull-references", () => {
               render({
                 p,
                 blockUid,
+                archivedDefault: toFlexRegex("archived").test(isMoveTodoEnabled.children[0]?.text)
               });
             }
           }
