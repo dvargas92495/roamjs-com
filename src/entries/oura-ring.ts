@@ -76,9 +76,9 @@ const importOuraRing = async (
           `Light Sleep:: ${secondsToTimeString(sleep.light)}`,
           `Rem Sleep:: ${secondsToTimeString(sleep.rem)}`,
           `Deep Sleep:: ${secondsToTimeString(sleep.deep)}`,
-          `Resting Heart Rate:: ${secondsToTimeString(sleep.hr_lowest)}`,
-          `Average Heart Rate:: ${secondsToTimeString(sleep.hr_average)}`,
-          `Heart Rate Variability:: ${secondsToTimeString(sleep.rmssd)}`
+          `Resting Heart Rate:: ${sleep.hr_lowest}`,
+          `Average Heart Rate:: ${sleep.hr_average}`,
+          `Heart Rate Variability:: ${sleep.rmssd}`
         );
       }
 
