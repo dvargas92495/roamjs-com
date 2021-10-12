@@ -107,25 +107,30 @@ const onDone = (blockUid: string, oldValue: string) => {
 };
 
 runExtension("todo-trigger", () => {
+  createHTMLObserver({
+    tag: "LABEL",
+    className: "check-container",
+    callback: (l: HTMLLabelElement) => {
+      const inputTarget = l.querySelector("input");
+      if (inputTarget.type === "checkbox") {
+        const blockUid = getBlockUidFromTarget(inputTarget);
+        inputTarget.addEventListener("click", () => {
+          setTimeout(() => {
+            const oldValue = getTextByBlockUid(blockUid);
+            if (inputTarget.checked) {
+              onTodo(blockUid, oldValue);
+            } else {
+              onDone(blockUid, oldValue);
+            }
+          }, 50);
+        });
+      }
+    },
+  });
+  
   document.addEventListener("click", async (e) => {
     const target = e.target as HTMLElement;
     if (
-      target.tagName === "INPUT" &&
-      target.parentElement.className === "check-container"
-    ) {
-      const inputTarget = target as HTMLInputElement;
-      if (inputTarget.type === "checkbox") {
-        const blockUid = getBlockUidFromTarget(inputTarget);
-        setTimeout(() => {
-          const oldValue = getTextByBlockUid(blockUid);
-          if (inputTarget.checked) {
-            onTodo(blockUid, oldValue);
-          } else {
-            onDone(blockUid, oldValue);
-          }
-        }, 50);
-      }
-    } else if (
       target.parentElement.getElementsByClassName(
         "bp3-text-overflow-ellipsis"
       )[0]?.innerHTML === "TODO"
