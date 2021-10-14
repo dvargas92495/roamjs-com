@@ -246,6 +246,8 @@ export const getUserFromEvent = (
 ): Promise<User> => {
   if (dev) {
     setClerkApiKey(process.env.CLERK_DEV_API_KEY);
+  } else {
+    setClerkApiKey(process.env.CLERK_API_KEY);
   }
   const [userId, token] =
     Authorization.length === 32 || Authorization.includes(":")
