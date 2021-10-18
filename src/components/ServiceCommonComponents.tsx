@@ -10,7 +10,6 @@ import {
   PanelStack2,
   ProgressBar,
 } from "@blueprintjs/core";
-import "@blueprintjs/core/lib/css/blueprint.css";
 import axios, { AxiosResponse } from "axios";
 import React, {
   useCallback,
