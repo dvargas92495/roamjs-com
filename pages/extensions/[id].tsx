@@ -32,6 +32,7 @@ import SponsorDialog from "../../components/SponsorDialog";
 import RoamJSDigest from "../../components/RoamJSDigest";
 import MdxComponents from "../../components/MdxComponents";
 import fs from "fs";
+import { isSafari } from "react-device-detect";
 
 const total = 30 - 1;
 const rowLength = 4;
@@ -82,26 +83,35 @@ const ExtensionPage = ({
       <H1>{title.toUpperCase()}</H1>
       <Subtitle>{description}</Subtitle>
       <H3>Installation</H3>
+      {!isSafari && (
+        <>
+          <Body>
+            You could use the Copy Extension button below to individually
+            install this extension. To install, just paste anywhere in your Roam
+            graph and click "Yes, I Know What I'm Doing".
+          </Body>
+          <div style={{ marginBottom: 24 }}>
+            <Button
+              onClick={() => onSave(`${id}/main`, entry)}
+              color="primary"
+              variant="contained"
+            >
+              COPY EXTENSION
+            </Button>
+            {copied && <span style={{ marginLeft: 24 }}>COPIED!</span>}
+          </div>
+          <H4>Manual Installation</H4>
+          <Body>
+            If the extension doesn't work after using the copy extension button
+            above, try installing manually using the instructions below.
+          </Body>
+        </>
+      )}
       <Body>
-        You could use the Copy Extension button below to individually install
-        this extension. To install, just paste anywhere in your Roam graph and
-        click "Yes, I Know What I'm Doing".
-      </Body>
-      <div style={{ marginBottom: 24 }}>
-        <Button
-          onClick={() => onSave(`${id}/main`, entry)}
-          color="primary"
-          variant="contained"
-        >
-          COPY EXTENSION
-        </Button>
-        {copied && <span style={{ marginLeft: 24 }}>COPIED!</span>}
-      </div>
-      <H4>Manual Installation</H4>
-      <Body>
-        If instead you prefer to manually install, first create a <b>block</b>{" "}
-        with the text <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam
-        DB. Then, copy and paste this code block as a child of the block.
+        First create a <b>block</b> with the text{" "}
+        <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam DB. Then,
+        create a single child of this block type three back ticks. A code block
+        should appear. Copy this code and paste it into the child code block in your graph:
       </Body>
       <div style={{ marginBottom: 48 }}>
         <Prism language="javascript">
@@ -110,6 +120,7 @@ const ExtensionPage = ({
             : getSingleCodeContent(`${id}/main`)}
         </Prism>
       </div>
+      <Body>Finally, click "Yes, I Know What I'm Doing".</Body>
       {content.compiledSource ? (
         <MDXRemote {...content} components={MdxComponents} />
       ) : (
