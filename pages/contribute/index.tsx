@@ -46,7 +46,6 @@ const RECURRING = [
   "Conor White-Sullivan",
   "Tom Kirkendall",
   "Alexander Young",
-  "Keenan Payne",
   "Salem Al-Mansoori",
   "Erik Bjäreholt",
   "Kurt Harriger",
@@ -67,7 +66,6 @@ const RECURRING = [
   "Mark Lavercombe",
   "Justin Mather",
   "Michael Brockbals",
-  "Jason Kleinberg",
   "Tsun Kuo Kuo",
   "Lance Tracey",
   "Francis Miller",
@@ -80,6 +78,8 @@ const RECURRING = [
 ];
 
 const ONE_TIME = [
+  "Keenan Payne",
+  "Jason Kleinberg",
   "David Eaton",
   "Matt Brockwell",
   "David Mehlman",
@@ -127,6 +127,7 @@ const ONE_TIME = [
   "Camilo Vera",
   "Paul Atkins",
   "Nicolas Heras",
+  "Keith Altomare"
 ];
 
 export const getStaticProps: GetStaticProps<Props> = () => {
