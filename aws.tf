@@ -63,14 +63,6 @@ variable "floss_token" {
     type = string
 }
 
-variable "facebook_client_id" {
-    type = string
-}
-
-variable "facebook_client_secret" {
-    type = string
-}
-
 variable "iframely_api_key" {
   type = string
 }
@@ -144,9 +136,6 @@ module "aws-serverless-backend" {
         "decrypt-proxy/post",
         "encrypt/post",
         "end-service/post",
-        "facebook-auth/post",
-        "facebook-groups/get",
-        "facebook-groups/post",
         "finish-launch-social/post",
         "finish-launch-website/post",
         "finish-shutdown-website/post",
@@ -536,18 +525,6 @@ resource "github_actions_secret" "cloudfront_arn" {
   repository       = "roam-js-extensions"
   secret_name      = "CLOUDFRONT_ARN"
   plaintext_value  = module.aws_static_site.cloudfront_arn
-}
-
-resource "github_actions_secret" "facebook_client_id" {
-  repository       = "roam-js-extensions"
-  secret_name      = "FACEBOOK_CLIENT_ID"
-  plaintext_value  = var.facebook_client_id
-}
-
-resource "github_actions_secret" "facebook_client_secret" {
-  repository       = "roam-js-extensions"
-  secret_name      = "FACEBOOK_CLIENT_SECRET"
-  plaintext_value  = var.facebook_client_secret
 }
 
 resource "github_actions_secret" "iframely_api_key" {
