@@ -1,19 +1,7 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  Button,
-  MenuItem,
-  Popover,
-} from "@blueprintjs/core";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Button, MenuItem, Popover } from "@blueprintjs/core";
 import { Select } from "@blueprintjs/select";
-import {
-  getUidsFromId,
-  getTextByBlockUid,
-} from "roam-client";
+import { getUidsFromId, getTextByBlockUid } from "roam-client";
 import { Icon } from "@blueprintjs/core";
 import { isControl } from "../entry-helpers";
 import ReactDOM from "react-dom";
@@ -224,13 +212,16 @@ const SubqueryContent = ({
               }}
             />
           ))}
-          <Button
-            icon={"plus"}
-            text="Add Child"
-            onClick={onAddChild}
-            style={{ marginTop: 8 }}
-            elementRef={addChildButtonRef}
-          />
+          {(queryState.type !== NODES.NOT ||
+            (queryState.children?.length || 0) < 1) && (
+            <Button
+              icon={"plus"}
+              text="Add Child"
+              onClick={onAddChild}
+              style={{ marginTop: 8 }}
+              elementRef={addChildButtonRef}
+            />
+          )}
         </div>
       )}
     </div>
