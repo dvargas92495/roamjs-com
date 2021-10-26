@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import Layout, { defaultLayoutProps } from "../../components/Layout";
 
 const SignupPage = (): JSX.Element => {
-  const { service } = useRouter().query;
+  const { service, extension } = useRouter().query;
   const otherObserverRef = useRef<MutationObserver>(null);
   const errorCallback = useCallback((mr: MutationRecord[]) => {
     const target = mr[0].target as HTMLDivElement;
@@ -40,6 +40,17 @@ const SignupPage = (): JSX.Element => {
       };
     }
   }, [mainCallback]);
+  const signUpProps = extension
+    ? {
+        afterSignUp: `${window.location.origin}/extensions/${extension}?started=true`,
+        signInURL: `${window.location.origin}/login?extension=${extension}`,
+      }
+    : service
+    ? {
+        afterSignUp: `${window.location.origin}/services/${service}?started=true`,
+        signInURL: `${window.location.origin}/login?service=${service}`,
+      }
+    : {};
   return (
     <Layout
       title={"Sign Up | RoamJS"}
@@ -48,14 +59,7 @@ const SignupPage = (): JSX.Element => {
       }
       img={defaultLayoutProps.img}
     >
-      {service ? (
-        <SignUp
-          afterSignUp={`${window.location.origin}/services/${service}?started=true`}
-          signInURL={`${window.location.origin}/login?service=${service}`}
-        />
-      ) : (
-        <SignUp />
-      )}
+      <SignUp {...signUpProps} />
     </Layout>
   );
 };
