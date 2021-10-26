@@ -1,7 +1,6 @@
 import React from "react";
 import StandardLayout from "../../components/StandardLayout";
 import { Body, CardGrid, H1, H4 } from "@dvargas92495/ui";
-import { items } from "../../components/ExtensionPageLayout";
 import { defaultLayoutProps } from "../../components/Layout";
 import { GetStaticProps } from "next";
 import axios from "axios";
@@ -36,7 +35,7 @@ const ExtensionHomePage = ({
       </Body>
       <CardGrid
         items={extensions
-          .filter(({ state }) => state === "LIVE")
+          .filter(({ state }) => state === "LIVE" || state === "LEGACY")
           .sort(({ title: a }, { title: b }) => a.localeCompare(b))}
         width={3}
       />
@@ -62,19 +61,15 @@ export const getStaticProps: GetStaticProps<{
     .get(`${API_URL}/request-path`)
     .then((r) => ({
       props: {
-        extensions: [
-          ...items.map((i) => ({
-            ...i,
-            state: i.development ? "DEVELOPMENT" : "LIVE",
-          })),
-          ...r.data.paths.map(({ id, description, state }) => ({
+        extensions: r.data.paths
+          .filter((p) => p.state !== "PRIVATE")
+          .map(({ id, description, state }) => ({
             title: idToTitle(id),
             description: description || "Description for " + idToTitle(id),
             image: `https://roamjs.com/thumbnails/${id}.png`,
             href: `/extensions/${id}`,
             state,
           })),
-        ],
       },
     }))
     .catch(() => ({

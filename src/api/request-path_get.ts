@@ -5,25 +5,28 @@ export const handler: APIGatewayProxyHandler = (event) => {
   const id = event.queryStringParameters?.id;
   const sub = event.queryStringParameters?.sub === "true";
   return id
-    ? s3
-        .getObject({ Bucket: "roamjs.com", Key: `markdown/${id}.md` })
+    ? dynamo
+        .getItem({
+          TableName: "RoamJSExtensions",
+          Key: { id: { S: id.split("/")[0] } },
+        })
         .promise()
-        .then((c) =>
-          dynamo
-            .getItem({
-              TableName: "RoamJSExtensions",
-              Key: { id: { S: id.split('/')[0] } },
-            })
-            .promise()
-            .then((r) => ({
-              statusCode: 200,
-              body: JSON.stringify({
-                content: c.Body.toString(),
-                state: r.Item.state.S,
-                description: r.Item.description.S,
-              }),
-              headers: headers(event),
-            }))
+        .then((r) =>
+          (r.Item?.state?.S === "LEGACY"
+            ? Promise.resolve("FILE")
+            : s3
+                .getObject({ Bucket: "roamjs.com", Key: `markdown/${id}.md` })
+                .promise()
+                .then((c) => c.Body.toString())
+          ).then((content) => ({
+            statusCode: 200,
+            body: JSON.stringify({
+              content,
+              state: r.Item.state.S,
+              description: r.Item.description.S,
+            }),
+            headers: headers(event),
+          }))
         )
     : sub
     ? listAll("markdown/")

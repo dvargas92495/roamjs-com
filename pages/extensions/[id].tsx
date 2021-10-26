@@ -1,7 +1,7 @@
 import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { Prism } from "react-syntax-highlighter";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { API_URL } from "../../components/constants";
 import StandardLayout from "../../components/StandardLayout";
 import { serialize } from "../../components/serverSide";
@@ -27,14 +27,16 @@ import {
   ThankYou,
   ThankYouSponsor,
   isThankYouEmoji,
+  CardGrid,
 } from "@dvargas92495/ui";
 import SponsorDialog from "../../components/SponsorDialog";
 import RoamJSDigest from "../../components/RoamJSDigest";
 import MdxComponents from "../../components/MdxComponents";
 import fs from "fs";
 import { isSafari } from "react-device-detect";
+import DemoVideo from "../../components/DemoVideo";
+import Loom from "../../components/Loom";
 
-const total = 30 - 1;
 const rowLength = 4;
 
 const ExtensionPage = ({
@@ -44,6 +46,10 @@ const ExtensionPage = ({
   development,
   sponsors,
   entry,
+  //@deprecated
+  loom,
+  skipDemo,
+  legacy,
 }: {
   id: string;
   content: MDXRemoteSerializeResult;
@@ -51,7 +57,13 @@ const ExtensionPage = ({
   development: boolean;
   entry: string;
   sponsors?: ThankYouSponsor[];
+  //@deprecated
+  loom: string;
+  skipDemo: boolean; // only in video extension
+  legacy: boolean;
 }): React.ReactElement => {
+  const [randomItems, setRandomItems] = useState([]);
+  const total = randomItems.length;
   const title = idToTitle(id);
   const [copied, setCopied] = useState(false);
   const onSave = useCopyCode(setCopied);
@@ -64,6 +76,22 @@ const ExtensionPage = ({
     () => setPagination((pagination + rowLength + total) % total),
     [pagination, setPagination]
   );
+  useEffect(() => {
+    axios.get(`${API_URL}/request-path`).then((r) => {
+      const items = r.data.paths
+        .filter((p) => p.state !== "PRIVATE" && p.id !== id)
+        .map((p) => ({
+          image: `/thumbnails/${p.id}.png`,
+          title: idToTitle(p.id),
+          description: p.description,
+          href: `/extensions/${p.id}`,
+        }))
+        .map((item) => ({ item, r: Math.random() }))
+        .sort(({ r: a }, { r: b }) => a - b)
+        .map(({ item }) => item);
+      setRandomItems(items);
+    });
+  }, [setRandomItems, id]);
   return (
     <StandardLayout
       title={title}
@@ -111,7 +139,8 @@ const ExtensionPage = ({
         First create a <b>block</b> with the text{" "}
         <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam DB. Then,
         create a single child of this block type three back ticks. A code block
-        should appear. Copy this code and paste it into the child code block in your graph:
+        should appear. Copy this code and paste it into the child code block in
+        your graph:
       </Body>
       <div style={{ marginBottom: 48 }}>
         <Prism language="javascript">
@@ -125,6 +154,12 @@ const ExtensionPage = ({
         <MDXRemote {...content} components={MdxComponents} />
       ) : (
         "No content"
+      )}
+      {legacy && (!development || loom) && !skipDemo && (
+        <>
+          <H3>Demo</H3>
+          {loom ? <Loom id={loom} /> : <DemoVideo src={id} />}
+        </>
       )}
       <H3>Contributors</H3>
       <Body>
@@ -169,7 +204,6 @@ const ExtensionPage = ({
           onClick={onClickLeft}
           style={{ height: 48 }}
         />
-        {/*
         <CardGrid
           items={[
             ...randomItems.slice(pagination, pagination + rowLength),
@@ -178,8 +212,7 @@ const ExtensionPage = ({
               : []),
           ]}
           width={3}
-        />*/}
-        <span>Coming Soon...</span>
+        />
         <IconButton
           icon={"chevronRight"}
           onClick={onClickRight}
@@ -216,10 +249,19 @@ export const getStaticProps: GetStaticProps<
     id: string;
     subpath: string;
   }
-> = (context) =>
+> = ({ params: { id } }) =>
   axios
-    .get(`${API_URL}/request-path?id=${context.params.id}`)
-    .then(({ data: { content, ...rest } }) => ({ ...matter(content), ...rest }))
+    .get(`${API_URL}/request-path?id=${id}`)
+    .then(({ data: { content, ...rest } }) => {
+      const mdxContent =
+        content === "FILE"
+          ? fs
+              .readFileSync(`pages/docs/extensions/${id}.mdx`)
+              .toString()
+              .replace(/(.)---\s/s, "$1---\n\n### Usage\n")
+          : content;
+      return { ...matter(mdxContent), ...rest };
+    })
     .then(({ content: preRender, data, state, description }) => {
       const { contributors: contributorsJson } = JSON.parse(
         fs.readFileSync("./thankyou.json").toString()
@@ -227,8 +269,9 @@ export const getStaticProps: GetStaticProps<
       return serialize(preRender).then((content) => ({
         props: {
           content,
-          id: context.params.id,
+          id,
           development: state === "DEVELOPMENT",
+          legacy: state === "LEGACY",
           description,
           sponsors: data.contributors
             ? data.contributors.split(",").map((s: string) => {
@@ -259,7 +302,7 @@ export const getStaticProps: GetStaticProps<
       ).then((content) => ({
         props: {
           content,
-          id: context.params.id,
+          id,
           development: true,
         },
       }));

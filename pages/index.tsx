@@ -118,7 +118,7 @@ const HomePage = (): JSX.Element => (
         }
         stats={[
           {
-            value: "46",
+            value: "49",
             label: "Extensions",
           },
           {
@@ -126,7 +126,7 @@ const HomePage = (): JSX.Element => (
             label: "Daily Downloads",
           },
           {
-            value: "560+",
+            value: "850+",
             label: "Subscribers",
           },
         ]}
