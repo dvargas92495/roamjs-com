@@ -54,7 +54,11 @@ const QueueItemPage = ({ number }: { number: string }): JSX.Element => {
     (c) => c.lifecycle === "active"
   );
   return (
-    <StandardLayout title={issue.title} description={`Queue item for ${issue.link}`} img={defaultLayoutProps.img}>
+    <StandardLayout
+      title={issue.title}
+      description={`Queue item for ${issue.link}`}
+      img={defaultLayoutProps.img}
+    >
       <DataLoader loadAsync={loadAsync}>
         <H2>{issue.title}</H2>
         <Subtitle>
@@ -62,7 +66,7 @@ const QueueItemPage = ({ number }: { number: string }): JSX.Element => {
         </Subtitle>
         <H4>Description</H4>
         <div style={{ marginBottom: 16 }}>
-          <Markdown>{issue.body}</Markdown>
+          <Markdown>{issue.body || ""}</Markdown>
         </div>
         <H4>Backers</H4>
         {activeContracts.length === 0 ? (
