@@ -71,13 +71,6 @@ functions:
           path: customer
           method: put
           cors: true
-  deploy-post:
-    handler: out/deploy_post.handler
-    events:
-      - http:
-          path: deploy
-          method: post
-          cors: true
   dropbox-auth-post:
     handler: out/dropbox-auth_post.handler
     events:
@@ -113,20 +106,6 @@ functions:
           path: finish-launch-social
           method: post
           cors: true
-  finish-launch-website-post:
-    handler: out/finish-launch-website_post.handler
-    events:
-      - http:
-          path: finish-launch-website
-          method: post
-          cors: true
-  finish-shutdown-website-post:
-    handler: out/finish-shutdown-website_post.handler
-    events:
-      - http:
-          path: finish-shutdown-website
-          method: post
-          cors: true
   finish-start-service-post:
     handler: out/finish-start-service_post.handler
     events:
@@ -160,13 +139,6 @@ functions:
     events:
       - http:
           path: launch-social
-          method: post
-          cors: true
-  launch-website-post:
-    handler: out/launch-website_post.handler
-    events:
-      - http:
-          path: launch-website
           method: post
           cors: true
   metadata-get:
@@ -273,13 +245,6 @@ functions:
       - http:
           path: request-path
           method: delete
-          cors: true
-  shutdown-website-post:
-    handler: out/shutdown-website_post.handler
-    events:
-      - http:
-          path: shutdown-website
-          method: post
           cors: true
   slack-url-post:
     handler: out/slack-url_post.handler
@@ -393,13 +358,6 @@ functions:
           path: twitter-upload
           method: post
           cors: true
-  update-website-post:
-    handler: out/update-website_post.handler
-    events:
-      - http:
-          path: update-website
-          method: post
-          cors: true
   user-get:
     handler: out/user_get.handler
     events:
@@ -419,19 +377,5 @@ functions:
     events:
       - http:
           path: versions
-          method: get
-          cors: true
-  website-status-get:
-    handler: out/website-status_get.handler
-    events:
-      - http:
-          path: website-status
-          method: get
-          cors: true
-  website-variables-get:
-    handler: out/website-variables_get.handler
-    events:
-      - http:
-          path: website-variables
           method: get
           cors: true

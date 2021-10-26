@@ -11,6 +11,7 @@ As part of a RoamJS Developer effort started in April, 2021, we've started to mi
 - [Discourse Graph](https://github.com/dvargas92495/roamjs-discourse-graph)
 - [Google Calendar](https://github.com/dvargas92495/roamjs-google-calendar)
 - [Google Drive](https://github.com/dvargas92495/roamjs-google-drive)
+- [Hypothesis](https://github.com/dvargas92495/roamjs-hypothesis)
 - [Marketplace](https://github.com/dvargas92495/roamjs-marketplace)
 - [Otter](https://github.com/dvargas92495/roamjs-otter)
 - [Roam42](https://github.com/dvargas92495/roam42)

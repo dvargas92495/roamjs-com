@@ -56,6 +56,7 @@ const commits = () => {
               message: d.commit.message,
               repo,
               date: new Date(d.commit.committer.date),
+              url: d.html_url
             }))
           )
           .then((r) =>
