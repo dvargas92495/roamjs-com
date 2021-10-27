@@ -2,6 +2,7 @@ import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { Prism } from "react-syntax-highlighter";
 import React, { useCallback, useEffect, useState } from "react";
+import { SignedOut } from "@clerk/clerk-react";
 import { API_URL } from "../../components/constants";
 import StandardLayout from "../../components/StandardLayout";
 import { serialize } from "../../components/serverSide";
@@ -36,6 +37,7 @@ import fs from "fs";
 import { isSafari } from "react-device-detect";
 import DemoVideo from "../../components/DemoVideo";
 import Loom from "../../components/Loom";
+import { ServiceButton } from "../../components/ServiceLayout";
 
 const rowLength = 4;
 
@@ -46,6 +48,11 @@ const ExtensionPage = ({
   development,
   sponsors,
   entry,
+  premium = [],
+  author = {
+    name: "RoamJS",
+    email: "support@roamjs.com",
+  },
   //@deprecated
   loom,
   skipDemo,
@@ -57,6 +64,11 @@ const ExtensionPage = ({
   development: boolean;
   entry: string;
   sponsors?: ThankYouSponsor[];
+  premium?: string[];
+  author?: {
+    name: string;
+    email: string;
+  };
   //@deprecated
   loom: string;
   skipDemo: boolean; // only in video extension
@@ -111,6 +123,26 @@ const ExtensionPage = ({
       {development && <H2>UNDER DEVELOPMENT</H2>}
       <H1>{title.toUpperCase()}</H1>
       <Subtitle>{description}</Subtitle>
+      <hr />
+      {!!premium.length && (
+        <>
+          <H3>Premium Features</H3>
+          <Body>
+            Some features in this extension require premium extension including:
+          </Body>
+          <ul>
+            {premium.map((p, i) => (
+              <li key={i}>{p}</li>
+            ))}
+          </ul>
+          <Body>Click the button below to include these features!</Body>
+          <ServiceButton
+            id={id}
+            SplashLayout={({ StartNowButton }) => <div>{StartNowButton}</div>}
+            price={1500}
+          />
+        </>
+      )}
       <H3>Installation</H3>
       {!isSafari && (
         <>
@@ -149,6 +181,7 @@ const ExtensionPage = ({
         </Prism>
       </div>
       <Body>Finally, click "Yes, I Know What I'm Doing".</Body>
+      <hr style={{marginTop: 24}}/>
       {content.compiledSource ? (
         <MDXRemote {...content} components={MdxComponents} />
       ) : (
@@ -160,35 +193,42 @@ const ExtensionPage = ({
           {loom ? <Loom id={loom} /> : <DemoVideo src={id} />}
         </>
       )}
-      <H3>Contributors</H3>
-      <Body>
-        This extension is brought to you by RoamJS! If you are facing any issues
-        reach out to{" "}
-        <ExternalLink href={"mailto:support@roamjs.com"}>
-          support@roamjs.com
-        </ExternalLink>{" "}
-        or click on the chat button on the bottom right. If you get value from
-        using this extension, consider sponsoring RoamJS by clicking on the
-        button below!
-      </Body>
-      <SponsorDialog id={id} />
-      {!!sponsors?.length && (
+      <hr style={{marginTop: 24}}/>
+      {!premium.length && (
         <>
+          <H3>Contributors</H3>
           <Body>
-            A special thanks to those who's contributions also helped make this
-            extension possible:
+            This extension is brought to you by {author.name}! If you are facing
+            any issues reach out to{" "}
+            <ExternalLink href={`mailto:${author.email}`}>
+              {author.email}
+            </ExternalLink>{" "}
+            or click on the chat button on the bottom right. If you get value
+            from using this extension, consider sponsoring {author.name} by clicking on
+            the button below!
           </Body>
-          <ThankYou
-            sponsors={sponsors}
-            defaultImgSrc={"/sponsors/default.jpg"}
-          />
+          <SponsorDialog id={id} />
+          {!!sponsors?.length && (
+            <>
+              <Body>
+                A special thanks to those who's contributions also helped make
+                this extension possible:
+              </Body>
+              <ThankYou
+                sponsors={sponsors}
+                defaultImgSrc={"/sponsors/default.jpg"}
+              />
+            </>
+          )}
         </>
       )}
-      <div style={{ margin: "128px 0" }}>
-        <div style={{ width: "100%", textAlign: "center" }}>
-          <RoamJSDigest />
+      <SignedOut>
+        <div style={{ margin: "128px 0" }}>
+          <div style={{ width: "100%", textAlign: "center" }}>
+            <RoamJSDigest />
+          </div>
         </div>
-      </div>
+      </SignedOut>
       <H3>Other Extensions</H3>
       <div
         style={{

@@ -238,6 +238,51 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
   );
 };
 
+export const ServiceButton = ({
+  id,
+  price,
+  SplashLayout,
+}: {
+  id: string;
+  price: number;
+  SplashLayout: (props: {
+    StartNowButton: React.ReactNode;
+  }) => React.ReactElement;
+}): React.ReactElement => {
+  const [started, setStarted] = useState(false);
+  const router = useRouter();
+  const start = useCallback(() => setStarted(true), [setStarted]);
+  const end = useCallback(() => setStarted(false), [setStarted]);
+  const login = useCallback(
+    () => router.push(`/login?service=${id}`),
+    [router]
+  );
+  return (
+    <>
+      <SignedIn>
+        <CheckSubscription id={id} start={start} price={price}>
+          {(StartNowButton) =>
+            started ? (
+              <Service id={id} end={end} />
+            ) : (
+              <SplashLayout StartNowButton={StartNowButton} />
+            )
+          }
+        </CheckSubscription>
+      </SignedIn>
+      <SignedOut>
+        <SplashLayout
+          StartNowButton={
+            <Button color={"primary"} variant={"contained"} onClick={login}>
+              <StartButtonText price={price} />
+            </Button>
+          }
+        />
+      </SignedOut>
+    </>
+  );
+};
+
 const ServiceLayout = ({
   children,
   development,
@@ -249,14 +294,6 @@ const ServiceLayout = ({
   children: React.ReactNode;
   development?: boolean;
 } & ServicePageProps): React.ReactElement => {
-  const [started, setStarted] = useState(false);
-  const router = useRouter();
-  const start = useCallback(() => setStarted(true), [setStarted]);
-  const end = useCallback(() => setStarted(false), [setStarted]);
-  const login = useCallback(
-    () => router.push(`/login?service=${id}`),
-    [router]
-  );
   const SplashLayout: React.FC<{ StartNowButton: React.ReactNode }> = ({
     StartNowButton,
   }) => (
@@ -315,26 +352,7 @@ const ServiceLayout = ({
           },
         ]}
       />
-      <SignedIn>
-        <CheckSubscription id={id} start={start} price={price}>
-          {(StartNowButton) =>
-            started ? (
-              <Service id={id} end={end} />
-            ) : (
-              <SplashLayout StartNowButton={StartNowButton} />
-            )
-          }
-        </CheckSubscription>
-      </SignedIn>
-      <SignedOut>
-        <SplashLayout
-          StartNowButton={
-            <Button color={"primary"} variant={"contained"} onClick={login}>
-              <StartButtonText price={price} />
-            </Button>
-          }
-        />
-      </SignedOut>
+      <ServiceButton id={id} SplashLayout={SplashLayout} price={price} />
     </StandardLayout>
   );
 };

@@ -1,6 +1,11 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { dynamo, headers, listAll, s3 } from "../lambda-helpers";
 
+const DEFAULT_AUTHOR = {
+  name: "RoamJS",
+  email: "support@roamjs.com",
+};
+
 export const handler: APIGatewayProxyHandler = (event) => {
   const id = event.queryStringParameters?.id;
   const sub = event.queryStringParameters?.sub === "true";
@@ -12,18 +17,27 @@ export const handler: APIGatewayProxyHandler = (event) => {
         })
         .promise()
         .then((r) =>
-          (r.Item?.state?.S === "LEGACY"
-            ? Promise.resolve("FILE")
-            : s3
-                .getObject({ Bucket: "roamjs.com", Key: `markdown/${id}.md` })
-                .promise()
-                .then((c) => c.Body.toString())
-          ).then((content) => ({
+          Promise.all([
+            r.Item?.state?.S === "LEGACY"
+              ? Promise.resolve("FILE")
+              : s3
+                  .getObject({ Bucket: "roamjs.com", Key: `markdown/${id}.md` })
+                  .promise()
+                  .then((c) => c.Body.toString()),
+            r.Item.author?.S
+              ? Promise.resolve({
+                  name: "Query Stripe",
+                  email: "For the author",
+                })
+              : Promise.resolve(DEFAULT_AUTHOR),
+          ]).then(([content, author]) => ({
             statusCode: 200,
             body: JSON.stringify({
               content,
               state: r.Item.state.S,
               description: r.Item.description.S,
+              premium: r.Item.premium?.SS || [],
+              author,
             }),
             headers: headers(event),
           }))
