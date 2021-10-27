@@ -67,6 +67,7 @@ const ExtensionPage = ({
   const title = idToTitle(id);
   const [copied, setCopied] = useState(false);
   const onSave = useCopyCode(setCopied);
+  const mainEntry = legacy ? id : `${id}/main`;
   const [pagination, setPagination] = useState(0);
   const onClickLeft = useCallback(
     () => setPagination((pagination - rowLength + total) % total),
@@ -120,7 +121,7 @@ const ExtensionPage = ({
           </Body>
           <div style={{ marginBottom: 24 }}>
             <Button
-              onClick={() => onSave(`${id}/main`, entry)}
+              onClick={() => onSave(mainEntry, entry)}
               color="primary"
               variant="contained"
             >
@@ -144,9 +145,7 @@ const ExtensionPage = ({
       </Body>
       <div style={{ marginBottom: 48 }}>
         <Prism language="javascript">
-          {entry
-            ? getCodeContent(id, entry)
-            : getSingleCodeContent(`${id}/main`)}
+          {entry ? getCodeContent(id, entry) : getSingleCodeContent(mainEntry)}
         </Prism>
       </div>
       <Body>Finally, click "Yes, I Know What I'm Doing".</Body>
