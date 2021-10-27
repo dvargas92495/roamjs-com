@@ -12,7 +12,7 @@ export const handler: CloudFrontRequestHandler = (event, _, callback) => {
         location: [
           {
             key: "Location",
-            value: `https://roamjs.com/${newUri}`,
+            value: `https://roamjs.com${newUri}`,
           },
         ],
       },
