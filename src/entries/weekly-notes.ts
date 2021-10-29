@@ -158,6 +158,32 @@ runExtension(ID, () => {
     }
   });
 
+  const getFormatDateData = (title: string) => {
+    const format = getFormat();
+    const formats: string[] = [];
+    const formatRegex = new RegExp(
+      `^${format
+        .replace(DATE_REGEX, (_, __, og) => {
+          formats.push(og);
+          return "(.*?)";
+        })
+        .replace(/\[/g, "\\[")
+        .replace(/\]/g, "\\]")}$`
+    );
+    const exec = formatRegex.exec(title);
+    if (exec) {
+      const dateArray = exec
+        .slice(1)
+        .map((d, i) => parse(d, formats[i], new Date()));
+      return {
+        dateArray,
+        formats,
+        valid: dateArray.length && dateArray.every((s) => !isNaN(s.valueOf())),
+      };
+    }
+    return { dateArray: [], formats, valid: false };
+  };
+
   const hashListener = (newUrl: string) => {
     document.getElementById("roamjs-weekly-mode-nav")?.remove?.();
     const urlUid = newUrl.match(/\/page\/(.*)$/)?.[1];
@@ -167,62 +193,46 @@ runExtension(ID, () => {
         formatCache.current = "";
         return;
       }
-      const format = getFormat();
-      const formats: string[] = [];
-      const formatRegex = new RegExp(
-        `^${format
-          .replace(DATE_REGEX, (_, __, og) => {
-            formats.push(og);
-            return "(.*?)";
-          })
-          .replace(/\[/g, "\\[")
-          .replace(/\]/g, "\\]")}$`
-      );
-      const exec = formatRegex.exec(title);
-      if (exec) {
-        const dateArray = exec
-          .slice(1)
-          .map((d, i) => parse(d, formats[i], new Date()));
-        if (dateArray.length && dateArray.every((s) => !isNaN(s.valueOf()))) {
-          const prevTitle = dateArray.reduce(
-            (prev, cur, i) =>
-              prev.replace(
-                dateFnsFormat(cur, formats[i]),
-                dateFnsFormat(subWeeks(cur, 1), formats[i])
-              ),
-            title
-          );
-          const nextTitle = dateArray.reduce(
-            (prev, cur, i) =>
-              prev.replace(
-                dateFnsFormat(cur, formats[i]),
-                dateFnsFormat(addWeeks(cur, 1), formats[i])
-              ),
-            title
-          );
-          setTimeout(() => {
-            const header = document.querySelector(
-              ".roam-article h1.rm-title-display"
-            ) as HTMLHeadingElement;
-            const headerContainer = header.parentElement;
-            const buttonContainer = document.createElement("div");
-            buttonContainer.style.display = "flex";
-            buttonContainer.style.justifyContent = "space-between";
-            buttonContainer.style.marginBottom = "32px";
-            buttonContainer.id = "roamjs-weekly-mode-nav";
-            headerContainer.appendChild(buttonContainer);
+      const { dateArray, valid, formats } = getFormatDateData(title);
+      if (valid) {
+        const prevTitle = dateArray.reduce(
+          (prev, cur, i) =>
+            prev.replace(
+              dateFnsFormat(cur, formats[i]),
+              dateFnsFormat(subWeeks(cur, 1), formats[i])
+            ),
+          title
+        );
+        const nextTitle = dateArray.reduce(
+          (prev, cur, i) =>
+            prev.replace(
+              dateFnsFormat(cur, formats[i]),
+              dateFnsFormat(addWeeks(cur, 1), formats[i])
+            ),
+          title
+        );
+        setTimeout(() => {
+          const header = document.querySelector(
+            ".roam-article h1.rm-title-display"
+          ) as HTMLHeadingElement;
+          const headerContainer = header.parentElement;
+          const buttonContainer = document.createElement("div");
+          buttonContainer.style.display = "flex";
+          buttonContainer.style.justifyContent = "space-between";
+          buttonContainer.style.marginBottom = "32px";
+          buttonContainer.id = "roamjs-weekly-mode-nav";
+          headerContainer.appendChild(buttonContainer);
 
-            const makeButton = (pagename: string, label: string) => {
-              const button = document.createElement("button");
-              button.className = "bp3-button";
-              button.onclick = () => navigateToPage(pagename);
-              button.innerText = label;
-              buttonContainer.appendChild(button);
-            };
-            makeButton(prevTitle, "Last Week");
-            makeButton(nextTitle, "Next Week");
-          });
-        }
+          const makeButton = (pagename: string, label: string) => {
+            const button = document.createElement("button");
+            button.className = "bp3-button";
+            button.onclick = () => navigateToPage(pagename);
+            button.innerText = label;
+            buttonContainer.appendChild(button);
+          };
+          makeButton(prevTitle, "Last Week");
+          makeButton(nextTitle, "Next Week");
+        });
       }
     }
   };
@@ -241,14 +251,8 @@ runExtension(ID, () => {
     className: "rm-title-display",
     callback: (header: HTMLHeadingElement) => {
       const title = getPageTitleValueByHtmlElement(header);
-      const format = getFormat();
-      const formatRegex = new RegExp(
-        `^${format
-          .replace(DATE_REGEX, "(.*?)")
-          .replace(/\[/g, "\\[")
-          .replace(/\]/g, "\\]")}$`
-      );
-      if (formatRegex.test(title)) {
+      const { valid } = getFormatDateData(title);
+      if (valid) {
         header.onmousedown = (e) => {
           if (!e.shiftKey) {
             render({
