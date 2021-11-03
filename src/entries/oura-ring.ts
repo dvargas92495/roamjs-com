@@ -2,11 +2,12 @@ import format from "date-fns/format";
 import {
   addButtonListener,
   getConfigFromPage,
+  getPageTitleByBlockUid,
   getParentUidByBlockUid,
   parseRoamDate,
   pushBullets,
 } from "roam-client";
-import { getPageTitle, runExtension } from "../entry-helpers";
+import { runExtension } from "../entry-helpers";
 import axios from "axios";
 import subDays from "date-fns/subDays";
 
@@ -30,8 +31,8 @@ const importOuraRing = async (
   ) => {
     const parentUid = getParentUidByBlockUid(blockUid);
   const config = getConfigFromPage("roam/js/oura-ring");
-  const pageTitle = getPageTitle(document.activeElement);
-  const dateFromPage = parseRoamDate(pageTitle.textContent);
+  const pageTitle = getPageTitleByBlockUid(blockUid);
+  const dateFromPage = parseRoamDate(pageTitle);
   const token = config["Token"]?.trim();
   if (!token) {
     window.roamAlphaAPI.updateBlock({
