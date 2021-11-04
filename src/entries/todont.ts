@@ -3,11 +3,47 @@ import {
   isControl,
   replaceText,
   runExtension,
+  toFlexRegex,
 } from "../entry-helpers";
-import { createObserver } from "roam-client";
+import {
+  createHTMLObserver,
+  createObserver,
+  getBasicTreeByParentUid,
+} from "roam-client";
+import { createConfigObserver, getSubTree } from "roamjs-components";
+
+const CLASSNAMES_TO_CHECK = [
+  "rm-block-ref",
+  "kanban-title",
+  "kanban-card",
+  "roam-block",
+];
 
 runExtension("todont", () => {
   const TODONT_CLASSNAME = "roamjs-todont";
+  const { pageUid } = createConfigObserver({
+    title: "roam/js/todont",
+    config: {
+      tabs: [
+        {
+          id: "appearance",
+          fields: [
+            {
+              title: "strikethrough",
+              type: "flag",
+              description:
+                "Whether or not TODONT boxes should have strikethrough. Changing requires refresh.",
+            },
+          ],
+        },
+      ],
+    },
+  });
+  const configTree = getBasicTreeByParentUid(pageUid);
+  const appearanceTree = getSubTree({ key: "appearance", tree: configTree }).children;
+  const strikethrough = appearanceTree.some((t) =>
+    toFlexRegex("strikethrough").test(t.text)
+  );
   const css = document.createElement("style");
   css.textContent = `.bp3-button.bp3-small.${TODONT_CLASSNAME} {
     padding: 0;
@@ -74,7 +110,9 @@ runExtension("todont", () => {
   const todontCallback = () => {
     if (document.activeElement.tagName === "TEXTAREA") {
       const textArea = document.activeElement as HTMLTextAreaElement;
-      const firstButtonTag = /{{\[\[([A-Z]{4,8})\]\]}}/.exec(textArea.value)?.[1];
+      const firstButtonTag = /{{\[\[([A-Z]{4,8})\]\]}}/.exec(
+        textArea.value
+      )?.[1];
       if (firstButtonTag === "TODO") {
         replaceText({ before: "{{[[TODO]]}}", after: "{{[[ARCHIVED]]}}" });
       } else if (firstButtonTag === "DONE") {
@@ -94,4 +132,31 @@ runExtension("todont", () => {
   };
 
   document.addEventListener("keydown", keydownEventListener);
+
+  if (strikethrough) {
+    const styleBlock = (block?: HTMLElement) => {
+      if (block) {
+        block.style.textDecoration = "line-through";
+      }
+    };
+    createHTMLObserver({
+      callback: (b: HTMLButtonElement) => {
+        const zoom = b.closest(".rm-zoom-item-content") as HTMLSpanElement;
+        if (zoom) {
+          styleBlock(
+            zoom.firstElementChild.firstElementChild as HTMLDivElement
+          );
+          return;
+        }
+        const block = CLASSNAMES_TO_CHECK.map(
+          (c) => b.closest(`.${c}`) as HTMLElement
+        ).find((d) => !!d);
+        if (block) {
+          styleBlock(block);
+        }
+      },
+      tag: "BUTTON",
+      className: TODONT_CLASSNAME,
+    });
+  }
 });
