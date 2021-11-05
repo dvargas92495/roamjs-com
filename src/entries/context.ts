@@ -7,7 +7,6 @@ import {
   getTextByBlockUid,
 } from "roam-client";
 import {
-  getRoamUrl,
   openBlockInSidebar,
   parseRoamMarked,
   runExtension,
@@ -20,20 +19,22 @@ runExtension(ID, () => {
     attribute: "data-roamjs-context-parent",
     callback: (s) => {
       if (s.getAttribute("data-tag") === "parent") {
-          const uid = getBlockUidFromTarget(s);
-          const parentUid = getParentUidByBlockUid(uid);
-          const parentText = getTextByBlockUid(parentUid);
-          s.className = "rm-block-ref dont-focus-block";
-          s.style.userSelect = "none";
-          s.innerHTML = parseRoamMarked(parentText);
-          s.onmousedown = (e) => e.stopPropagation();
-          s.onclick = (e) => {
-            if (e.shiftKey) {
-              openBlockInSidebar(parentUid);
-            } else {
-              window.location.assign(getRoamUrl(parentUid));
-            }
-          };
+        const uid = getBlockUidFromTarget(s);
+        const parentUid = getParentUidByBlockUid(uid);
+        const parentText = getTextByBlockUid(parentUid);
+        s.className = "rm-block-ref dont-focus-block";
+        s.style.userSelect = "none";
+        s.innerHTML = parseRoamMarked(parentText);
+        s.onmousedown = (e) => e.stopPropagation();
+        s.onclick = (e) => {
+          if (e.shiftKey) {
+            openBlockInSidebar(parentUid);
+          } else {
+            window.roamAlphaAPI.ui.mainWindow.openBlock({
+              block: { uid: parentUid },
+            });
+          }
+        };
       }
     },
   });
@@ -66,7 +67,7 @@ runExtension(ID, () => {
           if (e.shiftKey) {
             openBlockInSidebar(uid);
           } else {
-            window.location.assign(getRoamUrl(uid));
+            window.roamAlphaAPI.ui.mainWindow.openPage({ page: { uid } });
           }
         };
       }

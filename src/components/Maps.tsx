@@ -88,7 +88,8 @@ const getFilter = ({ children }: { children: TreeNode[] }) => {
 
 type RoamMarker = { x: number; y: number; tag: string; uid: string };
 
-const COORDS_REGEX = /((?:-?)(?:0|(?:[1-9][0-9]*))(?:\.[0-9]+)?),(?:\s)?((?:-?)(?:0|(?:[1-9][0-9]*))(?:\.[0-9]+)?)/;
+const COORDS_REGEX =
+  /((?:-?)(?:0|(?:[1-9][0-9]*))(?:\.[0-9]+)?),(?:\s)?((?:-?)(?:0|(?:[1-9][0-9]*))(?:\.[0-9]+)?)/;
 const getMarkers = ({ children }: { children: TreeNode[] }) => {
   const markerNode = children.find(
     (c) => c.text.trim().toUpperCase() === "MARKERS"
@@ -154,7 +155,9 @@ const Markers = ({
             if (e.originalEvent.shiftKey) {
               openBlockInSidebar(pageUid);
             } else {
-              window.location.assign(`${href}/page/${pageUid}`);
+              window.roamAlphaAPI.ui.mainWindow.openPage({
+                page: { uid: pageUid },
+              });
             }
           }
         },

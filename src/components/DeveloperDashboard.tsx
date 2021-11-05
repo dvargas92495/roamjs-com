@@ -16,7 +16,6 @@ import {
   getPageTitlesStartingWithPrefix,
   getPageUidByPageTitle,
   getPageViewType,
-  getRoamUrl,
   getTextByBlockUid,
   getTreeByBlockUid,
   getTreeByPageName,
@@ -98,7 +97,7 @@ const DeveloperContent: StageContent = () => {
               alignItems: "center",
               justifyContent: "space-between",
             }}
-            className={'roamjs-developer-path'}
+            className={"roamjs-developer-path"}
           >
             <span
               style={{
@@ -111,7 +110,7 @@ const DeveloperContent: StageContent = () => {
                 if (e.shiftKey) {
                   openBlockInSidebar(uid);
                 } else {
-                  window.location.assign(getRoamUrl(uid));
+                  window.roamAlphaAPI.ui.mainWindow.openPage({ page: { uid } });
                 }
               }}
             >
@@ -143,7 +142,7 @@ const DeveloperContent: StageContent = () => {
                             const tree = getTreeByBlockUid(blockUid);
                             t.children.push(...tree.children);
                             t.heading = tree.heading;
-                            t.viewType = tree.viewType || 'bullet';
+                            t.viewType = tree.viewType || "bullet";
                             t.textAlign = tree.textAlign;
                             return tree.text;
                           })

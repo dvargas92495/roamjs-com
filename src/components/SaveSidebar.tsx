@@ -14,7 +14,6 @@ import {
   createBlock,
   getCurrentPageUid,
   getPageUidByPageTitle,
-  getRoamUrl,
   getTreeByPageName,
 } from "roam-client";
 import { SidebarWindow } from "roam-client/lib/types";
@@ -188,7 +187,9 @@ const LoadSidebar = ({ onClose }: { onClose: () => void }) => {
                 const [pageUid, blockUid] = pageConfig.children;
                 if (pageUid) {
                   setTimeout(() => {
-                    window.location.assign(getRoamUrl(pageUid.text));
+                    window.roamAlphaAPI.ui.mainWindow.openPage({
+                      page: { uid: pageUid.text },
+                    });
                     if (blockUid) {
                       setTimeout(() => {
                         const div = Array.from(

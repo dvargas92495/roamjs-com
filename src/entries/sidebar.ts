@@ -5,7 +5,6 @@ import {
   deleteBlock,
   getPageTitleByPageUid,
   getPageUidByPageTitle,
-  getRoamUrl,
   getTreeByPageName,
 } from "roam-client";
 import {
@@ -68,8 +67,8 @@ runExtension(ID, () => {
               description: "The list of saved sidebar states",
               options: {
                 component: SavedSidebarConfig,
-              }
-            }
+              },
+            },
           ],
         },
       ],
@@ -187,7 +186,10 @@ runExtension(ID, () => {
             iconRender({
               p: linkIconContainer,
               tooltipContent: "Go to page",
-              onClick: () => window.location.assign(getRoamUrl(pageUid)),
+              onClick: () =>
+                window.roamAlphaAPI.ui.mainWindow.openPage({
+                  page: { uid: pageUid },
+                }),
               icon: "link",
             });
             h.appendChild(linkIconContainer);

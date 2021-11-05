@@ -16,12 +16,7 @@ import {
 } from "roam-client";
 import { createConfigObserver } from "roamjs-components";
 import { getSettingValueFromTree } from "../components/hooks";
-import {
-  getRoamUrl,
-  isApple,
-  runExtension,
-  toFlexRegex,
-} from "../entry-helpers";
+import { isApple, runExtension, toFlexRegex } from "../entry-helpers";
 import { render } from "../components/Toast";
 
 const ID = "weekly-notes";
@@ -89,7 +84,7 @@ const navigateToPage = (pageName: string) => {
     : { pageUid: createWeeklyPage(pageName), timeout: 500 };
   setTimeout(() => {
     if (pageUid) {
-      window.location.assign(getRoamUrl(pageUid));
+      window.roamAlphaAPI.ui.mainWindow.openPage({ page: { uid: pageUid } });
     }
   }, timeout);
 };
