@@ -1,8 +1,11 @@
 import { CloudFrontRequestHandler } from "aws-lambda";
 
-const movedUris = ["google-calendar", "static-site", "twitter"].map(
-  (e) => `/${e}.js`
-);
+const movedUris = [
+  "developer",
+  "google-calendar",
+  "static-site",
+  "twitter",
+].map((e) => `/${e}.js`);
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
   const request = event.Records[0].cf.request;
