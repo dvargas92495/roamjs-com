@@ -15,11 +15,12 @@ export const handler = authenticate(async (event) => {
     emailAddresses: [],
     primaryEmailAddressId: "",
   }));
-  const { token: storedToken, ...data } = (
-    user.publicMetadata as {
-      [s: string]: { token: string; authenticated: boolean };
-    }
-  )?.[service];
+  const { token: storedToken, ...data } =
+    (
+      user.publicMetadata as {
+        [s: string]: { token: string; authenticated: boolean };
+      }
+    )?.[service] || ({} as { token: string; authenticated: boolean });
   delete data.authenticated;
   if (!storedToken || token !== storedToken) {
     return {
