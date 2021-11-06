@@ -37,7 +37,7 @@ const ExtensionHomePage = ({
         items={extensions
           .filter(({ state }) => state === "LIVE" || state === "LEGACY")
           .sort(({ title: a }, { title: b }) => a.localeCompare(b))}
-        width={3}
+        width={2}
       />
       <H4>Under Development</H4>
       <Body>
