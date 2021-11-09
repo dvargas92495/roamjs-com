@@ -338,15 +338,13 @@ export const authenticate =
       )[service];
       if (!serviceData.authenticated) {
         users.updateUser(user.id, {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
-          publicMetadata: JSON.stringify({
+          publicMetadata: {
             ...publicMetadata,
             [service]: {
               ...serviceData,
               authenticated: true,
             },
-          }),
+          },
         });
       }
       event.headers.Authorization = user.id;

@@ -123,7 +123,7 @@ const ExtensionPage = ({
       {development && <H2>UNDER DEVELOPMENT</H2>}
       <H1>{title.toUpperCase()}</H1>
       <Subtitle>{description}</Subtitle>
-      <hr />
+      <hr style={{marginTop: 28}}/>
       {!!premium.length && (
         <>
           <H3>Premium Features</H3>
@@ -181,7 +181,7 @@ const ExtensionPage = ({
         </Prism>
       </div>
       <Body>Finally, click "Yes, I Know What I'm Doing".</Body>
-      <hr style={{marginTop: 24}}/>
+      <hr style={{marginTop: 40}}/>
       {content.compiledSource ? (
         <MDXRemote {...content} components={MdxComponents} />
       ) : (

@@ -1,8 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 const Dotenv = require("dotenv-webpack");
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
-  .BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const extensions = fs.readdirSync("./src/entries/");
@@ -23,6 +23,20 @@ module.exports = (env) => ({
   module: {
     rules: [
       {
+        test: /color[\\/]index\.js/,
+        enforce: "pre",
+        use: [
+          {
+            loader: "babel-loader",
+            options: {
+              cacheDirectory: true,
+              cacheCompression: false,
+              presets: ['@babel/preset-env'],
+            },
+          },
+        ],
+      },
+      {
         test: /\.tsx?$/,
         use: [
           {
@@ -30,6 +44,7 @@ module.exports = (env) => ({
             options: {
               cacheDirectory: true,
               cacheCompression: false,
+              presets: ['@babel/preset-env'],
             },
           },
           {

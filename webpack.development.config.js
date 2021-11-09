@@ -6,6 +6,7 @@ module.exports = (env) => {
   commonConfig.module.rules.push({
     test: /\.js$/,
     enforce: "pre",
+    exclude: /node_modules/,
     use: ["source-map-loader"],
   });
   if (env.WEBPACK_SERVE) {
