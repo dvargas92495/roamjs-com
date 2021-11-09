@@ -2,6 +2,10 @@ import {
   createHTMLObserver,
   getUids,
   ViewType,
+  extractRef,
+  getBasicTreeByParentUid,
+  RoamBasicNode,
+  createBlock,
 } from "roam-client";
 import { renderMouselessDialog } from "../components/MouselessDialog";
 import { isControl, runExtension } from "../entry-helpers";
@@ -11,6 +15,13 @@ runExtension("mouseless", () => {
   container.id = "roamjs-mouseless-root";
   document.body.appendChild(container);
   renderMouselessDialog(container as HTMLDivElement);
+
+  const toUidTree = (tree: RoamBasicNode[]): RoamBasicNode[] =>
+    tree.map((t) => ({
+      text: `((${t.uid}))`,
+      children: toUidTree(t.children),
+      uid: window.roamAlphaAPI.util.generateUID(),
+    }));
 
   createHTMLObserver({
     callback: (b) => {
@@ -47,6 +58,24 @@ runExtension("mouseless", () => {
             navigator.clipboard.writeText(`((${blockUid}))`);
             e.preventDefault();
             e.stopPropagation();
+          }
+        } else if (e.code === "KeyV" || e.key === "V") {
+          const el = e.target as HTMLElement;
+          if (el.nodeName === "TEXTAREA") {
+            const ta = el as HTMLTextAreaElement;
+            const { blockUid: uid } = getUids(ta);
+            if (uid) {
+              window.navigator.clipboard.readText().then((clip) => {
+                const srcUid = extractRef(clip);
+                const tree = getBasicTreeByParentUid(srcUid);
+                window.roamAlphaAPI.updateBlock({
+                  block: { uid, string: `${ta.value}((${srcUid}))` },
+                });
+                toUidTree(tree).forEach((t, order) => createBlock({parentUid: uid, node: t, order}))
+              });
+              e.preventDefault();
+              e.stopPropagation();
+            }
           }
         }
       }
