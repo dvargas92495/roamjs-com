@@ -1,6 +1,11 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { dynamo, headers, listAll, s3 } from "../lambda-helpers";
+import Stripe from "stripe";
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2020-08-27",
+  maxNetworkRetries: 3,
+});
 const DEFAULT_AUTHOR = {
   name: "RoamJS",
   email: "support@roamjs.com",
@@ -26,17 +31,29 @@ export const handler: APIGatewayProxyHandler = (event) => {
                   .then((c) => c.Body.toString()),
             r.Item.author?.S
               ? Promise.resolve({
-                  name: "Query Stripe",
+                  name: "Query clerk",
                   email: "For the author",
                 })
               : Promise.resolve(DEFAULT_AUTHOR),
-          ]).then(([content, author]) => ({
+            r.Item.premium?.S
+              ? stripe.prices
+                  .retrieve(r.Item.premium?.S)
+                  .then(({ product, unit_amount }) =>
+                    stripe.products
+                      .retrieve(product as string)
+                      .then(({ description }) => ({
+                        description,
+                        price: unit_amount / 100,
+                      }))
+                  )
+              : Promise.resolve(undefined),
+          ]).then(([content, author, premium]) => ({
             statusCode: 200,
             body: JSON.stringify({
               content,
               state: r.Item.state.S,
               description: r.Item.description.S,
-              premium: r.Item.premium?.SS || [],
+              premium,
               author,
             }),
             headers: headers(event),

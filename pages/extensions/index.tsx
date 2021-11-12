@@ -1,11 +1,12 @@
 import React from "react";
 import StandardLayout from "../../components/StandardLayout";
-import { Body, CardGrid, H1, H4 } from "@dvargas92495/ui";
+import { Body, H1, H4 } from "@dvargas92495/ui";
 import { defaultLayoutProps } from "../../components/Layout";
 import { GetStaticProps } from "next";
 import axios from "axios";
 import { API_URL } from "../../components/constants";
 import { idToTitle } from "../../components/hooks";
+import CardGrid from "../../components/CardGrid";
 
 type ExtensionMetadata = {
   title: string;
@@ -28,8 +29,8 @@ const ExtensionHomePage = ({
       }
       img={defaultLayoutProps.img}
     >
-      <H1>Home</H1>
-      <Body>
+      <H1>Extensions</H1>
+      <Body style={{marginBottom: 32}}>
         Welcome to RoamJS Extensions! Click on any of the extensions below to
         find out more about how to install and use them.
       </Body>
@@ -48,7 +49,7 @@ const ExtensionHomePage = ({
         items={extensions
           .filter(({ state }) => state === "DEVELOPMENT")
           .sort(({ title: a }, { title: b }) => a.localeCompare(b))}
-        width={3}
+        width={2}
       />
     </StandardLayout>
   );

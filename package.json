@@ -172,6 +172,7 @@
     "remark-unwrap-images": "^2.0.0",
     "reveal.js": "^4.1.0",
     "roamjs-components": "^0.26.16",
+    "stripe": "^8.187.0",
     "tesseract.js": "^2.1.4",
     "turndown": "^7.0.0",
     "twitter-text": "^3.1.0",
