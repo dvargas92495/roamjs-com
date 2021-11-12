@@ -140,6 +140,7 @@ const ExtensionPage = ({
             id={id}
             SplashLayout={({ StartNowButton }) => <div>{StartNowButton}</div>}
             price={premium.price}
+            param={'extension'}
           />
         </>
       )}

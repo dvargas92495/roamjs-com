@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import Layout, { defaultLayoutProps } from "../../components/Layout";
 
 const SignupPage = (): JSX.Element => {
-  const { service, extension } = useRouter().query;
+  const { service, extension, state } = useRouter().query;
   const otherObserverRef = useRef<MutationObserver>(null);
   const errorCallback = useCallback((mr: MutationRecord[]) => {
     const target = mr[0].target as HTMLDivElement;
@@ -42,13 +42,13 @@ const SignupPage = (): JSX.Element => {
   }, [mainCallback]);
   const signUpProps = extension
     ? {
-        afterSignUp: `${window.location.origin}/extensions/${extension}?started=true`,
-        signInURL: `${window.location.origin}/login?extension=${extension}`,
+        afterSignUp: `${window.location.origin}/extensions/${extension}?started=true&state=${state}`,
+        signInURL: `${window.location.origin}/login?extension=${extension}&state=${state}`,
       }
     : service
     ? {
-        afterSignUp: `${window.location.origin}/services/${service}?started=true`,
-        signInURL: `${window.location.origin}/login?service=${service}`,
+        afterSignUp: `${window.location.origin}/services/${service}?started=true&state=${state}`,
+        signInURL: `${window.location.origin}/login?service=${service}&state=${state}`,
       }
     : {};
   return (

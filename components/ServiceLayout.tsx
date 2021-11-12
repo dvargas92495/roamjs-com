@@ -242,19 +242,21 @@ export const ServiceButton = ({
   id,
   price,
   SplashLayout,
+  param,
 }: {
   id: string;
   price: number;
   SplashLayout: (props: {
     StartNowButton: React.ReactNode;
   }) => React.ReactElement;
+  param: string
 }): React.ReactElement => {
   const [started, setStarted] = useState(false);
   const router = useRouter();
   const start = useCallback(() => setStarted(true), [setStarted]);
   const end = useCallback(() => setStarted(false), [setStarted]);
   const login = useCallback(
-    () => router.push(`/login?service=${id}`),
+    () => router.push(`/login?${param}=${id}`),
     [router]
   );
   return (
@@ -352,7 +354,7 @@ const ServiceLayout = ({
           },
         ]}
       />
-      <ServiceButton id={id} SplashLayout={SplashLayout} price={price} />
+      <ServiceButton id={id} SplashLayout={SplashLayout} price={price} param={'service'}/>
     </StandardLayout>
   );
 };

@@ -6,8 +6,8 @@ import React, { useEffect } from "react";
 const Redirect = () => {
   const router = useRouter();
   useEffect(() => {
-    router.push("/login");
-  });
+    router.push('/login');
+  }, []);
   return (
     <div>
       <Loading loading />
@@ -16,7 +16,7 @@ const Redirect = () => {
   );
 };
 
-const RedirectToLogin: React.FunctionComponent = () => {
+const RedirectToLogin = (): React.ReactElement => {
   return (
     <SignedOut>
       <Redirect />
