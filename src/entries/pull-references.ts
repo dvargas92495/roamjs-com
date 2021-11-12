@@ -31,7 +31,8 @@ const pullReferences = async (
   pageTitleText = getPageTitle(document.activeElement)?.textContent
 ) => {
   const config = getConfigFromPage(CONFIG);
-  const format = config["Format"] || REPLACE;
+  const preFormat = config["Format"] || REPLACE;
+  const format = config["Add TODO"] ? `{{[[TODO]]}} ${preFormat}` : preFormat;
   const linkedReferences = getLinkedReferences(pageTitleText);
   const bullets = linkedReferences.map((l) =>
     format.replace(REPLACE, `((${l.uid}))`)
