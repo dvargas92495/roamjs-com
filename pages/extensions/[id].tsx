@@ -64,10 +64,10 @@ const ExtensionPage = ({
   development: boolean;
   entry: string;
   sponsors?: ThankYouSponsor[];
-  premium?: {
+  premium: {
     description: string;
     price: number;
-  };
+  } | null;
   author?: {
     name: string;
     email: string;
@@ -304,7 +304,7 @@ export const getStaticProps: GetStaticProps<
       return { ...matter(mdxContent), ...rest };
     })
     .then(
-      ({ content: preRender, state, description, data, premium, author }) => {
+      ({ content: preRender, state, description, data, premium = null, author }) => {
         const { contributors: contributorsJson } = JSON.parse(
           fs.readFileSync("./thankyou.json").toString()
         );
