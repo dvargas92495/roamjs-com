@@ -87,6 +87,10 @@ variable "convertkit_api_token" {
   type = string
 }
 
+variable "stripe_secret" {
+    type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -549,4 +553,10 @@ resource "github_actions_secret" "convertkit_api_token" {
   repository       = "roam-js-extensions"
   secret_name      = "CONVERTKIT_API_TOKEN"
   plaintext_value  = var.convertkit_api_token
+}
+
+resource "github_actions_secret" "stripe_secret" {
+  repository       = "roam-js-extensions"
+  secret_name      = "STRIPE_SECRET_KEY"
+  plaintext_value  = var.stripe_secret
 }
