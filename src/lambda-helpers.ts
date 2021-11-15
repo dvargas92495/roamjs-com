@@ -12,6 +12,12 @@ import crypto from "crypto";
 import AWS from "aws-sdk";
 import Mixpanel from "mixpanel";
 import randomstring from "randomstring";
+import Stripe from "stripe";
+
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2020-08-27",
+  maxNetworkRetries: 3,
+});
 
 export const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
@@ -419,14 +425,10 @@ export const listAll = async (
 };
 
 export const getStripePriceId = (service: string): Promise<string> =>
-  axios
-    .get<{ products: { name: string; prices: { id: string }[] }[] }>(
-      `${process.env.FLOSS_API_URL}/stripe-products?project=RoamJS`
-    )
-    .then(
-      (r) =>
-        r.data.products.find(
-          (p) =>
-            p.name.toLowerCase() === `roamjs ${service.split("-").slice(-1)}`
-        )?.prices?.[0]?.id
-    );
+  dynamo
+    .getItem({
+      TableName: "RoamJSExtensions",
+      Key: { id: { S: service } },
+    })
+    .promise()
+    .then((r) => r.Item.premium?.S);

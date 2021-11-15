@@ -83,6 +83,7 @@ const LaunchButton: React.FC<{
 }> = ({ start, id, price, refreshUser }) => {
   const {
     query: { started },
+    pathname,
   } = useRouter();
   const authenticatedAxiosGet = useAuthenticatedAxiosGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
@@ -90,6 +91,7 @@ const LaunchButton: React.FC<{
     () =>
       authenticatedAxiosPost(price === 0 ? "token" : "start-service", {
         service: id,
+        path: /^\/(services|extensions)\//.exec(pathname)?.[1]
       }).then((r) =>
         r.data.sessionId
           ? stripe.then((s) =>
@@ -168,14 +170,24 @@ const CheckSubscription = ({
   );
 };
 
-const Service = ({ id, end }: { id: string; end: () => void }) => {
+const Service = ({
+  id,
+  end,
+  inputAuthenticated,
+}: {
+  id: string;
+  end: () => void;
+  inputAuthenticated: boolean;
+}) => {
   const userData = useUser().publicMetadata as {
     [key: string]: { token: string; authenticated?: boolean };
   };
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const camel = idToCamel(id);
-  const { token = "NO TOKEN FOUND FOR USER", authenticated = false } =
-    userData?.[camel];
+  const {
+    token = "NO TOKEN FOUND FOR USER",
+    authenticated = inputAuthenticated,
+  } = userData?.[camel];
   const [copied, setCopied] = useState(false);
   const onSave = useCopyCode(
     setCopied,
@@ -189,9 +201,9 @@ const Service = ({ id, end }: { id: string; end: () => void }) => {
     <div
       style={{
         display: "flex",
-        flexDirection: "column",
         justifyContent: "space-between",
         height: "100%",
+        alignItems: "center",
       }}
     >
       <div
@@ -243,13 +255,15 @@ export const ServiceButton = ({
   price,
   SplashLayout,
   param,
+  inputAuthenticated,
 }: {
   id: string;
   price: number;
   SplashLayout: (props: {
     StartNowButton: React.ReactNode;
   }) => React.ReactElement;
-  param: string
+  param: string;
+  inputAuthenticated: boolean;
 }): React.ReactElement => {
   const [started, setStarted] = useState(false);
   const router = useRouter();
@@ -265,7 +279,11 @@ export const ServiceButton = ({
         <CheckSubscription id={id} start={start} price={price}>
           {(StartNowButton) =>
             started ? (
-              <Service id={id} end={end} />
+              <Service
+                id={id}
+                end={end}
+                inputAuthenticated={inputAuthenticated}
+              />
             ) : (
               <SplashLayout StartNowButton={StartNowButton} />
             )
@@ -354,7 +372,13 @@ const ServiceLayout = ({
           },
         ]}
       />
-      <ServiceButton id={id} SplashLayout={SplashLayout} price={price} param={'service'}/>
+      <ServiceButton
+        id={id}
+        SplashLayout={SplashLayout}
+        price={price}
+        param={"service"}
+        inputAuthenticated={false}
+      />
     </StandardLayout>
   );
 };

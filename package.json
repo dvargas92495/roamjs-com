@@ -4,6 +4,7 @@
   "description": "Various Roam Javascript extensions deployed to roamjs.com",
   "main": "index.js",
   "scripts": {
+    "ngrok": "ngrok http 3003 -subdomain vargas",
     "preapi": "npm run build:api",
     "api": "serverless offline",
     "automate": "node scripts/automation.js",

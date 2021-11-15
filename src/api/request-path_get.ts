@@ -1,11 +1,6 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { dynamo, headers, listAll, s3 } from "../lambda-helpers";
-import Stripe from "stripe";
+import { dynamo, headers, listAll, s3, stripe } from "../lambda-helpers";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2020-08-27",
-  maxNetworkRetries: 3,
-});
 const DEFAULT_AUTHOR = {
   name: "RoamJS",
   email: "support@roamjs.com",

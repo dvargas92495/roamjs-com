@@ -1,8 +1,13 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import axios from "axios";
-import { v4 } from "uuid";
-import { generateToken, getClerkUser, getStripePriceId, headers } from "../lambda-helpers";
+import {
+  generateToken,
+  getClerkUser,
+  getStripePriceId,
+  headers,
+  stripe,
+} from "../lambda-helpers";
+import type Stripe from "stripe";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -15,7 +20,10 @@ export const handler = async (
       headers: headers(event),
     };
   }
-  const { service } = JSON.parse(event.body || "{}") as { service: string };
+  const { service, path = "services" } = JSON.parse(event.body || "{}") as {
+    service: string;
+    path: string;
+  };
   const serviceCamelCase = service
     .split("-")
     .map((s, i) =>
@@ -24,72 +32,62 @@ export const handler = async (
     .join("");
   const priceId = await getStripePriceId(service);
 
-  const checkoutToken = v4();
+  const customer = user.privateMetadata?.stripeId as string;
+  const paymentMethod = await stripe.customers
+    .retrieve(customer)
+    .then((c) => c as Stripe.Customer)
+    .then((c) => c.invoice_settings?.default_payment_method);
+  const line_items = [{ price: priceId, quantity: 1 }];
+  const origin = event.headers.Origin || event.headers.origin;
 
-  const email = user.emailAddresses.find(
-    (e) => e.id === user.primaryEmailAddressId
-  )?.emailAddress;
-  const { active, id } = await axios
-    .post(
-      `${process.env.FLOSS_API_URL}/stripe-subscribe`,
-      {
-        priceId,
-        successPath: `services/${service}`,
-        metadata: {
-          service: serviceCamelCase,
-          userId: user.id,
-          callbackToken: checkoutToken,
-          url: `${process.env.API_URL}/finish-start-service`,
-        },
-      },
-      {
-        headers: {
-          Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
-          Origin: event.headers.Origin || event.headers.origin,
-        },
-      }
-    )
-    .then((r) => r.data)
-    .catch((e) => {
-      console.error(e.response?.data);
-      return { active: false };
-    });
+  const { active, id } = paymentMethod
+    ? await stripe.subscriptions
+        .create({
+          customer,
+          items: line_items,
+        })
+        .then((s) => ({ active: true, id: s.id }))
+        .catch(() => ({ active: false, id: undefined }))
+    : await stripe.checkout.sessions
+        .create({
+          customer,
+          payment_method_types: ["card"],
+          line_items,
+          mode: "subscription",
+          success_url: `${origin}/${path}/${service}`,
+          cancel_url: `${origin}/${path}/${service}`,
+          metadata: {
+            service: serviceCamelCase,
+            userId: user.id,
+            callback: `${process.env.API_URL}/finish-start-service`,
+          },
+        })
+        .then((session) => ({ id: session.id, active: false }))
+        .catch(() => ({ active: false, id: undefined }));
+
   if (!active) {
     if (id) {
-      const privateMetadata = JSON.stringify({
-        ...user.privateMetadata,
-        checkoutToken,
-      });
-      return users
-        .updateUser(user.id, {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
-          privateMetadata,
-        })
-        .then(() => ({
-          statusCode: 200,
-          body: JSON.stringify({ sessionId: id }),
-          headers: headers(event),
-        }));
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ sessionId: id }),
+        headers: headers(event),
+      };
     } else {
       return {
         statusCode: 500,
-        body:
-          "Failed to subscribe to RoamJS Site service. Contact support@roamjs.com for help!",
+        body: "Failed to subscribe to RoamJS Site service. Contact support@roamjs.com for help!",
         headers: headers(event),
       };
     }
   }
 
   await users.updateUser(user.id, {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
-    publicMetadata: JSON.stringify({
+    publicMetadata: {
       ...user.publicMetadata,
       [serviceCamelCase]: {
         token: generateToken(user.id),
       },
-    }),
+    },
   });
 
   return {

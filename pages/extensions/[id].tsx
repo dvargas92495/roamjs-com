@@ -130,18 +130,25 @@ const ExtensionPage = ({
       {!!premium && (
         <>
           <H3>Premium Features</H3>
-          <Body>
-            Some features in this extension require a premium subscription
-            including:
-          </Body>
-          <blockquote>{premium.description}</blockquote>
-          <Body>Click the button below to include these features!</Body>
-          <ServiceButton
-            id={id}
-            SplashLayout={({ StartNowButton }) => <div>{StartNowButton}</div>}
-            price={premium.price}
-            param={'extension'}
-          />
+          <div>
+            <ServiceButton
+              id={id}
+              SplashLayout={({ StartNowButton }) => (
+                <div>
+                  <Body>
+                    Some features in this extension require a premium
+                    subscription including:
+                  </Body>
+                  <blockquote>{premium.description}</blockquote>
+                  <Body>Click the button below to include these features!</Body>
+                  {StartNowButton}
+                </div>
+              )}
+              price={premium.price}
+              param={"extension"}
+              inputAuthenticated={true}
+            />
+          </div>
         </>
       )}
       <H3>Installation</H3>
@@ -305,7 +312,14 @@ export const getStaticProps: GetStaticProps<
       return { ...matter(mdxContent), ...rest };
     })
     .then(
-      ({ content: preRender, state, description, data, premium = null, author }) => {
+      ({
+        content: preRender,
+        state,
+        description,
+        data,
+        premium = null,
+        author,
+      }) => {
         const { contributors: contributorsJson } = JSON.parse(
           fs.readFileSync("./thankyou.json").toString()
         );
