@@ -59,7 +59,7 @@ runExtension("mouseless", () => {
             e.preventDefault();
             e.stopPropagation();
           }
-        } else if (e.code === "KeyV" || e.key === "V") {
+        } else if (e.altKey && (e.code === "KeyV" || e.key === "V")) {
           const el = e.target as HTMLElement;
           if (el.nodeName === "TEXTAREA") {
             const ta = el as HTMLTextAreaElement;
@@ -71,7 +71,9 @@ runExtension("mouseless", () => {
                 window.roamAlphaAPI.updateBlock({
                   block: { uid, string: `${ta.value}((${srcUid}))` },
                 });
-                toUidTree(tree).forEach((t, order) => createBlock({parentUid: uid, node: t, order}))
+                toUidTree(tree).forEach((t, order) =>
+                  createBlock({ parentUid: uid, node: t, order })
+                );
               });
               e.preventDefault();
               e.stopPropagation();
