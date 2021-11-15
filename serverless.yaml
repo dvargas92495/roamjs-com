@@ -99,13 +99,6 @@ functions:
           path: end-service
           method: post
           cors: true
-  finish-launch-social-post:
-    handler: out/finish-launch-social_post.handler
-    events:
-      - http:
-          path: finish-launch-social
-          method: post
-          cors: true
   finish-start-service-post:
     handler: out/finish-start-service_post.handler
     events:
@@ -133,13 +126,6 @@ functions:
       - http:
           path: is-subscribed
           method: get
-          cors: true
-  launch-social-post:
-    handler: out/launch-social_post.handler
-    events:
-      - http:
-          path: launch-social
-          method: post
           cors: true
   mixpanel-post:
     handler: out/mixpanel_post.handler

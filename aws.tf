@@ -91,6 +91,10 @@ variable "stripe_secret" {
     type = string
 }
 
+variable "stripe_checkout_secret" {
+    type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -139,12 +143,10 @@ module "aws-serverless-backend" {
         "decrypt-proxy/post",
         "encrypt/post",
         "end-service/post",
-        "finish-launch-social/post",
         "finish-start-service/post",
         "iframely/post",
         "install/put",
         "is-subscribed/get",
-        "launch-social/post",
         "mixpanel/post",
         "payment-methods/delete",
         "payment-methods/get",
@@ -175,7 +177,6 @@ module "aws-serverless-backend" {
     cors = [
       "connected",
       "convertkit",
-      "launch-social",
       "start-service",
       "end-service",
       "shutdown-social",
@@ -559,4 +560,10 @@ resource "github_actions_secret" "stripe_secret" {
   repository       = "roam-js-extensions"
   secret_name      = "STRIPE_SECRET_KEY"
   plaintext_value  = var.stripe_secret
+}
+
+resource "github_actions_secret" "stripe_checkout_secret" {
+  repository       = "roam-js-extensions"
+  secret_name      = "STRIPE_CHECKOUT_SECRET"
+  plaintext_value  = var.stripe_checkout_secret
 }
