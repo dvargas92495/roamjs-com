@@ -274,8 +274,36 @@ resource "aws_route53_record" "gitbook" {
 }
 
 resource "aws_dynamodb_table" "extensions" {
-  for_each       = toset(["RoamJSExtensions", "RoamJSExtensionsDev"])
-  name           = each.value
+  name           = "RoamJSExtensions"
+  billing_mode   = "PAY_PER_REQUEST"
+  hash_key       = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  attribute {
+    name = "state"
+    type = "S"
+  }
+
+  global_secondary_index {
+    hash_key           = "state"
+    name               = "state-index"
+    non_key_attributes = []
+    projection_type    = "ALL"
+    read_capacity      = 0
+    write_capacity     = 0
+  }
+
+  tags = {
+    Application = "Roam JS Extensions"
+  }
+}
+
+resource "aws_dynamodb_table" "extensions-dev" {
+  name           = "RoamJSExtensionsDev"
   billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "id"
 
