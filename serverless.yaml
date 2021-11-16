@@ -15,6 +15,20 @@ functions:
           path: article
           method: post
           cors: true
+  auth-get:
+    handler: out/auth_get.handler
+    events:
+      - http:
+          path: auth
+          method: get
+          cors: true
+  auth-post:
+    handler: out/auth_post.handler
+    events:
+      - http:
+          path: auth
+          method: post
+          cors: true
   balance-get:
     handler: out/balance_get.handler
     events:

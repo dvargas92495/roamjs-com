@@ -1,12 +1,11 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import axios from "axios";
 import {
   bareSuccessResponse,
-  getClerkOpts,
   getClerkUser,
+  getStripePriceId,
   headers,
-  serverError,
+  stripe,
 } from "../lambda-helpers";
 
 export const handler = async (
@@ -20,57 +19,42 @@ export const handler = async (
       headers: headers(event),
     };
   }
-  const email = user.emailAddresses.find(
-    (e) => e.id === user.primaryEmailAddressId
-  )?.emailAddress;
   const { service = "", subscription } = JSON.parse(event.body || "{}") as {
     service: string;
     subscription: string;
   };
-
-  const name = service.split("-").slice(-1)[0];
-  const productName = `RoamJS ${name
-    .substring(0, 1)
-    .toUpperCase()}${name.substring(1)}`;
+  const customer = user.privateMetadata.stripeId as string;
+  const priceId = await getStripePriceId(service);
   const subscriptionId =
     subscription ||
-    (await axios
-      .get(
-        `${process.env.FLOSS_API_URL}/stripe-is-subscribed?product=${encodeURI(
-          productName
-        )}`,
-        getClerkOpts(email)
-      )
-      .then((r) => r.data.subscriptionId || "")
-      .catch((e) => {
-        console.error(e);
-        return "";
-      }));
+    (await stripe.subscriptions
+      .list({ customer })
+      .then(
+        (s) =>
+          s.data
+            .flatMap((ss) =>
+              ss.items.data.map((si) => ({ priceId: si.price.id, id: ss.id }))
+            )
+            .find(({ priceId: id }) => priceId === id)?.id
+      ));
   if (!subscriptionId) {
-    return serverError(
-      `Current user is not subscribed to ${productName}`,
-      event
-    );
+    return {
+      statusCode: 409,
+      body: `Current user is not subscribed to ${service}`,
+      headers: headers(event),
+    };
   }
 
-  const opts = {
-    headers: {
-      Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
-    },
-  };
-  const { success, message } = await axios
-    .post(
-      `${process.env.FLOSS_API_URL}/stripe-cancel`,
-      {
-        subscriptionId,
-      },
-      opts
-    )
-    .then((r) => ({ success: r.data.success, message: "" }))
-    .catch((r) => ({ success: false, message: r.response.data || r.message }));
+  const { success, message } = await stripe.subscriptions
+    .del(subscriptionId)
+    .then(() => ({ success: true, message: "" }))
+    .catch((r) => ({
+      success: false,
+      message: r.response.data || r.message,
+    }));
   if (!success) {
     return {
-      statusCode: 500,
+      statusCode: 409,
       body: `Failed to cancel RoamJS subscription: ${message}`,
       headers: headers(event),
     };
@@ -88,9 +72,7 @@ export const handler = async (
   };
   if (serviceField) {
     await users.updateUser(user.id, {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore https://github.com/clerkinc/clerk-sdk-node/pull/12#issuecomment-785306137
-      publicMetadata: JSON.stringify(rest),
+      publicMetadata: rest,
     });
   } else {
     console.warn("No metadata value to clear for field", serviceField);

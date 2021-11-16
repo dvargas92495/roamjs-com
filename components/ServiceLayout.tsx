@@ -91,7 +91,8 @@ const LaunchButton: React.FC<{
     () =>
       authenticatedAxiosPost(price === 0 ? "token" : "start-service", {
         service: id,
-        path: /^\/(services|extensions)\//.exec(pathname)?.[1]
+        path: /^\/(services|extensions)\//.exec(pathname)?.[1],
+        query: window.location.search.slice(1),
       }).then((r) =>
         r.data.sessionId
           ? stripe.then((s) =>
@@ -174,10 +175,12 @@ const Service = ({
   id,
   end,
   inputAuthenticated,
+  onToken,
 }: {
   id: string;
   end: () => void;
   inputAuthenticated: boolean;
+  onToken?: (s: string) => void;
 }) => {
   const userData = useUser().publicMetadata as {
     [key: string]: { token: string; authenticated?: boolean };
@@ -197,6 +200,9 @@ const Service = ({
     () => authenticatedAxiosPost("end-service", { service: id }),
     [authenticatedAxiosPost]
   );
+  useEffect(() => {
+    onToken(token);
+  }, [onToken]);
   return (
     <div
       style={{
@@ -256,6 +262,7 @@ export const ServiceButton = ({
   SplashLayout,
   param,
   inputAuthenticated,
+  onToken,
 }: {
   id: string;
   price: number;
@@ -264,6 +271,7 @@ export const ServiceButton = ({
   }) => React.ReactElement;
   param: string;
   inputAuthenticated: boolean;
+  onToken?: (s: string) => void;
 }): React.ReactElement => {
   const [started, setStarted] = useState(false);
   const router = useRouter();
@@ -283,6 +291,7 @@ export const ServiceButton = ({
                 id={id}
                 end={end}
                 inputAuthenticated={inputAuthenticated}
+                onToken={onToken}
               />
             ) : (
               <SplashLayout StartNowButton={StartNowButton} />

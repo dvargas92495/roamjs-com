@@ -1,19 +1,19 @@
-import { SignedIn, SignIn } from "@clerk/clerk-react";
-import Loading from "@dvargas92495/ui/dist/components/Loading";
+import { SignedIn, SignedOut, SignIn } from "@clerk/clerk-react";
+import { Loading } from "@dvargas92495/ui";
 import { useRouter } from "next/router";
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import Layout, { defaultLayoutProps } from "../../components/Layout";
 
 const Redirect = () => {
   const router = useRouter();
-  const { service, extension, state = 'roamjs' } = useRouter().query;
+  const { service, extension, state = "roamjs" } = useRouter().query;
   useEffect(() => {
     if (service) {
-      router.push(`/service/${service}?started=true&state=${state}`);
+      router.push(`/services/${service}?started=true&state=${state}`);
     } else if (extension) {
-      router.push(`/extension/${extension}?started=true&state=${state}`);
+      router.push(`/extensions/${extension}?started=true&state=${state}`);
     } else {
-      router.push('/')
+      router.push("/");
     }
   }, [service, extension, state]);
   return (
@@ -25,7 +25,7 @@ const Redirect = () => {
 };
 
 const LoginPage = (): JSX.Element => {
-  const { service, extension, state = 'roamjs' } = useRouter().query;
+  const { service, extension, state = "roamjs" } = useRouter().query;
   const signInProps = extension
     ? {
         afterSignIn: `${window.location.origin}/extensions/${extension}?started=true&state=${state}`,
@@ -42,11 +42,13 @@ const LoginPage = (): JSX.Element => {
       title={"Login | RoamJS"}
       description={"Login to RoamJS to get access to subscribed services"}
       img={defaultLayoutProps.img}
-    >   
-        <SignedIn>
-          <Redirect />
-        </SignedIn>
-      <SignIn {...signInProps} />
+    >
+      <SignedIn>
+        <Redirect />
+      </SignedIn>
+      <SignedOut>
+        <SignIn {...signInProps} />
+      </SignedOut>
     </Layout>
   );
 };

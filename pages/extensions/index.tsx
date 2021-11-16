@@ -1,12 +1,11 @@
 import React from "react";
 import StandardLayout from "../../components/StandardLayout";
-import { Body, H1, H4 } from "@dvargas92495/ui";
+import { Body, H1, H4, CardGrid } from "@dvargas92495/ui";
 import { defaultLayoutProps } from "../../components/Layout";
 import { GetStaticProps } from "next";
 import axios from "axios";
 import { API_URL } from "../../components/constants";
 import { idToTitle } from "../../components/hooks";
-import CardGrid from "../../components/CardGrid";
 
 type ExtensionMetadata = {
   title: string;

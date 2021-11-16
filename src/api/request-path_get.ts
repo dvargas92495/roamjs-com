@@ -1,5 +1,12 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { dynamo, headers, listAll, s3, stripe } from "../lambda-helpers";
+import {
+  dynamo,
+  headers,
+  listAll,
+  s3,
+  stripe,
+  TableName,
+} from "../lambda-helpers";
 
 const DEFAULT_AUTHOR = {
   name: "RoamJS",
@@ -12,7 +19,7 @@ export const handler: APIGatewayProxyHandler = (event) => {
   return id
     ? dynamo
         .getItem({
-          TableName: "RoamJSExtensions",
+          TableName,
           Key: { id: { S: id.split("/")[0] } },
         })
         .promise()
@@ -88,7 +95,7 @@ export const handler: APIGatewayProxyHandler = (event) => {
         }))
     : dynamo
         .scan({
-          TableName: "RoamJSExtensions",
+          TableName,
         })
         .promise()
         .then((r) => ({

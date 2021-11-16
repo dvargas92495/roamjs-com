@@ -69,7 +69,7 @@ export const useCopyCode = (
       setCopied(true);
       setTimeout(() => setCopied(false), 1000);
     },
-    [setCopied]
+    [setCopied, initialLines]
   );
 
 export const useIsMobile = (): boolean => {

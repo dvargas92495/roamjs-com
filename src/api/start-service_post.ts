@@ -20,9 +20,10 @@ export const handler = async (
       headers: headers(event),
     };
   }
-  const { service, path = "services" } = JSON.parse(event.body || "{}") as {
+  const { service, path = "services", query } = JSON.parse(event.body || "{}") as {
     service: string;
     path: string;
+    query: string;
   };
   const serviceCamelCase = service
     .split("-")
@@ -54,8 +55,8 @@ export const handler = async (
           payment_method_types: ["card"],
           line_items,
           mode: "subscription",
-          success_url: `${origin}/${path}/${service}`,
-          cancel_url: `${origin}/${path}/${service}`,
+          success_url: `${origin}/${path}/${service}?success=true&${query}`,
+          cancel_url: `${origin}/${path}/${service}?cancel=true`,
           metadata: {
             service: serviceCamelCase,
             userId: user.id,

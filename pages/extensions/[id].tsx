@@ -11,6 +11,7 @@ import matter from "gray-matter";
 import {
   getCodeContent,
   getSingleCodeContent,
+  idToCamel,
   idToTitle,
   useCopyCode,
 } from "../../components/hooks";
@@ -38,8 +39,7 @@ import { isSafari } from "react-device-detect";
 import DemoVideo from "../../components/DemoVideo";
 import Loom from "../../components/Loom";
 import { ServiceButton } from "../../components/ServiceLayout";
-
-const rowLength = 4;
+import AES from "crypto-js/aes";
 
 const ExtensionPage = ({
   content,
@@ -81,23 +81,25 @@ const ExtensionPage = ({
   const total = randomItems.length;
   const title = idToTitle(id);
   const [copied, setCopied] = useState(false);
-  const onSave = useCopyCode(setCopied);
+  const [initialLines, setInitialLines] = useState("");
+  const onSave = useCopyCode(setCopied, initialLines);
   const mainEntry = legacy ? id : `${id}/main`;
   const [pagination, setPagination] = useState(0);
+  const rowLength = Math.min(4, randomItems.length);
   const onClickLeft = useCallback(
     () => setPagination((pagination - rowLength + total) % total),
-    [pagination, setPagination]
+    [pagination, setPagination, rowLength]
   );
   const onClickRight = useCallback(
     () => setPagination((pagination + rowLength + total) % total),
-    [pagination, setPagination]
+    [pagination, setPagination, rowLength]
   );
   useEffect(() => {
     axios.get(`${API_URL}/request-path`).then((r) => {
       const items = r.data.paths
         .filter((p) => p.state !== "PRIVATE" && p.id !== id)
         .map((p) => ({
-          image: `/thumbnails/${p.id}.png`,
+          image: `https://roamjs.com/thumbnails/${p.id}.png`,
           title: idToTitle(p.id),
           description: p.description,
           href: `/extensions/${p.id}`,
@@ -108,6 +110,36 @@ const ExtensionPage = ({
       setRandomItems(items);
     });
   }, [setRandomItems, id]);
+  const onToken = useCallback(
+    (token) => {
+      setInitialLines(`window.roamjs${idToCamel(id)}Token = "${token}";\n`);
+      const query = new URLSearchParams(window.location.search);
+      const state = query.get("state");
+      if (state) {
+        const [service, otp, key] = state.split("_");
+        const auth = AES.encrypt(JSON.stringify({ token }), key).toString();
+        axios.post(`${API_URL}/auth`, { service, otp, auth }).then(() => {
+          const poll = () =>
+            axios.get(`${API_URL}/auth?state=${service}_${otp}`).then((r) => {
+              if (r.data.success) {
+                window.close();
+                setTimeout(
+                  () =>
+                    window.alert(
+                      "You have successfully subscribed to this extension! You may close this window and return to Roam."
+                    ),
+                  1
+                );
+              } else {
+                setTimeout(poll, 1000);
+              }
+            });
+          poll();
+        });
+      }
+    },
+    [setInitialLines, id]
+  );
   return (
     <StandardLayout
       title={title}
@@ -124,7 +156,27 @@ const ExtensionPage = ({
         ]}
       />
       {development && <H2>UNDER DEVELOPMENT</H2>}
-      <H1>{title.toUpperCase()}</H1>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <H1>{title.toUpperCase()}</H1>
+        <div style={{ padding: "0 32px", maxWidth: 160 }}>
+          <span
+            style={{
+              display: "inline-block",
+              verticalAlign: "middle",
+              height: "100%",
+            }}
+          />
+          <img
+            src={`https://roamjs.com/thumbnails/${id}.png`}
+            style={{
+              verticalAlign: "middle",
+              width: "100%",
+              boxShadow: "0px 3px 14px #00000040",
+              borderRadius: 8,
+            }}
+          />
+        </div>
+      </div>
       <Subtitle>{description}</Subtitle>
       <hr style={{ marginTop: 28 }} />
       {!!premium && (
@@ -147,6 +199,7 @@ const ExtensionPage = ({
               price={premium.price}
               param={"extension"}
               inputAuthenticated={true}
+              onToken={onToken}
             />
           </div>
         </>
@@ -157,7 +210,7 @@ const ExtensionPage = ({
           <Body>
             You could use the Copy Extension button below to individually
             install this extension. To install, just paste anywhere in your Roam
-            graph and click "Yes, I Know What I'm Doing".
+            graph and click <b>"Yes, I Know What I'm Doing"</b>.
           </Body>
           <div style={{ marginBottom: 24 }}>
             <Button
@@ -188,7 +241,9 @@ const ExtensionPage = ({
           {entry ? getCodeContent(id, entry) : getSingleCodeContent(mainEntry)}
         </Prism>
       </div>
-      <Body>Finally, click "Yes, I Know What I'm Doing".</Body>
+      <Body>
+        Finally, click <b>"Yes, I Know What I'm Doing".</b>
+      </Body>
       <hr style={{ marginTop: 40 }} />
       {content.compiledSource ? (
         <MDXRemote {...content} components={MdxComponents} />
