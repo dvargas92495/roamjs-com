@@ -274,7 +274,8 @@ resource "aws_route53_record" "gitbook" {
 }
 
 resource "aws_dynamodb_table" "extensions" {
-  name           = "RoamJSExtensions"
+  for_each       = ["RoamJSExtensions", "RoamJSExtensionsDev"]
+  name           = each.value
   billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "id"
 
