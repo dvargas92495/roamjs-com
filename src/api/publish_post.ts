@@ -16,7 +16,7 @@ export const handler: APIGatewayProxyHandler = authenticate((event) => {
           .paths || []
     )
     .then((paths) =>
-      paths.includes(path)
+      paths.includes(path.replace(/^([^/]+)\/(.*)$/, '$1'))
         ? sts
             .assumeRole({
               RoleArn: process.env.LAMBDA_ROLE,

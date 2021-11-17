@@ -191,7 +191,9 @@ const ExtensionPage = ({
                     Some features in this extension require a premium
                     subscription including:
                   </Body>
-                  <blockquote>{premium.description}</blockquote>
+                  <ul>
+                    <li>{premium.description}</li>
+                  </ul>
                   <Body>Click the button below to include these features!</Body>
                   {StartNowButton}
                 </div>
