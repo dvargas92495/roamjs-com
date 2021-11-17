@@ -34,6 +34,7 @@ env:
   SLACK_CLIENT_ID: ${{ secrets.SLACK_CLIENT_ID }}
   SLACK_CLIENT_SECRET: ${{ secrets.SLACK_CLIENT_SECRET }}
   STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+  STRIPE_CHECKOUT_SECRET: ${{ secrets.STRIPE_CHECKOUT_SECRET }}
 
 jobs:
   deploy:
