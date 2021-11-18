@@ -20,31 +20,31 @@ import {
 } from "../components/SparqlQuery";
 import { addStyle, runExtension, toFlexRegex } from "../entry-helpers";
 
-addStyle(`.roamjs-sparql-editor .cm-comment {
+addStyle(`.roamjs-sparql-editor .cmt-comment {
   color: #72777d;
 }
 
-.roamjs-sparql-editor .cm-keyword {
+.roamjs-sparql-editor .cmt-keyword {
   color: #b32424;
 }
 
-.roamjs-sparql-editor .cm-variable-2 {
+.roamjs-sparql-editor .cmt-variable-2 {
   color: #14866d;
 }
 
-.roamjs-sparql-editor .cm-atom {
+.roamjs-sparql-editor .cmt-atom {
   color: #2a4b8d;
 }
 
-.roamjs-sparql-editor .cm-string {
+.roamjs-sparql-editor .cmt-string {
   color: #ac6600;
 }
 
-.roamjs-sparql-editor .cm-bracket {
+.roamjs-sparql-editor .cmt-bracket {
   color: inherit;
 }
 
-.roamjs-sparql-editor .cm-operator {
+.roamjs-sparql-editor .cmt-operator {
   color: inherit;
 }`);
 
