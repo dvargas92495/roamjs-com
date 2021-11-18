@@ -49,7 +49,7 @@ const WikiContent = ({
         )}&srprop=titlesnippet&srsort=relevance&origin=*`
       )
       .then((r) => {
-        const titles = r.data.query.search.map(
+        const titles = (r.data.query?.search || []).map(
           (s: { title: string }) => s.title
         );
         setResults(titles);
