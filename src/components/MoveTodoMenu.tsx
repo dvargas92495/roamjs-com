@@ -17,13 +17,16 @@ import React, {
 } from "react";
 import ReactDOM from "react-dom";
 import {
+  DAILY_NOTE_PAGE_TITLE_REGEX,
   createBlock,
   createPage,
   getChildrenLengthByPageUid,
   getPageUidByPageTitle,
+  getPageTitleByBlockUid,
   getTextByBlockUid,
   getUids,
   getUidsFromId,
+  parseRoamDate,
   toRoamDate,
   updateBlock,
 } from "roam-client";
@@ -39,7 +42,11 @@ const MoveTodoMenu = ({
   archivedDefault: boolean;
   onSuccess: () => void;
 }): React.ReactElement => {
-  const tomorrow = useMemo(() => addDays(new Date(), 1), []);
+  const tomorrow = useMemo(() => {
+    const title = getPageTitleByBlockUid(blockUid);
+    const ref = DAILY_NOTE_PAGE_TITLE_REGEX.test(title) ? parseRoamDate(title) : new Date();
+    return addDays(ref, 1)
+  }, []);
   const [target, setTarget] = useState(tomorrow);
   const unmountRef = useRef(0);
   const unmount = useCallback(() => {
