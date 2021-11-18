@@ -25,7 +25,7 @@ export const handler: CloudFrontRequestHandler = (event, _, callback) => {
     const newUri = '/extensions/twitter';
     return redirect(newUri);
   } else if (/^\/services(.*)$/.test(olduri)) {
-    const newUri = olduri.replace(/^\/services(.*)$/, "/extensions/$1");
+    const newUri = olduri.replace(/^\/services(.*)$/, "/extensions$1");
     return redirect(newUri);
   }
   return callback(null, request);
