@@ -13,7 +13,7 @@ export type LayoutProps = {
 export const defaultLayoutProps = {
   title: "RoamJS",
   description: "Become a Roam Power User",
-  img: "https://roamjs.com/images/logo-high-res.jpg",
+  img: "https://roamjs.com/images/logo-low-res.jpg",
 };
 
 const UserIconDynamic = dynamic(() => import("../components/UserIcon"), {

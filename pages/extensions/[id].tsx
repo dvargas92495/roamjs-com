@@ -192,7 +192,7 @@ const ExtensionPage = ({
                     subscription including:
                   </Body>
                   <ul>
-                    <li>{premium.description}</li>
+                    <li style={{ fontSize: "1rem" }}>{premium.description}</li>
                   </ul>
                   <Body>Click the button below to include these features!</Body>
                   {StartNowButton}
