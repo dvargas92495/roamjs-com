@@ -77,7 +77,8 @@ const RECURRING = [
   "Sidney J Bienvenu",
   "Jon Baum",
   "Edward Kako",
-  "Huimin Bhikshu"
+  "Huimin Bhikshu",
+  "Edwin Rooijakkers"
 ];
 
 const ONE_TIME = [
