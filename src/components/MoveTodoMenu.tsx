@@ -31,6 +31,8 @@ import {
   updateBlock,
 } from "roam-client";
 
+const MAX_DATE = new Date(9999, 11, 31);
+
 const MoveTodoMenu = ({
   blockUid,
   p,
@@ -44,8 +46,10 @@ const MoveTodoMenu = ({
 }): React.ReactElement => {
   const tomorrow = useMemo(() => {
     const title = getPageTitleByBlockUid(blockUid);
-    const ref = DAILY_NOTE_PAGE_TITLE_REGEX.test(title) ? parseRoamDate(title) : new Date();
-    return addDays(ref, 1)
+    const ref = DAILY_NOTE_PAGE_TITLE_REGEX.test(title)
+      ? parseRoamDate(title)
+      : new Date();
+    return addDays(ref, 1);
   }, []);
   const [target, setTarget] = useState(tomorrow);
   const unmountRef = useRef(0);
@@ -146,6 +150,7 @@ const MoveTodoMenu = ({
             value={target}
             onChange={(s) => setTarget(s)}
             minDate={tomorrow}
+            maxDate={MAX_DATE}
           />
           <div
             style={{
