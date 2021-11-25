@@ -26,11 +26,11 @@ const diffChildren = (
   );
   if (afterChildren.size > beforeChildren.size && addedCallback) {
     addedCallback(
-      Array.from(afterChildren).filter((b) => !beforeChildren.has(b))
+      Array.from(afterChildren).filter((b) => !beforeChildren.has(b) && !!b)
     );
   } else if (beforeChildren.size > afterChildren.size && removedCallback) {
     removedCallback(
-      Array.from(beforeChildren).filter((b) => !afterChildren.has(b))
+      Array.from(beforeChildren).filter((b) => !afterChildren.has(b) && !!b)
     );
   }
   if (callback) {
