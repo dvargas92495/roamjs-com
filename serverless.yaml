@@ -267,60 +267,18 @@ functions:
           path: subscribe-sponsorship
           method: post
           cors: true
+  token-get:
+    handler: out/token_get.handler
+    events:
+      - http:
+          path: token
+          method: get
+          cors: true
   token-post:
     handler: out/token_post.handler
     events:
       - http:
           path: token
-          method: post
-          cors: true
-  twitter-login-post:
-    handler: out/twitter-login_post.handler
-    events:
-      - http:
-          path: twitter-login
-          method: post
-          cors: true
-  twitter-auth-post:
-    handler: out/twitter-auth_post.handler
-    events:
-      - http:
-          path: twitter-auth
-          method: post
-          cors: true
-  twitter-feed-get:
-    handler: out/twitter-feed_get.handler
-    events:
-      - http:
-          path: twitter-feed
-          method: get
-          cors: true
-  twitter-tweet-post:
-    handler: out/twitter-tweet_post.handler
-    events:
-      - http:
-          path: twitter-tweet
-          method: post
-          cors: true
-  twitter-schedule-get:
-    handler: out/twitter-schedule_get.handler
-    events:
-      - http:
-          path: twitter-schedule
-          method: get
-          cors: true
-  twitter-schedule-post:
-    handler: out/twitter-schedule_post.handler
-    events:
-      - http:
-          path: twitter-schedule
-          method: post
-          cors: true
-  twitter-upload-post:
-    handler: out/twitter-upload_post.handler
-    events:
-      - http:
-          path: twitter-upload
           method: post
           cors: true
   user-get:

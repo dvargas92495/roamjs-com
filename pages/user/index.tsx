@@ -83,6 +83,8 @@ const Settings = ({ name, email }: { name: string; email: string }) => {
   });
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [tokenLoading, setTokenLoading] = useState(true);
+  const [tokenValue, setTokenValue] = useState("");
   const subscribe = useCallback(() => {
     setLoading(true);
     axiosPost("convertkit")
@@ -103,7 +105,10 @@ const Settings = ({ name, email }: { name: string; email: string }) => {
     axiosGet("convertkit")
       .then((r) => setIsSubscribed(r.data.isSubscribed))
       .finally(() => setLoading(false));
-  }, [setLoading, setIsSubscribed, axiosGet]);
+    axiosGet("token")
+      .then((r) => setTokenValue(r.data.token))
+      .finally(() => setTokenLoading(false));
+  }, [setLoading, setTokenValue, setTokenLoading]);
   return (
     <Items
       items={[
@@ -152,6 +157,31 @@ const Settings = ({ name, email }: { name: string; email: string }) => {
                 Subscribe
               </Button>
             )),
+        },
+        {
+          primary: (
+            <UserValue>
+              <Body>
+                {tokenValue
+                  .split("")
+                  .map(() => "*")
+                  .join("")}
+              </Body>
+            </UserValue>
+          ),
+          key: 3,
+          avatar: <Subtitle>Token</Subtitle>,
+          action: !tokenLoading ? (
+            <Button
+              variant={"outlined"}
+              color={"primary"}
+              onClick={() => window.navigator.clipboard.writeText(tokenValue)}
+            >
+              Copy
+            </Button>
+          ) : (
+            <Loading loading />
+          ),
         },
       ]}
     />
