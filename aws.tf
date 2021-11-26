@@ -141,7 +141,6 @@ module "aws-serverless-backend" {
         "github-projects/get",
         "github-repositories/get",
         "decrypt-proxy/post",
-        "encrypt/post",
         "end-service/post",
         "finish-start-service/post",
         "iframely/post",

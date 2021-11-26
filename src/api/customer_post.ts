@@ -6,11 +6,15 @@ import {
   emailCatch,
   emptyResponse,
   ses,
+  stripe,
 } from "../lambda-helpers";
 import { Webhook } from "diahook";
+import randomstring from "randomstring";
+import AES from "crypto-js/aes";
 
 const wh = new Webhook(process.env.DIAHOOK_SECRET);
 const ckApiSecret = process.env.CONVERTKIT_API_TOKEN;
+const encryptionSecret = process.env.ENCRYPTION_SECRET;
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -46,14 +50,25 @@ export const handler = async (
       if (private_metadata.stripeId) {
         return emptyResponse(event);
       }
+      const token = AES.encrypt(
+        `${id.replace(/^user_/, "")}:${randomstring.generate(15)}`,
+        encryptionSecret
+      );
       const email = email_addresses.find(
         (e) => e.id === primary_email_address_id
       ).email_address;
-      return axios
-        .put(`${process.env.FLOSS_API_URL}/stripe-user`, {
-          name: `${first_name} ${last_name}`,
+      return stripe.customers
+        .list({
           email,
         })
+        .then((existingCustomers) =>
+          existingCustomers.data.length
+            ? Promise.resolve(existingCustomers.data[0])
+            : stripe.customers.create({
+                email,
+                name: `${first_name} ${last_name}`,
+              })
+        )
         .then((r) =>
           axios
             .get(
@@ -73,19 +88,19 @@ export const handler = async (
                     .then((sub) => sub.data.subscription.subscriber.id)
             )
             .then((convertKit) => ({
-              stripeId: r.data.customer,
+              stripeId: r.id,
               convertKit,
             }))
             .catch((e) => {
               console.error(e);
               return {
-                stripeId: r.data.customer,
+                stripeId: r.id,
               };
             })
         )
-        .then((privateMetadata) =>
+        .then((d) =>
           users.updateUser(id, {
-            privateMetadata,
+            privateMetadata: { ...d, token },
           })
         )
         .then((user) =>

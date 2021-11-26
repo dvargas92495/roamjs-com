@@ -99,13 +99,6 @@ functions:
           path: decrypt-proxy
           method: post
           cors: true
-  encrypt-post:
-    handler: out/encrypt_post.handler
-    events:
-      - http:
-          path: encrypt
-          method: post
-          cors: true
   end-service-post:
     handler: out/end-service_post.handler
     events:
