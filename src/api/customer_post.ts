@@ -51,9 +51,9 @@ export const handler = async (
         return emptyResponse(event);
       }
       const token = AES.encrypt(
-        `${id.replace(/^user_/, "")}:${randomstring.generate(15)}`,
+        randomstring.generate(16),
         encryptionSecret
-      );
+      ).toString();
       const email = email_addresses.find(
         (e) => e.id === primary_email_address_id
       ).email_address;
