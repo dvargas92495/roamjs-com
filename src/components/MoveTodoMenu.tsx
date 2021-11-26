@@ -56,7 +56,7 @@ const MoveTodoMenu = ({
   const unmount = useCallback(() => {
     unmountRef.current = window.setTimeout(() => {
       ReactDOM.unmountComponentAtNode(p);
-    }, 100);
+    }, 200);
   }, [unmountRef]);
   const clear = useCallback(() => {
     clearTimeout(unmountRef.current);
@@ -143,6 +143,7 @@ const MoveTodoMenu = ({
         <div
           style={{ padding: 16 }}
           onMouseEnter={clear}
+          onMouseMove={clear}
           onMouseLeave={unmount}
           onMouseDown={(e) => e.stopPropagation()}
         >

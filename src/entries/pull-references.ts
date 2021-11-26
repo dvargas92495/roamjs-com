@@ -14,7 +14,6 @@ import {
 } from "roam-client";
 import { DAILY_NOTE_PAGE_REGEX } from "roam-client/lib/date";
 import {
-  createCustomSmartBlockCommand,
   createTagRegex,
   getLinkedReferences,
   getPageTitle,
@@ -95,19 +94,6 @@ runExtension("pull-references", () => {
   }
 });
 
-// legacy v1
-createCustomSmartBlockCommand({
-  command: "PULLREFERENCES",
-  processor: async () =>
-    pullReferences().then(async (bullets) => {
-      bullets.forEach((s) =>
-        window.roam42.smartBlocks.activeWorkflow.outputAdditionalBlock(s)
-      );
-      return "";
-    }),
-});
-
-// v2
 registerSmartBlocksCommand({
   text: "PULLREFERENCES",
   handler: (context: { targetUid: string }) => () =>
