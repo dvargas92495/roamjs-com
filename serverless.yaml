@@ -281,20 +281,6 @@ functions:
           path: token
           method: post
           cors: true
-  user-get:
-    handler: out/user_get.handler
-    events:
-      - http:
-          path: user
-          method: get
-          cors: true
-  user-put:
-    handler: out/user_put.handler
-    events:
-      - http:
-          path: user
-          method: put
-          cors: true
   versions-get:
     handler: out/versions_get.handler
     events:

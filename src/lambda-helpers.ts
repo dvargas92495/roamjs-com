@@ -13,6 +13,8 @@ import AWS from "aws-sdk";
 import Mixpanel from "mixpanel";
 import randomstring from "randomstring";
 import Stripe from "stripe";
+import AES from "crypto-js/aes";
+import encutf8 from "crypto-js/enc-utf8";
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2020-08-27",
@@ -311,6 +313,36 @@ ${e.stack}`,
       );
 };
 
+export const authenticateUser = (
+  Authorization: string,
+  dev?: boolean
+): Promise<User> => {
+  if (dev) {
+    setClerkApiKey(process.env.CLERK_DEV_API_KEY);
+  } else {
+    setClerkApiKey(process.env.CLERK_API_KEY);
+  }
+  const encryptionSecret = process.env.ENCRYPTION_SECRET;
+  const [email, token] = Buffer.from(
+    Authorization.replace(/^Bearer /, ""),
+    "base64"
+  )
+    .toString()
+    .split(":");
+  return users
+    .getUserList({ emailAddress: [email] })
+    .then((us) =>
+      us.find((u) => {
+        const stored = AES.decrypt(
+          u.privateMetadata.token as string,
+          encryptionSecret
+        ).toString(encutf8);
+        return stored && stored === token;
+      })
+    )
+    .catch(() => undefined);
+};
+
 export const authenticate =
   (
     handler: APIGatewayProxyHandler,
@@ -322,7 +354,11 @@ export const authenticate =
       event.headers.Authorization || event.headers.authorization || "";
     const dev = !!event.headers["x-roamjs-dev"];
 
-    return getUserFromEvent(Authorization, service, dev).then((user) => {
+    return Promise.all([
+      authenticateUser(Authorization, dev),
+      getUserFromEvent(Authorization, service, dev),
+    ]).then(([userv2, legacyUser]) => {
+      const user = userv2 || legacyUser;
       if (!user) {
         console.log(
           "Failed to authenticate",

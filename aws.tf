@@ -170,8 +170,6 @@ module "aws-serverless-backend" {
         "subscribe-sponsorship/post",
         "token/get",
         "token/post",
-        "user/get",
-        "user/put",
         "versions/get",
     ]
     cors = [
