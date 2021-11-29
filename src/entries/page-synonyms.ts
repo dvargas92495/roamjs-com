@@ -1,6 +1,7 @@
 import { isApple, runExtension } from "../entry-helpers";
 import {
   createOverlayObserver,
+  createPage,
   extractTag,
   getTextByBlockUid,
   getTreeByPageName,
@@ -141,5 +142,10 @@ runExtension("page-synonyms", () => {
         e.preventDefault();
       }
     }
+  });
+
+  createPage({
+    title: "roam/js/page-synonyms",
+    tree: [{ text: "Use Tags" }],
   });
 });
