@@ -2,8 +2,8 @@ import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { Prism } from "react-syntax-highlighter";
 import React, { useCallback, useEffect, useState } from "react";
-import { SignedOut } from "@clerk/clerk-react";
-import { API_URL } from "../../components/constants";
+import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
+import { API_URL, stripe } from "../../components/constants";
 import StandardLayout from "../../components/StandardLayout";
 import { serialize } from "../../components/serverSide";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
@@ -13,6 +13,8 @@ import {
   getSingleCodeContent,
   idToCamel,
   idToTitle,
+  useAuthenticatedAxiosGet,
+  useAuthenticatedAxiosPost,
   useCopyCode,
 } from "../../components/hooks";
 import {
@@ -30,6 +32,7 @@ import {
   ThankYouSponsor,
   isThankYouEmoji,
   CardGrid,
+  ConfirmationDialog,
 } from "@dvargas92495/ui";
 import SponsorDialog from "../../components/SponsorDialog";
 import RoamJSDigest from "../../components/RoamJSDigest";
@@ -38,8 +41,262 @@ import fs from "fs";
 import { isSafari } from "react-device-detect";
 import DemoVideo from "../../components/DemoVideo";
 import Loom from "../../components/Loom";
-import { ServiceButton } from "../../components/ServiceLayout";
 import AES from "crypto-js/aes";
+import { useRouter } from "next/router";
+import ServiceToken from "../../components/ServiceToken";
+
+const StartButtonText = ({ price }: { price: number }) => (
+  <>
+    <span style={{ fontSize: 14 }}>Start for</span>
+    {price === 0 ? (
+      <span style={{ fontSize: 14, marginLeft: 4 }}>Free</span>
+    ) : (
+      <>
+        <span style={{ fontWeight: 600, fontSize: 18, marginLeft: 4 }}>
+          ${price}
+        </span>
+        <span style={{ textTransform: "none" }}>/mo</span>
+      </>
+    )}
+  </>
+);
+
+const Service = ({
+  id,
+  end,
+  inputAuthenticated,
+  onToken,
+}: {
+  id: string;
+  end: () => void;
+  inputAuthenticated: boolean;
+  onToken?: (s: string) => void;
+}) => {
+  const userData = useUser().publicMetadata as {
+    [key: string]: { token: string; authenticated?: boolean };
+  };
+  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
+  const camel = idToCamel(id);
+  const {
+    token = "NO TOKEN FOUND FOR USER",
+    authenticated = inputAuthenticated,
+  } = userData?.[camel];
+  const [copied, setCopied] = useState(false);
+  const onSave = useCopyCode(
+    setCopied,
+    `window.roamjs${camel}Token = "${token}";\n`
+  );
+  const onEnd = useCallback(
+    () => authenticatedAxiosPost("end-service", { service: id }),
+    [authenticatedAxiosPost]
+  );
+  useEffect(() => {
+    onToken(token);
+  }, [onToken]);
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        height: "100%",
+        alignItems: "center",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          flexDirection: "column",
+          width: "70%",
+        }}
+      >
+        {!authenticated && (
+          <>
+            <H3>Thanks for subscribing!</H3>
+            <span style={{ fontSize: 18, marginBottom: 32 }}>
+              Click the button below to copy the extension and paste it anywhere
+              in your graph to get started!
+            </span>
+            <Button
+              onClick={() => onSave(id)}
+              color="primary"
+              variant="contained"
+            >
+              COPY EXTENSION
+            </Button>
+            <span style={{ minHeight: 20 }}>{copied && "COPIED!"}</span>
+          </>
+        )}
+        <div style={{ marginTop: 32 }}></div>
+        <ServiceToken id={id} token={token} />
+      </div>
+      <div>
+        <ConfirmationDialog
+          buttonText={"End Service"}
+          color="secondary"
+          title={`Ending ${idToTitle(id)}`}
+          content={`Are you sure you want to unsubscribe from the RoamJS ${idToTitle(
+            id
+          )}?`}
+          action={onEnd}
+          onSuccess={end}
+        />
+      </div>
+    </div>
+  );
+};
+
+const LaunchButton: React.FC<{
+  start: () => void;
+  id: string;
+  price: number;
+  refreshUser: () => void;
+}> = ({ start, id, price, refreshUser }) => {
+  const {
+    query: { started },
+    pathname,
+  } = useRouter();
+  const authenticatedAxiosGet = useAuthenticatedAxiosGet();
+  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
+  const startService = useCallback(
+    () =>
+      authenticatedAxiosPost(price === 0 ? "token" : "start-service", {
+        service: id,
+        path: /^\/(services|extensions)\//.exec(pathname)?.[1],
+        query: window.location.search.slice(1),
+      }).then((r) =>
+        r.data.sessionId
+          ? stripe.then((s) =>
+              s
+                .redirectToCheckout({
+                  sessionId: r.data.sessionId,
+                })
+                .catch((e) => console.error(e))
+            )
+          : refreshUser()
+      ),
+    [authenticatedAxiosPost]
+  );
+  const [disabled, setDisabled] = useState(true);
+  useEffect(() => {
+    const checkStripe = () =>
+      authenticatedAxiosGet("connected?key=stripeId")
+        .then((r) => {
+          if (r.data.connected) {
+            setDisabled(false);
+          } else {
+            setTimeout(checkStripe, 1000);
+          }
+        })
+        .catch(() => setTimeout(checkStripe, 5000));
+    checkStripe();
+  }, [authenticatedAxiosGet]);
+  return (
+    <ConfirmationDialog
+      action={startService}
+      buttonText={<StartButtonText price={price} />}
+      content={`By clicking submit below, you will subscribe to the RoamJS Service: ${idToTitle(
+        id
+      )}${price > 0 ? ` for $${price}/month` : ""}.`}
+      onSuccess={start}
+      title={`RoamJS ${idToTitle(id)}`}
+      defaultIsOpen={started === "true"}
+      disabled={disabled}
+    />
+  );
+};
+
+const CheckSubscription = ({
+  id,
+  start,
+  children,
+  price,
+}: {
+  id: string;
+  start: () => void;
+  price: number;
+  children: (button: React.ReactNode) => React.ReactNode;
+}) => {
+  const user = useUser();
+  const { publicMetadata } = user;
+  useEffect(() => {
+    if (publicMetadata[idToCamel(id)]) {
+      start();
+    }
+  }, [start, publicMetadata, id]);
+  return (
+    <>
+      {children(
+        <LaunchButton
+          start={start}
+          id={id}
+          price={price}
+          refreshUser={() =>
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore refresh metadata state
+            user.update({})
+          }
+        />
+      )}
+    </>
+  );
+};
+
+export const ServiceButton = ({
+  id,
+  price,
+  SplashLayout,
+  param,
+  inputAuthenticated,
+  onToken,
+}: {
+  id: string;
+  price: number;
+  SplashLayout: (props: {
+    StartNowButton: React.ReactNode;
+  }) => React.ReactElement;
+  param: string;
+  inputAuthenticated: boolean;
+  onToken?: (s: string) => void;
+}): React.ReactElement => {
+  const [started, setStarted] = useState(false);
+  const router = useRouter();
+  const start = useCallback(() => setStarted(true), [setStarted]);
+  const end = useCallback(() => setStarted(false), [setStarted]);
+  const login = useCallback(
+    () => router.push(`/login?${param}=${id}`),
+    [router]
+  );
+  return (
+    <>
+      <SignedIn>
+        <CheckSubscription id={id} start={start} price={price}>
+          {(StartNowButton) =>
+            started ? (
+              <Service
+                id={id}
+                end={end}
+                inputAuthenticated={inputAuthenticated}
+                onToken={onToken}
+              />
+            ) : (
+              <SplashLayout StartNowButton={StartNowButton} />
+            )
+          }
+        </CheckSubscription>
+      </SignedIn>
+      <SignedOut>
+        <SplashLayout
+          StartNowButton={
+            <Button color={"primary"} variant={"contained"} onClick={login}>
+              <StartButtonText price={price} />
+            </Button>
+          }
+        />
+      </SignedOut>
+    </>
+  );
+};
 
 const ExtensionPage = ({
   content,
