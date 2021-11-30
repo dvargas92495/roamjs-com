@@ -134,6 +134,7 @@ const ONE_TIME = [
   "Keith Altomare",
   "David Cohn",
   "Rita Castilho",
+  "Danaca Booth",
   "Habib Sayah",
 ];
 

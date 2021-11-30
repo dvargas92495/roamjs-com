@@ -280,31 +280,8 @@ export const getUserFromEvent = (
             ? user
             : undefined
         )
-        .catch((e) => {
-          return ses
-            .sendEmail({
-              Destination: {
-                ToAddresses: ["dvargas92495@gmail.com"],
-              },
-              Message: {
-                Body: {
-                  Text: {
-                    Charset: "UTF-8",
-                    Data: `An error was thrown in a RoamJS lambda:
-
-${e.name}: ${e.message}
-${e.stack}`,
-                  },
-                },
-                Subject: {
-                  Charset: "UTF-8",
-                  Data: `RoamJS Error: Getting User From Clerk`,
-                },
-              },
-              Source: "support@roamjs.com",
-            })
-            .promise()
-            .then(() => undefined);
+        .catch(() => {
+          return undefined;
         })
     : findUser(
         (user) =>
