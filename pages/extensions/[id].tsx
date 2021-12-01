@@ -43,7 +43,6 @@ import DemoVideo from "../../components/DemoVideo";
 import Loom from "../../components/Loom";
 import AES from "crypto-js/aes";
 import { useRouter } from "next/router";
-import ServiceToken from "../../components/ServiceToken";
 
 const StartButtonText = ({ price }: { price: number }) => (
   <>
@@ -64,28 +63,20 @@ const StartButtonText = ({ price }: { price: number }) => (
 const Service = ({
   id,
   end,
-  inputAuthenticated,
   onToken,
 }: {
   id: string;
   end: () => void;
-  inputAuthenticated: boolean;
   onToken?: (s: string) => void;
 }) => {
   const userData = useUser().publicMetadata as {
-    [key: string]: { token: string; authenticated?: boolean };
+    [key: string]: { token: string; };
   };
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const camel = idToCamel(id);
   const {
     token = "NO TOKEN FOUND FOR USER",
-    authenticated = inputAuthenticated,
   } = userData?.[camel];
-  const [copied, setCopied] = useState(false);
-  const onSave = useCopyCode(
-    setCopied,
-    `window.roamjs${camel}Token = "${token}";\n`
-  );
   const onEnd = useCallback(
     () => authenticatedAxiosPost("end-service", { service: id }),
     [authenticatedAxiosPost]
@@ -102,34 +93,6 @@ const Service = ({
         alignItems: "center",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          flexDirection: "column",
-          width: "70%",
-        }}
-      >
-        {!authenticated && (
-          <>
-            <H3>Thanks for subscribing!</H3>
-            <span style={{ fontSize: 18, marginBottom: 32 }}>
-              Click the button below to copy the extension and paste it anywhere
-              in your graph to get started!
-            </span>
-            <Button
-              onClick={() => onSave(id)}
-              color="primary"
-              variant="contained"
-            >
-              COPY EXTENSION
-            </Button>
-            <span style={{ minHeight: 20 }}>{copied && "COPIED!"}</span>
-          </>
-        )}
-        <div style={{ marginTop: 32 }}></div>
-        <ServiceToken id={id} token={token} />
-      </div>
       <div>
         <ConfirmationDialog
           buttonText={"End Service"}
@@ -154,7 +117,6 @@ const LaunchButton: React.FC<{
 }> = ({ start, id, price, refreshUser }) => {
   const {
     query: { started },
-    pathname,
   } = useRouter();
   const authenticatedAxiosGet = useAuthenticatedAxiosGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
@@ -162,7 +124,6 @@ const LaunchButton: React.FC<{
     () =>
       authenticatedAxiosPost(price === 0 ? "token" : "start-service", {
         service: id,
-        path: /^\/(services|extensions)\//.exec(pathname)?.[1],
         query: window.location.search.slice(1),
       }).then((r) =>
         r.data.sessionId
@@ -246,8 +207,6 @@ export const ServiceButton = ({
   id,
   price,
   SplashLayout,
-  param,
-  inputAuthenticated,
   onToken,
 }: {
   id: string;
@@ -255,8 +214,6 @@ export const ServiceButton = ({
   SplashLayout: (props: {
     StartNowButton: React.ReactNode;
   }) => React.ReactElement;
-  param: string;
-  inputAuthenticated: boolean;
   onToken?: (s: string) => void;
 }): React.ReactElement => {
   const [started, setStarted] = useState(false);
@@ -264,7 +221,7 @@ export const ServiceButton = ({
   const start = useCallback(() => setStarted(true), [setStarted]);
   const end = useCallback(() => setStarted(false), [setStarted]);
   const login = useCallback(
-    () => router.push(`/login?${param}=${id}`),
+    () => router.push(`/login?extension=${id}`),
     [router]
   );
   return (
@@ -276,7 +233,6 @@ export const ServiceButton = ({
               <Service
                 id={id}
                 end={end}
-                inputAuthenticated={inputAuthenticated}
                 onToken={onToken}
               />
             ) : (
@@ -369,7 +325,6 @@ const ExtensionPage = ({
   }, [setRandomItems, id]);
   const onToken = useCallback(
     (token) => {
-      setInitialLines(`window.roamjs${idToCamel(id)}Token = "${token}";\n`);
       const query = new URLSearchParams(window.location.search);
       const state = query.get("state");
       if (state) {
@@ -456,8 +411,6 @@ const ExtensionPage = ({
                 </div>
               )}
               price={premium.price}
-              param={"extension"}
-              inputAuthenticated={true}
               onToken={onToken}
             />
           </div>

@@ -6,16 +6,14 @@ import Layout, { defaultLayoutProps } from "../../components/Layout";
 
 const Redirect = () => {
   const router = useRouter();
-  const { service, extension, state = "roamjs" } = useRouter().query;
+  const { extension, state = "roamjs" } = useRouter().query;
   useEffect(() => {
-    if (service) {
-      router.push(`/services/${service}?started=true&state=${state}`);
-    } else if (extension) {
+    if (extension) {
       router.push(`/extensions/${extension}?started=true&state=${state}`);
     } else {
       router.push("/");
     }
-  }, [service, extension, state]);
+  }, [extension, state]);
   return (
     <div>
       <Loading loading />
@@ -25,16 +23,11 @@ const Redirect = () => {
 };
 
 const LoginPage = (): JSX.Element => {
-  const { service, extension, state = "roamjs" } = useRouter().query;
+  const { extension, state = "roamjs" } = useRouter().query;
   const signInProps = extension
     ? {
         afterSignIn: `${window.location.origin}/extensions/${extension}?started=true&state=${state}`,
         signUpURL: `${window.location.origin}/signup?extension=${extension}&state=${state}`,
-      }
-    : service
-    ? {
-        afterSignIn: `${window.location.origin}/services/${service}?started=true`,
-        signUpURL: `${window.location.origin}/signup?service=${service}`,
       }
     : {};
   return (
