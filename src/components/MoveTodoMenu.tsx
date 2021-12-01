@@ -8,6 +8,7 @@ import {
 } from "@blueprintjs/core";
 import { DatePicker } from "@blueprintjs/datetime";
 import { addDays } from "date-fns";
+import addYears from "date-fns/addYears";
 import React, {
   useCallback,
   useEffect,
@@ -31,8 +32,6 @@ import {
   updateBlock,
 } from "roam-client";
 
-const MAX_DATE = new Date(9999, 11, 31);
-
 const MoveTodoMenu = ({
   blockUid,
   p,
@@ -51,6 +50,9 @@ const MoveTodoMenu = ({
       : new Date();
     return addDays(ref, 1);
   }, []);
+  const maxDate = useMemo(() => { // https://github.com/palantir/blueprint/issues/877
+    return addYears(tomorrow, 5);
+  }, [tomorrow]);
   const [target, setTarget] = useState(tomorrow);
   const unmountRef = useRef(0);
   const unmount = useCallback(() => {
@@ -151,7 +153,7 @@ const MoveTodoMenu = ({
             value={target}
             onChange={(s) => setTarget(s)}
             minDate={tomorrow}
-            maxDate={MAX_DATE}
+            maxDate={maxDate}
           />
           <div
             style={{
