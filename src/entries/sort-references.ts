@@ -1,10 +1,11 @@
 import parse from "date-fns/parse";
-import { createSortIcons, getPageTitle, runExtension } from "../entry-helpers";
+import { createSortIcons, runExtension } from "../entry-helpers";
 import {
   createObserver,
   getConfigFromPage,
   getLinkedPageReferences,
   getTreeByPageName,
+  getPageTitleValueByHtmlElement,
 } from "roam-client";
 
 runExtension("sort-references", () => {
@@ -26,16 +27,16 @@ runExtension("sort-references", () => {
       b: { title: string; time: number }
     ) => number
   ) => {
-    const pageTitle = getPageTitle(sortContainer);
+    const pageTitle = getPageTitleValueByHtmlElement(sortContainer);
     if (!pageTitle) {
       return;
     }
     const linkedReferences = getLinkedPageReferences(
-      pageTitle.textContent
+      pageTitle
     ).concat(
       window.roamAlphaAPI
         .q(
-          `[:find ?t ?ct :where [?c :create/time ?ct] [?c :node/title ?t] [?c :block/refs ?r] [?r :node/title "${pageTitle.textContent}"]]`
+          `[:find ?t ?ct :where [?c :create/time ?ct] [?c :node/title ?t] [?c :block/refs ?r] [?r :node/title "${pageTitle}"]]`
         )
         .map((p) => ({ title: p[0] as string, time: p[1] as number }))
     );
