@@ -1,7 +1,6 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import {
-  generateToken,
   getClerkUser,
   getStripePriceId,
   headers,
@@ -85,9 +84,7 @@ export const handler = async (
   await users.updateUser(user.id, {
     publicMetadata: {
       ...user.publicMetadata,
-      [serviceCamelCase]: {
-        token: generateToken(user.id),
-      },
+      [serviceCamelCase]: {},
     },
   });
 

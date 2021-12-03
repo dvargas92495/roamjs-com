@@ -1,7 +1,7 @@
 import { users } from "@clerk/clerk-sdk-node";
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import type Stripe from "stripe";
-import { generateToken, headers, stripe } from "../lambda-helpers";
+import { headers, stripe } from "../lambda-helpers";
 
 const normalizeHeaders = (hdrs: APIGatewayProxyEvent["headers"]) =>
   Object.fromEntries(
@@ -45,9 +45,7 @@ export const handler = async (
     await users.updateUser(userId, {
       publicMetadata: {
         ...publicMetadata,
-        [service]: {
-          token: generateToken(userId),
-        },
+        [service]: {},
       },
     });
 
