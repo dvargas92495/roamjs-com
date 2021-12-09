@@ -1,7 +1,6 @@
 import {
   createBlock,
   createButtonObserver,
-  getActiveUids,
   getFirstChildUidByBlockUid,
   getUidsFromId,
   registerSmartBlocksCommand,
@@ -14,34 +13,38 @@ import {
   importArticle,
   renderImportArticle,
 } from "../components/ImportArticle";
-import { createCustomSmartBlockCommand, runExtension } from "../entry-helpers";
+import { runExtension } from "../entry-helpers";
 
 const inlineImportArticle = async ({
   value,
   parentUid,
 }: {
   value: string;
-  parentUid: string;
+  parentUid?: string;
 }) => {
   const match = value.match(urlRegex({ strict: true }));
   if (match) {
     const indent = getIndentConfig();
     const url = match[0];
-    const loadingUid = createBlock({
-      node: { text: "Loading..." },
-      parentUid,
-    });
-    const blockUid = await new Promise<string>((resolve) =>
-      setTimeout(() => resolve(getFirstChildUidByBlockUid(parentUid)), 1)
-    );
-    await importArticle({
-      url,
-      blockUid,
-      indent,
-    }).catch(() => {
-      updateBlock({ uid: loadingUid, text: ERROR_MESSAGE });
-    });
-    return `[Source](${url})`;
+    if (parentUid) {
+      const loadingUid = createBlock({
+        node: { text: "Loading..." },
+        parentUid,
+      });
+      const blockUid = await new Promise<string>((resolve) =>
+        setTimeout(() => resolve(getFirstChildUidByBlockUid(parentUid)), 1)
+      );
+      await importArticle({
+        url,
+        blockUid,
+        indent,
+      }).catch(() => {
+        updateBlock({ uid: loadingUid, text: ERROR_MESSAGE });
+      });
+      return `[Source](${url})`;
+    } else {
+      return importArticle({ url, indent });
+    }
   } else {
     return "Invalid Article URL";
   }
@@ -66,20 +69,11 @@ runExtension("article", () => {
     }
   });
 
-  // legacy v1
-  createCustomSmartBlockCommand({
-    command: "ARTICLE",
-    processor: async (value) => {
-      const { blockUid } = getActiveUids();
-      return inlineImportArticle({ value, parentUid: blockUid });
-    },
-  });
-
   // v2
   registerSmartBlocksCommand({
     text: "ARTICLE",
     handler: () => (value) => {
-      return 'Smart blocks V2 currently doesnt support article command. Reach out to support@roamjs.com if you need this feature!';
+      return inlineImportArticle({value});
     },
   });
 });

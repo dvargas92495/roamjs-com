@@ -12,11 +12,13 @@ import {
 } from "@blueprintjs/core";
 import {
   clearBlockByUid,
-  getNthChildUidByBlockUid,
-  getOrderByBlockUid,
+  createBlock,
   getTreeByPageName,
   getUidsFromId,
+  InputTextNode,
+  updateBlock,
   getParentUidByBlockUid,
+  getOrderByBlockUid,
 } from "roam-client";
 import axios from "axios";
 import { Readability } from "@mozilla/readability";
@@ -84,10 +86,10 @@ export const importArticle = ({
   onSuccess,
 }: {
   url: string;
-  blockUid: string;
+  blockUid?: string;
   indent: boolean;
   onSuccess?: () => void;
-}): Promise<void> =>
+}): Promise<InputTextNode[]> =>
   axios
     .post(
       `${process.env.API_URL}/article`,
@@ -110,69 +112,52 @@ export const importArticle = ({
       }${html.substring(headIndex)}`;
       const doc = new DOMParser().parseFromString(htmlWithBase, "text/html");
       const { content } = new Readability(doc).parse();
-      clearBlockByUid(blockUid);
-      const parentUid = getParentUidByBlockUid(blockUid);
-      const firstOrder = getOrderByBlockUid(blockUid);
-      const stack = [{ "parent-uid": parentUid, order: firstOrder }];
+      const stack: InputTextNode[] = [];
+      const inputTextNodes: InputTextNode[] = [];
       const markdown = td.turndown(content);
       const nodes = markdown.split("\n").filter((c) => !!c.trim());
-      let firstHeaderFound = false;
       let previousNodeTabbed = false;
-      let bulletIsParagraph = false;
       for (const node of nodes) {
         const isHeader = /^#{1,3} /.test(node);
         const isBullet = node.startsWith("* ");
         const bulletText = isBullet ? node.substring(2).trim() : node;
         const text = isHeader ? bulletText.replace(/^#+ /, "") : bulletText;
-        const heading = isHeader ? node.split(' ')[0].length : 0;
-        if (isBullet && previousNodeTabbed) {
-          bulletIsParagraph = true;
+        const heading = isHeader ? node.split(" ")[0].length : 0;
+        if (isHeader && indent) {
+          stack.pop();
         }
-        if (isHeader) {
-          if (indent) {
-            if (firstHeaderFound) {
-              stack.pop();
-              bulletIsParagraph = false;
-            } else {
-              firstHeaderFound = true;
-            }
-          }
+        if (isBullet && !previousNodeTabbed) {
+          const children = stack[stack.length - 1]?.children || inputTextNodes;
+          stack.push(children.slice(-1)[0]);
         }
-        const location = stack[stack.length - 1];
-        if (isBullet && !bulletIsParagraph) {
-          await new Promise((resolve) => setTimeout(resolve, 1));
-          const newParentUid = getNthChildUidByBlockUid({
-            blockUid: location["parent-uid"],
-            order: location["order"],
-          });
-          stack.push({ order: 0, "parent-uid": newParentUid });
-        }
-        if (stack.length === 1 && location.order === firstOrder) {
-          window.roamAlphaAPI.updateBlock({
-            block: { string: text, uid: blockUid, heading },
-          });
-        } else {
-          window.roamAlphaAPI.createBlock({
-            block: { string: text, heading },
-            location,
-          });
-        }
-        location.order++;
-        if (isBullet && !bulletIsParagraph) {
+        const children = stack[stack.length - 1]?.children || inputTextNodes;
+        const inputTextNode: InputTextNode = { text, heading, children: [] };
+        children.push(inputTextNode);
+        if (isBullet && !previousNodeTabbed) {
           stack.pop();
         }
         if (indent && isHeader) {
-          await new Promise((resolve) => setTimeout(resolve, 1));
-          const newParentUid = getNthChildUidByBlockUid({
-            blockUid: location["parent-uid"],
-            order: location["order"] - 1,
-          });
-          stack.push({ order: 0, "parent-uid": newParentUid });
+          stack.push(inputTextNode);
           previousNodeTabbed = true;
         } else {
           previousNodeTabbed = false;
         }
       }
+      if (blockUid) {
+        clearBlockByUid(blockUid);
+        updateBlock({ ...inputTextNodes[0], uid: blockUid });
+        inputTextNodes[0].children.forEach((node, order) =>
+          createBlock({ node, order, parentUid: blockUid })
+        );
+        const parentUid = getParentUidByBlockUid(blockUid);
+        const order = getOrderByBlockUid(blockUid);
+        inputTextNodes
+          .slice(1)
+          .forEach((node, o) =>
+            createBlock({ node, order: o + order + 1, parentUid })
+          );
+      }
+      return inputTextNodes;
     });
 
 const ImportContent = ({
