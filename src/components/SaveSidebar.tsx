@@ -15,6 +15,7 @@ import {
   getCurrentPageUid,
   getPageUidByPageTitle,
   getTreeByPageName,
+  deleteBlock,
 } from "roam-client";
 import { SidebarWindow } from "roam-client/lib/types";
 import { getWindowUid, openBlockElement } from "../entry-helpers";
@@ -31,6 +32,17 @@ const SaveSidebar = (): React.ReactElement => {
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const [value, setValue] = useState("");
   const [savePageState, setSavePageState] = useState(false);
+  const savedSidebar = useMemo(
+    () =>
+      getTreeByPageName("roam/js/sidebar").find((c) => /saved/i.test(c.text))
+        ?.children || [],
+    [isOpen]
+  );
+  const labelByUid = useMemo(
+    () => Object.fromEntries(savedSidebar.map((s) => [s.uid, s.text])),
+    [savedSidebar]
+  );
+  const [label, setLabel] = useState<string>("NEW");
   return (
     <>
       <Tooltip content={"Save sidebar windows"}>
@@ -45,11 +57,22 @@ const SaveSidebar = (): React.ReactElement => {
       >
         <div className={Classes.DIALOG_BODY}>
           <h6>Enter the label to save the content of this sidebar under:</h6>
+          {label === "NEW" && (
+            <Label>
+              New Label
+              <InputGroup
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+              />
+            </Label>
+          )}
           <Label>
-            Label
-            <InputGroup
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
+            Save As
+            <MenuItemSelect
+              activeItem={label}
+              items={["NEW", ...savedSidebar.map((s) => s.uid)]}
+              transformItem={(s) => labelByUid[s] || "NEW"}
+              onItemSelect={(s) => setLabel(s)}
             />
           </Label>
           <Checkbox
@@ -64,7 +87,7 @@ const SaveSidebar = (): React.ReactElement => {
           <div className={Classes.DIALOG_FOOTER_ACTIONS}>
             <Button
               text={"Save"}
-              disabled={!value}
+              disabled={label !== "NEW" && !value}
               onClick={() => {
                 const windows =
                   window.roamAlphaAPI.ui.rightSidebar.getWindows();
@@ -99,13 +122,22 @@ const SaveSidebar = (): React.ReactElement => {
                         : [])
                     ),
                 };
-                createBlock({
-                  node: uid
-                    ? configToSave
-                    : { text: "saved", children: [configToSave] },
-                  parentUid: uid || parentUid,
-                  order: children?.length,
-                });
+                if (label !== 'NEW') {
+                  (
+                    children.find((c) => c.uid === label)?.children || []
+                  ).forEach((c) => deleteBlock(c.uid));
+                  configToSave.children.forEach((node, order) =>
+                    createBlock({ node, order, parentUid: label })
+                  );
+                } else {
+                  createBlock({
+                    node: uid
+                      ? configToSave
+                      : { text: "saved", children: [configToSave] },
+                    parentUid: uid || parentUid,
+                    order: children?.length,
+                  });
+                }
                 close();
               }}
               intent={Intent.PRIMARY}
