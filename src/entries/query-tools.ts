@@ -27,10 +27,12 @@ const menuItemCallback =
     isSortByBlocks =
       !!blockConfig["Sort Blocks"] || !!pageConfig["Sort Blocks"];
     const refContainer =
-      sortContainer.getElementsByClassName("refs-by-page-view")[0];
-    const refsInView = Array.from(
-      refContainer.getElementsByClassName("rm-ref-page-view")
-    );
+      sortContainer.getElementsByClassName("refs-by-page-view")[0] ||
+      sortContainer;
+    const refsInView =
+      refContainer === sortContainer
+        ? Array.from(refContainer.children).filter((n) => n.tagName === "DIV")
+        : Array.from(refContainer.getElementsByClassName("rm-ref-page-view"));
     refsInView.forEach((r) => refContainer.removeChild(r));
     if (isSortByBlocks) {
       const blocksInView = refsInView.flatMap((r) =>
@@ -66,12 +68,10 @@ const menuItemCallback =
       blocksInView.forEach((r) => refContainer.appendChild(r));
     } else {
       refsInView.sort((a, b) => {
-        const aTitle = a.getElementsByClassName(
-          "rm-ref-page-view-title"
-        )[0] as HTMLDivElement;
-        const bTitle = b.getElementsByClassName(
-          "rm-ref-page-view-title"
-        )[0] as HTMLDivElement;
+        const aTitle = (a.getElementsByClassName("rm-ref-page-view-title")[0] ||
+          a.querySelector(".rm-zoom-item-content")) as HTMLDivElement;
+        const bTitle = (b.getElementsByClassName("rm-ref-page-view-title")[0] ||
+          b.querySelector(".rm-zoom-item-content")) as HTMLDivElement;
         return sortBy(aTitle.textContent, bTitle.textContent);
       });
       refsInView.forEach((r) => refContainer.appendChild(r));
@@ -79,7 +79,7 @@ const menuItemCallback =
   };
 
 const sortCallbacks = {
-  "Alphabetically": (refContainer: Element) =>
+  Alphabetically: (refContainer: Element) =>
     menuItemCallback(refContainer, (a, b) =>
       isSortByBlocks
         ? getTextByBlockUid(a).localeCompare(getTextByBlockUid(b))
