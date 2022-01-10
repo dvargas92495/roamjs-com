@@ -858,6 +858,24 @@ export const parseRoamBlocks = ({
     context,
   });
 
+export const parseJustText = (text: string): string => parseRoamBlocks({
+  content: [
+    {
+      text,
+      order: 0,
+      viewType: "document",
+      children: [],
+      uid: "",
+      heading: 0,
+      open: true,
+      textAlign: "left",
+      editTime: new Date(),
+      props: { imageResize: {}, iframe: {} },
+    },
+  ],
+  viewType: "document",
+})
+
 export const getBlockUidFromTarget = (target: HTMLElement): string => {
   const ref = target.closest(".rm-block-ref") as HTMLSpanElement;
   if (ref) {

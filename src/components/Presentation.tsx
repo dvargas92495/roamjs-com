@@ -13,6 +13,7 @@ import {
   getBlockUidFromTarget,
   isControl,
   openBlockElement,
+  parseJustText,
   parseRoamBlocks,
 } from "../entry-helpers";
 import { isSafari } from "mobile-device-detect";
@@ -174,7 +175,21 @@ const TitleSlide = ({
         Alt={() => (
           <>
             {texts.map((t, i) =>
-              i === 0 ? <h1 key={i}>{t}</h1> : <h3 key={i}>{t}</h3>
+              i === 0 ? (
+                <h1
+                  key={i}
+                  dangerouslySetInnerHTML={{
+                    __html: parseJustText(t),
+                  }}
+                />
+              ) : (
+                <h3
+                  key={i}
+                  dangerouslySetInnerHTML={{
+                    __html: parseJustText(t),
+                  }}
+                />
+              )
             )}
           </>
         )}
@@ -387,7 +402,9 @@ const ContentSlide = ({
 
             const clientWidth = Number(d.style.width.replace("px", ""));
             const clientHeight = Number(d.style.height.replace("px", ""));
-            const parent = d.closest('.roamjs-bullets-container') || d.closest('.roamjs-media-container');
+            const parent =
+              d.closest(".roamjs-bullets-container") ||
+              d.closest(".roamjs-media-container");
             if (parent) {
               const containerWidth = parent.clientWidth;
               const containerHeight = parent.clientHeight;
@@ -491,7 +508,11 @@ const ContentSlide = ({
   };
   return (
     <section style={{ textAlign: "left" }} {...props}>
-      <h1>{text}</h1>
+      <h1
+        dangerouslySetInnerHTML={{
+          __html: parseJustText(text),
+        }}
+      />
       <div
         style={{
           display: "flex",
