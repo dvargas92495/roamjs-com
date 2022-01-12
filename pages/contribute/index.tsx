@@ -80,6 +80,7 @@ const RECURRING = [
   "Huimin Bhikshu",
   "Edwin Rooijakkers",
   "Austen Allred",
+  "Paulo Vieira",
 ];
 
 const ONE_TIME = [
