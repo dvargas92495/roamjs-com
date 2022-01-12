@@ -1,4 +1,5 @@
-import { createConfigObserver, getOauth } from "roamjs-components";
+import { createConfigObserver } from "roamjs-components/components/ConfigPage";
+import getOauth from "roamjs-components/util/getOauth";
 import { getDropUidOffset, runExtension } from "../entry-helpers";
 import DropboxLogo from "../assets/Dropbox.svg";
 import axios from "axios";

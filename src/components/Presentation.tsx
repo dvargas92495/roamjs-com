@@ -13,14 +13,32 @@ import {
   getBlockUidFromTarget,
   isControl,
   openBlockElement,
-  parseJustText,
   parseRoamBlocks,
 } from "../entry-helpers";
 import { isSafari } from "mobile-device-detect";
 import { getUids, TreeNode, ViewType } from "roam-client";
-import { BlockErrorBoundary } from "roamjs-components";
+import BlockErrorBoundary from "roamjs-components/components/BlockErrorBoundary";
 
 const SAFARI_THEMES = ["black", "white", "beige"];
+
+const parseJustText = (text: string): string =>
+  parseRoamBlocks({
+    content: [
+      {
+        text,
+        order: 0,
+        viewType: "document",
+        children: [],
+        uid: "",
+        heading: 0,
+        open: true,
+        textAlign: "left",
+        editTime: new Date(),
+        props: { imageResize: {}, iframe: {} },
+      },
+    ],
+    viewType: "document",
+  });
 
 export const VALID_THEMES = [
   ...SAFARI_THEMES,
@@ -67,7 +85,7 @@ type SrcFromTextProps = {
 };
 
 const URL_REGEX =
-  /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=$]*)/;
+  /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=$,]*)/;
 const SRC_REGEXES = {
   image: /!\[(.*)\]\((.*)\)/,
   iframe: new RegExp(
@@ -102,15 +120,17 @@ const SrcFromText: React.FunctionComponent<
     if (srcResize) {
       setStyle(getResizeStyle(srcResize));
     } else if (srcRef.current.parentElement) {
-      const srcAspectRatio = srcRef.current.width / srcRef.current.height;
-      const containerAspectRatio =
-        srcRef.current.parentElement.offsetWidth /
-        srcRef.current.parentElement.offsetHeight;
+      const srcWidth = Number(getComputedStyle(srcRef.current).width.replace(/px$/, ""));
+      const srcHeight = Number(getComputedStyle(srcRef.current).height.replace(/px$/, ""));
+      const srcAspectRatio = srcWidth/ srcHeight;
+      const containerWidth = srcRef.current.parentElement.offsetWidth;
+      const containerHeight = srcRef.current.parentElement.offsetHeight;
+      const containerAspectRatio = containerWidth / containerHeight;
       if (!isNaN(srcAspectRatio) && !isNaN(srcAspectRatio)) {
         if (srcAspectRatio > containerAspectRatio) {
-          setStyle({ width: "100%", height: "auto" });
+          setStyle({ width: "100%", height: `${srcHeight * containerWidth/srcWidth}px` });
         } else {
-          setStyle({ height: "100%", width: "auto" });
+          setStyle({ height: "100%", width: `${srcWidth * containerHeight/srcHeight}px` });
         }
       }
     }

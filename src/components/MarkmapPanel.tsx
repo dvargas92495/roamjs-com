@@ -15,7 +15,7 @@ import { Markmap, loadCSS, loadJS, refreshHook } from "markmap-view";
 import { format } from "date-fns";
 import { isSafari } from "mobile-device-detect";
 import download from "downloadjs";
-import { MenuItemSelect } from "roamjs-components";
+import MenuItemSelect from "roamjs-components/components/MenuItemSelect";
 import {
   getCurrentPageUid,
   getPageTitleByPageUid,

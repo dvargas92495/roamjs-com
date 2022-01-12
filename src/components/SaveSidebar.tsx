@@ -20,7 +20,7 @@ import {
 import { SidebarWindow } from "roam-client/lib/types";
 import { getWindowUid, openBlockElement } from "../entry-helpers";
 import { getRenderRoot } from "./hooks";
-import { MenuItemSelect } from "roamjs-components";
+import MenuItemSelect from "roamjs-components/components/MenuItemSelect";
 
 const SaveSidebar = (): React.ReactElement => {
   const [isOpen, setIsOpen] = useState(false);

@@ -27,10 +27,8 @@ import {
   parseRoamMarked,
   resolveRefs,
 } from "../entry-helpers";
-import {
-  getSettingIntFromTree,
-  MenuItemSelect,
-} from "roamjs-components";
+import getSettingIntFromTree from "roamjs-components/util/getSettingIntFromTree";
+import MenuItemSelect from "roamjs-components/components/MenuItemSelect";
 import TagFilter from "./TagFilter";
 
 type TimelineProps = { blockId: string };

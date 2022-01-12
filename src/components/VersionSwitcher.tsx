@@ -16,7 +16,7 @@ import {
   getShallowTreeByParentUid,
   updateBlock,
 } from "roam-client";
-import { getRenderRoot } from "roamjs-components";
+import getRenderRoot from "roamjs-components/util/getRenderRoot";
 
 export type VersionSwitcherProps = {
   id: string;

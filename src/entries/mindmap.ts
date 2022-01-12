@@ -7,7 +7,7 @@ import {
   toRoamDateUid,
   TreeNode,
 } from "roam-client";
-import { createConfigObserver } from "roamjs-components";
+import { createConfigObserver } from "roamjs-components/components/ConfigPage";
 import { NODE_CLASSNAME, render } from "../components/MarkmapPanel";
 import { render as imageRender } from "../components/ImagePreview";
 import { addStyle, resolveRefs, runExtension } from "../entry-helpers";

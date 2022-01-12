@@ -10,7 +10,8 @@ import {
   createObserver,
   getBasicTreeByParentUid,
 } from "roam-client";
-import { createConfigObserver, getSubTree } from "roamjs-components";
+import { createConfigObserver } from "roamjs-components/components/ConfigPage";
+import getSubTree from "roamjs-components/util/getSubTree"
 
 const CLASSNAMES_TO_CHECK = [
   "rm-block-ref",
@@ -19,9 +20,9 @@ const CLASSNAMES_TO_CHECK = [
   "roam-block",
 ];
 
-runExtension("todont", () => {
+runExtension("todont", async () => {
   const TODONT_CLASSNAME = "roamjs-todont";
-  const { pageUid } = createConfigObserver({
+  const { pageUid } = await createConfigObserver({
     title: "roam/js/todont",
     config: {
       tabs: [

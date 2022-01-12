@@ -26,7 +26,7 @@ import {
   toRoamDateUid,
   TreeNode,
 } from "roam-client";
-import { createConfigObserver } from "roamjs-components";
+import { createConfigObserver } from "roamjs-components/components/ConfigPage";
 import {
   getSettingIntFromTree,
   getSettingValueFromTree,

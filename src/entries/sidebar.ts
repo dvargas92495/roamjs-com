@@ -17,7 +17,8 @@ import {
 import { render as iconRender } from "../components/MinimalIcon";
 import { loadRender, render as saveRender } from "../components/SaveSidebar";
 import SavedSidebarConfig from "../components/SavedSidebarConfig";
-import { createConfigObserver, toFlexRegex } from "roamjs-components";
+import { createConfigObserver } from "roamjs-components/components/ConfigPage";
+import toFlexRegex from "roamjs-components/util/toFlexRegex";
 
 const ID = "sidebar";
 const CONFIG = `roam/js/${ID}`;

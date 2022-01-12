@@ -14,7 +14,7 @@ import {
   toRoamDate,
   TreeNode,
 } from "roam-client";
-import { createConfigObserver } from "roamjs-components";
+import { createConfigObserver } from "roamjs-components/components/ConfigPage";
 import { getSettingValueFromTree } from "../components/hooks";
 import { isApple, runExtension, toFlexRegex } from "../entry-helpers";
 import { render } from "../components/Toast";

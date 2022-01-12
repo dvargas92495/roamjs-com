@@ -1,7 +1,7 @@
 import { createButtonObserver } from "roam-client";
 import { runExtension } from "../entry-helpers";
 import { render } from "../components/IframelyEmbed";
-import { createConfigObserver } from "roamjs-components";
+import { createConfigObserver } from "roamjs-components/components/ConfigPage";
 
 const ID = "iframely";
 

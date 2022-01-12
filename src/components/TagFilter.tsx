@@ -5,7 +5,7 @@ import {
   deleteBlock,
   getShallowTreeByParentUid,
 } from "roam-client";
-import { addInputSetting } from "roamjs-components";
+import addInputSetting from "roamjs-components/util/addInputSetting";
 import { toFlexRegex } from "../entry-helpers";
 
 const TagFilter = ({
@@ -249,7 +249,7 @@ const TagFilter = ({
                           borderBottomColor: "rgb(92, 112, 128)",
                           fontSize: "1.3em",
                         }}
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           const filterUid =
                             filterNodeUid ||
                             createBlock({
@@ -274,7 +274,7 @@ const TagFilter = ({
                                 key: "excludes",
                                 vals: excludes,
                               };
-                          const uid = addInputSetting({
+                          const uid = await addInputSetting({
                             blockUid: filterUid,
                             value: tag,
                             key,

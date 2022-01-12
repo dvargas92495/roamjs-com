@@ -10,16 +10,16 @@ import {
   getTextByBlockUid,
   getTreeByBlockUid,
   getUids,
-  parseInline,
-  parseRoamBlocksToHtml,
   RoamBlock,
   toRoamDate,
   TreeNode,
 } from "roam-client";
+import parseRoamBlocksToHtml from "roamjs-components/dom/parseRoamBlocksToHtml";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import { Dict } from "mixpanel-browser";
 import axios, { AxiosResponse } from "axios";
-import { SidebarWindow, ViewType } from "roam-client/lib/types";
+import { SidebarWindow, ViewType } from "roamjs-components/types";
+import { parseInline } from "roamjs-components/marked";
 
 declare global {
   interface Window {
@@ -857,24 +857,6 @@ export const parseRoamBlocks = ({
     level: 0,
     context,
   });
-
-export const parseJustText = (text: string): string => parseRoamBlocks({
-  content: [
-    {
-      text,
-      order: 0,
-      viewType: "document",
-      children: [],
-      uid: "",
-      heading: 0,
-      open: true,
-      textAlign: "left",
-      editTime: new Date(),
-      props: { imageResize: {}, iframe: {} },
-    },
-  ],
-  viewType: "document",
-})
 
 export const getBlockUidFromTarget = (target: HTMLElement): string => {
   const ref = target.closest(".rm-block-ref") as HTMLSpanElement;

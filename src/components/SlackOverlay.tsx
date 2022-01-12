@@ -21,7 +21,8 @@ import {
   getTextByBlockUid,
   getBlockUidByTextOnPage,
 } from "roam-client";
-import { getOauth, getSettingValueFromTree } from "roamjs-components";
+import getSettingValueFromTree from "roamjs-components/util/getSettingValueFromTree";
+import getOauth from "roamjs-components/util/getOauth";
 import { resolveRefs } from "../entry-helpers";
 import { useOauthAccounts } from "./OauthSelect";
 

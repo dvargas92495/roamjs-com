@@ -6,7 +6,7 @@ import {
   getUserFormat,
   render,
 } from "../components/SlackOverlay";
-import { createConfigObserver } from "roamjs-components";
+import { createConfigObserver } from "roamjs-components/components/ConfigPage";
 import Slack from "../assets/Slack_Mark.svg";
 import axios from "axios";
 

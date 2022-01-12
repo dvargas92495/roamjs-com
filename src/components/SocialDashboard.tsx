@@ -34,15 +34,15 @@ import {
   resolveRefs,
 } from "../entry-helpers";
 import {
-  SERVICE_TOKEN_STAGE,
+  TOKEN_STAGE as SERVICE_TOKEN_STAGE,
   ServiceDashboard,
   StageContent,
-  useAuthenticatedDelete,
-  useAuthenticatedGet,
-  useAuthenticatedPut,
-  useServicePageUid,
-  WrapServiceMainStage,
-} from "roamjs-components";
+  useAuthenticatedAxiosDelete as useAuthenticatedDelete,
+  useAuthenticatedAxiosGet as useAuthenticatedGet,
+  useAuthenticatedAxiosPut as useAuthenticatedPut,
+  usePageUid as useServicePageUid,
+  MainStage as WrapServiceMainStage,
+} from "roamjs-components/components/ServiceComponents";
 import startOfMinute from "date-fns/startOfMinute";
 import addMinutes from "date-fns/addMinutes";
 import endOfYear from "date-fns/endOfYear";

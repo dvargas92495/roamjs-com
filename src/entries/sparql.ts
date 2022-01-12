@@ -9,7 +9,7 @@ import {
   getUids,
   updateBlock,
 } from "roam-client";
-import { createConfigObserver } from "roamjs-components";
+import { createConfigObserver } from "roamjs-components/components/ConfigPage";
 import {
   DEFAULT_EXPORT_LABEL,
   getLabel,

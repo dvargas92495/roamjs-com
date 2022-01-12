@@ -11,7 +11,7 @@ import {
   TextArea,
 } from "@blueprintjs/core";
 import { getUids, getTreeByBlockUid } from "roam-client";
-import { MenuItemSelect } from "roamjs-components";
+import MenuItemSelect from "roamjs-components/components/MenuItemSelect";
 import parse from "date-fns/parse";
 import EditContainer from "./EditContainer";
 

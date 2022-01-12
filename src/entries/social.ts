@@ -1,4 +1,4 @@
-import { runService } from "roamjs-components";
+import { runService } from "roamjs-components/components/ServiceComponents";
 import Dashboard from "../components/SocialDashboard";
 import { addStyle } from "../entry-helpers";
 
