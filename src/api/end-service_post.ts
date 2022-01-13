@@ -19,25 +19,44 @@ export const handler = async (
       headers: headers(event),
     };
   }
-  const { service = "", subscription } = JSON.parse(event.body || "{}") as {
+  const { service = "", id } = JSON.parse(event.body || "{}") as {
     service: string;
-    subscription: string;
+    id: string;
   };
+  if (!service && !id) {
+    return {
+      statusCode: 400,
+      body: "One of either `id` or `service` is required.",
+      headers: headers(event),
+    };
+  }
   const customer = user.privateMetadata.stripeId as string;
-  const priceId = await getStripePriceId(service);
-  const subscriptionId =
-    subscription ||
-    (await stripe.subscriptions
-      .list({ customer })
-      .then(
-        (s) =>
+  const subscriptionItem = await (service
+    ? getStripePriceId(service).then((priceId) =>
+        stripe.subscriptions.list({ customer }).then((s) =>
           s.data
             .flatMap((ss) =>
-              ss.items.data.map((si) => ({ priceId: si.price.id, id: ss.id }))
+              ss.items.data.map((si) => ({
+                priceId: si.price.id,
+                count: ss.items.data.length,
+                id: si.id,
+                subscriptionId: ss.id,
+              }))
             )
-            .find(({ priceId: id }) => priceId === id)?.id
-      ));
-  if (!subscriptionId) {
+            .find(({ priceId: id }) => priceId === id)
+        )
+      )
+    : stripe.subscriptionItems
+        .retrieve(id)
+        .then((si) =>
+          stripe.subscriptions.retrieve(si.subscription).then((ss) => ({
+            priceId: si.price,
+            count: ss.items.data.length,
+            subscriptionId: ss.id,
+            id: si.id,
+          }))
+        ));
+  if (!subscriptionItem) {
     return {
       statusCode: 409,
       body: `Current user is not subscribed to ${service}`,
@@ -45,8 +64,10 @@ export const handler = async (
     };
   }
 
-  const { success, message } = await stripe.subscriptions
-    .del(subscriptionId)
+  const { success, message } = await (subscriptionItem.count > 1
+    ? stripe.subscriptionItems.del(subscriptionItem.id)
+    : stripe.subscriptions.del(subscriptionItem.subscriptionId)
+  )
     .then(() => ({ success: true, message: "" }))
     .catch((r) => ({
       success: false,

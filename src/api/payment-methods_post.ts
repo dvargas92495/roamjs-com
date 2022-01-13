@@ -1,32 +1,38 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import axios from "axios";
-import { getClerkUser, headers } from "../lambda-helpers";
+import { getClerkUser, headers, stripe } from "../lambda-helpers";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> =>
   getClerkUser(event).then((user) => {
-    const customer = user?.privateMetadata?.stripeId;
-    const opts = {
-      headers: {
-        Authorization: `Bearer ${process.env.FLOSS_TOKEN}`,
-        Origin: event.headers.origin || event.headers.Origin,
-      },
-    };
-    return axios
-      .post(
-        `${process.env.FLOSS_API_URL}/stripe-payment-method`,
-        { customer },
-        opts
-      )
-      .then((r) => ({
-        statusCode: r.status,
-        body: JSON.stringify(r.data),
+    if (!user) {
+      return {
+        statusCode: 401,
+        body: "No Active Session",
+        headers: headers(event),
+      };
+    }
+    const customer = user?.privateMetadata?.stripeId as string;
+    const origin = event.headers.Origin || event.headers.origin;
+    return stripe.checkout.sessions
+      .create({
+        customer,
+        payment_method_types: ["card"],
+        mode: "setup",
+        metadata: {
+          skipCallback: "true",
+        },
+        success_url: `${origin}/user`,
+        cancel_url: `${origin}/user`,
+      })
+      .then((session) => ({
+        statusCode: 200,
+        body: JSON.stringify({ id: session.id, active: false }),
         headers: headers(event),
       }))
       .catch((e) => ({
-        statusCode: e.response.status,
-        body: e.response.data,
+        statusCode: 500,
+        body: e.errorMessage || e.message,
         headers: headers(event),
       }));
   });

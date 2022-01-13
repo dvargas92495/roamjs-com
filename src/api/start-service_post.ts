@@ -19,25 +19,48 @@ export const handler = async (
       headers: headers(event),
     };
   }
-  const { service, query } = JSON.parse(event.body || "{}") as {
+  const { service } = JSON.parse(event.body || "{}") as {
     service: string;
-    path: string;
-    query: string;
   };
-  const serviceCamelCase = service
+  const extensionField = service
     .split("-")
     .map((s, i) =>
       i == 0 ? s : `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`
     )
     .join("");
   const priceId = await getStripePriceId(service);
-
   const customer = user.privateMetadata?.stripeId as string;
+  const line_items = [{ price: priceId, quantity: 1 }];
+  const finishSubscription = () =>
+    users
+      .updateUser(user.id, {
+        publicMetadata: {
+          ...user.publicMetadata,
+          [extensionField]: {},
+        },
+      })
+      .then(() => ({
+        statusCode: 200,
+        body: JSON.stringify({ success: true }),
+        headers: headers(event),
+      }));
+
+  const roamjsSubscription = await stripe.subscriptions
+    .list({ customer })
+    .then((all) => all.data.find((s) => s.metadata.project === "RoamJS"));
+  if (roamjsSubscription) {
+    return stripe.subscriptionItems
+      .create({
+        subscription: roamjsSubscription.id,
+        ...line_items[0],
+      })
+      .then(finishSubscription);
+  }
+
   const paymentMethod = await stripe.customers
     .retrieve(customer)
     .then((c) => c as Stripe.Customer)
     .then((c) => c.invoice_settings?.default_payment_method);
-  const line_items = [{ price: priceId, quantity: 1 }];
   const origin = event.headers.Origin || event.headers.origin;
 
   const { active, id } = paymentMethod
@@ -45,6 +68,9 @@ export const handler = async (
         .create({
           customer,
           items: line_items,
+          metadata: {
+            project: "RoamJS",
+          },
         })
         .then((s) => ({ active: true, id: s.id }))
         .catch(() => ({ active: false, id: undefined }))
@@ -54,10 +80,15 @@ export const handler = async (
           payment_method_types: ["card"],
           line_items,
           mode: "subscription",
-          success_url: `${origin}/extensions/${service}?success=true&${query}`,
+          success_url: `${origin}/extensions/${service}?success=true`,
           cancel_url: `${origin}/extensions/${service}?cancel=true`,
+          subscription_data: {
+            metadata: {
+              project: "RoamJS",
+            },
+          },
           metadata: {
-            service: serviceCamelCase,
+            service: extensionField,
             userId: user.id,
             callback: `${process.env.API_URL}/finish-start-service`,
           },
@@ -75,22 +106,11 @@ export const handler = async (
     } else {
       return {
         statusCode: 500,
-        body: "Failed to subscribe to RoamJS Site service. Contact support@roamjs.com for help!",
+        body: "Failed to subscribe to RoamJS extension. Contact support@roamjs.com for help!",
         headers: headers(event),
       };
     }
   }
 
-  await users.updateUser(user.id, {
-    publicMetadata: {
-      ...user.publicMetadata,
-      [serviceCamelCase]: {},
-    },
-  });
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ success: true }),
-    headers: headers(event),
-  };
+  return finishSubscription();
 };

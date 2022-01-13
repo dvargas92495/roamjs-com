@@ -41,49 +41,42 @@ import fs from "fs";
 import { isSafari } from "react-device-detect";
 import DemoVideo from "../../components/DemoVideo";
 import Loom from "../../components/Loom";
-import AES from "crypto-js/aes";
 import { useRouter } from "next/router";
 
-const StartButtonText = ({ price }: { price: number }) => (
+const StartButton = ({
+  price,
+  onClick,
+}: {
+  price: number;
+  onClick: () => void;
+}) => (
   <>
-    <span style={{ fontSize: 14 }}>Start for</span>
-    {price === 0 ? (
-      <span style={{ fontSize: 14, marginLeft: 4 }}>Free</span>
-    ) : (
-      <>
-        <span style={{ fontWeight: 600, fontSize: 18, marginLeft: 4 }}>
-          ${price}
-        </span>
-        <span style={{ textTransform: "none" }}>/mo</span>
-      </>
-    )}
+    <Body>
+      Click the button below to include these features! You may also choose to
+      add them later from within Roam.
+    </Body>
+    <Button color={"primary"} variant={"contained"} onClick={onClick}>
+      <span style={{ fontSize: 14 }}>Start for</span>
+      {price === 0 ? (
+        <span style={{ fontSize: 14, marginLeft: 4 }}>Free</span>
+      ) : (
+        <>
+          <span style={{ fontWeight: 600, fontSize: 18, marginLeft: 4 }}>
+            ${price}
+          </span>
+          <span style={{ textTransform: "none" }}>/mo</span>
+        </>
+      )}
+    </Button>
   </>
 );
 
-const Service = ({
-  id,
-  end,
-  onToken,
-}: {
-  id: string;
-  end: () => void;
-  onToken?: (s: string) => void;
-}) => {
-  const userData = useUser().publicMetadata as {
-    [key: string]: { token: string; };
-  };
+const EndButton = ({ id, end }: { id: string; end: () => void }) => {
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const camel = idToCamel(id);
-  const {
-    token = "NO TOKEN FOUND FOR USER",
-  } = userData?.[camel];
   const onEnd = useCallback(
     () => authenticatedAxiosPost("end-service", { service: id }),
     [authenticatedAxiosPost]
   );
-  useEffect(() => {
-    onToken(token);
-  }, [onToken]);
   return (
     <div
       style={{
@@ -94,11 +87,14 @@ const Service = ({
       }}
     >
       <div>
+        <Body>
+          Click the button below to remove these premium features.
+        </Body>
         <ConfirmationDialog
-          buttonText={"End Service"}
+          buttonText={"End Subscription"}
           color="secondary"
           title={`Ending ${idToTitle(id)}`}
-          content={`Are you sure you want to unsubscribe from the RoamJS ${idToTitle(
+          content={`Are you sure you want to unsubscribe from the premium features of RoamJS ${idToTitle(
             id
           )}?`}
           action={onEnd}
@@ -114,6 +110,7 @@ const LaunchButton: React.FC<{
   id: string;
   price: number;
   refreshUser: () => void;
+  signedOut?: boolean;
 }> = ({ start, id, price, refreshUser }) => {
   const {
     query: { started },
@@ -122,7 +119,7 @@ const LaunchButton: React.FC<{
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const startService = useCallback(
     () =>
-      authenticatedAxiosPost(price === 0 ? "token" : "start-service", {
+      authenticatedAxiosPost("start-service", {
         service: id,
         query: window.location.search.slice(1),
       }).then((r) =>
@@ -153,31 +150,28 @@ const LaunchButton: React.FC<{
     checkStripe();
   }, [authenticatedAxiosGet]);
   return (
-    <ConfirmationDialog
-      action={startService}
-      buttonText={<StartButtonText price={price} />}
-      content={`By clicking submit below, you will subscribe to the RoamJS Service: ${idToTitle(
-        id
-      )}${price > 0 ? ` for $${price}/month` : ""}.`}
-      onSuccess={start}
-      title={`RoamJS ${idToTitle(id)}`}
-      defaultIsOpen={started === "true"}
-      disabled={disabled}
-    />
+    <>
+      <ConfirmationDialog
+        action={startService}
+        Button={({ onClick }) => (
+          <StartButton onClick={onClick} price={price} />
+        )}
+        content={`By clicking submit below, you will subscribe to the premium features of the RoamJS Extension: ${idToTitle(
+          id
+        )}${price > 0 ? ` for $${price}/month` : ""}.`}
+        onSuccess={start}
+        title={`RoamJS ${idToTitle(id)}`}
+        defaultIsOpen={started === "true"}
+        disabled={disabled}
+      />
+    </>
   );
 };
 
-const CheckSubscription = ({
-  id,
-  start,
-  children,
-  price,
-}: {
-  id: string;
-  start: () => void;
-  price: number;
-  children: (button: React.ReactNode) => React.ReactNode;
-}) => {
+const CheckSubscription = ({ id, price }: { id: string; price: number }) => {
+  const [started, setStarted] = useState(false);
+  const start = useCallback(() => setStarted(true), [setStarted]);
+  const end = useCallback(() => setStarted(false), [setStarted]);
   const user = useUser();
   const { publicMetadata } = user;
   useEffect(() => {
@@ -185,72 +179,39 @@ const CheckSubscription = ({
       start();
     }
   }, [start, publicMetadata, id]);
-  return (
-    <>
-      {children(
-        <LaunchButton
-          start={start}
-          id={id}
-          price={price}
-          refreshUser={() =>
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore refresh metadata state
-            user.update({})
-          }
-        />
-      )}
-    </>
+  return started ? (
+    <EndButton id={id} end={end} />
+  ) : (
+    <LaunchButton
+      start={start}
+      id={id}
+      price={price}
+      refreshUser={() => user.update({})}
+    />
   );
 };
 
-export const ServiceButton = ({
+const ServiceButton = ({
   id,
   price,
-  SplashLayout,
-  onToken,
 }: {
   id: string;
   price: number;
-  SplashLayout: (props: {
-    StartNowButton: React.ReactNode;
-  }) => React.ReactElement;
-  onToken?: (s: string) => void;
 }): React.ReactElement => {
-  const [started, setStarted] = useState(false);
   const router = useRouter();
-  const start = useCallback(() => setStarted(true), [setStarted]);
-  const end = useCallback(() => setStarted(false), [setStarted]);
   const login = useCallback(
     () => router.push(`/login?extension=${id}`),
     [router]
   );
   return (
-    <>
+    <div>
       <SignedIn>
-        <CheckSubscription id={id} start={start} price={price}>
-          {(StartNowButton) =>
-            started ? (
-              <Service
-                id={id}
-                end={end}
-                onToken={onToken}
-              />
-            ) : (
-              <SplashLayout StartNowButton={StartNowButton} />
-            )
-          }
-        </CheckSubscription>
+        <CheckSubscription id={id} price={price} />
       </SignedIn>
       <SignedOut>
-        <SplashLayout
-          StartNowButton={
-            <Button color={"primary"} variant={"contained"} onClick={login}>
-              <StartButtonText price={price} />
-            </Button>
-          }
-        />
+        <StartButton onClick={login} price={price} />
       </SignedOut>
-    </>
+    </div>
   );
 };
 
@@ -294,7 +255,7 @@ const ExtensionPage = ({
   const total = randomItems.length;
   const title = idToTitle(id);
   const [copied, setCopied] = useState(false);
-  const [initialLines, setInitialLines] = useState("");
+  const [initialLines] = useState("");
   const onSave = useCopyCode(setCopied, initialLines);
   const mainEntry = legacy ? id : `${id}/main`;
   const [pagination, setPagination] = useState(0);
@@ -323,35 +284,6 @@ const ExtensionPage = ({
       setRandomItems(items);
     });
   }, [setRandomItems, id]);
-  const onToken = useCallback(
-    (token) => {
-      const query = new URLSearchParams(window.location.search);
-      const state = query.get("state");
-      if (state) {
-        const [service, otp, key] = state.split("_");
-        const auth = AES.encrypt(JSON.stringify({ token }), key).toString();
-        axios.post(`${API_URL}/auth`, { service, otp, auth }).then(() => {
-          const poll = () =>
-            axios.get(`${API_URL}/auth?state=${service}_${otp}`).then((r) => {
-              if (r.data.success) {
-                window.close();
-                setTimeout(
-                  () =>
-                    window.alert(
-                      "You have successfully subscribed to this extension! You may close this window and return to Roam."
-                    ),
-                  1
-                );
-              } else {
-                setTimeout(poll, 1000);
-              }
-            });
-          poll();
-        });
-      }
-    },
-    [setInitialLines, id]
-  );
   return (
     <StandardLayout
       title={title}
@@ -395,24 +327,14 @@ const ExtensionPage = ({
         <>
           <H3>Premium Features</H3>
           <div>
-            <ServiceButton
-              id={id}
-              SplashLayout={({ StartNowButton }) => (
-                <div>
-                  <Body>
-                    Some features in this extension require a premium
-                    subscription including:
-                  </Body>
-                  <ul>
-                    <li style={{ fontSize: "1rem" }}>{premium.description}</li>
-                  </ul>
-                  <Body>Click the button below to include these features!</Body>
-                  {StartNowButton}
-                </div>
-              )}
-              price={premium.price}
-              onToken={onToken}
-            />
+            <Body>
+              Some features in this extension require a premium subscription
+              including:
+            </Body>
+            <ul>
+              <li style={{ fontSize: "1rem" }}>{premium.description}</li>
+            </ul>
+            <ServiceButton id={id} price={premium.price} />
           </div>
         </>
       )}

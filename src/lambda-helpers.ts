@@ -204,29 +204,6 @@ export const getClerkOpts = (
   },
 });
 
-export const flossGet = ({
-  event,
-  path,
-}: {
-  event: APIGatewayProxyEvent;
-  path: string;
-}): Promise<APIGatewayProxyResult> =>
-  getClerkEmail(event).then((email) =>
-    email
-      ? axios
-          .get(`${process.env.FLOSS_API_URL}/${path}`, getClerkOpts(email))
-          .then((r) => ({
-            statusCode: 200,
-            body: JSON.stringify(r.data),
-            headers: headers(event),
-          }))
-      : Promise.resolve({
-          statusCode: 401,
-          body: "No Active Session",
-          headers: headers(event),
-        })
-  );
-
 export const generateToken = (userId: string): string =>
   Buffer.from(
     `${userId.replace(/^user_/, "")}:${randomstring.generate({ length: 16 })}`

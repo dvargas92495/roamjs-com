@@ -50,3 +50,8 @@
 .roamjs-user-card .MuiListItem-root {
   display: flex;
 }
+
+.roamjs-standard-layout {
+  max-width: 760px;
+  width: "95vw";
+}
