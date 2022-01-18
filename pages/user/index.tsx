@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
 import { Button, Loading, ConfirmationDialog } from "@dvargas92495/ui";
 import {
@@ -35,7 +35,7 @@ const UserProfileTab = ({
     getActions?: (
       i: ClerkItem,
       index: number
-    ) => { text: string; onClick: () => Promise<unknown> }[];
+    ) => { text: string; onClick: () => Promise<unknown> }[] | (() => void);
   }[];
 }) => {
   const [mounted, setMounted] = useState(false);
@@ -48,6 +48,47 @@ const UserProfileTab = ({
     setActive(window.location.hash === `#/${id}`);
   }, [setMounted, id, setActive]);
   const title = `${id.slice(0, 1).toUpperCase()}${id.slice(1)}`;
+  const ActionButton = ({
+    onClick,
+    ...i
+  }: {
+    onClick: () => void;
+    title: string;
+    display: string;
+  }) => (
+    <button
+      className="cl-list-item _1qJoyBQenGMr7kHEjL4Krl _2YW23wFdhOB4SEGzozPtqO qlMNWy3GFjlnVDhYmD_84"
+      onClick={onClick}
+    >
+      <div className={"_3cdHQF85GQrVzNyaksJFAn"}>{i.title}</div>
+      <div className={"_377YaX0RVdJAflWkqyk0_W _5doIP53SFIp-tF1LX17if"}>
+        <div>
+          <span
+            className="cl-font-semibold "
+            style={{ whiteSpace: "break-spaces" }}
+          >
+            {i.display}
+          </span>
+        </div>
+        <div style={{ marginRight: "2.125em" }}>
+          <svg
+            width="1.25em"
+            height="1.25em"
+            viewBox="0 0 20 20"
+            stroke="#335BF1"
+            fill="none"
+          >
+            <path
+              d="M3.333 10h13.332M11.666 5l5 5-5 5"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            ></path>
+          </svg>
+        </div>
+      </div>
+    </button>
+  );
   return mounted ? (
     <>
       {ReactDOM.createPortal(
@@ -82,56 +123,26 @@ const UserProfileTab = ({
                 </div>
                 {c.items && (
                   <div className="cl-titled-card-list">
-                    {c.items.map((i, index) => (
-                      <ConfirmationDialog
-                        key={i.id}
-                        title={c.dialogTitle}
-                        content={c.dialogContent}
-                        actions={c.getActions(i, index)}
-                        Button={({ onClick }) => (
-                          <button
-                            className="cl-list-item _1qJoyBQenGMr7kHEjL4Krl _2YW23wFdhOB4SEGzozPtqO qlMNWy3GFjlnVDhYmD_84"
-                            key={i.id}
-                            onClick={onClick}
-                          >
-                            <div className={"_3cdHQF85GQrVzNyaksJFAn"}>
-                              {i.title}
-                            </div>
-                            <div
-                              className={
-                                "_377YaX0RVdJAflWkqyk0_W _5doIP53SFIp-tF1LX17if"
-                              }
-                            >
-                              <div>
-                                <span className="cl-font-semibold ">
-                                  {i.display}
-                                </span>
-                              </div>
-                              <div style={{ marginRight: "2.125em" }}>
-                                <svg
-                                  width="1.25em"
-                                  height="1.25em"
-                                  viewBox="0 0 20 20"
-                                  stroke="#335BF1"
-                                  fill="none"
-                                >
-                                  <path
-                                    d="M3.333 10h13.332M11.666 5l5 5-5 5"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  ></path>
-                                </svg>
-                              </div>
-                            </div>
-                          </button>
-                        )}
-                      />
-                    ))}
+                    {c.items.map((i, index) => {
+                      const action = c.getActions(i, index);
+                      return typeof action === "function" ? (
+                        <ActionButton key={i.id} onClick={action} {...i} />
+                      ) : (
+                        <ConfirmationDialog
+                          key={i.id}
+                          title={c.dialogTitle}
+                          content={c.dialogContent}
+                          actions={action}
+                          Button={({ onClick }) => (
+                            <ActionButton key={i.id} onClick={onClick} {...i} />
+                          )}
+                        />
+                      );
+                    })}
                   </div>
                 )}
                 {c.Component && (
-                  <div style={{ paddingTop:24 }}>
+                  <div style={{ paddingTop: 24 }}>
                     <c.Component />
                   </div>
                 )}
@@ -194,6 +205,116 @@ const AddCard = () => {
       </Button>
       <Loading loading={loading} />
     </>
+  );
+};
+
+const ExtensionsTab = () => {
+  const axiosGet = useAuthenticatedAxiosGet();
+  const axiosPost = useAuthenticatedAxiosPost();
+  const axiosDelete = useAuthenticatedAxiosDelete();
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [tokenLoading, setTokenLoading] = useState(true);
+  const [tokenValue, setTokenValue] = useState("");
+  const [copied, setCopied] = useState(false);
+  const subscribe = useCallback(() => {
+    setLoading(true);
+    return axiosPost("convertkit")
+      .then(() => {
+        setIsSubscribed(true);
+      })
+      .finally(() => setLoading(false));
+  }, [setLoading, setIsSubscribed, axiosPost]);
+  const unsubscribe = useCallback(() => {
+    setLoading(true);
+    return axiosDelete("convertkit")
+      .then(() => {
+        setIsSubscribed(false);
+      })
+      .finally(() => setLoading(false));
+  }, [setLoading, setIsSubscribed, axiosDelete]);
+  const copiedRef = useRef(0);
+  useEffect(() => {
+    axiosGet("convertkit")
+      .then((r) => setIsSubscribed(r.data.isSubscribed))
+      .finally(() => setLoading(false));
+    axiosGet("token")
+      .then((r) => setTokenValue(r.data.token))
+      .finally(() => setTokenLoading(false));
+    return () => window.clearTimeout(copiedRef.current);
+  }, [setLoading, setTokenValue, setTokenLoading]);
+  return (
+    <UserProfileTab
+      id={"Extensions"}
+      icon={
+        <svg
+          width="1.25em"
+          height="1.25em"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          fill="none"
+          className="cl-icon"
+        >
+          <path
+            d="M19 5h-2V3c0-.55-.45-1-1-1h-4c-.55 0-1 .45-1 1v2H9V3c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V6c0-.55-.45-1-1-1zM8.71 15.29a1.003 1.003 0 01-1.42 1.42l-4-4C3.11 12.53 3 12.28 3 12s.11-.53.29-.71l4-4a1.003 1.003 0 011.42 1.42L5.41 12l3.3 3.29zm8-2.58l-4 4a1.003 1.003 0 01-1.42-1.42l3.3-3.29-3.29-3.29A.965.965 0 0111 8a1.003 1.003 0 011.71-.71l4 4c.18.18.29.43.29.71s-.11.53-.29.71z"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
+        </svg>
+      }
+      cards={[
+        {
+          title: "Digest",
+          description:
+            "Subscribe or unsubscribe from the RoamJS Digest, an email detailing RoamJS' latest updates.",
+          items: [
+            {
+              title: "Status",
+              id: "0",
+              display: loading
+                ? "Loading..."
+                : isSubscribed
+                ? "Subscribed"
+                : "Unsubscribed",
+            },
+          ],
+          dialogTitle: "RoamJS Digest",
+          dialogContent: `Would you like to ${
+            isSubscribed ? "un" : ""
+          }subscribe to the RoamJS Digest?`,
+          getActions: () => [
+            isSubscribed
+              ? { text: "Unsubscribe", onClick: unsubscribe }
+              : { text: "Subscribe", onClick: subscribe },
+          ],
+        },
+        {
+          title: "Token",
+          description:
+            "Your RoamJS user token gives you access to all of RoamJS' premium extensions.",
+          getActions: () => () => {
+            setCopied(true);
+            window.navigator.clipboard.writeText(tokenValue);
+            copiedRef.current = window.setTimeout(() => setCopied(false), 3000);
+          },
+          items: [
+            {
+              id: "0",
+              title: "Token",
+              display: tokenLoading
+                ? "Loading..."
+                : `${tokenValue
+                    .split("")
+                    .map(() => "∗")
+                    .join("")}${copied ? "    Copied!" : ""}`,
+            },
+          ],
+          dialogTitle: "Subscription Actions",
+          dialogContent: "What would you like to do with this subscription?",
+        },
+      ]}
+    />
   );
 };
 
@@ -347,6 +468,7 @@ main>div.roamjs-standard-layout{
 }`}</style>
         </Head>
         <UserProfile />
+        <ExtensionsTab />
         <BillingTab />
       </SignedIn>
       <RedirectToLogin />
