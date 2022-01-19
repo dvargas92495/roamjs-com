@@ -7,9 +7,10 @@ import React, {
   useState,
 } from "react";
 import ReactDOM from "react-dom";
-import { isApple } from "../entry-helpers";
-import { useArrowKeyDown } from "./hooks";
+import useArrowKeyDown from "roamjs-components/hooks/useArrowKeyDown";
+import { isIOS, isMacOs } from "mobile-device-detect";
 
+const isApple = isIOS || isMacOs;
 const os = (apple: string, windows: string) => (isApple ? apple : windows);
 const control = (key: string) => os(`Cmd-${key}`, `Ctrl-${key}`);
 
@@ -69,7 +70,12 @@ const COMMANDS = [
   { command: "Jump to Last Block", shortcut: control("Shift-Enter") },
   { command: "Add Shortcut To Page", shortcut: control("Shift-S") },
   { command: "Copy Current Block Ref", shortcut: control("Shift-C") },
+  { command: "Paste Block with children as references", shortcut: "Alt-Ctrl-Shift-V" },
   { command: "Toggle Parent Block View Type", shortcut: "Alt-v" },
+  { command: "Replace last reference before cursor with text and alias", shortcut: "Alt-Ctrl-Shift-A" },
+  { command: "Apply children as text", shortcut: "Alt-Ctrl-Shift-C" },
+  { command: "Replace with original + bring nested items along", shortcut: "Alt-Ctrl-Shift-O" },
+ // { command: "Create Comment", shortcut: "Alt-Ctrl-Shift-M" },
 ];
 
 const convertKey = (k: string) => {
