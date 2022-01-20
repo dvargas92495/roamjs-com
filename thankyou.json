@@ -330,6 +330,9 @@
     "Austen Allred": {
       "url": "https://austenallred.com",
       "imgSrc": "/sponsors/allred.png"
+    },
+    "Protocol Labs": {
+      "url": "https://protocol.ai/"
     }
   }
 }
