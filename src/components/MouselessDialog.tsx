@@ -269,7 +269,7 @@ const MouselessDialog = (): JSX.Element => {
       style={{ padding: 16, position: "absolute", top: 64 }}
     >
       <InputGroup
-        placeholder={"Search Command..."}
+        placeholder={"Search Mouseless Command..."}
         autoFocus={true}
         onChange={onInputChange}
         value={value}

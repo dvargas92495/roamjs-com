@@ -12,7 +12,9 @@ import {
   getBlockUidByTextOnPage,
   getBlockUidsReferencingPage,
   getChildrenLengthByPageUid,
+  getCurrentPageUid,
   getPageTitleByBlockUid,
+  getPageTitleByPageUid,
   getPageTitlesReferencingBlockUid,
   getTextByBlockUid,
   getTreeByBlockUid,
@@ -64,12 +66,14 @@ const pullDaily = ({
     key: "label",
     defaultValue: DEFAULT_DAILY_LABEL,
   }),
+  isDate = true,
 }: {
   date: Date;
   tree?: TreeNode[];
   label?: string;
+  isDate?: boolean;
 }) => {
-  const todayPageUid = toRoamDateUid(date);
+  const parentUid = isDate ? toRoamDateUid(date) : getCurrentPageUid();
   const includes = getSettingValuesFromTree({
     tree,
     key: "includes",
@@ -84,7 +88,7 @@ const pullDaily = ({
           },
         ],
       },
-      parentUid: todayPageUid,
+      parentUid,
     });
     return;
   }
@@ -95,8 +99,8 @@ const pullDaily = ({
   });
   const labelUid = createBlock({
     node: { text: label, children: [{ text: "Loading..." }] },
-    parentUid: todayPageUid,
-    order: location === "BOTTOM" ? getChildrenLengthByPageUid(todayPageUid) : 0,
+    parentUid,
+    order: location === "BOTTOM" ? getChildrenLengthByPageUid(parentUid) : 0,
   });
   const count = getSettingIntFromTree({
     tree,
@@ -315,9 +319,23 @@ runExtension(ID, () => {
       if (DAILY_NOTE_PAGE_REGEX.test(todayPage)) {
         b.onclick = () =>
           pullDaily({ date: parseRoamDate(todayPage) });
+      } else {
+        b.onclick = () => pullDaily({ date: new Date(), isDate: false });
       }
     },
   });
+
+  window.roamAlphaAPI.ui.commandPalette.addCommand({
+    label: 'Run Serendipity',
+    callback: () => {
+      const todayPage = getPageTitleByPageUid(getCurrentPageUid());
+      if (DAILY_NOTE_PAGE_REGEX.test(todayPage)) {
+        pullDaily({ date: parseRoamDate(todayPage) });
+      } else {
+        pullDaily({ date: new Date(), isDate: false });
+      }
+    }
+  })
 
   createBlockObserver((b) => {
     const { blockUid, parentUid } = getUids(b);
