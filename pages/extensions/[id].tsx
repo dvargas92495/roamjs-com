@@ -512,7 +512,6 @@ export const getStaticProps: GetStaticProps<
         const { contributors: contributorsJson } = JSON.parse(
           fs.readFileSync("./thankyou.json").toString()
         );
-        console.log(data);
         return serialize(preRender).then((content) => ({
           props: {
             content,

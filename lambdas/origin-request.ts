@@ -2,6 +2,7 @@ import { CloudFrontRequestHandler } from "aws-lambda";
 
 const movedUris = [
   "developer",
+  "github",
   "google-calendar",
   "static-site",
   "twitter",

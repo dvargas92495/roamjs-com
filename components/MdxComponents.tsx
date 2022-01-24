@@ -3,6 +3,7 @@ import React from "react";
 import Loom from "./Loom";
 import YouTube from "./Youtube";
 import { Prism } from "react-syntax-highlighter";
+import DemoVideo from "./DemoVideo";
 
 const Pre: React.FunctionComponent<HTMLPreElement> = ({ children }) => (
   <>{children}</>
@@ -96,5 +97,6 @@ export default {
   Center,
   Highlight,
   Block,
+  DemoVideo,
   blockquote: Blockquote,
 };

@@ -5,7 +5,11 @@ const DemoVideo: React.FunctionComponent<{ src: string }> = ({ src }) => (
     width="320"
     height="240"
     controls
-    src={`${process.env.APP_BASE_PATH || ""}/videos/${src}.mp4`}
+    src={
+      src.startsWith("https")
+        ? src
+        : `${process.env.APP_BASE_PATH || ""}/videos/${src}.mp4`
+    }
     style={{ display: "block", marginBottom: 16 }}
   />
 );
