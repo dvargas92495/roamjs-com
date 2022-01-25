@@ -90,10 +90,17 @@ const onDone = (blockUid: string, oldValue: string) => {
         .map((pp) =>
           pp.trim().replace("#", "").replace("[[", "").replace("]]", "")
         )
+        .map((pp) =>
+          pp === "{date}"
+            ? DAILY_NOTE_PAGE_REGEX.source
+            : pp === "{today}"
+            ? toRoamDate()
+            : pp
+        )
     );
     formattedPairs.forEach(([before, after]) => {
       if (after) {
-        value = value.replace(before, after);
+        value = value.replace(new RegExp(before), after);
       } else {
         value = value.replace(createTagRegex(before), "");
       }
@@ -127,7 +134,7 @@ runExtension("todo-trigger", () => {
       }
     },
   });
-  
+
   document.addEventListener("click", async (e) => {
     const target = e.target as HTMLElement;
     if (

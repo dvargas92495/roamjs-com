@@ -8,6 +8,7 @@ The script supports the following configuration attributes, to be added in the `
 - `Append Text` - (Optional) The text to add to the end of a block, when an item flips from TODO to DONE. Could use "/Current Time" to always put the current time and "/Today" to always put the current day. All other text is static.
 - `On Todo` - (Optional) The text to add to the end of a block, when an first becomes a TODO. Could use "/Current Time" to always put the current time and "/Today" to always put the current day. All other text is static.
 - `Replace Tags` - (Optional) The set of pairs that you would want to be replaced upon switching between todo and done. Multiple pairs are deliminited by `|` and each pair is delimited by `,`. For example, `Replace Tags:: #toRead, #Read | #toWrite, #Written`
+    - There are a couple of placeholders this option supports. `{date}` maps to any date tag and `{today}` maps to today. So you could configure `Replace Tags:: {date}, {today}` to replace a date tag with today's date.
 - `Strikethrough` - (Optional) Set to `True` to strikethrough blocks with `{{[[DONE]]}}`.
 - `Classname` - (Optional) Set to `True` to add a `roamjs-done` classname to blocks with `{{[[DONE]]}}`. You could then style the block to your liking with `roam/css`.
 
