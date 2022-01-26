@@ -458,6 +458,9 @@ const BillingTab = () => {
           })),
           dialogTitle: "Subscription Actions",
           dialogContent: "What would you like to do with this subscription?",
+          Component: () => (
+            <b>Total: ${subscriptions.reduce((p, c) => p + c.amount, 0)}</b>
+          ),
         },
       ]}
     />
