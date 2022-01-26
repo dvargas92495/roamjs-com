@@ -13,6 +13,7 @@ import { defaultLayoutProps } from "../../components/Layout";
 import { stripe } from "../../components/constants";
 import Head from "next/head";
 import ReactDOM from "react-dom";
+import format from "date-fns/format";
 
 type ClerkItem = { title: string; display: string; id: string };
 
@@ -168,7 +169,7 @@ type Subscription = {
   description: string;
   id: string;
   amount: number;
-  interval: "mo" | "yr";
+  date: number;
 };
 
 const AddCard = () => {
@@ -419,15 +420,18 @@ const BillingTab = () => {
         },
         {
           title: "Subscriptions",
-          description:
-            "All of the extensions who's premium features you are subscribed to",
+          description: `All of the extensions you are subscribed to, with the amount due by the end of your billing cycle. ${
+            subscriptions.length
+              ? `(${format(new Date(subscriptions[0].date), "MM/dd/yyyy")})`
+              : ""
+          }`,
           getActions: (i) => [
             { text: "Unsubscribe", onClick: () => unsubscribe(i.id) },
           ],
           items: subscriptions.map((s) => ({
             id: s.id,
             title: s.name,
-            display: `$${s.amount} / ${s.interval}`,
+            display: `$${s.amount}`,
           })),
           dialogTitle: "Subscription Actions",
           dialogContent: "What would you like to do with this subscription?",

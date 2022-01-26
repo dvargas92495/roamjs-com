@@ -40,12 +40,13 @@ export const handler: APIGatewayProxyHandler = (event) => {
             r.Item.premium?.S
               ? stripe.prices
                   .retrieve(r.Item.premium?.S)
-                  .then(({ product, unit_amount }) =>
+                  .then(({ product, unit_amount, recurring }) =>
                     stripe.products
                       .retrieve(product as string)
                       .then(({ description }) => ({
                         description,
                         price: unit_amount / 100,
+                        usage: recurring?.usage_type,
                       }))
                   )
               : Promise.resolve(undefined),

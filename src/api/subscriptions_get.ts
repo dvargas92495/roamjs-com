@@ -13,35 +13,48 @@ export const handler = async (
       };
     }
     const customer = user.privateMetadata?.stripeId as string;
-    return stripe.subscriptions
+    const subs = await stripe.subscriptions
       .list({
         customer,
       })
-      .then((r) => {
-        const ids = r.data.flatMap((s) =>
-          s.items.data.map((i) => i.price.product as string)
-        );
-        return stripe.products.list({ ids }).then((products) => {
-          const productMap = Object.fromEntries(
-            products.data.map(({ id, name, description }) => [
-              id,
-              { name, description },
-            ])
-          );
-          return r.data.flatMap((s) =>
-            s.items.data.map((i) => ({
-              ...productMap[i.price.product as string],
-              id: i.id,
-              amount: i.price.transform_quantity
-                ? ((i.quantity || 1) * (i.price.unit_amount || 1)) /
-                  100 /
-                  i.price.transform_quantity.divide_by
-                : (i.price.unit_amount || 1) / 100,
-              interval: "mo",
-            }))
-          );
-        });
-      })
+      .then((r) =>
+        Promise.all(
+          r.data.map((s) =>
+            stripe.invoices
+              .retrieveUpcoming({ subscription: s.id })
+              .then((i) => ({
+                invoiceAmountsByPrice: Object.fromEntries(
+                  i.lines.data.map((l) => [l.price.id, l.amount])
+                ),
+                items: s.items,
+                date: i.period_end * 1000,
+              }))
+          )
+        )
+      );
+    const productIds = subs.flatMap((s) =>
+      s.items.data.map((i) => i.price.product as string)
+    );
+    return stripe.products
+      .list({ ids: productIds })
+      .then((products) =>
+        Object.fromEntries(
+          products.data.map(({ id, name, description }) => [
+            id,
+            { name, description },
+          ])
+        )
+      )
+      .then((productMap) =>
+        subs.flatMap((s) => {
+          return s.items.data.map((i) => ({
+            ...productMap[i.price.product as string],
+            id: i.id,
+            amount: s.invoiceAmountsByPrice[i.price.id] / 100,
+            date: s.date,
+          }));
+        })
+      )
       .then((subscriptions) => ({
         statusCode: 200,
         body: JSON.stringify({
@@ -54,4 +67,4 @@ export const handler = async (
         body: e.message,
         headers: headers(event),
       }));
-  })
+  });

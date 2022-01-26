@@ -47,26 +47,19 @@ const StartButton = ({
   price,
   onClick,
 }: {
-  price: number;
+  price: string;
   onClick: () => void;
 }) => (
   <>
     <Body>
-      Click the button below to include these features! You may also choose to
-      add them later from within Roam.
+      You could subscribe directly from within Roam, or by clicking the button
+      below!
     </Body>
     <Button color={"primary"} variant={"contained"} onClick={onClick}>
       <span style={{ fontSize: 14 }}>Start for</span>
-      {price === 0 ? (
-        <span style={{ fontSize: 14, marginLeft: 4 }}>Free</span>
-      ) : (
-        <>
-          <span style={{ fontWeight: 600, fontSize: 18, marginLeft: 4 }}>
-            ${price}
-          </span>
-          <span style={{ textTransform: "none" }}>/mo</span>
-        </>
-      )}
+      <span style={{ fontWeight: 600, fontSize: 14, marginLeft: 4 }}>
+        {price}
+      </span>
     </Button>
   </>
 );
@@ -87,9 +80,7 @@ const EndButton = ({ id, end }: { id: string; end: () => void }) => {
       }}
     >
       <div>
-        <Body>
-          Click the button below to remove these premium features.
-        </Body>
+        <Body>Click the button below to remove these premium features.</Body>
         <ConfirmationDialog
           buttonText={"End Subscription"}
           color="secondary"
@@ -108,7 +99,7 @@ const EndButton = ({ id, end }: { id: string; end: () => void }) => {
 const LaunchButton: React.FC<{
   start: () => void;
   id: string;
-  price: number;
+  price: string;
   refreshUser: () => void;
   signedOut?: boolean;
 }> = ({ start, id, price, refreshUser }) => {
@@ -158,7 +149,7 @@ const LaunchButton: React.FC<{
         )}
         content={`By clicking submit below, you will subscribe to the premium features of the RoamJS Extension: ${idToTitle(
           id
-        )}${price > 0 ? ` for $${price}/month` : ""}.`}
+        )} for ${price}.`}
         onSuccess={start}
         title={`RoamJS ${idToTitle(id)}`}
         defaultIsOpen={started === "true"}
@@ -168,7 +159,7 @@ const LaunchButton: React.FC<{
   );
 };
 
-const CheckSubscription = ({ id, price }: { id: string; price: number }) => {
+const CheckSubscription = ({ id, price }: { id: string; price: string }) => {
   const [started, setStarted] = useState(false);
   const start = useCallback(() => setStarted(true), [setStarted]);
   const end = useCallback(() => setStarted(false), [setStarted]);
@@ -196,7 +187,7 @@ const ServiceButton = ({
   price,
 }: {
   id: string;
-  price: number;
+  price: string;
 }): React.ReactElement => {
   const router = useRouter();
   const login = useCallback(
@@ -241,6 +232,7 @@ const ExtensionPage = ({
   premium: {
     description: string;
     price: number;
+    usage: "licensed" | "metered";
   } | null;
   author?: {
     name: string;
@@ -323,21 +315,6 @@ const ExtensionPage = ({
       </div>
       <Subtitle>{description}</Subtitle>
       <hr style={{ marginTop: 28 }} />
-      {!!premium && (
-        <>
-          <H3>Premium Features</H3>
-          <div>
-            <Body>
-              Some features in this extension require a premium subscription
-              including:
-            </Body>
-            <ul>
-              <li style={{ fontSize: "1rem" }}>{premium.description}</li>
-            </ul>
-            <ServiceButton id={id} price={premium.price} />
-          </div>
-        </>
-      )}
       <H3>Installation</H3>
       {!isSafari && (
         <>
@@ -380,7 +357,20 @@ const ExtensionPage = ({
       </Body>
       <hr style={{ marginTop: 40 }} />
       {content.compiledSource ? (
-        <MDXRemote {...content} components={MdxComponents} />
+        <MDXRemote
+          {...content}
+          components={{
+            ...MdxComponents,
+            Premium: () => (
+              <ServiceButton
+                id={id}
+                price={`$${premium.price}${
+                  premium.usage === "metered" ? " per use" : ""
+                }/mo`}
+              />
+            ),
+          }}
+        />
       ) : (
         "No content"
       )}
