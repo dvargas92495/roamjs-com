@@ -5,16 +5,14 @@ import {
   bareSuccessResponse,
   emailCatch,
   emptyResponse,
+  generateToken,
   ses,
   stripe,
 } from "../lambda-helpers";
 import { Webhook } from "diahook";
-import randomstring from "randomstring";
-import AES from "crypto-js/aes";
 
 const wh = new Webhook(process.env.DIAHOOK_SECRET);
 const ckApiSecret = process.env.CONVERTKIT_API_TOKEN;
-const encryptionSecret = process.env.ENCRYPTION_SECRET;
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -50,10 +48,7 @@ export const handler = async (
       if (private_metadata.stripeId) {
         return emptyResponse(event);
       }
-      const token = AES.encrypt(
-        randomstring.generate(16),
-        encryptionSecret
-      ).toString();
+      const { encrypted: token } = generateToken();
       const email = email_addresses.find(
         (e) => e.id === primary_email_address_id
       ).email_address;

@@ -14,6 +14,13 @@ export const handler = async (
       };
     }
     const customer = user.privateMetadata?.stripeId as string;
+    if (!customer) {
+      return {
+        statusCode: 409,
+        body: "There is no payment record attached to your account. Reach out to support@roamjs.com for assistance.",
+        headers: headers(event),
+      };
+    }
     const defaultPaymentMethod = await stripe.customers
       .retrieve(customer, {
         expand: ["invoice_settings.default_payment_method"],

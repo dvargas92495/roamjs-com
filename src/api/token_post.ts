@@ -1,11 +1,6 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import {
-  generateToken,
-  getClerkUser,
-  getStripePriceId,
-  headers,
-} from "../lambda-helpers";
+import { generateToken, getClerkUser, headers } from "../lambda-helpers";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -19,41 +14,22 @@ export const handler = async (
       };
     }
 
-    const { service } = JSON.parse(event.body);
-    const serviceCamelCase = (service as string)
-      .split("-")
-      .map((s, i) =>
-        i == 0 ? s : `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`
-      )
-      .join("");
     const id = user.id;
-    const publicMetadata = user.publicMetadata as {
+    const privateMetadata = user.privateMetadata as {
       [key: string]: Record<string, unknown>;
     };
-    if (!publicMetadata[serviceCamelCase]?.token) {
-      if (await getStripePriceId(serviceCamelCase).catch(() => "Invalid")) {
-        return {
-          statusCode: 401,
-          body: `Not authorized to generate a new token if there is no existing token for ${serviceCamelCase}.`,
-          headers: headers(event),
-        };
-      }
-    }
 
-    const token = generateToken(id);
+    const { value, encrypted } = generateToken();
     return users
       .updateUser(id, {
-        publicMetadata: {
-          ...publicMetadata,
-          [serviceCamelCase]: {
-            ...publicMetadata[serviceCamelCase],
-            token,
-          },
+        privateMetadata: {
+          ...privateMetadata,
+          token: encrypted,
         },
       })
       .then(() => ({
         statusCode: 200,
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({ token: value }),
         headers: headers(event),
       }));
   });

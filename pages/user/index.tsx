@@ -120,7 +120,7 @@ const UserProfileTab = ({
               >
                 <div>
                   <h1>{c.title}</h1>
-                  <p>{c.description}</p>
+                  <p style={{ whiteSpace: "pre-wrap" }}>{c.description}</p>
                 </div>
                 {c.items && (
                   <div className="cl-titled-card-list">
@@ -294,11 +294,29 @@ const ExtensionsTab = () => {
           title: "Token",
           description:
             "Your RoamJS user token gives you access to all of RoamJS' premium extensions.",
-          getActions: () => () => {
-            setCopied(true);
-            window.navigator.clipboard.writeText(tokenValue);
-            copiedRef.current = window.setTimeout(() => setCopied(false), 3000);
-          },
+          getActions: () => [
+            {
+              text: "Copy",
+              onClick: () => {
+                setCopied(true);
+                window.navigator.clipboard.writeText(tokenValue);
+                copiedRef.current = window.setTimeout(
+                  () => setCopied(false),
+                  3000
+                );
+                return Promise.resolve();
+              },
+            },
+            {
+              text: "Generate New",
+              onClick: () => {
+                setTokenLoading(true);
+                return axiosPost("token")
+                  .then((r) => setTokenValue(r.data.token))
+                  .finally(() => setTokenLoading(false));
+              },
+            },
+          ],
           items: [
             {
               id: "0",
@@ -311,8 +329,8 @@ const ExtensionsTab = () => {
                     .join("")}${copied ? "    Copied!" : ""}`,
             },
           ],
-          dialogTitle: "Subscription Actions",
-          dialogContent: "What would you like to do with this subscription?",
+          dialogTitle: "Token Actions",
+          dialogContent: "What would you like to do with your token",
         },
       ]}
     />
@@ -326,13 +344,16 @@ const BillingTab = () => {
   const authenticatedAxiosDel = useAuthenticatedAxiosDelete();
   const authenticatedAxios = useAuthenticatedAxiosGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
+  const [error, setError] = useState("");
   const getPayment = useCallback(
     () =>
-      authenticatedAxios("payment-methods").then((r) => {
-        setPayment(r.data.defaultPaymentMethod);
-        setPaymentMethods(r.data.paymentMethods);
-      }),
-    [authenticatedAxios, setPayment, setPaymentMethods]
+      authenticatedAxios("payment-methods")
+        .then((r) => {
+          setPayment(r.data.defaultPaymentMethod);
+          setPaymentMethods(r.data.paymentMethods);
+        })
+        .catch((r) => setError(r.response?.data)),
+    [authenticatedAxios, setPayment, setPaymentMethods, setError]
   );
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const getSubscriptions = useCallback(
@@ -376,7 +397,9 @@ const BillingTab = () => {
       cards={[
         {
           title: "Card",
-          description: "Default card used to pay for subscribed extensions",
+          description: `Default card used to pay for subscribed extensions${
+            error && `\nERROR: ${error}`
+          }`,
           items: paymentMethods
             .sort((a, b) =>
               a.id === payment.id

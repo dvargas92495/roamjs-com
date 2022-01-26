@@ -204,10 +204,13 @@ export const getClerkOpts = (
   },
 });
 
-export const generateToken = (userId: string): string =>
-  Buffer.from(
-    `${userId.replace(/^user_/, "")}:${randomstring.generate({ length: 16 })}`
-  ).toString("base64");
+export const generateToken = (): { encrypted: string; value: string } => {
+  const value = randomstring.generate(16);
+  return {
+    encrypted: AES.encrypt(value, process.env.ENCRYPTION_SECRET).toString(),
+    value,
+  };
+};
 
 const findUser = async (predicate: (u: User) => boolean): Promise<User> => {
   let offset = 0;
