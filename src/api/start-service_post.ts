@@ -30,7 +30,14 @@ export const handler = async (
     .join("");
   const priceId = await getStripePriceId(service);
   const customer = user.privateMetadata?.stripeId as string;
-  const line_items = [{ price: priceId, quantity: 1 }];
+  const usage = await stripe.prices
+    .retrieve(priceId)
+    .then((p) => p.recurring?.usage_type);
+  const line_items = [
+    usage === "metered"
+      ? { price: priceId }
+      : { price: priceId, quantity: 1 },
+  ];
   const finishSubscription = () =>
     users
       .updateUser(user.id, {
