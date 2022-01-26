@@ -24,7 +24,7 @@
     "local": "http-server ./",
     "local:hmr": "webpack serve --config ./webpack.development.config.js",
     "test": "jest --passWithNoTests",
-    "extension": "node scripts/extension.js",
+    "extension": "concurrently npm:api npm:local npm:ngrok",
     "digest": "node scripts/digest.js",
     "lint": "eslint . --ext .ts,.tsx",
     "prebuild": "npm install",

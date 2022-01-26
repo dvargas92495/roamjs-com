@@ -18,10 +18,17 @@ import {
 import { isSafari } from "mobile-device-detect";
 import { getUids, TreeNode, ViewType } from "roam-client";
 import BlockErrorBoundary from "roamjs-components/components/BlockErrorBoundary";
+import { TextAlignment } from "roamjs-components/types";
 
 const SAFARI_THEMES = ["black", "white", "beige"];
 
-const parseJustText = (text: string): string =>
+const parseSolo = ({
+  text = "",
+  textAlign = "left",
+}: {
+  text?: string;
+  textAlign?: TextAlignment;
+}): string =>
   parseRoamBlocks({
     content: [
       {
@@ -32,7 +39,7 @@ const parseJustText = (text: string): string =>
         uid: "",
         heading: 0,
         open: true,
-        textAlign: "left",
+        textAlign,
         editTime: new Date(),
         props: { imageResize: {}, iframe: {} },
       },
@@ -120,17 +127,27 @@ const SrcFromText: React.FunctionComponent<
     if (srcResize) {
       setStyle(getResizeStyle(srcResize));
     } else if (srcRef.current.parentElement) {
-      const srcWidth = Number(getComputedStyle(srcRef.current).width.replace(/px$/, ""));
-      const srcHeight = Number(getComputedStyle(srcRef.current).height.replace(/px$/, ""));
-      const srcAspectRatio = srcWidth/ srcHeight;
+      const srcWidth = Number(
+        getComputedStyle(srcRef.current).width.replace(/px$/, "")
+      );
+      const srcHeight = Number(
+        getComputedStyle(srcRef.current).height.replace(/px$/, "")
+      );
+      const srcAspectRatio = srcWidth / srcHeight;
       const containerWidth = srcRef.current.parentElement.offsetWidth;
       const containerHeight = srcRef.current.parentElement.offsetHeight;
       const containerAspectRatio = containerWidth / containerHeight;
       if (!isNaN(srcAspectRatio) && !isNaN(srcAspectRatio)) {
         if (srcAspectRatio > containerAspectRatio) {
-          setStyle({ width: "100%", height: `${srcHeight * containerWidth/srcWidth}px` });
+          setStyle({
+            width: "100%",
+            height: `${(srcHeight * containerWidth) / srcWidth}px`,
+          });
         } else {
-          setStyle({ height: "100%", width: `${srcWidth * containerHeight/srcHeight}px` });
+          setStyle({
+            height: "100%",
+            width: `${(srcWidth * containerHeight) / srcHeight}px`,
+          });
         }
       }
     }
@@ -174,14 +191,14 @@ const TitleSlide = ({
   transition,
   animate,
 }: {
-  texts: string[];
+  texts: Partial<TreeNode>[];
   note: TreeNode;
   transition: string;
   animate: boolean;
 }) => {
   const text = texts[0];
   const type = Object.keys(SRC_REGEXES).find((k: keyof typeof SRC_REGEXES) =>
-    SRC_REGEXES[k].test(text)
+    SRC_REGEXES[k].test(text.text)
   ) as keyof typeof SRC_REGEXES;
   const props = {
     ...(type ? { style: { bottom: 0 } } : {}),
@@ -191,7 +208,7 @@ const TitleSlide = ({
   return (
     <section {...props}>
       <SrcFromText
-        text={text}
+        text={text.text}
         Alt={() => (
           <>
             {texts.map((t, i) =>
@@ -199,14 +216,14 @@ const TitleSlide = ({
                 <h1
                   key={i}
                   dangerouslySetInnerHTML={{
-                    __html: parseJustText(t),
+                    __html: parseSolo(t),
                   }}
                 />
               ) : (
                 <h3
                   key={i}
                   dangerouslySetInnerHTML={{
-                    __html: parseJustText(t),
+                    __html: parseSolo(t),
                   }}
                 />
               )
@@ -291,6 +308,7 @@ const findLinkResize = ({
 
 const ContentSlide = ({
   text,
+  textAlign,
   children,
   note,
   layout,
@@ -298,13 +316,7 @@ const ContentSlide = ({
   viewType,
   animate,
   transition,
-}: {
-  text: string;
-  children: TreeNode[];
-  viewType: ViewType;
-  transition: string;
-  animate: boolean;
-} & ContentSlideExtras) => {
+}: TreeNode & ContentSlideExtras) => {
   const isImageLayout = STARTS_WITH_IMAGE.test(layout);
   const isIframeLayout = STARTS_WITH_IFRAME.test(layout);
   const isMediaLayout = STARTS_WITH_MEDIA.test(layout);
@@ -530,7 +542,7 @@ const ContentSlide = ({
     <section style={{ textAlign: "left" }} {...props}>
       <h1
         dangerouslySetInnerHTML={{
-          __html: parseJustText(text),
+          __html: parseSolo({ text, textAlign }),
         }}
       />
       <div
@@ -803,7 +815,13 @@ const PresentationContent: React.FunctionComponent<{
             <React.Fragment key={i}>
               {s.isTitle ? (
                 <TitleSlide
-                  texts={[s.text, ...s.children.map((ss) => ss.text)]}
+                  texts={[
+                    { text: s.text, textAlign: s.textAlign },
+                    ...s.children.map((ss) => ({
+                      text: ss.text,
+                      textAlign: ss.textAlign,
+                    })),
+                  ]}
                   note={s.note}
                   transition={s.transition}
                   animate={s.animate}

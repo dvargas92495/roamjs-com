@@ -22,9 +22,8 @@ import {
   createButtonObserver,
   getUidsFromButton,
   getTextByBlockUid,
-  getTreeByBlockUid,
-  fixViewType,
 } from "roam-client";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
 
 addStyle(`.roamjs-collapsible-caret {
   position: absolute;
@@ -122,10 +121,7 @@ runExtension("presentation", async () => {
         : {};
       render({
         button,
-        getSlides: () =>
-          getTreeByBlockUid(blockUid).children.map((c) =>
-            fixViewType({ c, v: "bullet" })
-          ),
+        getSlides: () => getFullTreeByParentUid(blockUid).children,
         options,
       });
     },

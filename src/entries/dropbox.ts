@@ -124,6 +124,7 @@ runExtension(ID, () => {
                 .forEach((c) => (c.style.display = "none"));
             });
         e.stopPropagation();
+        e.stopImmediatePropagation();
         e.preventDefault();
       }
     }
@@ -197,7 +198,7 @@ runExtension(ID, () => {
             e,
           });
         },
-        { capture: true }
+        true
       );
     }
   });
