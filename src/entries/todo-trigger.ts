@@ -37,21 +37,23 @@ const onTodo = (blockUid: string, oldValue: string) => {
   const replaceTags = config["Replace Tags"];
   if (replaceTags) {
     const pairs = replaceTags.split("|") as string[];
-    const formattedPairs = pairs.map((p) =>
-      p
-        .split(",")
-        .map((pp) =>
-          pp.trim().replace("#", "").replace("[[", "").replace("]]", "")
-        )
-        .reverse()
-    );
-    formattedPairs.forEach(([before, after]) => {
-      if (after) {
-        value = value.replace(before, after);
-      } else {
-        value = `${value}#[[${before}]]`;
-      }
-    });
+    if (pairs.length === 1) {
+      const formattedPairs = pairs.map((p) =>
+        p
+          .split(",")
+          .map((pp) =>
+            pp.trim().replace("#", "").replace("[[", "").replace("]]", "")
+          )
+          .reverse()
+      );
+      formattedPairs.forEach(([before, after]) => {
+        if (after) {
+          value = value.replace(before, after);
+        } else {
+          value = `${value}#[[${before}]]`;
+        }
+      });
+    }
   }
 
   const onTodo = config["On Todo"];
