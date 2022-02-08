@@ -139,7 +139,8 @@ const ONE_TIME = [
   "Danaca Booth",
   "Habib Sayah",
   "Dinesh Chandak",
-  "James Madlom"
+  "James Madlom",
+  "Horacio Diego Ladislao Cuenca"
 ];
 
 export const getStaticProps: GetStaticProps<Props> = () => {

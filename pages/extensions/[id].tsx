@@ -343,7 +343,7 @@ const ExtensionPage = ({
       <Body>
         First create a <b>block</b> with the text{" "}
         <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam DB. Then,
-        create a single child of this block type three back ticks. A code block
+        create a single child of this block and type three backticks. A code block
         should appear. Copy this code and paste it into the child code block in
         your graph:
       </Body>
