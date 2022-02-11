@@ -8,7 +8,6 @@ import {
   createButtonObserver,
   createIconButton,
   getAllBlockUidsAndTexts,
-  getBasicTreeByParentUid,
   getBlockUidByTextOnPage,
   getBlockUidsReferencingPage,
   getChildrenLengthByPageUid,
@@ -28,6 +27,7 @@ import {
   toRoamDateUid,
   TreeNode,
 } from "roam-client";
+import getBasicTreeByParentUid from "roamjs-components/queries/getBasicTreeByParentUid";
 import { createConfigObserver } from "roamjs-components/components/ConfigPage";
 import {
   getSettingIntFromTree,
