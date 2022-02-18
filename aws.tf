@@ -145,6 +145,8 @@ module "aws-serverless-backend" {
         "finish-start-service/post",
         "iframely/post",
         "install/put",
+        "invoices/get",
+        "invoice/get",
         "is-subscribed/get",
         "mixpanel/post",
         "payment-methods/delete",
