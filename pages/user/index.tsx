@@ -172,6 +172,14 @@ type Subscription = {
   date: number;
 };
 
+type Invoice = {
+  name: string;
+  date: string;
+  id: string;
+  total: number;
+  pdf: string;
+};
+
 const AddCard = () => {
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const [loading, setLoading] = useState(false);
@@ -258,9 +266,9 @@ const ExtensionsTab = () => {
         >
           <path
             d="M19 5h-2V3c0-.55-.45-1-1-1h-4c-.55 0-1 .45-1 1v2H9V3c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V6c0-.55-.45-1-1-1zM8.71 15.29a1.003 1.003 0 01-1.42 1.42l-4-4C3.11 12.53 3 12.28 3 12s.11-.53.29-.71l4-4a1.003 1.003 0 011.42 1.42L5.41 12l3.3 3.29zm8-2.58l-4 4a1.003 1.003 0 01-1.42-1.42l3.3-3.29-3.29-3.29A.965.965 0 0111 8a1.003 1.003 0 011.71-.71l4 4c.18.18.29.43.29.71s-.11.53-.29.71z"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           ></path>
         </svg>
       }
@@ -370,10 +378,44 @@ const BillingTab = () => {
       ),
     [authenticatedAxiosPost, subscriptions, setSubscriptions]
   );
+  const [invoicePage, setInvoicePage] = useState(0);
+  const [invoiceMaxPage, setInvoiceMaxPage] = useState(0);
+  const [invoiceHasMore, setInvoiceHasMore] = useState(false);
+  const [invoiceParams, setInvoiceParams] = useState({});
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
+  const getInvoices = useCallback(() => {
+    setInvoiceLoading(true);
+    authenticatedAxios(
+      `invoices${
+        Object.entries(invoiceParams).length
+          ? `?${new URLSearchParams(invoiceParams).toString()}`
+          : ""
+      }`
+    ).then((r) => {
+      setInvoices(r.data.invoices);
+      setInvoiceHasMore(r.data.hasMore);
+      setInvoiceLoading(false);
+    });
+  }, [
+    invoiceParams,
+    setInvoices,
+    authenticatedAxios,
+    setInvoiceHasMore,
+    setInvoiceLoading,
+  ]);
+  const print = useCallback(
+    (id: string) =>
+      window.open(invoices.find((i) => i.id === id)?.pdf, "_blank").focus(),
+    [invoices]
+  );
   useEffect(() => {
     getPayment();
     getSubscriptions();
-  }, [getPayment]);
+  }, [getPayment, getSubscriptions]);
+  useEffect(() => {
+    getInvoices();
+  }, [getInvoices]);
   return (
     <UserProfileTab
       id={"billing"}
@@ -388,9 +430,9 @@ const BillingTab = () => {
         >
           <path
             d="M14.99 2.95h-14c-.55 0-1 .45-1 1v1h16v-1c0-.55-.45-1-1-1zm-15 10c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-6h-16v6zm5.5-2h5c.28 0 .5.22.5.5s-.22.5-.5.5h-5c-.28 0-.5-.22-.5-.5s.23-.5.5-.5zm-3 0h1c.28 0 .5.22.5.5s-.22.5-.5.5h-1c-.28 0-.5-.22-.5-.5s.23-.5.5-.5z"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           ></path>
         </svg>
       }
@@ -460,6 +502,57 @@ const BillingTab = () => {
           dialogContent: "What would you like to do with this subscription?",
           Component: () => (
             <b>Total: ${subscriptions.reduce((p, c) => p + c.amount, 0)}</b>
+          ),
+        },
+        {
+          title: "Invoices",
+          description: `All of the previous invoices you've already paid to RoamJS.`,
+          getActions: (i) => [
+            { text: "Print", onClick: () => Promise.resolve(print(i.id)) },
+          ],
+          items: (invoiceLoading ? [] : invoices).map((s) => ({
+            id: s.id,
+            title: s.name,
+            display: `Paid $${s.total} on ${s.date}`,
+          })),
+          dialogTitle: "Invoices",
+          dialogContent: "What would you like to do with this invoice?",
+          Component: () => (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Button
+                variant={"contained"}
+                color={"secondary"}
+                disabled={invoicePage === 0}
+                onClick={() => {
+                  setInvoicePage(invoicePage - 1);
+                  setInvoiceParams({
+                    ending_before: invoices[0].id,
+                  });
+                }}
+              >
+                Previous
+              </Button>
+              <Button
+                variant={"contained"}
+                color={"primary"}
+                disabled={!invoiceHasMore && invoicePage === invoiceMaxPage}
+                onClick={() => {
+                  setInvoicePage(invoicePage + 1);
+                  setInvoiceMaxPage(Math.max(invoicePage, invoiceMaxPage));
+                  setInvoiceParams({
+                    starting_after: invoices[invoices.length - 1].id,
+                  });
+                }}
+              >
+                Next
+              </Button>
+            </div>
           ),
         },
       ]}

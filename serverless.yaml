@@ -127,6 +127,13 @@ functions:
           path: iframely
           method: post
           cors: true
+  invoices-get:
+    handler: out/invoices_get.handler
+    events:
+      - http:
+          path: invoices
+          method: get
+          cors: true
   is-subscribed-get:
     handler: out/is-subscribed_get.handler
     events:
