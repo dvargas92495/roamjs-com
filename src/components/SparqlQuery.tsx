@@ -155,7 +155,7 @@ export const runSparqlQuery = ({
             ? s
             : !isNaN(new Date(s).valueOf())
             ? `[[${toRoamDate(new Date(s))}]]`
-            : p[valueKey].type === "literal"
+            : p[h].type === "uri"
             ? `[[${s}]]`
             : s;
         };
