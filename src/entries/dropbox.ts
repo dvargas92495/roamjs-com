@@ -98,14 +98,16 @@ runExtension(ID, () => {
                 );
             })
             .then(({ url, contentType }) => {
-              const dbxUrl = url
-                .replace(/dl=0$/, "raw=1");
+              const dbxUrl = url.replace(/dl=0$/, "raw=1");
               updateBlock({
                 uid,
-                text:
-                  contentType && contentType.includes("pdf")
+                text: contentType
+                  ? contentType.includes("audio/")
+                    ? `{{audio: ${dbxUrl}}}`
+                    : contentType.includes("pdf")
                     ? `{{pdf: ${dbxUrl}}}`
-                    : `![](${dbxUrl})`,
+                    : `![](${dbxUrl})`
+                  : `Unknown Content type for file ${fileToUpload.name}`,
               });
             })
             .catch((e) => {
