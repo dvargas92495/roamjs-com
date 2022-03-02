@@ -106,6 +106,8 @@ runExtension(ID, () => {
                     ? `{{audio: ${dbxUrl}}}`
                     : contentType.includes("pdf")
                     ? `{{pdf: ${dbxUrl}}}`
+                    : contentType.includes("video/")
+                    ? `{{video: ${dbxUrl}}}`
                     : `![](${dbxUrl})`
                   : `Unknown Content type for file ${fileToUpload.name}`,
               });
