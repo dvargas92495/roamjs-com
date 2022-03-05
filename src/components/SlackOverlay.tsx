@@ -164,11 +164,11 @@ const SlackContent: React.FunctionComponent<
     );
     const findFunction = realNameRegex.test(tag)
       ? (m: SlackMember) =>
-          m.real_name.toUpperCase() ===
-          tag.match(realNameRegex)[1].toUpperCase()
+          m.real_name?.toUpperCase?.() ===
+          tag.match(realNameRegex)[1]?.toUpperCase?.()
       : usernameRegex.test(tag)
       ? (m: SlackMember) =>
-          toName(m).toUpperCase() === tag.match(usernameRegex)[1].toUpperCase()
+          toName(m)?.toUpperCase() === tag.match(usernameRegex)[1]?.toUpperCase()
       : () => false;
     const channelFindFunction = channelRegex.test(tag)
       ? (c: SlackChannel) =>
