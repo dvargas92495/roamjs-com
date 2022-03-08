@@ -37,8 +37,7 @@ const onTodo = (blockUid: string, oldValue: string) => {
   const replaceTags = config["Replace Tags"];
   if (replaceTags) {
     const pairs = replaceTags.split("|") as string[];
-    if (pairs.length === 1) {
-      const formattedPairs = pairs.map((p) =>
+    const formattedPairs = pairs.map((p) =>
         p
           .split(",")
           .map((pp) =>
@@ -46,6 +45,7 @@ const onTodo = (blockUid: string, oldValue: string) => {
           )
           .reverse()
       );
+    if (formattedPairs.filter(p => p.length === 1).length < 2) {
       formattedPairs.forEach(([before, after]) => {
         if (after) {
           value = value.replace(before, after);
