@@ -9,7 +9,7 @@ export const handler = async (
     if (!user) {
       return {
         statusCode: 401,
-        body: "No Active Session",
+        body: "No Active User Session",
         headers: headers(event),
       };
     }
