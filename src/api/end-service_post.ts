@@ -41,21 +41,24 @@ export const handler = async (
                 count: ss.items.data.length,
                 id: si.id,
                 subscriptionId: ss.id,
+                extension: service,
               }))
             )
             .find(({ priceId: id }) => priceId === id)
         )
       )
-    : stripe.subscriptionItems
-        .retrieve(id)
-        .then((si) =>
-          stripe.subscriptions.retrieve(si.subscription).then((ss) => ({
-            priceId: si.price,
-            count: ss.items.data.length,
-            subscriptionId: ss.id,
-            id: si.id,
-          }))
-        ));
+    : stripe.subscriptionItems.retrieve(id).then((si) =>
+        Promise.all([
+          stripe.subscriptions.retrieve(si.subscription),
+          stripe.prices.retrieve(id).then((s) => s.metadata.id || ''),
+        ]).then(([ss, extension]) => ({
+          priceId: si.price,
+          count: ss.items.data.length,
+          subscriptionId: ss.id,
+          id: si.id,
+          extension,
+        }))
+      ));
   if (!subscriptionItem) {
     return {
       statusCode: 409,
@@ -81,7 +84,7 @@ export const handler = async (
     };
   }
 
-  const serviceCamelCase = service
+  const serviceCamelCase = subscriptionItem.extension
     .split("-")
     .map((s, i) =>
       i == 0 ? s : `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`
