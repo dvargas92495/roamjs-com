@@ -5,6 +5,7 @@ const movedUris = [
   "github",
   "google-calendar",
   "static-site",
+  "query-builder",
   "twitter",
 ].map((e) => `/${e}.js`);
 
