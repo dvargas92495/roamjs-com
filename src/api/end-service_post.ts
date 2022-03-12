@@ -50,9 +50,9 @@ export const handler = async (
     : stripe.subscriptionItems.retrieve(id).then((si) =>
         Promise.all([
           stripe.subscriptions.retrieve(si.subscription),
-          stripe.prices.retrieve(id).then((s) => s.metadata.id || ''),
+          stripe.prices.retrieve(si.price.id).then((s) => s.metadata.id || ''),
         ]).then(([ss, extension]) => ({
-          priceId: si.price,
+          priceId: si.price.id,
           count: ss.items.data.length,
           subscriptionId: ss.id,
           id: si.id,
