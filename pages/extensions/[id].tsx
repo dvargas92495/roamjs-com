@@ -506,7 +506,7 @@ export const getStaticProps: GetStaticProps<
           props: {
             content,
             id,
-            development: state === "DEVELOPMENT",
+            development: state === "DEVELOPMENT" || state === "UNDER REVIEW",
             legacy: state === "LEGACY",
             description,
             sponsors: data.contributors
