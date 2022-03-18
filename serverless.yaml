@@ -239,6 +239,13 @@ functions:
           path: social-schedule
           method: put
           cors: true
+  sponsor-card-post:
+    handler: out/sponsor-card_post.handler
+    events:
+      - http:
+          path: sponsor-card
+          method: post
+          cors: true
   sponsorships-get:
     handler: out/sponsorships_get.handler
     events:

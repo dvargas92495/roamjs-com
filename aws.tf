@@ -164,6 +164,7 @@ module "aws-serverless-backend" {
         "social-schedule/delete",
         "social-schedule/put",
         "social-token/get",
+        "sponsor-card/post",
         "sponsorships/get",
         "sponsorships/post",
         "start-service/post",
