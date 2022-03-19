@@ -173,7 +173,6 @@ export const twitterOAuth = new OAuth({
 export const getClerkUser = async (
   event: APIGatewayProxyEvent
 ): Promise<User> => {
-  console.log(event.headers);
   const cookies = new Cookies(event.headers.Cookie || event.headers.cookie);
   const sessionToken = cookies.get("__session");
   if (!sessionToken) {
