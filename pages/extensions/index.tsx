@@ -12,7 +12,7 @@ type ExtensionMetadata = {
   description: string;
   image: string;
   href: string;
-  state: "LIVE" | "DEVELOPMENT" | "PRIVATE" | "LEGACY";
+  state: "LIVE" | "DEVELOPMENT" | "PRIVATE" | "LEGACY" | "UNDER REVIEW";
 };
 
 const ExtensionHomePage = ({
@@ -46,7 +46,7 @@ const ExtensionHomePage = ({
       </Body>
       <CardGrid
         items={extensions
-          .filter(({ state }) => state === "DEVELOPMENT")
+          .filter(({ state }) => state === "DEVELOPMENT" || state === "UNDER REVIEW")
           .sort(({ title: a }, { title: b }) => a.localeCompare(b))}
         width={2}
       />

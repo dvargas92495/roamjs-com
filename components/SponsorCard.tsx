@@ -14,7 +14,7 @@ import {
 import axios from "axios";
 import { useRouter } from "next/router";
 import React, { useCallback, useMemo, useState } from "react";
-import { FLOSS_API_URL, stripe } from "./constants";
+import { API_URL, stripe } from "./constants";
 import { useAuthenticatedAxiosPost } from "./hooks";
 
 const Amount = ({ amount }: { amount: number }) => {
@@ -50,11 +50,13 @@ const Amount = ({ amount }: { amount: number }) => {
 };
 
 const LoggedInButton = ({
+  isLoading,
   setLoading,
   value,
   isMonthly,
   source,
 }: {
+  isLoading: boolean;
   setLoading: (b: boolean) => void;
   value: number;
   isMonthly: boolean;
@@ -89,10 +91,11 @@ const LoggedInButton = ({
       onClick={onClick}
       variant={"contained"}
       color={"primary"}
-      disabled={value <= 0}
+      disabled={value <= 0 || isLoading}
       style={{ marginLeft: 16 }}
     >
-      Sponsor
+      <Loading loading={isLoading} size={16} />
+      {!isLoading && 'Sponsor'}
     </Button>
   );
 };
@@ -101,19 +104,23 @@ const SponsorCard = ({ source }: { source: string }): React.ReactElement => {
   const [loading, setLoading] = useState(false);
   const [sponsorValue, setSponsorValue] = useState<string>("0");
   const [otherValue, setOtherValue] = useState<string>("0");
-  const onRadioGroupChange = useCallback((_, value) => setSponsorValue(value), [
-    setSponsorValue,
-  ]);
+  const onRadioGroupChange = useCallback(
+    (_, value) => setSponsorValue(value),
+    [setSponsorValue]
+  );
   const [isMonthly, setIsMonthly] = useState(true);
-  const onSwitchChange = useCallback((_, checked) => setIsMonthly(checked), [
-    setIsMonthly,
-  ]);
-  const onSetOtherValue = useCallback((v: number) => setOtherValue(`${v}`), [
-    setOtherValue,
-  ]);
-  const onOtherFocus = useCallback(() => setSponsorValue("other"), [
-    setSponsorValue,
-  ]);
+  const onSwitchChange = useCallback(
+    (_, checked) => setIsMonthly(checked),
+    [setIsMonthly]
+  );
+  const onSetOtherValue = useCallback(
+    (v: number) => setOtherValue(`${v}`),
+    [setOtherValue]
+  );
+  const onOtherFocus = useCallback(
+    () => setSponsorValue("other"),
+    [setSponsorValue]
+  );
   const value = useMemo(
     () => parseInt(sponsorValue === "other" ? otherValue : sponsorValue),
     [otherValue, sponsorValue]
@@ -121,12 +128,9 @@ const SponsorCard = ({ source }: { source: string }): React.ReactElement => {
   const onClick = useCallback(() => {
     setLoading(true);
     return axios
-      .post(`${FLOSS_API_URL}/stripe-session`, {
+      .post(`${API_URL}/sponsor-card`, {
         value,
         isMonthly,
-        name: "RoamJS Sponsor",
-        cancelPath: "contribute",
-        successPath: "checkout?thankyou=true",
         source,
       })
       .then((r) =>
@@ -195,13 +199,13 @@ const SponsorCard = ({ source }: { source: string }): React.ReactElement => {
           alignItems: "center",
         }}
       >
-        <Loading loading={loading} size={16} />
         <SignedIn>
           <LoggedInButton
             value={value}
             setLoading={setLoading}
             isMonthly={isMonthly}
             source={source}
+            isLoading={loading}
           />
         </SignedIn>
         <SignedOut>
@@ -212,7 +216,8 @@ const SponsorCard = ({ source }: { source: string }): React.ReactElement => {
             disabled={value <= 0}
             style={{ marginLeft: 16 }}
           >
-            Sponsor
+            <Loading loading={loading} size={16} />
+            {!loading && "Sponsor"}
           </Button>
         </SignedOut>
       </div>

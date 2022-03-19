@@ -4,8 +4,8 @@ import { getClerkEmail, headers } from "../lambda-helpers";
 
 const ckApiSecret = process.env.CONVERTKIT_API_TOKEN;
 
-export const handler: APIGatewayProxyHandler = (event) =>
-  getClerkEmail(event).then((email) =>
+export const handler: APIGatewayProxyHandler = (event) => {
+  return getClerkEmail(event).then((email) =>
     axios
       .get(
         `https://api.convertkit.com/v3/subscribers?api_secret=${ckApiSecret}&email_address=${email}`
@@ -16,3 +16,4 @@ export const handler: APIGatewayProxyHandler = (event) =>
         headers: headers(event),
       }))
   );
+};

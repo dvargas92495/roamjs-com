@@ -173,7 +173,8 @@ export const twitterOAuth = new OAuth({
 export const getClerkUser = async (
   event: APIGatewayProxyEvent
 ): Promise<User> => {
-  const cookies = new Cookies(event.headers.Cookie);
+  console.log(event.headers);
+  const cookies = new Cookies(event.headers.Cookie || event.headers.cookie);
   const sessionToken = cookies.get("__session");
   if (!sessionToken) {
     console.warn("No cookie found", JSON.stringify(event.headers, null, 4));
@@ -359,7 +360,7 @@ export const emailError = (subject: string, e: Error): Promise<string> =>
   ses
     .sendEmail({
       Destination: {
-        ToAddresses: ["dvargas92495@gmail.com"],
+        ToAddresses: ["support@roamjs.com"],
       },
       Message: {
         Body: {
@@ -422,11 +423,11 @@ export const TableName =
     ? "RoamJSExtensionsDev"
     : "RoamJSExtensions";
 
-export const getStripePriceId = (service: string): Promise<string> =>
+export const getStripePriceId = (extension: string): Promise<string> =>
   dynamo
     .getItem({
       TableName,
-      Key: { id: { S: service } },
+      Key: { id: { S: extension } },
     })
     .promise()
     .then((r) => r.Item.premium?.S);

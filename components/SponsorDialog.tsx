@@ -18,7 +18,7 @@ const SponsorDialog = ({ id }: { id: string }): React.ReactElement => {
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Sponsor RoamJS</DialogTitle>
         <DialogContent>
-          <SponsorCard source={`RoamJS Docs ${id}`} />
+          <SponsorCard source={id} />
           <Button
             onClick={handleClose}
             color="secondary"

@@ -7,6 +7,7 @@ import {
   stripe,
   TableName,
 } from "../lambda-helpers";
+import { users } from "@clerk/clerk-sdk-node";
 
 const DEFAULT_AUTHOR = {
   name: "RoamJS",
@@ -31,15 +32,19 @@ export const handler: APIGatewayProxyHandler = (event) => {
                   .getObject({ Bucket: "roamjs.com", Key: `markdown/${id}.md` })
                   .promise()
                   .then((c) => c.Body.toString()),
-            r.Item.author?.S
-              ? Promise.resolve({
-                  name: "Query clerk",
-                  email: "For the author",
-                })
+            r.Item.user?.S
+              ? users
+                  .getUser(r.Item.user.S)
+                  .then((u) => ({
+                    name: u.firstName && u.lastName ? `${u.firstName} ${u.lastName}`.trim() : 'an Anonymous Developer',
+                    email: u.emailAddresses.find(
+                      (e) => e.id === u.primaryEmailAddressId
+                    )?.emailAddress,
+                  }))
               : Promise.resolve(DEFAULT_AUTHOR),
             r.Item.premium?.S
               ? stripe.prices
-                  .retrieve(r.Item.premium?.S)
+                  .retrieve(r.Item.premium.S)
                   .then(({ product, unit_amount, recurring }) =>
                     stripe.products
                       .retrieve(product as string)
@@ -54,8 +59,8 @@ export const handler: APIGatewayProxyHandler = (event) => {
             statusCode: 200,
             body: JSON.stringify({
               content,
-              state: r.Item.state.S,
-              description: r.Item.description.S,
+              state: r.Item.state?.S || 'PRIVATE',
+              description: r.Item.description?.S || '',
               premium,
               author,
             }),

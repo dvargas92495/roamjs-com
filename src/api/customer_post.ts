@@ -136,7 +136,7 @@ export const handler = async (
           ses
             .sendEmail({
               Destination: {
-                ToAddresses: ["dvargas92495@gmail.com"],
+                ToAddresses: ["support@roamjs.com"],
               },
               Message: {
                 Body: {

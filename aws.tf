@@ -165,11 +165,9 @@ module "aws-serverless-backend" {
         "social-schedule/put",
         "social-token/get",
         "sponsor-card/post",
-        "sponsorships/get",
         "sponsorships/post",
         "start-service/post",
         "subscriptions/get",
-        "subscribe-sponsorship/post",
         "token/get",
         "token/post",
         "versions/get",
@@ -185,7 +183,7 @@ module "aws-serverless-backend" {
       "payment-methods",
       "project-fund",
       "token",
-      "subscribe-sponsorship",
+      "sponsor-card",
       "sponsorships",
     ]
     tags = {
