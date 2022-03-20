@@ -58,18 +58,18 @@ const UserProfileTab = ({
     display: string;
   }) => (
     <button
-      className="cl-list-item _1qJoyBQenGMr7kHEjL4Krl _2YW23wFdhOB4SEGzozPtqO qlMNWy3GFjlnVDhYmD_84"
+      className="cl-list-item tdcLsvPUy6va12fjbWeoaA== lDcSm5zthgXvDREoOppm+A== YQaXxv5CXpWrIgz9wCpq2g=="
       onClick={onClick}
     >
-      <div className={"_3cdHQF85GQrVzNyaksJFAn"}>{i.title}</div>
-      <div className={"_377YaX0RVdJAflWkqyk0_W _5doIP53SFIp-tF1LX17if"}>
-        <div>
-          <span
-            className="cl-font-semibold "
+      <div className={"_9SNWFS-Vh0PZng3FdNfr4Q=="}>{i.title}</div>
+      <div className={"+UDTovkDwHUg+nhZxGd0rQ== ydTkYqSHdXIQOM237Tl+rw=="}>
+        <div className="xFJ5rpwkVmYhgKY1beHGww==">
+          <div
+            className="cl-list-item-entry "
             style={{ whiteSpace: "break-spaces" }}
           >
             {i.display}
-          </span>
+          </div>
         </div>
         <div style={{ marginRight: "2.125em" }}>
           <svg
@@ -113,14 +113,12 @@ const UserProfileTab = ({
             </div>
             {cards.map((c) => (
               <div
-                className={
-                  "wKjtxHPVelSpGxgKD4J-K _1OzNYgdyNED3jLWN6DXv1T cl-themed-card"
-                }
+              className="TbneNCA4gZ19UdBjC4aa8w== UWBWNVaoq8lQMz06Xu2Cxg== cl-themed-card"
                 key={c.title}
               >
-                <div>
-                  <h1>{c.title}</h1>
-                  <p style={{ whiteSpace: "pre-wrap" }}>{c.description}</p>
+                <div className="Em1H2funtme6EXt9AM65sQ==">
+                  <h1 className="lxRDeMOoyAxXuzbXfY3AZA==">{c.title}</h1>
+                  <p className="lqA9GnSF-T6v3YCbt8CChA==" style={{ whiteSpace: "pre-wrap" }}>{c.description}</p>
                 </div>
                 {c.items && (
                   <div className="cl-titled-card-list">
@@ -150,7 +148,7 @@ const UserProfileTab = ({
               </div>
             ))}
           </>,
-          document.querySelector("div.cl-content") || document.body
+          document.querySelector("div.cl-main") || document.body
         )}
     </>
   ) : (
@@ -580,7 +578,7 @@ div.cl-component.cl-user-profile {
   position: relative;
 }
 
-div.cl-component.cl-user-profile div.cl-content {
+div.cl-component.cl-user-profile div.cl-main {
   margin-left: 24px;
   margin-right: 24px;
 }
