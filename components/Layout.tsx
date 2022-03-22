@@ -46,7 +46,7 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
       <AppBar
         homeIcon={<RoamJSLogo />}
         userIcon={<UserIconDynamic />}
-        pages={["extensions", "projects", "queue", "contribute"]}
+        pages={["extensions", "projects", "contribute"]}
       />
       <Main>{children}</Main>
       <Footer

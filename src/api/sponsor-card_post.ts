@@ -56,13 +56,13 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     .promise()
     .then((r) => r.Item?.user?.S);
   const connectedAccount = user
-    ? { email: "support@roamjs.com", stripeAccount: "" }
-    : await users.getUser(user).then((u) => ({
+    ? await users.getUser(user).then((u) => ({
         email: u.emailAddresses.find((e) => e.id === u.primaryEmailAddressId)
           ?.emailAddress,
         stripeAccount: u.privateMetadata?.stripeAccount as string,
-      }));
-
+        thankyou: `${u.firstName} ${u.lastName}`,
+      }))
+    : { email: "support@roamjs.com", stripeAccount: "", thankyou: "RoamJS" };
   if (
     !connectedAccount.stripeAccount &&
     connectedAccount.email !== "support@roamjs.com"

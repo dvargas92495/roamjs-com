@@ -156,7 +156,6 @@ module "aws-serverless-backend" {
         "project-fund/delete",
         "project-fund/post",
         "publish/post",
-        "queue-issues/get",
         "request-path/get",
         "slack-url/post",
         "shutdown-social/post",

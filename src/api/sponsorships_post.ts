@@ -55,13 +55,14 @@ export const handler = async (
     })
     .promise()
     .then((r) => r.Item?.user?.S);
-  const connectedAccount = user
-    ? { email: "support@roamjs.com", stripeAccount: "" }
-    : await users.getUser(owner).then((u) => ({
+  const connectedAccount = owner
+    ? await users.getUser(owner).then((u) => ({
         email: u.emailAddresses.find((e) => e.id === u.primaryEmailAddressId)
           ?.emailAddress,
         stripeAccount: u.privateMetadata?.stripeAccount as string,
-      }));
+        thankyou: `${u.firstName} ${u.lastName}`,
+      }))
+    : { email: "support@roamjs.com", stripeAccount: "", thankyou: "RoamJS" };
   const isConnected =
     connectedAccount.stripeAccount &&
     connectedAccount.email !== "support@roamjs.com";
@@ -150,7 +151,7 @@ export const handler = async (
               },
             ],
             mode: "subscription",
-            success_url: `${origin}/checkout?thankyou=true`,
+            success_url: `${origin}/checkout?thankyou=${connectedAccount.thankyou}`,
             cancel_url: `${origin}/contribute`,
             ...(connectedAccount.stripeAccount
               ? {
@@ -234,7 +235,7 @@ export const handler = async (
             },
           ],
           metadata: { source, skipCallback: "true" },
-          success_url: `${origin}/checkout?thankyou=true`,
+          success_url: `${origin}/checkout?thankyou=${connectedAccount.thankyou}`,
           cancel_url: `${origin}/contribute`,
         })
         .then((session) => ({
