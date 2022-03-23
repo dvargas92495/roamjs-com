@@ -17,6 +17,7 @@ import {
   createIconButton,
   getUids,
 } from "roam-client";
+import extensionDeprecatedWarning from "roamjs-components/util/extensionDeprecatedWarning";
 
 let isSortByBlocks = false;
 
@@ -279,7 +280,14 @@ const observerCallback = () => {
   }
 };
 
-runExtension("query-tools", () => {
+const ID = "query-tools";
+
+runExtension(ID, () => {
+  extensionDeprecatedWarning({
+    extensionId: ID,
+    reason:
+      "The features of this extension will soon be migrated to the [RoamJS Query Builder](https://roamjs.com/extensions/query-builder) extension.",
+  });
   observerCallback();
   createObserver(observerCallback);
 });
