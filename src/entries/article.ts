@@ -59,7 +59,7 @@ runExtension("article", () => {
   });
 
   document.addEventListener("keydown", async (e) => {
-    if (e.altKey && e.shiftKey && e.key === "I") {
+    if (e.altKey && e.shiftKey && (e.key === "I" || e.code === "KeyI")) {
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA") {
         const value = (target as HTMLTextAreaElement).value;
