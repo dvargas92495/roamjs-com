@@ -2,8 +2,8 @@ import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { Prism } from "react-syntax-highlighter";
 import React, { useCallback, useEffect, useState } from "react";
-import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
-import { API_URL, stripe } from "../../components/constants";
+import { SignedOut } from "@clerk/clerk-react";
+import { API_URL } from "../../components/constants";
 import StandardLayout from "../../components/StandardLayout";
 import { serialize } from "../../components/serverSide";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
@@ -11,10 +11,7 @@ import matter from "gray-matter";
 import {
   getCodeContent,
   getSingleCodeContent,
-  idToCamel,
   idToTitle,
-  useAuthenticatedAxiosGet,
-  useAuthenticatedAxiosPost,
   useCopyCode,
 } from "../../components/hooks";
 import {
@@ -32,179 +29,14 @@ import {
   ThankYouSponsor,
   isThankYouEmoji,
   CardGrid,
-  ConfirmationDialog,
 } from "@dvargas92495/ui";
 import SponsorDialog from "../../components/SponsorDialog";
 import RoamJSDigest from "../../components/RoamJSDigest";
-import MdxComponents from "../../components/MdxComponents";
+import getMdxComponents from "../../components/MdxComponents";
 import fs from "fs";
 import { isSafari } from "react-device-detect";
 import DemoVideo from "../../components/DemoVideo";
 import Loom from "../../components/Loom";
-import { useRouter } from "next/router";
-
-const StartButton = ({
-  price,
-  onClick,
-}: {
-  price: string;
-  onClick: () => void;
-}) => (
-  <>
-    <Body>
-      You could subscribe directly from within Roam, or by clicking the button
-      below!
-    </Body>
-    <Button color={"primary"} variant={"contained"} onClick={onClick}>
-      <span style={{ fontSize: 14 }}>Start for</span>
-      <span style={{ fontWeight: 600, fontSize: 14, marginLeft: 4 }}>
-        {price}
-      </span>
-    </Button>
-  </>
-);
-
-const EndButton = ({ id, end }: { id: string; end: () => void }) => {
-  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const onEnd = useCallback(
-    () => authenticatedAxiosPost("end-service", { service: id }),
-    [authenticatedAxiosPost]
-  );
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        height: "100%",
-        alignItems: "center",
-      }}
-    >
-      <div>
-        <Body>Click the button below to remove these premium features.</Body>
-        <ConfirmationDialog
-          buttonText={"End Subscription"}
-          color="secondary"
-          title={`Ending ${idToTitle(id)}`}
-          content={`Are you sure you want to unsubscribe from the premium features of RoamJS ${idToTitle(
-            id
-          )}?`}
-          action={onEnd}
-          onSuccess={end}
-        />
-      </div>
-    </div>
-  );
-};
-
-const LaunchButton: React.FC<{
-  start: () => void;
-  id: string;
-  price: string;
-  refreshUser: () => void;
-  signedOut?: boolean;
-}> = ({ start, id, price, refreshUser }) => {
-  const {
-    query: { started },
-  } = useRouter();
-  const authenticatedAxiosGet = useAuthenticatedAxiosGet();
-  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const startService = useCallback(
-    () =>
-      authenticatedAxiosPost("start-service", {
-        service: id,
-        query: window.location.search.slice(1),
-      }).then((r) =>
-        r.data.sessionId
-          ? stripe.then((s) =>
-              s
-                .redirectToCheckout({
-                  sessionId: r.data.sessionId,
-                })
-                .catch((e) => console.error(e))
-            )
-          : refreshUser()
-      ),
-    [authenticatedAxiosPost]
-  );
-  const [disabled, setDisabled] = useState(true);
-  useEffect(() => {
-    const checkStripe = () =>
-      authenticatedAxiosGet("connected?key=stripeId")
-        .then((r) => {
-          if (r.data.connected) {
-            setDisabled(false);
-          } else {
-            setTimeout(checkStripe, 1000);
-          }
-        })
-        .catch(() => setTimeout(checkStripe, 5000));
-    checkStripe();
-  }, [authenticatedAxiosGet]);
-  return (
-    <>
-      <ConfirmationDialog
-        action={startService}
-        Button={({ onClick }) => (
-          <StartButton onClick={onClick} price={price} />
-        )}
-        content={`By clicking submit below, you will subscribe to the premium features of the RoamJS Extension: ${idToTitle(
-          id
-        )} for ${price}.`}
-        onSuccess={start}
-        title={`RoamJS ${idToTitle(id)}`}
-        defaultIsOpen={started === "true"}
-        disabled={disabled}
-      />
-    </>
-  );
-};
-
-const CheckSubscription = ({ id, price }: { id: string; price: string }) => {
-  const [started, setStarted] = useState(false);
-  const start = useCallback(() => setStarted(true), [setStarted]);
-  const end = useCallback(() => setStarted(false), [setStarted]);
-  const user = useUser();
-  const { publicMetadata } = user;
-  useEffect(() => {
-    if (publicMetadata[idToCamel(id)]) {
-      start();
-    }
-  }, [start, publicMetadata, id]);
-  return started ? (
-    <EndButton id={id} end={end} />
-  ) : (
-    <LaunchButton
-      start={start}
-      id={id}
-      price={price}
-      refreshUser={() => user.update({})}
-    />
-  );
-};
-
-const ServiceButton = ({
-  id,
-  price,
-}: {
-  id: string;
-  price: string;
-}): React.ReactElement => {
-  const router = useRouter();
-  const login = useCallback(
-    () => router.push(`/login?extension=${id}`),
-    [router]
-  );
-  return (
-    <div>
-      <SignedIn>
-        <CheckSubscription id={id} price={price} />
-      </SignedIn>
-      <SignedOut>
-        <StartButton onClick={login} price={price} />
-      </SignedOut>
-    </div>
-  );
-};
 
 const ExtensionPage = ({
   content,
@@ -343,9 +175,9 @@ const ExtensionPage = ({
       <Body>
         First create a <b>block</b> with the text{" "}
         <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam DB. Then,
-        create a single child of this block and type three backticks. A code block
-        should appear. Copy this code and paste it into the child code block in
-        your graph:
+        create a single child of this block and type three backticks. A code
+        block should appear. Copy this code and paste it into the child code
+        block in your graph:
       </Body>
       <div style={{ marginBottom: 48 }}>
         <Prism language="javascript">
@@ -359,17 +191,10 @@ const ExtensionPage = ({
       {content.compiledSource ? (
         <MDXRemote
           {...content}
-          components={{
-            ...MdxComponents,
-            Premium: () => (
-              <ServiceButton
-                id={id}
-                price={`$${premium.price}${
-                  premium.usage === "metered" ? " per use" : ""
-                }/mo`}
-              />
-            ),
-          }}
+          components={getMdxComponents({
+            id,
+            premium,
+          })}
         />
       ) : (
         "No content"
