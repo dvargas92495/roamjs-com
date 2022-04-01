@@ -366,7 +366,11 @@ export const getStaticProps: GetStaticProps<
     )
     .catch((e) => {
       return serialize(
-        `Failed to render due to: ${e.response?.data || e.message}`
+        `Failed to render due to: ${
+          typeof e.response?.data === "object"
+            ? JSON.stringify(e.response?.data)
+            : e.response?.data || e.message
+        }`
       ).then((content) => ({
         props: {
           content,

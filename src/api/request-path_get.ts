@@ -52,7 +52,7 @@ export const handler: APIGatewayProxyHandler = (event) => {
                         description,
                         price: unit_amount / 100,
                         usage: recurring?.usage_type,
-                        quantity: transform_quantity.divide_by,
+                        quantity: transform_quantity?.divide_by || 1,
                       }))
                   )
               : Promise.resolve(undefined),
