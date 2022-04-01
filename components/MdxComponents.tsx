@@ -267,7 +267,7 @@ const getMdxComponents = ({
   premium,
 }: {
   id: string;
-  premium: { price: number; usage?: "metered" | "licensed" };
+  premium: { price: number; usage?: "metered" | "licensed"; quantity: number };
 }): Record<string, React.ReactNode> => ({
   h1: H1,
   h2: H2,
@@ -292,7 +292,9 @@ const getMdxComponents = ({
     <ServiceButton
       id={id}
       price={`$${premium.price}${
-        premium.usage === "metered" ? " per use" : ""
+        premium.usage === "metered"
+          ? ` per ${premium.quantity > 1 ? `${premium.quantity} uses` : "use"}`
+          : ""
       }/mo`}
     />
   ),

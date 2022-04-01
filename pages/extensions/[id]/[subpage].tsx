@@ -18,6 +18,7 @@ type ExtensionSubPageProps = {
     description: string;
     price: number;
     usage: "licensed" | "metered";
+    quantity: number;
   } | null;
 };
 
