@@ -91,7 +91,7 @@ export const getStaticProps: GetStaticProps<
         props: {
           content,
           development: r.data.state !== "LIVE",
-          premium: null,
+          premium: r.data.premium,
           ...context.params,
         },
       }))
