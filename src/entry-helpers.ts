@@ -396,45 +396,6 @@ export const getConfigFromBlock = (
 export const getWordCount = (str = ""): number =>
   str.trim().split(/\s+/).length;
 
-const getWordCountByBlockId = (blockId: number): number => {
-  const block = window.roamAlphaAPI.pull(
-    "[:block/children, :block/string]",
-    blockId
-  );
-  const children = block[":block/children"] || [];
-  const count = getWordCount(block[":block/string"]);
-  return (
-    count +
-    children
-      .map((c) => getWordCountByBlockId(c[":db/id"]))
-      .reduce((total, cur) => cur + total, 0)
-  );
-};
-
-export const getWordCountByBlockUid = (blockUid: string): number => {
-  const block = window.roamAlphaAPI.q(
-    `[:find (pull ?e [:block/children, :block/string]) :where [?e :block/uid "${blockUid}"]]`
-  )[0][0] as RoamBlock;
-  const children = block.children || [];
-  const count = getWordCount(block.string);
-  return (
-    count +
-    children
-      .map((c) => getWordCountByBlockId(c.id))
-      .reduce((total, cur) => cur + total, 0)
-  );
-};
-
-export const getWordCountByPageTitle = (title: string): number => {
-  const page = window.roamAlphaAPI.q(
-    `[:find (pull ?e [:block/children]) :where [?e :node/title "${title}"]]`
-  )[0][0] as RoamBlock;
-  const children = page.children || [];
-  return children
-    .map((c) => getWordCountByBlockId(c.id))
-    .reduce((total, cur) => cur + total, 0);
-};
-
 export const getRefTitlesByBlockUid = (uid: string): string[] =>
   window.roamAlphaAPI
     .q(
