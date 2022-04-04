@@ -19,10 +19,11 @@ export const handler = async (
       sig || "",
       process.env.STRIPE_CHECKOUT_SECRET || ""
     );
-    const { userId, service } = (
+    const { userId, service = '', extension = service } = (
       stripeEvent.data.object as Stripe.Checkout.Session
     ).metadata as {
       service: string;
+      extension: string;
       userId: string;
     };
 
@@ -34,7 +35,7 @@ export const handler = async (
       };
     }
     const { publicMetadata } = await users.getUser(userId);
-    if ((publicMetadata[service] as { token: string })?.token) {
+    if ((publicMetadata[extension] as { token: string })?.token) {
       return {
         statusCode: 204,
         body: "",
@@ -45,7 +46,7 @@ export const handler = async (
     await users.updateUser(userId, {
       publicMetadata: {
         ...publicMetadata,
-        [service]: {},
+        [extension]: {},
       },
     });
 

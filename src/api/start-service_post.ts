@@ -19,16 +19,18 @@ export const handler = async (
       headers: headers(event),
     };
   }
-  const { service } = JSON.parse(event.body || "{}") as {
-    service: string;
+  const { service = '', extension = service, quantity = 1 } = JSON.parse(event.body || "{}") as {
+    extension?: string;
+    service?: string;
+    quantity?: number;
   };
-  const extensionField = service
+  const extensionField = extension
     .split("-")
     .map((s, i) =>
       i == 0 ? s : `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`
     )
     .join("");
-  const priceId = await getStripePriceId(service);
+  const priceId = await getStripePriceId(extension);
   const customer = user.privateMetadata?.stripeId as string;
   const usage = await stripe.prices
     .retrieve(priceId)
@@ -36,7 +38,7 @@ export const handler = async (
   const line_items = [
     usage === "metered"
       ? { price: priceId }
-      : { price: priceId, quantity: 1 },
+      : { price: priceId, quantity },
   ];
   const finishSubscription = () =>
     users
@@ -70,7 +72,7 @@ export const handler = async (
     .then((c) => c.invoice_settings?.default_payment_method);
   const origin = event.headers.Origin || event.headers.origin;
 
-  const { active, id } = paymentMethod
+  const { active, id, error } = paymentMethod
     ? await stripe.subscriptions
         .create({
           customer,
@@ -79,29 +81,29 @@ export const handler = async (
             project: "RoamJS",
           },
         })
-        .then((s) => ({ active: true, id: s.id }))
-        .catch(() => ({ active: false, id: undefined }))
+        .then((s) => ({ active: true, id: s.id, error: undefined }))
+        .catch((error) => ({ active: false, id: undefined, error }))
     : await stripe.checkout.sessions
         .create({
           customer,
           payment_method_types: ["card"],
           line_items,
           mode: "subscription",
-          success_url: `${origin}/extensions/${service}?success=true`,
-          cancel_url: `${origin}/extensions/${service}?cancel=true`,
+          success_url: `${origin}/extensions/${extension}?success=true`,
+          cancel_url: `${origin}/extensions/${extension}?cancel=true`,
           subscription_data: {
             metadata: {
               project: "RoamJS",
             },
           },
           metadata: {
-            service: extensionField,
+            extension: extensionField,
             userId: user.id,
             callback: `${process.env.API_URL}/finish-start-service`,
           },
         })
-        .then((session) => ({ id: session.id, active: false }))
-        .catch(() => ({ active: false, id: undefined }));
+        .then((session) => ({ id: session.id, active: false, error: undefined }))
+        .catch((error) => ({ active: false, id: undefined, error }));
 
   if (!active) {
     if (id) {
@@ -111,6 +113,7 @@ export const handler = async (
         headers: headers(event),
       };
     } else {
+      console.log(error);
       return {
         statusCode: 500,
         body: "Failed to subscribe to RoamJS extension. Contact support@roamjs.com for help!",

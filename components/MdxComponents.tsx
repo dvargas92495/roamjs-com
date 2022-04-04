@@ -167,8 +167,7 @@ const LaunchButton: React.FC<{
   const startService = useCallback(
     () =>
       authenticatedAxiosPost("start-service", {
-        service: id,
-        query: window.location.search.slice(1),
+        extension: id,
       }).then((r) =>
         r.data.sessionId
           ? stripe.then((s) =>
@@ -291,10 +290,10 @@ const getMdxComponents = ({
   Premium: () => (
     <ServiceButton
       id={id}
-      price={`$${premium.price}${
+      price={`$${premium.price} per ${
         premium.usage === "metered"
-          ? ` per ${premium.quantity > 1 ? `${premium.quantity} uses` : "use"}`
-          : ""
+          ? `${premium.quantity > 1 ? `${premium.quantity} uses` : "use"}`
+          : "use"
       }/mo`}
     />
   ),
