@@ -2,11 +2,14 @@ import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import {
   bareSuccessResponse,
+  emailCatch,
   getClerkUser,
+  getExtensionUserId,
   getStripePriceId,
   headers,
   stripe,
 } from "../lambda-helpers";
+import sendEmail from "aws-sdk-plus/dist/sendEmail";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -19,20 +22,25 @@ export const handler = async (
       headers: headers(event),
     };
   }
-  const { service = "", id } = JSON.parse(event.body || "{}") as {
+  const {
+    service = "",
+    extension = service,
+    id,
+  } = JSON.parse(event.body || "{}") as {
     service: string;
+    extension: string;
     id: string;
   };
-  if (!service && !id) {
+  if (!extension && !id) {
     return {
       statusCode: 400,
-      body: "One of either `id` or `service` is required.",
+      body: "One of either `id` or `extension` is required.",
       headers: headers(event),
     };
   }
   const customer = user.privateMetadata.stripeId as string;
-  const subscriptionItem = await (service
-    ? getStripePriceId(service).then((priceId) =>
+  const subscriptionItem = await (extension
+    ? getStripePriceId(extension).then((priceId) =>
         stripe.subscriptions.list({ customer }).then((s) =>
           s.data
             .flatMap((ss) =>
@@ -41,7 +49,7 @@ export const handler = async (
                 count: ss.items.data.length,
                 id: si.id,
                 subscriptionId: ss.id,
-                extension: service,
+                extension,
               }))
             )
             .find(({ priceId: id }) => priceId === id)
@@ -50,7 +58,7 @@ export const handler = async (
     : stripe.subscriptionItems.retrieve(id).then((si) =>
         Promise.all([
           stripe.subscriptions.retrieve(si.subscription),
-          stripe.prices.retrieve(si.price.id).then((s) => s.metadata.id || ''),
+          stripe.prices.retrieve(si.price.id).then((s) => s.metadata.id || ""),
         ]).then(([ss, extension]) => ({
           priceId: si.price.id,
           count: ss.items.data.length,
@@ -62,7 +70,7 @@ export const handler = async (
   if (!subscriptionItem) {
     return {
       statusCode: 409,
-      body: `Current user is not subscribed to ${service}`,
+      body: `Current user is not subscribed to ${extension}`,
       headers: headers(event),
     };
   }
@@ -84,23 +92,49 @@ export const handler = async (
     };
   }
 
-  const serviceCamelCase = subscriptionItem.extension
+  const extensionCamelCase = subscriptionItem.extension
     .split("-")
     .map((s, i) =>
       i == 0 ? s : `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`
     )
     .join("");
 
-  const { [serviceCamelCase]: serviceField, ...rest } = user.publicMetadata as {
-    [key: string]: string;
-  };
-  if (serviceField) {
+  const { [extensionCamelCase]: extensionField, ...rest } =
+    user.publicMetadata as {
+      [key: string]: string;
+    };
+  if (extensionField) {
     await users.updateUser(user.id, {
       publicMetadata: rest,
     });
   } else {
-    console.warn("No metadata value to clear for field", serviceField);
+    console.warn("No metadata value to clear for field", extensionField);
   }
+
+  const userEmail = user.emailAddresses.find(
+    (e) => e.id === user.primaryEmailAddressId
+  )?.emailAddress;
+  const developer = await getExtensionUserId(subscriptionItem.extension);
+  const developerEmail = await users
+    .getUser(developer)
+    .then(
+      (u) =>
+        u.emailAddresses.find((e) => e.id === u.primaryEmailAddressId)
+          ?.emailAddress
+    )
+    .catch((e) =>
+      emailCatch(
+        `Failed to find developer ${developer} for extension ${subscriptionItem.extension}`,
+        event
+      )(e).then(() => "")
+    );
+  await sendEmail({
+    to: developerEmail || "support@roamjs.com",
+    from: "support@roamjs.com",
+    subject: `User unsubscribed from extension from RoamJS`,
+    body: `User ${userEmail} has unsubscribed from the ${subscriptionItem.extension} extension.`,
+    replyTo: userEmail,
+  });
 
   return bareSuccessResponse(event);
 };

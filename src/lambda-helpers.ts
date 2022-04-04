@@ -1,7 +1,7 @@
 import { AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
 import Cookies from "universal-cookie";
-import { sessions, users, User, setClerkApiKey } from "@clerk/clerk-sdk-node";
+import { sessions, users, User } from "@clerk/clerk-sdk-node";
 import {
   APIGatewayProxyEvent,
   APIGatewayProxyHandler,
@@ -212,65 +212,53 @@ export const generateToken = (): { encrypted: string; value: string } => {
   };
 };
 
-export const authenticateUser = (
-  Authorization: string,
-  dev?: boolean
-): Promise<User> => {
-  if (dev) {
-    setClerkApiKey(process.env.CLERK_DEV_API_KEY);
-  } else {
-    setClerkApiKey(process.env.CLERK_API_KEY);
-  }
-  const encryptionSecret = process.env.ENCRYPTION_SECRET;
-  const [email, token] = Buffer.from(
-    Authorization.replace(/^Bearer /, ""),
-    "base64"
-  )
-    .toString()
-    .split(":");
-  return users
-    .getUserList({ emailAddress: [email] })
-    .then((us) =>
-      us.find((u) => {
-        const stored = AES.decrypt(
-          u.privateMetadata.token as string,
-          encryptionSecret
-        ).toString(encutf8);
-        return stored && stored === token;
-      })
-    )
-    .catch(() => undefined);
-};
-
 export const authenticateDeveloper =
   (handler: APIGatewayProxyHandler): APIGatewayProxyHandler =>
   (event, ctx, callback) => {
     const Authorization =
       event.headers.Authorization || event.headers.authorization || "";
-    const dev = !!event.headers["x-roamjs-dev"];
+    const encryptionSecret = process.env.ENCRYPTION_SECRET;
+    const [email, token] = Buffer.from(
+      Authorization.replace(/^Bearer /, ""),
+      "base64"
+    )
+      .toString()
+      .split(":");
 
-    return authenticateUser(Authorization, dev).then((user) => {
-      if (!user) {
-        return {
-          statusCode: 401,
-          body: "Invalid Developer token",
-          headers: headers(event),
-        };
-      }
-      if (!user.publicMetadata["developer"]) {
-        return {
-          statusCode: 403,
-          body: "User has not signed up for the RoamJS Developer extension",
-          headers: headers(event),
-        };
-      }
-      event.headers.Authorization = user.id;
-      const result = handler(event, ctx, callback);
-      if (!result) {
-        return emptyResponse(event);
-      }
-      return result;
-    });
+    return users
+      .getUserList({ emailAddress: [email] })
+      .then((us) =>
+        us.find((u) => {
+          const stored = AES.decrypt(
+            u.privateMetadata.token as string,
+            encryptionSecret
+          ).toString(encutf8);
+          return stored && stored === token;
+        })
+      )
+      .catch(() => undefined)
+      .then((user) => {
+        if (!user) {
+          return {
+            statusCode: 401,
+            body: "Invalid Developer token",
+            headers: headers(event),
+          };
+        }
+        if (!user.publicMetadata["developer"]) {
+          return {
+            statusCode: 403,
+            body: "User has not signed up for the RoamJS Developer extension",
+            headers: headers(event),
+          };
+        }
+        event.headers.Authorization = user.id;
+        const result = handler(event, ctx, callback);
+        if (!result) {
+          return emptyResponse(event);
+        }
+        return result;
+      });
   };
 
 export const emailError = (subject: string, e: Error): Promise<string> =>
@@ -348,3 +336,12 @@ export const getStripePriceId = (extension: string): Promise<string> =>
     })
     .promise()
     .then((r) => r.Item.premium?.S);
+
+export const getExtensionUserId = (extension: string): Promise<string> =>
+  dynamo
+    .getItem({
+      TableName,
+      Key: { id: { S: extension } },
+    })
+    .promise()
+    .then((r) => r.Item.user?.S);

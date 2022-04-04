@@ -123,7 +123,7 @@ const StartButton = ({
 const EndButton = ({ id, end }: { id: string; end: () => void }) => {
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
   const onEnd = useCallback(
-    () => authenticatedAxiosPost("end-service", { service: id }),
+    () => authenticatedAxiosPost("end-service", { extension: id }),
     [authenticatedAxiosPost]
   );
   return (
