@@ -1,4 +1,4 @@
-import { Dialog, InputGroup, Menu, MenuItem } from "@blueprintjs/core";
+import { Dialog, InputGroup, Menu, MenuItem, Spinner } from "@blueprintjs/core";
 import React, {
   useCallback,
   useEffect,
@@ -8,7 +8,11 @@ import React, {
 } from "react";
 import ReactDOM from "react-dom";
 import useArrowKeyDown from "roamjs-components/hooks/useArrowKeyDown";
+import createOverlayRender from "roamjs-components/util/createOverlayRender";
 import { isIOS, isMacOs } from "mobile-device-detect";
+import getBasicTreeByParentUid from "roamjs-components/queries/getBasicTreeByParentUid";
+import { RoamBasicNode } from "roamjs-components/types";
+import updateBlock from "roamjs-components/writes/updateBlock";
 
 const isApple = isIOS || isMacOs;
 const os = (apple: string, windows: string) => (isApple ? apple : windows);
@@ -70,12 +74,21 @@ const COMMANDS = [
   { command: "Jump to Last Block", shortcut: control("Shift-Enter") },
   { command: "Add Shortcut To Page", shortcut: control("Shift-S") },
   { command: "Copy Current Block Ref", shortcut: control("Shift-C") },
-  { command: "Paste Block with children as references", shortcut: "Alt-Ctrl-Shift-V" },
+  {
+    command: "Paste Block with children as references",
+    shortcut: "Alt-Ctrl-Shift-V",
+  },
   { command: "Toggle Parent Block View Type", shortcut: "Alt-v" },
-  { command: "Replace last reference before cursor with text and alias", shortcut: "Alt-Ctrl-Shift-A" },
+  {
+    command: "Replace last reference before cursor with text and alias",
+    shortcut: "Alt-Ctrl-Shift-A",
+  },
   { command: "Apply children as text", shortcut: "Alt-Ctrl-Shift-C" },
-  { command: "Replace with original + bring nested items along", shortcut: "Alt-Ctrl-Shift-O" },
- // { command: "Create Comment", shortcut: "Alt-Ctrl-Shift-M" },
+  {
+    command: "Replace with original + bring nested items along",
+    shortcut: "Alt-Ctrl-Shift-O",
+  },
+  // { command: "Create Comment", shortcut: "Alt-Ctrl-Shift-M" },
 ];
 
 const convertKey = (k: string) => {
@@ -216,11 +229,7 @@ const MouselessDialog = (): JSX.Element => {
   );
   const eventListener = useCallback(
     (e: KeyboardEvent) => {
-      if (
-        (e.code === "Slash" || e.key === "?") &&
-        e.shiftKey &&
-        e.ctrlKey
-      ) {
+      if ((e.code === "Slash" || e.key === "?") && e.shiftKey && e.ctrlKey) {
         previousFocus.current = document.activeElement;
         setIsOpen(true);
         const currentValue = inputRef.current?.value || "";
@@ -301,6 +310,96 @@ const MouselessDialog = (): JSX.Element => {
     </Dialog>
   );
 };
+
+type Props = { blockUid: string };
+
+const getMaxLevel = (n: RoamBasicNode[]): number => {
+  if (n.length)
+    return (
+      n
+        .map((n) => getMaxLevel(n.children))
+        .reduce((p, c) => (p > c ? p : c), 0) + 1
+    );
+  else return 1;
+};
+
+const ExpColDialog = ({
+  blockUid,
+  onClose,
+}: Props & { onClose: () => void }) => {
+  const tree = useMemo(() => getBasicTreeByParentUid(blockUid), [blockUid]);
+  const level = getMaxLevel(tree);
+
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      const digit = Number(e.key);
+      if (digit && digit <= level) {
+        document.removeEventListener("keydown", listener);
+        const getNodes = (
+          ns: RoamBasicNode[],
+          l: number
+        ): { uid: string; within: boolean }[] => {
+          return ns.flatMap((n) => [
+            { uid: n.uid, within: l < digit },
+            ...getNodes(n.children, l + 1),
+          ]);
+        };
+        const nodes = getNodes(tree, 2).concat({
+          uid: blockUid,
+          within: digit > 1,
+        });
+
+        setLoading(true);
+        Promise.all(
+          nodes.map((n) => updateBlock({ uid: n.uid, open: n.within }))
+        ).then(onClose);
+      }
+    };
+    document.addEventListener("keydown", listener);
+  }, []);
+  return (
+    <Dialog
+      title={"Expand/Collapse all blocks to level"}
+      isOpen={true}
+      onClose={onClose}
+    >
+      <div tabIndex={-1} style={{ padding: 16, minHeight: 120 }}>
+        <input autoFocus style={{ visibility: "hidden" }} />
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+        >
+          {level &&
+            Array(level)
+              .fill(null)
+              .map((_, l) => (
+                <span
+                  key={l}
+                  style={{
+                    padding: 16,
+                    borderRadius: 8,
+                    background: "white",
+                    margin: "0px 16px",
+                  }}
+                >
+                  {l + 1}
+                </span>
+              ))}
+        </div>
+      </div>
+      {loading && <Spinner />}
+    </Dialog>
+  );
+};
+
+export const renderExpColDialog = createOverlayRender<Props>(
+  "exp-col-dialog",
+  ExpColDialog
+);
 
 export const renderMouselessDialog = (c: HTMLDivElement): void =>
   ReactDOM.render(<MouselessDialog />, c);

@@ -8,13 +8,17 @@ import type {
 import extractRef from "roamjs-components/util/extractRef";
 import getBasicTreeByParentUid from "roamjs-components/queries/getBasicTreeByParentUid";
 import createBlock from "roamjs-components/writes/createBlock";
-import { renderMouselessDialog } from "../components/MouselessDialog";
+import {
+  renderExpColDialog,
+  renderMouselessDialog,
+} from "../components/MouselessDialog";
 import runExtension from "roamjs-components/util/runExtension";
 import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
 import { BLOCK_REF_REGEX } from "roamjs-components/dom/constants";
 import updateBlock from "roamjs-components/writes/updateBlock";
 import getOrderByBlockUid from "roamjs-components/queries/getOrderByBlockUid";
 import getParentUidByBlockUid from "roamjs-components/queries/getParentUidByBlockUid";
+import { getCurrentPageUid } from "roam-client";
 
 runExtension("mouseless", () => {
   const container = document.createElement("div");
@@ -176,10 +180,16 @@ runExtension("mouseless", () => {
                 );
                 const refMatch =
                   latestMatch <= 0 ? allRefs[0] : allRefs[latestMatch - 1];
-                  console.log('comment on', refMatch[1]);
+                console.log("comment on", refMatch[1]);
               }
             }
           }
+        } else if (e.altKey && (e.code === "KeyX" || e.key === "X")) {
+          renderExpColDialog({
+            blockUid:
+              window.roamAlphaAPI.ui.getFocusedBlock()?.["block-uid"] ||
+              getCurrentPageUid(),
+          });
         } else if (e.key === "S") {
           const previousElement = document.activeElement as HTMLElement;
           const emptyShortcuts = document.getElementsByClassName(
