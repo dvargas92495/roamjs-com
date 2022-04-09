@@ -99,25 +99,10 @@ const Blockquote: React.FunctionComponent<{ id: string }> = ({ children }) => {
   );
 };
 
-const StartButton = ({
-  price,
-  onClick,
-}: {
-  price: string;
-  onClick: () => void;
-}) => (
-  <>
-    <Body>
-      You could subscribe directly from within Roam, or by clicking the button
-      below!
-    </Body>
-    <Button color={"primary"} variant={"contained"} onClick={onClick}>
-      <span style={{ fontSize: 14 }}>Start for</span>
-      <span style={{ fontWeight: 600, fontSize: 14, marginLeft: 4 }}>
-        {price}
-      </span>
-    </Button>
-  </>
+const StartButton = ({ onClick }: { onClick: () => void }) => (
+  <Button color={"primary"} variant={"contained"} onClick={onClick}>
+    <span style={{ fontWeight: 600, fontSize: 14 }}>Subscribe to Premium</span>
+  </Button>
 );
 
 const EndButton = ({ id, end }: { id: string; end: () => void }) => {
@@ -155,10 +140,9 @@ const EndButton = ({ id, end }: { id: string; end: () => void }) => {
 const LaunchButton: React.FC<{
   start: () => void;
   id: string;
-  price: string;
   refreshUser: () => void;
   signedOut?: boolean;
-}> = ({ start, id, price, refreshUser }) => {
+}> = ({ start, id, refreshUser }) => {
   const {
     query: { started },
   } = useRouter();
@@ -199,12 +183,10 @@ const LaunchButton: React.FC<{
     <>
       <ConfirmationDialog
         action={startService}
-        Button={({ onClick }) => (
-          <StartButton onClick={onClick} price={price} />
-        )}
+        Button={({ onClick }) => <StartButton onClick={onClick} />}
         content={`By clicking submit below, you will subscribe to the premium features of the RoamJS Extension: ${idToTitle(
           id
-        )} for ${price}.`}
+        )}.`}
         onSuccess={start}
         title={`RoamJS ${idToTitle(id)}`}
         defaultIsOpen={started === "true"}
@@ -214,7 +196,7 @@ const LaunchButton: React.FC<{
   );
 };
 
-const CheckSubscription = ({ id, price }: { id: string; price: string }) => {
+const CheckSubscription = ({ id }: { id: string }) => {
   const [started, setStarted] = useState(false);
   const start = useCallback(() => setStarted(true), [setStarted]);
   const end = useCallback(() => setStarted(false), [setStarted]);
@@ -228,22 +210,11 @@ const CheckSubscription = ({ id, price }: { id: string; price: string }) => {
   return started ? (
     <EndButton id={id} end={end} />
   ) : (
-    <LaunchButton
-      start={start}
-      id={id}
-      price={price}
-      refreshUser={() => user.update({})}
-    />
+    <LaunchButton start={start} id={id} refreshUser={() => user.update({})} />
   );
 };
 
-const ServiceButton = ({
-  id,
-  price,
-}: {
-  id: string;
-  price: string;
-}): React.ReactElement => {
+const ServiceButton = ({ id }: { id: string }): React.ReactElement => {
   const router = useRouter();
   const login = useCallback(
     () => router.push(`/login?extension=${id}`),
@@ -252,10 +223,10 @@ const ServiceButton = ({
   return (
     <div>
       <SignedIn>
-        <CheckSubscription id={id} price={price} />
+        <CheckSubscription id={id} />
       </SignedIn>
       <SignedOut>
-        <StartButton onClick={login} price={price} />
+        <StartButton onClick={login} />
       </SignedOut>
     </div>
   );
@@ -263,10 +234,8 @@ const ServiceButton = ({
 
 const getMdxComponents = ({
   id,
-  premium,
 }: {
   id: string;
-  premium: { price: number; usage?: "metered" | "licensed"; quantity: number };
 }): Record<string, React.ReactNode> => ({
   h1: H1,
   h2: H2,
@@ -287,16 +256,7 @@ const getMdxComponents = ({
   Block,
   DemoVideo,
   blockquote: Blockquote,
-  Premium: () => (
-    <ServiceButton
-      id={id}
-      price={`$${premium.price} per ${
-        premium.usage === "metered"
-          ? `${premium.quantity > 1 ? `${premium.quantity} uses` : "use"}`
-          : "use"
-      }/mo`}
-    />
-  ),
+  Premium: () => <ServiceButton id={id} />,
 });
 
 export default getMdxComponents;
