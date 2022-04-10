@@ -17,7 +17,6 @@ env:
   NEXT_PUBLIC_REST_API_URL: "https://api.roamjs.com"
   NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
   NEXT_PUBLIC_CLERK_FRONTEND_API: clerk.roamjs.com
-  NEXT_PUBLIC_CLERK_SIGN_IN: https://accounts.roamjs.com/sign-in
 
 jobs:
   deploy:

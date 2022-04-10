@@ -95,18 +95,6 @@ export const bareSuccessResponse = (
   headers: headers(event),
 });
 
-// Github Creds
-const personalAccessToken = process.env.GITHUB_PERSONAL_ACCESS_TOKEN || "";
-
-export const getGithubOpts = (): AxiosRequestConfig => ({
-  headers: {
-    Accept: "application/vnd.github.inertia-preview+json",
-    Authorization: `Basic ${Buffer.from(
-      `dvargas92495:${personalAccessToken}`
-    ).toString("base64")}`,
-  },
-});
-
 export const getClerkUser = async (
   event: APIGatewayProxyEvent
 ): Promise<User> => {
