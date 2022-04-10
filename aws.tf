@@ -63,10 +63,6 @@ variable "clerk_dev_api_key" {
     type = string
 }
 
-variable "floss_token" {
-    type = string
-}
-
 variable "iframely_api_key" {
   type = string
 }
@@ -130,8 +126,6 @@ module "aws-serverless-backend" {
         "article/post",
         "auth/get",
         "auth/post",
-        "balance/get",
-        "balance/post",
         "connected/get",
         "convertkit/get",
         "convertkit/post",
@@ -139,7 +133,6 @@ module "aws-serverless-backend" {
         "customer/post",
         "customer/put",
         "dropbox-auth/post",
-        "fund/post",
         "decrypt-proxy/post",
         "end-service/post",
         "finish-start-service/post",
@@ -153,8 +146,6 @@ module "aws-serverless-backend" {
         "payment-methods/post",
         "payment-methods/put",
         "postman/post",
-        "project-fund/delete",
-        "project-fund/post",
         "publish/post",
         "request-path/get",
         "slack-url/post",
@@ -172,10 +163,8 @@ module "aws-serverless-backend" {
       "start-service",
       "end-service",
       "shutdown-social",
-      "fund",
       "customer",
       "payment-methods",
-      "project-fund",
       "token",
       "sponsor-card",
       "sponsorships",
@@ -545,12 +534,6 @@ resource "github_actions_secret" "clerk_dev_api_key" {
   repository       = "roam-js-extensions"
   secret_name      = "CLERK_DEV_API_KEY"
   plaintext_value  = var.clerk_dev_api_key
-}
-
-resource "github_actions_secret" "floss_token" {
-  repository       = "roam-js-extensions"
-  secret_name      = "FLOSS_TOKEN"
-  plaintext_value  = var.floss_token
 }
 
 resource "github_actions_secret" "lambda_role" {

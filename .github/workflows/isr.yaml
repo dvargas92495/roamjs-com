@@ -13,7 +13,6 @@ env:
   AWS_DEFAULT_REGION: us-east-1
   CLOUDFRONT_ARN: ${{ secrets.CLOUDFRONT_ARN }}
   NEXT_PUBLIC_REST_API_URL: "https://api.roamjs.com"
-  NEXT_PUBLIC_FLOSS_API_URL: "https://api.davidvargas.me"
   NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
   NEXT_PUBLIC_CLERK_FRONTEND_API: clerk.roamjs.com
   NEXT_PUBLIC_CLERK_SIGN_IN: https://accounts.roamjs.com/sign-in

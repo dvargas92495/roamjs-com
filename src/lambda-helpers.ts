@@ -1,5 +1,4 @@
-import { AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
-import axios from "axios";
+import { AxiosPromise, AxiosRequestConfig } from "axios";
 import Cookies from "universal-cookie";
 import { sessions, users, User } from "@clerk/clerk-sdk-node";
 import {
@@ -7,8 +6,6 @@ import {
   APIGatewayProxyHandler,
   APIGatewayProxyResult,
 } from "aws-lambda";
-import OAuth from "oauth-1.0a";
-import crypto from "crypto";
 import AWS from "aws-sdk";
 import Mixpanel from "mixpanel";
 import randomstring from "randomstring";
@@ -107,66 +104,6 @@ export const getGithubOpts = (): AxiosRequestConfig => ({
     Authorization: `Basic ${Buffer.from(
       `dvargas92495:${personalAccessToken}`
     ).toString("base64")}`,
-  },
-});
-
-// Twitter Creds
-const twitterConsumerKey = process.env.TWITTER_CONSUMER_KEY || "";
-const twitterConsumerSecret = process.env.TWITTER_CONSUMER_SECRET || "";
-
-export const getTwitterOpts = async (
-  event: APIGatewayProxyEvent
-): Promise<AxiosRequestConfig> => {
-  const twitterBearerTokenResponse = await wrapAxios(
-    axios.post(
-      `https://api.twitter.com/oauth2/token`,
-      {},
-      {
-        params: {
-          grant_type: "client_credentials",
-        },
-        auth: {
-          username: twitterConsumerKey,
-          password: twitterConsumerSecret,
-        },
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-        },
-      }
-    ),
-    event
-  );
-
-  const body = JSON.parse(twitterBearerTokenResponse.body);
-  const twitterBearerToken = body.access_token;
-
-  return {
-    headers: {
-      Authorization: `Bearer ${twitterBearerToken}`,
-    },
-  };
-};
-
-export type Contracts = { link: string; reward: number }[];
-
-export const getFlossActiveContracts = (): Promise<{
-  projects: Contracts;
-  issues: Contracts;
-}> =>
-  axios
-    .get(`${process.env.FLOSS_API_URL}/contracts`)
-    .then(
-      (r: AxiosResponse<{ projects: Contracts; issues: Contracts }>) => r.data
-    );
-
-export const twitterOAuth = new OAuth({
-  consumer: {
-    key: process.env.TWITTER_CONSUMER_KEY || "",
-    secret: process.env.TWITTER_CONSUMER_SECRET || "",
-  },
-  signature_method: "HMAC-SHA1",
-  hash_function(base_string, key) {
-    return crypto.createHmac("sha1", key).update(base_string).digest("base64");
   },
 });
 
