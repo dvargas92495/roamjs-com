@@ -19,14 +19,6 @@ terraform {
   }
 }
 
-variable "roam_api_key" {
-    type = string
-}
-
-variable "roam_api_token" {
-    type = string
-}
-
 variable "secret" {
     type = string
 }
@@ -468,18 +460,6 @@ resource "github_actions_secret" "deploy_aws_access_secret" {
   repository       = "roam-js-extensions"
   secret_name      = "DEPLOY_AWS_ACCESS_SECRET"
   plaintext_value  = module.aws_static_site.deploy-secret
-}
-
-resource "github_actions_secret" "roam_api_key" {
-  repository       = "roam-js-extensions"
-  secret_name      = "ROAM_CLIENT_API_KEY"
-  plaintext_value  = var.roam_api_key
-}
-
-resource "github_actions_secret" "roam_api_token" {
-  repository       = "roam-js-extensions"
-  secret_name      = "ROAM_CLIENT_API_TOKEN"
-  plaintext_value  = var.roam_api_token
 }
 
 resource "github_actions_secret" "rest_api_id" {
