@@ -19,9 +19,6 @@ export const handler = async (
         customer,
         payment_method_types: ["card"],
         mode: "setup",
-        metadata: {
-          skipCallback: "true",
-        },
         success_url: `${origin}/user`,
         cancel_url: `${origin}/user`,
       })

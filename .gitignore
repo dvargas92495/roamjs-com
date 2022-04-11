@@ -6,4 +6,4 @@ dist/
 out/
 .next/
 .env.local
-clerk.js
+test.js

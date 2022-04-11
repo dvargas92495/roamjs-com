@@ -183,7 +183,6 @@ export const handler = async (
           amount: value * 100,
           payment_method: paymentMethod,
           currency: "usd",
-          metadata: { source, skipCallback: "true" },
           ...(connectedAccount.stripeAccount
             ? {
                 application_fee_amount: 30 + Math.ceil(value * 8),
@@ -234,7 +233,7 @@ export const handler = async (
               quantity: 1,
             },
           ],
-          metadata: { source, skipCallback: "true" },
+          metadata: { source },
           success_url: `${origin}/checkout?thankyou=${connectedAccount.thankyou}`,
           cancel_url: `${origin}/contribute`,
         })

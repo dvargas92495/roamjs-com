@@ -87,7 +87,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         },
       ],
       metadata: {
-        skipCallback: "true",
         source,
       },
       success_url: `${origin}/checkout?thankyou=true`,
