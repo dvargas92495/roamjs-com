@@ -87,7 +87,7 @@ const SaveSidebar = (): React.ReactElement => {
           <div className={Classes.DIALOG_FOOTER_ACTIONS}>
             <Button
               text={"Save"}
-              disabled={label !== "NEW" && !value}
+              disabled={label === "NEW" && !value}
               onClick={() => {
                 const windows =
                   window.roamAlphaAPI.ui.rightSidebar.getWindows();
