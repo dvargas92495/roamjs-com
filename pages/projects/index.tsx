@@ -33,6 +33,7 @@ const ProjectsPage = (): ReactElement => {
       <div
         id="84cc166b-9f98-4640-a2cb-6db8b28bfe0d"
         key="84cc166b-9f98-4640-a2cb-6db8b28bfe0d"
+        style={{ minHeight: 652 }}
       ></div>
       <h2 id="freelancing">Freelancing</h2>
       <p>
