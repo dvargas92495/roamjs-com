@@ -39,8 +39,14 @@ const ProjectsPage = (): ReactElement => {
       <p>
         Have a personal feature request? Or would like company's product to
         integrate with Roam? Reach out in the widget on the bottom right or
-        [book a call](https://calendly.com/dvargas92495/roamjs) to inquire about
-        working together on the project
+        <a
+          href="https://calendly.com/dvargas92495/roamjs"
+          rel="noopener"
+          target={"_blank"}
+        >
+          book a call
+        </a>{" "}
+        to inquire about working together on the project
       </p>
       <p>
         We operate on a milestone basis at $2,000/milestone. As our client, we
