@@ -3,7 +3,7 @@
 
 main -> expression {% id %}
 
-expression -> tag {% id %} | binop {% id %}
+expression -> binop {% id %} | tag {% id %} 
 
 fcn -> "{" method ":" _ (expression _ {% id %}):+ "}" {%
     function(data) {
@@ -20,7 +20,7 @@ method -> "daily" {% id %} | "max" {% id %} | "since" {% id %} | "attr" {% id %}
 binop -> sum {% id %}
 sum ->  sum _ ("+" {% id %}|"-" {% id %}) _  product {% ([f, _, operation, __, s]) => ({operation, children: [f, s], value: ""}) %} | product {% id %}
 product -> product _ ("*" {% id %}|"/" {% id %}) _ numberLike {% ([f, _, operation, __, s]) => ({operation, children: [f, s], value: ""}) %} | numberLike {% id %}
-numberLike -> number {% id %} | fcn {% id %}
+numberLike -> number {% id %} | fcn {% id %} | tag {% id %}
 number -> decimal {% ([value]) => ({operation: "value", children: [], value}) %}
 
 tag -> 

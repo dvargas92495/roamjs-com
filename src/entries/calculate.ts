@@ -1,5 +1,6 @@
 import {
   createButtonObserver,
+  extractTag,
   getConfigFromPage,
   getTextByBlockUid,
   getUidsFromButton,
@@ -15,6 +16,7 @@ import {
 import differenceInDays from "date-fns/differenceInDays";
 import { Parser, Grammar } from "nearley";
 import grammar from "../grammars/calculate.ne";
+import { subDays } from "date-fns";
 
 const attribute = "calculator";
 const shortcut = "calculate";
@@ -53,19 +55,30 @@ const calculateExpression = (expression: Expression): string => {
         .reduce((total, current) => total + parseInt(current), 0)
         .toString();
     case "-":
-      return args
-        .reduce((total, current) => total - parseInt(current), 0)
-        .toString();
+      return args.slice(1).reduce((total, current) => {
+        if (DAILY_NOTE_PAGE_REGEX.test(total)) {
+          const totalDate = parseRoamDate(extractTag(total));
+          if (DAILY_NOTE_PAGE_REGEX.test(current)) {
+            return differenceInDays(
+              totalDate,
+              parseRoamDate(extractTag(current))
+            ).toString();
+          } else {
+            return toRoamDate(subDays(totalDate, parseInt(current)));
+          }
+        }
+        return (parseInt(total) - parseInt(current)).toString();
+      }, args[0]);
     case "*":
       return args
         .reduce((total, current) => total * parseInt(current), 1)
         .toString();
     case "/":
       return args
+        .slice(1)
         .reduce(
-          (total, current, index) =>
-            index === 0 ? parseInt(current) : total / parseInt(current),
-          1
+          (total, current) => total / parseInt(current),
+          parseInt(args[0])
         )
         .toString();
     case "daily":
