@@ -1,6 +1,6 @@
 {
   "name": "roam-js-extensions",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Various Roam Javascript extensions deployed to roamjs.com",
   "main": "index.js",
   "scripts": {
