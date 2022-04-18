@@ -59,9 +59,8 @@ const calculateExpression = (expression: Expression): string => {
         if (DAILY_NOTE_PAGE_REGEX.test(total)) {
           const totalDate = parseRoamDate(extractTag(total));
           if (DAILY_NOTE_PAGE_REGEX.test(current)) {
-            return differenceInDays(
-              totalDate,
-              parseRoamDate(extractTag(current))
+            return Math.abs(
+              differenceInDays(totalDate, parseRoamDate(extractTag(current)))
             ).toString();
           } else {
             return toRoamDate(subDays(totalDate, parseInt(current)));

@@ -94,6 +94,12 @@ runExtension("page-synonyms", () => {
     callback: (props) => optionCallback(props["block-uid"]),
   });
 
+  window.roamjs.extension.pageSynonyms.aliasBlock = ({
+    blockUid,
+  }: {
+    blockUid: string;
+  }) => optionCallback(blockUid);
+
   const multiOption = createMenuOption(async () => {
     const replace = getReplacer();
     const highlightedDivIds = Array.from(

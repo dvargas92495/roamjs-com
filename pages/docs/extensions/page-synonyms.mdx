@@ -12,3 +12,13 @@ The extension also works for selecting multiple blocks. When you highlight and r
 Note that the extension does a simple search and replace. That means if aliases are nested in other words or already have links, it will still replace the instance with a new link.
 
 PS! By default, the extensions replace synonyms using the `[synonym](((page-uid)))` format. To use tags instead, add a block that says "Use Tags" in the `[[roam/js/page-synonyms]]` page. Roam may crash for some using the `[synonym](((page-uid)))` format but will work through tags.
+
+### Developers
+
+The main method to convert a block's text to synonyms is exposed through a public API. Developers could convert alias synonyms for any block by calling:
+
+```
+window.roamjs.extension.pageSynonyms.aliasBlock({
+  blockUid,
+});
+```
