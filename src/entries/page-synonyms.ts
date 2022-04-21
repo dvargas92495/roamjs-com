@@ -1,4 +1,4 @@
-import { isApple, runExtension } from "../entry-helpers";
+import { isApple } from "../entry-helpers";
 import {
   createOverlayObserver,
   createPage,
@@ -8,6 +8,7 @@ import {
   getUids,
   getUidsFromId,
 } from "roam-client";
+import runExtension from "roamjs-components/util/runExtension";
 
 const ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME = "roamjs-alias-page-synonyms";
 const ALIAS_PAGE_SYNONYM_ATTRIBUTE = "data-roamjs-has-alias-option";
