@@ -49,7 +49,7 @@ const ProjectsPage = (): ReactElement => {
         to inquire about working together on the project
       </p>
       <p>
-        We operate on a milestone basis at $2,000/milestone. As our client, we
+        We operate on a milestone basis at $800/milestone. As our client, we
         would work together to agree upon milestones ahead of time which we size
         at about 4 hours of work, but they often take longer. Bug fixes that
         come up during and after the project are free.
