@@ -11,8 +11,8 @@ import {
 runExtension("sort-references", () => {
   const config = getConfigFromPage("roam/js/sort-references");
   const getAttribute = (attr: string) => {
-    const page = document.getElementsByClassName("rm-title-display")[0]
-      ?.textContent;
+    const page =
+      document.getElementsByClassName("rm-title-display")[0]?.textContent;
     const node =
       getTreeByPageName(page).find((t) =>
         new RegExp(`${attr}::`, "i").test(t.text)
@@ -31,14 +31,12 @@ runExtension("sort-references", () => {
     if (!pageTitle) {
       return;
     }
-    const linkedReferences = getLinkedPageReferences(
-      pageTitle
-    ).concat(
+    const linkedReferences = getLinkedPageReferences(pageTitle).concat(
       window.roamAlphaAPI
         .q(
           `[:find ?t ?ct :where [?c :create/time ?ct] [?c :node/title ?t] [?c :block/refs ?r] [?r :node/title "${pageTitle}"]]`
         )
-        .map((p) => ({ title: p[0] as string, time: p[1] as number }))
+        .map((p) => ({ title: (p?.[0] as string) || "", time: p[1] as number }))
     );
     linkedReferences.sort(sortBy);
     const refIndexByTitle: { [key: string]: number } = {};
@@ -54,19 +52,19 @@ runExtension("sort-references", () => {
 
     const refContainer = sortContainer.parentElement
       .closest(".rm-reference-container")
-      ?.getElementsByClassName("refs-by-page-view")[0];
+      ?.getElementsByClassName("refs-by-page-view")?.[0];
     const refsInView = Array.from(refContainer.children);
     refsInView.forEach((r) => refContainer.removeChild(r));
     refsInView.sort((a, b) => {
       const aTitle = a.getElementsByClassName(
         "rm-ref-page-view-title"
-      )[0] as HTMLDivElement;
+      )?.[0] as HTMLDivElement;
       const bTitle = b.getElementsByClassName(
         "rm-ref-page-view-title"
-      )[0] as HTMLDivElement;
+      )?.[0] as HTMLDivElement;
       return (
-        getRefIndexByTitle(aTitle.textContent) -
-        getRefIndexByTitle(bTitle.textContent)
+        getRefIndexByTitle(aTitle?.textContent || "") -
+        getRefIndexByTitle(bTitle?.textContent || "")
       );
     });
     refsInView.forEach((r) => refContainer.appendChild(r));
@@ -158,7 +156,7 @@ runExtension("sort-references", () => {
       (container: HTMLDivElement) =>
         !!container.parentElement
           .closest(".rm-reference-container")
-          ?.getElementsByClassName("refs-by-page-view")[0]
+          ?.getElementsByClassName("refs-by-page-view")?.[0]
     );
   createObserver(observerCallback);
 });
