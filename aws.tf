@@ -110,12 +110,12 @@ module "aws_static_site" {
 
 module "aws-serverless-backend" {
     source  = "dvargas92495/serverless-backend/aws"
-    version = "1.5.11"
+    version = "2.5.0"
 
     api_name = "roam-js-extensions"
     domain = "roamjs.com"
     paths = [
-        "article/post",
+        "article/post", // MOVE
         "auth/get",
         "auth/post",
         "connected/get",
@@ -124,23 +124,22 @@ module "aws-serverless-backend" {
         "convertkit/delete",
         "customer/post",
         "customer/put",
-        "dropbox-auth/post",
-        "decrypt-proxy/post",
+        "dropbox-auth/post", // MOVE
         "end-service/post",
         "finish-start-service/post",
-        "iframely/post",
+        "iframely/post", // MOVE
         "install/put",
         "invoices/get",
         "is-subscribed/get",
-        "mixpanel/post",
+        "mixpanel/post", // REPLACE
         "payment-methods/delete",
         "payment-methods/get",
         "payment-methods/post",
         "payment-methods/put",
-        "postman/post",
+        "postman/post", // MOVE
         "publish/post",
         "request-path/get",
-        "slack-url/post",
+        "slack-url/post", // MOVE
         "sponsor-card/post",
         "sponsorships/post",
         "start-service/post",
