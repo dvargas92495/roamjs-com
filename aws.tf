@@ -148,6 +148,9 @@ module "aws-serverless-backend" {
         "token/post",
         "versions/get",
     ]
+    sizes = {
+      "publish/post": 1024
+    }
     tags = {
         Application = "Roam JS Extensions"
     }
