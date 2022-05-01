@@ -1,6 +1,5 @@
 name: Push Lambdas to Master
 on:
-  workflow_dispatch:
   push:
     branches: master
     paths:
@@ -29,9 +28,10 @@ jobs:
         run: npm run build:lambdas
       - name: Upload
         run: |
-          MODIFIED_ORIGIN=$(aws lambda update-function-code --function-name "roamjs-com_origin-request" --publish --zip-file "fileb://origin-request.zip" --query "LastModified" --output text)  
-          rm origin-request.zip
-          echo "Function origin-request successfully updated at $MODIFIED_ORIGIN"
-          MODIFIED_VIEWER=$(aws lambda update-function-code --function-name "roamjs-com_viewer-request" --publish --zip-file "fileb://viewer-request.zip" --query "LastModified" --output text)  
-          rm viewer-request.zip
-          echo "Function viewer-request successfully updated at $MODIFIED_VIEWER"
+          for filename in out/*.js; do
+              LAMBDA=$(basename "$filename" .js)
+              zip -jq $LAMBDA.zip ./out/$LAMBDA.js
+              MODIFIED=$(aws lambda update-function-code --function-name "roamjs-com_${LAMBDA}" --publish --zip-file "fileb://${LAMBDA}.zip" --query "LastModified" --output text)  
+              rm $LAMBDA.zip
+              echo "Function $LAMBDA successfully updated at $MODIFIED"
+          done
