@@ -53,7 +53,7 @@ runExtension("postman", () => {
                 {
                   text: "url",
                   children: [
-                    { text: "https://api.roamjs.com/postman", children: [] },
+                    { text: "https://lambda.roamjs.com/postman", children: [] },
                   ],
                 },
                 {

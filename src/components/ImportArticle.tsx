@@ -92,7 +92,7 @@ export const importArticle = ({
 }): Promise<InputTextNode[]> =>
   axios
     .post(
-      `${process.env.API_URL}/article`,
+      `https://lambda.roamjs.com/article`,
       { url },
       { headers: { "Content-Type": "application/json" } }
     )

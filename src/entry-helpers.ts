@@ -34,7 +34,7 @@ export const track = (
   eventName: string,
   properties?: Dict
 ): Promise<AxiosResponse> =>
-  axios.post(`${process.env.API_URL}/mixpanel`, { eventName, properties });
+  axios.post(`https://lambda.roamjs.com/mixpanel`, { eventName, properties });
 
 export const runExtension = async (
   extensionId: string,

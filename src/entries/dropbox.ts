@@ -41,7 +41,7 @@ runExtension(ID, () => {
                 getAuthData: (data) =>
                   axios
                     .post(
-                      `${process.env.API_URL}/dropbox-auth`,
+                      `https://lambda.roamjs.com/dropbox-auth`,
                       JSON.parse(data)
                     )
                     .then((r) => r.data),
