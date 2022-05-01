@@ -12,7 +12,7 @@
     "build": "webpack --config ./webpack.production.config.js",
     "build:api": "webpack --config ./webpack.lambda.config.js --env dir=api",
     "build:next": "next build",
-    "build:lambdas": "roamjs-scripts build",
+    "build:lambdas": "cross-env NODE_ENV=production roamjs-scripts lambdas",
     "hook": "node scripts/diahook.js",
     "postbuild:next": "next export",
     "prebuild:pr": "echo 'Building extensions: Process will take a couple of minutes...'",
