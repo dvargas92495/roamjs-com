@@ -79,6 +79,7 @@
     "babel-preset-env": "^1.7.0",
     "concurrently": "^6.4.0",
     "copy-webpack-plugin": "^7.0.0",
+    "cross-env": "^7.0.3",
     "css-loader": "^5.0.1",
     "cypress": "^9.5.3",
     "dotenv": "^8.2.0",
