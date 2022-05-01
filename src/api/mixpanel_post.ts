@@ -1,5 +1,10 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
-import { headers, mixpanel } from "../lambda-helpers";
+import { headers } from "../lambda-helpers";
+import Mixpanel from "mixpanel";
+
+const mixpanel = process.env.MIXPANEL_TOKEN
+  ? Mixpanel.init(process.env.MIXPANEL_TOKEN)
+  : { track: () => console.log("track") };
 
 export const handler = async (
   event: APIGatewayEvent

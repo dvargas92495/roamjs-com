@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
-import Mixpanel from "mixpanel";
 import headers from "roamjs-components/backend/headers";
+import Mixpanel from "mixpanel";
 
 const mixpanel = process.env.MIXPANEL_TOKEN
   ? Mixpanel.init(process.env.MIXPANEL_TOKEN)
