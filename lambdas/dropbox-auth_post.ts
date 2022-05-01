@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import axios from "axios";
-import { headers } from "../lambda-helpers";
+import headers from "roamjs-components/backend/headers";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   const { code } = JSON.parse(event.body || "{}");
@@ -28,12 +28,12 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         .then((u) => ({
           statusCode: 200,
           body: JSON.stringify({ ...r.data, label: u.data.name.display_name }),
-          headers: headers(event),
+          headers,
         }))
     )
     .catch((e) => ({
       statusCode: 500,
       body: JSON.stringify(e.response?.data || { message: e.message }),
-      headers: headers(event),
+      headers,
     }));
 };

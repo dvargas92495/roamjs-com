@@ -1,5 +1,10 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
-import { headers, mixpanel } from "../lambda-helpers";
+import Mixpanel from "mixpanel";
+import headers from "roamjs-components/backend/headers";
+
+const mixpanel = process.env.MIXPANEL_TOKEN
+  ? Mixpanel.init(process.env.MIXPANEL_TOKEN)
+  : { track: () => console.log("track") };
 
 export const handler = async (
   event: APIGatewayEvent
@@ -9,6 +14,6 @@ export const handler = async (
   return {
     statusCode: 204,
     body: JSON.stringify({}),
-    headers: headers(event),
+    headers,
   };
 };

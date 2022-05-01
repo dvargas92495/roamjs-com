@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
-import { headers } from "../lambda-helpers";
+import headers from "roamjs-components/backend/headers";
 import querystring from "querystring";
 import { WebClient } from "@slack/web-api";
 
@@ -45,23 +45,23 @@ export const handler = async (
                         r.data.team.name
                       })`,
                     }),
-                    headers: headers(event),
+                    headers,
                   }
                 : {
                     statusCode: 500,
                     body: r.data.error,
-                    headers: headers(event),
+                    headers,
                   }
             )
         : {
             statusCode: 500,
             body: r.data.error,
-            headers: headers(event),
+            headers,
           }
     )
     .catch((e) => ({
       statusCode: e.response?.status || 500,
       body: e.response?.data ? JSON.stringify(e.response.data) : e.message,
-      headers: headers(event),
+      headers,
     }));
 };

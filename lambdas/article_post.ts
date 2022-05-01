@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios, { AxiosError } from "axios";
-import { headers } from "../lambda-helpers";
+import headers from "roamjs-components/backend/headers";
 import charset from "charset";
 
 export const handler = async (
@@ -22,7 +22,7 @@ export const handler = async (
           statusCode: 200,
           body: JSON.stringify(r.data),
           headers: {
-            ...headers(event),
+            ...headers,
             "Content-Type": `application/json;charset=${enc}`,
           },
         };
@@ -30,7 +30,7 @@ export const handler = async (
   const handleError = (e: Error & AxiosError) => ({
     statusCode: e.response?.status || 500,
     body: e.response?.data ? JSON.stringify(e.response.data) : e.message,
-    headers: headers(event),
+    headers,
   });
   const mostHeaders = {
     "Content-type": "text/html",

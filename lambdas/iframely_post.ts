@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios, { AxiosError } from "axios";
-import { headers } from "../lambda-helpers";
+import headers from "roamjs-components/backend/headers";
 
 export const handler = async (
   event: APIGatewayEvent
@@ -13,11 +13,11 @@ export const handler = async (
     .then((r) => ({
       statusCode: 200,
       body: JSON.stringify(r.data),
-      headers: headers(event),
+      headers,
     }))
     .catch((e: Error & AxiosError) => ({
       statusCode: e.response?.status || 500,
       body: e.response?.data ? JSON.stringify(e.response.data) : e.message,
-      headers: headers(event),
+      headers,
     }));
 };

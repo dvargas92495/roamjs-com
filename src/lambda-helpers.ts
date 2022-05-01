@@ -7,7 +7,6 @@ import {
   APIGatewayProxyResult,
 } from "aws-lambda";
 import AWS from "aws-sdk";
-import Mixpanel from "mixpanel";
 import randomstring from "randomstring";
 import Stripe from "stripe";
 import AES from "crypto-js/aes";
@@ -22,10 +21,6 @@ export const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 export const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
 export const ses = new AWS.SES({ apiVersion: "2010-12-01" });
-
-export const mixpanel = process.env.MIXPANEL_TOKEN
-  ? Mixpanel.init(process.env.MIXPANEL_TOKEN)
-  : { track: () => console.log("track") };
 
 const ALLOWED_ORIGINS = ["https://roamjs.com", "https://roamresearch.com"];
 type Headers = {
