@@ -131,7 +131,7 @@ module "aws-serverless-backend" {
         "install/put",
         "invoices/get",
         "is-subscribed/get",
-        "mixpanel/post", // REPLACE
+        "mixpanel/post", // MOVE
         "payment-methods/delete",
         "payment-methods/get",
         "payment-methods/post",
@@ -440,128 +440,157 @@ provider "github" {
     owner = "dvargas92495"
 }
 
-resource "github_actions_secret" "deploy_aws_access_key" {
-  repository       = "roam-js-extensions"
-  secret_name      = "DEPLOY_AWS_ACCESS_KEY"
-  plaintext_value  = module.aws_static_site.deploy-id
-}
-
-resource "github_actions_secret" "deploy_aws_access_secret" {
-  repository       = "roam-js-extensions"
-  secret_name      = "DEPLOY_AWS_ACCESS_SECRET"
-  plaintext_value  = module.aws_static_site.deploy-secret
-}
-
 resource "github_actions_secret" "rest_api_id" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "REST_API_ID"
   plaintext_value  = module.aws-serverless-backend.rest_api_id
 }
 
 resource "github_actions_secret" "stripe_public" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "STRIPE_PUBLIC_KEY"
   plaintext_value  = var.stripe_public
 }
 
 resource "github_actions_secret" "mixpanel_token" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "MIXPANEL_TOKEN"
   plaintext_value  = var.mixpanel_token
 }
 
 resource "github_actions_secret" "mapbox_token" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "MAPBOX_TOKEN"
   plaintext_value  = var.mapbox_token
 }
 
 resource "github_actions_secret" "giphy_key" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "GIPHY_KEY"
   plaintext_value  = var.giphy_key
 }
 
 resource "github_actions_secret" "slack_client_id" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "SLACK_CLIENT_ID"
   plaintext_value  = var.slack_client_id
 }
 
 resource "github_actions_secret" "slack_client_secret" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "SLACK_CLIENT_SECRET"
   plaintext_value  = var.slack_client_secret
 }
 
 resource "github_actions_secret" "clerk_api_key" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "CLERK_API_KEY"
   plaintext_value  = var.clerk_api_key
 }
 
 resource "github_actions_secret" "clerk_dev_api_key" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "CLERK_DEV_API_KEY"
   plaintext_value  = var.clerk_dev_api_key
 }
 
 resource "github_actions_secret" "lambda_role" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "LAMBDA_ROLE"
   plaintext_value  = data.aws_iam_role.lambda_role.arn
 }
 
 resource "github_actions_secret" "cloudfront_arn" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "CLOUDFRONT_ARN"
   plaintext_value  = module.aws_static_site.cloudfront_arn
 }
 
 resource "github_actions_secret" "iframely_api_key" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "IFRAMELY_API_KEY"
   plaintext_value  = var.iframely_api_key
 }
 
 resource "github_actions_secret" "diahook_secret" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "DIAHOOK_SECRET"
   plaintext_value  = var.diahook_secret
 }
 
 resource "github_actions_secret" "dropbox_client_id" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "DROPBOX_CLIENT_ID"
   plaintext_value  = var.dropbox_client_id
 }
 
 resource "github_actions_secret" "dropbox_client_secret" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "DROPBOX_CLIENT_SECRET"
   plaintext_value  = var.dropbox_client_secret
 }
 
 resource "github_actions_secret" "encryption_secret" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "ENCRYPTION_SECRET"
   plaintext_value  = var.encryption_secret
 }
 
 resource "github_actions_secret" "convertkit_api_token" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "CONVERTKIT_API_TOKEN"
   plaintext_value  = var.convertkit_api_token
 }
 
 resource "github_actions_secret" "stripe_secret" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "STRIPE_SECRET_KEY"
   plaintext_value  = var.stripe_secret
 }
 
 resource "github_actions_secret" "stripe_checkout_secret" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-com"
   secret_name      = "STRIPE_CHECKOUT_SECRET"
   plaintext_value  = var.stripe_checkout_secret
+}
+
+// TODO: REMOVE WHEN RELATED EXTENSIONS HAVE BEEN MOVED
+module "roamjs_lambda" {
+  source = "dvargas92495/lambda/roamjs"
+  providers = {
+    aws = aws
+    github = github
+  }
+
+  name = "com"
+  lambdas = [
+    {
+      path = "article", 
+      method ="post"
+    },
+    {
+      path ="dropbox-auth", 
+      method ="post"
+    },
+    {
+      path = "iframely", 
+      method ="post"
+    },
+    {
+      path = "mixpanel", 
+      method ="post"
+    },
+    {
+      path = "postman", 
+      method ="post"
+    },
+    {
+      path ="slack-url", 
+      method ="post"
+    },
+  ]
+  aws_access_token = module.aws_static_site.deploy-id
+  aws_secret_token = module.aws_static_site.deploy-secret
+  github_token     = "github_token"
+  developer_token  = "developer_token"
 }
