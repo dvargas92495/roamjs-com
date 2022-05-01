@@ -5,7 +5,7 @@ const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 const buildEntry = (dir) => {
-  const srcDir = dir === "lambdas" ? `./lambdas/` : `./src/${dir}/`;
+  const srcDir = dir === "lambdas" ? `./lambdas/_cdn/` : `./src/${dir}/`;
   const extensions = fs.readdirSync(srcDir);
   const entry = Object.fromEntries(
     extensions.map((e) => [e.substring(0, e.length - 3), `${srcDir}${e}`])
