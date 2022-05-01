@@ -604,6 +604,6 @@ data "aws_iam_user" "deployer" {
 }
 
 resource "aws_iam_user_policy_attachment" "lambda_roam" {
-  user       = data.aws_iam_user.deployer.name
+  user       = data.aws_iam_user.deployer.user_name
   policy_arn = "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
 }
