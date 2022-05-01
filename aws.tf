@@ -146,7 +146,7 @@ module "aws-serverless-backend" {
         "subscriptions/get",
         "token/get",
         "token/post",
-        "versions/get",
+        "versions/get", // MOVE
     ]
     sizes = {
       "publish/post": 1024
@@ -588,9 +588,22 @@ module "roamjs_lambda" {
       path ="slack-url", 
       method ="post"
     },
+    {
+      path ="versions", 
+      method ="get"
+    },
   ]
   aws_access_token = module.aws_static_site.deploy-id
   aws_secret_token = module.aws_static_site.deploy-secret
   github_token     = "github_token"
   developer_token  = "developer_token"
+}
+
+data "aws_iam_user" "deployer" {
+  user_name = "roamjs.com-deploy"
+}
+
+resource "aws_iam_user_policy_attachment" "lambda_roam" {
+  user       = data.aws_iam_user.deployer.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
 }

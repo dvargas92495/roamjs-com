@@ -29,11 +29,9 @@ jobs:
         run: npm run build:lambdas
       - name: Upload
         run: |
-          zip -jq origin-request.zip ./out/origin-request.js
           MODIFIED_ORIGIN=$(aws lambda update-function-code --function-name "roamjs-com_origin-request" --publish --zip-file "fileb://origin-request.zip" --query "LastModified" --output text)  
           rm origin-request.zip
           echo "Function origin-request successfully updated at $MODIFIED_ORIGIN"
-          zip -jq viewer-request.zip ./out/viewer-request.js
           MODIFIED_VIEWER=$(aws lambda update-function-code --function-name "roamjs-com_viewer-request" --publish --zip-file "fileb://viewer-request.zip" --query "LastModified" --output text)  
           rm viewer-request.zip
           echo "Function viewer-request successfully updated at $MODIFIED_VIEWER"

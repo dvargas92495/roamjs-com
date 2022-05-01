@@ -46,7 +46,7 @@ const VersionSwitcher = ({
   useEffect(() => {
     setLoading(true);
     axios
-      .get(`${process.env.API_URL}/versions?limit=${5}&id=${id}&page=${page}`)
+      .get(`https://lambda.roamjs.com/versions?limit=${5}&id=${id}&page=${page}`)
       .then((r) => {
         setVersions(r.data.versions);
         setIsEnd(r.data.isEnd);
