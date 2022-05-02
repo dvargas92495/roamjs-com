@@ -600,7 +600,7 @@ module "roamjs_lambda" {
 }
 
 data "aws_iam_user" "deployer" {
-  user_name = "roamjs.com-deploy"
+  user_name = "roam-js-extensions-lambda"
 }
 
 resource "aws_iam_user_policy_attachment" "lambda_roam" {
