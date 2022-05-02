@@ -3,10 +3,9 @@ import axios from "axios";
 import headers from "roamjs-components/backend/headers";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  const { code } = JSON.parse(event.body || "{}");
+  const data = JSON.parse(event.body || "{}");
   const params = new URLSearchParams();
-  params.append("code", code);
-  params.append("grant_type", "authorization_code");
+  Object.keys(data).forEach((k) => params.append(k, data[k]));
   params.append("redirect_uri", "https://roamjs.com/oauth?auth=true");
 
   return axios

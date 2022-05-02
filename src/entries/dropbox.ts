@@ -3,14 +3,15 @@ import getOauth from "roamjs-components/util/getOauth";
 import { getDropUidOffset, runExtension } from "../entry-helpers";
 import DropboxLogo from "../assets/Dropbox.svg";
 import axios from "axios";
-import {
-  createBlock,
-  createHTMLObserver,
-  getUids,
-  updateBlock,
-} from "roam-client";
 import { Dropbox } from "dropbox";
 import mime from "mime-types";
+import differenceInSeconds from "date-fns/differenceInSeconds";
+import createBlock from "roamjs-components/writes/createBlock";
+import updateBlock from "roamjs-components/writes/updateBlock";
+import getUids from "roamjs-components/dom/getUids";
+import createHTMLObserver from "roamjs-components/dom/createHTMLObserver";
+import localStorageGet from "roamjs-components/util/localStorageGet";
+import localStorageSet from "roamjs-components/util/localStorageSet";
 
 const ID = "dropbox";
 const CONFIG = `roam/js/${ID}`;
@@ -36,14 +37,14 @@ runExtension(ID, () => {
                       process.env.DROPBOX_CLIENT_ID
                     }&redirect_uri=${encodeURIComponent(
                       "https://roamjs.com/oauth?auth=true"
-                    )}&response_type=code`
+                    )}&response_type=code&token_access_type=offline`
                   ),
                 getAuthData: (data) =>
                   axios
-                    .post(
-                      `https://lambda.roamjs.com/dropbox-auth`,
-                      JSON.parse(data)
-                    )
+                    .post(`https://lambda.roamjs.com/dropbox-auth`, {
+                      ...JSON.parse(data),
+                      grant_type: "authorization_code",
+                    })
                     .then((r) => r.data),
               },
             },
@@ -53,22 +54,72 @@ runExtension(ID, () => {
     },
   });
 
+  const getAccessToken = () => {
+    const oauth = getOauth(ID);
+    if (oauth !== "{}") {
+      const { access_token, expires_in, refresh_token, node } =
+        JSON.parse(oauth);
+      const { time, uid: oauthUid } = node || {};
+      const tokenAge = differenceInSeconds(
+        new Date(),
+        time ? new Date(time) : new Date(0)
+      );
+      return tokenAge > expires_in
+        ? axios
+            .post(`https://lambda.roamjs.com/dropbox-auth`, {
+              refresh_token,
+              grant_type: "refresh_token",
+            })
+            .then((r) => {
+              const storageData = localStorageGet("oauth-dropbox");
+              const data = JSON.stringify({ refresh_token, ...r.data });
+              if (storageData) {
+                localStorageSet(
+                  "oauth-google",
+                  JSON.stringify(
+                    JSON.parse(storageData).map(
+                      (at: { uid: string; text: string }) =>
+                        at.uid === oauthUid
+                          ? {
+                              uid: at.uid,
+                              data,
+                              time: new Date().valueOf(),
+                              text: at.text,
+                            }
+                          : at
+                    )
+                  )
+                );
+              } else {
+                window.roamAlphaAPI.updateBlock({
+                  block: {
+                    uid: oauthUid,
+                    string: data,
+                  },
+                });
+              }
+              return r.data.access_token;
+            })
+        : Promise.resolve(access_token);
+    } else {
+      return Promise.resolve("");
+    }
+  };
+
   const uploadToDropbox = ({
     files,
     getLoadingUid,
     e,
   }: {
     files: FileList;
-    getLoadingUid: () => string;
+    getLoadingUid: () => Promise<string>;
     e: Event;
   }) => {
     const fileToUpload = files[0];
     if (fileToUpload) {
-      const oauth = getOauth(ID);
-      if (oauth !== "{}") {
-        const { access_token } = JSON.parse(oauth);
+      getAccessToken().then(async (access_token) => {
         const dbx = new Dropbox({ accessToken: access_token });
-        const uid = getLoadingUid();
+        const uid = await getLoadingUid();
         const reader = new FileReader();
 
         reader.readAsBinaryString(fileToUpload);
@@ -130,7 +181,7 @@ runExtension(ID, () => {
         e.stopPropagation();
         e.stopImmediatePropagation();
         e.preventDefault();
-      }
+      });
     }
   };
 
