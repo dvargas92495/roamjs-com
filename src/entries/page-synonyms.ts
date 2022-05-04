@@ -66,7 +66,7 @@ const getReplacer = () => {
       .sort((a, b) => b.length - a.length)
       .reduce((prevText: string, alias: string) => {
         const regex = new RegExp(
-          `(^|[^a-zA-Z0-9_\\[\\]])${alias
+          `(^|[^a-zA-Z0-9_\\[\\].#])${alias
             .replace(/\[/g, "\\[")
             .replace(/\]/g, "\\]")}([^a-zA-Z0-9_\\[\\]]|$)`,
           "g"
