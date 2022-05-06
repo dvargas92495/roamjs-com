@@ -178,10 +178,10 @@ runExtension(ID, () => {
                 .map((c) => c as HTMLDivElement)
                 .forEach((c) => (c.style.display = "none"));
             });
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        e.preventDefault();
       });
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      e.preventDefault();
     }
   };
 
