@@ -41,7 +41,7 @@ const ProjectsPage = (): ReactElement => {
         integrate with Roam? Reach out in the widget on the bottom right or
         <a
           href="https://calendly.com/dvargas92495/roamjs"
-          rel="noopener"
+          rel="noreferrer"
           target={"_blank"}
         >
           book a call

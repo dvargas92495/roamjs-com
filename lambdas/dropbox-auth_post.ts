@@ -18,17 +18,26 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       },
     })
     .then((r) =>
-      axios
-        .post(
-          "https://api.dropboxapi.com/2/users/get_account",
-          { account_id: r.data.account_id },
-          { headers: { Authorization: `Bearer ${r.data.access_token}` } }
-        )
-        .then((u) => ({
-          statusCode: 200,
-          body: JSON.stringify({ ...r.data, label: u.data.name.display_name }),
-          headers,
-        }))
+      params["grant_type"] === "refresh_token"
+        ? {
+            statusCode: 200,
+            body: JSON.stringify(r.data),
+            headers,
+          }
+        : axios
+            .post(
+              "https://api.dropboxapi.com/2/users/get_account",
+              { account_id: r.data.account_id },
+              { headers: { Authorization: `Bearer ${r.data.access_token}` } }
+            )
+            .then((u) => ({
+              statusCode: 200,
+              body: JSON.stringify({
+                ...r.data,
+                label: u.data.name.display_name,
+              }),
+              headers,
+            }))
     )
     .catch((e) => ({
       statusCode: 500,

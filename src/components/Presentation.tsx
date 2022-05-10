@@ -364,7 +364,7 @@ const ContentSlide = ({
       }
       Array.from(slideRoot.current.getElementsByTagName("a")).forEach((a) => {
         a.target = "_blank";
-        a.rel = "noopener";
+        a.rel = "noreferrer";
       });
       Array.from(slideRoot.current.getElementsByTagName("img")).forEach(
         (img) => {
