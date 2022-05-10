@@ -44,6 +44,7 @@ runExtension(ID, () => {
                     .post(`https://lambda.roamjs.com/dropbox-auth`, {
                       ...JSON.parse(data),
                       grant_type: "authorization_code",
+                      redirect_uri: "https://roamjs.com/oauth?auth=true",
                     })
                     .then((r) => r.data),
               },

@@ -6,7 +6,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   const data = JSON.parse(event.body || "{}");
   const params = new URLSearchParams();
   Object.keys(data).forEach((k) => params.append(k, data[k]));
-  params.append("redirect_uri", "https://roamjs.com/oauth?auth=true");
 
   return axios
     .post("https://api.dropboxapi.com/oauth2/token", params, {
