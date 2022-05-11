@@ -1,13 +1,11 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import axios from "axios";
-import { headers } from "../lambda-helpers";
+import headers from "roamjs-components/backend/headers";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  const { code } = JSON.parse(event.body || "{}");
+  const data = JSON.parse(event.body || "{}");
   const params = new URLSearchParams();
-  params.append("code", code);
-  params.append("grant_type", "authorization_code");
-  params.append("redirect_uri", "https://roamjs.com/oauth?auth=true");
+  Object.keys(data).forEach((k) => params.append(k, data[k]));
 
   return axios
     .post("https://api.dropboxapi.com/oauth2/token", params, {
@@ -18,8 +16,15 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         "Content-Type": "application/x-www-form-urlencoded",
       },
     })
-    .then((r) =>
-      axios
+    .then((r) => {
+      if (data.grant_type === "refresh_token") {
+        return {
+          statusCode: 200,
+          body: JSON.stringify(r.data),
+          headers,
+        };
+      }
+      return axios
         .post(
           "https://api.dropboxapi.com/2/users/get_account",
           { account_id: r.data.account_id },
@@ -28,12 +33,12 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         .then((u) => ({
           statusCode: 200,
           body: JSON.stringify({ ...r.data, label: u.data.name.display_name }),
-          headers: headers(event),
-        }))
-    )
+          headers,
+        }));
+    })
     .catch((e) => ({
       statusCode: 500,
       body: JSON.stringify(e.response?.data || { message: e.message }),
-      headers: headers(event),
+      headers,
     }));
 };

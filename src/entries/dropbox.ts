@@ -58,7 +58,7 @@ runExtension(ID, () => {
   const getAccessToken = () => {
     const oauth = getOauth(ID);
     if (oauth !== "{}") {
-      const { access_token, expires_in, refresh_token, node } =
+      const { access_token, expires_in, refresh_token, node, ...rest } =
         JSON.parse(oauth);
       const { time, uid: oauthUid } = node || {};
       const tokenAge = differenceInSeconds(
@@ -73,7 +73,11 @@ runExtension(ID, () => {
             })
             .then((r) => {
               const storageData = localStorageGet("oauth-dropbox");
-              const data = JSON.stringify({ refresh_token, ...r.data });
+              const data = JSON.stringify({
+                refresh_token,
+                ...rest,
+                ...r.data,
+              });
               if (storageData) {
                 localStorageSet(
                   "oauth-google",
