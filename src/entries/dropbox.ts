@@ -73,6 +73,13 @@ runExtension(ID, () => {
               grant_type: "refresh_token",
             })
             .then((r) => {
+              if (!r.data.access_token) {
+                return Promise.reject(
+                  `Did not find an access token. Found: ${JSON.stringify(
+                    r.data
+                  )}`
+                );
+              }
               const storageData = localStorageGet("oauth-dropbox");
               const data = JSON.stringify({
                 refresh_token,
@@ -106,9 +113,18 @@ runExtension(ID, () => {
               }
               return r.data.access_token;
             })
+            .catch((e) =>
+              Promise.reject(
+                `Failed to refresh your access token: ${
+                  e.response.data || e.message
+                }`
+              )
+            )
         : Promise.resolve(access_token);
     } else {
-      return Promise.resolve("");
+      return Promise.reject(
+        "Could not find your login info. Try first logging in through the [[roam/js/dropbox]] page"
+      );
     }
   };
 
@@ -123,67 +139,71 @@ runExtension(ID, () => {
   }) => {
     const fileToUpload = files[0];
     if (fileToUpload) {
-      getAccessToken().then(async (access_token) => {
-        const dbx = new Dropbox({ accessToken: access_token });
-        const uid = await getLoadingUid();
-        const reader = new FileReader();
+      getLoadingUid().then((uid) => {
+        const catchError = (e: unknown) => {
+          updateBlock({
+            uid,
+            text: "Failed to upload file to dropbox. Email support@roamjs.com with the error below:",
+          });
+          createBlock({
+            parentUid: uid,
+            node: { text: JSON.stringify(e) },
+          });
+        };
+        return getAccessToken()
+          .then(async (access_token) => {
+            const dbx = new Dropbox({ accessToken: access_token });
+            const reader = new FileReader();
 
-        reader.readAsBinaryString(fileToUpload);
+            reader.readAsBinaryString(fileToUpload);
 
-        reader.onloadend = () =>
-          dbx
-            .filesUpload({
-              path: `/${fileToUpload.name}`,
-              contents: fileToUpload,
-              autorename: true,
-            })
-            .then((r) => {
-              const contentType = mime.lookup(r.result.name);
-              return dbx
-                .sharingListSharedLinks({ path: r.result.path_display })
-                .then((l) =>
-                  l.result.links.length
-                    ? { contentType, url: l.result.links[0].url }
-                    : dbx
-                        .sharingCreateSharedLinkWithSettings({
-                          path: r.result.path_display,
-                          settings: {
-                            requested_visibility: { ".tag": "public" },
-                          },
-                        })
-                        .then((c) => ({ url: c.result.url, contentType }))
-                );
-            })
-            .then(({ url, contentType }) => {
-              const dbxUrl = url.replace(/dl=0$/, "raw=1");
-              updateBlock({
-                uid,
-                text: contentType
-                  ? contentType.includes("audio/")
-                    ? `{{audio: ${dbxUrl}}}`
-                    : contentType.includes("pdf")
-                    ? `{{pdf: ${dbxUrl}}}`
-                    : contentType.includes("video/")
-                    ? `{{video: ${dbxUrl}}}`
-                    : `![](${dbxUrl})`
-                  : `Unknown Content type for file ${fileToUpload.name}`,
-              });
-            })
-            .catch((e) => {
-              updateBlock({
-                uid,
-                text: "Failed to upload file to dropbox. Email support@roamjs.com with the error below:",
-              });
-              createBlock({
-                parentUid: uid,
-                node: { text: JSON.stringify(e) },
-              });
-            })
-            .finally(() => {
-              Array.from(document.getElementsByClassName("dnd-drop-bar"))
-                .map((c) => c as HTMLDivElement)
-                .forEach((c) => (c.style.display = "none"));
-            });
+            reader.onloadend = () =>
+              dbx
+                .filesUpload({
+                  path: `/${fileToUpload.name}`,
+                  contents: fileToUpload,
+                  autorename: true,
+                })
+                .then((r) => {
+                  const contentType = mime.lookup(r.result.name);
+                  return dbx
+                    .sharingListSharedLinks({ path: r.result.path_display })
+                    .then((l) =>
+                      l.result.links.length
+                        ? { contentType, url: l.result.links[0].url }
+                        : dbx
+                            .sharingCreateSharedLinkWithSettings({
+                              path: r.result.path_display,
+                              settings: {
+                                requested_visibility: { ".tag": "public" },
+                              },
+                            })
+                            .then((c) => ({ url: c.result.url, contentType }))
+                    );
+                })
+                .then(({ url, contentType }) => {
+                  const dbxUrl = url.replace(/dl=0$/, "raw=1");
+                  updateBlock({
+                    uid,
+                    text: contentType
+                      ? contentType.includes("audio/")
+                        ? `{{audio: ${dbxUrl}}}`
+                        : contentType.includes("pdf")
+                        ? `{{pdf: ${dbxUrl}}}`
+                        : contentType.includes("video/")
+                        ? `{{video: ${dbxUrl}}}`
+                        : `![](${dbxUrl})`
+                      : `Unknown Content type for file ${fileToUpload.name}`,
+                  });
+                })
+                .catch(catchError)
+                .finally(() => {
+                  Array.from(document.getElementsByClassName("dnd-drop-bar"))
+                    .map((c) => c as HTMLDivElement)
+                    .forEach((c) => (c.style.display = "none"));
+                });
+          })
+          .catch(catchError);
       });
       e.stopPropagation();
       e.stopImmediatePropagation();
