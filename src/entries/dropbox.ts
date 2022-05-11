@@ -52,6 +52,7 @@ runExtension(ID, () => {
           ],
         },
       ],
+      versioning: true,
     },
   });
 
