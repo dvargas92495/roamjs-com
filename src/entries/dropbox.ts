@@ -1,6 +1,6 @@
 import { createConfigObserver } from "roamjs-components/components/ConfigPage";
 import getOauth from "roamjs-components/util/getOauth";
-import { getDropUidOffset, runExtension } from "../entry-helpers";
+import { getDropUidOffset } from "../entry-helpers";
 import DropboxLogo from "../assets/Dropbox.svg";
 import axios from "axios";
 import { Dropbox } from "dropbox";
@@ -12,6 +12,7 @@ import getUids from "roamjs-components/dom/getUids";
 import createHTMLObserver from "roamjs-components/dom/createHTMLObserver";
 import localStorageGet from "roamjs-components/util/localStorageGet";
 import localStorageSet from "roamjs-components/util/localStorageSet";
+import runExtension from "roamjs-components/util/runExtension";
 
 const ID = "dropbox";
 const CONFIG = `roam/js/${ID}`;

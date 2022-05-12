@@ -9,6 +9,12 @@ const extensions = fs.readdirSync("./src/entries/");
 const entry = Object.fromEntries(
   extensions.map((e) => [e.substring(0, e.length - 3), `./src/entries/${e}`])
 );
+const today = new Date();
+process.env.ROAMJS_VERSION = `${today.getFullYear()}-${toDoubleDigit(
+  today.getMonth() + 1
+)}-${toDoubleDigit(today.getDate())}-${toDoubleDigit(
+  today.getHours()
+)}-${toDoubleDigit(today.getMinutes())}`;
 
 module.exports = (env) => ({
   entry,
@@ -31,7 +37,7 @@ module.exports = (env) => ({
             options: {
               cacheDirectory: true,
               cacheCompression: false,
-              presets: ['@babel/preset-env'],
+              presets: ["@babel/preset-env"],
             },
           },
         ],
@@ -44,7 +50,7 @@ module.exports = (env) => ({
             options: {
               cacheDirectory: true,
               cacheCompression: false,
-              presets: ['@babel/preset-env'],
+              presets: ["@babel/preset-env"],
             },
           },
           {
