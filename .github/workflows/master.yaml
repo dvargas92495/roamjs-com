@@ -1,5 +1,6 @@
 name: Push Extensions to Master
 on:
+  workflow_dispatch:
   push:
     branches: master
     paths:
