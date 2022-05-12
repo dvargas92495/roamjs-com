@@ -9,6 +9,7 @@ const extensions = fs.readdirSync("./src/entries/");
 const entry = Object.fromEntries(
   extensions.map((e) => [e.substring(0, e.length - 3), `./src/entries/${e}`])
 );
+const toDoubleDigit = (n) => n.toString().padStart(2, "0");
 const today = new Date();
 process.env.ROAMJS_VERSION = `${today.getFullYear()}-${toDoubleDigit(
   today.getMonth() + 1
