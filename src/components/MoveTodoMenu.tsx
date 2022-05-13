@@ -187,11 +187,11 @@ const MoveTodoMenu = ({
 export const render = ({
   p,
   blockUid,
-  archivedDefault,
+  archivedDefault = false,
 }: {
   p: HTMLElement;
   blockUid: string;
-  archivedDefault: boolean;
+  archivedDefault?: boolean;
 }): void => {
   const block = p.parentElement;
   const onEnter = () =>
