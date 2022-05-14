@@ -112,7 +112,8 @@ runExtension("pull-references", () => {
         }
       },
     });
-  } else if (isMoveTagEnabled) {
+  } 
+  if (isMoveTagEnabled) {
     createHTMLObserver({
       tag: "SPAN",
       className: "rm-page-ref",
