@@ -19,7 +19,6 @@ import React, {
 import ReactDOM from "react-dom";
 import {
   DAILY_NOTE_PAGE_TITLE_REGEX,
-  createBlock,
   createPage,
   getChildrenLengthByPageUid,
   getPageUidByPageTitle,
@@ -29,8 +28,11 @@ import {
   getUidsFromId,
   parseRoamDate,
   toRoamDate,
-  updateBlock,
 } from "roam-client";
+import updateBlock from "roamjs-components/writes/updateBlock";
+import createBlock from "roamjs-components/writes/createBlock";
+
+const TODO_REGEX = /{{(\[\[)?TODO(\]\])?}}\s*/;
 
 const MoveTodoMenu = ({
   blockUid,
@@ -50,7 +52,8 @@ const MoveTodoMenu = ({
       : new Date();
     return addDays(ref, 1);
   }, []);
-  const maxDate = useMemo(() => { // https://github.com/palantir/blueprint/issues/877
+  const maxDate = useMemo(() => {
+    // https://github.com/palantir/blueprint/issues/877
     return addYears(tomorrow, 5);
   }, [tomorrow]);
   const [target, setTarget] = useState(tomorrow);
@@ -82,27 +85,24 @@ const MoveTodoMenu = ({
       getPageUidByPageTitle(targetDate) || createPage({ title: targetDate });
     const order = getChildrenLengthByPageUid(parentUid);
     Promise.all(
-      blockUids.map(
-        (buid, i) =>
-          new Promise<void>((resolve) => {
-            const text = getTextByBlockUid(buid);
-            setTimeout(() => {
-              const uid = createBlock({
-                node: { text: `${text} [*](((${buid})))` },
-                order: order + i,
-                parentUid,
-              });
-              updateBlock({
-                uid: buid,
-                text: `${text.replace(
+      blockUids.map((buid, i) => {
+        const text = getTextByBlockUid(buid);
+        return createBlock({
+          node: { text: `${text} [*](((${buid})))` },
+          order: order + i,
+          parentUid,
+        }).then((uid) =>
+          updateBlock({
+            uid: buid,
+            text: TODO_REGEX.test(text)
+              ? `${text.replace(
                   /{{(\[\[)?TODO(\]\])?}}\s*/,
                   `[→](((${uid}))) {{[[${archive ? "ARCHIVED" : "DONE"}]]}} `
-                )}`,
-              });
-              resolve();
-            }, 1);
+                )}`
+              : `[→](((${uid})))`,
           })
-      )
+        );
+      })
     ).then(() => {
       Array.from(
         document.getElementsByClassName("block-highlight-blue")
