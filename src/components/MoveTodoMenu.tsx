@@ -31,6 +31,7 @@ import {
 } from "roam-client";
 import updateBlock from "roamjs-components/writes/updateBlock";
 import createBlock from "roamjs-components/writes/createBlock";
+import getShallowTreeByParentUid from "roamjs-components/queries/getShallowTreeByParentUid";
 
 const TODO_REGEX = /{{(\[\[)?TODO(\]\])?}}\s*/;
 
@@ -87,20 +88,29 @@ const MoveTodoMenu = ({
     Promise.all(
       blockUids.map((buid, i) => {
         const text = getTextByBlockUid(buid);
+        const children = getShallowTreeByParentUid(buid);
         return createBlock({
           node: { text: `${text} [*](((${buid})))` },
           order: order + i,
           parentUid,
         }).then((uid) =>
-          updateBlock({
-            uid: buid,
-            text: TODO_REGEX.test(text)
-              ? `${text.replace(
-                  /{{(\[\[)?TODO(\]\])?}}\s*/,
-                  `[→](((${uid}))) {{[[${archive ? "ARCHIVED" : "DONE"}]]}} `
-                )}`
-              : `[→](((${uid})))`,
-          })
+          Promise.all([
+            updateBlock({
+              uid: buid,
+              text: TODO_REGEX.test(text)
+                ? `${text.replace(
+                    /{{(\[\[)?TODO(\]\])?}}\s*/,
+                    `[→](((${uid}))) {{[[${archive ? "ARCHIVED" : "DONE"}]]}} `
+                  )}`
+                : `[→](((${uid})))`,
+            }),
+            ...children.map((c, order) =>
+              window.roamAlphaAPI.moveBlock({
+                block: { uid: c.uid },
+                location: { "parent-uid": uid, order },
+              })
+            ),
+          ])
         );
       })
     ).then(() => {
