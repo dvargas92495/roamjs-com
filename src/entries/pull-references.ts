@@ -137,6 +137,7 @@ runExtension("pull-references", () => {
               archivedDefault: toFlexRegex("archived").test(
                 isMoveTodoEnabled.children[0]?.text
               ),
+              move: true,
             });
           }
         }

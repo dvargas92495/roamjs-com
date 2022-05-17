@@ -40,11 +40,13 @@ const MoveTodoMenu = ({
   p,
   onSuccess,
   archivedDefault,
+  move,
 }: {
   blockUid: string;
   p: HTMLElement;
   archivedDefault: boolean;
   onSuccess: () => void;
+  move?: boolean;
 }): React.ReactElement => {
   const tomorrow = useMemo(() => {
     const title = getPageTitleByBlockUid(blockUid);
@@ -89,29 +91,36 @@ const MoveTodoMenu = ({
       blockUids.map((buid, i) => {
         const text = getTextByBlockUid(buid);
         const children = getShallowTreeByParentUid(buid);
-        return createBlock({
-          node: { text: `${text} [*](((${buid})))` },
-          order: order + i,
-          parentUid,
-        }).then((uid) =>
-          Promise.all([
-            updateBlock({
-              uid: buid,
-              text: TODO_REGEX.test(text)
-                ? `${text.replace(
-                    /{{(\[\[)?TODO(\]\])?}}\s*/,
-                    `[→](((${uid}))) {{[[${archive ? "ARCHIVED" : "DONE"}]]}} `
-                  )}`
-                : `[→](((${uid})))`,
-            }),
-            ...children.map((c, order) =>
-              window.roamAlphaAPI.moveBlock({
-                block: { uid: c.uid },
-                location: { "parent-uid": uid, order },
-              })
-            ),
-          ])
-        );
+        return move
+          ? window.roamAlphaAPI.moveBlock({
+              block: { uid: buid },
+              location: { "parent-uid": parentUid, order: order + i },
+            })
+          : createBlock({
+              node: { text: `${text} [*](((${buid})))` },
+              order: order + i,
+              parentUid,
+            }).then((uid) =>
+              Promise.all([
+                updateBlock({
+                  uid: buid,
+                  text: TODO_REGEX.test(text)
+                    ? `${text.replace(
+                        /{{(\[\[)?TODO(\]\])?}}\s*/,
+                        `[→](((${uid}))) {{[[${
+                          archive ? "ARCHIVED" : "DONE"
+                        }]]}} `
+                      )}`
+                    : `[→](((${uid})))`,
+                }),
+                ...children.map((c, order) =>
+                  window.roamAlphaAPI.moveBlock({
+                    block: { uid: c.uid },
+                    location: { "parent-uid": uid, order },
+                  })
+                ),
+              ])
+            );
       })
     ).then(() => {
       Array.from(
@@ -198,10 +207,12 @@ export const render = ({
   p,
   blockUid,
   archivedDefault = false,
+  move,
 }: {
   p: HTMLElement;
   blockUid: string;
   archivedDefault?: boolean;
+  move?: boolean;
 }): void => {
   const block = p.parentElement;
   const onEnter = () =>
@@ -212,6 +223,7 @@ export const render = ({
         blockUid={blockUid}
         onSuccess={() => block.removeEventListener("mouseenter", onEnter)}
         archivedDefault={archivedDefault}
+        move={move}
       />,
       p
     );
