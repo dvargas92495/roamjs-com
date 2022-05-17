@@ -3,7 +3,6 @@ import {
   createButtonObserver,
   getFirstChildUidByBlockUid,
   getUidsFromId,
-  registerSmartBlocksCommand,
   updateBlock,
 } from "roam-client";
 import urlRegex from "url-regex-safe";
@@ -13,7 +12,8 @@ import {
   importArticle,
   renderImportArticle,
 } from "../components/ImportArticle";
-import { runExtension } from "../entry-helpers";
+import runExtension from "roamjs-components/util/runExtension";
+import registerSmartBlocksCommand from "roamjs-components/util/registerSmartBlocksCommand";
 
 const inlineImportArticle = async ({
   value,
@@ -73,7 +73,7 @@ runExtension("article", () => {
   registerSmartBlocksCommand({
     text: "ARTICLE",
     handler: () => (value) => {
-      return inlineImportArticle({value});
+      return inlineImportArticle({ value });
     },
   });
 });

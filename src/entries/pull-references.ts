@@ -139,13 +139,13 @@ runExtension("pull-references", () => {
       },
     });
   }
-});
 
-registerSmartBlocksCommand({
-  text: "PULLREFERENCES",
-  handler: (context: { targetUid: string }) => () =>
-    pullReferences(
-      getPageTitleByBlockUid(context.targetUid) ||
-        getPageTitleByPageUid(context.targetUid)
-    ),
+  registerSmartBlocksCommand({
+    text: "PULLREFERENCES",
+    handler: (context: { targetUid: string }) => () =>
+      pullReferences(
+        getPageTitleByBlockUid(context.targetUid) ||
+          getPageTitleByPageUid(context.targetUid)
+      ),
+  });
 });
