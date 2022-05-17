@@ -63,18 +63,22 @@ runExtension("pull-references", () => {
   createButtonObserver({
     attribute: PULL_REFERENCES_COMMAND,
     render: (b) =>
-      pullReferences().then((bts) => {
-        const { blockUid } = getUidsFromButton(b);
-        const parentUid = getParentUidByBlockUid(blockUid);
-        const order = getOrderByBlockUid(blockUid);
-        return Promise.all([
-          updateBlock({ text: bts[0], uid: blockUid }),
-          ...bts
-            .slice(1)
-            .map((text, o) =>
-              createBlock({ parentUid, order: o + order + 1, node: { text } })
-            ),
-        ]);
+      (b.onclick = (e) => {
+        pullReferences().then((bts) => {
+          const { blockUid } = getUidsFromButton(b);
+          const parentUid = getParentUidByBlockUid(blockUid);
+          const order = getOrderByBlockUid(blockUid);
+          return Promise.all([
+            updateBlock({ text: bts[0], uid: blockUid }),
+            ...bts
+              .slice(1)
+              .map((text, o) =>
+                createBlock({ parentUid, order: o + order + 1, node: { text } })
+              ),
+          ]);
+        });
+        e.preventDefault();
+        e.stopPropagation();
       }),
   });
 
@@ -112,7 +116,7 @@ runExtension("pull-references", () => {
         }
       },
     });
-  } 
+  }
   if (isMoveTagEnabled) {
     createHTMLObserver({
       tag: "SPAN",
@@ -132,7 +136,7 @@ runExtension("pull-references", () => {
               blockUid,
               archivedDefault: toFlexRegex("archived").test(
                 isMoveTodoEnabled.children[0]?.text
-              )
+              ),
             });
           }
         }
