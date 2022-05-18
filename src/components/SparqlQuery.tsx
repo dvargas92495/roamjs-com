@@ -93,7 +93,7 @@ const WIKIDATA_ITEMS = [
 const LIMIT_REGEX = /LIMIT ([\d]*)/;
 const IMAGE_REGEX_URL =
   /(http(s?):)([/|.|\w|\s|\-|:|%])*\.(?:jpg|gif|png|svg)/i;
-const WIKIDATA_SOURCE = "https://query.wikidata.org/sparql?format=json&query=";
+const WIKIDATA_SOURCE = "https://query.wikidata.org/bigdata/namespace/wdq/sparql?format=json&query=";
 
 const combineTextNodes = (nodes: InputTextNode[]) =>
   nodes
