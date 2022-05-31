@@ -17,35 +17,34 @@ import React, {
   useState,
 } from "react";
 import ReactDOM from "react-dom";
-import {
-  DAILY_NOTE_PAGE_TITLE_REGEX,
-  createPage,
-  getChildrenLengthByPageUid,
-  getPageUidByPageTitle,
-  getPageTitleByBlockUid,
-  getTextByBlockUid,
-  getUids,
-  getUidsFromId,
-  parseRoamDate,
-  toRoamDate,
-} from "roam-client";
+import { DAILY_NOTE_PAGE_TITLE_REGEX } from "roamjs-components/date/constants";
+import createPage from "roamjs-components/writes/createPage";
+import getChildrenLengthByPageUid from "roamjs-components/queries/getChildrenLengthByPageUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import getPageTitleByBlockUid from "roamjs-components/queries/getPageTitleByBlockUid";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import getUids from "roamjs-components/dom/getUids";
+import getUidsFromId from "roamjs-components/dom/getUidsFromId";
+import parseRoamDate from "roamjs-components/date/parseRoamDate";
+import toRoamDate from "roamjs-components/date/toRoamDate";
 import updateBlock from "roamjs-components/writes/updateBlock";
 import createBlock from "roamjs-components/writes/createBlock";
 import getShallowTreeByParentUid from "roamjs-components/queries/getShallowTreeByParentUid";
+import { render as renderToast } from "roamjs-components/components/Toast";
 
 const TODO_REGEX = /{{(\[\[)?TODO(\]\])?}}\s*/;
 
 const MoveTodoMenu = ({
   blockUid,
   p,
-  onSuccess,
+  onClose,
   archivedDefault,
   move,
 }: {
   blockUid: string;
   p: HTMLElement;
   archivedDefault: boolean;
-  onSuccess: () => void;
+  onClose: () => void;
   move?: boolean;
 }): React.ReactElement => {
   const tomorrow = useMemo(() => {
@@ -65,7 +64,8 @@ const MoveTodoMenu = ({
     unmountRef.current = window.setTimeout(() => {
       ReactDOM.unmountComponentAtNode(p);
     }, 200);
-  }, [unmountRef]);
+    onClose();
+  }, [unmountRef, onClose]);
   const clear = useCallback(() => {
     clearTimeout(unmountRef.current);
   }, [unmountRef]);
@@ -84,51 +84,61 @@ const MoveTodoMenu = ({
         .filter((b) => b !== blockUid),
     ];
     const targetDate = toRoamDate(target);
-    const parentUid =
-      getPageUidByPageTitle(targetDate) || createPage({ title: targetDate });
-    const order = getChildrenLengthByPageUid(parentUid);
-    Promise.all(
-      blockUids.map((buid, i) => {
-        const text = getTextByBlockUid(buid);
-        const children = getShallowTreeByParentUid(buid);
-        return move
-          ? window.roamAlphaAPI.moveBlock({
-              block: { uid: buid },
-              location: { "parent-uid": parentUid, order: order + i },
-            })
-          : createBlock({
-              node: { text: `${text} [*](((${buid})))` },
-              order: order + i,
-              parentUid,
-            }).then((uid) =>
-              Promise.all([
-                updateBlock({
-                  uid: buid,
-                  text: TODO_REGEX.test(text)
-                    ? `${text.replace(
-                        /{{(\[\[)?TODO(\]\])?}}\s*/,
-                        `[→](((${uid}))) {{[[${
-                          archive ? "ARCHIVED" : "DONE"
-                        }]]}} `
-                      )}`
-                    : `[→](((${uid})))`,
-                }),
-                ...children.map((c, order) =>
-                  window.roamAlphaAPI.moveBlock({
-                    block: { uid: c.uid },
-                    location: { "parent-uid": uid, order },
-                  })
-                ),
-              ])
-            );
+    const parentUid = getPageUidByPageTitle(targetDate);
+    return (
+      parentUid ? Promise.resolve(parentUid) : createPage({ title: targetDate })
+    )
+      .then((parentUid) => {
+        const order = getChildrenLengthByPageUid(parentUid);
+        return Promise.all(
+          blockUids.map((buid, i) => {
+            const text = getTextByBlockUid(buid);
+            const children = getShallowTreeByParentUid(buid);
+            return move
+              ? window.roamAlphaAPI.moveBlock({
+                  block: { uid: buid },
+                  location: { "parent-uid": parentUid, order: order + i },
+                })
+              : createBlock({
+                  node: { text: `${text} [*](((${buid})))` },
+                  order: order + i,
+                  parentUid,
+                }).then((uid) =>
+                  Promise.all([
+                    updateBlock({
+                      uid: buid,
+                      text: TODO_REGEX.test(text)
+                        ? `${text.replace(
+                            /{{(\[\[)?TODO(\]\])?}}\s*/,
+                            `[→](((${uid}))) {{[[${
+                              archive ? "ARCHIVED" : "DONE"
+                            }]]}} `
+                          )}`
+                        : `[→](((${uid})))`,
+                    }),
+                    ...children.map((c, order) =>
+                      window.roamAlphaAPI.moveBlock({
+                        block: { uid: c.uid },
+                        location: { "parent-uid": uid, order },
+                      })
+                    ),
+                  ])
+                );
+          })
+        );
       })
-    ).then(() => {
-      Array.from(
-        document.getElementsByClassName("block-highlight-blue")
-      ).forEach((d) => d.classList.remove("block-highlight-blue"));
-      unmount();
-      onSuccess();
-    });
+      .then(() => {
+        Array.from(
+          document.getElementsByClassName("block-highlight-blue")
+        ).forEach((d) => d.classList.remove("block-highlight-blue"));
+      })
+      .catch((e) => {
+        renderToast({
+          id: "move-todo-failure",
+          content: `Error: ${e.message}`,
+        });
+      })
+      .finally(unmount);
   };
   return (
     <Popover
@@ -221,7 +231,7 @@ export const render = ({
       <MoveTodoMenu
         p={p}
         blockUid={blockUid}
-        onSuccess={() => block.removeEventListener("mouseenter", onEnter)}
+        onClose={() => block.removeEventListener("mouseenter", onEnter)}
         archivedDefault={archivedDefault}
         move={move}
       />,
