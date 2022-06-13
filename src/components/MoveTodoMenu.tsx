@@ -37,14 +37,14 @@ const TODO_REGEX = /{{(\[\[)?TODO(\]\])?}}\s*/;
 const MoveTodoMenu = ({
   blockUid,
   p,
-  onClose,
+  removeListener,
   archivedDefault,
   move,
 }: {
   blockUid: string;
   p: HTMLElement;
   archivedDefault: boolean;
-  onClose: () => void;
+  removeListener: () => void;
   move?: boolean;
 }): React.ReactElement => {
   const tomorrow = useMemo(() => {
@@ -64,8 +64,7 @@ const MoveTodoMenu = ({
     unmountRef.current = window.setTimeout(() => {
       ReactDOM.unmountComponentAtNode(p);
     }, 200);
-    onClose();
-  }, [unmountRef, onClose]);
+  }, [unmountRef]);
   const clear = useCallback(() => {
     clearTimeout(unmountRef.current);
   }, [unmountRef]);
@@ -131,6 +130,7 @@ const MoveTodoMenu = ({
         Array.from(
           document.getElementsByClassName("block-highlight-blue")
         ).forEach((d) => d.classList.remove("block-highlight-blue"));
+        removeListener();
       })
       .catch((e) => {
         renderToast({
@@ -231,7 +231,7 @@ export const render = ({
       <MoveTodoMenu
         p={p}
         blockUid={blockUid}
-        onClose={() => block.removeEventListener("mouseenter", onEnter)}
+        removeListener={() => block.removeEventListener("mouseenter", onEnter)}
         archivedDefault={archivedDefault}
         move={move}
       />,
