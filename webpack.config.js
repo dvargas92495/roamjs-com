@@ -125,8 +125,11 @@ module.exports = (env) => ({
         loader: "svg-react-loader",
       },
       {
-        test: /\.(png|woff|woff2|eot|ttf)$/,
-        loader: "url-loader?limit=100000",
+        test: /\.(woff|woff2|eot|ttf)$/,
+        loader: "url-loader",
+        options: {
+          limit: 100000,
+        },
       },
       {
         test: /\.ne$/,

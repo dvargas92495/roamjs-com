@@ -8,6 +8,7 @@ on:
       - "src/entries/**"
       - "src/entry-helpers.ts"
       - "webpack.production.config.js"
+      - "webpack.config.js"
       - ".github/workflows/master.yaml"
       - "package.json"
 
