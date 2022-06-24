@@ -92,6 +92,7 @@
     "localhost-lambdas": "^0.6.3",
     "nearley-loader": "^2.0.0",
     "next-react-svg": "^1.1.2",
+    "node-polyfill-webpack-plugin": "^2.0.0",
     "open": "^8.0.6",
     "postcss": "^8.4.14",
     "react-hot-loader": "^4.13.0",

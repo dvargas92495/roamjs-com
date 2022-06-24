@@ -4,6 +4,7 @@ const Dotenv = require("dotenv-webpack");
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 
 const extensions = fs.readdirSync("./src/entries/");
 const entry = Object.fromEntries(
@@ -139,6 +140,7 @@ module.exports = (env) => ({
   },
   plugins: [
     new MiniCssExtractPlugin(),
+    new NodePolyfillPlugin(),
     new Dotenv({
       path: ".env.local",
       systemvars: true,
