@@ -4,6 +4,7 @@ import { GetStaticProps } from "next";
 import axios from "axios";
 import { API_URL } from "../../components/constants";
 import { idToTitle } from "../../components/hooks";
+import { useRouter } from "next/router";
 
 type ExtensionMetadata = {
   id: string;
@@ -17,6 +18,7 @@ type ExtensionMetadata = {
 };
 
 const ExtensionCard = (props: ExtensionMetadata) => {
+  const router = useRouter();
   return (
     <div className="shadow-sm rounded-lg border border-gray-100 border-opacity-50 p-4 h-48 flex-1 flex flex-col bg-white">
       <div className="flex gap-4 flex-1 max-h-24">
@@ -27,14 +29,19 @@ const ExtensionCard = (props: ExtensionMetadata) => {
           }
         />
         <div className="overflow-hidden overflow-ellipsis">
-          <h2 className="text-xl font-semibold mb-4">{props.title}</h2>
+          <h2
+            className="text-xl font-semibold mb-4 cursor-pointer"
+            onClick={() => router.push(props.href)}
+          >
+            {props.title}
+          </h2>
           <p className="text-sm mb-0 overflow-ellipsis">{props.description}</p>
         </div>
       </div>
       <hr className="my-4" />
       <div className="flex justify-between items-center">
         <div>Made By {props.user.name}</div>
-        <button className="bg-sky-500 text-white py-2 px-4 rounded-md">
+        <button className="bg-sky-500 text-white py-2 px-4 rounded-md cursor-not-allowed bg-opacity-25">
           Copy
         </button>
       </div>
@@ -119,7 +126,7 @@ const ExtensionHomePage = ({
               <SearchSvg />
             </span>
             <input
-              placeholder="Search Extension by name, description" // TODO: , author..."
+              placeholder="Search Extension by name, description author..."
               className="focus:ring-0 active:ring-0 flex-grow h-full focus:outline-none"
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -130,7 +137,8 @@ const ExtensionHomePage = ({
                 (e) =>
                   !search ||
                   searchRegex.test(e.title) ||
-                  searchRegex.test(e.description)
+                  searchRegex.test(e.description) ||
+                  searchRegex.test(e.user.name)
               )
               .map((e) => (
                 <ExtensionCard {...e} key={e.id} />

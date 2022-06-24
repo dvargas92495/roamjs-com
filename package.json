@@ -29,7 +29,6 @@
     "extension": "concurrently npm:api npm:local npm:ngrok",
     "digest": "node scripts/digest.js",
     "lint": "eslint . --ext .ts,.tsx",
-    "prebuild": "npm install",
     "upload": "node scripts/upload.js"
   },
   "repository": {
