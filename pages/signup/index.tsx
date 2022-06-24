@@ -1,7 +1,7 @@
 import { SignUp } from "@clerk/clerk-react";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef } from "react";
-import Layout, { defaultLayoutProps } from "../../components/Layout";
+import Layout from "../../components/Layout";
 
 const SignupPage = (): JSX.Element => {
   const { extension, state } = useRouter().query;
@@ -22,6 +22,8 @@ const SignupPage = (): JSX.Element => {
         const errorNode = passwordInput.nextElementSibling;
         if (errorNode) {
           observer.disconnect();
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           otherObserverRef.current = new MutationObserver(errorCallback);
           otherObserverRef.current.observe(errorNode, { attributes: true });
         }
@@ -52,7 +54,6 @@ const SignupPage = (): JSX.Element => {
       description={
         "Sign up on RoamJS to gain access to powerful services for Roam!"
       }
-      img={defaultLayoutProps.img}
     >
       <SignUp {...signUpProps} />
     </Layout>

@@ -2,7 +2,7 @@ import { SignedIn, SignedOut, SignIn } from "@clerk/clerk-react";
 import { Loading } from "@dvargas92495/ui";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
-import Layout, { defaultLayoutProps } from "../../components/Layout";
+import Layout from "../../components/Layout";
 
 const Redirect = () => {
   const router = useRouter();
@@ -34,7 +34,6 @@ const LoginPage = (): JSX.Element => {
     <Layout
       title={"Login | RoamJS"}
       description={"Login to RoamJS to get access to subscribed services"}
-      img={defaultLayoutProps.img}
     >
       <SignedIn>
         <Redirect />

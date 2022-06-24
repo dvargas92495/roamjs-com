@@ -13,6 +13,7 @@ type ExtensionMetadata = {
   href: string;
   state: "LIVE" | "DEVELOPMENT" | "PRIVATE" | "LEGACY" | "UNDER REVIEW";
   featured: number;
+  user: { name: string; email: string };
 };
 
 const ExtensionCard = (props: ExtensionMetadata) => {
@@ -32,7 +33,7 @@ const ExtensionCard = (props: ExtensionMetadata) => {
       </div>
       <hr className="my-4" />
       <div className="flex justify-between items-center">
-        <div>Made By RoamJS</div>
+        <div>Made By {props.user.name}</div>
         <button className="bg-sky-500 text-white py-2 px-4 rounded-md">
           Copy
         </button>
@@ -42,6 +43,23 @@ const ExtensionCard = (props: ExtensionMetadata) => {
 };
 
 const FEATURED_LENGTH = 3;
+
+const SearchSvg = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M15.5 14.0003H14.71L14.43 13.7303C15.63 12.3303 16.25 10.4203 15.91 8.39026C15.44 5.61026 13.12 3.39026 10.32 3.05026C6.09002 2.53026 2.53002 6.09026 3.05002 10.3203C3.39002 13.1203 5.61002 15.4403 8.39002 15.9103C10.42 16.2503 12.33 15.6303 13.73 14.4303L14 14.7103V15.5003L18.25 19.7503C18.66 20.1603 19.33 20.1603 19.74 19.7503C20.15 19.3403 20.15 18.6703 19.74 18.2603L15.5 14.0003ZM9.50002 14.0003C7.01002 14.0003 5.00002 11.9903 5.00002 9.50026C5.00002 7.01026 7.01002 5.00026 9.50002 5.00026C11.99 5.00026 14 7.01026 14 9.50026C14 11.9903 11.99 14.0003 9.50002 14.0003Z"
+      fill="#2E364D"
+    />
+  </svg>
+);
 
 const ExtensionHomePage = ({
   extensions,
@@ -53,6 +71,8 @@ const ExtensionHomePage = ({
     .sort((a, b) => a.featured - b.featured);
   const [page, setPage] = useState(0);
   const featuredStart = (page * FEATURED_LENGTH) % featured.length;
+  const [search, setSearch] = useState("");
+  const searchRegex = new RegExp(search, "i");
   return (
     <Layout
       title={"RoamJS Extensions"}
@@ -95,17 +115,26 @@ const ExtensionHomePage = ({
             All Extensions
           </h2>
           <div className="border border-black rounded-lg p-2 bg-white max-w-2xl w-full mb-24 flex items-center h-12">
-            <span className="mag h-8 w-8 inline-block" />
+            <span className="mag h-8 w-8 inline-flex justify-center items-center">
+              <SearchSvg />
+            </span>
             <input
-              placeholder="Search Extension by name, description, author..."
+              placeholder="Search Extension by name, description" // TODO: , author..."
               className="focus:ring-0 active:ring-0 flex-grow h-full focus:outline-none"
+              onChange={(e) => setSearch(e.target.value)}
             />
-            <span className="cmd+k rounded-lg shadow-sm border border-gray-500 border-opacity-50 w-12 h-8 inline-block" />
           </div>
-          <div className="grid grid-cols-3 mb-24 w-full max-w-6xl mx-auto gap-8">
-            {extensions.map((e) => (
-              <ExtensionCard {...e} key={e.id} />
-            ))}
+          <div className="grid md:grid-cols-3 grid-cols-1 mb-24 w-full max-w-6xl mx-auto gap-8">
+            {extensions
+              .filter(
+                (e) =>
+                  !search ||
+                  searchRegex.test(e.title) ||
+                  searchRegex.test(e.description)
+              )
+              .map((e) => (
+                <ExtensionCard {...e} key={e.id} />
+              ))}
           </div>
         </div>
       </div>
@@ -121,8 +150,8 @@ export const getStaticProps: GetStaticProps<{
     .then((r) => ({
       props: {
         extensions: r.data.paths
-          .filter((p) => p.state !== "PRIVATE")
-          .map(({ id, description, state, featured }) => ({
+          .filter((p) => p.state !== "PRIVATE" && p.state !== "UNDER REVIEW")
+          .map(({ id, description, state, featured, user }) => ({
             id,
             title: idToTitle(id),
             description: description || "Description for " + idToTitle(id),
@@ -130,8 +159,13 @@ export const getStaticProps: GetStaticProps<{
             href: `/extensions/${id}`,
             state,
             featured,
+            user,
           }))
-          .sort((a, b) => a.title.localeCompare(b.title)),
+          .sort((a, b) =>
+            a.state === b.state
+              ? a.title.localeCompare(b.title)
+              : b.state.localeCompare(a.state)
+          ),
       },
     }))
     .catch(() => ({

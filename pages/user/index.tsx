@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import StandardLayout from "../../components/StandardLayout";
+import Layout from "../../components/Layout";
 import { Button, Loading, ConfirmationDialog } from "@dvargas92495/ui";
 import {
   useAuthenticatedAxiosGet,
@@ -566,7 +566,7 @@ const BillingTab = () => {
 
 const UserPage = (): JSX.Element => {
   return (
-    <StandardLayout
+    <Layout
       title={"User | RoamJS"}
       description={"Manage your user settings for RoamJS"}
     >
@@ -598,7 +598,7 @@ main>div.roamjs-standard-layout{
         <BillingTab />
       </SignedIn>
       <RedirectToLogin />
-    </StandardLayout>
+    </Layout>
   );
 };
 

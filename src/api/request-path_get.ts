@@ -14,6 +14,20 @@ const DEFAULT_AUTHOR = {
   email: "support@roamjs.com",
 };
 
+const userCache: Record<string, Promise<{ name: string; email: string }>> = {};
+const getUser = (s?: string) =>
+  s
+    ? userCache[s] ||
+      (userCache[s] = users.getUser(s).then((u) => ({
+        name:
+          u.firstName && u.lastName
+            ? `${u.firstName} ${u.lastName}`.trim()
+            : u.firstName || "Anonymous",
+        email: u.emailAddresses.find((e) => e.id === u.primaryEmailAddressId)
+          ?.emailAddress,
+      })))
+    : Promise.resolve(DEFAULT_AUTHOR);
+
 export const handler: APIGatewayProxyHandler = (event) => {
   const id = event.queryStringParameters?.id;
   const sub = event.queryStringParameters?.sub === "true";
@@ -32,17 +46,7 @@ export const handler: APIGatewayProxyHandler = (event) => {
                   .getObject({ Bucket: "roamjs.com", Key: `markdown/${id}.md` })
                   .promise()
                   .then((c) => c.Body.toString()),
-            r.Item.user?.S
-              ? users.getUser(r.Item.user.S).then((u) => ({
-                  name:
-                    u.firstName && u.lastName
-                      ? `${u.firstName} ${u.lastName}`.trim()
-                      : "an Anonymous Developer",
-                  email: u.emailAddresses.find(
-                    (e) => e.id === u.primaryEmailAddressId
-                  )?.emailAddress,
-                }))
-              : Promise.resolve(DEFAULT_AUTHOR),
+            getUser(r.Item.user?.S),
             r.Item.premium?.S
               ? stripe.prices
                   .retrieve(r.Item.premium.S)
@@ -107,15 +111,20 @@ export const handler: APIGatewayProxyHandler = (event) => {
           TableName,
         })
         .promise()
-        .then((r) => ({
+        .then(async (r) => ({
           statusCode: 200,
           body: JSON.stringify({
-            paths: r.Items.map((c) => ({
-              id: c.id?.S,
-              description: c.description?.S,
-              state: c.state?.S,
-              featured: Number(c.featured?.N || 0),
-            })),
+            paths: await Promise.all(
+              r.Items.map((c) =>
+                getUser(c.user?.S).then((user) => ({
+                  id: c.id?.S,
+                  description: c.description?.S,
+                  state: c.state?.S,
+                  featured: Number(c.featured?.N || 0),
+                  user,
+                }))
+              )
+            ),
           }),
           headers: headers(event),
         }));
