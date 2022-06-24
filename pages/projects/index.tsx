@@ -1,6 +1,5 @@
 import React, { ReactElement, useEffect, useState } from "react";
 import StandardLayout from "../../components/StandardLayout";
-import { defaultLayoutProps } from "../../components/Layout";
 
 const ProjectsPage = (): ReactElement => {
   const [mounted, setMounted] = useState(false);
@@ -25,7 +24,7 @@ const ProjectsPage = (): ReactElement => {
       description={
         "Check out what's coming to RoamJS and fund whichever project you're most excited about!"
       }
-      img={defaultLayoutProps.img}
+      activeLink={"projects"}
     >
       <h2 style={{ textAlign: "center" }}>
         This Page Is Under Construction. Come Back Soon!

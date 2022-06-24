@@ -1,19 +1,16 @@
 import React from "react";
 import Head from "next/head";
-import { AppBar, Root, Main, Footer } from "@dvargas92495/ui";
-import RoamJSLogo from "./RoamJSLogo";
+import Link from "next/link";
+import { Root, Main, Footer } from "@dvargas92495/ui";
 import dynamic from "next/dynamic";
 
-export type LayoutProps = {
-  title: string;
-  description: string;
-  img: string;
-};
+const PAGES = ["extensions", "projects", "contribute"] as const;
 
-export const defaultLayoutProps = {
-  title: "RoamJS",
-  description: "Become a Roam Power User",
-  img: "https://roamjs.com/images/logo-low-res.png",
+export type LayoutProps = {
+  title?: string;
+  description?: string;
+  img?: string;
+  activeLink?: typeof PAGES[number];
 };
 
 const UserIconDynamic = dynamic(() => import("../components/UserIcon"), {
@@ -22,9 +19,10 @@ const UserIconDynamic = dynamic(() => import("../components/UserIcon"), {
 
 const Layout: React.FunctionComponent<LayoutProps> = ({
   children,
-  title,
-  description,
-  img,
+  title = "RoamJS",
+  description = "Become a Roam Power User",
+  img = "https://roamjs.com/images/logo-low-res.png",
+  activeLink,
 }) => {
   return (
     <Root>
@@ -43,11 +41,38 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
         <meta name="og:image" content={img} />
         <meta name="twitter:image" content={img} />
       </Head>
-      <AppBar
-        homeIcon={<RoamJSLogo />}
-        userIcon={<UserIconDynamic />}
-        pages={["extensions", "projects", "contribute"]}
-      />
+      <header className="static bg-transparent shadow-xl z-10">
+        <div className="px-6 h-16 flex items-center">
+          <span className="flex max-h-full w-16 mr-4">
+            <Link href={"/"}>
+              <img
+                src={"https://roamjs.com/images/logo-low-res.png"}
+                height={"48px"}
+                width={"48px"}
+                className={"cursor-pointer"}
+              />
+            </Link>
+          </span>
+          <div className="justify-start flex-grow flex gap-6 capitalize text-lg items-center h-full">
+            {PAGES.map((p, i) => (
+              <h6 key={i}>
+                <a
+                  href={`/${p}`}
+                  color="inherit"
+                  className={`${
+                    activeLink === p ? "text-gray-800" : "text-gray-400"
+                  } hover:text-gray-700 active:text-gray-800 hover:no-underline active:no-underline`}
+                >
+                  {p}
+                </a>
+              </h6>
+            ))}
+          </div>
+          <div className="w-48 flex justify-end items-center">
+            <UserIconDynamic />
+          </div>
+        </div>
+      </header>
       <Main>{children}</Main>
       <Footer
         siteLinks={["About", "Terms of Use", "Privacy Policy", "Contact"]}

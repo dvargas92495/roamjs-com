@@ -9,7 +9,7 @@ import {
   Button,
   Subtitle,
 } from "@dvargas92495/ui";
-import Layout, { defaultLayoutProps } from "../components/Layout";
+import Layout from "../components/Layout";
 import LandingUndraw from "../components/svg/LandingUndraw.svg";
 import FreelancerUndraw from "../components/svg/Freelancer.svg";
 import dynamic from "next/dynamic";
@@ -77,7 +77,7 @@ const Carousel = () => {
 };
 
 const HomePage = (): JSX.Element => (
-  <Layout {...defaultLayoutProps}>
+  <Layout>
     <Landing>
       <SplashLanding
         Logo={LandingUndraw}

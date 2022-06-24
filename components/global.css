@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .roamjs-services-list {
   flex: 0 1 auto;
   flex-flow: row wrap;
@@ -49,9 +53,4 @@
 
 .roamjs-user-card .MuiListItem-root {
   display: flex;
-}
-
-.roamjs-standard-layout {
-  max-width: 760px;
-  width: 95vw;
 }

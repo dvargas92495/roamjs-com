@@ -27,7 +27,6 @@ const ExtensionSubPage = ({
   id,
   subpage,
   development,
-  premium,
 }: ExtensionSubPageProps): React.ReactElement => {
   const title = idToTitle(subpage);
   return (
@@ -35,6 +34,7 @@ const ExtensionSubPage = ({
       title={`${title} | ${idToTitle(id)}`}
       description={`${title} page of the ${idToTitle(id)} extension.`}
       img={`https://roamjs.com/thumbnails/${id}.png`}
+      activeLink={"extensions"}
     >
       <Breadcrumbs
         page={title.toUpperCase()}
@@ -55,7 +55,6 @@ const ExtensionSubPage = ({
         {...content}
         components={getMdxComponents({
           id,
-          premium,
         })}
       />
     </StandardLayout>
@@ -85,7 +84,7 @@ export const getStaticProps: GetStaticProps<
 > = (context) =>
   axios
     .get(
-      `${API_URL}/request-path?id=${context.params.id}/${context.params.subpage}`
+      `${API_URL}/request-path?id=${context.params?.id}/${context.params?.subpage}`
     )
     .then((r) =>
       serialize(r.data.content).then((content) => ({
@@ -93,7 +92,8 @@ export const getStaticProps: GetStaticProps<
           content,
           development: r.data.state !== "LIVE",
           premium: r.data.premium || null,
-          ...context.params,
+          subpage: context.params?.subpage || "",
+          id: context.params?.id || "",
         },
       }))
     )
@@ -111,7 +111,8 @@ export const getStaticProps: GetStaticProps<
           content,
           development: true,
           premium: null,
-          ...context.params,
+          subpage: context.params?.subpage || "",
+          id: context.params?.id || "",
         },
       }))
     );

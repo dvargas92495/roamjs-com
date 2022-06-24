@@ -33,35 +33,37 @@ export const handler: APIGatewayProxyHandler = (event) => {
                   .promise()
                   .then((c) => c.Body.toString()),
             r.Item.user?.S
-              ? users
-                  .getUser(r.Item.user.S)
-                  .then((u) => ({
-                    name: u.firstName && u.lastName ? `${u.firstName} ${u.lastName}`.trim() : 'an Anonymous Developer',
-                    email: u.emailAddresses.find(
-                      (e) => e.id === u.primaryEmailAddressId
-                    )?.emailAddress,
-                  }))
+              ? users.getUser(r.Item.user.S).then((u) => ({
+                  name:
+                    u.firstName && u.lastName
+                      ? `${u.firstName} ${u.lastName}`.trim()
+                      : "an Anonymous Developer",
+                  email: u.emailAddresses.find(
+                    (e) => e.id === u.primaryEmailAddressId
+                  )?.emailAddress,
+                }))
               : Promise.resolve(DEFAULT_AUTHOR),
             r.Item.premium?.S
               ? stripe.prices
                   .retrieve(r.Item.premium.S)
-                  .then(({ product, unit_amount, recurring, transform_quantity }) =>
-                    stripe.products
-                      .retrieve(product as string)
-                      .then(({ description }) => ({
-                        description,
-                        price: unit_amount / 100,
-                        usage: recurring?.usage_type,
-                        quantity: transform_quantity?.divide_by || 1,
-                      }))
+                  .then(
+                    ({ product, unit_amount, recurring, transform_quantity }) =>
+                      stripe.products
+                        .retrieve(product as string)
+                        .then(({ description }) => ({
+                          description,
+                          price: unit_amount / 100,
+                          usage: recurring?.usage_type,
+                          quantity: transform_quantity?.divide_by || 1,
+                        }))
                   )
               : Promise.resolve(undefined),
           ]).then(([content, author, premium]) => ({
             statusCode: 200,
             body: JSON.stringify({
               content,
-              state: r.Item.state?.S || 'PRIVATE',
-              description: r.Item.description?.S || '',
+              state: r.Item.state?.S || "PRIVATE",
+              description: r.Item.description?.S || "",
               premium,
               author,
             }),
@@ -112,6 +114,7 @@ export const handler: APIGatewayProxyHandler = (event) => {
               id: c.id?.S,
               description: c.description?.S,
               state: c.state?.S,
+              featured: Number(c.featured?.N || 0),
             })),
           }),
           headers: headers(event),

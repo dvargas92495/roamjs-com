@@ -155,7 +155,7 @@ const LaunchButton: React.FC<{
       }).then((r) =>
         r.data.sessionId
           ? stripe.then((s) =>
-              s
+              s && s
                 .redirectToCheckout({
                   sessionId: r.data.sessionId,
                 })

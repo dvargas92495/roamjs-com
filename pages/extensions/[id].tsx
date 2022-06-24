@@ -114,6 +114,7 @@ const ExtensionPage = ({
       title={title}
       description={description}
       img={`https://roamjs.com/thumbnails/${id}.png`}
+      activeLink={"extensions"}
     >
       <Breadcrumbs
         page={title.toUpperCase()}
@@ -194,7 +195,6 @@ const ExtensionPage = ({
           {...content}
           components={getMdxComponents({
             id,
-            premium,
           })}
         />
       ) : (
@@ -303,14 +303,14 @@ export const getStaticProps: GetStaticProps<
     id: string;
     subpath: string;
   }
-> = ({ params: { id } }) =>
+> = (context) =>
   axios
-    .get(`${API_URL}/request-path?id=${id}`)
+    .get(`${API_URL}/request-path?id=${context.params?.id}`)
     .then(({ data: { content, ...rest } }) => {
       const mdxContent =
         content === "FILE"
           ? fs
-              .readFileSync(`pages/docs/extensions/${id}.mdx`)
+              .readFileSync(`pages/docs/extensions/${context.params?.id}.mdx`)
               .toString()
               .replace(/(.)---\s/s, "$1---\n\n### Usage\n")
           : content;
@@ -331,7 +331,7 @@ export const getStaticProps: GetStaticProps<
         return serialize(preRender).then((content) => ({
           props: {
             content,
-            id,
+            id: context.params?.id,
             development: state === "DEVELOPMENT" || state === "UNDER REVIEW",
             legacy: state === "LEGACY",
             description,
@@ -374,7 +374,7 @@ export const getStaticProps: GetStaticProps<
       ).then((content) => ({
         props: {
           content,
-          id,
+          id: context.params?.id || '',
           development: true,
         },
       }));

@@ -7,3 +7,4 @@ out/
 .next/
 .env.local
 test.js
+/app/tailwind.css

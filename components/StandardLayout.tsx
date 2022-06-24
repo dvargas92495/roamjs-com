@@ -6,7 +6,7 @@ const StandardLayout: React.FunctionComponent<LayoutProps> = ({
   ...layoutProps
 }) => (
   <Layout {...layoutProps}>
-    <div className={'roamjs-standard-layout'}>{children}</div>
+    <div className={"max-w-3xl w-11/12"}>{children}</div>
   </Layout>
 );
 

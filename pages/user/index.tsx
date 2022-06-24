@@ -9,7 +9,6 @@ import {
 } from "../../components/hooks";
 import { SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
-import { defaultLayoutProps } from "../../components/Layout";
 import { stripe } from "../../components/constants";
 import Head from "next/head";
 import ReactDOM from "react-dom";
@@ -113,24 +112,29 @@ const UserProfileTab = ({
             </div>
             {cards.map((c) => (
               <div
-              className="TbneNCA4gZ19UdBjC4aa8w== UWBWNVaoq8lQMz06Xu2Cxg== cl-themed-card"
+                className="TbneNCA4gZ19UdBjC4aa8w== UWBWNVaoq8lQMz06Xu2Cxg== cl-themed-card"
                 key={c.title}
               >
                 <div className="Em1H2funtme6EXt9AM65sQ==">
                   <h1 className="lxRDeMOoyAxXuzbXfY3AZA==">{c.title}</h1>
-                  <p className="lqA9GnSF-T6v3YCbt8CChA==" style={{ whiteSpace: "pre-wrap" }}>{c.description}</p>
+                  <p
+                    className="lqA9GnSF-T6v3YCbt8CChA=="
+                    style={{ whiteSpace: "pre-wrap" }}
+                  >
+                    {c.description}
+                  </p>
                 </div>
                 {c.items && (
                   <div className="cl-titled-card-list">
                     {c.items.map((i, index) => {
-                      const action = c.getActions(i, index);
+                      const action = c.getActions && c.getActions(i, index);
                       return typeof action === "function" ? (
                         <ActionButton key={i.id} onClick={action} {...i} />
                       ) : (
                         <ConfirmationDialog
                           key={i.id}
-                          title={c.dialogTitle}
-                          content={c.dialogContent}
+                          title={c.dialogTitle || ""}
+                          content={c.dialogContent || ""}
                           actions={action}
                           Button={({ onClick }) => (
                             <ActionButton key={i.id} onClick={onClick} {...i} />
@@ -188,10 +192,12 @@ const AddCard = () => {
         (r) =>
           r.data.id &&
           stripe
-            .then((s) =>
-              s.redirectToCheckout({
-                sessionId: r.data.id,
-              })
+            .then(
+              (s) =>
+                s &&
+                s.redirectToCheckout({
+                  sessionId: r.data.id,
+                })
             )
             .then(() => Promise.resolve())
       )
@@ -404,7 +410,7 @@ const BillingTab = () => {
   ]);
   const print = useCallback(
     (id: string) =>
-      window.open(invoices.find((i) => i.id === id)?.pdf, "_blank").focus(),
+      window.open(invoices.find((i) => i.id === id)?.pdf, "_blank")?.focus(),
     [invoices]
   );
   useEffect(() => {
@@ -442,9 +448,9 @@ const BillingTab = () => {
           }`,
           items: paymentMethods
             .sort((a, b) =>
-              a.id === payment.id
+              a.id === payment?.id
                 ? -1
-                : b.id === payment.id
+                : b.id === payment?.id
                 ? 1
                 : a.id.localeCompare(b.id)
             )
@@ -563,7 +569,6 @@ const UserPage = (): JSX.Element => {
     <StandardLayout
       title={"User | RoamJS"}
       description={"Manage your user settings for RoamJS"}
-      img={defaultLayoutProps.img}
     >
       <SignedIn>
         {/*<Profile />*/}

@@ -137,6 +137,7 @@ const ExtensionPageLayout: React.FunctionComponent<{
       title={idToTitle(id)}
       description={frontMatter.description}
       img={`https://roamjs.com/thumbnails/${id}.png`}
+      activeLink={"extensions"}
     >
       <Breadcrumbs
         page={label}
@@ -179,7 +180,8 @@ const ExtensionPageLayout: React.FunctionComponent<{
         First create a <b>block</b> with the text{" "}
         <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam DB. Then,
         create a single child of this block type three back ticks. A code block
-        should appear. Copy this code and paste it into the child code block in your graph:
+        should appear. Copy this code and paste it into the child code block in
+        your graph:
       </Body>
       <Prism language="javascript">{getSingleCodeContent(id)}</Prism>
       <Body>Finally, click "Yes, I Know What I'm Doing".</Body>
