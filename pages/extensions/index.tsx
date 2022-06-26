@@ -25,14 +25,23 @@ const ExtensionCard = (props: ExtensionMetadata) => {
   const onSave = useCopyCode(setCopied, "", true);
   const mainEntry = props.state === "LEGACY" ? props.id : `${props.id}/main`;
   return (
-    <div className="shadow-sm rounded-lg border border-gray-100 border-opacity-50 p-4 h-48 flex-1 flex flex-col bg-white">
+    <div className="shadow-sm rounded-lg border border-gray-100 border-opacity-50 p-4 h-48 flex-1 flex flex-col bg-white relative">
+      {(props.state === "DEVELOPMENT" || props.state === "UNDER REVIEW") && (
+        <div className="absolute top-0 flex justify-center w-full">
+          <div className="relative -top-4 rounded-lg bg-slate-700 text-white px-3 py-1">
+            🚧 WIP
+          </div>
+        </div>
+      )}
       <div className="flex gap-4 flex-1 max-h-24">
-        <img
-          src={props.image}
-          className={
-            "rounded-lg border border-gray-100 border-opacity-50 h-24 w-24"
-          }
-        />
+        <div
+          className={"h-24 w-24 flex-shrink-0 flex justify-center items-center"}
+        >
+          <img
+            src={props.image}
+            className={"rounded-lg border border-gray-100 border-opacity-50"}
+          />
+        </div>
         <div className="overflow-hidden overflow-ellipsis">
           <h2
             className="text-xl font-semibold mb-4 cursor-pointer"
@@ -40,7 +49,7 @@ const ExtensionCard = (props: ExtensionMetadata) => {
           >
             {props.title}
           </h2>
-          <p className="text-sm mb-0 overflow-ellipsis">{props.description}</p>
+          <p className="text-xs mb-0 overflow-ellipsis">{props.description}</p>
         </div>
       </div>
       <hr className="my-4" />
@@ -172,14 +181,14 @@ export const getStaticProps: GetStaticProps<{
     .then((r) => ({
       props: {
         extensions: r.data.paths
-          .filter((p) => p.state !== "PRIVATE" && p.state !== "UNDER REVIEW")
+          .filter((p) => p.state !== "PRIVATE")
           .map(({ id, description, state, featured, user }) => ({
             id,
             title: idToTitle(id),
             description: description || "Description for " + idToTitle(id),
             image: `https://roamjs.com/thumbnails/${id}.png`,
             href: `/extensions/${id}`,
-            state,
+            state: state === "UNDER REVIEW" ? "DEVELOPMENT" : state,
             featured,
             user,
           }))
