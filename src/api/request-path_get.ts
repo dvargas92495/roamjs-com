@@ -122,6 +122,7 @@ export const handler: APIGatewayProxyHandler = (event) => {
                   state: c.state?.S,
                   featured: Number(c.featured?.N || 0),
                   user,
+                  entry: c.src?.S || "",
                 }))
               )
             ),

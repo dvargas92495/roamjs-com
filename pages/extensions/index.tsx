@@ -3,8 +3,9 @@ import Layout from "../../components/Layout";
 import { GetStaticProps } from "next";
 import axios from "axios";
 import { API_URL } from "../../components/constants";
-import { idToTitle } from "../../components/hooks";
+import { idToTitle, useCopyCode } from "../../components/hooks";
 import { useRouter } from "next/router";
+import Toast from "@dvargas92495/app/components/Toast";
 
 type ExtensionMetadata = {
   id: string;
@@ -15,10 +16,14 @@ type ExtensionMetadata = {
   state: "LIVE" | "DEVELOPMENT" | "PRIVATE" | "LEGACY" | "UNDER REVIEW";
   featured: number;
   user: { name: string; email: string };
+  entry: string;
 };
 
 const ExtensionCard = (props: ExtensionMetadata) => {
   const router = useRouter();
+  const [copied, setCopied] = useState(false);
+  const onSave = useCopyCode(setCopied, "", true);
+  const mainEntry = props.state === "LEGACY" ? props.id : `${props.id}/main`;
   return (
     <div className="shadow-sm rounded-lg border border-gray-100 border-opacity-50 p-4 h-48 flex-1 flex flex-col bg-white">
       <div className="flex gap-4 flex-1 max-h-24">
@@ -41,9 +46,18 @@ const ExtensionCard = (props: ExtensionMetadata) => {
       <hr className="my-4" />
       <div className="flex justify-between items-center">
         <div>Made By {props.user.name}</div>
-        <button className="bg-sky-500 text-white py-2 px-4 rounded-md cursor-not-allowed bg-opacity-25">
+        <button
+          className="bg-sky-500 text-white py-2 px-4 rounded-md"
+          onClick={() => onSave(mainEntry, props.entry)}
+        >
           Copy
         </button>
+        <Toast
+          isOpen={copied}
+          onClose={() => setCopied(false)}
+          message={"Copied Extension! Paste into your Roam graph to install!"}
+          autoHideDuration={10000}
+        />
       </div>
     </div>
   );

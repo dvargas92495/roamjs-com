@@ -54,7 +54,8 @@ ${initialLines}${
 
 export const useCopyCode = (
   setCopied: (flag: boolean) => void,
-  initialLines?: string
+  initialLines?: string,
+  skipAutoHide?: boolean
 ): ((id: string, entry?: string) => void) =>
   useCallback(
     (id: string, entry?: string) => {
@@ -67,7 +68,7 @@ export const useCopyCode = (
       );
       document.execCommand("copy");
       setCopied(true);
-      setTimeout(() => setCopied(false), 1000);
+      if (!skipAutoHide) setTimeout(() => setCopied(false), 1000);
     },
     [setCopied, initialLines]
   );
@@ -89,7 +90,7 @@ export const useAuthenticatedAxiosGet = <T = unknown>(): ((
   return useCallback(
     (path: string) => {
       const url = new URL(`${API_URL}/${path}`);
-      url.searchParams.set("_clerk_session_id", session.id);
+      url.searchParams.set("_clerk_session_id", session?.id || "");
       return axios.get<T>(url.toString(), {
         withCredentials: true,
       });
@@ -106,7 +107,7 @@ export const useAuthenticatedAxiosPost = (): ((
   return useCallback(
     (path: string, data = {}) => {
       const url = new URL(`${API_URL}/${path}`);
-      url.searchParams.set("_clerk_session_id", session.id);
+      url.searchParams.set("_clerk_session_id", session?.id || "");
       return axios.post(url.toString(), data, {
         withCredentials: true,
       });
@@ -123,7 +124,7 @@ export const useAuthenticatedAxiosPut = (): ((
   return useCallback(
     (path: string, data?: Record<string, unknown>) => {
       const url = new URL(`${API_URL}/${path}`);
-      url.searchParams.set("_clerk_session_id", session.id);
+      url.searchParams.set("_clerk_session_id", session?.id || "");
       return axios.put(url.toString(), data || {}, {
         withCredentials: true,
       });
@@ -139,7 +140,7 @@ export const useAuthenticatedAxiosDelete = <T = unknown>(): ((
   return useCallback(
     (path: string) => {
       const url = new URL(`${API_URL}/${path}`);
-      url.searchParams.set("_clerk_session_id", session.id);
+      url.searchParams.set("_clerk_session_id", session?.id || "");
       return axios.delete<T>(url.toString(), {
         withCredentials: true,
       });
