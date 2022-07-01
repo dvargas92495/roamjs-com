@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+#__next ul,
+#__next ol {
+  list-style: unset;
+  margin: unset;
+  padding-left: 40px;
+}
+
 .roamjs-services-list {
   flex: 0 1 auto;
   flex-flow: row wrap;
