@@ -9,6 +9,10 @@
   padding-left: 40px;
 }
 
+#__next a {
+  color: #3ba4dc;
+}
+
 .roamjs-services-list {
   flex: 0 1 auto;
   flex-flow: row wrap;
