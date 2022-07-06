@@ -101,12 +101,13 @@ const IframelyEmbed = ({
           watcher
         );
         processUrl(getTextByBlockUid(uid));
-        return () =>
+        return () => {
           window.roamAlphaAPI.data.removePullWatch(
             "[:block/string]",
             `[:block/uid "${uid}"]`,
             watcher
           );
+        };
       }
       processUrl(arg);
     }

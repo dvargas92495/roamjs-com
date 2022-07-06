@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-#__next ul,
-#__next ol {
+#__next p ul,
+#__next p ol {
   list-style: unset;
   margin: unset;
   padding-left: 40px;
