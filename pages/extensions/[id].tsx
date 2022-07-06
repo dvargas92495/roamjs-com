@@ -137,6 +137,7 @@ const ExtensionPage = ({
           />
           <img
             src={`https://roamjs.com/thumbnails/${id}.png`}
+            className={"thumbnail"}
             style={{
               verticalAlign: "middle",
               width: "100%",
@@ -373,7 +374,7 @@ export const getStaticProps: GetStaticProps<
       ).then((content) => ({
         props: {
           content,
-          id: context.params?.id || '',
+          id: context.params?.id || "",
           development: true,
         },
       }));

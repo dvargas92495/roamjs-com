@@ -42,7 +42,16 @@ import { getRenderRoot } from "./hooks";
 import getSettingIntFromTree from "roamjs-components/util/getSettingIntFromTree";
 import MenuItemSelect from "roamjs-components/components/MenuItemSelect";
 import getSettingValueFromTree from "roamjs-components/util/getSettingValueFromTree";
-import urlRegex from "url-regex-safe";
+
+// https://github.com/spamscanner/url-regex-safe/blob/master/src/index.js
+const protocol = `(?:(?:[a-z]+:)?//)`;
+const host = "(?:(?:[a-z\\u00a1-\\uffff0-9][-_]*)*[a-z\\u00a1-\\uffff0-9]+)";
+const domain = "(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*";
+const tld = `(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})})`;
+const port = "(?::\\d{2,5})?";
+const path = "(?:[/?#][^\\s\"\\)']*)?";
+const regex = `(?:${protocol}|www\\.)(?:${host}${domain}${tld})${port}${path}`;
+const URL_REGEX = new RegExp(regex, "ig");
 
 type PageResult = { description: string; id: string; label: string };
 const OUTPUT_FORMATS = ["Parent", "Line", "Table"] as const;
@@ -69,7 +78,6 @@ export const getLabel = ({
   `${label.replace("{date}", new Date().toLocaleString())} ${
     outputFormat === "Table" ? "{{[[table]]}}" : ""
   }`;
-const URL_REGEX = urlRegex({ strict: true });
 
 const PAGE_QUERY = `SELECT ?property ?propertyLabel ?value ?valueLabel {QUALIFIER_SELECT}{
   VALUES (?id) {(wd:{ID})}

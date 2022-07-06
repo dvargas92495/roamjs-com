@@ -70,7 +70,6 @@
     "@types/react-vertical-timeline-component": "^3.0.0",
     "@types/turndown": "^5.0.0",
     "@types/twitter-text": "^3.1.0",
-    "@types/url-regex-safe": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^4.10.0",
     "@typescript-eslint/parser": "^4.10.0",
     "@vercel/ncc": "^0.26.2",
@@ -192,7 +191,6 @@
     "turndown": "^7.0.0",
     "twitter-text": "^3.1.0",
     "universal-cookie": "^4.0.4",
-    "url-regex-safe": "^1.0.2",
     "uuid": "^8.3.2"
   }
 }

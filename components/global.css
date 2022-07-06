@@ -2,11 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-#__next p ul,
-#__next p ol {
+#__next main ul,
+#__next main ol {
   list-style: unset;
   margin: unset;
   padding-left: 40px;
+}
+
+#__next nav ol {
+  list-style: none;
+  margin: 0;
+  padding-left: 0px;
 }
 
 #__next p a {
@@ -14,6 +20,9 @@
 }
 #__next footer a {
   color: #888888;
+}
+img.thumbnail {
+  display: inline;
 }
 
 .roamjs-services-list {
