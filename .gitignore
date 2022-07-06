@@ -5,6 +5,7 @@ build/
 dist/
 out/
 .next/
+.env
 .env.local
 test.js
 /app/tailwind.css

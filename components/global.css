@@ -9,8 +9,11 @@
   padding-left: 40px;
 }
 
-#__next a {
+#__next p a {
   color: #3ba4dc;
+}
+#__next footer a {
+  color: #888888;
 }
 
 .roamjs-services-list {

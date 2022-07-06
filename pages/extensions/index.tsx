@@ -103,6 +103,14 @@ const ExtensionHomePage = ({
   const featuredStart = (page * FEATURED_LENGTH) % featured.length;
   const [search, setSearch] = useState("");
   const searchRegex = new RegExp(search, "i");
+  const filteredExtensions = extensions.filter(
+    (e) =>
+      !search ||
+      searchRegex.test(e.title) ||
+      searchRegex.test(e.description) ||
+      searchRegex.test(e.user.name)
+  );
+  const [max, setMax] = useState(9);
   return (
     <Layout
       title={"RoamJS Extensions"}
@@ -140,7 +148,7 @@ const ExtensionHomePage = ({
           />
         </div>
         <hr className="bg-black" />
-        <div className="bg-gray-100 flex-grow w-full flex flex-col items-center">
+        <div className="bg-gray-100 flex-grow w-full flex flex-col items-center pb-8">
           <h2 className="text-3xl font-bold text-center mb-12 mt-24">
             All Extensions
           </h2>
@@ -155,18 +163,20 @@ const ExtensionHomePage = ({
             />
           </div>
           <div className="grid md:grid-cols-3 grid-cols-1 mb-24 w-full max-w-6xl mx-auto gap-8">
-            {extensions
-              .filter(
-                (e) =>
-                  !search ||
-                  searchRegex.test(e.title) ||
-                  searchRegex.test(e.description) ||
-                  searchRegex.test(e.user.name)
-              )
-              .map((e) => (
-                <ExtensionCard {...e} key={e.id} />
-              ))}
+            {filteredExtensions.slice(0, max).map((e) => (
+              <ExtensionCard {...e} key={e.id} />
+            ))}
           </div>
+          {max < filteredExtensions.length && (
+            <div className={"flex justify-center"}>
+              <button
+                onClick={() => setMax(max + 9)}
+                className={`px-6 py-3 font-semibold rounded-full bg-sky-500 shadow-sm hover:bg-sky-700 active:bg-sky-900 hover:shadow-md active:shadow-none disabled:cursor-not-allowed disabled:bg-opacity-50 disabled:opacity-50 disabled:hover:bg-sky-500 disabled:hover:shadow-none disabled:active:bg-sky-500 disabled:hover:bg-opacity-50`}
+              >
+                Show More
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </Layout>

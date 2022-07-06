@@ -131,6 +131,30 @@ const HomePage = (): JSX.Element => (
           },
         ]}
       />
+      <div className={"flex"}>
+        <div className="px-16 flex flex-col justify-content-around">
+          <H4>We Offer Consulting</H4>
+          <Subtitle>
+            Need help using an extension? We offer paid consulting services at
+            $200/hour, and just $100 for monthly sponsors. If you're interested,
+            sign up for one by clicking the link below!
+          </Subtitle>
+          <a
+            href={"https://calendly.com/dvargas92495/roamjs"}
+            className={"mt-4 rounded-lg py-2 px-8 border border-sky-500"}
+          >
+            Sign Up
+          </a>
+        </div>
+        <div
+          className="px-15"
+          style={{
+            minWidth: 480,
+          }}
+        >
+          <FreelancerUndraw width={360} height={230} />
+        </div>
+      </div>
       <div style={{ display: "flex" }}>
         <div style={{ padding: "0 120px" }}>
           <img src={"/images/github.png"} width={240} height={240} />
@@ -152,44 +176,6 @@ const HomePage = (): JSX.Element => (
           >
             Check out the Project!
           </Button>
-        </div>
-      </div>
-      <div style={{ display: "flex" }}>
-        <div
-          style={{
-            padding: "0 64px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-around",
-          }}
-        >
-          <H4>We Offer Freelancing</H4>
-          <Subtitle>
-            Have a Roam-related project idea? We would love to work together!
-            You could check out some of our previous projects:
-          </Subtitle>
-          <Button
-            style={{ marginRight: 96, marginLeft: 16 }}
-            variant={"outlined"}
-            href={"https://github.com/dvargas92495/generate-roam-site-action"}
-          >
-            Generate Static Site GitHub Action
-          </Button>
-          <Button
-            style={{ marginRight: 96, marginLeft: 16 }}
-            variant={"outlined"}
-            href={"https://github.com/dvargas92495/roam-client"}
-          >
-            Roam Client NPM Package
-          </Button>
-        </div>
-        <div
-          style={{
-            minWidth: 480,
-            padding: "0 60px",
-          }}
-        >
-          <FreelancerUndraw width={360} height={230} />
         </div>
       </div>
       <div style={{ display: "flex" }}>
