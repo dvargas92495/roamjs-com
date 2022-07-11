@@ -14,7 +14,7 @@ import {
 import axios from "axios";
 import { useRouter } from "next/router";
 import React, { useCallback, useMemo, useState } from "react";
-import { API_URL, stripe } from "./constants";
+import { API_URL, getStripe } from "./constants";
 import { useAuthenticatedAxiosPost } from "./hooks";
 
 const Amount = ({ amount }: { amount: number }) => {
@@ -74,7 +74,7 @@ const LoggedInButton = ({
       .then((r) =>
         r.data.active
           ? router.push("/checkout?thankyou=true")
-          : stripe.then((s) =>
+          : getStripe().then((s) =>
               s
                 .redirectToCheckout({
                   sessionId: r.data.id,
@@ -95,7 +95,7 @@ const LoggedInButton = ({
       style={{ marginLeft: 16 }}
     >
       <Loading loading={isLoading} size={16} />
-      {!isLoading && 'Sponsor'}
+      {!isLoading && "Sponsor"}
     </Button>
   );
 };

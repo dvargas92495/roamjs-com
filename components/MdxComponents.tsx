@@ -17,7 +17,7 @@ import { Prism } from "react-syntax-highlighter";
 import DemoVideo from "./DemoVideo";
 import { useUser, SignedIn, SignedOut } from "@clerk/clerk-react";
 import { useRouter } from "next/router";
-import { stripe } from "./constants";
+import { getStripe } from "./constants";
 import {
   useAuthenticatedAxiosPost,
   idToTitle,
@@ -192,7 +192,7 @@ const LaunchButton: React.FC<{
         extension: id,
       }).then((r) =>
         r.data.sessionId
-          ? stripe.then(
+          ? getStripe().then(
               (s) =>
                 s &&
                 s

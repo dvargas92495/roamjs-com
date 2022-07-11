@@ -9,7 +9,7 @@ import {
 } from "../../components/hooks";
 import { SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
-import { stripe } from "../../components/constants";
+import { getStripe } from "../../components/constants";
 import Head from "next/head";
 import ReactDOM from "react-dom";
 import format from "date-fns/format";
@@ -191,7 +191,7 @@ const AddCard = () => {
       .then(
         (r) =>
           r.data.id &&
-          stripe
+          getStripe()
             .then(
               (s) =>
                 s &&

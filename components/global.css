@@ -4,9 +4,16 @@
 
 #__next main ul,
 #__next main ol {
-  list-style: unset;
   margin: unset;
   padding-left: 40px;
+}
+
+#__next main ul {
+  list-style: disc;
+}
+
+#__next main ol {
+  list-style: decimal;
 }
 
 #__next nav ol {
@@ -23,6 +30,9 @@
 }
 img.thumbnail {
   display: inline;
+}
+#__next hr {
+  margin: 16px 0;
 }
 
 .roamjs-services-list {

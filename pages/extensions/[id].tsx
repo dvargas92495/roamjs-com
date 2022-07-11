@@ -50,6 +50,7 @@ const ExtensionPage = ({
     name: "RoamJS",
     email: "support@roamjs.com",
   },
+  githubUrl,
   //@deprecated
   loom,
   skipDemo,
@@ -71,6 +72,7 @@ const ExtensionPage = ({
     name: string;
     email: string;
   };
+  githubUrl?: string;
   //@deprecated
   loom: string;
   skipDemo: boolean; // only in video extension
@@ -81,7 +83,6 @@ const ExtensionPage = ({
   const title = idToTitle(id);
   const [copied, setCopied] = useState(false);
   const onSave = useCopyCode(setCopied);
-  const mainEntry = legacy ? id : `${id}/main`;
   const [pagination, setPagination] = useState(0);
   const rowLength = Math.min(4, randomItems.length);
   const onClickLeft = useCallback(
@@ -149,47 +150,54 @@ const ExtensionPage = ({
       </div>
       <Subtitle>{description}</Subtitle>
       <hr style={{ marginTop: 28 }} />
-      <H3>Installation</H3>
-      {!isSafari && (
+      {legacy && (
         <>
+          <H3>Installation</H3>
+          {!isSafari && (
+            <>
+              <Body>
+                You could use the Copy Extension button below to individually
+                install this extension. To install, just paste anywhere in your
+                Roam graph and click <b>"Yes, I Know What I'm Doing"</b>.
+              </Body>
+              <div style={{ marginBottom: 24 }}>
+                <Button
+                  onClick={() => onSave(`${id}/main`, entry)}
+                  color="primary"
+                  variant="contained"
+                >
+                  COPY EXTENSION
+                </Button>
+                {copied && <span style={{ marginLeft: 24 }}>COPIED!</span>}
+              </div>
+              <H4>Manual Installation</H4>
+              <Body>
+                If the extension doesn't work after using the copy extension
+                button above, try installing manually using the instructions
+                below.
+              </Body>
+            </>
+          )}
           <Body>
-            You could use the Copy Extension button below to individually
-            install this extension. To install, just paste anywhere in your Roam
-            graph and click <b>"Yes, I Know What I'm Doing"</b>.
+            First create a <b>block</b> with the text{" "}
+            <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam DB. Then,
+            create a single child of this block and type three backticks. A code
+            block should appear. Copy this code and paste it into the child code
+            block in your graph:
           </Body>
-          <div style={{ marginBottom: 24 }}>
-            <Button
-              onClick={() => onSave(mainEntry, entry)}
-              color="primary"
-              variant="contained"
-            >
-              COPY EXTENSION
-            </Button>
-            {copied && <span style={{ marginLeft: 24 }}>COPIED!</span>}
+          <div style={{ marginBottom: 48 }}>
+            <Prism language="javascript">
+              {entry
+                ? getCodeContent(id, entry)
+                : getSingleCodeContent(`${id}/main`)}
+            </Prism>
           </div>
-          <H4>Manual Installation</H4>
           <Body>
-            If the extension doesn't work after using the copy extension button
-            above, try installing manually using the instructions below.
+            Finally, click <b>"Yes, I Know What I'm Doing".</b>
           </Body>
+          <hr style={{ marginTop: 40 }} />
         </>
       )}
-      <Body>
-        First create a <b>block</b> with the text{" "}
-        <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam DB. Then,
-        create a single child of this block and type three backticks. A code
-        block should appear. Copy this code and paste it into the child code
-        block in your graph:
-      </Body>
-      <div style={{ marginBottom: 48 }}>
-        <Prism language="javascript">
-          {entry ? getCodeContent(id, entry) : getSingleCodeContent(mainEntry)}
-        </Prism>
-      </div>
-      <Body>
-        Finally, click <b>"Yes, I Know What I'm Doing".</b>
-      </Body>
-      <hr style={{ marginTop: 40 }} />
       {content.compiledSource ? (
         <MDXRemote
           {...content}
@@ -236,6 +244,14 @@ const ExtensionPage = ({
             </>
           )}
         </>
+      )}
+      {githubUrl && (
+        <Body>
+          Check out the project on{" "}
+          <a href={githubUrl} target={"_blank"} rel={"noreferrer"}>
+            GitHub!
+          </a>
+        </Body>
       )}
       <SignedOut>
         <div style={{ margin: "128px 0" }}>
