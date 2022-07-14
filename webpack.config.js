@@ -142,7 +142,7 @@ module.exports = (env) => ({
     new MiniCssExtractPlugin(),
     new NodePolyfillPlugin(),
     new Dotenv({
-      path: ".env.local",
+      path: ".env",
       systemvars: true,
       silent: true,
     }),
