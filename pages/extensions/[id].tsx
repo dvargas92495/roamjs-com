@@ -342,6 +342,7 @@ export const getStaticProps: GetStaticProps<
         content: preRender,
         state,
         description,
+        entry,
         data,
         premium = null,
         author,
@@ -381,6 +382,7 @@ export const getStaticProps: GetStaticProps<
             ...data,
             premium,
             author,
+            entry,
           },
         }));
       }
