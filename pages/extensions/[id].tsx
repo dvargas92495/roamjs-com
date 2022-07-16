@@ -150,7 +150,7 @@ const ExtensionPage = ({
       </div>
       <Subtitle>{description}</Subtitle>
       <hr style={{ marginTop: 28 }} />
-      {legacy && (
+      {legacy ? (
         <>
           <H3>Installation</H3>
           {!isSafari && (
@@ -197,6 +197,11 @@ const ExtensionPage = ({
           </Body>
           <hr style={{ marginTop: 40 }} />
         </>
+      ) : (
+        <p>
+          This extension is avaiable in Roam Depot! Install it directly from
+          Roam by navigating to Settings {">"} RoamDepot {">"} Browse.
+        </p>
       )}
       {content.compiledSource ? (
         <MDXRemote
@@ -349,7 +354,7 @@ export const getStaticProps: GetStaticProps<
             content,
             id: context.params?.id,
             development: state === "DEVELOPMENT" || state === "UNDER REVIEW",
-            legacy: state === "LEGACY",
+            legacy: state !== "LIVE",
             description,
             sponsors: data.contributors
               ? data.contributors.split(",").map((s: string) => {
