@@ -60,7 +60,7 @@ const ExtensionPage = ({
   content: MDXRemoteSerializeResult;
   description: string;
   development: boolean;
-  entry: string;
+  entry?: string;
   sponsors?: ThankYouSponsor[];
   premium: {
     description: string;
