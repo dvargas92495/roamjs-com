@@ -90,7 +90,7 @@ export const getStaticProps: GetStaticProps<
       serialize(r.data.content).then((content) => ({
         props: {
           content,
-          development: r.data.state !== "LIVE",
+          development: r.data.state === "DEVELOPMENT" || r.data.state === "UNDER REVIEW",
           premium: r.data.premium || null,
           subpage: context.params?.subpage || "",
           id: context.params?.id || "",
