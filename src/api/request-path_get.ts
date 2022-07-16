@@ -70,6 +70,7 @@ export const handler: APIGatewayProxyHandler = (event) => {
               description: r.Item.description?.S || "",
               premium,
               author,
+              entry: r.Item.src?.S || "",
             }),
             headers: headers(event),
           }))
