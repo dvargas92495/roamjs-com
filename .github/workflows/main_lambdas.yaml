@@ -1,11 +1,11 @@
-name: Push Lambdas to Master
+name: Push Lambdas to Main
 on:
   workflow_dispatch:
   push:
-    branches: master
+    branches: main
     paths:
       - "lambdas/**"
-      - ".github/workflows/master_lambdas.yaml"
+      - ".github/workflows/main_lambdas.yaml"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY }}

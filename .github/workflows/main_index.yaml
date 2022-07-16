@@ -1,14 +1,14 @@
-name: Push Site to Master
+name: Push Site to Main
 on:
   workflow_dispatch:
   push:
-    branches: master
+    branches: main
     paths:
       - "components/**"
       - "public/**"
       - "pages/**"
       - "package.json"
-      - ".github/workflows/master_index.yaml"
+      - ".github/workflows/main_index.yaml"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY }}

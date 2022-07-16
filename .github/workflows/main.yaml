@@ -1,15 +1,15 @@
-name: Push Extensions to Master
+name: Push Extensions to Main
 on:
   workflow_dispatch:
   push:
-    branches: master
+    branches: main
     paths:
       - "src/components/**"
       - "src/entries/**"
       - "src/entry-helpers.ts"
       - "webpack.production.config.js"
       - "webpack.config.js"
-      - ".github/workflows/master.yaml"
+      - ".github/workflows/main.yaml"
       - "package.json"
 
 env:
