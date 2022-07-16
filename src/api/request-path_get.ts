@@ -40,12 +40,11 @@ export const handler: APIGatewayProxyHandler = (event) => {
         .promise()
         .then((r) =>
           Promise.all([
-            r.Item?.state?.S === "LEGACY"
-              ? Promise.resolve("FILE")
-              : s3
-                  .getObject({ Bucket: "roamjs.com", Key: `markdown/${id}.md` })
-                  .promise()
-                  .then((c) => c.Body.toString()),
+            s3
+              .getObject({ Bucket: "roamjs.com", Key: `markdown/${id}.md` })
+              .promise()
+              .then((c) => c.Body.toString())
+              .catch(() => "FILE"),
             getUser(r.Item.user?.S),
             r.Item.premium?.S
               ? stripe.prices
