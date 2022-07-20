@@ -8,6 +8,7 @@ import {
   TableName,
 } from "../lambda-helpers";
 import { users } from "@clerk/clerk-sdk-node";
+import axios from "axios";
 
 const DEFAULT_AUTHOR = {
   name: "RoamJS",
@@ -44,6 +45,19 @@ export const handler: APIGatewayProxyHandler = (event) => {
               .getObject({ Bucket: "roamjs.com", Key: `markdown/${id}.md` })
               .promise()
               .then((c) => c.Body.toString())
+              .then((c) =>
+                c === "GITHUB"
+                  ? axios
+                      .get(
+                        `${(r.Item.implementation?.S || "").replace(
+                          /github\.com/,
+                          "raw.githubusercontent.com"
+                        )}/main/README.md`,
+                        { responseType: "text" }
+                      )
+                      .then((r) => r.data)
+                  : c
+              )
               .catch(() => "FILE"),
             getUser(r.Item.user?.S),
             r.Item.premium?.S
