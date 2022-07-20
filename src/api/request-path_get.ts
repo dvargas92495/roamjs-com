@@ -46,10 +46,10 @@ export const handler: APIGatewayProxyHandler = (event) => {
               .promise()
               .then((c) => c.Body.toString())
               .then((c) =>
-                c === "GITHUB"
+                /^https:\/\/github.com\/[\w]+\/[\w-]+$/.test(c)
                   ? axios
                       .get(
-                        `${(r.Item.implementation?.S || "").replace(
+                        `${c.replace(
                           /github\.com/,
                           "raw.githubusercontent.com"
                         )}/main/README.md`,
