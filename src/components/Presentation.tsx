@@ -63,9 +63,9 @@ const IMG_MAX_WIDTH = 580;
 const IMG_MAX_HEIGHT = 720;
 
 const unload = () =>
-  Array.from(window.roamjs.dynamicElements)
-    .filter((s) => !!s.parentElement)
-    .forEach((s) => s.parentElement.removeChild(s));
+  Array.from(document.querySelectorAll("style.roamjs-style-reveal")).forEach(
+    (s) => ((s as HTMLStyleElement).disabled = true)
+  );
 
 const Notes = ({ note }: { note?: TreeNode }) => (
   <>
@@ -879,12 +879,12 @@ const Presentation: React.FunctionComponent<{
 
   const open = useCallback(async () => {
     setShowOverlay(true);
-    Array.from(window.roamjs.dynamicElements)
+    Array.from(document.head.children)
       .filter(
         (s) =>
           s.id.endsWith(`${normalizedTheme}.css`) || s.id.endsWith("reveal.css")
       )
-      .forEach((s) => document.head.appendChild(s));
+      .forEach((s) => ((s as HTMLStyleElement).disabled = false));
   }, [setShowOverlay, normalizedTheme]);
   const onMouseDown = useCallback(() => {
     const slides = getSlides();

@@ -84,29 +84,6 @@ module.exports = (env) => ({
                   class: `roamjs-style-${className}`,
                 },
                 injectType: relative.includes() ? "lazyStyleTag" : "styleTag",
-                insert: (element) => {
-                  if (element.className.includes("reveal")) {
-                    let tries = 0;
-                    const interval = setInterval(() => {
-                      if (window.roamjs && window.roamjs.dynamicElements) {
-                        window.roamjs.dynamicElements.add(element);
-                        clearInterval(interval);
-                      } else {
-                        tries++;
-                      }
-                      if (tries > 1000) {
-                        console.warn(
-                          "Could not add",
-                          element,
-                          "after 1000 tries"
-                        );
-                        clearInterval(interval);
-                      }
-                    }, 500);
-                  } else {
-                    document.head.appendChild(element);
-                  }
-                },
               },
             };
           },
