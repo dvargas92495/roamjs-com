@@ -1,9 +1,11 @@
 import StandardLayout from "../../components/StandardLayout";
 import Title from "@dvargas92495/app/components/Title";
-import { Prism } from "react-syntax-highlighter";
+import React from "react";
 
-const Q: React.FC = ({ children }) => (
-  <p className="font-bold text-lg">{children}</p>
+const Q: React.FC<{ id: string }> = ({ children, id }) => (
+  <p className="font-bold text-lg" id={id}>
+    {children}
+  </p>
 );
 const A: React.FC = ({ children }) => (
   <p className="font-normal text-base whitespace-pre-wrap">{children}</p>
@@ -17,55 +19,63 @@ const FaqPage: React.FC = () => {
       activeLink={"faq"}
     >
       <Title>FAQ</Title>
-      <Q>Are extensions safe to install?</Q>
+      <Q id={"safe"}>Are extensions safe to install?</Q>
       <A>
-        When you install a Roam extension into your graph, you are giving that
-        extension full access to do whatever it wants with your data. This makes
-        extensions very dangerous if from an unknown source.
+        All extensions in RoamDepot are vetted by the Roam team and have been
+        deemed safe to install by them. Additionally, they are all required to
+        be open source, so you or someone you trust are able to vet the
+        extensions directly.
       </A>
       <A>
-        You should make sure that either {"A)"} you can understand the source
-        code of an extension you install or {"B)"} the extension is vetted by
-        someone you trust. With the Roam native extension store, every extension
-        is vetted by the Roam team themselves. RoamJS extensions are either
-        written or vetted by David Vargas.
+        Roam supports a <code>{"{{[[roam/js]]}}"}</code> feature that allows
+        users to execute arbitrary code within. We <b>do not</b> recommend
+        accepting any code from third parties to run in this context. Extensions
+        should be posted to Roam Depot for official vetting. Any RoamJS
+        extensions of this form are in the middle of being ported to RoamDepot.
       </A>
-      <Q>How do I install an extension?</Q>
+      <Q id={"migrate"}>
+        I have a the old RoamJS version of an extension installed. How do I
+        migrate to the Roam Depot version?
+      </Q>
       <A>
-        Roam will soon have a way to install extensions natively within the App.
+        If an extension is available in Roam Depot, the RoamJS version will
+        release a warning that will appear until you migrate. To migrate:
+        <ol>
+          <li>
+            Remove the RoamJS version. You could find this by going to the{" "}
+            <code>[[roam/js]]</code> page, checking the linked references, and
+            searching for the code block that has the name of the extension in
+            it. Delete the block.
+          </li>
+          <li>Refresh Roam.</li>
+          <li>
+            Open "Roam Depot Marketplace" from the Roam Command Palette and
+            install the extension from there with one click!
+          </li>
+        </ol>
+        And that's it!
       </A>
       <A>
-        In the meantime, there are a few ways to install extensions manually.
-        There fastest way is to click the "Copy Extension" button found in each
-        extension page. You could then go to any page in your graph and paste
-        the result. Click the "Yes, I know what I'm doing" button to enable.
+        Settings for most RoamJS extensions live in the{" "}
+        <code>roam/js/[name]</code> page. These settings are <b>not</b> migrated
+        by default. To migrate them to the Roam Depot settings panels, open the
+        Roam Command Palette, and type "Migrate Settings: [name]" with the name
+        of the extension. Clicking this command will make a best attempt at
+        migrating your settings to the Roam Depot version of the extension and
+        renames the old settings page as <code>legacy/roam/js/[name]</code>.
+        Once you are sure that all settings migrated correctly, feel free to
+        delete this page. It's recommended that you refresh after migrating
+        settings. This should be a one time operation per extension.
       </A>
+      <Q id={"install"}>How do I install an extension?</Q>
       <A>
-        If the above doesn't work, then create a <b>block</b> with the text{" "}
-        <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam DB. Then,
-        create a single child of this block and type three backticks. A code
-        block should appear. Copy this code and paste it into the child code
-        block in your graph:
+        Simply open the Roam Command Palette by hitting CMD+p (CTRL+p on
+        Windows) and type "Roam Depot Marketplace". From there, you could see
+        all of the wonderful extensions submitted by the community. Click on any
+        one of them to see more details about how the extension works. If one
+        catches your eye, click the install button to add to your graph!
       </A>
-      <Prism language="javascript">
-        {`var existing = document.getElementById("roamjs-EXTENSION");
-if (!existing) {
-  var extension = document.createElement("script");
-  extension.src = "https://roamjs.com/EXTENSION/main.js";
-  extension.id = "roamjs-EXTENSION";
-  extension.async = true;
-  extension.type = "text/javascript";
-  document.getElementsByTagName("head")[0].appendChild(extension);
-}`}
-      </Prism>
-      <A>
-        Replace the three instances of <code>EXTENSION</code> above with the id
-        of the extension, which you could determine by making the name of the
-        extension lowercase and replacing dashes with spaces. For example, the
-        id of the Query Builder extension is <code>query-builder</code>. With
-        the code set, Click the "Yes, I know what I'm doing" button to enable.
-      </A>
-      <Q>What are experimental features?</Q>
+      <Q id={"experimental"}>What are experimental features?</Q>
       <A>
         RoamJS extensions will often have experimental features that can be
         enabled through the Roam Command Palette. These are features that are
