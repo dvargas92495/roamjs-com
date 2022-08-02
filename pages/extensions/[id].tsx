@@ -330,10 +330,12 @@ export const getStaticProps: GetStaticProps<
     .then(({ data: { content, ...rest } }) => {
       const mdxContent =
         content === "FILE"
-          ? fs
-              .readFileSync(`pages/docs/extensions/${context.params?.id}.mdx`)
-              .toString()
-              .replace(/(.)---\s/s, "$1---\n\n### Usage\n")
+          ? fs.existsSync(`pages/docs/extensions/${context.params?.id}.mdx`)
+            ? fs
+                .readFileSync(`pages/docs/extensions/${context.params?.id}.mdx`)
+                .toString()
+                .replace(/(.)---\s/s, "$1---\n\n### Usage\n")
+            : ""
           : content;
       return { ...matter(mdxContent), ...rest };
     })
@@ -399,6 +401,7 @@ export const getStaticProps: GetStaticProps<
           content,
           id: context.params?.id || "",
           development: true,
+          legacy: true,
         },
       }));
     });
