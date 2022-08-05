@@ -74,12 +74,14 @@ const LoggedInButton = ({
       .then((r) =>
         r.data.active
           ? router.push("/checkout?thankyou=true")
-          : getStripe().then((s) =>
-              s
-                .redirectToCheckout({
-                  sessionId: r.data.id,
-                })
-                .then(() => true)
+          : getStripe().then(
+              (s) =>
+                s &&
+                s
+                  .redirectToCheckout({
+                    sessionId: r.data.id,
+                  })
+                  .then(() => true)
             )
       )
       .catch(() => {
@@ -134,10 +136,12 @@ const SponsorCard = ({ source }: { source: string }): React.ReactElement => {
         source,
       })
       .then((r) =>
-        stripe.then((s) =>
-          s.redirectToCheckout({
-            sessionId: r.data.id,
-          })
+        getStripe().then(
+          (s) =>
+            s &&
+            s.redirectToCheckout({
+              sessionId: r.data.id,
+            })
         )
       )
       .catch(() => {
