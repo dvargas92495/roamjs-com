@@ -79,12 +79,12 @@ export const getStaticProps: GetStaticProps<
   ExtensionSubPageProps,
   {
     id: string;
-    subpage: string;
+    subpage: string[];
   }
 > = (context) =>
   axios
     .get(
-      `${API_URL}/request-path?id=${context.params?.id}/${context.params?.subpage}`
+      `${API_URL}/request-path?id=${context.params?.id}/${context.params?.subpage.join("/")}`
     )
     .then((r) =>
       serialize(r.data.content).then((content) => ({
@@ -92,7 +92,7 @@ export const getStaticProps: GetStaticProps<
           content,
           development: r.data.state === "DEVELOPMENT" || r.data.state === "UNDER REVIEW",
           premium: r.data.premium || null,
-          subpage: context.params?.subpage || "",
+          subpage: context.params?.subpage.join("/") || "",
           id: context.params?.id || "",
         },
       }))
@@ -111,7 +111,7 @@ export const getStaticProps: GetStaticProps<
           content,
           development: true,
           premium: null,
-          subpage: context.params?.subpage || "",
+          subpage: context.params?.subpage.join("/") || "",
           id: context.params?.id || "",
         },
       }))
