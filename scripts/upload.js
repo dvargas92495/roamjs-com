@@ -40,13 +40,21 @@ const catalog = {
 };
 const content = fs.readFileSync(`out/extensions/${extension}.html`).toString();
 const linkRegex = /<(?:link|script) (?:.*?)(?:href|src)="(.*?)"(?:.*?)(?:\/)?>/;
+const readDir = (s) =>
+  fs.existsSync(s)
+    ? fs
+        .readdirSync(s, { withFileTypes: true })
+        .flatMap((f) =>
+          f.isDirectory() ? readDir(`${s}/${f.name}`) : [`${s}/${f.name}`]
+        )
+    : [];
 const allContent = fs.existsSync(`out/extensions/${extension}`)
   ? [
       catalog,
       { Key: `extensions/${extension}`, Body: content },
-      ...fs.readdirSync(`out/extensions/${extension}`).map((f) => ({
-        Key: `extensions/${extension}/${f}`,
-        Body: fs.readFileSync(`out/extensions/${extension}/${f}`).toString(),
+      ...readDir(`out/extensions/${extension}`).map((f) => ({
+        Key: f.replace(/^out\//, ""),
+        Body: fs.readFileSync(f).toString(),
       })),
     ]
   : [catalog, { Key: `extensions/${extension}`, Body: content }];
