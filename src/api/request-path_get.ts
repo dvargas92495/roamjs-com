@@ -104,7 +104,8 @@ export const handler: APIGatewayProxyHandler = (event) => {
                     subpage: id.Key.substring(prefix.Prefix.length)
                       .replace(/\.md$/, "")
                       .replace(/ /g, "_")
-                      .toLowerCase(),
+                      .toLowerCase()
+                      .split("/"),
                     id: prefix.Prefix.replace(/markdown\//, "").replace(
                       /\/$/,
                       ""
