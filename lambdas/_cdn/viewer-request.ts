@@ -1,6 +1,7 @@
 import { CloudFrontRequestHandler } from "aws-lambda";
 
-const REDIRECTS = {
+// In the future, move this to the roamjs static site generator
+const REDIRECTS: Record<string, string> = {
   "/extensions/query-tools": "/extensions/query-builder",
 };
 
