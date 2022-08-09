@@ -3,36 +3,7 @@ const AWS = require("aws-sdk");
 const path = require("path");
 
 const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
-const cloudfront = new AWS.CloudFront({ apiVersion: "2020-05-31" });
-const waitForCloudfront = (props) => {
-  const { trial = 0, resolve, ...args } = props;
-  cloudfront
-    .getInvalidation(args)
-    .promise()
-    .then((r) => r.Invalidation.Status)
-    .then((status) => {
-      if (status === "Completed") {
-        resolve("Done!");
-      } else if (trial === 60) {
-        resolve("Ran out of time waiting for cloudfront...");
-      } else {
-        console.log(
-          "Still waiting for invalidation. Found",
-          status,
-          "on trial",
-          trial
-        );
-        setTimeout(
-          () => waitForCloudfront({ ...args, trial: trial + 1, resolve }),
-          1000
-        );
-      }
-    });
-};
-
 const extension = process.argv[2];
-const DistributionId =
-  process.env.CLOUDFRONT_ARN.match(/:distribution\/(.*)$/)[1];
 
 const catalog = {
   Key: "extensions",
@@ -106,29 +77,4 @@ Promise.all([
   ),
   ...uploads,
 ])
-  .then((items) => {
-    console.log("Successfully uploaded", items.length, "files");
-    return cloudfront
-      .createInvalidation({
-        DistributionId,
-        InvalidationBatch: {
-          CallerReference: new Date().toJSON(),
-          Paths: {
-            Quantity: 3,
-            Items: [
-              `/extensions/${extension}*`,
-              "/extensions",
-              "/extensions.html",
-            ],
-          },
-        },
-      })
-      .promise();
-  })
-  .then(
-    (r) =>
-      new Promise((resolve) =>
-        waitForCloudfront({ Id: r.Invalidation.Id, DistributionId, resolve })
-      )
-  )
   .then(console.log);
