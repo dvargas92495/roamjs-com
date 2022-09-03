@@ -3,7 +3,17 @@ import { CloudFrontRequestHandler } from "aws-lambda";
 // In the future, move this to the roamjs static site generator
 const REDIRECTS: Record<string, string> = {
   "/extensions/query-tools": "/extensions/query-builder",
-  // "/extensions/roam42/workbench": "/extensions/workbench/command_palette_plus",
+  "/extensions/roam42": "/extensions/workbench",
+  "/extensions/roam42/workbench": "/extensions/workbench/command_palette_plus",
+  "/extensions/roam42/live_preview": "/extensions/workbench/live_preview",
+  "/extensions/roam42/daily_note_popup": "/extensions/workbench/daily_note_popup",
+  "/extensions/roam42/jump_navigation": "/extensions/workbench/hot_keys",
+  "/extensions/roam42/deep_nav": "/extensions/workbench/deep_nav",
+  "/extensions/roam42/privacy_mode": "/extensions/workbench/privacy_mode",
+  "/extensions/roam42/dictionary": "/extensions/workbench/dictionary",
+  "/extensions/roam42/strikeout-text-shortcut": "/extensions/workbench",
+  "/extensions/roam42/update_log": "/extensions/workbench",
+  "/extensions/roam42/date_nlp": "/extensions/workbench/daily_note_popup",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {

@@ -55,12 +55,14 @@ const ExtensionCard = (props: ExtensionMetadata) => {
       <hr className="my-4" />
       <div className="flex justify-between items-center">
         <div>Made By {props.user.name}</div>
-        <button
-          className="bg-sky-500 text-white py-2 px-4 rounded-md"
-          onClick={() => onSave(mainEntry, props.entry)}
-        >
-          Copy
-        </button>
+        {props.state !== "LIVE" && (
+          <button
+            className="bg-sky-500 text-white py-2 px-4 rounded-md"
+            onClick={() => onSave(mainEntry, props.entry)}
+          >
+            Copy
+          </button>
+        )}
         <Toast
           isOpen={copied}
           onClose={() => setCopied(false)}
