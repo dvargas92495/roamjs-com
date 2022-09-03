@@ -72,6 +72,7 @@ const ExtensionCard = (props: ExtensionMetadata) => {
             Download
           </a>
         )}
+        {props.state === "LIVE" && <span>Available in Roam Depot</span>}
         <Toast
           isOpen={copied}
           onClose={() => setCopied(false)}

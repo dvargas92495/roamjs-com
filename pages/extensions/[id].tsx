@@ -197,6 +197,23 @@ const ExtensionPage = ({
           </Body>
           <hr style={{ marginTop: 40 }} />
         </>
+      ) : development ? (
+        <>
+          <H3>Installation</H3>
+          <Body>
+            Click the button below to download the extension. Unzip the package
+            to a new directory. Then in your Roam Depot settings, enable
+            developer mode and choose the new directory that you created.
+          </Body>
+          <a
+            className="bg-sky-500 text-white py-2 px-4 rounded-md"
+            href={`/downloads/${id}.zip`}
+            download
+          >
+            Download
+          </a>
+          <hr style={{ marginTop: 40 }} />
+        </>
       ) : (
         <p>
           This extension is avaiable in Roam Depot! Install it directly from
@@ -357,7 +374,7 @@ export const getStaticProps: GetStaticProps<
             content,
             id: context.params?.id,
             development: state === "DEVELOPMENT" || state === "UNDER REVIEW",
-            legacy: state !== "LIVE",
+            legacy: state === "LEGACY",
             description,
             sponsors: data.contributors
               ? data.contributors.split(",").map((s: string) => {
@@ -401,7 +418,7 @@ export const getStaticProps: GetStaticProps<
           content,
           id: context.params?.id || "",
           development: true,
-          legacy: true,
+          legacy: false,
         },
       }));
     });
