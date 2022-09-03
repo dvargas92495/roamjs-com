@@ -55,13 +55,22 @@ const ExtensionCard = (props: ExtensionMetadata) => {
       <hr className="my-4" />
       <div className="flex justify-between items-center">
         <div>Made By {props.user.name}</div>
-        {props.state !== "LIVE" && (
+        {props.state === "LEGACY" && (
           <button
             className="bg-sky-500 text-white py-2 px-4 rounded-md"
             onClick={() => onSave(mainEntry, props.entry)}
           >
             Copy
           </button>
+        )}
+        {props.state === "DEVELOPMENT" && (
+          <a
+            className="bg-sky-500 text-white py-2 px-4 rounded-md"
+            href={`/downloads/${props.id}.zip`}
+            download
+          >
+            Download
+          </a>
         )}
         <Toast
           isOpen={copied}
