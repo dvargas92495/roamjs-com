@@ -8,7 +8,6 @@ import {
   Icon,
   InputGroup,
   Label,
-  TextArea,
 } from "@blueprintjs/core";
 import { getUids, getTreeByBlockUid } from "roam-client";
 import MenuItemSelect from "roamjs-components/components/MenuItemSelect";
@@ -227,56 +226,5 @@ export const renderBarChart = ({
   parent: HTMLElement;
 }): void =>
   ReactDOM.render(<Charts type={"bar"} {...getProps(blockId)} />, parent);
-
-export const DemoCharts = (): JSX.Element => {
-  const [data, setData] = React.useState([
-    {
-      label: "First",
-      data: `0, 1
-1, 2
-2, 4
-3, 2
-4, 7`,
-      key: 0,
-    },
-  ]);
-  // const [key, setKey] = useState(2);
-  return (
-    <>
-      <Charts
-        data={data.map((d) => ({ ...d, data: d.data.trim().split("\n") }))}
-        type={"line"}
-        initialBottomType={"linear"}
-        initialLeftType={"linear"}
-      />
-      {data.map((d) => (
-        <div key={d.key} style={{ width: 400, padding: 4 }}>
-          <InputGroup
-            value={d.label}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setData(
-                data.map((dd) =>
-                  dd.key === d.key ? { ...d, label: e.target.value } : dd
-                )
-              )
-            }
-          />
-          <TextArea
-            value={d.data}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setData(
-                data.map((dd) =>
-                  dd.key === d.key ? { ...d, data: e.target.value } : dd
-                )
-              )
-            }
-            growVertically={true}
-            style={{ width: "100%", resize: "none" }}
-          />
-        </div>
-      ))}
-    </>
-  );
-};
 
 export default Charts;
