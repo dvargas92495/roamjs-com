@@ -262,9 +262,11 @@ const MouselessDialog = (): JSX.Element => {
     },
     [onClose]
   );
+  const menuRef = useRef<HTMLUListElement>(null);
   const { activeIndex, onKeyDown } = useArrowKeyDown({
     onEnter,
     results,
+    menuRef,
   });
 
   useEffect(() => {
@@ -287,7 +289,7 @@ const MouselessDialog = (): JSX.Element => {
         inputRef={inputRef}
       />
       {value && (
-        <Menu>
+        <Menu ulRef={menuRef}>
           {results.length
             ? results.slice(0, 10).map((k, i) => (
                 <MenuItem
