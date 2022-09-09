@@ -1,17 +1,12 @@
-import {
-  createMobileIcon,
-  isControl,
-  replaceText,
-  runExtension,
-  toFlexRegex,
-} from "../entry-helpers";
-import {
-  createHTMLObserver,
-  createObserver,
-  getBasicTreeByParentUid,
-} from "roam-client";
+import { createMobileIcon, isControl, replaceText } from "../entry-helpers";
 import { createConfigObserver } from "roamjs-components/components/ConfigPage";
-import getSubTree from "roamjs-components/util/getSubTree"
+import getSubTree from "roamjs-components/util/getSubTree";
+import runExtension from "roamjs-components/util/runExtension";
+import FlagPanel from "roamjs-components/components/ConfigPanels/FlagPanel";
+import getBasicTreeByParentUid from "roamjs-components/queries/getBasicTreeByParentUid";
+import createHTMLObserver from "roamjs-components/dom/createHTMLObserver";
+import createObserver from "roamjs-components/dom/createObserver";
+import toFlexRegex from "roamjs-components/util/toFlexRegex";
 
 const CLASSNAMES_TO_CHECK = [
   "rm-block-ref",
@@ -31,7 +26,7 @@ runExtension("todont", async () => {
           fields: [
             {
               title: "strikethrough",
-              type: "flag",
+              Panel: FlagPanel,
               description:
                 "Whether or not TODONT boxes should have strikethrough. Changing requires refresh.",
             },
@@ -41,7 +36,10 @@ runExtension("todont", async () => {
     },
   });
   const configTree = getBasicTreeByParentUid(pageUid);
-  const appearanceTree = getSubTree({ key: "appearance", tree: configTree }).children;
+  const appearanceTree = getSubTree({
+    key: "appearance",
+    tree: configTree,
+  }).children;
   const strikethrough = appearanceTree.some((t) =>
     toFlexRegex("strikethrough").test(t.text)
   );

@@ -9,13 +9,14 @@ import {
   Label,
   Popover,
 } from "@blueprintjs/core";
-import { getTextByBlockUid, getUidsFromId } from "roam-client";
 import { parseDate } from "chrono-node";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import differenceInMillieseconds from "date-fns/differenceInMilliseconds";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { getRenderRoot, useDocumentKeyDown } from "./hooks";
+import getUidsFromId from "roamjs-components/dom/getUidsFromId";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
 
 export const LOCAL_STORAGE_KEY = "roamjsAlerts";
 
@@ -126,6 +127,8 @@ export const schedule = (
       });
       n.addEventListener("show", () => removeAlertById(id));
     } else {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       window.roamjs.extension.alert.open({ ...input, id });
     }
   }, input.timeout);

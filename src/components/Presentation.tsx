@@ -10,18 +10,20 @@ import ReactDOM from "react-dom";
 import Reveal from "reveal.js";
 import {
   addStyle,
-  getBlockUidFromTarget,
   isControl,
   openBlockElement,
-  parseRoamBlocks,
+  getParseRoamBlocks,
 } from "../entry-helpers";
 import { isSafari } from "mobile-device-detect";
-import { getUids, TreeNode, ViewType } from "roam-client";
 import BlockErrorBoundary from "roamjs-components/components/BlockErrorBoundary";
-import { TextAlignment } from "roamjs-components/types";
+import { TextAlignment, TreeNode, ViewType } from "roamjs-components/types";
+import getUids from "roamjs-components/dom/getUids";
+import getBlockUidFromTarget from "roamjs-components/dom/getBlockUidFromTarget";
 
 const SAFARI_THEMES = ["black", "white", "beige"];
 
+let parseRoamBlocks: Awaited<ReturnType<typeof getParseRoamBlocks>>;
+getParseRoamBlocks().then(f => parseRoamBlocks = f);
 const parseSolo = ({
   text = "",
   textAlign = "left",
@@ -29,7 +31,7 @@ const parseSolo = ({
   text?: string;
   textAlign?: TextAlignment;
 }): string =>
-  parseRoamBlocks({
+  parseRoamBlocks?.({
     content: [
       {
         text,

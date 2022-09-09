@@ -1,6 +1,6 @@
-import { runExtension } from "../entry-helpers";
+import createHTMLObserver from "roamjs-components/dom/createHTMLObserver";
+import runExtension from "roamjs-components/util/runExtension";
 import { render } from "../components/GiphyPopover";
-import { createHTMLObserver } from "roam-client";
 
 runExtension("giphy", () => {
   createHTMLObserver({

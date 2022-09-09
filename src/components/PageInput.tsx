@@ -6,8 +6,8 @@ import {
   InputGroup,
 } from "@blueprintjs/core";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { getAllPageNames } from "roam-client";
 import { useArrowKeyDown } from "./hooks";
+import getAllPageNames from "roamjs-components/queries/getAllPageNames";
 
 const searchPagesByString = (q: string, extra: string[]) =>
   [...getAllPageNames(), ...extra]

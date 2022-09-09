@@ -1,22 +1,18 @@
 import {
-  createButtonObserver,
-  extractTag,
-  getConfigFromPage,
-  getTextByBlockUid,
-  getUidsFromButton,
-  parseRoamDate,
-  toRoamDate,
-} from "roam-client";
-import {
   DAILY_NOTE_PAGE_REGEX,
   getAttributeValueFromPage,
   getTitlesReferencingPagesInSameBlockTree,
-  runExtension,
 } from "../entry-helpers";
+import extractTag from "roamjs-components/util/extractTag";
 import differenceInDays from "date-fns/differenceInDays";
 import { Parser, Grammar } from "nearley";
 import grammar from "../grammars/calculate.ne";
 import { subDays } from "date-fns";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import createButtonObserver from "roamjs-components/dom/createButtonObserver";
+import getUidsFromButton from "roamjs-components/dom/getUidsFromButton";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import runExtension from "roamjs-components/util/runExtension";
 
 const attribute = "calculator";
 const shortcut = "calculate";
@@ -57,13 +53,20 @@ const calculateExpression = (expression: Expression): string => {
     case "-":
       return args.slice(1).reduce((total, current) => {
         if (DAILY_NOTE_PAGE_REGEX.test(total)) {
-          const totalDate = parseRoamDate(extractTag(total));
+          const totalDate = window.roamAlphaAPI.util.pageTitleToDate(
+            extractTag(total)
+          );
           if (DAILY_NOTE_PAGE_REGEX.test(current)) {
             return Math.abs(
-              differenceInDays(totalDate, parseRoamDate(extractTag(current)))
+              differenceInDays(
+                totalDate,
+                window.roamAlphaAPI.util.pageTitleToDate(extractTag(current))
+              )
             ).toString();
           } else {
-            return toRoamDate(subDays(totalDate, parseInt(current)));
+            return window.roamAlphaAPI.util.dateToPageTitle(
+              subDays(totalDate, parseInt(current))
+            );
           }
         }
         return (parseInt(total) - parseInt(current)).toString();
@@ -86,17 +89,32 @@ const calculateExpression = (expression: Expression): string => {
         .join(DELIM);
     case "max":
       return args.every((s) => DAILY_NOTE_PAGE_REGEX.test(s))
-        ? toRoamDate(
-            new Date(Math.max(...args.map((s) => parseRoamDate(s).valueOf())))
+        ? window.roamAlphaAPI.util.dateToPageTitle(
+            new Date(
+              Math.max(
+                ...args.map((s) =>
+                  window.roamAlphaAPI.util.pageTitleToDate(s).valueOf()
+                )
+              )
+            )
           )
         : Math.max(...args.map((s) => parseInt(s))).toString();
     case "since":
       return args.length
-        ? differenceInDays(new Date(), parseRoamDate(args[0])).toString()
+        ? differenceInDays(
+            new Date(),
+            window.roamAlphaAPI.util.pageTitleToDate(args[0])
+          ).toString()
         : "0";
     case "attr":
       return calculateExpression(
-        parseExpression(getConfigFromPage(args[0])[args[1]] || "0")
+        parseExpression(
+          Object.fromEntries(
+            getFullTreeByParentUid(args[0])
+              .children.map((c) => c.text.split("::"))
+              .filter((c) => c.length === 2)
+          )[args[1]] || "0"
+        )
       );
     case "value":
       return expression.value.toString();

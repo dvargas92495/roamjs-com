@@ -1,6 +1,6 @@
-import { runExtension } from "../entry-helpers";
+import createButtonObserver from "roamjs-components/dom/createButtonObserver";
+import runExtension from "roamjs-components/util/runExtension";
 import { render } from "../components/Maps";
-import { createButtonObserver } from "roam-client";
 
 runExtension("maps", () => {
   createButtonObserver({

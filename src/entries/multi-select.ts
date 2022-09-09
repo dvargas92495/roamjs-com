@@ -1,14 +1,13 @@
-import {
-  createBlockObserver,
-  createHTMLObserver,
-  deleteBlock,
-  getShallowTreeByParentUid,
-  getTreeByBlockUid,
-  getUids,
-  TreeNode,
-  updateBlock,
-} from "roam-client";
-import { getDropUidOffset, isControl, runExtension } from "../entry-helpers";
+import createBlockObserver from "roamjs-components/dom/createBlockObserver";
+import createHTMLObserver from "roamjs-components/dom/createHTMLObserver";
+import getUids from "roamjs-components/dom/getUids";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getShallowTreeByParentUid from "roamjs-components/queries/getShallowTreeByParentUid";
+import { TreeNode } from "roamjs-components/types";
+import runExtension from "roamjs-components/util/runExtension";
+import deleteBlock from "roamjs-components/writes/deleteBlock";
+import updateBlock from "roamjs-components/writes/updateBlock";
+import { getDropUidOffset, isControl } from "../entry-helpers";
 
 const ID = "multi-select";
 const HIGHLIGHT_CLASS = "block-highlight-blue";
@@ -126,7 +125,7 @@ runExtension(ID, () => {
       .map((uid) =>
         globalRefs.shiftKey
           ? `- ((${uid}))\n`
-          : treeNodeToString(getTreeByBlockUid(uid), 0)
+          : treeNodeToString(getFullTreeByParentUid(uid), 0)
       )
       .join("");
     globalRefs.shiftKey = false;
@@ -139,7 +138,7 @@ runExtension(ID, () => {
   document.addEventListener("cut", (e) => {
     const data = getHighlightedUids()
       .map((uid) => {
-        const text = treeNodeToString(getTreeByBlockUid(uid), 0);
+        const text = treeNodeToString(getFullTreeByParentUid(uid), 0);
         deleteBlock(uid);
         return text;
       })
@@ -160,7 +159,7 @@ runExtension(ID, () => {
       const uids = getHighlightedUids();
       if (uids.length) {
         const text = uids
-          .map((u) => treeNodeToString(getTreeByBlockUid(u), 0, ""))
+          .map((u) => treeNodeToString(getFullTreeByParentUid(u), 0, ""))
           .join("")
           .slice(0, -1); // trim trailing newline
         updateBlock({ text, uid: uids[0] });

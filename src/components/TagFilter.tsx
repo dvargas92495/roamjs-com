@@ -1,12 +1,10 @@
 import { Button, Popover, Tooltip } from "@blueprintjs/core";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  createBlock,
-  deleteBlock,
-  getShallowTreeByParentUid,
-} from "roam-client";
+import getShallowTreeByParentUid from "roamjs-components/queries/getShallowTreeByParentUid";
 import addInputSetting from "roamjs-components/util/addInputSetting";
-import { toFlexRegex } from "../entry-helpers";
+import toFlexRegex from "roamjs-components/util/toFlexRegex";
+import createBlock from "roamjs-components/writes/createBlock";
+import deleteBlock from "roamjs-components/writes/deleteBlock";
 
 const TagFilter = ({
   blockUid,
@@ -262,7 +260,7 @@ const TagFilter = ({
                                 ],
                               },
                             });
-                          setFilterNodeUid(filterUid);
+                          setFilterNodeUid(await filterUid);
                           const { setter, key, vals } = !e.shiftKey
                             ? {
                                 setter: setIncludes,
@@ -275,7 +273,7 @@ const TagFilter = ({
                                 vals: excludes,
                               };
                           const uid = await addInputSetting({
-                            blockUid: filterUid,
+                            blockUid: await filterUid,
                             value: tag,
                             key,
                           });

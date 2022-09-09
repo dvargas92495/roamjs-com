@@ -1,64 +1,26 @@
 import {
-  createBlock,
-  createIconButton,
-  deleteBlock,
-  getAttrConfigFromQuery,
-  getNthChildUidByBlockUid,
-  getPageTitleByBlockUid,
-  getPageUidByPageTitle,
-  getReferenceBlockUid,
-  getTextByBlockUid,
-  getTreeByBlockUid,
-  getUids,
-  RoamBlock,
-  toRoamDate,
-  TreeNode,
-} from "roam-client";
-import parseRoamBlocksToHtml from "roamjs-components/dom/parseRoamBlocksToHtml";
+  syncParseRoamBlocksToHtml,
+} from "roamjs-components/dom/parseRoamBlocksToHtml";
 import { isIOS, isMacOs } from "mobile-device-detect";
 import { Dict } from "mixpanel-browser";
 import axios, { AxiosResponse } from "axios";
-import { SidebarWindow, ViewType } from "roamjs-components/types";
-import { parseInline } from "roamjs-components/marked";
-
-declare global {
-  interface Window {
-    // https://github.com/microsoft/TypeScript/pull/26797
-    [key: string]: string;
-  }
-}
-
-const roamJsVersion = process.env.ROAMJS_VERSION || "0";
+import type {
+  SidebarWindow,
+  TreeNode,
+  ViewType,
+} from "roamjs-components/types";
+import { getParseInline } from "roamjs-components/marked";
+import getUids from "roamjs-components/dom/getUids";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import createIconButton from "roamjs-components/dom/createIconButton";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import getPageTitleByBlockUid from "roamjs-components/queries/getPageTitleByBlockUid";
 
 export const track = (
   eventName: string,
   properties?: Dict
 ): Promise<AxiosResponse> =>
   axios.post(`https://lambda.roamjs.com/mixpanel`, { eventName, properties });
-
-export const runExtension = async (
-  extensionId: string,
-  run: () => void
-): Promise<void> => {
-  if (!window.roamjs) {
-    window.roamjs = {
-      loaded: new Set(),
-      extension: {},
-      dynamicElements: new Set(),
-      version: {},
-    };
-  }
-  if (window.roamjs.loaded.has(extensionId)) {
-    return;
-  }
-  window.roamjs.loaded.add(extensionId);
-
-  track("Load Extension", {
-    extensionId,
-    roamJsVersion,
-  });
-  run();
-};
 
 // update-block replaces with a new textarea
 export const fixCursorById = ({
@@ -365,7 +327,7 @@ export const getCreatedTimeByTitle = (title: string): number => {
       /"/g,
       '\\"'
     )}"]]`
-  )[0][0] as RoamBlock;
+  )[0][0] as { time: number };
   return result?.time || getEditTimeByTitle(title);
 };
 
@@ -375,8 +337,47 @@ export const getEditTimeByTitle = (title: string): number => {
       /"/g,
       '\\"'
     )}"]]`
-  )[0][0] as RoamBlock;
+  )[0][0] as { time: number };
   return result?.time;
+};
+
+const toAttributeValue = (s: string) =>
+  (s.trim().startsWith("{{or: ")
+    ? s.substring("{{or: ".length, s.indexOf("|"))
+    : s
+  ).trim();
+
+const getAttrConfigFromQuery = (query: string) => {
+  const pageResults = window.roamAlphaAPI.q(query) as {
+    attrs: [string, string, { source: string[] }][];
+  }[][];
+  if (pageResults.length === 0) {
+    return {};
+  }
+  const resultAsBlock = pageResults[0][0];
+  if (!resultAsBlock.attrs) {
+    return {};
+  }
+  const configurationAttrRefs = resultAsBlock.attrs.map((a) => a[2].source[1]);
+  const entries = configurationAttrRefs.map((r) => {
+    let _a, _b, _c;
+    return (
+      ((_c =
+        (_b =
+          (_a = window.roamAlphaAPI.q(
+            `[:find (pull ?e [:block/string]) :where [?e :block/uid "${r}"] ]`
+          )[0]) === null || _a === void 0
+            ? void 0
+            : _a[0]) === null || _b === void 0
+          ? void 0
+          : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            _b.string) === null || _c === void 0
+        ? void 0
+        : _c.split("::").map(toAttributeValue)) || [r, "undefined"]
+    );
+  });
+  return Object.fromEntries(entries);
 };
 
 export const getConfigFromBlock = (
@@ -401,7 +402,7 @@ export const getRefTitlesByBlockUid = (uid: string): string[] =>
     .q(
       `[:find (pull ?r [:node/title]) :where [?e :block/refs ?r] [?e :block/uid "${uid}"]]`
     )
-    .map((b: RoamBlock[]) => b[0]?.title || "");
+    .map((b: { title: string }[]) => b[0]?.title || "");
 
 export const isTagOnPage = ({
   tag,
@@ -457,19 +458,7 @@ export const getChildRefStringsByBlockUid = (b: string): string[] =>
       `[:find (pull ?r [:block/string]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
     )
     .filter((r) => r.length && r[0])
-    .map((r: RoamBlock[]) => r[0].string || "");
-
-export const getLinkedReferences = (t: string): RoamBlock[] => {
-  const parentBlocks = window.roamAlphaAPI
-    .q(
-      `[:find (pull ?referencingBlock [*]) :where [?referencingBlock :block/refs ?referencedPage] [?referencedPage :node/title "${t.replace(
-        /"/g,
-        '\\"'
-      )}"]]`
-    )
-    .filter((block) => block.length);
-  return parentBlocks.map((b) => b[0]) as RoamBlock[];
-};
+    .map((r: { string: string }[]) => r[0].string || "");
 
 export const createMobileIcon = (
   id: string,
@@ -504,44 +493,10 @@ export const addStyle = (content: string): HTMLStyleElement => {
   return css;
 };
 
-export const createCustomSmartBlockCommand = ({
-  command,
-  processor,
-}: {
-  command: string;
-  processor: (afterColon?: string) => Promise<string>;
-}): void => {
-  const inputListener = () => {
-    if (window.roam42 && window.roam42.smartBlocks) {
-      const value = `<%${command.toUpperCase()}(:.*)?%>`;
-      window.roam42.smartBlocks.customCommands.push({
-        key: `<% ${command.toUpperCase()} %> (SmartBlock function)`,
-        icon: "gear",
-        processor: (match: string) => {
-          const colonPrefix = `<%${command.toUpperCase()}:`;
-          if (match.startsWith(colonPrefix)) {
-            const afterColon = match.replace("<%${}:", "").replace("%>", "");
-            return processor(afterColon);
-          } else {
-            return processor();
-          }
-        },
-        value,
-      });
-      document.removeEventListener("input", inputListener);
-    }
-  };
-  document.addEventListener("input", inputListener);
-};
-
 export const getRoamUrl = (blockUid?: string): string =>
   `${window.location.href.replace(/\/page\/.*$/, "")}${
     blockUid ? `/page/${blockUid}` : ""
   }`;
-
-export const getCurrentPageUid = (): string =>
-  window.location.hash.match(/\/page\/(.*)$/)?.[1] ||
-  getPageUidByPageTitle(toRoamDate(new Date()));
 
 export const getRoamUrlByPage = (page: string): string => {
   const uid = getPageUidByPageTitle(page);
@@ -549,28 +504,6 @@ export const getRoamUrlByPage = (page: string): string => {
 };
 
 export const BLOCK_REF_REGEX = new RegExp("\\(\\((..........?)\\)\\)", "g");
-const aliasRefRegex = new RegExp(
-  `\\[[^\\]]*\\]\\((${BLOCK_REF_REGEX.source})\\)`,
-  "g"
-);
-const aliasTagRegex = new RegExp(
-  `\\[[^\\]]*\\]\\((\\[\\[([^\\]]*)\\]\\])\\)`,
-  "g"
-);
-export const resolveRefs = (text: string): string => {
-  return text
-    .replace(aliasTagRegex, (alias, del, pageName) => {
-      const blockUid = getPageUidByPageTitle(pageName);
-      return alias.replace(del, `${getRoamUrl(blockUid)}`);
-    })
-    .replace(aliasRefRegex, (alias, del, blockUid) => {
-      return alias.replace(del, `${getRoamUrl(blockUid)}`);
-    })
-    .replace(BLOCK_REF_REGEX, (_, blockUid) => {
-      const reference = getTextByBlockUid(blockUid);
-      return reference || blockUid;
-    });
-};
 
 export const getTitlesReferencingPagesInSameBlockTree = (
   pages: string[]
@@ -622,7 +555,8 @@ export const getAttributeValueFromPage = ({
     : "";
 };
 
-export const DAILY_NOTE_PAGE_REGEX = /(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]/;
+export const DAILY_NOTE_PAGE_REGEX =
+  /(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]/;
 export const DAILY_NOTE_TAG_REGEX = new RegExp(
   `#?\\[\\[(${DAILY_NOTE_PAGE_REGEX.source})\\]\\]`
 );
@@ -643,87 +577,6 @@ export const extractTag = (tag: string): string =>
     : tag.startsWith("#")
     ? tag.substring(1)
     : tag;
-
-export const openBlockInSidebar = (blockUid: string): boolean | void =>
-  window.roamAlphaAPI.ui.rightSidebar
-    .getWindows()
-    .some((w) => w.type === "block" && w["block-uid"] === blockUid)
-    ? window.roamAlphaAPI.ui.rightSidebar.open()
-    : window.roamAlphaAPI.ui.rightSidebar.addWindow({
-        window: {
-          type: "block",
-          "block-uid": blockUid,
-        },
-      });
-
-export const toFlexRegex = (key: string): RegExp =>
-  new RegExp(`^\\s*${key}\\s*$`, "i");
-
-export const setInputSetting = ({
-  blockUid,
-  value,
-  key,
-  index = 0,
-}: {
-  blockUid: string;
-  value: string;
-  key: string;
-  index?: number;
-}): void => {
-  const tree = getTreeByBlockUid(blockUid);
-  const keyNode = tree.children.find((t) => toFlexRegex(key).test(t.text));
-  if (keyNode && keyNode.children.length) {
-    window.roamAlphaAPI.updateBlock({
-      block: { uid: keyNode.children[0].uid, string: value },
-    });
-  } else if (!keyNode) {
-    const uid = window.roamAlphaAPI.util.generateUID();
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": blockUid, order: index },
-      block: { string: key, uid },
-    });
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": uid, order: 0 },
-      block: { string: value },
-    });
-  } else {
-    window.roamAlphaAPI.createBlock({
-      location: { "parent-uid": keyNode.uid, order: 0 },
-      block: { string: value },
-    });
-  }
-};
-
-export const setInputSettings = ({
-  blockUid,
-  values,
-  key,
-  index = 0,
-}: {
-  blockUid: string;
-  values: string[];
-  key: string;
-  index?: number;
-}): void => {
-  const tree = getTreeByBlockUid(blockUid);
-  const keyNode = tree.children.find((t) => toFlexRegex(key).test(t.text));
-  if (keyNode) {
-    keyNode.children
-      .filter(({ text }) => !values.includes(text))
-      .forEach(({ uid }) => deleteBlock(uid));
-    values
-      .filter((v) => !keyNode.children.some(({ text }) => text === v))
-      .forEach((text, order) =>
-        createBlock({ node: { text }, order, parentUid: keyNode.uid })
-      );
-  } else {
-    createBlock({
-      parentUid: blockUid,
-      order: index,
-      node: { text: key, children: values.map((text) => ({ text })) },
-    });
-  }
-};
 
 export const isPopoverThePageFilter = (popover?: HTMLElement): boolean => {
   if (popover) {
@@ -780,9 +633,10 @@ export const getDropUidOffset = (
         : prev,
     0
   );
-  const parentBlock = childrenContainer.previousElementSibling.getElementsByClassName(
-    "roam-block"
-  )?.[0] as HTMLDivElement;
+  const parentBlock =
+    childrenContainer.previousElementSibling.getElementsByClassName(
+      "roam-block"
+    )?.[0] as HTMLDivElement;
   const parentUid = parentBlock
     ? getUids(parentBlock).blockUid
     : getPageUidByPageTitle(getPageTitle(childrenContainer).textContent);
@@ -803,58 +657,23 @@ const context = {
     return false;
   },
 };
-export const parseRoamMarked = (text: string): string =>
-  parseInline(text, context);
-export const parseRoamBlocks = ({
-  content,
-  viewType,
-}: {
-  content: TreeNode[];
-  viewType: ViewType;
-}): string =>
-  parseRoamBlocksToHtml({
-    content,
-    viewType,
-    level: 0,
-    context,
-  });
 
-export const getBlockUidFromTarget = (target: HTMLElement): string => {
-  const ref = target.closest(".rm-block-ref") as HTMLSpanElement;
-  if (ref) {
-    return getReferenceBlockUid(ref, "rm-block-ref");
-  }
+export const getParseRoamMarked = (): Promise<(s: string) => string> =>
+  getParseInline().then(
+    (parseInline) => (text: string) => parseInline(text, context)
+  );
 
-  const customView = target.closest(".roamjs-block-view") as HTMLDivElement;
-  if (customView) {
-    return getUids(customView).blockUid;
-  }
-
-  const aliasTooltip = target.closest(".rm-alias-tooltip__content");
-  if (aliasTooltip) {
-    const aliasRef = document.querySelector(
-      ".bp3-popover-open .rm-alias--block"
-    ) as HTMLAnchorElement;
-    return getReferenceBlockUid(aliasRef, "rm-alias--block");
-  }
-
-  const { blockUid } = getUids(target.closest(".roam-block") as HTMLDivElement);
-  const kanbanTitle = target.closest(".kanban-title");
-  if (kanbanTitle) {
-    const container = kanbanTitle.closest(".kanban-column-container");
-    const column = kanbanTitle.closest(".kanban-column");
-    const order = Array.from(container.children).findIndex((d) => d === column);
-    return getNthChildUidByBlockUid({ blockUid, order });
-  }
-  const kanbanCard = target.closest(".kanban-card");
-  if (kanbanCard) {
-    const container = kanbanCard.closest(".kanban-column-container");
-    const column = kanbanCard.closest(".kanban-column");
-    const order = Array.from(container.children).findIndex((d) => d === column);
-    const titleUid = getNthChildUidByBlockUid({ blockUid, order });
-    const nestedOrder =
-      Array.from(column.children).findIndex((d) => d === kanbanCard) - 1;
-    return getNthChildUidByBlockUid({ blockUid: titleUid, order: nestedOrder });
-  }
-  return blockUid;
-};
+export const getParseRoamBlocks = (): Promise<
+  (a: { content: TreeNode[]; viewType: ViewType }) => string
+> =>
+  getParseInline().then(
+    (parseInline) => (args: { content: TreeNode[]; viewType: ViewType }) =>
+      syncParseRoamBlocksToHtml({
+        ...args,
+        level: 0,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        context,
+        parseInline,
+      })
+  );

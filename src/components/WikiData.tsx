@@ -12,8 +12,10 @@ import {
 import React, { useCallback, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
-import { getUidsFromId, getTextByBlockUid, createBlock } from "roam-client";
 import { useArrowKeyDown } from "./hooks";
+import getUidsFromId from "roamjs-components/dom/getUidsFromId";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import createBlock from "roamjs-components/writes/createBlock";
 
 const MENUITEM_CLASSNAME = "roamjs-wiki-data-result";
 

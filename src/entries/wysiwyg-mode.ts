@@ -1,5 +1,5 @@
+import runExtension from "roamjs-components/util/runExtension";
 import { renderWYSIWYGMode } from "../components/WYSIWYGMode";
-import { runExtension } from "../entry-helpers";
 
 const toggleWysiwyg = (textarea: HTMLTextAreaElement) => {
   const parent = textarea.parentElement;

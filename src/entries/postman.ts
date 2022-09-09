@@ -1,11 +1,10 @@
-import {
-  createHashtagObserver,
-  getPageUidByPageTitle,
-  getTreeByPageName,
-  getUids,
-} from "roam-client";
+import createHashtagObserver from "roamjs-components/dom/createHashtagObserver";
+import getUids from "roamjs-components/dom/getUids";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import runExtension from "roamjs-components/util/runExtension";
 import { render } from "../components/PostmanOverlay";
-import { extractTag, runExtension } from "../entry-helpers";
+import { extractTag } from "../entry-helpers";
 
 const APIS_REGEX = /apis/i;
 
@@ -89,7 +88,9 @@ runExtension("postman", () => {
   createHashtagObserver({
     attribute: "data-roamjs-postman",
     callback: (s: HTMLSpanElement) => {
-      const tree = getTreeByPageName("roam/js/postman");
+      const tree = getFullTreeByParentUid(
+        getPageUidByPageTitle("roam/js/postman")
+      ).children;
       const tag = s.getAttribute("data-tag");
       const apis = tree.find((t) => APIS_REGEX.test(t.text)).children;
       const api = apis.find(

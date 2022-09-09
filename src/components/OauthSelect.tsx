@@ -1,15 +1,16 @@
 import { Label } from "@blueprintjs/core";
 import React, { useState } from "react";
-import { getTreeByPageName } from "roam-client";
-import { toFlexRegex } from "../entry-helpers";
 import MenuItemSelect from "roamjs-components/components/MenuItemSelect";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import toFlexRegex from "roamjs-components/util/toFlexRegex";
 
 export const useOauthAccounts = (id:string): {
   accountDropdown: React.ReactElement;
   accountLabel: string;
 } => {
   const accountLabels = (
-    getTreeByPageName(`roam/js/${id}`).find((t) =>
+    getFullTreeByParentUid(getPageUidByPageTitle(`roam/js/${id}`)).children.find((t) =>
       toFlexRegex("oauth").test(t.text)
     )?.children || []
   )

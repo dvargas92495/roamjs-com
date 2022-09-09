@@ -18,7 +18,6 @@ import { BLOCK_REF_REGEX } from "roamjs-components/dom/constants";
 import updateBlock from "roamjs-components/writes/updateBlock";
 import getOrderByBlockUid from "roamjs-components/queries/getOrderByBlockUid";
 import getParentUidByBlockUid from "roamjs-components/queries/getParentUidByBlockUid";
-import { getCurrentPageUid } from "roam-client";
 
 runExtension("mouseless", () => {
   const container = document.createElement("div");
@@ -100,8 +99,6 @@ runExtension("mouseless", () => {
                   )}`,
                   uid,
                 }).then(() =>
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore remove roam-client
                   window.roamAlphaAPI.ui.setBlockFocusAndSelection({
                     location,
                     selection: { start: prefix.length },
@@ -185,11 +182,14 @@ runExtension("mouseless", () => {
             }
           }
         } else if (e.altKey && (e.code === "KeyX" || e.key === "X")) {
-          renderExpColDialog({
-            blockUid:
-              window.roamAlphaAPI.ui.getFocusedBlock()?.["block-uid"] ||
-              getCurrentPageUid(),
-          });
+          Promise.resolve(
+            window.roamAlphaAPI.ui.getFocusedBlock()?.["block-uid"] ||
+              window.roamAlphaAPI.ui.mainWindow.getOpenPageOrBlockUid()
+          ).then((blockUid) =>
+            renderExpColDialog({
+              blockUid,
+            })
+          );
         } else if (e.key === "S") {
           const previousElement = document.activeElement as HTMLElement;
           const emptyShortcuts = document.getElementsByClassName(
@@ -221,9 +221,11 @@ runExtension("mouseless", () => {
         if (el.nodeName === "TEXTAREA") {
           const { blockUid: uid } = getUids(el as HTMLTextAreaElement);
           if (uid) {
-            const viewType = window.roamAlphaAPI.q(
-              `[:find (pull ?b [:children/view-type]) :where [?b :block/uid "${uid}"]]`
-            )[0]?.[0]?.["view-type"] as ViewType;
+            const viewType = (
+              window.roamAlphaAPI.q(
+                `[:find (pull ?b [:children/view-type]) :where [?b :block/uid "${uid}"]]`
+              )[0]?.[0] as { "view-type": ViewType }
+            )?.["view-type"];
             const newViewType =
               viewType === "document"
                 ? "numbered"

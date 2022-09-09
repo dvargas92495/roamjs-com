@@ -10,21 +10,19 @@ import {
   Spinner,
   Text,
 } from "@blueprintjs/core";
-import {
-  clearBlockByUid,
-  createBlock,
-  getTreeByPageName,
-  getUidsFromId,
-  InputTextNode,
-  updateBlock,
-  getParentUidByBlockUid,
-  getOrderByBlockUid,
-} from "roam-client";
 import axios from "axios";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 import iconv from "iconv-lite";
 import charset from "charset";
+import { InputTextNode } from "roamjs-components/types/native";
+import updateBlock from "roamjs-components/writes/updateBlock";
+import createBlock from "roamjs-components/writes/createBlock";
+import getUidsFromId from "roamjs-components/dom/getUidsFromId";
+import getOrderByBlockUid from "roamjs-components/queries/getOrderByBlockUid";
+import getParentUidByBlockUid from "roamjs-components/queries/getParentUidByBlockUid";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
 
 export const ERROR_MESSAGE =
   "Error Importing Article. Email link to support@roamjs.com for help!";
@@ -144,7 +142,6 @@ export const importArticle = ({
         }
       }
       if (blockUid) {
-        clearBlockByUid(blockUid);
         updateBlock({ ...inputTextNodes[0], uid: blockUid });
         inputTextNodes[0].children.forEach((node, order) =>
           createBlock({ node, order, parentUid: blockUid })
@@ -267,8 +264,10 @@ const ImportArticle = ({
 };
 
 export const getIndentConfig = (): boolean => {
-  const config = getTreeByPageName("roam/js/article");
-  return config.some(
+  const config = getFullTreeByParentUid(
+    getPageUidByPageTitle("roam/js/article")
+  );
+  return config.children.some(
     (s) => s.text.trim().toUpperCase() === "INDENT UNDER HEADER"
   );
 };

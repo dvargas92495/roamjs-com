@@ -1,6 +1,6 @@
+import createButtonObserver from "roamjs-components/dom/createButtonObserver";
+import runExtension from "roamjs-components/util/runExtension";
 import { renderWikipedia } from "../components/WikiData";
-import { runExtension } from "../entry-helpers";
-import { createButtonObserver } from "roam-client";
 
 runExtension("wiki-data", () => {
   createButtonObserver({

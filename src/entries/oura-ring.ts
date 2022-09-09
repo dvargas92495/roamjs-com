@@ -1,15 +1,16 @@
 import format from "date-fns/format";
-import {
-  addButtonListener,
-  getConfigFromPage,
-  getPageTitleByBlockUid,
-  getParentUidByBlockUid,
-  parseRoamDate,
-  pushBullets,
-} from "roam-client";
-import { runExtension } from "../entry-helpers";
 import axios from "axios";
 import subDays from "date-fns/subDays";
+import getPageTitleByBlockUid from "roamjs-components/queries/getPageTitleByBlockUid";
+import getParentUidByBlockUid from "roamjs-components/queries/getParentUidByBlockUid";
+import runExtension from "roamjs-components/util/runExtension";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import updateBlock from "roamjs-components/writes/updateBlock";
+import createBlock from "roamjs-components/writes/createBlock";
+import getOrderByBlockUid from "roamjs-components/queries/getOrderByBlockUid";
+import createButtonObserver from "roamjs-components/dom/createButtonObserver";
+import getUidsFromButton from "roamjs-components/dom/getUidsFromButton";
 
 const OURA_COMMAND = "Import Oura Ring";
 
@@ -23,16 +24,15 @@ const secondsToTimeString = (s: number) => {
   )}:${seconds.padStart(2, "0")}`;
 };
 
-const importOuraRing = async (
-  _: {
-    [key: string]: string;
-  },
-  blockUid: string
-  ) => {
-    const parentUid = getParentUidByBlockUid(blockUid);
-  const config = getConfigFromPage("roam/js/oura-ring");
+const importOuraRing = async (blockUid: string) => {
+  const parentUid = getParentUidByBlockUid(blockUid);
+  const config = Object.fromEntries(
+    getFullTreeByParentUid(getPageUidByPageTitle("roam/js/oura-ring"))
+      .children.map((c) => c.text.split("::"))
+      .filter((c) => c.length === 2)
+  );
   const pageTitle = getPageTitleByBlockUid(blockUid);
-  const dateFromPage = parseRoamDate(pageTitle);
+  const dateFromPage = window.roamAlphaAPI.util.pageTitleToDate(pageTitle);
   const token = config["Token"]?.trim();
   if (!token) {
     window.roamAlphaAPI.updateBlock({
@@ -113,7 +113,15 @@ const importOuraRing = async (
         bullets.push(`Readiness Score:: ${readiness.score}`);
       }
 
-      return pushBullets(bullets, blockUid, parentUid);
+      const base = getOrderByBlockUid(blockUid);
+      return Promise.all([
+        updateBlock({ uid: blockUid, text: bullets[0] }),
+        ...bullets
+          .slice(1)
+          .map((text, order) =>
+            createBlock({ node: { text }, parentUid, order: order + base })
+          ),
+      ]);
     })
     .catch((e) => {
       if (e.response?.status === 401) {
@@ -134,5 +142,14 @@ const importOuraRing = async (
 };
 
 runExtension("oura-ring", () => {
-  addButtonListener(OURA_COMMAND, importOuraRing);
+  createButtonObserver({
+    attribute: OURA_COMMAND.replace(/\s/g, "-"),
+    shortcut: OURA_COMMAND,
+    render: (b) =>
+      (b.onclick = (e) => {
+        importOuraRing(getUidsFromButton(b).blockUid);
+        e.preventDefault();
+        e.stopPropagation();
+      }),
+  });
 });

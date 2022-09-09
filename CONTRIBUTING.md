@@ -28,8 +28,7 @@ Here are the important directories to keep in mind:
 1. `docs` - Where all of the documentation for the project is stored
 1. `src/entries` - Where all of the extensions are stored
 1. `src/apis` - Any extensions that need backend logic or secrets like an API key store it's lambdas here
-1. `src/automations` - Extensions that run automatically and use Roam's backend API
-1. `src/entry-helpers.ts` - Common utility functions that extensions used. Am in the middle of migrating to [here](https://www.npmjs.com/package/roam-client).
+1. `src/entry-helpers.ts` - Common utility functions that extensions used. Deprecated, in favor of [RoamJS Components](https://www.npmjs.com/package/roamjs-components).
 
 For any new extension added, please also added a new page in the docs that describe the behavior of the extension.
 

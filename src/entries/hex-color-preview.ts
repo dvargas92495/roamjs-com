@@ -1,11 +1,11 @@
-import { getRefTitlesByBlockUid, runExtension } from "../entry-helpers";
-import {
-  createBlockObserver,
-  getReferenceBlockUid,
-  getUids,
-  getTreeByPageName,
-} from "roam-client";
+import { getRefTitlesByBlockUid } from "../entry-helpers";
 import Color from "color";
+import getUids from "roamjs-components/dom/getUids";
+import runExtension from "roamjs-components/util/runExtension";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import createBlockObserver from "roamjs-components/dom/createBlockObserver";
+import getReferenceBlockUid from "roamjs-components/dom/getReferenceBlockUid";
 
 runExtension("hex-color-preview", () => {
   const HEX_COLOR_PREVIEW_CLASSNAME = "roamjs-hex-color-preview";
@@ -19,15 +19,15 @@ runExtension("hex-color-preview", () => {
     position: relative;
 }`;
   document.getElementsByTagName("head")[0].appendChild(css);
-  const config = getTreeByPageName("roam/js/hex-color-preview");
-  const includeLengthsNode = config.find(
-    (t) => t.text.toUpperCase() === "INCLUDE LENGTHS"
-  );
-  const includeLengths = includeLengthsNode
-    ? includeLengthsNode.children
-        .filter((c) => !Number.isNaN(c.text))
-        .map((c) => parseInt(c.text))
-    : [];
+  const config = getFullTreeByParentUid(
+    getPageUidByPageTitle("roam/js/hex-color-preview")
+  ).children;
+  const includeLengths = (
+    config.find((c) => c.text.toUpperCase() === "INCLUDE LENGTHS")?.children ||
+    []
+  )
+    .map((c) => Number(c) || -1)
+    .filter((l) => l >= 0);
 
   const renderColorPreviews = (container: HTMLElement, blockUid: string) => {
     const refs = getRefTitlesByBlockUid(blockUid);

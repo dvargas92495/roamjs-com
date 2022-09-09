@@ -13,6 +13,8 @@ import createHTMLObserver from "roamjs-components/dom/createHTMLObserver";
 import localStorageGet from "roamjs-components/util/localStorageGet";
 import localStorageSet from "roamjs-components/util/localStorageSet";
 import runExtension from "roamjs-components/util/runExtension";
+import OauthPanel from "roamjs-components/components/ConfigPanels/OauthPanel";
+import { Field, OauthField } from "roamjs-components/components/ConfigPanels/types";
 
 const ID = "dropbox";
 const CONFIG = `roam/js/${ID}`;
@@ -26,7 +28,7 @@ runExtension(ID, () => {
           id: "home",
           fields: [
             {
-              type: "oauth",
+              Panel: OauthPanel,
               title: "oauth",
               description: "Sign in to your Dropbox account below",
               options: {
@@ -49,7 +51,7 @@ runExtension(ID, () => {
                     })
                     .then((r) => r.data),
               },
-            },
+            } as Field<OauthField>,
           ],
         },
       ],

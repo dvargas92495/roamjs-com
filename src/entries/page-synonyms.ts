@@ -1,14 +1,13 @@
 import { isApple } from "../entry-helpers";
-import {
-  createOverlayObserver,
-  createPage,
-  extractTag,
-  getTextByBlockUid,
-  getTreeByPageName,
-  getUids,
-  getUidsFromId,
-} from "roam-client";
 import runExtension from "roamjs-components/util/runExtension";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import extractTag from "roamjs-components/util/extractTag";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import getUidsFromId from "roamjs-components/dom/getUidsFromId";
+import createOverlayObserver from "roamjs-components/dom/createOverlayObserver";
+import getUids from "roamjs-components/dom/getUids";
+import createPage from "roamjs-components/writes/createPage";
 
 const ALIAS_PAGE_SYNONYM_OPTION_CLASSNAME = "roamjs-alias-page-synonyms";
 const ALIAS_PAGE_SYNONYM_ATTRIBUTE = "data-roamjs-has-alias-option";
@@ -33,7 +32,9 @@ const createMenuOption = (menuOnClick: () => void) => {
 };
 
 const getReplacer = () => {
-  const tree = getTreeByPageName("roam/js/page-synonyms");
+  const tree = getFullTreeByParentUid(
+    getPageUidByPageTitle("roam/js/page-synonyms")
+  ).children;
   const useTags = tree.some((t) => t.text.toUpperCase() === "USE TAGS");
   const uidWithAliases = window.roamAlphaAPI
     .q(

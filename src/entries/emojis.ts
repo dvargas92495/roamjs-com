@@ -1,9 +1,15 @@
 import emoji from "node-emoji";
-import { getConfigFromPage, getUids } from "roam-client";
-import { runExtension } from "../entry-helpers";
+import getUids from "roamjs-components/dom/getUids";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import runExtension from "roamjs-components/util/runExtension";
 
 runExtension("emojis", () => {
-  const config = getConfigFromPage("roam/js/emojis");
+  const config = Object.fromEntries(
+    getFullTreeByParentUid(getPageUidByPageTitle("roam/js/emojis"))
+      .children.map((s) => s.text.split("::"))
+      .filter((c) => c.length === 2)
+  );
   const minimumCharacters = config["Minimum Characters"]
     ? parseInt(config["Minimum Characters"])
     : 2;
@@ -61,38 +67,38 @@ runExtension("emojis", () => {
     const initialValue = target.value;
     window.roamAlphaAPI.updateBlock({
       block: {
-        uid: getUids(menu.parentElement.getElementsByTagName('textarea')[0]).blockUid,
+        uid: getUids(menu.parentElement.getElementsByTagName("textarea")[0])
+          .blockUid,
         string: initialValue.replace(searchText, emojiCode),
       },
     });
     turnOffEmoji();
   };
 
-  const createMenuElement = (size: number) => (
-    { emoji, key }: emoji.Emoji,
-    i: number
-  ) => {
-    const title = `${key} ${emoji}`;
-    const container = document.createElement("div");
-    container.title = title;
-    container.className = "dont-unfocus-block";
-    container.style.borderRadius = "2px";
-    container.style.padding = "6px";
-    container.style.cursor = "pointer";
-    if (i % size === menuItemIndex) {
-      container.style.backgroundColor = HIGHLIGHTED_COLOR;
-    }
+  const createMenuElement =
+    (size: number) =>
+    ({ emoji, key }: emoji.Emoji, i: number) => {
+      const title = `${key} ${emoji}`;
+      const container = document.createElement("div");
+      container.title = title;
+      container.className = "dont-unfocus-block";
+      container.style.borderRadius = "2px";
+      container.style.padding = "6px";
+      container.style.cursor = "pointer";
+      if (i % size === menuItemIndex) {
+        container.style.backgroundColor = HIGHLIGHTED_COLOR;
+      }
 
-    const result = document.createElement("div");
-    result.className = "rm-autocomplete-result";
-    result.innerText = title;
+      const result = document.createElement("div");
+      result.className = "rm-autocomplete-result";
+      result.innerText = title;
 
-    const target = document.activeElement as HTMLTextAreaElement;
-    result.onclick = () => insertEmoji(target, emoji);
-    container.appendChild(result);
+      const target = document.activeElement as HTMLTextAreaElement;
+      result.onclick = () => insertEmoji(target, emoji);
+      container.appendChild(result);
 
-    menu.appendChild(container);
-  };
+      menu.appendChild(container);
+    };
 
   const emojiKeyDownListener = (e: KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -160,7 +166,9 @@ runExtension("emojis", () => {
       if (!emojiOn) {
         const textarea = e.target as HTMLTextAreaElement;
         if (
-          !/[a-zA-Z0-9)]/.test(textarea.value.charAt(textarea.selectionStart - 2))
+          !/[a-zA-Z0-9)]/.test(
+            textarea.value.charAt(textarea.selectionStart - 2)
+          )
         ) {
           turnOnEmoji();
         }

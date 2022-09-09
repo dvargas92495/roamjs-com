@@ -9,10 +9,11 @@ import {
   InputGroup,
   Label,
 } from "@blueprintjs/core";
-import { getUids, getTreeByBlockUid } from "roam-client";
 import MenuItemSelect from "roamjs-components/components/MenuItemSelect";
 import parse from "date-fns/parse";
 import EditContainer from "./EditContainer";
+import getUids from "roamjs-components/dom/getUids";
+import getBasicTreeByParentUid from "roamjs-components/queries/getBasicTreeByParentUid";
 
 const CHARTS_WRAPPER = "roamjs-charts-wrapper";
 const CHART_WRAPPER = "roamjs-charts-chart-wrapper";
@@ -76,9 +77,9 @@ const getProps = (blockId: string) => {
   const { blockUid } = getUids(
     document.getElementById(blockId).closest(".roam-block") as HTMLDivElement
   );
-  const tree = getTreeByBlockUid(blockUid);
-  const dataNodes = tree.children.filter((t) => t.text.indexOf("::") <= -1);
-  const metaDataNodes = tree.children.filter((t) => t.text.indexOf("::") > -1);
+  const tree = getBasicTreeByParentUid(blockUid);
+  const dataNodes = tree.filter((t) => t.text.indexOf("::") <= -1);
+  const metaDataNodes = tree.filter((t) => t.text.indexOf("::") > -1);
   const bottomTypeNode = metaDataNodes.find((t) =>
     t.text.startsWith(BOTTOM_TYPE_KEY)
   );

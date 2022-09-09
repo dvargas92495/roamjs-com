@@ -5,7 +5,7 @@ import {
 } from "../components/Charts";
 import runExtension from "roamjs-components/util/runExtension";
 import addStyle from "roamjs-components/dom/addStyle";
-import { createButtonObserver } from "roam-client";
+import createButtonObserver from "roamjs-components/dom/createButtonObserver";
 
 runExtension({
   extensionId: "charts",

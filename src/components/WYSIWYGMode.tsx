@@ -18,8 +18,8 @@ import "@dvargas92495/react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import ReactDOM from "react-dom";
 import { TextArea } from "@blueprintjs/core";
 import { useDocumentKeyDown } from "./hooks";
-import { getUids } from "roam-client";
 import { fixCursorById } from "../entry-helpers";
+import getUids from "roamjs-components/dom/getUids";
 
 const ToolbarWarning = () => (
   <span style={{ margin: "0 8px" }}>

@@ -2,8 +2,13 @@ import { Icon, Popover, Spinner, Text } from "@blueprintjs/core";
 import axios from "axios";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
-import { getTreeByBlockUid, TreeNode, TextNode } from "roam-client";
-import { createTagRegex, extractTag, parseRoamBlocks } from "../entry-helpers";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import { TextNode, TreeNode } from "roamjs-components/types/native";
+import {
+  createTagRegex,
+  extractTag,
+  getParseRoamBlocks,
+} from "../entry-helpers";
 
 type PostmanProps = {
   apiUid: string;
@@ -21,6 +26,8 @@ const toText = ({ t, i }: { t: TreeNode; i: number }): string => {
   return `${line}${lines}`;
 };
 
+let parseRoamBlocks: Awaited<ReturnType<typeof getParseRoamBlocks>>;
+getParseRoamBlocks().then((f) => (parseRoamBlocks = f));
 const convertTextToValue = ({
   text,
   blockTree,
@@ -131,7 +138,7 @@ const PostmanOverlay: React.FunctionComponent<PostmanProps> = ({
   );
   const onClick = useCallback(() => {
     setIsOpen(true);
-    const tree = getTreeByBlockUid(apiUid);
+    const tree = getFullTreeByParentUid(apiUid);
     const urlNode = tree.children.find((t) => /url/i.test(t.text));
     if (!urlNode) {
       return fail(`No URL configured for API ${tree.text}`);
@@ -139,7 +146,7 @@ const PostmanOverlay: React.FunctionComponent<PostmanProps> = ({
     if (!urlNode.children.length) {
       return fail("Set URL as a child of the URL block");
     }
-    const blockTree = getTreeByBlockUid(blockUid);
+    const blockTree = getFullTreeByParentUid(blockUid);
     const url = urlNode.children[0].text.replace(/{id}/i, blockUid).trim();
 
     const bodyNode = tree.children.find((t) => /body/i.test(t.text));

@@ -7,15 +7,13 @@ import React, {
   useState,
 } from "react";
 import YouTube from "react-youtube";
-import {
-  createBlock,
-  getShallowTreeByParentUid,
-  getTextByBlockUid,
-  getTreeByBlockUid,
-  getUids,
-  updateBlock,
-} from "roam-client";
-import { toFlexRegex } from "../entry-helpers";
+import getUids from "roamjs-components/dom/getUids";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getShallowTreeByParentUid from "roamjs-components/queries/getShallowTreeByParentUid";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import toFlexRegex from "roamjs-components/util/toFlexRegex";
+import createBlock from "roamjs-components/writes/createBlock";
+import updateBlock from "roamjs-components/writes/updateBlock";
 import EditContainer from "./EditContainer";
 import { renderWithUnmount } from "./hooks";
 
@@ -63,7 +61,7 @@ const YoutubePlayer = ({
   });
   const getTimestampNode = useCallback(
     () =>
-      getTreeByBlockUid(blockUid).children.find((t) =>
+      getFullTreeByParentUid(blockUid).children.find((t) =>
         toFlexRegex("timestamps").test(t.text)
       ),
     [blockUid]
@@ -122,7 +120,7 @@ const YoutubePlayer = ({
         time: number;
         text: string;
         parentUid: string;
-      }) => string
+      }) => Promise<string>
     ) => {
       const time = playerRef.current.getCurrentTime();
       const text = valueToTimestamp(time, playerRef.current?.getDuration?.());
@@ -133,9 +131,14 @@ const YoutubePlayer = ({
           parentUid: blockUid,
           order: 0,
         });
-      setTimeout(() => {
-        const children = getShallowTreeByParentUid(parentUid);
-        const uid = writeTimestamp({ children, time, text, parentUid });
+      setTimeout(async () => {
+        const children = getShallowTreeByParentUid(await parentUid);
+        const uid = await writeTimestamp({
+          children,
+          time,
+          text,
+          parentUid: await parentUid,
+        });
         setTimeout(() => {
           const ts = uid ? [...timestamps, uid] : timestamps;
           timestampBlocks.current = calcBlocks(ts);
@@ -164,7 +167,7 @@ const YoutubePlayer = ({
     });
   }, [onClick]);
   const onLoopClick = useCallback(() => {
-    onClick(({ children, time, text, parentUid }) => {
+    onClick(async ({ children, time, text, parentUid }) => {
       if (isLoopActive) {
         const node = children.find(
           (t) => timestampToValue(t.text) < time && /-\s*$/.test(t.text)

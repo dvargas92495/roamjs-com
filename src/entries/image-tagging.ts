@@ -1,16 +1,20 @@
+import createIconButton from "roamjs-components/dom/createIconButton";
+import createObserver from "roamjs-components/dom/createObserver";
+import getUidsFromButton from "roamjs-components/dom/getUidsFromButton";
+import getFirstChildUidByBlockUid from "roamjs-components/queries/getFirstChildUidByBlockUid";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import runExtension from "roamjs-components/util/runExtension";
+import createBlock from "roamjs-components/writes/createBlock";
+import deleteBlock from "roamjs-components/writes/deleteBlock";
 import { createWorker } from "tesseract.js";
-import { runExtension } from "../entry-helpers";
-import {
-  createObserver,
-  getFirstChildUidByBlockUid,
-  getConfigFromPage,
-  pushBullets,
-  createIconButton,
-  getUidsFromButton,
-} from "roam-client";
 
 runExtension("image-tagging", () => {
-  const config = getConfigFromPage("roam/js/image-tagging");
+  const config = Object.fromEntries(
+    getFullTreeByParentUid(getPageUidByPageTitle("roam/js/image-tagging"))
+      .children.map((t) => t.text.split("::"))
+      .filter((t) => t.length === 2)
+  );
   const events = {
     "DOUBLE CLICK": "dblclick",
     "SHIFT CLICK": "click",
@@ -71,7 +75,11 @@ runExtension("image-tagging", () => {
           currentText = "";
         }
       }
-      await pushBullets(bullets, loadingUid, blockUid);
+      await Promise.all(
+        bullets.map((text, order) =>
+          createBlock({ node: { text }, parentUid: blockUid, order })
+        )
+      ).then(() => deleteBlock(loadingUid));
     };
   };
 

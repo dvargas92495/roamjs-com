@@ -1,7 +1,9 @@
 import { render } from "../components/Timeline";
-import { addStyle, runExtension } from "../entry-helpers";
-import { createButtonObserver } from "roam-client";
+import { addStyle } from "../entry-helpers";
 import { createConfigObserver } from "roamjs-components/components/ConfigPage";
+import runExtension from "roamjs-components/util/runExtension";
+import NumberPanel from "roamjs-components/components/ConfigPanels/NumberPanel";
+import createButtonObserver from "roamjs-components/dom/createButtonObserver";
 
 addStyle(`.roamjs-timeline-date > a, 
 .roamjs-timeline-date > a:hover,
@@ -30,8 +32,8 @@ runExtension("timeline", () => {
               title: "depth",
               description:
                 "The number of child levels included with each timeline element.",
-              type: "number",
               defaultValue: -1,
+              Panel: NumberPanel,
             },
           ],
         },

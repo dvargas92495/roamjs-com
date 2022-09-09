@@ -25,8 +25,6 @@ import getPageTitleByBlockUid from "roamjs-components/queries/getPageTitleByBloc
 import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
 import getUids from "roamjs-components/dom/getUids";
 import getUidsFromId from "roamjs-components/dom/getUidsFromId";
-import parseRoamDate from "roamjs-components/date/parseRoamDate";
-import toRoamDate from "roamjs-components/date/toRoamDate";
 import updateBlock from "roamjs-components/writes/updateBlock";
 import createBlock from "roamjs-components/writes/createBlock";
 import getShallowTreeByParentUid from "roamjs-components/queries/getShallowTreeByParentUid";
@@ -50,7 +48,7 @@ const MoveTodoMenu = ({
   const tomorrow = useMemo(() => {
     const title = getPageTitleByBlockUid(blockUid);
     const ref = DAILY_NOTE_PAGE_TITLE_REGEX.test(title)
-      ? parseRoamDate(title)
+      ? window.roamAlphaAPI.util.pageTitleToDate(title)
       : new Date();
     return addDays(ref, 1);
   }, []);
@@ -82,7 +80,7 @@ const MoveTodoMenu = ({
         .map((d) => getUids(d.querySelector(".roam-block")).blockUid)
         .filter((b) => b !== blockUid),
     ];
-    const targetDate = toRoamDate(target);
+    const targetDate = window.roamAlphaAPI.util.dateToPageTitle(target);
     const parentUid = getPageUidByPageTitle(targetDate);
     return (
       parentUid ? Promise.resolve(parentUid) : createPage({ title: targetDate })

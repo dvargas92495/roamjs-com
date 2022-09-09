@@ -1,30 +1,28 @@
 import { Tooltip } from "@blueprintjs/core";
-import React, { useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { getPageTitleByPageUid, getTextByBlockUid } from "roam-client";
-import { parseRoamMarked } from "../entry-helpers";
+import getPageTitleByPageUid from "roamjs-components/queries/getPageTitleByPageUid";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import { getParseRoamMarked } from "../entry-helpers";
 
 const AliasPreview: React.FunctionComponent<{ blockUid: string }> = ({
   blockUid,
   children,
 }) => {
-  const html = useMemo(() => {
-      const title = getPageTitleByPageUid(blockUid);
-      if (title) {
-          return `<span data-link-title="${title}" data-link-uid="${blockUid}">
+  const [html, setHtml] = useState("");
+  useEffect(() => {
+    const title = getPageTitleByPageUid(blockUid);
+    if (title) {
+      setHtml(`<span data-link-title="${title}" data-link-uid="${blockUid}">
   <span class="rm-page-ref__brackets">[[</span>
   <span tabindex="-1" class="rm-page-ref rm-page-ref--link">${title}</span>
   <span class="rm-page-ref__brackets">]]</span>
-</span>`;
-      }
-      return parseRoamMarked(getTextByBlockUid(blockUid));
-  }, [blockUid]);
+</span>`);
+    }
+    getParseRoamMarked().then((p) => setHtml(p(getTextByBlockUid(blockUid))));
+  }, [blockUid, setHtml]);
   return (
-    <Tooltip
-      content={
-        <div dangerouslySetInnerHTML={{ __html: html }} />
-      }
-    >
+    <Tooltip content={<div dangerouslySetInnerHTML={{ __html: html }} />}>
       {children}
     </Tooltip>
   );

@@ -16,14 +16,11 @@ import { format } from "date-fns";
 import { isSafari } from "mobile-device-detect";
 import download from "downloadjs";
 import MenuItemSelect from "roamjs-components/components/MenuItemSelect";
-import {
-  getCurrentPageUid,
-  getPageTitleByPageUid,
-  getTextByBlockUid,
-  getTreeByBlockUid,
-  TreeNode,
-} from "roam-client";
-import { resolveRefs } from "../entry-helpers";
+import getPageTitleByPageUid from "roamjs-components/queries/getPageTitleByPageUid";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import resolveRefs from "roamjs-components/dom/resolveRefs";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import { TreeNode } from "roamjs-components/types/native";
 
 const transformer = new Transformer();
 const CLASSNAME = "roamjs-markmap-class";
@@ -203,9 +200,9 @@ const MarkmapPanel: React.FunctionComponent<{
       };
       img.src = `data:image/svg+xml; charset=utf8, ${encodeURIComponent(data)}`;
     } else if (activeFormat === "OPML") {
-      const uid = getCurrentPageUid();
+      const uid = await window.roamAlphaAPI.ui.mainWindow.getOpenPageOrBlockUid();
       const title = getPageTitleByPageUid(uid) || getTextByBlockUid(uid);
-      const tree = getTreeByBlockUid(uid);
+      const tree = getFullTreeByParentUid(uid);
       tree.text = tree.text || title;
       const toOpml = (node: TreeNode): string =>
         `<outline text="${resolveRefs(node.text)

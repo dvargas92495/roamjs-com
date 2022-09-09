@@ -10,21 +10,19 @@ import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import Slack from "../assets/Slack_Mark.svg";
 import { WebClient } from "@slack/web-api";
-import {
-  getTreeByPageName,
-  TreeNode,
-  getDisplayNameByEmail,
-  getEditedUserEmailByBlockUid,
-  getPageTitleByBlockUid,
-  getParentTextByBlockUid,
-  getParentTextByBlockUidAndTag,
-  getTextByBlockUid,
-  getBlockUidByTextOnPage,
-} from "roam-client";
 import getSettingValueFromTree from "roamjs-components/util/getSettingValueFromTree";
 import getOauth from "roamjs-components/util/getOauth";
-import { resolveRefs } from "../entry-helpers";
 import { useOauthAccounts } from "./OauthSelect";
+import { TreeNode } from "roamjs-components/types/native";
+import resolveRefs from "roamjs-components/dom/resolveRefs";
+import getPageTitleByBlockUid from "roamjs-components/queries/getPageTitleByBlockUid";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import getEditedUserEmailByBlockUid from "roamjs-components/queries/getEditedUserEmailByBlockUid";
+import getDisplayNameByEmail from "roamjs-components/queries/getDisplayNameByEmail";
+import getParentTextByBlockUid from "roamjs-components/queries/getParentTextByBlockUid";
+import getParentTextByBlockUidAndTag from "roamjs-components/queries/getParentTextByBlockUidAndTag";
 
 type ContentProps = {
   tag: string;
@@ -94,7 +92,6 @@ const getCurrentUserEmail = () => {
       return userArray[emailIndex + 1];
     }
   }
-  getBlockUidByTextOnPage
   return "";
 };
 const web = new WebClient();
@@ -142,7 +139,9 @@ const SlackContent: React.FunctionComponent<
   const onClick = useCallback(() => {
     setLoading(true);
     setError("");
-    const tree = getTreeByPageName("roam/js/slack");
+    const tree = getFullTreeByParentUid(
+      getPageUidByPageTitle("roam/js/slack")
+    ).children;
     const legacyToken = getSettingValueFromTree({ tree, key: "token" });
     const oauth = getOauth("slack", accountLabel);
     const { token = legacyToken, user_token } = JSON.parse(oauth);
@@ -168,7 +167,8 @@ const SlackContent: React.FunctionComponent<
           tag.match(realNameRegex)[1]?.toUpperCase?.()
       : usernameRegex.test(tag)
       ? (m: SlackMember) =>
-          toName(m)?.toUpperCase() === tag.match(usernameRegex)[1]?.toUpperCase()
+          toName(m)?.toUpperCase() ===
+          tag.match(usernameRegex)[1]?.toUpperCase()
       : () => false;
     const channelFindFunction = channelRegex.test(tag)
       ? (c: SlackChannel) =>

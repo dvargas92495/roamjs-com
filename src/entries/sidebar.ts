@@ -1,24 +1,27 @@
 import {
-  createBlock,
-  createHTMLObserver,
-  createObserver,
-  deleteBlock,
-  getPageTitleByPageUid,
-  getPageUidByPageTitle,
-  getTreeByPageName,
-} from "roam-client";
-import {
-  getCurrentPageUid,
   getWindowUid,
   isPopoverThePageFilter,
   openBlockElement,
-  runExtension,
 } from "../entry-helpers";
 import { render as iconRender } from "../components/MinimalIcon";
 import { loadRender, render as saveRender } from "../components/SaveSidebar";
 import SavedSidebarConfig from "../components/SavedSidebarConfig";
 import { createConfigObserver } from "roamjs-components/components/ConfigPage";
 import toFlexRegex from "roamjs-components/util/toFlexRegex";
+import createHTMLObserver from "roamjs-components/dom/createHTMLObserver";
+import createObserver from "roamjs-components/dom/createObserver";
+import getPageTitleByPageUid from "roamjs-components/queries/getPageTitleByPageUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import runExtension from "roamjs-components/util/runExtension";
+import createBlock from "roamjs-components/writes/createBlock";
+import deleteBlock from "roamjs-components/writes/deleteBlock";
+import FlagPanel from "roamjs-components/components/ConfigPanels/FlagPanel";
+import CustomPanel from "roamjs-components/components/ConfigPanels/CustomPanel";
+import {
+  CustomField,
+  Field,
+} from "roamjs-components/components/ConfigPanels/types";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
 
 const ID = "sidebar";
 const CONFIG = `roam/js/${ID}`;
@@ -57,19 +60,19 @@ runExtension(ID, () => {
           fields: [
             {
               title: "auto focus",
-              type: "flag",
+              Panel: FlagPanel,
               description:
                 "Whether or not the sidebar should be automatically focused upon opening.",
               defaultValue: true,
             },
             {
               title: "saved",
-              type: "custom",
+              Panel: CustomPanel,
               description: "The list of saved sidebar states",
               options: {
                 component: SavedSidebarConfig,
               },
-            },
+            } as Field<CustomField>,
           ],
         },
       ],
@@ -139,7 +142,7 @@ runExtension(ID, () => {
       const sidebarStyleObserver = new MutationObserver(() => {
         setTimeout(() => {
           const parentUid = getPageUidByPageTitle(CONFIG);
-          const tree = getTreeByPageName(CONFIG);
+          const tree = getFullTreeByParentUid(parentUid).children;
           const uid = tree.find((i) => /open/i.test(i.text))?.uid;
           const isOpen = !!uid;
           const isCloseIconPresent = !!document.querySelector(
@@ -162,7 +165,11 @@ runExtension(ID, () => {
       });
       sidebarStyleObserver.observe(rightSidebar, { attributes: true });
 
-      if (getTreeByPageName(CONFIG).some((i) => /open/i.test(i.text))) {
+      if (
+        getFullTreeByParentUid(getPageUidByPageTitle(CONFIG)).children.some(
+          (i) => /open/i.test(i.text)
+        )
+      ) {
         window.roamAlphaAPI.ui.rightSidebar.open();
       }
     }
@@ -207,8 +214,9 @@ runExtension(ID, () => {
         /^Outline of:/.test((d.firstElementChild as HTMLDivElement).innerText)
       ) {
         const filters =
-          getTreeByPageName(CONFIG).find((t) => /filters/i.test(t.text))
-            ?.children || [];
+          getFullTreeByParentUid(getPageUidByPageTitle(CONFIG)).children.find(
+            (t) => /filters/i.test(t.text)
+          )?.children || [];
         if (filters.length) {
           const parsedFilters = Object.fromEntries(
             filters.map((f) => [
@@ -267,23 +275,25 @@ runExtension(ID, () => {
     },
   });
 
-  document.addEventListener("click", (e) => {
+  document.addEventListener("click", async (e) => {
     const target = e.target as HTMLElement;
     if (target.tagName === "BUTTON") {
       const button = target as HTMLButtonElement;
       const popover = button.closest(".bp3-popover-enter-done") as HTMLElement;
       if (isPopoverThePageFilter(popover)) {
-        const title = getPageTitleByPageUid(getCurrentPageUid());
-        const targetTag = button.firstChild.nodeValue;
-        const filters = getTreeByPageName(CONFIG).find((f) =>
-          /filters/i.test(f.text)
+        const title = getPageTitleByPageUid(
+          await window.roamAlphaAPI.ui.mainWindow.getOpenPageOrBlockUid()
         );
+        const targetTag = button.firstChild.nodeValue;
+        const filters = getFullTreeByParentUid(
+          getPageUidByPageTitle(CONFIG)
+        ).children.find((f) => /filters/i.test(f.text));
         const filterUid =
           filters?.uid ||
-          createBlock({
+          (await createBlock({
             node: { text: "filters" },
             parentUid: getPageUidByPageTitle(CONFIG),
-          });
+          }));
         const titleBlock = (filters?.children || []).find(
           (t) => t.text === title
         );
@@ -312,14 +322,20 @@ runExtension(ID, () => {
         } else {
           const titleUid =
             titleBlock?.uid ||
-            createBlock({ node: { text: title }, parentUid: filterUid });
+            (await createBlock({
+              node: { text: title },
+              parentUid: filterUid,
+            }));
           if (e.shiftKey) {
             const removeTagBlock = (titleBlock?.children || []).find((t) =>
               /removes/i.test(t.text)
             );
             const removeTagUid =
               removeTagBlock?.uid ||
-              createBlock({ node: { text: "removes" }, parentUid: titleUid });
+              (await createBlock({
+                node: { text: "removes" },
+                parentUid: titleUid,
+              }));
             createBlock({ node: { text: targetTag }, parentUid: removeTagUid });
           } else {
             const includeTagBlock = (titleBlock?.children || []).find((t) =>
@@ -327,7 +343,10 @@ runExtension(ID, () => {
             );
             const includeTagUid =
               includeTagBlock?.uid ||
-              createBlock({ node: { text: "includes" }, parentUid: titleUid });
+              (await createBlock({
+                node: { text: "includes" },
+                parentUid: titleUid,
+              }));
             createBlock({
               node: { text: targetTag },
               parentUid: includeTagUid,

@@ -1,19 +1,17 @@
-import {
-  createHashtagObserver,
-  getBlockUidFromTarget,
-  getPageTitleByBlockUid,
-  getPageUidByPageTitle,
-  getParentUidByBlockUid,
-  getTextByBlockUid,
-} from "roam-client";
-import {
-  openBlockInSidebar,
-  parseRoamMarked,
-  runExtension,
-} from "../entry-helpers";
+import getBlockUidFromTarget from "roamjs-components/dom/getBlockUidFromTarget";
+import getPageTitleByBlockUid from "roamjs-components/queries/getPageTitleByBlockUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import getParentUidByBlockUid from "roamjs-components/queries/getParentUidByBlockUid";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import runExtension from "roamjs-components/util/runExtension";
+import openBlockInSidebar from "roamjs-components/writes/openBlockInSidebar";
+import createHashtagObserver from "roamjs-components/dom/createHashtagObserver";
+import { getParseRoamMarked } from "../entry-helpers";
 
 const ID = "context";
 
+let parseRoamMarked: Awaited<ReturnType<typeof getParseRoamMarked>>;
+getParseRoamMarked().then((f) => (parseRoamMarked = f));
 runExtension(ID, () => {
   createHashtagObserver({
     attribute: "data-roamjs-context-parent",

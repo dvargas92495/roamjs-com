@@ -1,10 +1,8 @@
-import { replaceTagText, replaceText, runExtension } from "../entry-helpers";
-import {
-  getTreeByBlockUid,
-  getTreeByPageName,
-  PullBlock,
-  TreeNode,
-} from "roam-client";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import { PullBlock, TreeNode } from "roamjs-components/types/native";
+import runExtension from "roamjs-components/util/runExtension";
+import { replaceTagText, replaceText } from "../entry-helpers";
 
 type IdsCallback = (ids: number[]) => void;
 type DiffOptions = {
@@ -176,7 +174,7 @@ runExtension("tag-cycle", () => {
 
   const watchTagCycleBlockUid = (blockUid: string) => {
     const shortcutCallback = () => {
-      const shortcut = getTreeByBlockUid(blockUid);
+      const shortcut = getFullTreeByParentUid(blockUid);
       if (isValidShortcut(shortcut)) {
         configureShortcut({ ...shortcut, uid: blockUid });
       }
@@ -201,14 +199,14 @@ runExtension("tag-cycle", () => {
     });
   };
 
-  getTreeByPageName("roam/js/tag-cycle")
-    .map((t) => {
+  getFullTreeByParentUid(getPageUidByPageTitle("roam/js/tag-cycle"))
+    .children.map((t) => {
       watchTagCycleBlockUid(t.uid);
       t.children.forEach((v) =>
         watchBlock({
           blockUid: v.uid,
           callback: () => {
-            const c = getTreeByBlockUid(t.uid);
+            const c = getFullTreeByParentUid(t.uid);
             return isValidShortcut(c) && configureShortcut(c);
           },
         })

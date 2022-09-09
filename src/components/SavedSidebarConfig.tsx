@@ -1,6 +1,7 @@
 import { Button } from "@blueprintjs/core";
 import React, { useState } from "react";
-import { deleteBlock, getBasicTreeByParentUid } from "roam-client";
+import getBasicTreeByParentUid from "roamjs-components/queries/getBasicTreeByParentUid";
+import deleteBlock from "roamjs-components/writes/deleteBlock";
 
 const SavedSidebarConfig = ({ uid }: { uid?: string }): React.ReactElement => {
   const [states, setStates] = useState(() =>

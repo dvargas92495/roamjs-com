@@ -8,31 +8,27 @@ import {
 import "react-vertical-timeline-component/style.min.css";
 import { Checkbox, Icon, InputGroup, Label } from "@blueprintjs/core";
 import {
-  getTreeByBlockUid,
-  getTreeByPageName,
-  getUidsFromId,
-  parseRoamDate,
-  toRoamDate,
-  toRoamDateUid,
-  TreeNode,
-} from "roam-client";
-import {
   createTagRegex,
   DAILY_NOTE_PAGE_REGEX,
   DAILY_NOTE_TAG_REGEX,
   DAILY_NOTE_TAG_REGEX_GLOBAL,
   extractTag,
+  getParseRoamMarked,
   getRoamUrl,
-  openBlockInSidebar,
-  parseRoamMarked,
-  resolveRefs,
 } from "../entry-helpers";
 import getSettingIntFromTree from "roamjs-components/util/getSettingIntFromTree";
 import MenuItemSelect from "roamjs-components/components/MenuItemSelect";
 import TagFilter from "./TagFilter";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import { TreeNode } from "roamjs-components/types/native";
+import getUidsFromId from "roamjs-components/dom/getUidsFromId";
+import resolveRefs from "roamjs-components/dom/resolveRefs";
+import openBlockInSidebar from "roamjs-components/writes/openBlockInSidebar";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
 
 type TimelineProps = { blockId: string };
-
+let parseRoamMarked: Awaited<ReturnType<typeof getParseRoamMarked>>;
+getParseRoamMarked().then((f) => (parseRoamMarked = f));
 const getText = (cur: string) => {
   try {
     return parseRoamMarked(cur);
@@ -47,7 +43,7 @@ const reduceChildren = (prev: string, cur: TreeNode, l: number): string =>
   )}<br/>${cur.children.reduce((p, c) => reduceChildren(p, c, l + 1), "")}`;
 
 const getTag = (blockUid: string) => {
-  const tree = getTreeByBlockUid(blockUid);
+  const tree = getFullTreeByParentUid(blockUid);
   const tagNode = tree.children.find((t) => /tag/i.test(t.text));
   if (tagNode && tagNode.children.length) {
     return extractTag(tagNode.children[0].text);
@@ -62,7 +58,7 @@ const LAYOUTS = {
 };
 
 const getLayout = (blockUid: string) => {
-  const tree = getTreeByBlockUid(blockUid);
+  const tree = getFullTreeByParentUid(blockUid);
   const layoutNode = tree.children.find((t) => /layout/i.test(t.text));
   if (layoutNode && layoutNode.children.length) {
     return (
@@ -75,7 +71,7 @@ const getLayout = (blockUid: string) => {
 };
 
 const getColors = (blockUid: string) => {
-  const tree = getTreeByBlockUid(blockUid);
+  const tree = getFullTreeByParentUid(blockUid);
   const colorNode = tree.children.find((t) => /colors/i.test(t.text));
   if (colorNode && colorNode.children.length) {
     return colorNode.children.map((c) => c.text);
@@ -84,17 +80,17 @@ const getColors = (blockUid: string) => {
 };
 
 const getReverse = (blockUid: string) => {
-  const tree = getTreeByBlockUid(blockUid);
+  const tree = getFullTreeByParentUid(blockUid);
   return tree.children.some((t) => /reverse/i.test(t.text));
 };
 
 const getCreationDate = (blockUid: string) => {
-  const tree = getTreeByBlockUid(blockUid);
+  const tree = getFullTreeByParentUid(blockUid);
   return tree.children.some((t) => /creation date/i.test(t.text));
 };
 
 const getHideTags = (blockUid: string) => {
-  const tree = getTreeByBlockUid(blockUid);
+  const tree = getFullTreeByParentUid(blockUid);
   return tree.children.some((t) => /clean/i.test(t.text));
 };
 
@@ -109,7 +105,7 @@ const BooleanSetting = ({
 }) => {
   const regex = new RegExp(name, "i");
   const [booleanSetting, setBooleanSetting] = useState(() => {
-    const tree = getTreeByBlockUid(blockUid);
+    const tree = getFullTreeByParentUid(blockUid);
     return tree.children.some((t) => regex.test(t.text));
   });
   const onBooleanChange = useCallback(
@@ -122,7 +118,7 @@ const BooleanSetting = ({
           block: { string: name },
         });
       } else {
-        const uid = getTreeByBlockUid(blockUid).children.find((t) =>
+        const uid = getFullTreeByParentUid(blockUid).children.find((t) =>
           regex.test(t.text)
         ).uid;
         window.roamAlphaAPI.deleteBlock({
@@ -147,7 +143,8 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
   const depth = useMemo(
     () =>
       getSettingIntFromTree({
-        tree: getTreeByPageName("roam/js/timeline"),
+        tree: getFullTreeByParentUid(getPageUidByPageTitle("roam/js/timeline"))
+          .children,
         key: "depth",
         defaultValue: -1,
       }),
@@ -170,19 +167,19 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
             DAILY_NOTE_TAG_REGEX.test(text)
         )
         .flatMap(([text, pageTitle, uid, creationDate]) => {
-          const node = getTreeByBlockUid(uid);
+          const node = getFullTreeByParentUid(uid);
           if (depth >= 0) {
-            const trim = (n:TreeNode, level: number) => {
+            const trim = (n: TreeNode, level: number) => {
               if (level >= depth) {
                 n.children = [];
               }
-              n.children.forEach(c => trim(c, level + 1));
-            }
+              n.children.forEach((c) => trim(c, level + 1));
+            };
             trim(node, 0);
           }
           const { children } = node;
-          const dates = useCreationDate
-            ? [toRoamDate(new Date(creationDate))]
+          const dates: string[] = useCreationDate
+            ? [window.roamAlphaAPI.util.dateToPageTitle(new Date(creationDate))]
             : DAILY_NOTE_PAGE_REGEX.test(pageTitle)
             ? [pageTitle]
             : text
@@ -204,8 +201,8 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
           }));
         })
         .sort(({ date: a }, { date: b }) => {
-          const bDate = parseRoamDate(b).valueOf();
-          const aDate = parseRoamDate(a).valueOf();
+          const bDate = window.roamAlphaAPI.util.pageTitleToDate(b).valueOf();
+          const aDate = window.roamAlphaAPI.util.pageTitleToDate(a).valueOf();
           return reverse ? aDate - bDate : bDate - aDate;
         });
     }
@@ -252,7 +249,7 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
   const [tagSetting, setTagSetting] = useState(() => getTag(blockUid));
   const onTagBlur = useCallback(() => {
     const { blockUid } = getUidsFromId(blockId);
-    const tree = getTreeByBlockUid(blockUid);
+    const tree = getFullTreeByParentUid(blockUid);
     const tagNode = tree.children.find((t) => /tag/i.test(t.text));
     if (tagNode && tagNode.children.length) {
       window.roamAlphaAPI.updateBlock({
@@ -279,7 +276,7 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
   const onLayoutSelect = useCallback(
     (key: keyof typeof LAYOUTS) => {
       const { blockUid } = getUidsFromId(blockId);
-      const tree = getTreeByBlockUid(blockUid);
+      const tree = getFullTreeByParentUid(blockUid);
       const layoutNode = tree.children.find((t) => /layout/i.test(t.text));
       if (layoutNode && layoutNode.children.length) {
         window.roamAlphaAPI.updateBlock({
@@ -372,7 +369,13 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore could technically take react node
               date={
-                <a href={getRoamUrl(toRoamDateUid(parseRoamDate(t.date)))}>
+                <a
+                  href={getRoamUrl(
+                    window.roamAlphaAPI.util.dateToPageUid(
+                      window.roamAlphaAPI.util.pageTitleToDate(t.date)
+                    )
+                  )}
+                >
                   {t.date}
                 </a>
               }
@@ -419,7 +422,7 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
           {filteredElements.length &&
             (() => {
               const tag = getTag(blockUid);
-              const tags = new Set(
+              const tags = new Set<string>(
                 filteredElements.flatMap((t) =>
                   [
                     ...window.roamAlphaAPI.q(
@@ -428,7 +431,7 @@ const Timeline: React.FunctionComponent<TimelineProps> = ({ blockId }) => {
                     ...window.roamAlphaAPI.q(
                       `[:find ?t :where [?p :node/title ?t] [?c :block/parents ?b] [?c :block/refs ?p] [?b :block/uid "${t.uid}"]]`
                     ),
-                  ].map((s) => s[0])
+                  ].map((s) => s[0] as string)
                 )
               );
               tags.delete(tag);

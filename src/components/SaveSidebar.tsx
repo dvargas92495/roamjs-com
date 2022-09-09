@@ -10,17 +10,14 @@ import {
 } from "@blueprintjs/core";
 import React, { useCallback, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
-import {
-  createBlock,
-  getCurrentPageUid,
-  getPageUidByPageTitle,
-  getTreeByPageName,
-  deleteBlock,
-} from "roam-client";
-import { SidebarWindow } from "roam-client/lib/types";
 import { getWindowUid, openBlockElement } from "../entry-helpers";
 import { getRenderRoot } from "./hooks";
 import MenuItemSelect from "roamjs-components/components/MenuItemSelect";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import { SidebarWindow } from "roamjs-components/types";
+import createBlock from "roamjs-components/writes/createBlock";
+import deleteBlock from "roamjs-components/writes/deleteBlock";
 
 const SaveSidebar = (): React.ReactElement => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,8 +31,9 @@ const SaveSidebar = (): React.ReactElement => {
   const [savePageState, setSavePageState] = useState(false);
   const savedSidebar = useMemo(
     () =>
-      getTreeByPageName("roam/js/sidebar").find((c) => /saved/i.test(c.text))
-        ?.children || [],
+      getFullTreeByParentUid(
+        getPageUidByPageTitle("roam/js/sidebar")
+      ).children.find((c) => /saved/i.test(c.text))?.children || [],
     [isOpen]
   );
   const labelByUid = useMemo(
@@ -88,14 +86,14 @@ const SaveSidebar = (): React.ReactElement => {
             <Button
               text={"Save"}
               disabled={label === "NEW" && !value}
-              onClick={() => {
+              onClick={async () => {
                 const windows =
                   window.roamAlphaAPI.ui.rightSidebar.getWindows();
                 const parentUid = getPageUidByPageTitle("roam/js/sidebar");
                 const { uid, children } =
-                  getTreeByPageName("roam/js/sidebar").find((c) =>
-                    /saved/i.test(c.text)
-                  ) || {};
+                  getFullTreeByParentUid(
+                    getPageUidByPageTitle("roam/js/sidebar")
+                  ).children.find((c) => /saved/i.test(c.text)) || {};
                 const configToSave = {
                   text: value,
                   children: windows
@@ -112,7 +110,9 @@ const SaveSidebar = (): React.ReactElement => {
                             {
                               text: "page",
                               children: [
-                                { text: getCurrentPageUid() },
+                                {
+                                  text: await window.roamAlphaAPI.ui.mainWindow.getOpenPageOrBlockUid(),
+                                },
                                 {
                                   text: blockUid,
                                 },
@@ -122,7 +122,7 @@ const SaveSidebar = (): React.ReactElement => {
                         : [])
                     ),
                 };
-                if (label !== 'NEW') {
+                if (label !== "NEW") {
                   (
                     children.find((c) => c.uid === label)?.children || []
                   ).forEach((c) => deleteBlock(c.uid));
@@ -152,7 +152,9 @@ const SaveSidebar = (): React.ReactElement => {
 const LoadSidebar = ({ onClose }: { onClose: () => void }) => {
   const savedSidebar = useMemo(
     () =>
-      getTreeByPageName("roam/js/sidebar").find((c) => /saved/i.test(c.text)),
+      getFullTreeByParentUid(
+        getPageUidByPageTitle("roam/js/sidebar")
+      ).children.find((c) => /saved/i.test(c.text)),
     []
   );
   const savedSidebarConfigs = useMemo(

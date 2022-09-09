@@ -1,11 +1,4 @@
 import {
-  createBlock,
-  createButtonObserver,
-  getFirstChildUidByBlockUid,
-  getUidsFromId,
-  updateBlock,
-} from "roam-client";
-import {
   ERROR_MESSAGE,
   getIndentConfig,
   importArticle,
@@ -13,6 +6,11 @@ import {
 } from "../components/ImportArticle";
 import runExtension from "roamjs-components/util/runExtension";
 import registerSmartBlocksCommand from "roamjs-components/util/registerSmartBlocksCommand";
+import createButtonObserver from "roamjs-components/dom/createButtonObserver";
+import getUidsFromId from "roamjs-components/dom/getUidsFromId";
+import getFirstChildUidByBlockUid from "roamjs-components/queries/getFirstChildUidByBlockUid";
+import createBlock from "roamjs-components/writes/createBlock";
+import updateBlock from "roamjs-components/writes/updateBlock";
 
 // https://github.com/spamscanner/url-regex-safe/blob/master/src/index.js
 const protocol = `(?:https?://)`;
@@ -47,8 +45,8 @@ const inlineImportArticle = async ({
         url,
         blockUid,
         indent,
-      }).catch(() => {
-        updateBlock({ uid: loadingUid, text: ERROR_MESSAGE });
+      }).catch(async () => {
+        updateBlock({ uid: await loadingUid, text: ERROR_MESSAGE });
       });
       return `[Source](${url})`;
     } else {

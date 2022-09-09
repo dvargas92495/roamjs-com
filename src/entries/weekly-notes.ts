@@ -3,21 +3,22 @@ import dateFnsFormat from "date-fns/format";
 import parse from "date-fns/parse";
 import addWeeks from "date-fns/addWeeks";
 import subWeeks from "date-fns/subWeeks";
-import {
-  createBlock,
-  createHTMLObserver,
-  createPage,
-  getPageTitleValueByHtmlElement,
-  getPageTitleByPageUid,
-  getPageUidByPageTitle,
-  getTreeByPageName,
-  toRoamDate,
-  TreeNode,
-} from "roam-client";
 import { createConfigObserver } from "roamjs-components/components/ConfigPage";
+import TextPanel from "roamjs-components/components/ConfigPanels/TextPanel";
+import FlagPanel from "roamjs-components/components/ConfigPanels/FlagPanel";
 import { getSettingValueFromTree } from "../components/hooks";
-import { isApple, runExtension, toFlexRegex } from "../entry-helpers";
+import { isApple } from "../entry-helpers";
 import { render } from "../components/Toast";
+import { TreeNode } from "roamjs-components/types/native";
+import createHTMLObserver from "roamjs-components/dom/createHTMLObserver";
+import getPageTitleValueByHtmlElement from "roamjs-components/dom/getPageTitleValueByHtmlElement";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getPageTitleByPageUid from "roamjs-components/queries/getPageTitleByPageUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import runExtension from "roamjs-components/util/runExtension";
+import toFlexRegex from "roamjs-components/util/toFlexRegex";
+import createBlock from "roamjs-components/writes/createBlock";
+import createPage from "roamjs-components/writes/createPage";
 
 const ID = "weekly-notes";
 const DAYS = [
@@ -39,12 +40,13 @@ const getFormat = (tree?: TreeNode[]) =>
   (formatCache.current = getSettingValueFromTree({
     key: "format",
     defaultValue: FORMAT_DEFAULT_VALUE,
-    tree: tree || getTreeByPageName(CONFIG),
+    tree:
+      tree || getFullTreeByParentUid(getPageUidByPageTitle(CONFIG)).children,
   }));
 
 const createWeeklyPage = (pageName: string) => {
   const weekUid = createPage({ title: pageName });
-  const tree = getTreeByPageName(CONFIG);
+  const tree = getFullTreeByParentUid(getPageUidByPageTitle(CONFIG)).children;
   const format = getFormat(tree);
   const [, day, dayFormat] = format.match(new RegExp(DATE_REGEX.source));
   const firstDateFormatted = pageName.match(
@@ -61,17 +63,22 @@ const createWeeklyPage = (pageName: string) => {
   const autoEmbed = tree.some((t) => toFlexRegex("auto embed").test(t.text));
   DAYS.forEach((_, i) => {
     const dayDate = setDay(date, i, { weekStartsOn });
-    const title = toRoamDate(dayDate);
+    const title = window.roamAlphaAPI.util.dateToPageTitle(dayDate);
     if (autoTag) {
-      const parentUid = getPageUidByPageTitle(title) || createPage({ title });
-      createBlock({ node: { text: `#[[${pageName}]]` }, parentUid });
+      Promise.resolve(
+        getPageUidByPageTitle(title) || createPage({ title })
+      ).then((parentUid) =>
+        createBlock({ node: { text: `#[[${pageName}]]` }, parentUid })
+      );
     }
     if (autoEmbed) {
-      createBlock({
-        node: { text: `{{[[embed]]:[[${title}]]}}` },
-        parentUid: weekUid,
-        order: (i - weekStartsOn + 7) % 7,
-      });
+      weekUid.then((parentUid) =>
+        createBlock({
+          node: { text: `{{[[embed]]:[[${title}]]}}` },
+          parentUid,
+          order: (i - weekStartsOn + 7) % 7,
+        })
+      );
     }
   });
   return weekUid;
@@ -84,7 +91,9 @@ const navigateToPage = (pageName: string) => {
     : { pageUid: createWeeklyPage(pageName), timeout: 500 };
   setTimeout(() => {
     if (pageUid) {
-      window.roamAlphaAPI.ui.mainWindow.openPage({ page: { uid: pageUid } });
+      Promise.resolve(pageUid).then((uid) =>
+        window.roamAlphaAPI.ui.mainWindow.openPage({ page: { uid } })
+      );
     }
   }, timeout);
 };
@@ -99,27 +108,27 @@ runExtension(ID, () => {
           fields: [
             {
               title: "format",
-              type: "text",
+              Panel: TextPanel,
               defaultValue: FORMAT_DEFAULT_VALUE,
               description:
                 "Format of your weekly page titles. When changing the format, be sure to rename your old weekly pages.",
             },
             {
               title: "auto load",
-              type: "flag",
+              Panel: FlagPanel,
               description:
                 "Automatically load the current weekly note on initial Roam load of daily note page",
             },
             {
               title: "auto tag",
-              type: "flag",
+              Panel: FlagPanel,
               description:
                 "Automatically tag the weekly page on all the related daily pages when it's created",
               defaultValue: true,
             },
             {
               title: "auto embed",
-              type: "flag",
+              Panel: FlagPanel,
               description:
                 "Automatically embed the related daily pages into a newly created weekly page",
             },
@@ -234,9 +243,9 @@ runExtension(ID, () => {
   window.addEventListener("hashchange", (e) => hashListener(e.newURL));
   hashListener(window.location.href);
 
-  const autoLoad = getTreeByPageName(CONFIG).some((t) =>
-    toFlexRegex("auto load").test(t.text)
-  );
+  const autoLoad = getFullTreeByParentUid(
+    getPageUidByPageTitle(CONFIG)
+  ).children.some((t) => toFlexRegex("auto load").test(t.text));
   if (autoLoad && !window.location.hash.includes("/page/")) {
     goToThisWeek();
   }

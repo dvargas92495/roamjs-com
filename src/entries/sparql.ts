@@ -1,15 +1,18 @@
-import {
-  createBlockObserver,
-  createHTMLObserver,
-  createIconButton,
-  deleteBlock,
-  getPageUidByPageTitle,
-  getShallowTreeByParentUid,
-  getTextByBlockUid,
-  getUids,
-  updateBlock,
-} from "roam-client";
 import { createConfigObserver } from "roamjs-components/components/ConfigPage";
+import FlagPanel from "roamjs-components/components/ConfigPanels/FlagPanel";
+import NumberPanel from "roamjs-components/components/ConfigPanels/NumberPanel";
+import TextPanel from "roamjs-components/components/ConfigPanels/TextPanel";
+import createBlockObserver from "roamjs-components/dom/createBlockObserver";
+import createHTMLObserver from "roamjs-components/dom/createHTMLObserver";
+import createIconButton from "roamjs-components/dom/createIconButton";
+import getUids from "roamjs-components/dom/getUids";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import getShallowTreeByParentUid from "roamjs-components/queries/getShallowTreeByParentUid";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import runExtension from "roamjs-components/util/runExtension";
+import toFlexRegex from "roamjs-components/util/toFlexRegex";
+import deleteBlock from "roamjs-components/writes/deleteBlock";
+import updateBlock from "roamjs-components/writes/updateBlock";
 import {
   DEFAULT_EXPORT_LABEL,
   getLabel,
@@ -18,7 +21,7 @@ import {
   RenderProps,
   runSparqlQuery,
 } from "../components/SparqlQuery";
-import { addStyle, runExtension, toFlexRegex } from "../entry-helpers";
+import { addStyle } from "../entry-helpers";
 
 addStyle(`.roamjs-sparql-editor .cmt-comment {
   color: #72777d;
@@ -64,21 +67,21 @@ runExtension(ID, () => {
           id: "import",
           fields: [
             {
-              type: "text",
+              Panel: TextPanel,
               title: "default label",
               description:
                 "The default label each Sparql query will have on import",
               defaultValue: DEFAULT_EXPORT_LABEL,
             },
             {
-              type: "number",
+              Panel: NumberPanel,
               title: "default limit",
               description:
                 "The default limit each Sparql query will have on import",
               defaultValue: 10,
             },
             {
-              type: "flag",
+              Panel: FlagPanel,
               title: "qualifiers",
               description:
                 "Whether sparql queries for blocks and pages should import qualifiers by default",
@@ -141,7 +144,10 @@ runExtension(ID, () => {
 
   window.roamAlphaAPI.ui.commandPalette.addCommand({
     label: "Run SPARQL Query",
-    callback: () => render({ textareaRef, queriesCache }),
+    callback: () =>
+      window.roamAlphaAPI.ui.mainWindow
+        .getOpenPageOrBlockUid()
+        .then((parentUid) => render({ textareaRef, queriesCache, parentUid })),
   });
 
   createHTMLObserver({

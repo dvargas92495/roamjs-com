@@ -1,16 +1,16 @@
-import {
-  createButtonObserver,
-  createHTMLObserver,
-  getPageUidByPageTitle,
-  getShallowTreeByParentUid,
-  getTreeByBlockUid,
-  toRoamDateUid,
-  TreeNode,
-} from "roam-client";
 import { createConfigObserver } from "roamjs-components/components/ConfigPage";
 import { NODE_CLASSNAME, render } from "../components/MarkmapPanel";
 import { render as imageRender } from "../components/ImagePreview";
-import { addStyle, resolveRefs, runExtension } from "../entry-helpers";
+import { addStyle } from "../entry-helpers";
+import { TreeNode } from "roamjs-components/types/native";
+import resolveRefs from "roamjs-components/dom/resolveRefs";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import createButtonObserver from "roamjs-components/dom/createButtonObserver";
+import createHTMLObserver from "roamjs-components/dom/createHTMLObserver";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import getShallowTreeByParentUid from "roamjs-components/queries/getShallowTreeByParentUid";
+import runExtension from "roamjs-components/util/runExtension";
+import FlagPanel from "roamjs-components/components/ConfigPanels/FlagPanel";
 
 const CONFIG = "roam/js/mindmap";
 
@@ -47,7 +47,7 @@ const expandEmbeds = (c: TreeNode) => {
   c.text = c.text.replace(
     /({{(?:\[\[)?embed(?:\]\]): \(\((..........?)\)\)}})/,
     (_, __, blockuid) => {
-      const newNodes = getTreeByBlockUid(blockuid);
+      const newNodes = getFullTreeByParentUid(blockuid);
       c.children.push(...newNodes.children);
       return newNodes.text;
     }
@@ -75,8 +75,10 @@ const hideImageText = (c: TreeNode) => {
 
 const getMarkdown = (): string => {
   const match = window.location.href.match("/page/(.*)$");
-  const uid = match ? match[1] : toRoamDateUid(new Date());
-  const nodes = getTreeByBlockUid(uid).children;
+  const uid = match
+    ? match[1]
+    : window.roamAlphaAPI.util.dateToPageUid(new Date());
+  const nodes = getFullTreeByParentUid(uid).children;
   nodes.forEach((c) => expandEmbeds(c));
   nodes.forEach((c) => replaceTags(c));
   const config = getShallowTreeByParentUid(getPageUidByPageTitle(CONFIG));
@@ -102,12 +104,12 @@ runExtension("markmap", () => {
             {
               title: "hide tags",
               description: "Whether or not to hide tag syntax from mindmap",
-              type: "flag",
+              Panel: FlagPanel,
             },
             {
               title: "hide images",
               description: "Whether or not to filter out images from mindmap",
-              type: "flag",
+              Panel: FlagPanel,
             },
           ],
         },

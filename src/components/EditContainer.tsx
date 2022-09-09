@@ -1,8 +1,8 @@
 import { Button } from "@blueprintjs/core";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
+import getBlockUidFromTarget from "roamjs-components/dom/getBlockUidFromTarget";
 import {
-  getBlockUidFromTarget,
   openBlock,
   openBlockElement,
 } from "../entry-helpers";

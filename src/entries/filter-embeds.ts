@@ -1,12 +1,10 @@
-import {
-  createHTMLObserver,
-  getUids,
-  getPageTitleByBlockUid,
-} from "roam-client";
+import createHTMLObserver from "roamjs-components/dom/createHTMLObserver";
+import getUids from "roamjs-components/dom/getUids";
+import getPageTitleByBlockUid from "roamjs-components/queries/getPageTitleByBlockUid";
+import runExtension from "roamjs-components/util/runExtension";
 import {
   getPageTitle,
   isPopoverThePageFilter,
-  runExtension,
 } from "../entry-helpers";
 
 const KEY = "roamjsPageFilters";

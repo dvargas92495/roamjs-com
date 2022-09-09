@@ -1,13 +1,10 @@
 import { differenceInMilliseconds } from "date-fns";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
-import {
-  getTreeByBlockUid,
-  getTreeByPageName,
-  getUidsFromId,
-  TreeNode,
-} from "roam-client";
-import { toFlexRegex } from "../entry-helpers";
+import getUidsFromId from "roamjs-components/dom/getUidsFromId";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import { TreeNode } from "roamjs-components/types";
+import toFlexRegex from "roamjs-components/util/toFlexRegex";
 
 export const useArrowKeyDown = <T>({
   results,
@@ -110,18 +107,12 @@ export const allBlockMapper = (t: TreeNode): TreeNode[] => [
   ...t.children.flatMap(allBlockMapper),
 ];
 
-export const useSocialToken = (): string =>
-  useMemo(
-    () =>
-      getTreeByPageName("roam/js/social").find((t) => /token/i.test(t.text))
-        ?.children?.[0]?.text,
-    []
-  );
-
 export const getTreeByHtmlId = (
   blockId: string
-): { children: TreeNode[]; text: string } =>
-  getTreeByBlockUid(getUidsFromId(blockId).blockUid);
+): { children: TreeNode[]; text: string } => {
+  const { blockUid } = getUidsFromId(blockId);
+  return getFullTreeByParentUid(blockUid);
+};
 
 export const useTreeByHtmlId = (
   blockId: string
@@ -131,7 +122,7 @@ export const useTreeByHtmlId = (
 export const useTree = (
   blockUid: string
 ): { children: TreeNode[]; text: string } =>
-  useMemo(() => getTreeByBlockUid(blockUid), [blockUid]);
+  useMemo(() => getFullTreeByParentUid(blockUid), [blockUid]);
 
 export const toTitle = (id: string): string =>
   id
@@ -140,15 +131,15 @@ export const toTitle = (id: string): string =>
     .join(" ");
 
 const monitorCache: { [label: string]: number } = {};
-export const monitor = <T>(label: string, callback: (props: T) => void) => (
-  props: T
-): void => {
-  monitorCache[label] = (monitorCache[label] || 0) + 1;
-  const start = new Date();
-  console.log(label, "start", monitorCache[label]);
-  callback(props);
-  console.log(label, "end", differenceInMilliseconds(new Date(), start));
-};
+export const monitor =
+  <T>(label: string, callback: (props: T) => void) =>
+  (props: T): void => {
+    monitorCache[label] = (monitorCache[label] || 0) + 1;
+    const start = new Date();
+    console.log(label, "start", monitorCache[label]);
+    callback(props);
+    console.log(label, "end", differenceInMilliseconds(new Date(), start));
+  };
 
 export const renderWithUnmount = (
   el: React.ReactElement,

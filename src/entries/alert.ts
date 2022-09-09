@@ -1,4 +1,3 @@
-import { runExtension } from "../entry-helpers";
 import {
   AlertContent,
   LOCAL_STORAGE_KEY,
@@ -6,8 +5,9 @@ import {
   renderWindowAlert,
   schedule,
 } from "../components/AlertButton";
-import { createButtonObserver } from 'roam-client';
 import differenceInMilliseconds from "date-fns/differenceInMilliseconds";
+import runExtension from "roamjs-components/util/runExtension";
+import createButtonObserver from "roamjs-components/dom/createButtonObserver";
 
 runExtension("alert", () => {
   window.roamjs.extension.alert = {

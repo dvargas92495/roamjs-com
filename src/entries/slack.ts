@@ -1,5 +1,3 @@
-import { createHashtagObserver, getTreeByPageName, getUids } from "roam-client";
-import { runExtension } from "../entry-helpers";
 import {
   getAliases,
   getChannelFormat,
@@ -9,6 +7,16 @@ import {
 import { createConfigObserver } from "roamjs-components/components/ConfigPage";
 import Slack from "../assets/Slack_Mark.svg";
 import axios from "axios";
+import createHashtagObserver from "roamjs-components/dom/createHashtagObserver";
+import getUids from "roamjs-components/dom/getUids";
+import runExtension from "roamjs-components/util/runExtension";
+import OauthPanel from "roamjs-components/components/ConfigPanels/OauthPanel";
+import {
+  Field,
+  OauthField,
+} from "roamjs-components/components/ConfigPanels/types";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
 
 const CONFIG = "roam/js/slack";
 
@@ -22,7 +30,7 @@ runExtension("slack", () => {
           fields: [
             {
               title: "oauth",
-              type: "oauth",
+              Panel: OauthPanel,
               description: "Click the button below to login with slack",
               options: {
                 ServiceIcon: Slack,
@@ -39,7 +47,7 @@ runExtension("slack", () => {
                     })
                     .then((r) => r.data),
               },
-            },
+            } as Field<OauthField>,
           ],
         },
       ],
@@ -48,7 +56,7 @@ runExtension("slack", () => {
   createHashtagObserver({
     attribute: "data-roamjs-slack-overlay",
     callback: (s: HTMLSpanElement) => {
-      const tree = getTreeByPageName(CONFIG);
+      const tree = getFullTreeByParentUid(getPageUidByPageTitle(CONFIG)).children;
       const userFormatIsDefault = tree.every(
         (t) => !/user format/i.test(t.text.trim())
       );

@@ -11,12 +11,10 @@ import {
 import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
-import {
-  getBlockUidsReferencingPage,
-  getShallowTreeByParentUid,
-  updateBlock,
-} from "roam-client";
+import getBlockUidsReferencingPage from "roamjs-components/queries/getBlockUidsReferencingPage";
+import getShallowTreeByParentUid from "roamjs-components/queries/getShallowTreeByParentUid";
 import getRenderRoot from "roamjs-components/util/getRenderRoot";
+import updateBlock from "roamjs-components/writes/updateBlock";
 
 export type VersionSwitcherProps = {
   id: string;

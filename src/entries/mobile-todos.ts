@@ -1,9 +1,10 @@
-import { createObserver, getUids } from "roam-client";
+import createObserver from "roamjs-components/dom/createObserver";
+import getUids from "roamjs-components/dom/getUids";
+import runExtension from "roamjs-components/util/runExtension";
 import {
   createMobileIcon,
   DONE_REGEX,
   fixCursorById,
-  runExtension,
   TODO_REGEX,
 } from "../entry-helpers";
 

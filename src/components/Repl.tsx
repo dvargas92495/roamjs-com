@@ -3,7 +3,8 @@ import ReactDOM from "react-dom";
 import { Controlled as CodeMirror } from "react-codemirror2";
 import "codemirror/mode/javascript/javascript";
 import { Card } from "@blueprintjs/core";
-import { getFirstChildUidByBlockUid, getTreeByBlockUid } from "roam-client";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getFirstChildUidByBlockUid from "roamjs-components/queries/getFirstChildUidByBlockUid";
 
 type ReplProps = {
   blockUid: string;
@@ -38,11 +39,12 @@ const EvalRepl = ({ code }: { code: string }) => {
 
 const Repl: React.FC<ReplProps> = ({ blockUid }) => {
   const [code, setCode] = useState(
-    () => getTreeByBlockUid(blockUid).children?.[0]?.text
+    () => getFullTreeByParentUid(blockUid).children?.[0]?.text
   );
-  const onBeforeChange = useCallback((_, __, value) => setCode(value), [
-    setCode,
-  ]);
+  const onBeforeChange = useCallback(
+    (_, __, value) => setCode(value),
+    [setCode]
+  );
   const onChange = useCallback(
     (_, __, value) => {
       const childUid = getFirstChildUidByBlockUid(blockUid);

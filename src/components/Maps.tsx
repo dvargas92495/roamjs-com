@@ -6,14 +6,11 @@ import React, {
   useState,
 } from "react";
 import ReactDOM from "react-dom";
-import { getUidsFromId, getPageUidByPageTitle, TreeNode } from "roam-client";
 import {
   addStyle,
   extractTag,
-  setInputSetting,
+  getParseRoamMarked,
   isTagOnPage,
-  openBlockInSidebar,
-  parseRoamMarked,
 } from "../entry-helpers";
 import {
   MapContainer,
@@ -32,6 +29,11 @@ import { Label } from "@blueprintjs/core";
 import PageInput from "./PageInput";
 import { getTreeByHtmlId, useTreeByHtmlId } from "./hooks";
 import { render as renderAlias } from "./AliasPreview";
+import getUidsFromId from "roamjs-components/dom/getUidsFromId";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import { TreeNode } from "roamjs-components/types/native";
+import openBlockInSidebar from "roamjs-components/writes/openBlockInSidebar";
+import setInputSetting from "roamjs-components/util/setInputSetting";
 
 addStyle(`.leaflet-pane {
   z-index: 10 !important;
@@ -118,7 +120,6 @@ const getMarkers = ({ children }: { children: TreeNode[] }) => {
 
 const Markers = ({
   id,
-  href,
   markers,
 }: {
   id: string;
@@ -139,6 +140,8 @@ const Markers = ({
       }
     }, 100);
   };
+  const parseRoamMarked =
+    useRef<Awaited<ReturnType<typeof getParseRoamMarked>>>();
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore until there's a better way to grab markers
@@ -202,8 +205,9 @@ const Markers = ({
       childList: true,
       subtree: true,
     });
+    getParseRoamMarked().then((f) => (parseRoamMarked.current = f));
     return () => observer.disconnect();
-  });
+  }, []);
   return (
     <>
       {markers.map((m, i) => (
@@ -221,7 +225,7 @@ const Markers = ({
               data-uid={m.uid}
               style={{ display: "flex" }}
               dangerouslySetInnerHTML={{
-                __html: parseRoamMarked(m.tag),
+                __html: parseRoamMarked.current(m.tag),
               }}
             />
           </Popup>

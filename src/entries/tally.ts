@@ -1,6 +1,8 @@
-import { createButtonObserver, getUidsFromButton, getTreeByBlockUid } from "roam-client";
+import createButtonObserver from "roamjs-components/dom/createButtonObserver";
+import getUidsFromButton from "roamjs-components/dom/getUidsFromButton";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import runExtension from "roamjs-components/util/runExtension";
 import { renderTallyCounter } from "../components/TallyCounter";
-import { runExtension } from "../entry-helpers";
 
 runExtension("tally", () => {
   createButtonObserver({
@@ -8,7 +10,7 @@ runExtension("tally", () => {
     attribute: "tally-button",
     render: (b: HTMLButtonElement) => {
       const { blockUid } = getUidsFromButton(b);
-      const tree = getTreeByBlockUid(blockUid);
+      const tree = getFullTreeByParentUid(blockUid);
       const initialValueNode = tree.children.find(
         (c) => !isNaN(parseInt(c.text))
       );

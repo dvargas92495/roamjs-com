@@ -1,20 +1,23 @@
 import parse from "date-fns/parse";
-import { createSortIcons, runExtension } from "../entry-helpers";
-import {
-  createObserver,
-  getConfigFromPage,
-  getLinkedPageReferences,
-  getTreeByPageName,
-  getPageTitleValueByHtmlElement,
-} from "roam-client";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import runExtension from "roamjs-components/util/runExtension";
+import getPageTitleValueByHtmlElement from "roamjs-components/dom/getPageTitleValueByHtmlElement";
+import getLinkedPageReferences from "roamjs-components/queries/getPageTitleReferencesByPageTitle";
+import { createSortIcons } from "../entry-helpers";
+import createObserver from "roamjs-components/dom/createObserver";
 
 runExtension("sort-references", () => {
-  const config = getConfigFromPage("roam/js/sort-references");
+  const config = Object.fromEntries(
+    getFullTreeByParentUid(getPageUidByPageTitle("roam/js/sort-references"))
+      .children.map((c) => c.text.split("::"))
+      .filter((c) => c.length === 2)
+  );
   const getAttribute = (attr: string) => {
     const page =
       document.getElementsByClassName("rm-title-display")[0]?.textContent;
     const node =
-      getTreeByPageName(page).find((t) =>
+      getFullTreeByParentUid(getPageUidByPageTitle(page)).children.find((t) =>
         new RegExp(`${attr}::`, "i").test(t.text)
       )?.text || "";
     return node.substring(attr.length + 2).trim();
@@ -31,12 +34,14 @@ runExtension("sort-references", () => {
     if (!pageTitle) {
       return;
     }
-    const linkedReferences = getLinkedPageReferences(pageTitle).concat(
-      window.roamAlphaAPI
-        .q(
-          `[:find ?t ?ct :where [?c :create/time ?ct] [?c :node/title ?t] [?c :block/refs ?r] [?r :node/title "${pageTitle}"]]`
-        )
-        .map((p) => ({ title: (p?.[0] as string) || "", time: p[1] as number }))
+    const linkedReferences = getLinkedPageReferences(pageTitle).map(
+      (title) => ({
+        title,
+        time:
+          window.roamAlphaAPI.pull("[:create/time]", [":node/title", title])?.[
+            ":create/time"
+          ] || 0,
+      })
     );
     linkedReferences.sort(sortBy);
     const refIndexByTitle: { [key: string]: number } = {};

@@ -124,7 +124,6 @@ module "aws-serverless-backend" {
         "end-service/post",
         "finish-start-service/post",
         "iframely/post", // MOVE
-        "install/put",
         "invoices/get",
         "is-subscribed/get",
         "mixpanel/post", // MOVE

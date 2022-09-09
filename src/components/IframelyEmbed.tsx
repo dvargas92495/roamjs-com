@@ -1,13 +1,11 @@
 import axios from "axios";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  getTextByBlockUid,
-  getTreeByBlockUid,
-  getTreeByPageName,
-  PullBlock,
-  TreeNode,
-} from "roam-client";
-import { BLOCK_REF_REGEX, toFlexRegex } from "../entry-helpers";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import { TreeNode, PullBlock } from "roamjs-components/types";
+import toFlexRegex from "roamjs-components/util/toFlexRegex";
+import { BLOCK_REF_REGEX } from "../entry-helpers";
 import EditContainer, { editContainerRender } from "./EditContainer";
 
 const REGEX = /^https?:\/\//i;
@@ -34,8 +32,11 @@ const IframelyEmbed = ({
     (inputUrl: string) => {
       const url = REGEX.test(inputUrl) ? inputUrl : `https://${inputUrl}`;
       const view =
-        getViewFromTree(getTreeByBlockUid(blockUid).children) ||
-        getViewFromTree(getTreeByPageName("roam/js/iframely"));
+        getViewFromTree(getFullTreeByParentUid(blockUid).children) ||
+        getViewFromTree(
+          getFullTreeByParentUid(getPageUidByPageTitle("roam/js/iframely"))
+            .children
+        );
       axios
         .post(`https://lambda.roamjs.com/iframely`, {
           url,

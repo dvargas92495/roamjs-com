@@ -22,26 +22,24 @@ import React, {
   useState,
 } from "react";
 import ReactDOM from "react-dom";
-import {
-  getPageTitleByPageUid,
-  createBlock,
-  getPageTitleReferencesByPageTitle,
-  getPageUidByPageTitle,
-  deleteBlock,
-  InputTextNode,
-  getTextByBlockUid,
-  getPageTitleByBlockUid,
-  getUids,
-  getShallowTreeByParentUid,
-  getTreeByBlockUid,
-  getParentUidByBlockUid,
-  toRoamDate,
-} from "roam-client";
-import { extractTag, getCurrentPageUid, toFlexRegex } from "../entry-helpers";
 import { getRenderRoot } from "./hooks";
 import getSettingIntFromTree from "roamjs-components/util/getSettingIntFromTree";
 import MenuItemSelect from "roamjs-components/components/MenuItemSelect";
 import getSettingValueFromTree from "roamjs-components/util/getSettingValueFromTree";
+import getUids from "roamjs-components/dom/getUids";
+import getPageTitleByBlockUid from "roamjs-components/queries/getPageTitleByBlockUid";
+import getPageTitleByPageUid from "roamjs-components/queries/getPageTitleByPageUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import getParentUidByBlockUid from "roamjs-components/queries/getParentUidByBlockUid";
+import getShallowTreeByParentUid from "roamjs-components/queries/getShallowTreeByParentUid";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import { InputTextNode } from "roamjs-components/types";
+import toFlexRegex from "roamjs-components/util/toFlexRegex";
+import createBlock from "roamjs-components/writes/createBlock";
+import deleteBlock from "roamjs-components/writes/deleteBlock";
+import getPageTitleReferencesByPageTitle from "roamjs-components/queries/getPageTitleReferencesByPageTitle";
+import { extractTag } from "../entry-helpers";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
 
 // https://github.com/spamscanner/url-regex-safe/blob/master/src/index.js
 const protocol = `(?:https?://)`;
@@ -65,6 +63,7 @@ export type RenderProps = {
       outputFormat: OutputFormat;
     };
   };
+  parentUid: string;
 };
 
 export const DEFAULT_EXPORT_LABEL = "SPARQL Import";
@@ -101,7 +100,8 @@ const WIKIDATA_ITEMS = [
 const LIMIT_REGEX = /LIMIT ([\d]*)/;
 const IMAGE_REGEX_URL =
   /(http(s?):)([/|.|\w|\s|\-|:|%])*\.(?:jpg|gif|png|svg)/i;
-const WIKIDATA_SOURCE = "https://query.wikidata.org/bigdata/namespace/wdq/sparql?format=json&query=";
+const WIKIDATA_SOURCE =
+  "https://query.wikidata.org/bigdata/namespace/wdq/sparql?format=json&query=";
 
 const combineTextNodes = (nodes: InputTextNode[]) =>
   nodes
@@ -162,7 +162,7 @@ export const runSparqlQuery = ({
             : /^\d+$/.test(s)
             ? s
             : !isNaN(new Date(s).valueOf())
-            ? `[[${toRoamDate(new Date(s))}]]`
+            ? `[[${window.roamAlphaAPI.util.dateToPageTitle(new Date(s))}]]`
             : p[h].type === "uri"
             ? `[[${s}]]`
             : s;
@@ -240,7 +240,7 @@ export const runSparqlQuery = ({
           );
         }, 1);
       }, 1);
-      deleteBlock(loadingUid);
+      loadingUid.then(deleteBlock);
     } else {
       createBlock({
         node: {
@@ -255,11 +255,12 @@ const SparqlQuery = ({
   onClose,
   textareaRef,
   queriesCache,
+  parentUid,
 }: {
   onClose: () => void;
 } & RenderProps): React.ReactElement => {
   const configUid = useMemo(() => getPageUidByPageTitle("roam/js/sparql"), []);
-  const parentUid = useMemo(getCurrentPageUid, []);
+
   const pageTitle = useMemo(
     () => getPageTitleByPageUid(parentUid) || getPageTitleByBlockUid(parentUid),
     [parentUid]
@@ -300,7 +301,7 @@ const SparqlQuery = ({
   );
   const importTree = useMemo(
     () =>
-      getTreeByBlockUid(configUid).children.find((t) =>
+      getFullTreeByParentUid(configUid).children.find((t) =>
         toFlexRegex("import").test(t.text)
       )?.children || [],
     [configUid]
@@ -529,7 +530,7 @@ const SparqlQuery = ({
           <Button
             text={"Import"}
             disabled={activeItem === "Custom Query" ? !codeValue : !radioValue}
-            onClick={() => {
+            onClick={async () => {
               setLoading(true);
               const importParentUid =
                 activeItem === "Current Page" ? parentUid : blockUid;
@@ -542,7 +543,7 @@ const SparqlQuery = ({
                   },
                 });
               }
-              const labelUid = createBlock({
+              const labelUid = await createBlock({
                 node: {
                   text: getLabel({ outputFormat, label }),
                 },
@@ -575,7 +576,7 @@ const SparqlQuery = ({
                       { text: outputFormat },
                     ],
                   },
-                  parentUid: queriesUid,
+                  parentUid: await queriesUid,
                 });
                 queriesCache[labelUid] = queryInfo;
               }

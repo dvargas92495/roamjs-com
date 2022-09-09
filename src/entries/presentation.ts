@@ -1,4 +1,4 @@
-import { addStyle, runExtension } from "../entry-helpers";
+import { addStyle } from "../entry-helpers";
 import "reveal.js/dist/reveal.css";
 import "reveal.js/dist/theme/black.css";
 import "reveal.js/dist/theme/white.css";
@@ -18,12 +18,11 @@ import {
   TRANSITION_REGEX,
   VALID_THEMES,
 } from "../components/Presentation";
-import {
-  createButtonObserver,
-  getUidsFromButton,
-  getTextByBlockUid,
-} from "roam-client";
 import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import createButtonObserver from "roamjs-components/dom/createButtonObserver";
+import getUidsFromButton from "roamjs-components/dom/getUidsFromButton";
+import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
+import runExtension from "roamjs-components/util/runExtension";
 
 addStyle(`.roamjs-collapsible-caret {
   position: absolute;

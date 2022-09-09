@@ -1,7 +1,9 @@
 import axios from "axios";
-import { createHTMLObserver, getUidsFromId } from "roam-client";
+import createHTMLObserver from "roamjs-components/dom/createHTMLObserver";
+import getUidsFromId from "roamjs-components/dom/getUidsFromId";
+import runExtension from "roamjs-components/util/runExtension";
 import { render } from "../components/YoutubePlayer";
-import { addStyle, runExtension } from "../entry-helpers";
+import { addStyle } from "../entry-helpers";
 
 addStyle(`.roam-block-container {
   position: relative

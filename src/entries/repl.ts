@@ -1,6 +1,7 @@
-import { createButtonObserver, getUidsFromButton } from "roam-client";
+import createButtonObserver from "roamjs-components/dom/createButtonObserver";
+import getUidsFromButton from "roamjs-components/dom/getUidsFromButton";
+import runExtension from "roamjs-components/util/runExtension";
 import { render } from "../components/Repl";
-import { runExtension } from "../entry-helpers";
 
 runExtension("repl", () => {
   createButtonObserver({

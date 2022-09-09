@@ -1,13 +1,9 @@
-import {
-  getConfigFromBlock,
-  runExtension,
-} from "../entry-helpers";
-import {
-  createObserver,
-  getConfigFromPage,
-  parseRoamDate,
-  createIconButton,
-} from "roam-client";
+import createIconButton from "roamjs-components/dom/createIconButton";
+import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
+import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
+import runExtension from "roamjs-components/util/runExtension";
+import createObserver from "roamjs-components/dom/createObserver";
+import { getConfigFromBlock } from "../entry-helpers";
 
 type SortConfig = {
   [column: string]: {
@@ -74,8 +70,12 @@ const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
           .innerText;
         if (aData !== bData) {
           if (config.asc) {
-            const aDate = parseRoamDate(aData).valueOf();
-            const bDate = parseRoamDate(bData).valueOf();
+            const aDate = window.roamAlphaAPI.util
+              .pageTitleToDate(aData)
+              .valueOf();
+            const bDate = window.roamAlphaAPI.util
+              .pageTitleToDate(bData)
+              .valueOf();
             if (!isNaN(aDate) && !isNaN(bDate)) {
               return aDate - bDate;
             }
@@ -86,8 +86,12 @@ const sortTable = (t: HTMLTableElement, sortConfig: SortConfig) => {
             }
             return aData.localeCompare(bData);
           } else {
-            const aDate = parseRoamDate(aData).valueOf();
-            const bDate = parseRoamDate(bData).valueOf();
+            const aDate = window.roamAlphaAPI.util
+              .pageTitleToDate(aData)
+              .valueOf();
+            const bDate = window.roamAlphaAPI.util
+              .pageTitleToDate(bData)
+              .valueOf();
             if (!isNaN(aDate) && !isNaN(bDate)) {
               return bDate - aDate;
             }
@@ -122,7 +126,11 @@ const observerCallback = () => {
         const sortButton = createIconButton("sort");
         th.appendChild(sortButton);
         sortButton.onclick = () => {
-          const pageConfig = getConfigFromPage("roam/js/attr-tables");
+          const pageConfig = Object.fromEntries(
+            getFullTreeByParentUid(getPageUidByPageTitle("roam/js/attr-tables"))
+              .children.map((c) => c.text.split("::"))
+              .filter((c) => c.length === 2)
+          );
           const maxSortsConfig = config["Max Sorts"] || pageConfig["Max Sorts"];
           const maxSorts = isNaN(maxSortsConfig) ? 0 : parseInt(maxSortsConfig);
           const icon = sortButton.children[0];
