@@ -20,33 +20,36 @@ addStyle(`.roamjs-timeline-date > a,
   right: 130%;
 }`);
 
-runExtension("timeline", () => {
-  createConfigObserver({
-    title: "roam/js/timeline",
-    config: {
-      tabs: [
-        {
-          id: "home",
-          fields: [
-            {
-              title: "depth",
-              description:
-                "The number of child levels included with each timeline element.",
-              defaultValue: -1,
-              Panel: NumberPanel,
-            },
-          ],
-        },
-      ],
-    },
-  });
-  createButtonObserver({
-    attribute: "vertical-timeline",
-    shortcut: "timeline",
-    render: (b: HTMLButtonElement) => {
-      const blockId = b.closest(".roam-block")?.id;
-      b.parentElement.onmousedown = (e: MouseEvent) => e.stopPropagation();
-      render({ p: b.parentElement, blockId });
-    },
-  });
+runExtension({
+  extensionId: "timeline",
+  run: () => {
+    createConfigObserver({
+      title: "roam/js/timeline",
+      config: {
+        tabs: [
+          {
+            id: "home",
+            fields: [
+              {
+                title: "depth",
+                description:
+                  "The number of child levels included with each timeline element.",
+                defaultValue: -1,
+                Panel: NumberPanel,
+              },
+            ],
+          },
+        ],
+      },
+    });
+    createButtonObserver({
+      attribute: "vertical-timeline",
+      shortcut: "timeline",
+      render: (b: HTMLButtonElement) => {
+        const blockId = b.closest(".roam-block")?.id;
+        b.parentElement.onmousedown = (e: MouseEvent) => e.stopPropagation();
+        render({ p: b.parentElement, blockId });
+      },
+    });
+  },
 });

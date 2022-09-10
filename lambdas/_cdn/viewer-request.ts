@@ -14,6 +14,8 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/roam42/strikeout-text-shortcut": "/extensions/workbench",
   "/extensions/roam42/update_log": "/extensions/workbench",
   "/extensions/roam42/date_nlp": "/extensions/workbench/daily_note_popup",
+  "/extensions/charts": "/extensions/query-builder",
+  "/extensions/timeline": "/extensions/query-builder",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {

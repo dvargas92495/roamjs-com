@@ -341,9 +341,10 @@ runExtension(ID, () => {
   window.roamAlphaAPI.ui.commandPalette.addCommand({
     label: "Run Serendipity",
     callback: async () => {
-      const todayPage = getPageTitleByPageUid(
-        await window.roamAlphaAPI.ui.mainWindow.getOpenPageOrBlockUid()
-      );
+      const currentUid = await window.roamAlphaAPI.ui.mainWindow
+        .getOpenPageOrBlockUid()
+        .then((u) => u || window.roamAlphaAPI.util.dateToPageUid(new Date()));
+      const todayPage = getPageTitleByPageUid(currentUid);
       if (DAILY_NOTE_PAGE_REGEX.test(todayPage)) {
         pullDaily({
           date: window.roamAlphaAPI.util.pageTitleToDate(todayPage),
