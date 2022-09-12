@@ -38,7 +38,10 @@ export const handler: APIGatewayProxyHandler = authenticateDeveloper(
                       Sid: "PutPaths",
                       Effect: "Allow",
                       Action: "s3:PutObject",
-                      Resource: [`arn:aws:s3:::roamjs.com/${path}/*`],
+                      Resource: [
+                        `arn:aws:s3:::roamjs.com/${path}/*`,
+                        `arn:aws:s3:::roamjs.com/downloads/${path}.zip`,
+                      ],
                     },
                     {
                       Sid: "InvalidateCache",
