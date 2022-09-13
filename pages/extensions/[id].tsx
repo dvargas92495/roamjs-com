@@ -217,7 +217,16 @@ const ExtensionPage = ({
       ) : (
         <p>
           This extension is avaiable in Roam Depot! Install it directly from
-          Roam by navigating to Settings {">"} RoamDepot {">"} Browse.
+          Roam by navigating to Settings {">"} RoamDepot {">"} Browse. To help
+          test a development version of the extension before it's available in
+          Roam Depot,
+          <a
+            className="bg-sky-500 text-white py-2 px-4 rounded-md"
+            href={`/downloads/${id}.zip`}
+            download
+          >
+            click here to download.
+          </a>
         </p>
       )}
       {content.compiledSource ? (
