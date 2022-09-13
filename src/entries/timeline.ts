@@ -22,6 +22,7 @@ addStyle(`.roamjs-timeline-date > a,
 
 runExtension({
   extensionId: "timeline",
+  migratedTo: "Query Builder",
   run: () => {
     createConfigObserver({
       title: "roam/js/timeline",

@@ -16,6 +16,7 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/roam42/date_nlp": "/extensions/workbench/daily_note_popup",
   "/extensions/charts": "/extensions/query-builder",
   "/extensions/timeline": "/extensions/query-builder",
+  "/extensions/attr-tables": "/extensions/query-builder",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {

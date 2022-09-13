@@ -195,7 +195,11 @@ const observerCallback = () => {
     });
 };
 
-runExtension("attr-tables", () => {
-  observerCallback();
-  createObserver(observerCallback);
+runExtension({
+  extensionId: "attr-tables",
+  run: () => {
+    observerCallback();
+    createObserver(observerCallback);
+  },
+  migratedTo: "Query Builder",
 });
