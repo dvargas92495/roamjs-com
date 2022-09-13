@@ -221,7 +221,7 @@ const ExtensionPage = ({
           test a development version of the extension before it's available in
           Roam Depot,
           <a
-            className="bg-sky-500 text-white py-2 px-4 rounded-md"
+            className="text-sky-500 underline"
             href={`/downloads/${id}.zip`}
             download
           >
