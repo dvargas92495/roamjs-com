@@ -12,19 +12,6 @@ declare module "@mozilla/readability" {
   export { default as Readability } from "mozilla-readability";
 }
 
-declare module "react-charts" {
-  type SeriesType = "line" | "bubble" | "area" | "bar";
-  type AxisType = "ordinal" | "time" | "utc" | "linear" | "log";
-  export const Chart: React.FunctionComponent<{
-    data: { label: string; data: (number | string | Date)[][] }[];
-    axes: { primary?: boolean; type: AxisType; position: string }[];
-    series: {
-      type: SeriesType;
-    };
-    defaultColors?: string[];
-  }>;
-}
-
 declare module "reveal.js" {
   type RevealOptions = {
     embedded?: boolean;
