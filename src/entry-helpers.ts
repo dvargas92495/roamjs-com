@@ -303,59 +303,6 @@ export const getEditTimeByTitle = (title: string): number => {
   return result?.time;
 };
 
-const toAttributeValue = (s: string) =>
-  (s.trim().startsWith("{{or: ")
-    ? s.substring("{{or: ".length, s.indexOf("|"))
-    : s
-  ).trim();
-
-const getAttrConfigFromQuery = (query: string) => {
-  const pageResults = window.roamAlphaAPI.q(query) as {
-    attrs: [string, string, { source: string[] }][];
-  }[][];
-  if (pageResults.length === 0) {
-    return {};
-  }
-  const resultAsBlock = pageResults[0][0];
-  if (!resultAsBlock.attrs) {
-    return {};
-  }
-  const configurationAttrRefs = resultAsBlock.attrs.map((a) => a[2].source[1]);
-  const entries = configurationAttrRefs.map((r) => {
-    let _a, _b, _c;
-    return (
-      ((_c =
-        (_b =
-          (_a = window.roamAlphaAPI.q(
-            `[:find (pull ?e [:block/string]) :where [?e :block/uid "${r}"] ]`
-          )[0]) === null || _a === void 0
-            ? void 0
-            : _a[0]) === null || _b === void 0
-          ? void 0
-          : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            _b.string) === null || _c === void 0
-        ? void 0
-        : _c.split("::").map(toAttributeValue)) || [r, "undefined"]
-    );
-  });
-  return Object.fromEntries(entries);
-};
-
-export const getConfigFromBlock = (
-  container: HTMLElement
-): { [key: string]: string } => {
-  const block = container.closest(".roam-block");
-  if (!block) {
-    return {};
-  }
-  const blockId = block.id.substring(block.id.length - 9, block.id.length);
-
-  return getAttrConfigFromQuery(
-    `[:find (pull ?e [*]) :where [?e :block/uid "${blockId}"]]`
-  );
-};
-
 export const getWordCount = (str = ""): number =>
   str.trim().split(/\s+/).length;
 
