@@ -132,44 +132,6 @@ export const replaceTagText = ({
   }
 };
 
-export const createPageTitleObserver = ({
-  title,
-  callback,
-  log = false,
-}: {
-  title: string;
-  callback: (d: HTMLDivElement) => void;
-  log?: boolean;
-}): void => {
-  const listener = (e?: HashChangeEvent) => {
-    const d = document.getElementsByClassName(
-      "roam-article"
-    )[0] as HTMLDivElement;
-    if (d) {
-      const uid = getPageUidByPageTitle(title);
-      const attribute = `data-roamjs-${uid}`;
-      const url = e?.newURL || window.location.href;
-      if ((uid && url === getRoamUrl(uid)) || (log && url === getRoamUrl())) {
-        // React's rerender crushes the old article/heading
-        setTimeout(() => {
-          if (!d.hasAttribute(attribute)) {
-            d.setAttribute(attribute, "true");
-            callback(
-              document.getElementsByClassName(
-                "roam-article"
-              )[0] as HTMLDivElement
-            );
-          }
-        }, 1);
-      } else {
-        d.removeAttribute(attribute);
-      }
-    }
-  };
-  window.addEventListener("hashchange", listener);
-  listener();
-};
-
 const POPOVER_WRAPPER_CLASS = "sort-popover-wrapper";
 
 export const createSortIcon = (
@@ -493,15 +455,10 @@ export const addStyle = (content: string): HTMLStyleElement => {
   return css;
 };
 
-export const getRoamUrl = (blockUid?: string): string =>
+const getRoamUrl = (blockUid?: string): string =>
   `${window.location.href.replace(/\/page\/.*$/, "")}${
     blockUid ? `/page/${blockUid}` : ""
   }`;
-
-export const getRoamUrlByPage = (page: string): string => {
-  const uid = getPageUidByPageTitle(page);
-  return uid && getRoamUrl(uid);
-};
 
 export const BLOCK_REF_REGEX = new RegExp("\\(\\((..........?)\\)\\)", "g");
 
@@ -557,13 +514,6 @@ export const getAttributeValueFromPage = ({
 
 export const DAILY_NOTE_PAGE_REGEX =
   /(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]/;
-export const DAILY_NOTE_TAG_REGEX = new RegExp(
-  `#?\\[\\[(${DAILY_NOTE_PAGE_REGEX.source})\\]\\]`
-);
-export const DAILY_NOTE_TAG_REGEX_GLOBAL = new RegExp(
-  DAILY_NOTE_TAG_REGEX,
-  "g"
-);
 export const TODO_REGEX = /{{\[\[TODO\]\]}}/g;
 export const DONE_REGEX = /{{\[\[DONE\]\]}} ?/g;
 export const createTagRegex = (tag: string): RegExp =>
