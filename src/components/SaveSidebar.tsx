@@ -52,6 +52,8 @@ const SaveSidebar = (): React.ReactElement => {
         canOutsideClickClose
         onClose={close}
         title={"Save Sidebar Content"}
+        enforceFocus={false}
+        autoFocus={false}
       >
         <div className={Classes.DIALOG_BODY}>
           <h6>Enter the label to save the content of this sidebar under:</h6>
@@ -169,6 +171,8 @@ const LoadSidebar = ({ onClose }: { onClose: () => void }) => {
       title={"Load Sidebar Content"}
       canEscapeKeyClose
       canOutsideClickClose
+      enforceFocus={false}
+      autoFocus={false}
     >
       <div className={Classes.DIALOG_BODY}>
         <h6>Pick which label to load to the sidebar:</h6>

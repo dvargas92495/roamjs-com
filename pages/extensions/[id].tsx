@@ -219,7 +219,7 @@ const ExtensionPage = ({
           This extension is avaiable in Roam Depot! Install it directly from
           Roam by navigating to Settings {">"} RoamDepot {">"} Browse. To help
           test a development version of the extension before it's available in
-          Roam Depot,
+          Roam Depot,{" "}
           <a
             className="text-sky-500 underline"
             href={`/downloads/${id}.zip`}
