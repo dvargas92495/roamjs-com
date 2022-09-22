@@ -376,6 +376,7 @@ export const getStaticProps: GetStaticProps<
         data,
         premium = null,
         author,
+        downloadUrl,
       }) => {
         const { contributors: contributorsJson } = JSON.parse(
           fs.readFileSync("./thankyou.json").toString()
@@ -387,6 +388,7 @@ export const getStaticProps: GetStaticProps<
             development: state === "DEVELOPMENT" || state === "UNDER REVIEW",
             legacy: state === "LEGACY",
             description,
+            downloadUrl,
             sponsors: data.contributors
               ? data.contributors.split(",").map((s: string) => {
                   const parts = s.trim().split(" ");
