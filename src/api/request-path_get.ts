@@ -84,6 +84,7 @@ export const handler: APIGatewayProxyHandler = (event) => {
               premium,
               author,
               entry: r.Item.src?.S || "",
+              downloadUrl: r.Item.download?.S || "",
             }),
             headers: headers(event),
           }))

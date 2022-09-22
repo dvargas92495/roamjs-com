@@ -51,6 +51,7 @@ const ExtensionPage = ({
     email: "support@roamjs.com",
   },
   githubUrl,
+  downloadUrl = `/downloads/${id}.zip`,
   //@deprecated
   loom,
   skipDemo,
@@ -73,6 +74,7 @@ const ExtensionPage = ({
     email: string;
   };
   githubUrl?: string;
+  downloadUrl?: string;
   //@deprecated
   loom: string;
   skipDemo: boolean; // only in video extension
@@ -207,7 +209,7 @@ const ExtensionPage = ({
           </Body>
           <a
             className="bg-sky-500 text-white py-2 px-4 rounded-md"
-            href={`/downloads/${id}.zip`}
+            href={downloadUrl}
             download
           >
             Download
