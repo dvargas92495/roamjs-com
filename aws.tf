@@ -586,10 +586,6 @@ module "roamjs_lambda" {
     {
       path ="versions", 
       method ="get"
-    },
-    {
-      path = "auth",
-      method = "post"
     }
   ]
   aws_access_token = module.aws_static_site.deploy-id
