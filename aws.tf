@@ -113,7 +113,7 @@ module "aws-serverless-backend" {
     paths = [
         "article/post", // MOVE
         "auth/get",
-        "auth/post",
+        "auth/post", // MOVE
         "connected/get",
         "convertkit/get",
         "convertkit/post",
@@ -587,6 +587,10 @@ module "roamjs_lambda" {
       path ="versions", 
       method ="get"
     },
+    {
+      path = "auth",
+      method = "post"
+    }
   ]
   aws_access_token = module.aws_static_site.deploy-id
   aws_secret_token = module.aws_static_site.deploy-secret
