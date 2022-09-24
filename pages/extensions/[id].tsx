@@ -51,7 +51,7 @@ const ExtensionPage = ({
     email: "support@roamjs.com",
   },
   githubUrl,
-  downloadUrl = `/downloads/${id}.zip`,
+  downloadUrl,
   //@deprecated
   loom,
   skipDemo,
@@ -209,7 +209,7 @@ const ExtensionPage = ({
           </Body>
           <a
             className="bg-sky-500 text-white py-2 px-4 rounded-md"
-            href={downloadUrl}
+            href={downloadUrl || `/downloads/${id}.zip`}
             download
           >
             Download
