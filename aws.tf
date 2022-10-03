@@ -83,6 +83,10 @@ variable "stripe_checkout_secret" {
     type = string
 }
 
+variable "roam_api_token" {
+    type = string
+}
+
 provider "aws" {
     region = "us-east-1"
 }
@@ -547,6 +551,12 @@ resource "github_actions_secret" "stripe_checkout_secret" {
   repository       = "roamjs-com"
   secret_name      = "STRIPE_CHECKOUT_SECRET"
   plaintext_value  = var.stripe_checkout_secret
+}
+
+resource "github_actions_secret" "roam_api_token" {
+  repository       = "roamjs-com"
+  secret_name      = "ROAM_API_TOKEN"
+  plaintext_value  = var.roam_api_token
 }
 
 // TODO: REMOVE WHEN RELATED EXTENSIONS HAVE BEEN MOVED

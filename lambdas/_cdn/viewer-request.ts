@@ -17,6 +17,8 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/charts": "/extensions/query-builder",
   "/extensions/timeline": "/extensions/query-builder",
   "/extensions/attr-tables": "/extensions/query-builder",
+  "/extensions/google-calendar": "/extensions/google",
+  "/extensions/google-drive": "/extensions/google",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
