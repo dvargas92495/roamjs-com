@@ -19,6 +19,7 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/attr-tables": "/extensions/query-builder",
   "/extensions/google-calendar": "/extensions/google",
   "/extensions/google-drive": "/extensions/google",
+  "/extensions/github": "/extensions/github",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {

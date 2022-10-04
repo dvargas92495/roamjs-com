@@ -245,7 +245,7 @@ export const listAll = async (
 
 export const TableName =
   process.env.NODE_ENV === "development"
-    ? "RoamJSExtensionsDev"
+    ? "RoamJSExtensions"
     : "RoamJSExtensions";
 
 export const getStripePriceId = (extension: string): Promise<string> =>
