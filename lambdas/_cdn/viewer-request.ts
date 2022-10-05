@@ -6,7 +6,8 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/roam42": "/extensions/workbench",
   "/extensions/roam42/workbench": "/extensions/workbench/command_palette_plus",
   "/extensions/roam42/live_preview": "/extensions/workbench/live_preview",
-  "/extensions/roam42/daily_note_popup": "/extensions/workbench/daily_note_popup",
+  "/extensions/roam42/daily_note_popup":
+    "/extensions/workbench/daily_note_popup",
   "/extensions/roam42/jump_navigation": "/extensions/workbench/hot_keys",
   "/extensions/roam42/deep_nav": "/extensions/workbench/deep_nav",
   "/extensions/roam42/privacy_mode": "/extensions/workbench/privacy_mode",
@@ -19,7 +20,8 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/attr-tables": "/extensions/query-builder",
   "/extensions/google-calendar": "/extensions/google",
   "/extensions/google-drive": "/extensions/google",
-  "/extensions/github": "/extensions/github",
+  "/extensions/github": "/extensions/developer",
+  "/extensions/repl": "/extensions/developer",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
