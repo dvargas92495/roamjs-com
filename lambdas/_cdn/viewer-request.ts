@@ -24,6 +24,7 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/repl": "/extensions/developer",
   "/extensions/alert": "/extensions/workbench/alert",
   "/extensions/mouseless": "/extensions/workbench/hot_keys",
+  "/extensions/multi-select": "/extensions/workbench/multi_select",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
