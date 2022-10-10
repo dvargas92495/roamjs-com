@@ -145,25 +145,29 @@ const getCalculateText = (button: HTMLButtonElement) => {
   return getTextByBlockUid(blockUid);
 };
 
-runExtension("calculate", () => {
-  createButtonObserver({
-    attribute,
-    shortcut,
-    render: (button: HTMLButtonElement) => {
-      const text = getCalculateText(button);
-      const buttonText =
-        text.match(
-          new RegExp(`{{(${attribute}|${shortcut}):(.*)}}`, "is")
-        )?.[2] || "";
-      if (buttonText) {
-        const expression = parseExpression(buttonText.trim());
-        const value = calculateExpression(expression);
-        const parentSpan = button.parentElement as HTMLSpanElement;
-        parentSpan.removeChild(button);
-        parentSpan.className = "dont-focus-block rm-calc-val";
-        parentSpan.style.cursor = "pointer";
-        parentSpan.innerText = value;
-      }
-    },
-  });
+runExtension({
+  extensionId: "calculate",
+  migratedTo: "Query Builder",
+  run: () => {
+    createButtonObserver({
+      attribute,
+      shortcut,
+      render: (button: HTMLButtonElement) => {
+        const text = getCalculateText(button);
+        const buttonText =
+          text.match(
+            new RegExp(`{{(${attribute}|${shortcut}):(.*)}}`, "is")
+          )?.[2] || "";
+        if (buttonText) {
+          const expression = parseExpression(buttonText.trim());
+          const value = calculateExpression(expression);
+          const parentSpan = button.parentElement as HTMLSpanElement;
+          parentSpan.removeChild(button);
+          parentSpan.className = "dont-focus-block rm-calc-val";
+          parentSpan.style.cursor = "pointer";
+          parentSpan.innerText = value;
+        }
+      },
+    });
+  },
 });

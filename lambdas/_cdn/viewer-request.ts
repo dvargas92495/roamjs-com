@@ -25,6 +25,8 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/alert": "/extensions/workbench/alert",
   "/extensions/mouseless": "/extensions/workbench/hot_keys",
   "/extensions/multi-select": "/extensions/workbench/multi_select",
+  "/extensions/pull-references": "/extensions/workbench/command_palette_plus",
+  "/extensions/calculate": "/extensions/query-builder"
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
