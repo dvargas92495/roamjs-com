@@ -24,9 +24,10 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/repl": "/extensions/developer",
   "/extensions/alert": "/extensions/workbench/alert",
   "/extensions/mouseless": "/extensions/workbench/hot_keys",
-  "/extensions/multi-select": "/extensions/workbench/multi_select",
+  "/extensions/multi-select":
+    "https://roamresearch.com/#/app/help/page/rQOT9lVIP",
   "/extensions/pull-references": "/extensions/workbench/command_palette_plus",
-  "/extensions/calculate": "/extensions/query-builder"
+  "/extensions/calculate": "/extensions/query-builder",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
@@ -40,7 +41,9 @@ export const handler: CloudFrontRequestHandler = (event, _, callback) => {
         location: [
           {
             key: "Location",
-            value: `https://roamjs.com${newUri}`,
+            value: newUri.startsWith("https")
+              ? newUri
+              : `https://roamjs.com${newUri}`,
           },
         ],
       },

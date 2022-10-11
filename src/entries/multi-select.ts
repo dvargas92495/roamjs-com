@@ -26,7 +26,7 @@ const getUidByContainer = (d: Element) =>
 
 runExtension({
   extensionId: ID,
-  migratedTo: "workbench",
+  migratedTo: "natively in Roam",
   run: () => {
     createBlockObserver((d) => {
       const b = d.closest(".roam-block-container") as HTMLDivElement;
