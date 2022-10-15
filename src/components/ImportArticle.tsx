@@ -99,7 +99,10 @@ export const importArticle = ({
         onSuccess();
       }
       const enc = charset(r.headers) || "utf-8";
-      const buffer = iconv.encode(r.data, "base64");
+      const buffer = iconv.encode(
+        typeof r.data === "string" ? r.data : r.data.encoded,
+        "base64"
+      );
       const html = iconv.decode(buffer, enc);
       const headIndex = html.indexOf("<head>") + "<head>".length;
       const base = document.createElement("base");

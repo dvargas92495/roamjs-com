@@ -57,30 +57,33 @@ const inlineImportArticle = async ({
   }
 };
 
-runExtension("article", () => {
-  createButtonObserver({
-    shortcut: "article",
-    attribute: "import-article",
-    render: (b: HTMLButtonElement) =>
-      renderImportArticle(b.closest(".roam-block").id, b.parentElement),
-  });
+runExtension({
+  extensionId: "article",
+  run: () => {
+    createButtonObserver({
+      shortcut: "article",
+      attribute: "import-article",
+      render: (b: HTMLButtonElement) =>
+        renderImportArticle(b.closest(".roam-block").id, b.parentElement),
+    });
 
-  document.addEventListener("keydown", async (e) => {
-    if (e.altKey && e.shiftKey && (e.key === "I" || e.code === "KeyI")) {
-      const target = e.target as HTMLElement;
-      if (target.tagName === "TEXTAREA") {
-        const value = (target as HTMLTextAreaElement).value;
-        const { blockUid } = getUidsFromId(target.id);
-        await inlineImportArticle({ value, parentUid: blockUid });
+    document.addEventListener("keydown", async (e) => {
+      if (e.altKey && e.shiftKey && (e.key === "I" || e.code === "KeyI")) {
+        const target = e.target as HTMLElement;
+        if (target.tagName === "TEXTAREA") {
+          const value = (target as HTMLTextAreaElement).value;
+          const { blockUid } = getUidsFromId(target.id);
+          await inlineImportArticle({ value, parentUid: blockUid });
+        }
       }
-    }
-  });
+    });
 
-  // v2
-  registerSmartBlocksCommand({
-    text: "ARTICLE",
-    handler: () => (value) => {
-      return inlineImportArticle({ value });
-    },
-  });
+    // v2
+    registerSmartBlocksCommand({
+      text: "ARTICLE",
+      handler: () => (value) => {
+        return inlineImportArticle({ value });
+      },
+    });
+  },
 });

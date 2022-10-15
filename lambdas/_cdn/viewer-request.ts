@@ -28,6 +28,7 @@ const REDIRECTS: Record<string, string> = {
     "https://roamresearch.com/#/app/help/page/rQOT9lVIP",
   "/extensions/pull-references": "/extensions/workbench/command_palette_plus",
   "/extensions/calculate": "/extensions/query-builder",
+  "/extensions/article": "/extensions/workbench/article",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {

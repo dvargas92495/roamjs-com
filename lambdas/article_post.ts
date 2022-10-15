@@ -6,7 +6,7 @@ import charset from "charset";
 export const handler = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
-  const { url } = JSON.parse(event.body);
+  const { url } = JSON.parse(event.body || "{}");
   const fetch = (requestHeaders: { [key: string]: string }) =>
     axios
       .get(url, {
@@ -20,7 +20,7 @@ export const handler = async (
         const enc = charset(r.headers) || "utf8";
         return {
           statusCode: 200,
-          body: JSON.stringify(r.data),
+          body: JSON.stringify({ encoded: r.data }),
           headers: {
             ...headers,
             "Content-Type": `application/json;charset=${enc}`,
