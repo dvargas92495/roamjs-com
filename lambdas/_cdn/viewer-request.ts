@@ -29,6 +29,8 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/pull-references": "/extensions/workbench/command_palette_plus",
   "/extensions/calculate": "/extensions/query-builder",
   "/extensions/article": "/extensions/workbench/article",
+  "/extensions/sort-references": "/extensions/query-builder",
+  "/extensions/emojis": "/extensions/workbench",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
