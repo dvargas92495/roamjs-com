@@ -31,6 +31,7 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/article": "/extensions/workbench/article",
   "/extensions/sort-references": "/extensions/query-builder",
   "/extensions/emojis": "/extensions/workbench",
+  "/extensions/todont": "/extensions/todo-trigger",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
