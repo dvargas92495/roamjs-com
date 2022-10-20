@@ -5,7 +5,7 @@ on:
       extension:
         description: "Id of the extension to upload"
         required: true
-        default: 'example'
+        default: "example"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY }}
@@ -20,7 +20,7 @@ jobs:
   deploy:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install
         run: npm install --force
       - name: Build
