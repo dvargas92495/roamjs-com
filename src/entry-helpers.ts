@@ -154,13 +154,6 @@ export const getEditTimeByTitle = (title: string): number => {
 export const getWordCount = (str = ""): number =>
   str.trim().split(/\s+/).length;
 
-export const getRefTitlesByBlockUid = (uid: string): string[] =>
-  window.roamAlphaAPI
-    .q(
-      `[:find (pull ?r [:node/title]) :where [?e :block/refs ?r] [?e :block/uid "${uid}"]]`
-    )
-    .map((b: { title: string }[]) => b[0]?.title || "");
-
 export const isTagOnPage = ({
   tag,
   title,
@@ -238,7 +231,7 @@ export const createMobileIcon = (
   return iconButton;
 };
 
-export const isApple = isIOS || isMacOs;
+const isApple = isIOS || isMacOs;
 
 export const isControl = (e: KeyboardEvent | MouseEvent): boolean =>
   (e.ctrlKey && !isApple) || (e.metaKey && isApple);
