@@ -13,6 +13,7 @@ const ID = "context";
 let parseRoamMarked: Awaited<ReturnType<typeof getParseRoamMarked>>;
 getParseRoamMarked().then((f) => (parseRoamMarked = f));
 runExtension({
+  migratedTo: "WorkBench (Decorated Blocks)",
   extensionId: ID,
   run: () => {
     createHashtagObserver({

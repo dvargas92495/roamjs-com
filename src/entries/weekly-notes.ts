@@ -98,175 +98,180 @@ const navigateToPage = (pageName: string) => {
   }, timeout);
 };
 
-runExtension(ID, () => {
-  createConfigObserver({
-    title: CONFIG,
-    config: {
-      tabs: [
-        {
-          id: "home",
-          fields: [
-            {
-              title: "format",
-              Panel: TextPanel,
-              defaultValue: FORMAT_DEFAULT_VALUE,
-              description:
-                "Format of your weekly page titles. When changing the format, be sure to rename your old weekly pages.",
-            },
-            {
-              title: "auto load",
-              Panel: FlagPanel,
-              description:
-                "Automatically load the current weekly note on initial Roam load of daily note page",
-            },
-            {
-              title: "auto tag",
-              Panel: FlagPanel,
-              description:
-                "Automatically tag the weekly page on all the related daily pages when it's created",
-              defaultValue: true,
-            },
-            {
-              title: "auto embed",
-              Panel: FlagPanel,
-              description:
-                "Automatically embed the related daily pages into a newly created weekly page",
-            },
-          ],
-        },
-      ],
-    },
-  });
-
-  const goToThisWeek = () => {
-    const format = getFormat();
-    const today = new Date();
-    const weekStartsOn = DAYS.indexOf(
-      format.match(new RegExp(DATE_REGEX.source))?.[1] || "sunday"
-    ) as 0 | 1 | 2 | 3 | 4 | 5 | 6;
-    const pageName = format.replace(DATE_REGEX, (_, day, f) => {
-      const dayOfWeek = setDay(today, DAYS.indexOf(day), { weekStartsOn });
-      return dateFnsFormat(dayOfWeek, f);
+runExtension({
+  extensionId: ID,
+  migratedTo: "WorkBench (Weekly Notes)",
+  run: () => {
+    createConfigObserver({
+      title: CONFIG,
+      config: {
+        tabs: [
+          {
+            id: "home",
+            fields: [
+              {
+                title: "format",
+                Panel: TextPanel,
+                defaultValue: FORMAT_DEFAULT_VALUE,
+                description:
+                  "Format of your weekly page titles. When changing the format, be sure to rename your old weekly pages.",
+              },
+              {
+                title: "auto load",
+                Panel: FlagPanel,
+                description:
+                  "Automatically load the current weekly note on initial Roam load of daily note page",
+              },
+              {
+                title: "auto tag",
+                Panel: FlagPanel,
+                description:
+                  "Automatically tag the weekly page on all the related daily pages when it's created",
+                defaultValue: true,
+              },
+              {
+                title: "auto embed",
+                Panel: FlagPanel,
+                description:
+                  "Automatically embed the related daily pages into a newly created weekly page",
+              },
+            ],
+          },
+        ],
+      },
     });
-    navigateToPage(pageName);
-  };
 
-  document.addEventListener("keydown", (e) => {
-    if (
-      e.code === "KeyW" &&
-      (e.altKey || (e.ctrlKey && e.shiftKey && isApple))
-    ) {
-      e.preventDefault();
-      e.stopPropagation();
-      goToThisWeek();
-    }
-  });
+    const goToThisWeek = () => {
+      const format = getFormat();
+      const today = new Date();
+      const weekStartsOn = DAYS.indexOf(
+        format.match(new RegExp(DATE_REGEX.source))?.[1] || "sunday"
+      ) as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+      const pageName = format.replace(DATE_REGEX, (_, day, f) => {
+        const dayOfWeek = setDay(today, DAYS.indexOf(day), { weekStartsOn });
+        return dateFnsFormat(dayOfWeek, f);
+      });
+      navigateToPage(pageName);
+    };
 
-  const getFormatDateData = (title: string) => {
-    const format = getFormat();
-    const formats: string[] = [];
-    const formatRegex = new RegExp(
-      `^${format
-        .replace(DATE_REGEX, (_, __, og) => {
-          formats.push(og);
-          return "(.*?)";
-        })
-        .replace(/\[/g, "\\[")
-        .replace(/\]/g, "\\]")}$`
-    );
-    const exec = formatRegex.exec(title);
-    if (exec) {
-      const dateArray = exec
-        .slice(1)
-        .map((d, i) => parse(d, formats[i], new Date()));
-      return {
-        dateArray,
-        formats,
-        valid: dateArray.length && dateArray.every((s) => !isNaN(s.valueOf())),
-      };
-    }
-    return { dateArray: [], formats, valid: false };
-  };
-
-  const hashListener = (newUrl: string) => {
-    document.getElementById("roamjs-weekly-mode-nav")?.remove?.();
-    const urlUid = newUrl.match(/\/page\/(.*)$/)?.[1];
-    if (urlUid) {
-      const title = getPageTitleByPageUid(urlUid);
-      if (title === CONFIG) {
-        formatCache.current = "";
-        return;
+    document.addEventListener("keydown", (e) => {
+      if (
+        e.code === "KeyW" &&
+        (e.altKey || (e.ctrlKey && e.shiftKey && isApple))
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        goToThisWeek();
       }
-      const { dateArray, valid, formats } = getFormatDateData(title);
-      if (valid) {
-        const prevTitle = dateArray.reduce(
-          (prev, cur, i) =>
-            prev.replace(
-              dateFnsFormat(cur, formats[i]),
-              dateFnsFormat(subWeeks(cur, 1), formats[i])
-            ),
-          title
-        );
-        const nextTitle = dateArray.reduce(
-          (prev, cur, i) =>
-            prev.replace(
-              dateFnsFormat(cur, formats[i]),
-              dateFnsFormat(addWeeks(cur, 1), formats[i])
-            ),
-          title
-        );
-        setTimeout(() => {
-          const header = document.querySelector(
-            ".roam-article h1.rm-title-display"
-          ) as HTMLHeadingElement;
-          const headerContainer = header.parentElement;
-          const buttonContainer = document.createElement("div");
-          buttonContainer.style.display = "flex";
-          buttonContainer.style.justifyContent = "space-between";
-          buttonContainer.style.marginBottom = "32px";
-          buttonContainer.id = "roamjs-weekly-mode-nav";
-          headerContainer.appendChild(buttonContainer);
+    });
 
-          const makeButton = (pagename: string, label: string) => {
-            const button = document.createElement("button");
-            button.className = "bp3-button";
-            button.onclick = () => navigateToPage(pagename);
-            button.innerText = label;
-            buttonContainer.appendChild(button);
-          };
-          makeButton(prevTitle, "Last Week");
-          makeButton(nextTitle, "Next Week");
-        });
-      }
-    }
-  };
-  window.addEventListener("hashchange", (e) => hashListener(e.newURL));
-  hashListener(window.location.href);
-
-  const autoLoad = getFullTreeByParentUid(
-    getPageUidByPageTitle(CONFIG)
-  ).children.some((t) => toFlexRegex("auto load").test(t.text));
-  if (autoLoad && !window.location.hash.includes("/page/")) {
-    goToThisWeek();
-  }
-
-  createHTMLObserver({
-    tag: "H1",
-    className: "rm-title-display",
-    callback: (header: HTMLHeadingElement) => {
-      const title = getPageTitleValueByHtmlElement(header);
-      const { valid } = getFormatDateData(title);
-      if (valid) {
-        header.onmousedown = (e) => {
-          if (!e.shiftKey) {
-            render({
-              id: "week-uid",
-              content: "Weekly Note Titles Cannot be Changed",
-            });
-            e.stopPropagation();
-          }
+    const getFormatDateData = (title: string) => {
+      const format = getFormat();
+      const formats: string[] = [];
+      const formatRegex = new RegExp(
+        `^${format
+          .replace(DATE_REGEX, (_, __, og) => {
+            formats.push(og);
+            return "(.*?)";
+          })
+          .replace(/\[/g, "\\[")
+          .replace(/\]/g, "\\]")}$`
+      );
+      const exec = formatRegex.exec(title);
+      if (exec) {
+        const dateArray = exec
+          .slice(1)
+          .map((d, i) => parse(d, formats[i], new Date()));
+        return {
+          dateArray,
+          formats,
+          valid:
+            dateArray.length && dateArray.every((s) => !isNaN(s.valueOf())),
         };
       }
-    },
-  });
+      return { dateArray: [], formats, valid: false };
+    };
+
+    const hashListener = (newUrl: string) => {
+      document.getElementById("roamjs-weekly-mode-nav")?.remove?.();
+      const urlUid = newUrl.match(/\/page\/(.*)$/)?.[1];
+      if (urlUid) {
+        const title = getPageTitleByPageUid(urlUid);
+        if (title === CONFIG) {
+          formatCache.current = "";
+          return;
+        }
+        const { dateArray, valid, formats } = getFormatDateData(title);
+        if (valid) {
+          const prevTitle = dateArray.reduce(
+            (prev, cur, i) =>
+              prev.replace(
+                dateFnsFormat(cur, formats[i]),
+                dateFnsFormat(subWeeks(cur, 1), formats[i])
+              ),
+            title
+          );
+          const nextTitle = dateArray.reduce(
+            (prev, cur, i) =>
+              prev.replace(
+                dateFnsFormat(cur, formats[i]),
+                dateFnsFormat(addWeeks(cur, 1), formats[i])
+              ),
+            title
+          );
+          setTimeout(() => {
+            const header = document.querySelector(
+              ".roam-article h1.rm-title-display"
+            ) as HTMLHeadingElement;
+            const headerContainer = header.parentElement;
+            const buttonContainer = document.createElement("div");
+            buttonContainer.style.display = "flex";
+            buttonContainer.style.justifyContent = "space-between";
+            buttonContainer.style.marginBottom = "32px";
+            buttonContainer.id = "roamjs-weekly-mode-nav";
+            headerContainer.appendChild(buttonContainer);
+
+            const makeButton = (pagename: string, label: string) => {
+              const button = document.createElement("button");
+              button.className = "bp3-button";
+              button.onclick = () => navigateToPage(pagename);
+              button.innerText = label;
+              buttonContainer.appendChild(button);
+            };
+            makeButton(prevTitle, "Last Week");
+            makeButton(nextTitle, "Next Week");
+          });
+        }
+      }
+    };
+    window.addEventListener("hashchange", (e) => hashListener(e.newURL));
+    hashListener(window.location.href);
+
+    const autoLoad = getFullTreeByParentUid(
+      getPageUidByPageTitle(CONFIG)
+    ).children.some((t) => toFlexRegex("auto load").test(t.text));
+    if (autoLoad && !window.location.hash.includes("/page/")) {
+      goToThisWeek();
+    }
+
+    createHTMLObserver({
+      tag: "H1",
+      className: "rm-title-display",
+      callback: (header: HTMLHeadingElement) => {
+        const title = getPageTitleValueByHtmlElement(header);
+        const { valid } = getFormatDateData(title);
+        if (valid) {
+          header.onmousedown = (e) => {
+            if (!e.shiftKey) {
+              render({
+                id: "week-uid",
+                content: "Weekly Note Titles Cannot be Changed",
+              });
+              e.stopPropagation();
+            }
+          };
+        }
+      },
+    });
+  },
 });

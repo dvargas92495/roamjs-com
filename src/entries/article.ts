@@ -58,6 +58,7 @@ const inlineImportArticle = async ({
 };
 
 runExtension({
+  migratedTo: "WorkBench (Import Article)",
   extensionId: "article",
   run: () => {
     createButtonObserver({

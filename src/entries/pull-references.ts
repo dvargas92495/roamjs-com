@@ -59,46 +59,78 @@ const pullReferences = async (
   return bullets;
 };
 
-runExtension("pull-references", () => {
-  createButtonObserver({
-    attribute: PULL_REFERENCES_COMMAND,
-    render: (b) =>
-      (b.onclick = (e) => {
-        pullReferences().then((bts) => {
-          const { blockUid } = getUidsFromButton(b);
-          const parentUid = getParentUidByBlockUid(blockUid);
-          const order = getOrderByBlockUid(blockUid);
-          return Promise.all([
-            updateBlock({ text: bts[0], uid: blockUid }),
-            ...bts
-              .slice(1)
-              .map((text, o) =>
-                createBlock({ parentUid, order: o + order + 1, node: { text } })
+runExtension({
+  extensionId: "pull-references",
+  migratedTo: "WorkBench",
+  run: () => {
+    createButtonObserver({
+      attribute: PULL_REFERENCES_COMMAND,
+      render: (b) =>
+        (b.onclick = (e) => {
+          pullReferences().then((bts) => {
+            const { blockUid } = getUidsFromButton(b);
+            const parentUid = getParentUidByBlockUid(blockUid);
+            const order = getOrderByBlockUid(blockUid);
+            return Promise.all([
+              updateBlock({ text: bts[0], uid: blockUid }),
+              ...bts.slice(1).map((text, o) =>
+                createBlock({
+                  parentUid,
+                  order: o + order + 1,
+                  node: { text },
+                })
               ),
-          ]);
-        });
-        e.preventDefault();
-        e.stopPropagation();
-      }),
-  });
+            ]);
+          });
+          e.preventDefault();
+          e.stopPropagation();
+        }),
+    });
 
-  const isMoveTodoEnabled = getBasicTreeByParentUid(
-    getPageUidByPageTitle(CONFIG)
-  ).find((t) => toFlexRegex("move todos").test(t.text));
-  const isMoveTagEnabled = getBasicTreeByParentUid(
-    getPageUidByPageTitle(CONFIG)
-  ).find((t) => toFlexRegex("move tags").test(t.text));
-  if (isMoveTodoEnabled) {
-    createHTMLObserver({
-      tag: "LABEL",
-      className: "check-container",
-      callback: (l: HTMLLabelElement) => {
-        const input = l.getElementsByTagName("input")[0];
-        if (!input.checked) {
-          const blockUid = getBlockUidFromTarget(input);
+    const isMoveTodoEnabled = getBasicTreeByParentUid(
+      getPageUidByPageTitle(CONFIG)
+    ).find((t) => toFlexRegex("move todos").test(t.text));
+    const isMoveTagEnabled = getBasicTreeByParentUid(
+      getPageUidByPageTitle(CONFIG)
+    ).find((t) => toFlexRegex("move tags").test(t.text));
+    if (isMoveTodoEnabled) {
+      createHTMLObserver({
+        tag: "LABEL",
+        className: "check-container",
+        callback: (l: HTMLLabelElement) => {
+          const input = l.getElementsByTagName("input")[0];
+          if (!input.checked) {
+            const blockUid = getBlockUidFromTarget(input);
+            const title = getPageTitleByBlockUid(blockUid);
+            if (DAILY_NOTE_PAGE_REGEX.test(title)) {
+              const block = input.closest(".roam-block") as HTMLDivElement;
+              if (!block.hasAttribute("data-roamjs-move-ref")) {
+                block.setAttribute("data-roamjs-move-ref", "true");
+                const p = document.createElement("span");
+                p.onmousedown = (e) => e.stopPropagation();
+                block.appendChild(p);
+                render({
+                  p,
+                  blockUid,
+                  archivedDefault: toFlexRegex("archived").test(
+                    isMoveTodoEnabled.children[0]?.text
+                  ),
+                });
+              }
+            }
+          }
+        },
+      });
+    }
+    if (isMoveTagEnabled) {
+      createHTMLObserver({
+        tag: "SPAN",
+        className: "rm-page-ref",
+        callback: (s: HTMLSpanElement) => {
+          const blockUid = getBlockUidFromTarget(s);
           const title = getPageTitleByBlockUid(blockUid);
           if (DAILY_NOTE_PAGE_REGEX.test(title)) {
-            const block = input.closest(".roam-block") as HTMLDivElement;
+            const block = s.closest(".roam-block") as HTMLDivElement;
             if (!block.hasAttribute("data-roamjs-move-ref")) {
               block.setAttribute("data-roamjs-move-ref", "true");
               const p = document.createElement("span");
@@ -110,47 +142,21 @@ runExtension("pull-references", () => {
                 archivedDefault: toFlexRegex("archived").test(
                   isMoveTodoEnabled.children[0]?.text
                 ),
+                move: true,
               });
             }
           }
-        }
-      },
-    });
-  }
-  if (isMoveTagEnabled) {
-    createHTMLObserver({
-      tag: "SPAN",
-      className: "rm-page-ref",
-      callback: (s: HTMLSpanElement) => {
-        const blockUid = getBlockUidFromTarget(s);
-        const title = getPageTitleByBlockUid(blockUid);
-        if (DAILY_NOTE_PAGE_REGEX.test(title)) {
-          const block = s.closest(".roam-block") as HTMLDivElement;
-          if (!block.hasAttribute("data-roamjs-move-ref")) {
-            block.setAttribute("data-roamjs-move-ref", "true");
-            const p = document.createElement("span");
-            p.onmousedown = (e) => e.stopPropagation();
-            block.appendChild(p);
-            render({
-              p,
-              blockUid,
-              archivedDefault: toFlexRegex("archived").test(
-                isMoveTodoEnabled.children[0]?.text
-              ),
-              move: true,
-            });
-          }
-        }
-      },
-    });
-  }
+        },
+      });
+    }
 
-  registerSmartBlocksCommand({
-    text: "PULLREFERENCES",
-    handler: (context: { targetUid: string }) => () =>
-      pullReferences(
-        getPageTitleByBlockUid(context.targetUid) ||
-          getPageTitleByPageUid(context.targetUid)
-      ),
-  });
+    registerSmartBlocksCommand({
+      text: "PULLREFERENCES",
+      handler: (context: { targetUid: string }) => () =>
+        pullReferences(
+          getPageTitleByBlockUid(context.targetUid) ||
+            getPageTitleByPageUid(context.targetUid)
+        ),
+    });
+  },
 });
