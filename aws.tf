@@ -51,10 +51,6 @@ variable "clerk_dev_api_key" {
     type = string
 }
 
-variable "iframely_api_key" {
-  type = string
-}
-
 variable "diahook_secret" {
   type = string
 }
@@ -127,7 +123,6 @@ module "aws-serverless-backend" {
         "dropbox-auth/post", // MOVE
         "end-service/post",
         "finish-start-service/post",
-        "iframely/post", // MOVE
         "invoices/get",
         "is-subscribed/get",
         "mixpanel/post", // MOVE
@@ -505,12 +500,6 @@ resource "github_actions_secret" "cloudfront_arn" {
   plaintext_value  = module.aws_static_site.cloudfront_arn
 }
 
-resource "github_actions_secret" "iframely_api_key" {
-  repository       = "roamjs-com"
-  secret_name      = "IFRAMELY_API_KEY"
-  plaintext_value  = var.iframely_api_key
-}
-
 resource "github_actions_secret" "diahook_secret" {
   repository       = "roamjs-com"
   secret_name      = "DIAHOOK_SECRET"
@@ -575,10 +564,6 @@ module "roamjs_lambda" {
     },
     {
       path ="dropbox-auth", 
-      method ="post"
-    },
-    {
-      path = "iframely", 
       method ="post"
     },
     {

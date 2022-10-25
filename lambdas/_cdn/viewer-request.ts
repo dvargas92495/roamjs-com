@@ -34,6 +34,7 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/todont": "/extensions/todo-trigger",
   "/extensions/weekly-notes": "/extensions/workbench/weekly-notes",
   "/extensions/sidebar": "https://github.com/mlava/workspaces",
+  "/extensions/iframely": "/extensions"
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
