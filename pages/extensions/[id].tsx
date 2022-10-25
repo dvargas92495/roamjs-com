@@ -203,6 +203,12 @@ const ExtensionPage = ({
         <>
           <H3>Installation</H3>
           <Body>
+            While the extension is under Roam Depot review, users could try out
+            the version that will soon be available from Roam Depot by following
+            the steps below. Note, this extension has not yet been approved by
+            the Roam team.
+          </Body>
+          <Body>
             Click the button below to download the extension. Unzip the package
             to a new directory. Then in your Roam Depot settings, enable
             developer mode and choose the new directory that you created.
