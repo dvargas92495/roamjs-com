@@ -159,6 +159,7 @@ const createSortIcons = (
 
 runExtension({
   extensionId: "sort-references",
+  migratedTo: "Query Builder",
   run: () => {
     const config = Object.fromEntries(
       getFullTreeByParentUid(getPageUidByPageTitle("roam/js/sort-references"))
