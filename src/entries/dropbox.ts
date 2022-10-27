@@ -23,6 +23,7 @@ const ID = "dropbox";
 const CONFIG = `roam/js/${ID}`;
 
 runExtension({
+  migratedTo: "Dropbox",
   extensionId: ID,
   run: () => {
     createConfigObserver({
