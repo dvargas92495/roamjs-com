@@ -37,7 +37,8 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/iframely": "/extensions",
   "/extensions/image-tagging": "/extensions/workbench/image_ocr",
   "/extensions/mobile-todos": "https://roamresearch.com/#/app/help/page/KnvM2AMyC",
-  "/extensions/mindmap": "/extensions/workbench/mindmap"
+  "/extensions/mindmap": "/extensions/workbench/mindmap",
+  "/extensions/postman": "/extensions/developer",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
