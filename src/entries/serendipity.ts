@@ -223,142 +223,84 @@ const pullDaily = async ({
   }, 1);
 };
 
-runExtension(ID, () => {
-  createConfigObserver({
-    title: CONFIG,
-    config: {
-      tabs: [
-        {
-          id: "daily",
-          fields: [
-            {
-              title: "includes",
-              Panel: PagesPanel,
-              description:
-                "Blocks and children tagged with one of these pages will be included for random selection.",
-              defaultValue: ["books"],
-            },
-            {
-              title: "excludes",
-              Panel: PagesPanel,
-              description:
-                "Blocks and children tagged with one of these pages will be excluded from random selection.",
-            },
-            {
-              title: "timeout",
-              Panel: NumberPanel,
-              description:
-                "Number of days that must pass for a block to be reconsidere for randoom selection",
-              defaultValue: DEFAULT_TIMEOUT_COUNT,
-            },
-            {
-              title: "label",
-              Panel: TextPanel,
-              description:
-                "The block text used that all chosen block refrences will be nested under.",
-              defaultValue: DEFAULT_DAILY_LABEL,
-            },
-            {
-              title: "count",
-              Panel: NumberPanel,
-              description: "The number of randomly chosen block references",
-              defaultValue: DEFAULT_DAILY_COUNT,
-            },
-            {
-              title: "character minimum",
-              Panel: NumberPanel,
-              description:
-                "Blocks must have at least this many characters to be considered for random selection.",
-            },
-            {
-              title: "word minimum",
-              Panel: NumberPanel,
-              description:
-                "Block must have at least this many words to be considered for random selection.",
-            },
-            {
-              title: "location",
-              Panel: SelectPanel,
-              description:
-                "Where the daily serendipity block should be inserted on the DNP",
-              options: {
-                items: ["TOP", "BOTTOM"],
+runExtension({
+  extensionId: ID,
+  migratedTo: "SmartBlocks (RANDOMBLOCKMENTION)",
+  run: () => {
+    createConfigObserver({
+      title: CONFIG,
+      config: {
+        tabs: [
+          {
+            id: "daily",
+            fields: [
+              {
+                title: "includes",
+                Panel: PagesPanel,
+                description:
+                  "Blocks and children tagged with one of these pages will be included for random selection.",
+                defaultValue: ["books"],
               },
-            } as Field<SelectField>,
-          ],
-        },
-      ],
-    },
-  });
-
-  if (!localStorageGet(LOCAL_STORAGE_KEY)) {
-    localStorageSet(LOCAL_STORAGE_KEY, JSON.stringify({ latest: 0 }));
-  }
-
-  const timeoutFunction = () => {
-    const date = new Date();
-    const todayPage = window.roamAlphaAPI.util.dateToPageTitle(date);
-    const tree =
-      getFullTreeByParentUid(
-        getPageUidByPageTitle("roam/js/serendipity")
-      ).children.find((t) => /daily/i.test(t.text))?.children || [];
-    const label = getSettingValueFromTree({
-      tree,
-      key: "label",
-      defaultValue: DEFAULT_DAILY_LABEL,
+              {
+                title: "excludes",
+                Panel: PagesPanel,
+                description:
+                  "Blocks and children tagged with one of these pages will be excluded from random selection.",
+              },
+              {
+                title: "timeout",
+                Panel: NumberPanel,
+                description:
+                  "Number of days that must pass for a block to be reconsidere for randoom selection",
+                defaultValue: DEFAULT_TIMEOUT_COUNT,
+              },
+              {
+                title: "label",
+                Panel: TextPanel,
+                description:
+                  "The block text used that all chosen block refrences will be nested under.",
+                defaultValue: DEFAULT_DAILY_LABEL,
+              },
+              {
+                title: "count",
+                Panel: NumberPanel,
+                description: "The number of randomly chosen block references",
+                defaultValue: DEFAULT_DAILY_COUNT,
+              },
+              {
+                title: "character minimum",
+                Panel: NumberPanel,
+                description:
+                  "Blocks must have at least this many characters to be considered for random selection.",
+              },
+              {
+                title: "word minimum",
+                Panel: NumberPanel,
+                description:
+                  "Block must have at least this many words to be considered for random selection.",
+              },
+              {
+                title: "location",
+                Panel: SelectPanel,
+                description:
+                  "Where the daily serendipity block should be inserted on the DNP",
+                options: {
+                  items: ["TOP", "BOTTOM"],
+                },
+              } as Field<SelectField>,
+            ],
+          },
+        ],
+      },
     });
-    const { latest } = JSON.parse(localStorageGet(LOCAL_STORAGE_KEY)) as {
-      latest: number;
-    };
-    if (
-      !getBlockUidByTextOnPage({ text: label, title: todayPage }) &&
-      isAfter(startOfDay(date), startOfDay(latest))
-    ) {
-      pullDaily({ date, tree, label });
+
+    if (!localStorageGet(LOCAL_STORAGE_KEY)) {
+      localStorageSet(LOCAL_STORAGE_KEY, JSON.stringify({ latest: 0 }));
     }
-    const tomorrow = addDays(startOfDay(date), 1);
-    setTimeout(timeoutFunction, differenceInMilliseconds(tomorrow, date));
-  };
-  timeoutFunction();
 
-  createButtonObserver({
-    shortcut: "serendipity",
-    attribute: "serendipity-daily",
-    render: (b: HTMLButtonElement) => {
-      const { blockUid } = getUidsFromButton(b);
-      const todayPage = getPageTitleByBlockUid(blockUid);
-      if (DAILY_NOTE_PAGE_REGEX.test(todayPage)) {
-        b.onclick = () =>
-          pullDaily({
-            date: window.roamAlphaAPI.util.pageTitleToDate(todayPage),
-          });
-      } else {
-        b.onclick = () => pullDaily({ date: new Date(), isDate: false });
-      }
-    },
-  });
-
-  window.roamAlphaAPI.ui.commandPalette.addCommand({
-    label: "Run Serendipity",
-    callback: async () => {
-      const currentUid = await window.roamAlphaAPI.ui.mainWindow
-        .getOpenPageOrBlockUid()
-        .then((u) => u || window.roamAlphaAPI.util.dateToPageUid(new Date()));
-      const todayPage = getPageTitleByPageUid(currentUid);
-      if (DAILY_NOTE_PAGE_REGEX.test(todayPage)) {
-        pullDaily({
-          date: window.roamAlphaAPI.util.pageTitleToDate(todayPage),
-        });
-      } else {
-        pullDaily({ date: new Date(), isDate: false });
-      }
-    },
-  });
-
-  createBlockObserver((b) => {
-    const { blockUid } = getUids(b);
-    const parentUid = getPageTitleByBlockUid(blockUid);
-    if (parentUid.length === 10) {
+    const timeoutFunction = () => {
+      const date = new Date();
+      const todayPage = window.roamAlphaAPI.util.dateToPageTitle(date);
       const tree =
         getFullTreeByParentUid(
           getPageUidByPageTitle("roam/js/serendipity")
@@ -368,20 +310,82 @@ runExtension(ID, () => {
         key: "label",
         defaultValue: DEFAULT_DAILY_LABEL,
       });
-      const text = getTextByBlockUid(blockUid);
-      if (text === label) {
-        const container = b.closest(".rm-block-main");
-        const icon = createIconButton("arrow-top-right");
-        icon.style.position = "absolute";
-        icon.style.top = "0";
-        icon.style.right = "0";
-        icon.addEventListener("click", () => {
-          getFullTreeByParentUid(blockUid).children.forEach((t) =>
-            openBlockInSidebar(/\(\((.*?)\)\)/.exec(t.text)?.[1])
-          );
-        });
-        container.append(icon);
+      const { latest } = JSON.parse(localStorageGet(LOCAL_STORAGE_KEY)) as {
+        latest: number;
+      };
+      if (
+        !getBlockUidByTextOnPage({ text: label, title: todayPage }) &&
+        isAfter(startOfDay(date), startOfDay(latest))
+      ) {
+        pullDaily({ date, tree, label });
       }
-    }
-  });
+      const tomorrow = addDays(startOfDay(date), 1);
+      setTimeout(timeoutFunction, differenceInMilliseconds(tomorrow, date));
+    };
+    timeoutFunction();
+
+    createButtonObserver({
+      shortcut: "serendipity",
+      attribute: "serendipity-daily",
+      render: (b: HTMLButtonElement) => {
+        const { blockUid } = getUidsFromButton(b);
+        const todayPage = getPageTitleByBlockUid(blockUid);
+        if (DAILY_NOTE_PAGE_REGEX.test(todayPage)) {
+          b.onclick = () =>
+            pullDaily({
+              date: window.roamAlphaAPI.util.pageTitleToDate(todayPage),
+            });
+        } else {
+          b.onclick = () => pullDaily({ date: new Date(), isDate: false });
+        }
+      },
+    });
+
+    window.roamAlphaAPI.ui.commandPalette.addCommand({
+      label: "Run Serendipity",
+      callback: async () => {
+        const currentUid = await window.roamAlphaAPI.ui.mainWindow
+          .getOpenPageOrBlockUid()
+          .then((u) => u || window.roamAlphaAPI.util.dateToPageUid(new Date()));
+        const todayPage = getPageTitleByPageUid(currentUid);
+        if (DAILY_NOTE_PAGE_REGEX.test(todayPage)) {
+          pullDaily({
+            date: window.roamAlphaAPI.util.pageTitleToDate(todayPage),
+          });
+        } else {
+          pullDaily({ date: new Date(), isDate: false });
+        }
+      },
+    });
+
+    createBlockObserver((b) => {
+      const { blockUid } = getUids(b);
+      const parentUid = getPageTitleByBlockUid(blockUid);
+      if (parentUid.length === 10) {
+        const tree =
+          getFullTreeByParentUid(
+            getPageUidByPageTitle("roam/js/serendipity")
+          ).children.find((t) => /daily/i.test(t.text))?.children || [];
+        const label = getSettingValueFromTree({
+          tree,
+          key: "label",
+          defaultValue: DEFAULT_DAILY_LABEL,
+        });
+        const text = getTextByBlockUid(blockUid);
+        if (text === label) {
+          const container = b.closest(".rm-block-main");
+          const icon = createIconButton("arrow-top-right");
+          icon.style.position = "absolute";
+          icon.style.top = "0";
+          icon.style.right = "0";
+          icon.addEventListener("click", () => {
+            getFullTreeByParentUid(blockUid).children.forEach((t) =>
+              openBlockInSidebar(/\(\((.*?)\)\)/.exec(t.text)?.[1])
+            );
+          });
+          container.append(icon);
+        }
+      }
+    });
+  },
 });

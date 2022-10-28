@@ -36,9 +36,12 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/sidebar": "https://github.com/mlava/workspaces",
   "/extensions/iframely": "/extensions",
   "/extensions/image-tagging": "/extensions/workbench/image_ocr",
-  "/extensions/mobile-todos": "https://roamresearch.com/#/app/help/page/KnvM2AMyC",
+  "/extensions/mobile-todos":
+    "https://roamresearch.com/#/app/help/page/KnvM2AMyC",
   "/extensions/mindmap": "/extensions/workbench/mindmap",
   "/extensions/postman": "/extensions/developer",
+  "/extensions/serendipity":
+    "/extensions/smartblocks/command_reference#Md9KfcSaH",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
