@@ -42,6 +42,7 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/postman": "/extensions/developer",
   "/extensions/serendipity":
     "/extensions/smartblocks/command_reference#Md9KfcSaH",
+  "/extensions/sparql": "/extensions/developer",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
