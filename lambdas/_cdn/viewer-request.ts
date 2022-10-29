@@ -43,6 +43,8 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/serendipity":
     "/extensions/smartblocks/command_reference#Md9KfcSaH",
   "/extensions/sparql": "/extensions/developer",
+  "/extensions/tally": "/extensions/workbench/tally",
+  "/extensions/tag-cycle": "/extensions/workbench/tag_cycle",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
