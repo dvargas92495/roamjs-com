@@ -168,24 +168,6 @@ export const isTagOnPage = ({
     )}"]]`
   )?.[0]?.[0];
 
-export const getPageTitle = (e: Element): ChildNode => {
-  const container =
-    e.closest(".roam-log-page") ||
-    e.closest(".rm-sidebar-outline") ||
-    e.closest(".roam-article") ||
-    document;
-  const heading =
-    (container.getElementsByClassName(
-      "rm-title-display"
-    )[0] as HTMLHeadingElement) ||
-    (container.getElementsByClassName(
-      "rm-zoom-item-content"
-    )[0] as HTMLSpanElement);
-  return Array.from(heading.childNodes).find(
-    (n) => n.nodeName === "#text" || n.nodeName === "SPAN"
-  );
-};
-
 export const getChildrenLengthByPageTitle = (title: string): number =>
   window.roamAlphaAPI.q(
     `[:find ?c :where [?e :block/children ?c] [?e :node/title "${title}"]]`

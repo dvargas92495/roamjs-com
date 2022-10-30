@@ -1,5 +1,5 @@
 import { differenceInMilliseconds } from "date-fns";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import getUidsFromId from "roamjs-components/dom/getUidsFromId";
 import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParentUid";
@@ -43,14 +43,6 @@ export const useArrowKeyDown = <T>({
     onKeyDown,
   };
 };
-
-export const useDocumentKeyDown = (
-  eventListener: (e: KeyboardEvent) => void
-): void =>
-  useEffect(() => {
-    document.addEventListener("keydown", eventListener);
-    return () => document.removeEventListener("keydown", eventListener);
-  }, [eventListener]);
 
 export const getRenderRoot = (id: string): HTMLDivElement => {
   const app = document.getElementById("app");

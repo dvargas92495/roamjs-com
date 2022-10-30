@@ -113,7 +113,6 @@
     "@clerk/clerk-react": "^2.12.6",
     "@clerk/clerk-sdk-node": "^0.5.2",
     "@dvargas92495/app": "^0.8.11",
-    "@dvargas92495/react-draft-wysiwyg": "^1.15.1",
     "@dvargas92495/ui": "^0.32.23",
     "@giphy/js-fetch-api": "^2.0.1",
     "@giphy/react-components": "^2.0.1",
