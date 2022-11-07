@@ -3,7 +3,7 @@ terraform {
     hostname = "app.terraform.io"
     organization = "VargasArts"
     workspaces {
-      prefix = "roam-js-extensions"
+      name = "roam-js-extensions"
     }
   }
   
@@ -39,6 +39,10 @@ variable "slack_client_secret" {
     type = string
 }
 
+variable "dropbox_client_secret" {
+  type = string
+}
+
 variable "clerk_api_key" {
     type = string
 }
@@ -52,10 +56,6 @@ variable "diahook_secret" {
 }
 
 variable "dropbox_client_id" {
-  type = string
-}
-
-variable "dropbox_client_secret" {
   type = string
 }
 
@@ -453,12 +453,6 @@ resource "github_actions_secret" "slack_client_id" {
   plaintext_value  = var.slack_client_id
 }
 
-resource "github_actions_secret" "slack_client_secret" {
-  repository       = "roamjs-com"
-  secret_name      = "SLACK_CLIENT_SECRET"
-  plaintext_value  = var.slack_client_secret
-}
-
 resource "github_actions_secret" "clerk_api_key" {
   repository       = "roamjs-com"
   secret_name      = "CLERK_API_KEY"
@@ -499,6 +493,12 @@ resource "github_actions_secret" "dropbox_client_secret" {
   repository       = "roamjs-com"
   secret_name      = "DROPBOX_CLIENT_SECRET"
   plaintext_value  = var.dropbox_client_secret
+}
+
+resource "github_actions_secret" "slack_client_secret" {
+  repository       = "roamjs-com"
+  secret_name      = "SLACK_CLIENT_SECRET"
+  plaintext_value  = var.slack_client_secret
 }
 
 resource "github_actions_secret" "encryption_secret" {
