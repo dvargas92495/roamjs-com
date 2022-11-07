@@ -23,10 +23,6 @@ variable "stripe_public" {
     type = string
 }
 
-variable "mixpanel_token" {
-    type = string
-}
-
 variable "mapbox_token" {
     type = string
 }
@@ -111,36 +107,29 @@ module "aws-serverless-backend" {
     api_name = "roam-js-extensions"
     domain = "roamjs.com"
     paths = [
-        "article/post", // MOVE
         "auth/get",
-        "auth/post", // MOVE
         "connected/get",
         "convertkit/get",
         "convertkit/post",
         "convertkit/delete",
         "customer/post",
         "customer/put",
-        "dropbox-auth/post", // MOVE
         "end-service/post",
         "finish-start-service/post",
         "invoices/get",
         "is-subscribed/get",
-        "mixpanel/post", // MOVE
         "payment-methods/delete",
         "payment-methods/get",
         "payment-methods/post",
         "payment-methods/put",
-        "postman/post", // MOVE
         "publish/post",
         "request-path/get",
-        "slack-url/post", // MOVE
         "sponsor-card/post",
         "sponsorships/post",
         "start-service/post",
         "subscriptions/get",
         "token/get",
         "token/post",
-        "versions/get", // MOVE
     ]
     sizes = {
       "publish/post": 1024
@@ -446,12 +435,6 @@ resource "github_actions_secret" "stripe_public" {
   plaintext_value  = var.stripe_public
 }
 
-resource "github_actions_secret" "mixpanel_token" {
-  repository       = "roamjs-com"
-  secret_name      = "MIXPANEL_TOKEN"
-  plaintext_value  = var.mixpanel_token
-}
-
 resource "github_actions_secret" "mapbox_token" {
   repository       = "roamjs-com"
   secret_name      = "MAPBOX_TOKEN"
@@ -567,20 +550,12 @@ module "roamjs_lambda" {
       method ="post"
     },
     {
-      path = "mixpanel", 
-      method ="post"
-    },
-    {
       path = "postman", 
       method ="post"
     },
     {
       path ="slack-url", 
       method ="post"
-    },
-    {
-      path ="versions", 
-      method ="get"
     }
   ]
   aws_access_token = module.aws_static_site.deploy-id

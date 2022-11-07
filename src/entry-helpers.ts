@@ -2,8 +2,6 @@ import {
   syncParseRoamBlocksToHtml,
 } from "roamjs-components/dom/parseRoamBlocksToHtml";
 import { isIOS, isMacOs } from "mobile-device-detect";
-import { Dict } from "mixpanel-browser";
-import axios, { AxiosResponse } from "axios";
 import type {
   SidebarWindow,
   TreeNode,
@@ -14,12 +12,6 @@ import getUids from "roamjs-components/dom/getUids";
 import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
 import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
 import getPageTitleByBlockUid from "roamjs-components/queries/getPageTitleByBlockUid";
-
-export const track = (
-  eventName: string,
-  properties?: Dict
-): Promise<AxiosResponse> =>
-  axios.post(`https://lambda.roamjs.com/mixpanel`, { eventName, properties });
 
 // update-block replaces with a new textarea
 export const fixCursorById = ({
