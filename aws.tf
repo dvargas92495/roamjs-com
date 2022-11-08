@@ -10,7 +10,6 @@ terraform {
   required_providers {
     github = {
       source = "integrations/github"
-      version = "4.2.0"
     }
   }
 }
@@ -39,10 +38,6 @@ variable "slack_client_secret" {
     type = string
 }
 
-variable "dropbox_client_secret" {
-  type = string
-}
-
 variable "clerk_api_key" {
     type = string
 }
@@ -52,10 +47,6 @@ variable "clerk_dev_api_key" {
 }
 
 variable "diahook_secret" {
-  type = string
-}
-
-variable "dropbox_client_id" {
   type = string
 }
 
@@ -483,18 +474,6 @@ resource "github_actions_secret" "diahook_secret" {
   plaintext_value  = var.diahook_secret
 }
 
-resource "github_actions_secret" "dropbox_client_id" {
-  repository       = "roamjs-com"
-  secret_name      = "DROPBOX_CLIENT_ID"
-  plaintext_value  = var.dropbox_client_id
-}
-
-resource "github_actions_secret" "dropbox_client_secret" {
-  repository       = "roamjs-com"
-  secret_name      = "DROPBOX_CLIENT_SECRET"
-  plaintext_value  = var.dropbox_client_secret
-}
-
 resource "github_actions_secret" "slack_client_secret" {
   repository       = "roamjs-com"
   secret_name      = "SLACK_CLIENT_SECRET"
@@ -529,39 +508,6 @@ resource "github_actions_secret" "roam_api_token" {
   repository       = "roamjs-com"
   secret_name      = "ROAM_API_TOKEN"
   plaintext_value  = var.roam_api_token
-}
-
-// TODO: REMOVE WHEN RELATED EXTENSIONS HAVE BEEN MOVED
-module "roamjs_lambda" {
-  source = "dvargas92495/lambda/roamjs"
-  providers = {
-    aws = aws
-    github = github
-  }
-
-  name = "com"
-  lambdas = [
-    {
-      path = "article", 
-      method ="post"
-    },
-    {
-      path ="dropbox-auth", 
-      method ="post"
-    },
-    {
-      path = "postman", 
-      method ="post"
-    },
-    {
-      path ="slack-url", 
-      method ="post"
-    }
-  ]
-  aws_access_token = module.aws_static_site.deploy-id
-  aws_secret_token = module.aws_static_site.deploy-secret
-  github_token     = "github_token"
-  developer_token  = "developer_token"
 }
 
 data "aws_iam_user" "deployer" {
