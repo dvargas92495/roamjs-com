@@ -4,20 +4,24 @@ import getFullTreeByParentUid from "roamjs-components/queries/getFullTreeByParen
 import runExtension from "roamjs-components/util/runExtension";
 import { renderTallyCounter } from "../components/TallyCounter";
 
-runExtension("tally", () => {
-  createButtonObserver({
-    shortcut: "tally",
-    attribute: "tally-button",
-    render: (b: HTMLButtonElement) => {
-      const { blockUid } = getUidsFromButton(b);
-      const tree = getFullTreeByParentUid(blockUid);
-      const initialValueNode = tree.children.find(
-        (c) => !isNaN(parseInt(c.text))
-      );
-      const initialValue = initialValueNode
-        ? parseInt(initialValueNode.text)
-        : 0;
-      renderTallyCounter(initialValue, b.parentElement);
-    },
-  });
+runExtension({
+  extensionId: "tally",
+  migratedTo: "WorkBench",
+  run: () => {
+    createButtonObserver({
+      shortcut: "tally",
+      attribute: "tally-button",
+      render: (b: HTMLButtonElement) => {
+        const { blockUid } = getUidsFromButton(b);
+        const tree = getFullTreeByParentUid(blockUid);
+        const initialValueNode = tree.children.find(
+          (c) => !isNaN(parseInt(c.text))
+        );
+        const initialValue = initialValueNode
+          ? parseInt(initialValueNode.text)
+          : 0;
+        renderTallyCounter(initialValue, b.parentElement);
+      },
+    });
+  },
 });

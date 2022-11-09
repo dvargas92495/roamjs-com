@@ -93,68 +93,72 @@ const getMarkdown = (): string => {
   return nodes.map((c) => toMarkdown({ c, i: 0 })).join("\n");
 };
 
-runExtension("markmap", () => {
-  createConfigObserver({
-    title: CONFIG,
-    config: {
-      tabs: [
-        {
-          id: "home",
-          fields: [
-            {
-              title: "hide tags",
-              description: "Whether or not to hide tag syntax from mindmap",
-              Panel: FlagPanel,
-            },
-            {
-              title: "hide images",
-              description: "Whether or not to filter out images from mindmap",
-              Panel: FlagPanel,
-            },
-          ],
-        },
-      ],
-    },
-  });
+runExtension({
+  extensionId: "markmap",
+  migratedTo: "workbench",
+  run: () => {
+    createConfigObserver({
+      title: CONFIG,
+      config: {
+        tabs: [
+          {
+            id: "home",
+            fields: [
+              {
+                title: "hide tags",
+                description: "Whether or not to hide tag syntax from mindmap",
+                Panel: FlagPanel,
+              },
+              {
+                title: "hide images",
+                description: "Whether or not to filter out images from mindmap",
+                Panel: FlagPanel,
+              },
+            ],
+          },
+        ],
+      },
+    });
 
-  createHTMLObserver({
-    callback: (u: HTMLUListElement) => {
-      const lis = Array.from(u.getElementsByTagName("li")).map(
-        (l: HTMLLIElement) => l.innerText.trim()
-      );
-      if (
-        lis.includes("Settings") &&
-        !u.getAttribute("data-roamjs-has-markmap")
-      ) {
-        u.setAttribute("data-roamjs-has-markmap", "true");
-        u.appendChild(div);
-        render({ parent: div, getMarkdown, mode: "menu" });
-      }
-    },
-    tag: "UL",
-    className: "bp3-menu",
-  });
+    createHTMLObserver({
+      callback: (u: HTMLUListElement) => {
+        const lis = Array.from(u.getElementsByTagName("li")).map(
+          (l: HTMLLIElement) => l.innerText.trim()
+        );
+        if (
+          lis.includes("Settings") &&
+          !u.getAttribute("data-roamjs-has-markmap")
+        ) {
+          u.setAttribute("data-roamjs-has-markmap", "true");
+          u.appendChild(div);
+          render({ parent: div, getMarkdown, mode: "menu" });
+        }
+      },
+      tag: "UL",
+      className: "bp3-menu",
+    });
 
-  createButtonObserver({
-    shortcut: "mindmap",
-    attribute: "open-mindmap",
-    render: (b: HTMLButtonElement) =>
-      render({ parent: b.parentElement, getMarkdown, mode: "button" }),
-  });
+    createButtonObserver({
+      shortcut: "mindmap",
+      attribute: "open-mindmap",
+      render: (b: HTMLButtonElement) =>
+        render({ parent: b.parentElement, getMarkdown, mode: "button" }),
+    });
 
-  createHTMLObserver({
-    tag: "span",
-    className: NODE_CLASSNAME,
-    useBody: true,
-    callback: (s: HTMLSpanElement) => {
-      Array.from(s.getElementsByTagName("img"))
-        .filter((i) => !i.hasAttribute("data-roamjs-image-preview"))
-        .forEach((i) => {
-          const span = document.createElement("span");
-          i.parentElement.insertBefore(span, i);
-          imageRender({ p: span, src: i.src });
-          i.remove();
-        });
-    },
-  });
+    createHTMLObserver({
+      tag: "span",
+      className: NODE_CLASSNAME,
+      useBody: true,
+      callback: (s: HTMLSpanElement) => {
+        Array.from(s.getElementsByTagName("img"))
+          .filter((i) => !i.hasAttribute("data-roamjs-image-preview"))
+          .forEach((i) => {
+            const span = document.createElement("span");
+            i.parentElement.insertBefore(span, i);
+            imageRender({ p: span, src: i.src });
+            i.remove();
+          });
+      },
+    });
+  },
 });
