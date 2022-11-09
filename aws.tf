@@ -512,6 +512,18 @@ resource "github_actions_secret" "roam_api_token" {
   plaintext_value  = var.roam_api_token
 }
 
+resource "github_actions_secret" "deploy_aws_access_key" {
+  repository       = "roamjs-com"
+  secret_name      = "DEPLOY_AWS_ACCESS_KEY"
+  plaintext_value  = module.aws_static_site.deploy-id
+}
+
+resource "github_actions_secret" "deploy_aws_access_secret" {
+  repository       = "roamjs-com"
+  secret_name      = "DEPLOY_AWS_ACCESS_SECRET"
+  plaintext_value  = module.aws_static_site.deploy-secret
+}
+
 data "aws_iam_user" "deployer" {
   user_name = "roam-js-extensions-lambda"
 }
