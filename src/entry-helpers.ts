@@ -8,7 +8,6 @@ import type {
   ViewType,
 } from "roamjs-components/types";
 import { getParseInline } from "roamjs-components/marked";
-import getUids from "roamjs-components/dom/getUids";
 import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
 import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
 import getPageTitleByBlockUid from "roamjs-components/queries/getPageTitleByBlockUid";
@@ -32,96 +31,6 @@ export const fixCursorById = ({
     }
     textArea.setSelectionRange(start, end);
   }, 100);
-
-export const replaceText = ({
-  before,
-  after,
-  prepend,
-}: {
-  before: string;
-  after: string;
-  prepend?: boolean;
-}): void => {
-  const textArea = document.activeElement as HTMLTextAreaElement;
-  const id = textArea.id;
-  const oldValue = textArea.value;
-  const start = textArea.selectionStart;
-  const end = textArea.selectionEnd;
-  const text = !before
-    ? prepend
-      ? `${after} ${oldValue}`
-      : `${oldValue}${after}`
-    : oldValue.replace(`${before}${!after && prepend ? " " : ""}`, after);
-  const { blockUid } = getUids(textArea);
-  window.roamAlphaAPI.updateBlock({ block: { string: text, uid: blockUid } });
-  const diff = text.length - oldValue.length;
-  if (diff !== 0) {
-    let index = 0;
-    const maxIndex = Math.min(
-      Math.max(oldValue.length, text.length),
-      Math.max(start, end) + 1
-    );
-    for (index = 0; index < maxIndex; index++) {
-      if (oldValue.charAt(index) !== text.charAt(index)) {
-        break;
-      }
-    }
-    const newStart = index > start ? start : start + diff;
-    const newEnd = index > end ? end : end + diff;
-    if (newStart !== start || newEnd !== end) {
-      fixCursorById({
-        id,
-        start: newStart,
-        end: newEnd,
-      });
-    }
-  }
-};
-
-export const replaceTagText = ({
-  before,
-  after,
-  addHash = false,
-  prepend = false,
-}: {
-  before: string;
-  after: string;
-  addHash?: boolean;
-  prepend?: boolean;
-}): void => {
-  if (before) {
-    const textArea = document.activeElement as HTMLTextAreaElement;
-    if (textArea.value.includes(`#[[${before}]]`)) {
-      replaceText({
-        before: `#[[${before}]]`,
-        after: after ? `#[[${after}]]` : "",
-        prepend,
-      });
-    } else if (textArea.value.includes(`[[${before}]]`)) {
-      replaceText({
-        before: `[[${before}]]`,
-        after: after ? `[[${after}]]` : "",
-        prepend,
-      });
-    } else if (textArea.value.includes(`#${before}`)) {
-      const hashAfter = after.match(/(\s|\[\[.*\]\]|[^\x00-\xff])/)
-        ? `#[[${after}]]`
-        : `#${after}`;
-      replaceText({
-        before: `#${before}`,
-        after: after ? hashAfter : "",
-        prepend,
-      });
-    }
-  } else if (addHash) {
-    const hashAfter = after.match(/(\s|\[\[.*\]\]|[^\x00-\xff])/)
-      ? `#[[${after}]]`
-      : `#${after}`;
-    replaceText({ before: "", after: hashAfter, prepend });
-  } else {
-    replaceText({ before: "", after: `[[${after}]]`, prepend });
-  }
-};
 
 export const getCreatedTimeByTitle = (title: string): number => {
   const result = window.roamAlphaAPI.q(
