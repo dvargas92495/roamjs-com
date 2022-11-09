@@ -34,10 +34,6 @@ variable "slack_client_id" {
     type = string
 }
 
-variable "slack_client_secret" {
-    type = string
-}
-
 variable "clerk_api_key" {
     type = string
 }
@@ -474,12 +470,6 @@ resource "github_actions_secret" "diahook_secret" {
   repository       = "roamjs-com"
   secret_name      = "DIAHOOK_SECRET"
   plaintext_value  = var.diahook_secret
-}
-
-resource "github_actions_secret" "slack_client_secret" {
-  repository       = "roamjs-com"
-  secret_name      = "SLACK_CLIENT_SECRET"
-  plaintext_value  = var.slack_client_secret
 }
 
 resource "github_actions_secret" "encryption_secret" {
