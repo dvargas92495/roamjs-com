@@ -99,6 +99,8 @@ module "aws-serverless-backend" {
     domain = "roamjs.com"
     paths = [
         "auth/get",
+        // this is a DIFFERENT endpoint from the one in lambda.roamjs.com
+        "auth/post",
         "connected/get",
         "convertkit/get",
         "convertkit/post",
