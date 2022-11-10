@@ -56,15 +56,6 @@ export const wrapAxios = (
       headers: headers(event),
     }));
 
-export const userError = (
-  body: string,
-  event: APIGatewayProxyEvent
-): APIGatewayProxyResult => ({
-  statusCode: 400,
-  body,
-  headers: headers(event),
-});
-
 export const serverError = (
   body: string,
   event: Pick<APIGatewayProxyEvent, "headers">
