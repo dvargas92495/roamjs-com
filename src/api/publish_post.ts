@@ -7,6 +7,13 @@ const sts = new AWS.STS({ apiVersion: "2011-06-15" });
 export const handler: APIGatewayProxyHandler = authenticateDeveloper(
   (event) => {
     const userId = event.headers.Authorization;
+    if (userId !== "user_1pIwG1JD0nGguhKyk2izDGUjDOr") {
+      return Promise.resolve({
+        statusCode: 401,
+        body: "Only RoamJS can deploy extensions",
+        headers: headers(event),
+      });
+    }
     const { path } = JSON.parse(event.body || "{}");
     return sts
       .assumeRole({
