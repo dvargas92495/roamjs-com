@@ -30,7 +30,6 @@ import {
   isThankYouEmoji,
   CardGrid,
 } from "@dvargas92495/ui";
-import SponsorDialog from "../../components/SponsorDialog";
 import RoamJSDigest from "../../components/RoamJSDigest";
 import getMdxComponents from "../../components/MdxComponents";
 import fs from "fs";
@@ -263,25 +262,16 @@ const ExtensionPage = ({
         </ExternalLink>{" "}
         or click on the chat button on the bottom right.
       </Body>
-      {!premium && (
+      {!premium && !!sponsors?.length && (
         <>
           <Body>
-            If you get value from using this extension, consider sponsoring{" "}
-            {author.name} by clicking on the button below!
+            A special thanks to those who's contributions also helped make this
+            extension possible:
           </Body>
-          <SponsorDialog id={id} />
-          {!!sponsors?.length && (
-            <>
-              <Body>
-                A special thanks to those who's contributions also helped make
-                this extension possible:
-              </Body>
-              <ThankYou
-                sponsors={sponsors}
-                defaultImgSrc={"/sponsors/default.jpg"}
-              />
-            </>
-          )}
+          <ThankYou
+            sponsors={sponsors}
+            defaultImgSrc={"/sponsors/default.jpg"}
+          />
         </>
       )}
       {githubUrl && (

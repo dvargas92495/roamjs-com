@@ -3,8 +3,6 @@ import {
   Grid,
   Radio,
   Button,
-  H6,
-  Switch,
   FormControl,
   FormLabel,
   RadioGroup,
@@ -110,11 +108,7 @@ const SponsorCard = ({ source }: { source: string }): React.ReactElement => {
     (_, value) => setSponsorValue(value),
     [setSponsorValue]
   );
-  const [isMonthly, setIsMonthly] = useState(true);
-  const onSwitchChange = useCallback(
-    (_, checked) => setIsMonthly(checked),
-    [setIsMonthly]
-  );
+  const isMonthly = false;
   const onSetOtherValue = useCallback(
     (v: number) => setOtherValue(`${v}`),
     [setOtherValue]
@@ -150,22 +144,6 @@ const SponsorCard = ({ source }: { source: string }): React.ReactElement => {
   }, [value, isMonthly, setLoading]);
   return (
     <div>
-      <Grid component="label" container alignItems="center" spacing={1}>
-        <Grid item>
-          <H6>One-Time</H6>
-        </Grid>
-        <Grid item>
-          <Switch
-            checked={isMonthly}
-            onChange={onSwitchChange}
-            name="isMonthly"
-            color={"primary"}
-          />
-        </Grid>
-        <Grid item>
-          <H6>Monthly</H6>
-        </Grid>
-      </Grid>
       <FormControl component="fieldset" style={{ width: "100%" }}>
         <FormLabel component="legend">Amount</FormLabel>
         <RadioGroup
