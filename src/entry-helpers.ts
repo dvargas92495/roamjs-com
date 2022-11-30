@@ -1,12 +1,6 @@
-import {
-  syncParseRoamBlocksToHtml,
-} from "roamjs-components/dom/parseRoamBlocksToHtml";
+import { syncParseRoamBlocksToHtml } from "roamjs-components/dom/parseRoamBlocksToHtml";
 import { isIOS, isMacOs } from "mobile-device-detect";
-import type {
-  SidebarWindow,
-  TreeNode,
-  ViewType,
-} from "roamjs-components/types";
+import type { TreeNode, ViewType } from "roamjs-components/types/native";
 import { getParseInline } from "roamjs-components/marked";
 import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTitle";
 import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
@@ -148,32 +142,6 @@ export const extractTag = (tag: string): string =>
     : tag.startsWith("#")
     ? tag.substring(1)
     : tag;
-
-export const isPopoverThePageFilter = (popover?: HTMLElement): boolean => {
-  if (popover) {
-    const strongs = Array.from(popover.getElementsByTagName("strong")).map(
-      (e) => e.innerText
-    );
-    if (strongs.includes("Includes") && strongs.includes("Removes")) {
-      const transform = popover.style.transform;
-      // this is the only way I know how to differentiate between the two filters
-      if (
-        transform.startsWith("translate3d(") &&
-        transform.endsWith("px, 50px, 0px)")
-      ) {
-        return true;
-      }
-    }
-  }
-  return false;
-};
-
-export const getWindowUid = (w: SidebarWindow): string =>
-  w.type === "outline"
-    ? w["page-uid"]
-    : w.type === "mentions"
-    ? w["mentions-uid"]
-    : w["block-uid"];
 
 export const openBlock = (blockId?: string): void =>
   openBlockElement(document.getElementById(blockId));

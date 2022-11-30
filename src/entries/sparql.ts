@@ -58,108 +58,114 @@ const textareaRef: RenderProps["textareaRef"] = {
 };
 const queriesCache: RenderProps["queriesCache"] = {};
 
-runExtension(ID, () => {
-  createConfigObserver({
-    title: CONFIG,
-    config: {
-      tabs: [
-        {
-          id: "import",
-          fields: [
-            {
-              Panel: TextPanel,
-              title: "default label",
-              description:
-                "The default label each Sparql query will have on import",
-              defaultValue: DEFAULT_EXPORT_LABEL,
-            },
-            {
-              Panel: NumberPanel,
-              title: "default limit",
-              description:
-                "The default limit each Sparql query will have on import",
-              defaultValue: 10,
-            },
-            {
-              Panel: FlagPanel,
-              title: "qualifiers",
-              description:
-                "Whether sparql queries for blocks and pages should import qualifiers by default",
-            },
-          ],
-        },
-      ],
-    },
-  });
-
-  const queryUid = getShallowTreeByParentUid(
-    getPageUidByPageTitle(CONFIG)
-  ).find(({ text }) => toFlexRegex("queries").test(text))?.uid;
-  if (queryUid) {
-    getShallowTreeByParentUid(queryUid).forEach(({ uid, text }) => {
-      const cache = getShallowTreeByParentUid(uid);
-      queriesCache[text] = {
-        query: cache[0]?.text,
-        source: cache[1]?.text,
-        outputFormat: cache[2]?.text as OutputFormat,
-      };
+runExtension({
+  extensionId: ID,
+  migratedTo: "Developer",
+  run: () => {
+    createConfigObserver({
+      title: CONFIG,
+      config: {
+        tabs: [
+          {
+            id: "import",
+            fields: [
+              {
+                Panel: TextPanel,
+                title: "default label",
+                description:
+                  "The default label each Sparql query will have on import",
+                defaultValue: DEFAULT_EXPORT_LABEL,
+              },
+              {
+                Panel: NumberPanel,
+                title: "default limit",
+                description:
+                  "The default limit each Sparql query will have on import",
+                defaultValue: 10,
+              },
+              {
+                Panel: FlagPanel,
+                title: "qualifiers",
+                description:
+                  "Whether sparql queries for blocks and pages should import qualifiers by default",
+              },
+            ],
+          },
+        ],
+      },
     });
-  }
 
-  createHTMLObserver({
-    tag: "TEXTAREA",
-    className: "rm-block-input",
-    callback: (t: HTMLTextAreaElement) => (textareaRef.current = t),
-  });
-
-  createBlockObserver((b) => {
-    if (!b.hasAttribute("roamjs-sparql-update-button")) {
-      b.setAttribute("roamjs-sparql-update-button", "true");
-      const { blockUid } = getUids(b);
-      const queryInfo = queriesCache[blockUid];
-      if (queryInfo) {
-        const updateButton = createIconButton("refresh");
-        updateButton.style.float = "right";
-        updateButton.onmousedown = (e) => e.stopPropagation();
-        updateButton.onclick = () => {
-          getShallowTreeByParentUid(blockUid).forEach(({ uid }) =>
-            deleteBlock(uid)
-          );
-          runSparqlQuery({ ...queryInfo, parentUid: blockUid });
-          updateBlock({
-            uid: blockUid,
-            text: getLabel({
-              outputFormat: queryInfo.outputFormat,
-              label: getTextByBlockUid(blockUid).replace(
-                /(\d)?\d\/(\d)?\d\/\d\d\d\d, (\d)?\d:\d\d:\d\d [A|P]M/,
-                "{date}"
-              ),
-            }),
-          });
+    const queryUid = getShallowTreeByParentUid(
+      getPageUidByPageTitle(CONFIG)
+    ).find(({ text }) => toFlexRegex("queries").test(text))?.uid;
+    if (queryUid) {
+      getShallowTreeByParentUid(queryUid).forEach(({ uid, text }) => {
+        const cache = getShallowTreeByParentUid(uid);
+        queriesCache[text] = {
+          query: cache[0]?.text,
+          source: cache[1]?.text,
+          outputFormat: cache[2]?.text as OutputFormat,
         };
-        b.appendChild(updateButton);
-      }
+      });
     }
-  });
 
-  window.roamAlphaAPI.ui.commandPalette.addCommand({
-    label: "Run SPARQL Query",
-    callback: () =>
-      window.roamAlphaAPI.ui.mainWindow
-        .getOpenPageOrBlockUid()
-        .then((parentUid) => render({ textareaRef, queriesCache, parentUid })),
-  });
+    createHTMLObserver({
+      tag: "TEXTAREA",
+      className: "rm-block-input",
+      callback: (t: HTMLTextAreaElement) => (textareaRef.current = t),
+    });
 
-  createHTMLObserver({
-    callback: (s: HTMLSpanElement) => {
-      if (s.innerText === "sparql") {
-        const editor = s.closest(".rm-code-block");
-        if (editor && !editor.classList.contains("roamjs-sparql-editor")) {
-          editor.classList.add("roamjs-sparql-editor");
+    createBlockObserver((b) => {
+      if (!b.hasAttribute("roamjs-sparql-update-button")) {
+        b.setAttribute("roamjs-sparql-update-button", "true");
+        const { blockUid } = getUids(b);
+        const queryInfo = queriesCache[blockUid];
+        if (queryInfo) {
+          const updateButton = createIconButton("refresh");
+          updateButton.style.float = "right";
+          updateButton.onmousedown = (e) => e.stopPropagation();
+          updateButton.onclick = () => {
+            getShallowTreeByParentUid(blockUid).forEach(({ uid }) =>
+              deleteBlock(uid)
+            );
+            runSparqlQuery({ ...queryInfo, parentUid: blockUid });
+            updateBlock({
+              uid: blockUid,
+              text: getLabel({
+                outputFormat: queryInfo.outputFormat,
+                label: getTextByBlockUid(blockUid).replace(
+                  /(\d)?\d\/(\d)?\d\/\d\d\d\d, (\d)?\d:\d\d:\d\d [A|P]M/,
+                  "{date}"
+                ),
+              }),
+            });
+          };
+          b.appendChild(updateButton);
         }
       }
-    },
-    tag: "SPAN",
-    className: "bp3-button-text",
-  });
+    });
+
+    window.roamAlphaAPI.ui.commandPalette.addCommand({
+      label: "Run SPARQL Query",
+      callback: () =>
+        window.roamAlphaAPI.ui.mainWindow
+          .getOpenPageOrBlockUid()
+          .then((parentUid) =>
+            render({ textareaRef, queriesCache, parentUid })
+          ),
+    });
+
+    createHTMLObserver({
+      callback: (s: HTMLSpanElement) => {
+        if (s.innerText === "sparql") {
+          const editor = s.closest(".rm-code-block");
+          if (editor && !editor.classList.contains("roamjs-sparql-editor")) {
+            editor.classList.add("roamjs-sparql-editor");
+          }
+        }
+      },
+      tag: "SPAN",
+      className: "bp3-button-text",
+    });
+  },
 });

@@ -19,7 +19,6 @@ As part of a RoamJS RoamDepot effort started in July, 2022, we've started to mig
 - [Oura Ring](https://github.com/dvargas92495/roamjs-oura-ring)
 - [Presentation](https://github.com/dvargas92495/roamjs-presentation)
 - [Query Builder](https://github.com/dvargas92495/roamjs-query-builder)
-- [SamePage](https://github.com/dvargas92495/roamjs-samepage)
 - [Slack](https://github.com/dvargas92495/roamjs-slack)
 - [SmartBlocks](https://github.com/dvargas92495/roamjs-smartblocks)
 - [Static Site](https://github.com/dvargas92495/roamjs-static-site)

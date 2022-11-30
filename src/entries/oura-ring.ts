@@ -141,15 +141,19 @@ const importOuraRing = async (blockUid: string) => {
     });
 };
 
-runExtension("oura-ring", () => {
-  createButtonObserver({
-    attribute: OURA_COMMAND.replace(/\s/g, "-"),
-    shortcut: OURA_COMMAND,
-    render: (b) =>
-      (b.onclick = (e) => {
-        importOuraRing(getUidsFromButton(b).blockUid);
-        e.preventDefault();
-        e.stopPropagation();
-      }),
-  });
+runExtension({
+  migratedTo: "Oura Ring",
+  extensionId: "oura-ring",
+  run: () => {
+    createButtonObserver({
+      attribute: OURA_COMMAND.replace(/\s/g, "-"),
+      shortcut: OURA_COMMAND,
+      render: (b) =>
+        (b.onclick = (e) => {
+          importOuraRing(getUidsFromButton(b).blockUid);
+          e.preventDefault();
+          e.stopPropagation();
+        }),
+    });
+  },
 });
