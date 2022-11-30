@@ -6,49 +6,6 @@ import getPageUidByPageTitle from "roamjs-components/queries/getPageUidByPageTit
 import getTextByBlockUid from "roamjs-components/queries/getTextByBlockUid";
 import getPageTitleByBlockUid from "roamjs-components/queries/getPageTitleByBlockUid";
 
-// update-block replaces with a new textarea
-export const fixCursorById = ({
-  id,
-  start,
-  end,
-  focus,
-}: {
-  id: string;
-  start: number;
-  end: number;
-  focus?: boolean;
-}): number =>
-  window.setTimeout(() => {
-    const textArea = document.getElementById(id) as HTMLTextAreaElement;
-    if (focus) {
-      textArea.focus();
-    }
-    textArea.setSelectionRange(start, end);
-  }, 100);
-
-export const getCreatedTimeByTitle = (title: string): number => {
-  const result = window.roamAlphaAPI.q(
-    `[:find (pull ?e [:create/time]) :where [?e :node/title "${title.replace(
-      /"/g,
-      '\\"'
-    )}"]]`
-  )[0][0] as { time: number };
-  return result?.time || getEditTimeByTitle(title);
-};
-
-export const getEditTimeByTitle = (title: string): number => {
-  const result = window.roamAlphaAPI.q(
-    `[:find (pull ?e [:edit/time]) :where [?e :node/title "${title.replace(
-      /"/g,
-      '\\"'
-    )}"]]`
-  )[0][0] as { time: number };
-  return result?.time;
-};
-
-export const getWordCount = (str = ""): number =>
-  str.trim().split(/\s+/).length;
-
 export const isTagOnPage = ({
   tag,
   title,
@@ -62,51 +19,6 @@ export const isTagOnPage = ({
       '\\"'
     )}"]]`
   )?.[0]?.[0];
-
-export const getChildrenLengthByPageTitle = (title: string): number =>
-  window.roamAlphaAPI.q(
-    `[:find ?c :where [?e :block/children ?c] [?e :node/title "${title}"]]`
-  ).length;
-
-export const getChildrenLengthByPageUid = (uid: string): number =>
-  window.roamAlphaAPI.q(
-    `[:find ?c :where [?e :block/children ?c] [?e :block/uid "${uid}"]]`
-  ).length;
-
-export const getBlockDepthByBlockUid = (blockUid: string): number => {
-  return window.roamAlphaAPI.q(
-    `[:find ?p :where [?e :block/parents ?p] [?e :block/uid "${blockUid}"]]`
-  ).length;
-};
-
-export const getChildRefStringsByBlockUid = (b: string): string[] =>
-  window.roamAlphaAPI
-    .q(
-      `[:find (pull ?r [:block/string]) :where [?e :block/refs ?r] [?e :block/uid "${b}"]]`
-    )
-    .filter((r) => r.length && r[0])
-    .map((r: { string: string }[]) => r[0].string || "");
-
-export const createMobileIcon = (
-  id: string,
-  iconType: string
-): HTMLButtonElement => {
-  const iconButton = document.createElement("button");
-  iconButton.id = id;
-  iconButton.className =
-    "bp3-button bp3-minimal rm-mobile-button dont-unfocus-block";
-  iconButton.style.padding = "6px 4px 4px;";
-  const icon = document.createElement("i");
-  icon.className = `zmdi zmdi-hc-fw-rc zmdi-${iconType}`;
-  icon.style.cursor = "pointer";
-  icon.style.color = "rgb(92, 112, 128)";
-  icon.style.fontSize = "18px";
-  icon.style.transform = "scale(1.2)";
-  icon.style.fontWeight = "1.8";
-  icon.style.margin = "8px 4px";
-  iconButton.appendChild(icon);
-  return iconButton;
-};
 
 const isApple = isIOS || isMacOs;
 
@@ -124,15 +36,6 @@ const getRoamUrl = (blockUid?: string): string =>
   `${window.location.href.replace(/\/page\/.*$/, "")}${
     blockUid ? `/page/${blockUid}` : ""
   }`;
-
-export const BLOCK_REF_REGEX = new RegExp("\\(\\((..........?)\\)\\)", "g");
-
-export const DAILY_NOTE_PAGE_REGEX =
-  /(January|February|March|April|May|June|July|August|September|October|November|December) [0-3]?[0-9](st|nd|rd|th), [0-9][0-9][0-9][0-9]/;
-export const TODO_REGEX = /{{\[\[TODO\]\]}}/g;
-export const DONE_REGEX = /{{\[\[DONE\]\]}} ?/g;
-export const createTagRegex = (tag: string): RegExp =>
-  new RegExp(`#?\\[\\[${tag}\\]\\]|#${tag}`, "g");
 
 export const extractTag = (tag: string): string =>
   tag.startsWith("#[[") && tag.endsWith("]]")
