@@ -172,7 +172,7 @@ export const authenticateDeveloper =
       });
   };
 
-export const emailError = (subject: string, e: Error): Promise<string> =>
+const emailError = (subject: string, e: Error): Promise<string> =>
   ses
     .sendEmail({
       Destination: {
@@ -234,10 +234,7 @@ export const listAll = async (
   return { objects, prefixes };
 };
 
-export const TableName =
-  process.env.NODE_ENV === "development"
-    ? "RoamJSExtensions"
-    : "RoamJSExtensions";
+const TableName = "RoamJSExtensions";
 
 export const getStripePriceId = (extension: string): Promise<string> =>
   dynamo

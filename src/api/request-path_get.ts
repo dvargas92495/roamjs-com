@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { dynamo, headers, stripe, TableName } from "../lambda-helpers";
+import { dynamo, headers, stripe } from "../lambda-helpers";
 import axios from "axios";
 import { PullBlock, TreeNode, ViewType } from "roamjs-components/types/native";
 import https from "https";
@@ -131,6 +131,8 @@ const viewTypeToPrefix = {
   document: "",
   numbered: "1. ",
 };
+
+const TableName = "RoamJSExtensions";
 
 export const handler: APIGatewayProxyHandler = (event) => {
   const id = event.queryStringParameters?.id;

@@ -92,6 +92,7 @@ export const getStaticProps: GetStaticProps<
           premium: r.data.premium || null,
           subpage: context.params?.subpage.join("/") || "",
           id: context.params?.id || "",
+          ogData: r.data,
         },
       }))
     )
