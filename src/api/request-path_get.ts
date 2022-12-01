@@ -377,10 +377,6 @@ export const handler: APIGatewayProxyHandler = (event) => {
                   };
                   return docs.map((b) => blockToMarkdown(b, viewType)).join("");
                 }
-              })
-              .catch((e) => {
-                console.error(e.response?.data?.message || e);
-                return "FILE";
               }),
             r.Item.premium?.S
               ? stripe.prices
