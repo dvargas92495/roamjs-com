@@ -155,6 +155,3 @@ export const idToTitle = (id: string): string =>
     .map((s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
     .join(" ")
     .replace(/_/g, " ");
-
-export const idToCamel = (id: string): string =>
-  `${id.substring(0, 1)}${idToTitle(id).replace(/ /g, "").substring(1)}`;

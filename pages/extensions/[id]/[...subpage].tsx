@@ -51,12 +51,7 @@ const ExtensionSubPage = ({
       />
       {development && <H2>UNDER DEVELOPMENT</H2>}
       <H1>{title.toUpperCase()}</H1>
-      <MDXRemote
-        {...content}
-        components={getMdxComponents({
-          id,
-        })}
-      />
+      <MDXRemote {...content} components={getMdxComponents()} />
     </StandardLayout>
   );
 };
@@ -84,13 +79,16 @@ export const getStaticProps: GetStaticProps<
 > = (context) =>
   axios
     .get(
-      `${API_URL}/request-path?id=${context.params?.id}/${context.params?.subpage.join("/")}`
+      `${API_URL}/request-path?id=${
+        context.params?.id
+      }/${context.params?.subpage.join("/")}`
     )
     .then((r) =>
       serialize(r.data.content).then((content) => ({
         props: {
           content,
-          development: r.data.state === "DEVELOPMENT" || r.data.state === "UNDER REVIEW",
+          development:
+            r.data.state === "DEVELOPMENT" || r.data.state === "UNDER REVIEW",
           premium: r.data.premium || null,
           subpage: context.params?.subpage.join("/") || "",
           id: context.params?.id || "",

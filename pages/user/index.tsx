@@ -9,10 +9,13 @@ import {
 } from "../../components/hooks";
 import { SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
-import { getStripe } from "../../components/constants";
 import Head from "next/head";
 import ReactDOM from "react-dom";
 import format from "date-fns/format";
+import { loadStripe, Stripe } from "@stripe/stripe-js";
+
+const getStripe = (): Promise<Stripe | null> =>
+  loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || "");
 
 type ClerkItem = { title: string; display: string; id: string };
 

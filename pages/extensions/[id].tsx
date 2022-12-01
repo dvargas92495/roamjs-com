@@ -45,10 +45,6 @@ const ExtensionPage = ({
   sponsors,
   entry,
   premium,
-  author = {
-    name: "RoamJS",
-    email: "support@roamjs.com",
-  },
   githubUrl,
   downloadUrl,
   //@deprecated
@@ -68,10 +64,6 @@ const ExtensionPage = ({
     usage: "licensed" | "metered";
     quantity: number;
   } | null;
-  author?: {
-    name: string;
-    email: string;
-  };
   githubUrl?: string;
   downloadUrl?: string;
   //@deprecated
@@ -237,12 +229,7 @@ const ExtensionPage = ({
         </p>
       )}
       {content.compiledSource ? (
-        <MDXRemote
-          {...content}
-          components={getMdxComponents({
-            id,
-          })}
-        />
+        <MDXRemote {...content} components={getMdxComponents()} />
       ) : (
         "No content"
       )}
@@ -255,10 +242,10 @@ const ExtensionPage = ({
       <hr style={{ marginTop: 24 }} />
       <H3>Contributors</H3>
       <Body>
-        This extension is brought to you by {author.name}! If you are facing any
-        issues reach out to{" "}
-        <ExternalLink href={`mailto:${author.email}`}>
-          {author.email}
+        This extension is brought to you by RoamJS! If you are facing any issues
+        reach out to{" "}
+        <ExternalLink href={`mailto:support@roamjs.com`}>
+          support@roamjs.com
         </ExternalLink>{" "}
         or click on the chat button on the bottom right.
       </Body>
@@ -371,7 +358,6 @@ export const getStaticProps: GetStaticProps<
         entry,
         data,
         premium = null,
-        author,
         downloadUrl,
       }) => {
         const { contributors: contributorsJson } = JSON.parse(
@@ -409,7 +395,6 @@ export const getStaticProps: GetStaticProps<
               : [],
             ...data,
             premium,
-            author,
             entry,
           },
         }));

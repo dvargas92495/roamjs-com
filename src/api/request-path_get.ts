@@ -1,28 +1,8 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { dynamo, headers, stripe, TableName } from "../lambda-helpers";
-import { users } from "@clerk/clerk-sdk-node";
 import axios from "axios";
 import { PullBlock, TreeNode, ViewType } from "roamjs-components/types/native";
 import https from "https";
-
-const DEFAULT_AUTHOR = {
-  name: "RoamJS",
-  email: "support@roamjs.com",
-};
-
-const userCache: Record<string, Promise<{ name: string; email: string }>> = {};
-const getUser = (s?: string) =>
-  s
-    ? userCache[s] ||
-      (userCache[s] = users.getUser(s).then((u) => ({
-        name:
-          u.firstName && u.lastName
-            ? `${u.firstName} ${u.lastName}`.trim()
-            : u.firstName || "Anonymous",
-        email: u.emailAddresses.find((e) => e.id === u.primaryEmailAddressId)
-          ?.emailAddress,
-      })))
-    : Promise.resolve(DEFAULT_AUTHOR);
 
 const normalize = (data: unknown): unknown => {
   if (Array.isArray(data)) {
@@ -355,7 +335,6 @@ export const handler: APIGatewayProxyHandler = (event) => {
                         /\^\^(.*?)\^\^/g,
                         (_, i) => `<Highlight>${i}</Highlight>`
                       )
-                      .replace(/{{premium}}/g, "<Premium />")
                       .replace(/__/g, "_")
                       .replace(new RegExp(String.fromCharCode(160), "g"), " ")
                       .replace(/```$/, "\n```")
@@ -410,7 +389,6 @@ export const handler: APIGatewayProxyHandler = (event) => {
                 console.error(e.response?.data?.message || e);
                 return "FILE";
               }),
-            getUser(r.Item.user?.S),
             r.Item.premium?.S
               ? stripe.prices
                   .retrieve(r.Item.premium.S)
@@ -426,14 +404,13 @@ export const handler: APIGatewayProxyHandler = (event) => {
                         }))
                   )
               : Promise.resolve(undefined),
-          ]).then(([content, author, premium]) => ({
+          ]).then(([content, premium]) => ({
             statusCode: 200,
             body: JSON.stringify({
               content,
               state: r.Item.state?.S || "PRIVATE",
               description: r.Item.description?.S || "",
               premium,
-              author,
               entry: r.Item.src?.S || "",
               downloadUrl: r.Item.download?.S || "",
             }),
@@ -476,16 +453,13 @@ export const handler: APIGatewayProxyHandler = (event) => {
           statusCode: 200,
           body: JSON.stringify({
             paths: await Promise.all(
-              r.Items.map((c) =>
-                getUser(c.user?.S).then((user) => ({
-                  id: c.id?.S,
-                  description: c.description?.S,
-                  state: c.state?.S,
-                  featured: Number(c.featured?.N || 0),
-                  user,
-                  entry: c.src?.S || "",
-                }))
-              )
+              r.Items.map((c) => ({
+                id: c.id?.S,
+                description: c.description?.S,
+                state: c.state?.S,
+                featured: Number(c.featured?.N || 0),
+                entry: c.src?.S || "",
+              }))
             ),
           }),
           headers: headers(event),

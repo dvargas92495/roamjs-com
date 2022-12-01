@@ -15,7 +15,6 @@ type ExtensionMetadata = {
   href: string;
   state: "LIVE" | "DEVELOPMENT" | "PRIVATE" | "LEGACY" | "UNDER REVIEW";
   featured: number;
-  user: { name: string; email: string };
   entry: string;
 };
 
@@ -54,7 +53,7 @@ const ExtensionCard = (props: ExtensionMetadata) => {
       </div>
       <hr className="my-4" />
       <div className="flex justify-between items-center">
-        <div>Made By {props.user.name}</div>
+        <div>Made By RoamJS</div>
         {props.state === "LEGACY" && (
           <button
             className="bg-sky-500 text-white py-2 px-4 rounded-md"
@@ -119,8 +118,7 @@ const ExtensionHomePage = ({
     (e) =>
       !search ||
       searchRegex.test(e.title) ||
-      searchRegex.test(e.description) ||
-      searchRegex.test(e.user.name)
+      searchRegex.test(e.description)
   );
   const [max, setMax] = useState(9);
   return (
@@ -204,7 +202,7 @@ export const getStaticProps: GetStaticProps<{
       props: {
         extensions: r.data.paths
           .filter((p) => p.state !== "PRIVATE")
-          .map(({ id, description, state, featured, user }) => ({
+          .map(({ id, description, state, featured }) => ({
             id,
             title: idToTitle(id),
             description: description || "Description for " + idToTitle(id),
@@ -212,7 +210,6 @@ export const getStaticProps: GetStaticProps<{
             href: `/extensions/${id}`,
             state: state === "UNDER REVIEW" ? "DEVELOPMENT" : state,
             featured,
-            user,
           }))
           .sort((a, b) =>
             a.state === b.state
