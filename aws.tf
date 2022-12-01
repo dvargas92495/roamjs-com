@@ -22,15 +22,7 @@ variable "stripe_public" {
     type = string
 }
 
-variable "mapbox_token" {
-    type = string
-}
-
 variable "giphy_key" {
-    type = string
-}
-
-variable "slack_client_id" {
     type = string
 }
 
@@ -376,22 +368,10 @@ resource "github_actions_secret" "stripe_public" {
   plaintext_value  = var.stripe_public
 }
 
-resource "github_actions_secret" "mapbox_token" {
-  repository       = "roamjs-com"
-  secret_name      = "MAPBOX_TOKEN"
-  plaintext_value  = var.mapbox_token
-}
-
 resource "github_actions_secret" "giphy_key" {
   repository       = "roamjs-com"
   secret_name      = "GIPHY_KEY"
   plaintext_value  = var.giphy_key
-}
-
-resource "github_actions_secret" "slack_client_id" {
-  repository       = "roamjs-com"
-  secret_name      = "SLACK_CLIENT_ID"
-  plaintext_value  = var.slack_client_id
 }
 
 resource "github_actions_secret" "clerk_api_key" {

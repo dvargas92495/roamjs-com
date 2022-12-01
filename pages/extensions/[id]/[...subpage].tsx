@@ -93,6 +93,10 @@ export const getStaticProps: GetStaticProps<
           subpage: context.params?.subpage.join("/") || "",
           id: context.params?.id || "",
           ogData: r.data,
+          url: `${API_URL}/request-path?id=${
+            context.params?.id
+          }/${context.params?.subpage.join("/")}`,
+          params: context.params,
         },
       }))
     )
