@@ -49,7 +49,8 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/wiki-data": "https://github.com/mlava/wikipedia",
   "/extensions/filter-embeds": "/extensions",
   "/extensions/video": "/extensions",
-  "/extensions/marketplace": "/extensions"
+  "/extensions/marketplace": "/extensions",
+  "/contribute": "/extensions"
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
