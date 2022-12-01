@@ -68,7 +68,7 @@ const q = (query: string) => {
   //       );
   //     }
   //   });
-  return new Promise<[PullBlock][]>((resolve, reject) => {
+  return new Promise<PullBlock[][]>((resolve, reject) => {
     const req = https
       .request(
         `https://api.roamresearch.com/api/graph/${graph}/q`,
@@ -122,7 +122,7 @@ const q = (query: string) => {
     req.end();
   }).catch((e) => {
     console.error(e);
-    return [] as const;
+    return [] as PullBlock[][];
   });
 };
 
@@ -443,35 +443,25 @@ export const handler: APIGatewayProxyHandler = (event) => {
     : sub
     ? q(`[:find 
            (pull ?b [:node/title]) 
+           (pull ?sub [:node/title]) 
           :where 
             [?d :block/string "Documentation"] 
             [?b :block/children ?d] 
             [?b :node/title ?t] 
-            [not [[clojure.string/starts-with? ?t "legacy"]]] 
+            [not [[clojure.string/starts-with? ?t "legacy"]]]
+            [?sub :node/title ?sub-title]
+            [[clojure.string/starts-with? ?sub-title ?t]]
           ]`)
         .then((r) =>
-          Promise.all(
-            r.map((prefix) => {
-              const id = prefix[0][":node/title"];
-              return q(
-                `[:find 
-                   (pull ?b [:node/title]) 
-                  :where 
-                   [?b :node/title ?t]
-                   [[clojure.string/starts-with? ?t "${id}/"]] 
-                  ]`
-              ).then((res) =>
-                res.map((subpage) => ({
-                  subpage: subpage[0]?.[":node/title"]?.split("/").slice(1),
-                  id,
-                }))
-              );
-            })
-          )
+          r
+            .filter(([a, b]) =>
+              b[":node/title"].startsWith(`${a[":node/title"]}/`)
+            )
+            .map(([id, sub]) => ({
+              subpage: sub?.[":node/title"]?.split("/").slice(1),
+              id: id[":node/title"],
+            }))
         )
-        .then((paths) => {
-          return paths.flat();
-        })
         .then((paths) => ({
           statusCode: 200,
           body: JSON.stringify({ paths }),

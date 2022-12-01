@@ -85,8 +85,8 @@ const HomePage = (): JSX.Element => (
         subtitle={
           "Install RoamJS plugins to your Roam DB to fully customize and empower your Roam Experience"
         }
-        primaryHref={"docs"}
-        secondaryHref={"services"}
+        primaryHref={"extensions"}
+        secondaryHref={"faq"}
       />
       <ShowcaseLanding
         header={"RoamJS adds the features you need natively to Roam"}
