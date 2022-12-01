@@ -74,13 +74,7 @@ const q = (query: string) => {
                       normalize(JSON.parse(body).result) as [PullBlock][]
                     );
                   } else {
-                    reject(
-                      new Error(
-                        `${redirectRes.statusCode}: ${body} ${JSON.stringify(
-                          redirectRes.headers
-                        )} ${redirectRes.statusMessage}`
-                      )
-                    );
+                    reject(new Error(redirectRes.statusMessage));
                   }
                 });
                 res.on("error", reject);
@@ -100,9 +94,6 @@ const q = (query: string) => {
       .on("error", reject);
     req.write(JSON.stringify({ query }));
     req.end();
-  }).catch((e) => {
-    console.error(e);
-    return [] as PullBlock[][];
   });
 };
 
@@ -418,6 +409,14 @@ export const handler: APIGatewayProxyHandler = (event) => {
             }),
             headers: headers(event),
           }));
+        })
+        .catch((e) => {
+          console.error(e);
+          return {
+            statusCode: e.message === "Too Many Requests" ? 429 : 500,
+            body: e.message,
+            headers: headers(event),
+          };
         })
     : sub
     ? q(`[:find 

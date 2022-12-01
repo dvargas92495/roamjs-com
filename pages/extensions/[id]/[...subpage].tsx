@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { serialize } from "../../../components/serverSide";
 import React from "react";
@@ -101,23 +101,33 @@ export const getStaticProps: GetStaticProps<
       }))
     )
     .catch((e) =>
-      serialize(
-        `Failed to render due to: ${
-          e.response?.data
-            ? typeof e.response.data === "string"
-              ? e.response.data
-              : JSON.stringify(e.response?.data)
-            : e.message
-        }`
-      ).then((content) => ({
-        props: {
-          content,
-          development: true,
-          premium: null,
-          subpage: context.params?.subpage.join("/") || "",
-          id: context.params?.id || "",
-        },
-      }))
+      (e as AxiosError).response?.status === 429
+        ? new Promise((resolve) =>
+            setTimeout(() => {
+              console.log(
+                `${context.params?.id}/${context.params?.subpage.join("/")}`,
+                "was rate limited. Trying again in a minute..."
+              );
+              resolve(getStaticProps(context));
+            }, 60000)
+          )
+        : serialize(
+            `Failed to render due to: ${
+              e.response?.data
+                ? typeof e.response.data === "string"
+                  ? e.response.data
+                  : JSON.stringify(e.response?.data)
+                : e.message
+            }`
+          ).then((content) => ({
+            props: {
+              content,
+              development: true,
+              premium: null,
+              subpage: context.params?.subpage.join("/") || "",
+              id: context.params?.id || "",
+            },
+          }))
     );
 
 export default ExtensionSubPage;
