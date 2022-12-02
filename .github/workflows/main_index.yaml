@@ -14,7 +14,7 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.DEPLOY_AWS_ACCESS_SECRET }}
   AWS_DEFAULT_REGION: us-east-1
-  NEXT_PUBLIC_REST_API_URL: "https://api.roamjs.com"
+  NEXT_PUBLIC_REST_API_URL: https://api.roamjs.com
   NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
   NEXT_PUBLIC_CLERK_FRONTEND_API: clerk.roamjs.com
 

@@ -1,4 +1,3 @@
-import { AxiosPromise, AxiosRequestConfig } from "axios";
 import Cookies from "universal-cookie";
 import { sessions, users, User } from "@clerk/clerk-sdk-node";
 import {
@@ -17,9 +16,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   maxNetworkRetries: 3,
 });
 
-export const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
 export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
-export const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
 export const ses = new AWS.SES({ apiVersion: "2010-12-01" });
 
 const ALLOWED_ORIGINS = ["https://roamjs.com", "https://roamresearch.com"];
@@ -39,31 +36,6 @@ export const headers = (
     "Access-Control-Allow-Credentials": true,
   };
 };
-
-export const wrapAxios = (
-  req: AxiosPromise<Record<string, unknown>>,
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> =>
-  req
-    .then((r) => ({
-      statusCode: 200,
-      body: JSON.stringify(r.data),
-      headers: headers(event),
-    }))
-    .catch((e) => ({
-      statusCode: e.response?.status || 500,
-      body: e.response?.data ? JSON.stringify(e.response.data) : e.message,
-      headers: headers(event),
-    }));
-
-export const serverError = (
-  body: string,
-  event: Pick<APIGatewayProxyEvent, "headers">
-): APIGatewayProxyResult => ({
-  statusCode: 500,
-  body,
-  headers: headers(event),
-});
 
 export const emptyResponse = (
   event: APIGatewayProxyEvent
@@ -104,16 +76,6 @@ export const getClerkEmail = async (
         ?.emailAddress
     : "";
 };
-
-export const getClerkOpts = (
-  email: string,
-  headers?: Record<string, string>
-): AxiosRequestConfig => ({
-  headers: {
-    Authorization: `Basic ${Buffer.from(email).toString("base64")}`,
-    ...headers,
-  },
-});
 
 export const generateToken = (): { encrypted: string; value: string } => {
   const value = randomstring.generate(16);
@@ -207,49 +169,3 @@ export const emailCatch =
       headers: headers(event),
     }));
 
-export const listAll = async (
-  Prefix: string
-): Promise<{
-  objects: AWS.S3.ObjectList;
-  prefixes: AWS.S3.CommonPrefixList;
-}> => {
-  const objects: AWS.S3.ObjectList = [];
-  const prefixes: AWS.S3.CommonPrefixList = [];
-  let ContinuationToken: string = undefined;
-  let isTruncated = true;
-  while (isTruncated) {
-    const res = await s3
-      .listObjectsV2({
-        Bucket: "roamjs.com",
-        Prefix,
-        ContinuationToken,
-        Delimiter: "/",
-      })
-      .promise();
-    objects.push(...res.Contents);
-    prefixes.push(...res.CommonPrefixes);
-    ContinuationToken = res.ContinuationToken;
-    isTruncated = res.IsTruncated;
-  }
-  return { objects, prefixes };
-};
-
-const TableName = "RoamJSExtensions";
-
-export const getStripePriceId = (extension: string): Promise<string> =>
-  dynamo
-    .getItem({
-      TableName,
-      Key: { id: { S: extension } },
-    })
-    .promise()
-    .then((r) => r.Item.premium?.S);
-
-export const getExtensionUserId = (extension: string): Promise<string> =>
-  dynamo
-    .getItem({
-      TableName,
-      Key: { id: { S: extension } },
-    })
-    .promise()
-    .then((r) => r.Item.user?.S);

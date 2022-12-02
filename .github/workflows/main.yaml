@@ -16,9 +16,7 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_AWS_ACCESS_KEY }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.DEPLOY_AWS_ACCESS_SECRET }}
   AWS_DEFAULT_REGION: us-east-1
-  ROAMJS_VERSION: production
   GIPHY_KEY: ${{ secrets.GIPHY_KEY }}
-  API_URL: https://lambda.roamjs.com
 
 jobs:
   deploy:

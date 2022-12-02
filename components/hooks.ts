@@ -1,10 +1,9 @@
 import { useClerk } from "@clerk/clerk-react";
 import axios, { AxiosResponse } from "axios";
-import { useCallback, useEffect, useState } from "react";
-import { isMobile } from "react-device-detect";
+import { useCallback } from "react";
 import { API_URL } from "./constants";
 
-export const cleanCode = (text: string): string =>
+const cleanCode = (text: string): string =>
   text.replace(/\n/g, "\\n").replace(/"/g, '\\"');
 
 export const getCodeContent = (
@@ -72,16 +71,6 @@ export const useCopyCode = (
     },
     [setCopied, initialLines]
   );
-
-export const useIsMobile = (): boolean => {
-  const [mobile, setMobile] = useState(false);
-
-  useEffect(() => {
-    setMobile(isMobile);
-  }, [setMobile]);
-
-  return mobile;
-};
 
 export const useAuthenticatedAxiosGet = <T = unknown>(): ((
   path: string

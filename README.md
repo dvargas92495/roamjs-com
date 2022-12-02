@@ -25,7 +25,3 @@ As part of a RoamJS RoamDepot effort started in July, 2022, we've started to mig
 - [TODO Trigger](https://github.com/dvargas92495/roamjs-todo-trigger)
 - [Twitter](https://github.com/dvargas92495/roamjs-twitter)
 - [Workbench](https://github.com/dvargas92495/roamjs-workbench)
-
-## Contributing
-
-See the [Contributing Guide](./CONTRIBUTING.md) for more information!

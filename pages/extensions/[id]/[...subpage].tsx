@@ -14,12 +14,6 @@ type ExtensionSubPageProps = {
   id: string;
   subpage: string;
   development: boolean;
-  premium: {
-    description: string;
-    price: number;
-    usage: "licensed" | "metered";
-    quantity: number;
-  } | null;
 };
 
 const ExtensionSubPage = ({
@@ -89,7 +83,6 @@ export const getStaticProps: GetStaticProps<
           content,
           development:
             r.data.state === "DEVELOPMENT" || r.data.state === "UNDER REVIEW",
-          premium: r.data.premium || null,
           subpage: context.params?.subpage.join("/") || "",
           id: context.params?.id || "",
           ogData: r.data,
@@ -123,7 +116,6 @@ export const getStaticProps: GetStaticProps<
             props: {
               content,
               development: true,
-              premium: null,
               subpage: context.params?.subpage.join("/") || "",
               id: context.params?.id || "",
             },

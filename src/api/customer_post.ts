@@ -116,8 +116,8 @@ export const handler = async (
 <p>Welcome ${first_name}!</p>
 <br>
 <p>Thanks for signing up for RoamJS!</p>
-<p>You already had access to the many free to use Roam extensions offered by RoamJS, which could be found <a href="https://roamjs.com/extensions">here.</a> Now with a RoamJS account, you have access to <b>premium</b> RoamJS services to really get the most out of your Roam graph. Browse through the available extensions and see which ones excite you!</p>
-<p>You have also been automatically subscribed to the RoamJS Digest, where you'll receive the latest news and updates on all things RoamJS. To unsubscribe, you could visit your <a href="https://roamjs.com/user">user page</a>.</p>
+<p>RoamJS is a leading publisher of Roam Depot extensions. To see what we have to offer, be sure to check out the Roam Depot within Roam!</p>
+<p>By signing up, you have been automatically subscribed to the RoamJS Digest, where you'll receive the latest news and updates on all things RoamJS.</p>
 <p>If you have any questions, always feel free to reach out <a href="mailto:support@roamjs.com">support@roamjs.com.</a></p>
 <p>Excited to have you join the rest of Roam's power users!</p>
 <br>

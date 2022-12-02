@@ -31,16 +31,3 @@ declare module "reveal.js" {
   }
   export default Reveal;
 }
-
-declare module "*.ne" {
-  import Nearley from "nearley";
-  const Rules: Nearley.CompiledRules;
-  export default Rules;
-}
-
-declare module "../pages/services/*" {
-  const blob: {
-    _importMeta: { absolutePath: string; importedPath: string }[];
-  };
-  export default blob;
-}

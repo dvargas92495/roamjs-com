@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { dynamo, headers, stripe } from "../lambda-helpers";
+import { dynamo, headers } from "../lambda-helpers";
 import axios from "axios";
 import { PullBlock, TreeNode, ViewType } from "roamjs-components/types/native";
 import https from "https";
@@ -264,147 +264,127 @@ export const handler: APIGatewayProxyHandler = (event) => {
                 };
               }
             );
-          return Promise.all([
-            getContentBlocks(id)
-              .then(({ blocks, viewType, path }) => {
-                const docs =
-                  id === path
-                    ? blocks.find((f) => /^\s*Documentation\s*$/i.test(f.text))
-                        ?.children || []
-                    : blocks;
-                if (
-                  docs.length === 1 &&
-                  /^https:\/\/github.com\/[\w]+\/[\w-]+$/.test(docs[0].text)
-                )
-                  return axios
-                    .get<string>(
-                      `${docs[0].text.replace(
-                        /github\.com/,
-                        "raw.githubusercontent.com"
-                      )}/main/README.md`,
-                      { responseType: "text" }
-                    )
-                    .then((r) =>
-                      (r.data || "").replace(/https:\/\/roamjs\.com/g, (s) =>
-                        process.env.NODE_ENV === "development"
-                          ? "http://localhost:3000"
-                          : s
-                      )
-                    );
-                else {
-                  const replaceComponents = (
-                    text: string,
-                    prefix: string
-                  ): string =>
-                    text
-                      .replace(
-                        /{{(?:\[\[)?video(?:\]\])?:(?:\s)*https:\/\/www.loom.com\/share\/([0-9a-f]*)}}/g,
-                        (_, id) => `<Loom id={"${id}"} />`
-                      )
-                      .replace(
-                        /{{(?:\[\[)?(?:youtube|video)(?:\]\])?:(?:\s)*https:\/\/(?:youtu\.be\/([\w\d-]*)|(?:www\.)youtube.com\/watch\?v=([\w\d-]+)[^}]+)}}/g,
-                        (_, id, otherId) =>
-                          `<YouTube id={"${id || otherId}"} />`
-                      )
-                      .replace(
-                        /{{(?:\[\[)?video(?:\]\])?:(?:\s)*([^\s]+)(?:\s)*}}/g,
-                        (_, id) => `<DemoVideo src={"${id}"} />`
-                      )
-                      .replace(
-                        new RegExp(
-                          `\\[(.*?)\\]\\(\\[\\[${path}/(.*?)\\]\\]\\)`,
-                          "g"
-                        ),
-                        (_, label, page) =>
-                          `[${label}](/extensions/${path}/${page
-                            .replace(/ /g, "_")
-                            .toLowerCase()})`
-                      )
-                      .replace(
-                        new RegExp(`\\[(.*?)\\]\\(\\[\\[${path}\\]\\]\\)`, "g"),
-                        (_, label) => `[${label}](/extensions/${path})`
-                      )
-                      .replace(
-                        /\^\^(.*?)\^\^/g,
-                        (_, i) => `<Highlight>${i}</Highlight>`
-                      )
-                      .replace(/__/g, "_")
-                      .replace(new RegExp(String.fromCharCode(160), "g"), " ")
-                      .replace(/```$/, "\n```")
-                      .replace(/\n/g, `\n${"".padStart(prefix.length, " ")}`)
-                      .replace(/https:\/\/roamjs\.com/g, (s) =>
-                        process.env.NODE_ENV === "development"
-                          ? "http://localhost:3000"
-                          : s
-                      );
-
-                  const blockToMarkdown = (
-                    block: TreeNode,
-                    viewType: ViewType,
-                    depth = 0
-                  ): string => {
-                    const prefix = `${"".padStart(depth * 4, " ")}${
-                      viewTypeToPrefix[viewType || "bullet"]
-                    }`;
-                    return `${prefix}<Block id={"${block.uid}"}>${"".padStart(
-                      block.heading,
-                      "#"
-                    )}${block.heading > 0 ? " " : ""}${
-                      block.textAlign === "center" ? "<Center>" : ""
-                    }${
-                      /\n/.test(block.text)
-                        ? `\n\n${"".padStart(prefix.length)}`
-                        : ""
-                    }${replaceComponents(block.text, prefix)}${
-                      /\n/.test(block.text)
-                        ? `\n\n${"".padStart(prefix.length)}`
-                        : ""
-                    }${
-                      block.textAlign === "center" ? "</Center>" : ""
-                    }</Block>\n\n${block.children
-                      .map((v) =>
-                        blockToMarkdown(
-                          v,
-                          block.viewType,
-                          viewType === "document" ? depth : depth + 1
-                        )
-                      )
-                      .join("")}${
-                      viewType === "document" && block.children.length
-                        ? "\n"
-                        : ""
-                    }`;
-                  };
-                  return docs.map((b) => blockToMarkdown(b, viewType)).join("");
-                }
-              }),
-            r.Item.premium?.S
-              ? stripe.prices
-                  .retrieve(r.Item.premium.S)
-                  .then(
-                    ({ product, unit_amount, recurring, transform_quantity }) =>
-                      stripe.products
-                        .retrieve(product as string)
-                        .then(({ description }) => ({
-                          description,
-                          price: unit_amount / 100,
-                          usage: recurring?.usage_type,
-                          quantity: transform_quantity?.divide_by || 1,
-                        }))
+          return getContentBlocks(id)
+            .then(({ blocks, viewType, path }) => {
+              const docs =
+                id === path
+                  ? blocks.find((f) => /^\s*Documentation\s*$/i.test(f.text))
+                      ?.children || []
+                  : blocks;
+              if (
+                docs.length === 1 &&
+                /^https:\/\/github.com\/[\w]+\/[\w-]+$/.test(docs[0].text)
+              )
+                return axios
+                  .get<string>(
+                    `${docs[0].text.replace(
+                      /github\.com/,
+                      "raw.githubusercontent.com"
+                    )}/main/README.md`,
+                    { responseType: "text" }
                   )
-              : Promise.resolve(undefined),
-          ]).then(([content, premium]) => ({
-            statusCode: 200,
-            body: JSON.stringify({
-              content,
-              state: r.Item.state?.S || "PRIVATE",
-              description: r.Item.description?.S || "",
-              premium,
-              entry: r.Item.src?.S || "",
-              downloadUrl: r.Item.download?.S || "",
-            }),
-            headers: headers(event),
-          }));
+                  .then((r) =>
+                    (r.data || "").replace(/https:\/\/roamjs\.com/g, (s) =>
+                      process.env.NODE_ENV === "development"
+                        ? "http://localhost:3000"
+                        : s
+                    )
+                  );
+              else {
+                const replaceComponents = (
+                  text: string,
+                  prefix: string
+                ): string =>
+                  text
+                    .replace(
+                      /{{(?:\[\[)?video(?:\]\])?:(?:\s)*https:\/\/www.loom.com\/share\/([0-9a-f]*)}}/g,
+                      (_, id) => `<Loom id={"${id}"} />`
+                    )
+                    .replace(
+                      /{{(?:\[\[)?(?:youtube|video)(?:\]\])?:(?:\s)*https:\/\/(?:youtu\.be\/([\w\d-]*)|(?:www\.)youtube.com\/watch\?v=([\w\d-]+)[^}]+)}}/g,
+                      (_, id, otherId) => `<YouTube id={"${id || otherId}"} />`
+                    )
+                    .replace(
+                      /{{(?:\[\[)?video(?:\]\])?:(?:\s)*([^\s]+)(?:\s)*}}/g,
+                      (_, id) => `<DemoVideo src={"${id}"} />`
+                    )
+                    .replace(
+                      new RegExp(
+                        `\\[(.*?)\\]\\(\\[\\[${path}/(.*?)\\]\\]\\)`,
+                        "g"
+                      ),
+                      (_, label, page) =>
+                        `[${label}](/extensions/${path}/${page
+                          .replace(/ /g, "_")
+                          .toLowerCase()})`
+                    )
+                    .replace(
+                      new RegExp(`\\[(.*?)\\]\\(\\[\\[${path}\\]\\]\\)`, "g"),
+                      (_, label) => `[${label}](/extensions/${path})`
+                    )
+                    .replace(
+                      /\^\^(.*?)\^\^/g,
+                      (_, i) => `<Highlight>${i}</Highlight>`
+                    )
+                    .replace(/__/g, "_")
+                    .replace(new RegExp(String.fromCharCode(160), "g"), " ")
+                    .replace(/```$/, "\n```")
+                    .replace(/\n/g, `\n${"".padStart(prefix.length, " ")}`)
+                    .replace(/https:\/\/roamjs\.com/g, (s) =>
+                      process.env.NODE_ENV === "development"
+                        ? "http://localhost:3000"
+                        : s
+                    );
+
+                const blockToMarkdown = (
+                  block: TreeNode,
+                  viewType: ViewType,
+                  depth = 0
+                ): string => {
+                  const prefix = `${"".padStart(depth * 4, " ")}${
+                    viewTypeToPrefix[viewType || "bullet"]
+                  }`;
+                  return `${prefix}<Block id={"${block.uid}"}>${"".padStart(
+                    block.heading,
+                    "#"
+                  )}${block.heading > 0 ? " " : ""}${
+                    block.textAlign === "center" ? "<Center>" : ""
+                  }${
+                    /\n/.test(block.text)
+                      ? `\n\n${"".padStart(prefix.length)}`
+                      : ""
+                  }${replaceComponents(block.text, prefix)}${
+                    /\n/.test(block.text)
+                      ? `\n\n${"".padStart(prefix.length)}`
+                      : ""
+                  }${
+                    block.textAlign === "center" ? "</Center>" : ""
+                  }</Block>\n\n${block.children
+                    .map((v) =>
+                      blockToMarkdown(
+                        v,
+                        block.viewType,
+                        viewType === "document" ? depth : depth + 1
+                      )
+                    )
+                    .join("")}${
+                    viewType === "document" && block.children.length ? "\n" : ""
+                  }`;
+                };
+                return docs.map((b) => blockToMarkdown(b, viewType)).join("");
+              }
+            })
+            .then((content) => ({
+              statusCode: 200,
+              body: JSON.stringify({
+                content,
+                state: r.Item.state?.S || "PRIVATE",
+                description: r.Item.description?.S || "",
+                entry: r.Item.src?.S || "",
+                downloadUrl: r.Item.download?.S || "",
+              }),
+              headers: headers(event),
+            }));
         })
         .catch((e) => {
           console.error(e);

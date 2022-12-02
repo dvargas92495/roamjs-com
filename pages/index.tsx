@@ -136,8 +136,8 @@ const HomePage = (): JSX.Element => (
           <H4>We Offer Consulting</H4>
           <Subtitle>
             Need help using an extension? We offer paid consulting services at
-            $200/hour, and just $100 for monthly sponsors. If you're interested,
-            sign up for one by clicking the link below!
+            $200/hour. If you're interested, sign up for one by clicking the
+            link below!
           </Subtitle>
           <a
             href={"https://calendly.com/dvargas92495/roamjs"}

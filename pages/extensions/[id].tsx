@@ -25,9 +25,6 @@ import {
   H4,
   IconButton,
   Subtitle,
-  ThankYou,
-  ThankYouSponsor,
-  isThankYouEmoji,
   CardGrid,
 } from "@dvargas92495/ui";
 import RoamJSDigest from "../../components/RoamJSDigest";
@@ -42,9 +39,7 @@ const ExtensionPage = ({
   id,
   description,
   development,
-  sponsors,
   entry,
-  premium,
   githubUrl,
   downloadUrl,
   //@deprecated
@@ -57,13 +52,6 @@ const ExtensionPage = ({
   description: string;
   development: boolean;
   entry?: string;
-  sponsors?: ThankYouSponsor[];
-  premium: {
-    description: string;
-    price: number;
-    usage: "licensed" | "metered";
-    quantity: number;
-  } | null;
   githubUrl?: string;
   downloadUrl?: string;
   //@deprecated
@@ -249,18 +237,6 @@ const ExtensionPage = ({
         </ExternalLink>{" "}
         or click on the chat button on the bottom right.
       </Body>
-      {!premium && !!sponsors?.length && (
-        <>
-          <Body>
-            A special thanks to those who's contributions also helped make this
-            extension possible:
-          </Body>
-          <ThankYou
-            sponsors={sponsors}
-            defaultImgSrc={"/sponsors/default.jpg"}
-          />
-        </>
-      )}
       {githubUrl && (
         <Body>
           Check out the project on{" "}
@@ -357,12 +333,8 @@ export const getStaticProps: GetStaticProps<
         description,
         entry,
         data,
-        premium = null,
         downloadUrl,
       }) => {
-        const { contributors: contributorsJson } = JSON.parse(
-          fs.readFileSync("./thankyou.json").toString()
-        );
         return serialize(preRender).then((content) => ({
           props: {
             content,
@@ -371,30 +343,7 @@ export const getStaticProps: GetStaticProps<
             legacy: state === "LEGACY",
             description,
             downloadUrl,
-            sponsors: data.contributors
-              ? data.contributors.split(",").map((s: string) => {
-                  const parts = s.trim().split(" ");
-                  const emojis = parts[parts.length - 1];
-                  const emojiKeys = emojis
-                    .split("")
-                    .map((s, i) => `${s}${emojis.charAt(i + 1)}`)
-                    .filter((_, i) => i % 2 === 0)
-                    .filter(isThankYouEmoji);
-                  const title = parts
-                    .slice(
-                      0,
-                      emojiKeys.length ? parts.length - 1 : parts.length
-                    )
-                    .join(" ");
-                  return {
-                    ...contributorsJson[title],
-                    title,
-                    emojis: emojiKeys,
-                  };
-                })
-              : [],
             ...data,
-            premium,
             entry,
           },
         }));

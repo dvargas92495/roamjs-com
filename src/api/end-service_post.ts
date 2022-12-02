@@ -4,12 +4,31 @@ import {
   bareSuccessResponse,
   emailCatch,
   getClerkUser,
-  getExtensionUserId,
-  getStripePriceId,
+  dynamo,
   headers,
   stripe,
 } from "../lambda-helpers";
 import sendEmail from "aws-sdk-plus/dist/sendEmail";
+
+const TableName = "RoamJSExtensions";
+
+const getStripePriceId = (extension: string): Promise<string> =>
+  dynamo
+    .getItem({
+      TableName,
+      Key: { id: { S: extension } },
+    })
+    .promise()
+    .then((r) => r.Item.premium?.S);
+
+    const getExtensionUserId = (extension: string): Promise<string> =>
+  dynamo
+    .getItem({
+      TableName,
+      Key: { id: { S: extension } },
+    })
+    .promise()
+    .then((r) => r.Item.user?.S);
 
 export const handler = async (
   event: APIGatewayProxyEvent
