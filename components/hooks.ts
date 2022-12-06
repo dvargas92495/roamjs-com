@@ -105,22 +105,6 @@ export const useAuthenticatedAxiosPost = (): ((
   );
 };
 
-export const useAuthenticatedAxiosDelete = <T = unknown>(): ((
-  path: string
-) => Promise<AxiosResponse>) => {
-  const { session } = useClerk();
-  return useCallback(
-    (path: string) => {
-      const url = new URL(`${API_URL}/${path}`);
-      url.searchParams.set("_clerk_session_id", session?.id || "");
-      return axios.delete<T>(url.toString(), {
-        withCredentials: true,
-      });
-    },
-    [session]
-  );
-};
-
 export const idToTitle = (id: string): string =>
   id
     .split("-")

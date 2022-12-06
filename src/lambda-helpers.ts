@@ -67,16 +67,6 @@ export const getClerkUser = async (
   return await users.getUser(session.userId);
 };
 
-export const getClerkEmail = async (
-  event: APIGatewayProxyEvent
-): Promise<string> => {
-  const user = await getClerkUser(event);
-  return user
-    ? user.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)
-        ?.emailAddress
-    : "";
-};
-
 export const generateToken = (): { encrypted: string; value: string } => {
   const value = randomstring.generate(16);
   return {

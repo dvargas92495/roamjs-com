@@ -4,7 +4,6 @@ import { Button, ConfirmationDialog } from "@dvargas92495/ui";
 import {
   useAuthenticatedAxiosGet,
   useAuthenticatedAxiosPost,
-  useAuthenticatedAxiosDelete,
 } from "../../components/hooks";
 import { SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
@@ -177,38 +176,16 @@ type Invoice = {
 const ExtensionsTab = () => {
   const axiosGet = useAuthenticatedAxiosGet();
   const axiosPost = useAuthenticatedAxiosPost();
-  const axiosDelete = useAuthenticatedAxiosDelete();
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [tokenLoading, setTokenLoading] = useState(true);
   const [tokenValue, setTokenValue] = useState("");
   const [copied, setCopied] = useState(false);
-  const subscribe = useCallback(() => {
-    setLoading(true);
-    return axiosPost("convertkit")
-      .then(() => {
-        setIsSubscribed(true);
-      })
-      .finally(() => setLoading(false));
-  }, [setLoading, setIsSubscribed, axiosPost]);
-  const unsubscribe = useCallback(() => {
-    setLoading(true);
-    return axiosDelete("convertkit")
-      .then(() => {
-        setIsSubscribed(false);
-      })
-      .finally(() => setLoading(false));
-  }, [setLoading, setIsSubscribed, axiosDelete]);
   const copiedRef = useRef(0);
   useEffect(() => {
-    axiosGet("convertkit")
-      .then((r) => setIsSubscribed(r.data.isSubscribed))
-      .finally(() => setLoading(false));
     axiosGet("token")
       .then((r) => setTokenValue(r.data.token))
       .finally(() => setTokenLoading(false));
     return () => window.clearTimeout(copiedRef.current);
-  }, [setLoading, setTokenValue, setTokenLoading]);
+  }, [setTokenValue, setTokenLoading]);
   return (
     <UserProfileTab
       id={"Extensions"}
@@ -230,31 +207,6 @@ const ExtensionsTab = () => {
         </svg>
       }
       cards={[
-        {
-          title: "Digest",
-          description:
-            "Subscribe or unsubscribe from the RoamJS Digest, an email detailing RoamJS' latest updates.",
-          items: [
-            {
-              title: "Status",
-              id: "0",
-              display: loading
-                ? "Loading..."
-                : isSubscribed
-                ? "Subscribed"
-                : "Unsubscribed",
-            },
-          ],
-          dialogTitle: "RoamJS Digest",
-          dialogContent: `Would you like to ${
-            isSubscribed ? "un" : ""
-          }subscribe to the RoamJS Digest?`,
-          getActions: () => [
-            isSubscribed
-              ? { text: "Unsubscribe", onClick: unsubscribe }
-              : { text: "Subscribe", onClick: subscribe },
-          ],
-        },
         {
           title: "Token",
           description:

@@ -89,9 +89,6 @@ module "aws-serverless-backend" {
         "auth/get",
         // this is a DIFFERENT endpoint from the one in lambda.roamjs.com
         "auth/post",
-        "convertkit/get",
-        "convertkit/post",
-        "convertkit/delete",
         "customer/post",
         "customer/put",
         "end-service/post",
