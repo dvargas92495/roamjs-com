@@ -3,7 +3,6 @@ import { GetStaticPaths, GetStaticProps } from "next";
 import { Prism } from "react-syntax-highlighter";
 import React, { useCallback, useEffect, useState } from "react";
 import { SignedOut } from "@clerk/clerk-react";
-import { API_URL } from "../../components/constants";
 import StandardLayout from "../../components/StandardLayout";
 import { serialize } from "../../components/serverSide";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
@@ -33,6 +32,8 @@ import fs from "fs";
 import { isSafari } from "react-device-detect";
 import DemoVideo from "../../components/DemoVideo";
 import Loom from "../../components/Loom";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const ExtensionPage = ({
   content,

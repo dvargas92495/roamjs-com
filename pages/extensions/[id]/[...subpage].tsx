@@ -2,12 +2,13 @@ import axios, { AxiosError } from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { serialize } from "../../../components/serverSide";
 import React from "react";
-import { API_URL } from "../../../components/constants";
 import StandardLayout from "../../../components/StandardLayout";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import { Breadcrumbs, H1, H2 } from "@dvargas92495/ui";
 import { idToTitle } from "../../../components/hooks";
 import getMdxComponents from "../../../components/MdxComponents";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type ExtensionSubPageProps = {
   content: MDXRemoteSerializeResult;

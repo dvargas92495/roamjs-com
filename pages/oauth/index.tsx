@@ -2,8 +2,9 @@ import { Loading, Root } from "@dvargas92495/ui";
 import React, { useEffect, useState } from "react";
 import { v4 } from "uuid";
 import axios from "axios";
-import { API_URL } from "../../components/constants";
 import AES from "crypto-js/aes";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const OauthPage = (): React.ReactElement => {
   const [loading, setLoading] = useState(false);
@@ -37,9 +38,9 @@ const OauthPage = (): React.ReactElement => {
     if (state) {
       const [service, otp, key] = state.split("_");
       const auth = AES.encrypt(authData, key).toString();
-      axios.post(`${API_URL}/auth`, { service, otp, auth }).then(() => {
+      axios.put(`${API_URL}/oauth`, { service, otp, auth }).then(() => {
         const poll = () =>
-          axios.get(`${API_URL}/auth?state=${service}_${otp}`).then((r) => {
+          axios.get(`${API_URL}/oauth?state=${service}_${otp}`).then((r) => {
             if (r.data.success) {
               setClose(true);
               window.close();

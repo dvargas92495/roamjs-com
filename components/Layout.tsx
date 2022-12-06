@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Root, Main, Footer } from "@dvargas92495/ui";
 import dynamic from "next/dynamic";
 
-const PAGES = ["extensions", "contribute", "faq"] as const;
+const PAGES = ["extensions", "faq"] as const;
 
 export type LayoutProps = {
   title?: string;

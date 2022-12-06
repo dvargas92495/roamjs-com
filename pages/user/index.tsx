@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Layout from "../../components/Layout";
-import { Button, Loading, ConfirmationDialog } from "@dvargas92495/ui";
+import { Button, ConfirmationDialog } from "@dvargas92495/ui";
 import {
   useAuthenticatedAxiosGet,
-  useAuthenticatedAxiosPut,
   useAuthenticatedAxiosPost,
   useAuthenticatedAxiosDelete,
 } from "../../components/hooks";
@@ -12,10 +11,6 @@ import RedirectToLogin from "../../components/RedirectToLogin";
 import Head from "next/head";
 import ReactDOM from "react-dom";
 import format from "date-fns/format";
-import { loadStripe, Stripe } from "@stripe/stripe-js";
-
-const getStripe = (): Promise<Stripe | null> =>
-  loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || "");
 
 type ClerkItem = { title: string; display: string; id: string };
 
@@ -163,12 +158,6 @@ const UserProfileTab = ({
   );
 };
 
-type PaymentMethod = {
-  brand: string;
-  last4: string;
-  id: string;
-};
-
 type Subscription = {
   name: string;
   description: string;
@@ -183,45 +172,6 @@ type Invoice = {
   id: string;
   total: number;
   pdf: string;
-};
-
-const AddCard = () => {
-  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const [loading, setLoading] = useState(false);
-  const addCard = useCallback(() => {
-    setLoading(true);
-    authenticatedAxiosPost("payment-methods")
-      .then(
-        (r) =>
-          r.data.id &&
-          getStripe()
-            .then(
-              (s) =>
-                s &&
-                s.redirectToCheckout({
-                  sessionId: r.data.id,
-                })
-            )
-            .then(() => Promise.resolve())
-      )
-      .catch(() => {
-        setLoading(false);
-      });
-  }, [authenticatedAxiosPost]);
-  return (
-    <>
-      <Button
-        color={"primary"}
-        variant={"contained"}
-        onClick={addCard}
-        disabled={loading}
-        style={{ marginRight: 16 }}
-      >
-        Add Card
-      </Button>
-      <Loading loading={loading} />
-    </>
-  );
 };
 
 const ExtensionsTab = () => {
@@ -353,23 +303,8 @@ const ExtensionsTab = () => {
 };
 
 const BillingTab = () => {
-  const [payment, setPayment] = useState<PaymentMethod>();
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const authenticatedAxiosPut = useAuthenticatedAxiosPut();
-  const authenticatedAxiosDel = useAuthenticatedAxiosDelete();
   const authenticatedAxios = useAuthenticatedAxiosGet();
   const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const [error, setError] = useState("");
-  const getPayment = useCallback(
-    () =>
-      authenticatedAxios("payment-methods")
-        .then((r) => {
-          setPayment(r.data.defaultPaymentMethod);
-          setPaymentMethods(r.data.paymentMethods);
-        })
-        .catch((r) => setError(r.response?.data)),
-    [authenticatedAxios, setPayment, setPaymentMethods, setError]
-  );
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const getSubscriptions = useCallback(
     () =>
@@ -417,9 +352,8 @@ const BillingTab = () => {
     [invoices]
   );
   useEffect(() => {
-    getPayment();
     getSubscriptions();
-  }, [getPayment, getSubscriptions]);
+  }, [getSubscriptions]);
   useEffect(() => {
     getInvoices();
   }, [getInvoices]);
@@ -444,52 +378,6 @@ const BillingTab = () => {
         </svg>
       }
       cards={[
-        {
-          title: "Card",
-          description: `Default card used to pay for subscribed extensions${
-            error && `\nERROR: ${error}`
-          }`,
-          items: paymentMethods
-            .sort((a, b) =>
-              a.id === payment?.id
-                ? -1
-                : b.id === payment?.id
-                ? 1
-                : a.id.localeCompare(b.id)
-            )
-            .map((pm, i) => ({
-              title: pm.brand.toUpperCase(),
-              id: pm.id,
-              display: `Ends in ${pm.last4}${i === 0 ? " (default)" : ""}`,
-            })),
-          Component: AddCard,
-          getActions: (i, index) => [
-            {
-              text: "Remove Card",
-              onClick: () =>
-                authenticatedAxiosDel(
-                  `payment-methods?payment_method_id=${i.id}`
-                ).then(() =>
-                  setPaymentMethods(paymentMethods.filter((p) => p.id !== i.id))
-                ),
-            },
-            ...(index === 0
-              ? []
-              : [
-                  {
-                    text: "Make Default",
-                    onClick: () =>
-                      authenticatedAxiosPut("payment-methods", {
-                        id: i.id,
-                      }).then(() =>
-                        setPayment(paymentMethods.find((p) => p.id === i.id))
-                      ),
-                  },
-                ]),
-          ],
-          dialogTitle: "Card Actions",
-          dialogContent: "What would you like to do with this card?",
-        },
         {
           title: "Subscriptions",
           description: `All of the extensions you are subscribed to, with the amount due by the end of your billing cycle. ${

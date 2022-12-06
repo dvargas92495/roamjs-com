@@ -1,7 +1,7 @@
 import { useClerk } from "@clerk/clerk-react";
 import axios, { AxiosResponse } from "axios";
 import { useCallback } from "react";
-import { API_URL } from "./constants";
+import { LEGACY_API_URL as API_URL } from "./constants";
 
 const cleanCode = (text: string): string =>
   text.replace(/\n/g, "\\n").replace(/"/g, '\\"');
@@ -98,23 +98,6 @@ export const useAuthenticatedAxiosPost = (): ((
       const url = new URL(`${API_URL}/${path}`);
       url.searchParams.set("_clerk_session_id", session?.id || "");
       return axios.post(url.toString(), data, {
-        withCredentials: true,
-      });
-    },
-    [session]
-  );
-};
-
-export const useAuthenticatedAxiosPut = (): ((
-  path: string,
-  data?: Record<string, unknown>
-) => Promise<AxiosResponse>) => {
-  const { session } = useClerk();
-  return useCallback(
-    (path: string, data?: Record<string, unknown>) => {
-      const url = new URL(`${API_URL}/${path}`);
-      url.searchParams.set("_clerk_session_id", session?.id || "");
-      return axios.put(url.toString(), data || {}, {
         withCredentials: true,
       });
     },

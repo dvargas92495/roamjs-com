@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Layout from "../../components/Layout";
 import { GetStaticProps } from "next";
 import axios from "axios";
-import { API_URL } from "../../components/constants";
 import { idToTitle, useCopyCode } from "../../components/hooks";
 import { useRouter } from "next/router";
 import Toast from "@dvargas92495/app/components/Toast";
@@ -116,9 +115,7 @@ const ExtensionHomePage = ({
   const searchRegex = new RegExp(search, "i");
   const filteredExtensions = extensions.filter(
     (e) =>
-      !search ||
-      searchRegex.test(e.title) ||
-      searchRegex.test(e.description)
+      !search || searchRegex.test(e.title) || searchRegex.test(e.description)
   );
   const [max, setMax] = useState(9);
   return (
@@ -197,7 +194,7 @@ export const getStaticProps: GetStaticProps<{
   extensions: ExtensionMetadata[];
 }> = () =>
   axios
-    .get(`${API_URL}/request-path`)
+    .get(`${process.env.NEXT_PUBLIC_API_URL}/request-path`)
     .then((r) => ({
       props: {
         extensions: r.data.paths
