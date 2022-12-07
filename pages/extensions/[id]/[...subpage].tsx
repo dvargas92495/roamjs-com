@@ -95,7 +95,7 @@ export const getStaticProps: GetStaticProps<
       }))
     )
     .catch((e) =>
-      (e as AxiosError).response?.status === 429
+      (e as AxiosError).response?.status === 429 || /You've crossed your quotas/.test(e.response?.data?.message)
         ? new Promise((resolve) =>
             setTimeout(() => {
               console.log(
