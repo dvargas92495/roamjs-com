@@ -86,17 +86,9 @@ module "aws-serverless-backend" {
     api_name = "roam-js-extensions"
     domain = "roamjs.com"
     paths = [
-        "auth/get",
-        // this is a DIFFERENT endpoint from the one in lambda.roamjs.com
-        "auth/post",
         "customer/post",
         "customer/put",
-        "end-service/post",
-        "invoices/get",
-        "is-subscribed/get",
         "publish/post",
-        "request-path/get",
-        "subscriptions/get",
         "token/get",
         "token/post",
     ]

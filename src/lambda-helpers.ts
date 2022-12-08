@@ -16,7 +16,6 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   maxNetworkRetries: 3,
 });
 
-export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 export const ses = new AWS.SES({ apiVersion: "2010-12-01" });
 
 const ALLOWED_ORIGINS = ["https://roamjs.com", "https://roamresearch.com"];

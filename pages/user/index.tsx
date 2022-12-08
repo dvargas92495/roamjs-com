@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Layout from "../../components/Layout";
-import { Button, ConfirmationDialog } from "@dvargas92495/ui";
+import { ConfirmationDialog } from "@dvargas92495/ui";
 import {
   useAuthenticatedAxiosGet,
   useAuthenticatedAxiosPost,
@@ -9,7 +9,6 @@ import { SignedIn, UserProfile } from "@clerk/clerk-react";
 import RedirectToLogin from "../../components/RedirectToLogin";
 import Head from "next/head";
 import ReactDOM from "react-dom";
-import format from "date-fns/format";
 
 type ClerkItem = { title: string; display: string; id: string };
 
@@ -157,22 +156,6 @@ const UserProfileTab = ({
   );
 };
 
-type Subscription = {
-  name: string;
-  description: string;
-  id: string;
-  amount: number;
-  date: number;
-};
-
-type Invoice = {
-  name: string;
-  date: string;
-  id: string;
-  total: number;
-  pdf: string;
-};
-
 const ExtensionsTab = () => {
   const axiosGet = useAuthenticatedAxiosGet();
   const axiosPost = useAuthenticatedAxiosPost();
@@ -254,159 +237,6 @@ const ExtensionsTab = () => {
   );
 };
 
-const BillingTab = () => {
-  const authenticatedAxios = useAuthenticatedAxiosGet();
-  const authenticatedAxiosPost = useAuthenticatedAxiosPost();
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const getSubscriptions = useCallback(
-    () =>
-      authenticatedAxios("subscriptions").then((r) =>
-        setSubscriptions(r.data.subscriptions)
-      ),
-    [setSubscriptions]
-  );
-  const unsubscribe = useCallback(
-    (id) =>
-      authenticatedAxiosPost("end-service", { id }).then(() =>
-        setSubscriptions(subscriptions.filter((s) => s.id !== id))
-      ),
-    [authenticatedAxiosPost, subscriptions, setSubscriptions]
-  );
-  const [invoicePage, setInvoicePage] = useState(0);
-  const [invoiceMaxPage, setInvoiceMaxPage] = useState(0);
-  const [invoiceHasMore, setInvoiceHasMore] = useState(false);
-  const [invoiceParams, setInvoiceParams] = useState({});
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [invoiceLoading, setInvoiceLoading] = useState(false);
-  const getInvoices = useCallback(() => {
-    setInvoiceLoading(true);
-    authenticatedAxios(
-      `invoices${
-        Object.entries(invoiceParams).length
-          ? `?${new URLSearchParams(invoiceParams).toString()}`
-          : ""
-      }`
-    ).then((r) => {
-      setInvoices(r.data.invoices);
-      setInvoiceHasMore(r.data.hasMore);
-      setInvoiceLoading(false);
-    });
-  }, [
-    invoiceParams,
-    setInvoices,
-    authenticatedAxios,
-    setInvoiceHasMore,
-    setInvoiceLoading,
-  ]);
-  const print = useCallback(
-    (id: string) =>
-      window.open(invoices.find((i) => i.id === id)?.pdf, "_blank")?.focus(),
-    [invoices]
-  );
-  useEffect(() => {
-    getSubscriptions();
-  }, [getSubscriptions]);
-  useEffect(() => {
-    getInvoices();
-  }, [getInvoices]);
-  return (
-    <UserProfileTab
-      id={"billing"}
-      icon={
-        <svg
-          width="1.25em"
-          height="1.25em"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          fill="none"
-          className="cl-icon"
-        >
-          <path
-            d="M14.99 2.95h-14c-.55 0-1 .45-1 1v1h16v-1c0-.55-.45-1-1-1zm-15 10c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-6h-16v6zm5.5-2h5c.28 0 .5.22.5.5s-.22.5-.5.5h-5c-.28 0-.5-.22-.5-.5s.23-.5.5-.5zm-3 0h1c.28 0 .5.22.5.5s-.22.5-.5.5h-1c-.28 0-.5-.22-.5-.5s.23-.5.5-.5z"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          ></path>
-        </svg>
-      }
-      cards={[
-        {
-          title: "Subscriptions",
-          description: `All of the extensions you are subscribed to, with the amount due by the end of your billing cycle. ${
-            subscriptions.length
-              ? `(${format(new Date(subscriptions[0].date), "MM/dd/yyyy")})`
-              : ""
-          }`,
-          getActions: (i) => [
-            { text: "Unsubscribe", onClick: () => unsubscribe(i.id) },
-          ],
-          items: subscriptions.map((s) => ({
-            id: s.id,
-            title: s.name,
-            display: `$${s.amount}`,
-          })),
-          dialogTitle: "Subscription Actions",
-          dialogContent: "What would you like to do with this subscription?",
-          Component: () => (
-            <b>Total: ${subscriptions.reduce((p, c) => p + c.amount, 0)}</b>
-          ),
-        },
-        {
-          title: "Invoices",
-          description: `All of the previous invoices you've already paid to RoamJS.`,
-          getActions: (i) => [
-            { text: "Print", onClick: () => Promise.resolve(print(i.id)) },
-          ],
-          items: (invoiceLoading ? [] : invoices).map((s) => ({
-            id: s.id,
-            title: s.name,
-            display: `Paid $${s.total} on ${s.date}`,
-          })),
-          dialogTitle: "Invoices",
-          dialogContent: "What would you like to do with this invoice?",
-          Component: () => (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Button
-                variant={"contained"}
-                color={"secondary"}
-                disabled={invoicePage === 0}
-                onClick={() => {
-                  setInvoicePage(invoicePage - 1);
-                  setInvoiceParams({
-                    ending_before: invoices[0].id,
-                  });
-                }}
-              >
-                Previous
-              </Button>
-              <Button
-                variant={"contained"}
-                color={"primary"}
-                disabled={!invoiceHasMore && invoicePage === invoiceMaxPage}
-                onClick={() => {
-                  setInvoicePage(invoicePage + 1);
-                  setInvoiceMaxPage(Math.max(invoicePage, invoiceMaxPage));
-                  setInvoiceParams({
-                    starting_after: invoices[invoices.length - 1].id,
-                  });
-                }}
-              >
-                Next
-              </Button>
-            </div>
-          ),
-        },
-      ]}
-    />
-  );
-};
-
 const UserPage = (): JSX.Element => {
   return (
     <Layout
@@ -438,7 +268,6 @@ main>div.roamjs-standard-layout{
         </Head>
         <UserProfile />
         <ExtensionsTab />
-        <BillingTab />
       </SignedIn>
       <RedirectToLogin />
     </Layout>
