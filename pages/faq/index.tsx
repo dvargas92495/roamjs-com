@@ -83,6 +83,18 @@ const FaqPage: React.FC = () => {
         curious users who accept the risk, until one day the feature could be
         integrated with the extension itself.
       </A>
+      <Q id={"experimental"}>
+        My Roam Graph is slowing down - how do I know if it's because of the
+        extensions?
+      </Q>
+      <A>
+        You could load Roam in the browser with <code>?disablejs=true</code> at
+        the end of the URL to load Roam with all extensions disabled. If you're
+        graph is still slow, we recommend contacting Roam Support. If it's no
+        longer slow, then the issue is with one of the extensions you have
+        installed. At that point, we recommend turning off and on individual
+        extensions until you could spot the one slowing the graph.
+      </A>
     </StandardLayout>
   );
 };

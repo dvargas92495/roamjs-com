@@ -4,9 +4,6 @@ import React from "react";
 import { MDXProvider } from "@mdx-js/react";
 import { ClerkProvider } from "@clerk/clerk-react";
 import "../components/global.css";
-import "normalize.css/normalize.css";
-import "@blueprintjs/icons/lib/css/blueprint-icons.css";
-import "@blueprintjs/core/lib/css/blueprint.css";
 import useTawkTo from "../components/tawkto";
 import components from "../components/MdxComponents";
 
