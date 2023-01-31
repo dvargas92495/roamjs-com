@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Root, Main, Footer } from "@dvargas92495/ui";
 import dynamic from "next/dynamic";
 
-const PAGES = ["extensions", "faq"] as const;
+const PAGES = ["extensions", "FAQ"] as const;
 
 export type LayoutProps = {
   title?: string;
@@ -57,7 +57,7 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
             {PAGES.map((p, i) => (
               <h6 key={i}>
                 <a
-                  href={`/${p}`}
+                  href={`/${p.toLowerCase()}`}
                   color="inherit"
                   className={`${
                     activeLink === p ? "text-gray-800" : "text-gray-400"
