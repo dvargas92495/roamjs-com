@@ -121,22 +121,22 @@ const Blockquote: React.FunctionComponent<{ id: string }> = ({ children }) => {
 };
 
 const H1 = ({ children }) => (
-  <h1 className="MuiTypography-root MuiTypography-h1" id={children.toLowerCase().replace(/ /g, "-")}>{children}</h1>
+  <h1 className="MuiTypography-root MuiTypography-h1" id={children.toString().toLowerCase().replace(/ /g, "-")}>{children}</h1>
   )
 const H2 = ({ children }) => (
-  <h2 className="MuiTypography-root MuiTypography-h2" id={children.toLowerCase().replace(/ /g, "-")}>{children}</h2>
+  <h2 className="MuiTypography-root MuiTypography-h2" id={children.toString().toLowerCase().replace(/ /g, "-")}>{children}</h2>
 )
 const H3 = ({ children }) => (
-  <h3 className="MuiTypography-root MuiTypography-h3" id={children.toLowerCase().replace(/ /g, "-")}>{children}</h3>
+  <h3 className="MuiTypography-root MuiTypography-h3" id={children.toString().toLowerCase().replace(/ /g, "-")}>{children}</h3>
 )
 const H4 = ({ children }) => (
-  <h4 className="MuiTypography-root MuiTypography-h4" id={children.toLowerCase().replace(/ /g, "-")}>{children}</h4>
+  <h4 className="MuiTypography-root MuiTypography-h4" id={children.toString().toLowerCase().replace(/ /g, "-")}>{children}</h4>
 )
 const H5 = ({ children }) => (
-  <h5 className="MuiTypography-root MuiTypography-h5" id={children.toLowerCase().replace(/ /g, "-")}>{children}</h5>
+  <h5 className="MuiTypography-root MuiTypography-h5" id={children.toString().toLowerCase().replace(/ /g, "-")}>{children}</h5>
 )
 const H6 = ({ children }) => (
-  <h6 className="MuiTypography-root MuiTypography-h6" id={children.toLowerCase().replace(/ /g, "-")}>{children}</h6>
+  <h6 className="MuiTypography-root MuiTypography-h6" id={children.toString().toLowerCase().replace(/ /g, "-")}>{children}</h6>
 )
 
 const getMdxComponents = (): Record<string, React.ReactNode> => ({
