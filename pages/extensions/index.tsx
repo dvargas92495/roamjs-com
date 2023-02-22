@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import Layout from "../../components/Layout";
 import { GetStaticProps } from "next";
 import axios from "axios";
-import { idToTitle, useCopyCode } from "../../components/hooks";
+import { idToTitle } from "../../components/hooks";
 import { useRouter } from "next/router";
-import Toast from "@dvargas92495/app/components/Toast";
 
 type ExtensionMetadata = {
   id: string;
@@ -19,9 +18,6 @@ type ExtensionMetadata = {
 
 const ExtensionCard = (props: ExtensionMetadata) => {
   const router = useRouter();
-  const [copied, setCopied] = useState(false);
-  const onSave = useCopyCode(setCopied, "", true);
-  const mainEntry = props.state === "LEGACY" ? props.id : `${props.id}/main`;
   return (
     <div className="shadow-sm rounded-lg border border-gray-100 border-opacity-50 p-4 h-48 flex-1 flex flex-col bg-white relative">
       {(props.state === "DEVELOPMENT" || props.state === "UNDER REVIEW") && (
@@ -49,34 +45,6 @@ const ExtensionCard = (props: ExtensionMetadata) => {
           </h2>
           <p className="text-xs mb-0 overflow-ellipsis">{props.description}</p>
         </div>
-      </div>
-      <hr className="my-4" />
-      <div className="flex justify-between items-center">
-        <div>Made By RoamJS</div>
-        {props.state === "LEGACY" && (
-          <button
-            className="bg-sky-500 text-white py-2 px-4 rounded-md"
-            onClick={() => onSave(mainEntry, props.entry)}
-          >
-            Copy
-          </button>
-        )}
-        {props.state === "DEVELOPMENT" && (
-          <a
-            className="bg-sky-500 text-white py-2 px-4 rounded-md"
-            href={`/downloads/${props.id}.zip`}
-            download
-          >
-            Download
-          </a>
-        )}
-        {props.state === "LIVE" && <span>Available in Roam Depot</span>}
-        <Toast
-          isOpen={copied}
-          onClose={() => setCopied(false)}
-          message={"Copied Extension! Paste into your Roam graph to install!"}
-          autoHideDuration={10000}
-        />
       </div>
     </div>
   );

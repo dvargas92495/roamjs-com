@@ -1,27 +1,19 @@
 import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
-import { Prism } from "react-syntax-highlighter";
 import React, { useCallback, useEffect, useState } from "react";
 import { SignedOut } from "@clerk/clerk-react";
 import StandardLayout from "../../components/StandardLayout";
 import { serialize } from "../../components/serverSide";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import matter from "gray-matter";
-import {
-  getCodeContent,
-  getSingleCodeContent,
-  idToTitle,
-  useCopyCode,
-} from "../../components/hooks";
+import { idToTitle } from "../../components/hooks";
 import {
   Body,
   Breadcrumbs,
-  Button,
   ExternalLink,
   H1,
   H2,
   H3,
-  H4,
   IconButton,
   Subtitle,
   CardGrid,
@@ -29,7 +21,6 @@ import {
 import RoamJSDigest from "../../components/RoamJSDigest";
 import getMdxComponents from "../../components/MdxComponents";
 import fs from "fs";
-import { isSafari } from "react-device-detect";
 import DemoVideo from "../../components/DemoVideo";
 import Loom from "../../components/Loom";
 
@@ -40,7 +31,6 @@ const ExtensionPage = ({
   id,
   description,
   development,
-  entry,
   githubUrl,
   downloadUrl,
   //@deprecated
@@ -52,7 +42,6 @@ const ExtensionPage = ({
   content: MDXRemoteSerializeResult;
   description: string;
   development: boolean;
-  entry?: string;
   githubUrl?: string;
   downloadUrl?: string;
   //@deprecated
@@ -63,8 +52,6 @@ const ExtensionPage = ({
   const [randomItems, setRandomItems] = useState([]);
   const total = randomItems.length;
   const title = idToTitle(id);
-  const [copied, setCopied] = useState(false);
-  const onSave = useCopyCode(setCopied);
   const [pagination, setPagination] = useState(0);
   const rowLength = Math.min(4, randomItems.length);
   const onClickLeft = useCallback(
@@ -132,54 +119,7 @@ const ExtensionPage = ({
       </div>
       <Subtitle>{description}</Subtitle>
       <hr style={{ marginTop: 28 }} />
-      {legacy ? (
-        <>
-          <H3>Installation</H3>
-          {!isSafari && (
-            <>
-              <Body>
-                You could use the Copy Extension button below to individually
-                install this extension. To install, just paste anywhere in your
-                Roam graph and click <b>"Yes, I Know What I'm Doing"</b>.
-              </Body>
-              <div style={{ marginBottom: 24 }}>
-                <Button
-                  onClick={() => onSave(`${id}/main`, entry)}
-                  color="primary"
-                  variant="contained"
-                >
-                  COPY EXTENSION
-                </Button>
-                {copied && <span style={{ marginLeft: 24 }}>COPIED!</span>}
-              </div>
-              <H4>Manual Installation</H4>
-              <Body>
-                If the extension doesn't work after using the copy extension
-                button above, try installing manually using the instructions
-                below.
-              </Body>
-            </>
-          )}
-          <Body>
-            First create a <b>block</b> with the text{" "}
-            <code>{"{{[[roam/js]]}}"}</code> on any page in your Roam DB. Then,
-            create a single child of this block and type three backticks. A code
-            block should appear. Copy this code and paste it into the child code
-            block in your graph:
-          </Body>
-          <div style={{ marginBottom: 48 }}>
-            <Prism language="javascript">
-              {entry
-                ? getCodeContent(id, entry)
-                : getSingleCodeContent(`${id}/main`)}
-            </Prism>
-          </div>
-          <Body>
-            Finally, click <b>"Yes, I Know What I'm Doing".</b>
-          </Body>
-          <hr style={{ marginTop: 40 }} />
-        </>
-      ) : development ? (
+      {development ? (
         <>
           <H3>Installation</H3>
           <Body>
@@ -210,7 +150,7 @@ const ExtensionPage = ({
           Roam Depot,{" "}
           <a
             className="text-sky-500 underline"
-            href={`/downloads/${id}.zip`}
+            href={`https://github.com/dvargas92495/roamjs-${id}/releases/download/latest/${id}.zip`}
             download
           >
             click here to download.
