@@ -1,7 +1,6 @@
 import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
 import React, { useCallback, useEffect, useState } from "react";
-import { SignedOut } from "@clerk/clerk-react";
 import StandardLayout from "../../components/StandardLayout";
 import { serialize } from "../../components/serverSide";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
@@ -18,7 +17,6 @@ import {
   Subtitle,
   CardGrid,
 } from "@dvargas92495/ui";
-import RoamJSDigest from "../../components/RoamJSDigest";
 import getMdxComponents from "../../components/MdxComponents";
 import fs from "fs";
 import DemoVideo from "../../components/DemoVideo";
@@ -186,13 +184,6 @@ const ExtensionPage = ({
           </a>
         </Body>
       )}
-      <SignedOut>
-        <div style={{ margin: "128px 0" }}>
-          <div style={{ width: "100%", textAlign: "center" }}>
-            <RoamJSDigest />
-          </div>
-        </div>
-      </SignedOut>
       <H3>Other Extensions</H3>
       <div
         style={{

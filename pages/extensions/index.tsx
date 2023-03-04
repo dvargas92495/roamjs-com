@@ -19,7 +19,7 @@ type ExtensionMetadata = {
 const ExtensionCard = (props: ExtensionMetadata) => {
   const router = useRouter();
   return (
-    <div className="shadow-sm rounded-lg border border-gray-100 border-opacity-50 p-4 h-48 flex-1 flex flex-col bg-white relative">
+    <div className="shadow-sm rounded-lg border border-gray-100 border-opacity-50 p-4 h-32 flex-1 flex flex-col bg-white relative">
       {(props.state === "DEVELOPMENT" || props.state === "UNDER REVIEW") && (
         <div className="absolute top-0 flex justify-center w-full">
           <div className="relative -top-4 rounded-lg bg-slate-700 text-white px-3 py-1">
@@ -85,7 +85,6 @@ const ExtensionHomePage = ({
     (e) =>
       !search || searchRegex.test(e.title) || searchRegex.test(e.description)
   );
-  const [max, setMax] = useState(9);
   return (
     <Layout
       title={"RoamJS Extensions"}
@@ -100,7 +99,8 @@ const ExtensionHomePage = ({
           <span className="text-orange-400">Extensions</span>
         </h1>
         <p className="mb-24 text-center font-semibold text-lg">
-          Click on any of the extensions below to find out how to use them.
+          We are the leading publisher of Roam Depot extensions. Check out our
+          work below!
         </p>
         <h2 className="text-3xl font-bold text-center mb-12">
           Featured Extensions
@@ -138,20 +138,10 @@ const ExtensionHomePage = ({
             />
           </div>
           <div className="grid md:grid-cols-3 grid-cols-1 mb-24 w-full max-w-6xl mx-auto gap-8">
-            {filteredExtensions.slice(0, max).map((e) => (
+            {filteredExtensions.map((e) => (
               <ExtensionCard {...e} key={e.id} />
             ))}
           </div>
-          {max < filteredExtensions.length && (
-            <div className={"flex justify-center"}>
-              <button
-                onClick={() => setMax(max + 9)}
-                className={`px-6 py-3 font-semibold rounded-full bg-sky-500 shadow-sm hover:bg-sky-700 active:bg-sky-900 hover:shadow-md active:shadow-none disabled:cursor-not-allowed disabled:bg-opacity-50 disabled:opacity-50 disabled:hover:bg-sky-500 disabled:hover:shadow-none disabled:active:bg-sky-500 disabled:hover:bg-opacity-50`}
-              >
-                Show More
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </Layout>
@@ -162,7 +152,7 @@ export const getStaticProps: GetStaticProps<{
   extensions: ExtensionMetadata[];
 }> = () =>
   axios
-    .get(`${process.env.NEXT_PUBLIC_API_URL}/request-path`)
+    .get(`https://lambda.roamjs.com/request-path`)
     .then((r) => ({
       props: {
         extensions: r.data.paths

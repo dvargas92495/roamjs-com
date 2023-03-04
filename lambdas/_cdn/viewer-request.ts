@@ -50,7 +50,8 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/filter-embeds": "/extensions",
   "/extensions/video": "/extensions",
   "/extensions/marketplace": "/extensions",
-  "/contribute": "/extensions"
+  "/contribute": "/extensions",
+  "/subscribe": "https://roamjs.com"
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {

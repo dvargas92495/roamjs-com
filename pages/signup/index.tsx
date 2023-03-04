@@ -1,53 +1,7 @@
-import { SignUp } from "@clerk/clerk-react";
-import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useRef } from "react";
+import React from "react";
 import Layout from "../../components/Layout";
 
 const SignupPage = (): JSX.Element => {
-  const { extension, state } = useRouter().query;
-  const otherObserverRef = useRef<MutationObserver>(null);
-  const errorCallback = useCallback((mr: MutationRecord[]) => {
-    const target = mr[0].target as HTMLDivElement;
-    if (target.innerText === "has invalid length") {
-      target.innerText = "Has invalid length: Must be at least 8 characters.";
-    } else if (target.innerText === "is insecure") {
-      target.innerText =
-        "Password is insecure, it's publicly available. Please choose another";
-    }
-  }, []);
-  const mainCallback = useCallback(
-    (_, observer: MutationObserver) => {
-      const passwordInput = document.getElementById("password");
-      if (passwordInput) {
-        const errorNode = passwordInput.nextElementSibling;
-        if (errorNode) {
-          observer.disconnect();
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          otherObserverRef.current = new MutationObserver(errorCallback);
-          otherObserverRef.current.observe(errorNode, { attributes: true });
-        }
-      }
-    },
-    [errorCallback]
-  );
-  useEffect(() => {
-    const main = document.getElementsByTagName("main")[0];
-    if (main) {
-      const mutationObserver = new MutationObserver(mainCallback);
-      mutationObserver.observe(main, { childList: true, subtree: true });
-      return () => {
-        mutationObserver.disconnect();
-        otherObserverRef.current?.disconnect?.();
-      };
-    }
-  }, [mainCallback]);
-  const signUpProps = extension
-    ? {
-        afterSignUp: `${window.location.origin}/extensions/${extension}?started=true&state=${state}`,
-        signInURL: `${window.location.origin}/login?extension=${extension}&state=${state}`,
-      }
-    : {};
   return (
     <Layout
       title={"Sign Up | RoamJS"}
@@ -55,7 +9,20 @@ const SignupPage = (): JSX.Element => {
         "Sign up on RoamJS to gain access to powerful services for Roam!"
       }
     >
-      <SignUp {...signUpProps} />
+      <div className="text-center text-xl">
+        <div className="my-12">
+          We are no longer accepting signups for RoamJS.
+        </div>
+        <div>
+          To become a user of SamePage,{" "}
+          <a
+            href={"https://samepage.network/signup"}
+            className={"text-sky-800"}
+          >
+            click here!
+          </a>
+        </div>
+      </div>
     </Layout>
   );
 };

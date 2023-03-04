@@ -1,8 +1,38 @@
 import React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { Root, Main, Footer } from "@dvargas92495/ui";
 import dynamic from "next/dynamic";
+
+const Footer = ({ siteLinks }: { siteLinks: string[] }) => {
+  return (
+    <footer
+      style={{
+        padding: "24px 16px",
+        marginTop: "32px",
+        background: "#f8a94a40",
+      }}
+    >
+      <hr />
+      <div className="flex gap-64">
+        <div>
+          <p>
+            {"\u00A9"} {new Date().getFullYear()} SamePage Network, Inc.
+          </p>
+        </div>
+        <div>
+          <h6 className="text-xl font-bold mb-2">Site Links</h6>
+          {siteLinks.map((l, i) => {
+            return (
+              <p key={i}>
+                <Link href={`/${l.toLowerCase().replace(/ /g, "-")}`}>{l}</Link>
+              </p>
+            );
+          })}
+        </div>
+      </div>
+    </footer>
+  );
+};
 
 const PAGES = ["extensions", "FAQ"] as const;
 
@@ -22,10 +52,15 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
   title = "RoamJS",
   description = "Become a Roam Power User",
   img = "https://roamjs.com/images/logo-low-res.png",
-  activeLink,
 }) => {
   return (
-    <Root>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
       <Head>
         <title>{title}</title>
         <meta charSet="utf-8" />
@@ -42,7 +77,14 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
         <meta name="twitter:image" content={img} />
       </Head>
       <header className="static bg-transparent shadow-xl z-10">
-        <div className="px-6 h-16 flex items-center">
+        <div className="bg-sky-400 bg-opacity-25 font-semibold py-2 text-center">
+          RoamJS is becoming a part of SamePage! To check out the inter-tool
+          network we're building,{" "}
+          <a href={"https://samepage.network"} className={"text-sky-800"}>
+            click here to learn more!
+          </a>
+        </div>
+        <div className="px-6 h-16 flex items-center justify-between">
           <span className="flex max-h-full w-16 mr-4">
             <Link href={"/"}>
               <img
@@ -53,31 +95,35 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
               />
             </Link>
           </span>
-          <div className="justify-start flex-grow flex gap-6 capitalize text-lg items-center h-full">
-            {PAGES.map((p, i) => (
-              <h6 key={i}>
-                <a
-                  href={`/${p.toLowerCase()}`}
-                  color="inherit"
-                  className={`${
-                    activeLink === p ? "text-gray-800" : "text-gray-400"
-                  } hover:text-gray-700 active:text-gray-800 hover:no-underline active:no-underline`}
-                >
-                  {p}
-                </a>
-              </h6>
-            ))}
-          </div>
           <div className="w-48 flex justify-end items-center">
             <UserIconDynamic />
           </div>
         </div>
       </header>
-      <Main>{children}</Main>
+      <main
+        className="my-8"
+        style={{
+          marginLeft: 0,
+          marginRight: 0,
+          display: "flex",
+          justifyContent: "center",
+          width: "100%",
+          padding: 0,
+          flexGrow: 1,
+        }}
+      >
+        {children}
+      </main>
       <Footer
-        siteLinks={["About", "Terms of Use", "Privacy Policy", "Contact"]}
+        siteLinks={[
+          "About",
+          "FAQ",
+          "Terms of Use",
+          "Privacy Policy",
+          "Contact",
+        ]}
       />
-    </Root>
+    </div>
   );
 };
 
