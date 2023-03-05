@@ -79,27 +79,6 @@ module "aws_static_site" {
   }
 }
 
-module "aws-serverless-backend" {
-    source  = "dvargas92495/serverless-backend/aws"
-    version = "2.5.0"
-
-    api_name = "roam-js-extensions"
-    domain = "roamjs.com"
-    paths = [
-        "customer/post",
-        "customer/put",
-        "publish/post",
-        "token/get",
-        "token/post",
-    ]
-    sizes = {
-      "publish/post": 1024
-    }
-    tags = {
-        Application = "Roam JS Extensions"
-    }
-}
-
 module "aws_email" {
   source  = "dvargas92495/email/aws"
   version = "2.0.3"

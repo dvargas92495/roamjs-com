@@ -19,8 +19,6 @@ import {
 } from "@dvargas92495/ui";
 import getMdxComponents from "../../components/MdxComponents";
 import fs from "fs";
-import DemoVideo from "../../components/DemoVideo";
-import Loom from "../../components/Loom";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -31,10 +29,6 @@ const ExtensionPage = ({
   development,
   githubUrl,
   downloadUrl,
-  //@deprecated
-  loom,
-  skipDemo,
-  legacy,
 }: {
   id: string;
   content: MDXRemoteSerializeResult;
@@ -42,10 +36,6 @@ const ExtensionPage = ({
   development: boolean;
   githubUrl?: string;
   downloadUrl?: string;
-  //@deprecated
-  loom: string;
-  skipDemo: boolean; // only in video extension
-  legacy: boolean;
 }): React.ReactElement => {
   const [randomItems, setRandomItems] = useState([]);
   const total = randomItems.length;
@@ -160,12 +150,6 @@ const ExtensionPage = ({
       ) : (
         "No content"
       )}
-      {legacy && (!development || loom) && !skipDemo && (
-        <>
-          <H3>Demo</H3>
-          {loom ? <Loom id={loom} /> : <DemoVideo src={id} />}
-        </>
-      )}
       <hr style={{ marginTop: 24 }} />
       <H3>Contributors</H3>
       <Body>
@@ -272,7 +256,6 @@ export const getStaticProps: GetStaticProps<
             content,
             id: context.params?.id,
             development: state === "DEVELOPMENT" || state === "UNDER REVIEW",
-            legacy: state === "LEGACY",
             description,
             downloadUrl,
             ...data,
@@ -293,7 +276,6 @@ export const getStaticProps: GetStaticProps<
           content,
           id: context.params?.id || "",
           development: true,
-          legacy: false,
         },
       }));
     });

@@ -1,12 +1,62 @@
-import {
-  Body,
-  LI,
-} from "@dvargas92495/ui";
+import { Body, LI } from "@dvargas92495/ui";
 import React, { useEffect, useState } from "react";
-import Loom from "./Loom";
-import YouTube from "./Youtube";
 import { Prism } from "react-syntax-highlighter";
-import DemoVideo from "./DemoVideo";
+import ReactYoutube from "react-youtube";
+
+const YouTube = ({ id }: { id: string }): React.ReactNode => {
+  return (
+    <ReactYoutube
+      videoId={id}
+      id={`roamjs-youtube-${id}`}
+      opts={{
+        width: "100%",
+        playerVars: {
+          origin: "https://roamjs.com",
+          autoplay: 0 as const,
+          rel: 0 as const,
+        },
+      }}
+    />
+  );
+};
+
+const DemoVideo: React.FunctionComponent<{ src: string }> = ({ src }) => (
+  <video
+    width="320"
+    height="240"
+    controls
+    src={
+      src.startsWith("https")
+        ? src
+        : `${process.env.APP_BASE_PATH || ""}/videos/${src}.mp4`
+    }
+    style={{ display: "block", marginBottom: 16 }}
+  />
+);
+
+const Loom: React.FunctionComponent<{ id: string }> = ({ id }) => {
+  return (
+    <div
+      style={{
+        position: "relative",
+        paddingBottom: "66.66666666666666%",
+        height: 0,
+      }}
+    >
+      <iframe
+        src={`https://www.loom.com/embed/${id}`}
+        allowFullScreen
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+        }}
+      />
+    </div>
+  );
+};
 
 const Pre: React.FunctionComponent<HTMLPreElement> = ({ children }) => (
   <>{children}</>
@@ -18,7 +68,7 @@ const Code: React.FunctionComponent<HTMLElement> = ({
 }) => {
   return (
     <Prism language={(className || "").substring("language-".length)}>
-      {typeof children === "string" ? children.trim() : children}
+      {typeof children === "string" ? children.trim() : children.toString()}
     </Prism>
   );
 };
@@ -121,23 +171,53 @@ const Blockquote: React.FunctionComponent<{ id: string }> = ({ children }) => {
 };
 
 const H1 = ({ children }) => (
-  <h1 className="MuiTypography-root MuiTypography-h1" id={children.toString().toLowerCase().replace(/ /g, "-")}>{children}</h1>
-  )
+  <h1
+    className="MuiTypography-root MuiTypography-h1"
+    id={children.toString().toLowerCase().replace(/ /g, "-")}
+  >
+    {children}
+  </h1>
+);
 const H2 = ({ children }) => (
-  <h2 className="MuiTypography-root MuiTypography-h2" id={children.toString().toLowerCase().replace(/ /g, "-")}>{children}</h2>
-)
+  <h2
+    className="MuiTypography-root MuiTypography-h2"
+    id={children.toString().toLowerCase().replace(/ /g, "-")}
+  >
+    {children}
+  </h2>
+);
 const H3 = ({ children }) => (
-  <h3 className="MuiTypography-root MuiTypography-h3" id={children.toString().toLowerCase().replace(/ /g, "-")}>{children}</h3>
-)
+  <h3
+    className="MuiTypography-root MuiTypography-h3"
+    id={children.toString().toLowerCase().replace(/ /g, "-")}
+  >
+    {children}
+  </h3>
+);
 const H4 = ({ children }) => (
-  <h4 className="MuiTypography-root MuiTypography-h4" id={children.toString().toLowerCase().replace(/ /g, "-")}>{children}</h4>
-)
+  <h4
+    className="MuiTypography-root MuiTypography-h4"
+    id={children.toString().toLowerCase().replace(/ /g, "-")}
+  >
+    {children}
+  </h4>
+);
 const H5 = ({ children }) => (
-  <h5 className="MuiTypography-root MuiTypography-h5" id={children.toString().toLowerCase().replace(/ /g, "-")}>{children}</h5>
-)
+  <h5
+    className="MuiTypography-root MuiTypography-h5"
+    id={children.toString().toLowerCase().replace(/ /g, "-")}
+  >
+    {children}
+  </h5>
+);
 const H6 = ({ children }) => (
-  <h6 className="MuiTypography-root MuiTypography-h6" id={children.toString().toLowerCase().replace(/ /g, "-")}>{children}</h6>
-)
+  <h6
+    className="MuiTypography-root MuiTypography-h6"
+    id={children.toString().toLowerCase().replace(/ /g, "-")}
+  >
+    {children}
+  </h6>
+);
 
 const getMdxComponents = (): Record<string, React.ReactNode> => ({
   h1: H1,
