@@ -90,39 +90,43 @@ addStyle(`.roamjs-collapsible-caret {
 }
 `);
 
-runExtension("presentation", async () => {
-  createButtonObserver({
-    attribute: "presentation",
-    shortcut: "slides",
-    render: (button: HTMLButtonElement) => {
-      const { blockUid } = getUidsFromButton(button);
-      if (!blockUid) {
-        return;
-      }
-      const text = getTextByBlockUid(blockUid);
-      const buttonText = text.match(
-        "{{(presentation|slides|#?\\[\\[presentation\\]\\]|#?\\[\\[slides\\]\\]|#presentation|#slides):(.*)}}"
-      )?.[2];
-      const options = buttonText
-        ? {
-            theme: buttonText.match(
-              `(?:\\[\\[{|{\\[\\[|{)theme:(${VALID_THEMES.join(
-                "|"
-              )})(?:\\]\\]}|}\\]\\]|})`
-            )?.[1],
-            notes: buttonText.match(
-              "(?:\\[\\[{|{\\[\\[|{)notes:(true|false)(?:\\]\\]}|}\\]\\]|})"
-            )?.[1],
-            collapsible: !!buttonText.match(COLLAPSIBLE_REGEX),
-            animate: !!buttonText.match(ANIMATE_REGEX),
-            transition: buttonText.match(TRANSITION_REGEX)?.[1] || "",
-          }
-        : {};
-      render({
-        button,
-        getSlides: () => getFullTreeByParentUid(blockUid).children,
-        options,
-      });
-    },
-  });
+runExtension({
+  extensionId: "presentation",
+  migratedTo: "Presentation",
+  run: async () => {
+    createButtonObserver({
+      attribute: "presentation",
+      shortcut: "slides",
+      render: (button: HTMLButtonElement) => {
+        const { blockUid } = getUidsFromButton(button);
+        if (!blockUid) {
+          return;
+        }
+        const text = getTextByBlockUid(blockUid);
+        const buttonText = text.match(
+          "{{(presentation|slides|#?\\[\\[presentation\\]\\]|#?\\[\\[slides\\]\\]|#presentation|#slides):(.*)}}"
+        )?.[2];
+        const options = buttonText
+          ? {
+              theme: buttonText.match(
+                `(?:\\[\\[{|{\\[\\[|{)theme:(${VALID_THEMES.join(
+                  "|"
+                )})(?:\\]\\]}|}\\]\\]|})`
+              )?.[1],
+              notes: buttonText.match(
+                "(?:\\[\\[{|{\\[\\[|{)notes:(true|false)(?:\\]\\]}|}\\]\\]|})"
+              )?.[1],
+              collapsible: !!buttonText.match(COLLAPSIBLE_REGEX),
+              animate: !!buttonText.match(ANIMATE_REGEX),
+              transition: buttonText.match(TRANSITION_REGEX)?.[1] || "",
+            }
+          : {};
+        render({
+          button,
+          getSlides: () => getFullTreeByParentUid(blockUid).children,
+          options,
+        });
+      },
+    });
+  },
 });

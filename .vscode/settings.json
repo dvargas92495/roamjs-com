@@ -1,6 +1,0 @@
-{
-    "terminal.integrated.env.windows": {
-      "AWS_PROFILE": "roam-js-extensions",
-      "TF_WORKSPACE": "roam-js-extensions"
-    }
-}
