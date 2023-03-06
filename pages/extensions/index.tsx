@@ -12,7 +12,6 @@ type ExtensionMetadata = {
   image: string;
   href: string;
   state: "LIVE" | "DEVELOPMENT" | "PRIVATE" | "LEGACY" | "UNDER REVIEW";
-  featured: number;
   entry: string;
 };
 
@@ -50,7 +49,6 @@ const ExtensionCard = (props: ExtensionMetadata) => {
   );
 };
 
-const FEATURED_LENGTH = 3;
 
 const SearchSvg = () => (
   <svg
@@ -74,11 +72,6 @@ const ExtensionHomePage = ({
 }: {
   extensions: ExtensionMetadata[];
 }): React.ReactElement => {
-  const featured = extensions
-    .filter((e) => e.featured > 0)
-    .sort((a, b) => a.featured - b.featured);
-  const [page, setPage] = useState(0);
-  const featuredStart = (page * FEATURED_LENGTH) % featured.length;
   const [search, setSearch] = useState("");
   const searchRegex = new RegExp(search, "i");
   const filteredExtensions = extensions.filter(
@@ -102,31 +95,7 @@ const ExtensionHomePage = ({
           We are the leading publisher of Roam Depot extensions. Check out our
           work below!
         </p>
-        <h2 className="text-3xl font-bold text-center mb-12">
-          Featured Extensions
-        </h2>
-        <div className="flex items-center gap-8 mb-16 max-w-6xl mx-auto w-full">
-          <div
-            className="h-0 w-0 border-t-8 border-t-transparent border-b-8 border-b-transparent border-r-8 border-r-black cursor-pointer"
-            onClick={() => setPage(page - 1)}
-          />
-          {featured
-            .slice(featuredStart)
-            .concat(featured.slice(0, featuredStart))
-            .slice(0, FEATURED_LENGTH)
-            .map((props) => (
-              <ExtensionCard {...props} key={props.id} />
-            ))}
-          <div
-            className="h-0 w-0 border-t-8 border-t-transparent border-b-8 border-b-transparent border-l-8 border-l-black cursor-pointer"
-            onClick={() => setPage(page + 1)}
-          />
-        </div>
-        <hr className="bg-black" />
-        <div className="bg-gray-100 flex-grow w-full flex flex-col items-center pb-8">
-          <h2 className="text-3xl font-bold text-center mb-12 mt-24">
-            All Extensions
-          </h2>
+        <div className="flex-grow w-full flex flex-col items-center pb-8">
           <div className="border border-black rounded-lg p-2 bg-white max-w-2xl w-full mb-24 flex items-center h-12">
             <span className="mag h-8 w-8 inline-flex justify-center items-center">
               <SearchSvg />
@@ -157,14 +126,13 @@ export const getStaticProps: GetStaticProps<{
       props: {
         extensions: r.data.paths
           .filter((p) => p.state !== "PRIVATE")
-          .map(({ id, description, state, featured }) => ({
+          .map(({ id, description, state }) => ({
             id,
             title: idToTitle(id),
             description: description || "Description for " + idToTitle(id),
             image: `https://roamjs.com/thumbnails/${id}.png`,
             href: `/extensions/${id}`,
             state: state === "UNDER REVIEW" ? "DEVELOPMENT" : state,
-            featured,
           }))
           .sort((a, b) =>
             a.state === b.state
