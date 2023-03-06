@@ -320,12 +320,6 @@ provider "github" {
     owner = "dvargas92495"
 }
 
-resource "github_actions_secret" "rest_api_id" {
-  repository       = "roamjs-com"
-  secret_name      = "REST_API_ID"
-  plaintext_value  = module.aws-serverless-backend.rest_api_id
-}
-
 resource "github_actions_secret" "stripe_public" {
   repository       = "roamjs-com"
   secret_name      = "STRIPE_PUBLIC_KEY"
