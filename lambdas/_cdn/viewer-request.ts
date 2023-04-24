@@ -44,6 +44,7 @@ const REDIRECTS: Record<string, string> = {
     "/extensions/smartblocks/command_reference#Md9KfcSaH",
   "/extensions/sparql": "/extensions/developer",
   "/extensions/tally": "/extensions/workbench/tally",
+  "/extensions/workbench/multi_select": "https://roamresearch.com/#/app/help/page/rQOT9lVIP",
   "/extensions/tag-cycle": "/extensions/workbench/tag_cycle",
   "/extensions/wysiwyg-mode": "/extensions",
   "/extensions/wiki-data": "https://github.com/mlava/wikipedia",
