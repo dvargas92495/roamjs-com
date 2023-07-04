@@ -73,7 +73,7 @@ const REDIRECTS: Record<string, string> = {
     "/extensions/smartblocks/alternative_methods",
   "/extensions/roam42/smartblocks:_customization": "/extensions/smartblocks",
   "/extensions/roam42/smartblocks:_developer_docs":
-    "/extensions/developer_docs",
+    "/extensions/smartblocks/developer_docs",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
