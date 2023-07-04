@@ -1,7 +1,6 @@
 import React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 
 const Footer = ({ siteLinks }: { siteLinks: string[] }) => {
   return (
@@ -16,7 +15,10 @@ const Footer = ({ siteLinks }: { siteLinks: string[] }) => {
       <div className="flex gap-64">
         <div>
           <p>
-            {"\u00A9"} {new Date().getFullYear()} SamePage Network, Inc.
+            {"\u00A9"} {new Date().getFullYear()}{" "}
+            <a href="https://samepage.network" target="_blank" rel="noreferrer">
+              SamePage Network, Inc.
+            </a>
           </p>
         </div>
         <div>
@@ -40,12 +42,8 @@ export type LayoutProps = {
   title?: string;
   description?: string;
   img?: string;
-  activeLink?: typeof PAGES[number];
+  activeLink?: (typeof PAGES)[number];
 };
-
-const UserIconDynamic = dynamic(() => import("../components/UserIcon"), {
-  ssr: false,
-});
 
 const Layout: React.FunctionComponent<LayoutProps> = ({
   children,
@@ -77,13 +75,6 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
         <meta name="twitter:image" content={img} />
       </Head>
       <header className="static bg-transparent shadow-xl z-10">
-        <div className="bg-sky-400 bg-opacity-25 font-semibold py-2 text-center">
-          RoamJS is becoming a part of SamePage! To check out the inter-tool
-          network we're building,{" "}
-          <a href={"https://samepage.network"} className={"text-sky-800"}>
-            click here to learn more!
-          </a>
-        </div>
         <div className="px-6 h-16 flex items-center justify-between">
           <span className="flex max-h-full w-16 mr-4">
             <Link href={"/"}>
@@ -95,9 +86,6 @@ const Layout: React.FunctionComponent<LayoutProps> = ({
               />
             </Link>
           </span>
-          <div className="w-48 flex justify-end items-center">
-            <UserIconDynamic />
-          </div>
         </div>
       </header>
       <main

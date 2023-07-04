@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Layout from "../../components/Layout";
 import { GetStaticProps } from "next";
 import axios from "axios";
@@ -11,21 +11,12 @@ type ExtensionMetadata = {
   description: string;
   image: string;
   href: string;
-  state: "LIVE" | "DEVELOPMENT" | "PRIVATE" | "LEGACY" | "UNDER REVIEW";
-  entry: string;
 };
 
 const ExtensionCard = (props: ExtensionMetadata) => {
   const router = useRouter();
   return (
     <div className="shadow-sm rounded-lg border border-gray-100 border-opacity-50 p-4 h-32 flex-1 flex flex-col bg-white relative">
-      {(props.state === "DEVELOPMENT" || props.state === "UNDER REVIEW") && (
-        <div className="absolute top-0 flex justify-center w-full">
-          <div className="relative -top-4 rounded-lg bg-slate-700 text-white px-3 py-1">
-            🚧 WIP
-          </div>
-        </div>
-      )}
       <div className="flex gap-4 flex-1 max-h-24">
         <div
           className={"h-24 w-24 flex-shrink-0 flex justify-center items-center"}
@@ -49,35 +40,11 @@ const ExtensionCard = (props: ExtensionMetadata) => {
   );
 };
 
-
-const SearchSvg = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M15.5 14.0003H14.71L14.43 13.7303C15.63 12.3303 16.25 10.4203 15.91 8.39026C15.44 5.61026 13.12 3.39026 10.32 3.05026C6.09002 2.53026 2.53002 6.09026 3.05002 10.3203C3.39002 13.1203 5.61002 15.4403 8.39002 15.9103C10.42 16.2503 12.33 15.6303 13.73 14.4303L14 14.7103V15.5003L18.25 19.7503C18.66 20.1603 19.33 20.1603 19.74 19.7503C20.15 19.3403 20.15 18.6703 19.74 18.2603L15.5 14.0003ZM9.50002 14.0003C7.01002 14.0003 5.00002 11.9903 5.00002 9.50026C5.00002 7.01026 7.01002 5.00026 9.50002 5.00026C11.99 5.00026 14 7.01026 14 9.50026C14 11.9903 11.99 14.0003 9.50002 14.0003Z"
-      fill="#2E364D"
-    />
-  </svg>
-);
-
 const ExtensionHomePage = ({
   extensions,
 }: {
   extensions: ExtensionMetadata[];
 }): React.ReactElement => {
-  const [search, setSearch] = useState("");
-  const searchRegex = new RegExp(search, "i");
-  const filteredExtensions = extensions.filter(
-    (e) =>
-      !search || searchRegex.test(e.title) || searchRegex.test(e.description)
-  );
   return (
     <Layout
       title={"RoamJS Extensions"}
@@ -96,18 +63,8 @@ const ExtensionHomePage = ({
           work below!
         </p>
         <div className="flex-grow w-full flex flex-col items-center pb-8">
-          <div className="border border-black rounded-lg p-2 bg-white max-w-2xl w-full mb-24 flex items-center h-12">
-            <span className="mag h-8 w-8 inline-flex justify-center items-center">
-              <SearchSvg />
-            </span>
-            <input
-              placeholder="Search Extension by name, description author..."
-              className="focus:ring-0 active:ring-0 flex-grow h-full focus:outline-none"
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="grid md:grid-cols-3 grid-cols-1 mb-24 w-full max-w-6xl mx-auto gap-8">
-            {filteredExtensions.map((e) => (
+          <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 mb-24 w-full max-w-6xl mx-auto gap-8">
+            {extensions.map((e) => (
               <ExtensionCard {...e} key={e.id} />
             ))}
           </div>
@@ -126,19 +83,14 @@ export const getStaticProps: GetStaticProps<{
       props: {
         extensions: r.data.paths
           .filter((p) => p.state !== "PRIVATE")
-          .map(({ id, description, state }) => ({
+          .map(({ id, description }) => ({
             id,
             title: idToTitle(id),
             description: description || "Description for " + idToTitle(id),
             image: `https://roamjs.com/thumbnails/${id}.png`,
             href: `/extensions/${id}`,
-            state: state === "UNDER REVIEW" ? "DEVELOPMENT" : state,
           }))
-          .sort((a, b) =>
-            a.state === b.state
-              ? a.title.localeCompare(b.title)
-              : b.state.localeCompare(a.state)
-          ),
+          .sort((a, b) => a.title.localeCompare(b.title)),
       },
     }))
     .catch(() => ({

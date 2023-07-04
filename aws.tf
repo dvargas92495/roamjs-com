@@ -18,46 +18,6 @@ variable "secret" {
     type = string
 }
 
-variable "stripe_public" {
-    type = string
-}
-
-variable "giphy_key" {
-    type = string
-}
-
-variable "clerk_api_key" {
-    type = string
-}
-
-variable "clerk_dev_api_key" {
-    type = string
-}
-
-variable "diahook_secret" {
-  type = string
-}
-
-variable "encryption_secret" {
-  type = string
-}
-
-variable "convertkit_api_token" {
-  type = string
-}
-
-variable "stripe_secret" {
-    type = string
-}
-
-variable "stripe_checkout_secret" {
-    type = string
-}
-
-variable "roam_api_token" {
-    type = string
-}
-
 provider "aws" {
     region = "us-east-1"
 }
@@ -320,30 +280,6 @@ provider "github" {
     owner = "dvargas92495"
 }
 
-resource "github_actions_secret" "stripe_public" {
-  repository       = "roamjs-com"
-  secret_name      = "STRIPE_PUBLIC_KEY"
-  plaintext_value  = var.stripe_public
-}
-
-resource "github_actions_secret" "giphy_key" {
-  repository       = "roamjs-com"
-  secret_name      = "GIPHY_KEY"
-  plaintext_value  = var.giphy_key
-}
-
-resource "github_actions_secret" "clerk_api_key" {
-  repository       = "roamjs-com"
-  secret_name      = "CLERK_API_KEY"
-  plaintext_value  = var.clerk_api_key
-}
-
-resource "github_actions_secret" "clerk_dev_api_key" {
-  repository       = "roamjs-com"
-  secret_name      = "CLERK_DEV_API_KEY"
-  plaintext_value  = var.clerk_dev_api_key
-}
-
 resource "github_actions_secret" "lambda_role" {
   repository       = "roamjs-com"
   secret_name      = "LAMBDA_ROLE"
@@ -354,42 +290,6 @@ resource "github_actions_secret" "cloudfront_arn" {
   repository       = "roamjs-com"
   secret_name      = "CLOUDFRONT_ARN"
   plaintext_value  = module.aws_static_site.cloudfront_arn
-}
-
-resource "github_actions_secret" "diahook_secret" {
-  repository       = "roamjs-com"
-  secret_name      = "DIAHOOK_SECRET"
-  plaintext_value  = var.diahook_secret
-}
-
-resource "github_actions_secret" "encryption_secret" {
-  repository       = "roamjs-com"
-  secret_name      = "ENCRYPTION_SECRET"
-  plaintext_value  = var.encryption_secret
-}
-
-resource "github_actions_secret" "convertkit_api_token" {
-  repository       = "roamjs-com"
-  secret_name      = "CONVERTKIT_API_TOKEN"
-  plaintext_value  = var.convertkit_api_token
-}
-
-resource "github_actions_secret" "stripe_secret" {
-  repository       = "roamjs-com"
-  secret_name      = "STRIPE_SECRET_KEY"
-  plaintext_value  = var.stripe_secret
-}
-
-resource "github_actions_secret" "stripe_checkout_secret" {
-  repository       = "roamjs-com"
-  secret_name      = "STRIPE_CHECKOUT_SECRET"
-  plaintext_value  = var.stripe_checkout_secret
-}
-
-resource "github_actions_secret" "roam_api_token" {
-  repository       = "roamjs-com"
-  secret_name      = "ROAM_API_TOKEN"
-  plaintext_value  = var.roam_api_token
 }
 
 resource "github_actions_secret" "deploy_aws_access_key" {
