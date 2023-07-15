@@ -1,3 +1,7 @@
+# ARCHIVED
+
+https://roamjs.com now redirects to our GitHub organization for all RoamJS extensions: https://github.com/RoamJS
+
 # Roam JS Extensions
 
 The suite of [Roam](https://roamresearch.com) extensions built and maintained by [RoamJS](https://roamjs.com).
