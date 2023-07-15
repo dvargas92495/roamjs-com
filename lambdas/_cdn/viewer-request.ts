@@ -1,7 +1,7 @@
 import { CloudFrontRequestHandler } from "aws-lambda";
 
 // In the future, move this to the roamjs static site generator
-const REDIRECTS: Record<string, string> = {
+const LEGACY_REDIRECTS: Record<string, string> = {
   "/extensions/query-tools": "/extensions/query-builder",
   "/extensions/roam42": "/extensions/workbench",
   "/extensions/roam42/workbench": "/extensions/workbench/command_palette_plus",
@@ -74,6 +74,9 @@ const REDIRECTS: Record<string, string> = {
   "/extensions/roam42/smartblocks:_customization": "/extensions/smartblocks",
   "/extensions/roam42/smartblocks:_developer_docs":
     "/extensions/smartblocks/developer_docs",
+  "/extensions": "/",
+  "/privacy-policy": "https://samepage.network/privacy-policy",
+  "/terms-of-use": "https://samepage.network/terms-of-use",
 };
 
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
@@ -96,17 +99,18 @@ export const handler: CloudFrontRequestHandler = (event, _, callback) => {
     };
     return callback(null, response);
   };
-  if (/^\/docs(\/extensions)?/.test(olduri)) {
-    const newUri = olduri.replace(/^\/docs(\/extensions)?/, "/extensions");
-    return redirect(newUri);
-  } else if (/^\/services\/social(\/)?/.test(olduri)) {
-    const newUri = "/extensions/twitter";
-    return redirect(newUri);
-  } else if (/^\/services(.*)$/.test(olduri)) {
-    const newUri = olduri.replace(/^\/services(.*)$/, "/extensions$1");
-    return redirect(newUri);
-  } else if (REDIRECTS[olduri]) {
-    return redirect(REDIRECTS[olduri]);
-  }
-  return callback(null, request);
+  const legacyUri = /^\/docs(\/extensions)?/.test(olduri)
+    ? olduri.replace(/^\/docs(\/extensions)?/, "/extensions")
+    : /^\/services\/social(\/)?/.test(olduri)
+    ? "/extensions/twitter"
+    : /^\/services(.*)$/.test(olduri)
+    ? olduri.replace(/^\/services(.*)$/, "/extensions$1")
+    : LEGACY_REDIRECTS[olduri] && olduri;
+
+  const extensionPath =
+    /^\/extensions\/(.*)(?:\/.*)?$/.exec(legacyUri)?.[1] || "";
+  const newUri = extensionPath
+    ? `https://github.com/RoamJS/${extensionPath}`
+    : "https://github.com/RoamJS";
+  return redirect(newUri);
 };
