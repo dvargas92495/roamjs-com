@@ -1,14 +1,11 @@
-import { Loading, Root } from "@dvargas92495/ui";
+import { Root } from "@dvargas92495/ui";
 import React, { useEffect, useState } from "react";
-import { v4 } from "uuid";
 import axios from "axios";
 import AES from "crypto-js/aes";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const OauthPage = (): React.ReactElement => {
-  const [loading, setLoading] = useState(false);
-  const [mock, setMock] = useState("");
   const [close, setClose] = useState(false);
   useEffect(() => {
     const params = {};
@@ -27,11 +24,8 @@ const OauthPage = (): React.ReactElement => {
     const authData = JSON.stringify(params);
     if (window.opener && window.opener !== window) {
       const isAuth = query.get("auth");
-      const mockService = query.get("mock");
       if (isAuth) {
         window.opener.postMessage(authData, "https://roamresearch.com");
-      } else if (mockService) {
-        setMock(mockService);
       }
     }
     const state = query.get("state");
@@ -51,36 +45,14 @@ const OauthPage = (): React.ReactElement => {
         poll();
       });
     }
-  }, [setMock, setClose]);
+  }, [setClose]);
   return (
     <Root>
       {close && <h3>Success! You may close this window.</h3>}
-      {!mock ? (
-        <img
-          src={"/images/logo-high-res.jpg"}
-          style={{ maxHeight: "100vh", maxWidth: "100vw" }}
-        />
-      ) : (
-        <>
-          <h5>Mock Login for {mock}</h5>
-          <p>
-            This page is a mock oauth flow until {mock} implements oauth. Click
-            the button below to simulate the flow.
-          </p>
-          <button
-            onClick={() => {
-              setLoading(true);
-              window.location.assign(
-                `${window.location.origin}/oauth?auth=true&code=${v4()}`
-              );
-            }}
-            style={{ width: 200 }}
-          >
-            Log In
-          </button>
-          <Loading loading={loading} />
-        </>
-      )}
+      <img
+        src={"/images/logo-high-res.jpg"}
+        style={{ maxHeight: "100vh", maxWidth: "100vw" }}
+      />
     </Root>
   );
 };
