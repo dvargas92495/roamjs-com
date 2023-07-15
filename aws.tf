@@ -51,54 +51,6 @@ data "aws_iam_role" "lambda_role" {
   name = "roam-js-extensions-lambda-execution"
 }
 
-resource "aws_route53_record" "clerk-accounts" {
-  zone_id = module.aws_static_site.route53_zone_id
-  name    = "accounts"
-  type    = "CNAME"
-  ttl     = "300"
-  records = ["accounts.clerk.services"]
-}
-
-resource "aws_route53_record" "clerk-fe" {
-  zone_id = module.aws_static_site.route53_zone_id
-  name    = "clerk"
-  type    = "CNAME"
-  ttl     = "300"
-  records = ["frontend-api.clerk.services"]
-}
-
-resource "aws_route53_record" "clerk-fe-api" {
-  zone_id = module.aws_static_site.route53_zone_id
-  name    = "clerk.api"
-  type    = "CNAME"
-  ttl     = "300"
-  records = ["frontend-api.clerk.services"]
-}
-
-resource "aws_route53_record" "clerk-s1" {
-  zone_id = module.aws_static_site.route53_zone_id
-  name    = "s1._domainkey"
-  type    = "CNAME"
-  ttl     = "300"
-  records = ["dkim1.q5lvvno2col9.clerk.services"]
-}
-
-resource "aws_route53_record" "clerk-s2" {
-  zone_id = module.aws_static_site.route53_zone_id
-  name    = "s2._domainkey"
-  type    = "CNAME"
-  ttl     = "300"
-  records = ["dkim2.q5lvvno2col9.clerk.services"]
-}
-
-resource "aws_route53_record" "clerk-mail" {
-  zone_id = module.aws_static_site.route53_zone_id
-  name    = "mail"
-  type    = "CNAME"
-  ttl     = "300"
-  records = ["mail.q5lvvno2col9.clerk.services"]
-}
-
 resource "aws_route53_record" "google-verifu" {
   zone_id = module.aws_static_site.route53_zone_id
   name    = "roamjs.com"
@@ -229,18 +181,6 @@ provider "github" {
     owner = "dvargas92495"
 }
 
-resource "github_actions_secret" "lambda_role" {
-  repository       = "roamjs-com"
-  secret_name      = "LAMBDA_ROLE"
-  plaintext_value  = data.aws_iam_role.lambda_role.arn
-}
-
-resource "github_actions_secret" "cloudfront_arn" {
-  repository       = "roamjs-com"
-  secret_name      = "CLOUDFRONT_ARN"
-  plaintext_value  = module.aws_static_site.cloudfront_arn
-}
-
 resource "github_actions_secret" "deploy_aws_access_key" {
   repository       = "roamjs-com"
   secret_name      = "DEPLOY_AWS_ACCESS_KEY"
@@ -251,13 +191,4 @@ resource "github_actions_secret" "deploy_aws_access_secret" {
   repository       = "roamjs-com"
   secret_name      = "DEPLOY_AWS_ACCESS_SECRET"
   plaintext_value  = module.aws_static_site.deploy-secret
-}
-
-data "aws_iam_user" "deployer" {
-  user_name = "roam-js-extensions-lambda"
-}
-
-resource "aws_iam_user_policy_attachment" "lambda_roam" {
-  user       = data.aws_iam_user.deployer.user_name
-  policy_arn = "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
 }
