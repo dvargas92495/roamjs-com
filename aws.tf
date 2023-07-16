@@ -47,10 +47,6 @@ module "aws_email" {
   zone_id = module.aws_static_site.route53_zone_id
 }
 
-data "aws_iam_role" "lambda_role" {
-  name = "roam-js-extensions-lambda-execution"
-}
-
 resource "aws_route53_record" "google-verifu" {
   zone_id = module.aws_static_site.route53_zone_id
   name    = "roamjs.com"
@@ -88,35 +84,6 @@ resource "aws_api_gateway_rest_api" "lambda_api" {
 
   tags = {
     Application = "Roam JS Extensions"
-  }
-}
-
-resource "aws_api_gateway_resource" "resource" {
-  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
-  parent_id   = aws_api_gateway_rest_api.lambda_api.root_resource_id
-  path_part   = "mock"
-}
-
-resource "aws_api_gateway_method" "options" {
-  rest_api_id   = aws_api_gateway_rest_api.lambda_api.id
-  resource_id   = aws_api_gateway_resource.resource.id
-  http_method   = "OPTIONS"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_integration" "mock" {
-  rest_api_id          = aws_api_gateway_rest_api.lambda_api.id
-  resource_id          = aws_api_gateway_resource.resource.id
-  http_method          = aws_api_gateway_method.options.http_method
-  type                 = "MOCK"
-  passthrough_behavior = "WHEN_NO_TEMPLATES"
-
-  request_templates = {
-    "application/json" = jsonencode(
-        {
-            statusCode = 200
-        }
-    )
   }
 }
 
