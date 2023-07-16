@@ -82,6 +82,9 @@ const LEGACY_REDIRECTS: Record<string, string> = {
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
   const request = event.Records[0].cf.request;
   const olduri = request.uri;
+  if (olduri === "/oauth") {
+    return callback(null, request);
+  }
   const redirect = (newUri: string) => {
     const response = {
       status: "301",
