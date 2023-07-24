@@ -82,7 +82,7 @@ const LEGACY_REDIRECTS: Record<string, string> = {
 export const handler: CloudFrontRequestHandler = (event, _, callback) => {
   const request = event.Records[0].cf.request;
   const olduri = request.uri;
-  if (olduri === "/oauth") {
+  if (olduri === "/oauth" || olduri.startsWith("/images")) {
     return callback(null, request);
   }
   const redirect = (newUri: string) => {
