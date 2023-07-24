@@ -5,6 +5,7 @@ on:
     branches: main
     paths:
       - "lambdas/**"
+      - "webpack.lambda.config.js"
       - ".github/workflows/main_lambdas.yaml"
 
 env:
