@@ -6,6 +6,7 @@ on:
     paths:
       - "lambdas/**"
       - "webpack.lambda.config.js"
+      - "tsconfig.json"
       - ".github/workflows/main_lambdas.yaml"
 
 env:
